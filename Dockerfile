@@ -5,25 +5,41 @@ FROM node:18-alpine AS base
 RUN apk add --no-cache \
     python3 \
     py3-pip \
+    python3-dev \
+    py3-setuptools \
+    py3-wheel \
+    py3-numpy \
+    py3-pandas \
+    py3-scipy \
     make \
     g++ \
     gcc \
     musl-dev \
     libffi-dev \
-    openssl-dev
+    openssl-dev \
+    lapack-dev \
+    gfortran \
+    pkgconfig \
+    cmake
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY requirements.txt ./
+COPY requirements-production.txt ./
 
 # Install Node.js dependencies
 RUN npm ci --only=production
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Create Python virtual environment and install dependencies
+RUN python3 -m venv /app/venv && \
+    . /app/venv/bin/activate && \
+    pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements-production.txt
+
+# Add virtual environment to PATH
+ENV PATH="/app/venv/bin:$PATH"
 
 # Copy application code
 COPY src/ ./src/

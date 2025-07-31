@@ -256,4 +256,156 @@ def process_listening_data(df: pd.DataFrame) -> pd.DataFrame:
 - Use connection pooling for database access
 - Implement lazy loading for large datasets
 
+## 🗄️ Database Architecture & Setup
+
+EchoTune AI supports multiple database platforms optimized for different use cases:
+
+### Database Platform Overview
+
+| Platform | Use Case | Data Type | Strengths |
+|----------|----------|-----------|-----------|
+| **MongoDB Atlas** | Analytics & ML Training | Document-based | Aggregation pipelines, flexible schema, ML-optimized |
+| **Supabase** | Application Layer | Relational | Real-time features, authentication, ACID compliance |
+| **Digital Ocean** | Production Deployment | Multi-engine | Cost-effective, managed backups, VPC networking |
+
+### Quick Database Setup
+
+1. **Interactive Setup Wizard**:
+   ```bash
+   python scripts/database_setup.py --interactive
+   ```
+
+2. **Test Existing Connections**:
+   ```bash
+   python scripts/database_setup.py --test
+   ```
+
+3. **Generate Database Commands**:
+   ```bash
+   python scripts/database_setup.py --commands
+   ```
+
+### Data Migration Workflow
+
+1. **Populate Missing Audio Features**:
+   ```bash
+   # With Spotify API credentials
+   python scripts/populate_audio_features.py --input data/spotify_listening_history_combined.csv
+   
+   # Mock mode for testing
+   python scripts/populate_audio_features.py --mock --input data/spotify_listening_history_combined.csv
+   ```
+
+2. **Migrate to MongoDB** (for ML/Analytics):
+   ```bash
+   python scripts/migrate_to_mongodb.py --input data/spotify_listening_history_combined.csv
+   ```
+
+3. **Migrate to Supabase** (for Application):
+   ```bash
+   python scripts/migrate_to_supabase.py --input data/spotify_listening_history_combined.csv
+   ```
+
+### Environment Configuration
+
+Create a `.env` file with your database credentials:
+
+```bash
+# Spotify API
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_CLIENT_SECRET=your_client_secret
+
+# MongoDB Atlas
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_DATABASE=spotify_analytics
+MONGODB_COLLECTION=listening_history
+
+# Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+DATABASE_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
+```
+
+### Performance Optimizations
+
+- **MongoDB**: Compound indexes, aggregation pipelines, sharding for >1GB datasets
+- **Supabase**: Connection pooling, JSONB indexes, read replicas for analytics
+- **Caching**: Redis layer for frequently accessed data
+- **Data Partitioning**: By date ranges for improved query performance
+
+For detailed setup instructions, see `DATABASE_ARCHITECTURE_GUIDE.md`.
+
+### Cost Estimation
+
+#### Development (Free Tiers)
+- MongoDB Atlas M0: Free (512MB RAM, 5GB storage)
+- Supabase Free: Free (500MB database, 1GB bandwidth)
+- **Total**: $0/month
+
+#### Production
+- MongoDB Atlas M10: ~$57/month
+- Supabase Pro: ~$25/month  
+- Digital Ocean Managed DB: ~$30/month
+- **Total**: $55-115/month depending on platform choice
+
+### Database Schema Examples
+
+#### MongoDB Document Structure
+```javascript
+{
+  "_id": "track_user_timestamp",
+  "spotify_track_uri": "spotify:track:...",
+  "timestamp": ISODate("2024-01-01T12:00:00Z"),
+  "user": {
+    "username": "user123",
+    "platform": "Windows",
+    "country": "US"
+  },
+  "track": {
+    "name": "Song Title",
+    "artist": "Artist Name",
+    "album": "Album Name",
+    "duration_ms": 240000
+  },
+  "audio_features": {
+    "danceability": 0.75,
+    "energy": 0.85,
+    "valence": 0.60
+  },
+  "listening": {
+    "ms_played": 180000,
+    "completion_rate": 0.75,
+    "skipped": false
+  }
+}
+```
+
+#### Supabase Schema
+```sql
+-- Core application tables
+CREATE TABLE users (
+    id UUID PRIMARY KEY,
+    spotify_user_id TEXT UNIQUE,
+    username TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE tracks (
+    id UUID PRIMARY KEY,
+    spotify_track_id TEXT UNIQUE,
+    name TEXT NOT NULL,
+    artist_name TEXT,
+    duration_ms INTEGER
+);
+
+CREATE TABLE listening_history (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id),
+    track_id UUID REFERENCES tracks(id),
+    played_at TIMESTAMP WITH TIME ZONE,
+    ms_played INTEGER,
+    completion_rate REAL
+);
+```
+
 This guide ensures coding agents can efficiently contribute to the EchoTune AI project while maintaining code quality and following established patterns.

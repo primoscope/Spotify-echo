@@ -1,0 +1,134 @@
+{
+  "name": "echotune-ai",
+  "version": "1.0.0",
+  "description": "EchoTune AI - Next-generation music recommendation system with conversational AI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "webpack --mode production",
+    "build:server": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/ --ext .js,.ts,.jsx,.tsx",
+    "lint:fix": "eslint src/ --ext .js,.ts,.jsx,.tsx --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "merge-csv": "python scripts/merge_csv_data.py",
+    "setup-db": "python scripts/setup_database.py",
+    "mcp-server": "cd mcp-server && npm start",
+    "mcp-spotify": "cd mcp-server && python spotify_server.py",
+    "analyze-data": "python scripts/analyze_listening_data.py",
+    "train-model": "python scripts/train_recommendation_model.py"
+  },
+  "keywords": [
+    "music",
+    "recommendation",
+    "spotify",
+    "ai",
+    "machine-learning",
+    "conversational-ai",
+    "mcp",
+    "automation"
+  ],
+  "author": "EchoTune AI Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dzp5103/Spotify-echo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dzp5103/Spotify-echo/issues"
+  },
+  "homepage": "https://github.com/dzp5103/Spotify-echo#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0",
+    "python": ">=3.8"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.0",
+    "ws": "^8.14.0",
+    "axios": "^1.5.0",
+    "socket.io": "^4.7.0",
+    "multer": "^1.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.0",
+    "@types/cors": "^2.8.0",
+    "@types/multer": "^1.4.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0",
+    "nodemon": "^3.0.0",
+    "prettier": "^3.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "mcp": {
+    "servers": {
+      "browser": {
+        "command": "npx",
+        "args": ["@modelcontextprotocol/server-puppeteer"],
+        "env": {
+          "PUPPETEER_HEADLESS": "true"
+        }
+      },
+      "spotify": {
+        "command": "python",
+        "args": ["mcp-server/spotify_server.py"],
+        "env": {
+          "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
+          "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}"
+        }
+      }
+    }
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.{js,ts}",
+      "**/tests/**/*.test.{js,ts}"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{js,ts}",
+      "!src/**/*.d.ts"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "@typescript-eslint/recommended",
+      "prettier"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint", "prettier"],
+    "env": {
+      "node": true,
+      "es2021": true
+    },
+    "rules": {
+      "prettier/prettier": "error",
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/explicit-function-return-type": "warn"
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 100,
+    "tabWidth": 2
+  }
+}

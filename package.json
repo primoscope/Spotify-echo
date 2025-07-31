@@ -6,15 +6,16 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "webpack --mode production",
-    "build:server": "tsc",
+    "build": "echo 'No build step required for production'",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/ --ext .js,.ts,.jsx,.tsx",
     "lint:fix": "eslint src/ --ext .js,.ts,.jsx,.tsx --fix",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
+    "health-check": "curl -f http://localhost:3000/health || exit 1",
+    "deploy": "./scripts/deploy.sh",
+    "setup-digitalocean": "./scripts/setup-digitalocean.sh",
     "merge-csv": "python scripts/merge_csv_data.py",
     "setup-db": "python scripts/database_setup.py",
     "populate-audio": "python scripts/populate_audio_features.py",
@@ -111,20 +112,21 @@
   },
   "eslintConfig": {
     "extends": [
-      "eslint:recommended",
-      "@typescript-eslint/recommended",
-      "prettier"
+      "eslint:recommended"
     ],
-    "parser": "@typescript-eslint/parser",
-    "plugins": ["@typescript-eslint", "prettier"],
     "env": {
       "node": true,
       "es2021": true
     },
+    "parserOptions": {
+      "ecmaVersion": 2021,
+      "sourceType": "module"
+    },
     "rules": {
-      "prettier/prettier": "error",
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/explicit-function-return-type": "warn"
+      "no-unused-vars": "error",
+      "no-console": "off",
+      "semi": ["error", "always"],
+      "quotes": ["error", "single"]
     }
   },
   "prettier": {

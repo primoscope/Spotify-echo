@@ -26,6 +26,7 @@ class DatabaseSetupHelper:
     
     def load_existing_config(self):
         """Load existing configuration from .env file"""
+        # First try to load from .env file
         if os.path.exists(self.config_file):
             with open(self.config_file, 'r') as f:
                 for line in f:
@@ -33,6 +34,18 @@ class DatabaseSetupHelper:
                     if line and '=' in line and not line.startswith('#'):
                         key, value = line.split('=', 1)
                         self.config[key] = value
+        
+        # Also load environment variables (they take precedence)
+        env_vars = [
+            'MONGODB_URI', 'MONGODB_DATABASE', 'MONGODB_COLLECTION',
+            'SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET', 'SPOTIFY_REDIRECT_URI',
+            'DATABASE_URL', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY'
+        ]
+        
+        for var in env_vars:
+            env_value = os.getenv(var)
+            if env_value:
+                self.config[var] = env_value
     
     def save_config(self):
         """Save configuration to .env file"""
@@ -148,16 +161,60 @@ class DatabaseSetupHelper:
         print("\n🔍 Testing Database Connections")
         print("="*50)
         
-        # Test MongoDB
+        # Test MongoDB with detailed reporting
         if self.config.get('MONGODB_URI'):
             try:
                 import pymongo
-                client = pymongo.MongoClient(self.config['MONGODB_URI'])
-                client.admin.command('ismaster')
+                from datetime import datetime, timezone
+                
+                # Initialize client with timeout
+                client = pymongo.MongoClient(self.config['MONGODB_URI'], serverSelectionTimeoutMS=5000)
+                
+                # Test server connection
+                server_info = client.admin.command('ismaster')
                 print("✅ MongoDB connection successful")
+                
+                # Test database access
+                db_name = self.config.get('MONGODB_DATABASE', 'spotify_analytics')
+                collection_name = self.config.get('MONGODB_COLLECTION', 'listening_history')
+                
+                db = client[db_name]
+                collections = db.list_collection_names()
+                
+                print(f"   Database: {db_name}")
+                print(f"   Target Collection: {collection_name}")
+                
+                # Check if target collection exists
+                if collection_name in collections:
+                    try:
+                        collection_stats = db.command("collStats", collection_name)
+                        doc_count = collection_stats.get('count', 0)
+                        print(f"   Collection exists with {doc_count:,} documents")
+                    except Exception:
+                        print(f"   Collection exists (stats unavailable)")
+                else:
+                    print(f"   Collection does not exist yet")
+                    if collections:
+                        print(f"   Available collections: {', '.join(collections[:3])}")
+                        if len(collections) > 3:
+                            print(f"   ... and {len(collections) - 3} more")
+                
                 client.close()
+                
+            except pymongo.errors.ServerSelectionTimeoutError as e:
+                print(f"❌ MongoDB connection failed: Timeout connecting to server")
+                print(f"   Check your MongoDB URI and network connectivity")
+            except pymongo.errors.ConfigurationError as e:
+                print(f"❌ MongoDB connection failed: Configuration error")
+                print(f"   Check your MongoDB URI format")
+            except pymongo.errors.OperationFailure as e:
+                print(f"❌ MongoDB connection failed: Authentication error")
+                print(f"   Check your username/password in the MongoDB URI")
             except Exception as e:
                 print(f"❌ MongoDB connection failed: {e}")
+        else:
+            print("⚠️ MongoDB URI not configured")
+            print("   Set MONGODB_URI in your .env file to test MongoDB connection")
         
         # Test Supabase/PostgreSQL
         if self.config.get('DATABASE_URL'):
@@ -170,6 +227,8 @@ class DatabaseSetupHelper:
                 print("✅ Supabase/PostgreSQL connection successful")
             except Exception as e:
                 print(f"❌ Supabase/PostgreSQL connection failed: {e}")
+        else:
+            print("⚠️ PostgreSQL/Supabase not configured")
         
         # Test Spotify API
         if self.config.get('SPOTIFY_CLIENT_ID') and self.config.get('SPOTIFY_CLIENT_SECRET'):
@@ -190,10 +249,13 @@ class DatabaseSetupHelper:
                 if response.status_code == 200:
                     print("✅ Spotify API connection successful")
                 else:
-                    print(f"❌ Spotify API connection failed: {response.status_code}")
+                    print(f"❌ Spotify API connection failed: HTTP {response.status_code}")
                     
             except Exception as e:
                 print(f"❌ Spotify API connection failed: {e}")
+        else:
+            print("⚠️ Spotify API not configured")
+            print("   Set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in your .env file")
     
     def generate_sample_commands(self):
         """Generate sample commands for database operations"""

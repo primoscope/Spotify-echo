@@ -513,6 +513,27 @@ The dataset currently has audio feature columns but they're mostly empty. We nee
 
 ## 🛠️ Development Workflow
 
+### Quick Setup Commands
+
+```bash
+# Interactive database setup wizard
+python scripts/database_setup.py --interactive
+
+# Populate audio features (mock mode for testing)
+python scripts/populate_audio_features.py --mock --input data/spotify_listening_history_combined.csv
+
+# Migrate to MongoDB
+python scripts/migrate_to_mongodb.py --input data/spotify_listening_history_combined.csv
+
+# Migrate to Supabase
+python scripts/migrate_to_supabase.py --input data/spotify_listening_history_combined.csv
+
+# Test database connections
+python scripts/database_setup.py --test
+```
+
+### Development Phases
+
 1. **Local Development**: Use free tier databases
 2. **Staging**: Use development tier configurations
 3. **Production**: Use optimized production configurations with monitoring

@@ -299,6 +299,9 @@ reports/
 *.sqlite
 *.sqlite3
 
+# Audio features cache
+*_audio_features_cache.db
+
 # MCP Server logs
 mcp-server/logs/
 

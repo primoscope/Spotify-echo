@@ -334,3 +334,28 @@ backup_*
 *.bak
 *.backup
 migration_logs/
+
+# Production deployment files
+ssl/
+*.crt
+*.key
+*.pem
+
+# Docker volumes and data
+docker-data/
+volumes/
+
+# Production logs
+logs/
+*.access.log
+*.error.log
+
+# Backup files
+backups/
+*.tar.gz
+*.zip
+
+# Environment-specific configs
+.env.production
+.env.staging
+.env.local

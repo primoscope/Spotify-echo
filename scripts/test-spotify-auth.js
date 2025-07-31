@@ -75,9 +75,22 @@ async function testSpotifyAuth() {
     
     console.log('');
     console.log('🎯 OAuth URL that will be used:');
-    const authURL = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=user-read-private%20user-read-email%20playlist-modify-public%20playlist-modify-private&redirect_uri=${encodeURIComponent(process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/auth/callback')}`;
+    
+    // Environment-aware redirect URI fallback
+    const getDefaultRedirectUri = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://primosphere.studio/auth/callback';
+        }
+        return 'http://localhost:3000/auth/callback';
+    };
+    
+    const redirectUri = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedirectUri();
+    const authURL = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=user-read-private%20user-read-email%20playlist-modify-public%20playlist-modify-private&redirect_uri=${encodeURIComponent(redirectUri)}`;
     console.log(`   ${authURL}`);
     
+    console.log('');
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔗 Redirect URI: ${redirectUri}`);
     console.log('');
     console.log('✅ All tests passed! Your Spotify integration is ready.');
 }

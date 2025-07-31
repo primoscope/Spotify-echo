@@ -15,6 +15,10 @@ from typing import List, Dict, Any
 import json
 from tqdm import tqdm
 import argparse
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

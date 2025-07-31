@@ -41,6 +41,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: package-lock.json
         continue-on-error: true
           
       - name: Setup Node.js (fallback without cache)
@@ -206,6 +207,7 @@ jobs:
         with:
           node-version: ${{ needs.setup-environment.outputs.node-version }}
           cache: 'npm'
+          cache-dependency-path: package-lock.json
         continue-on-error: true
           
       - name: Setup Node.js (fallback without cache)
@@ -338,6 +340,7 @@ jobs:
         with:
           node-version: ${{ needs.setup-environment.outputs.node-version }}
           cache: 'npm'
+          cache-dependency-path: package-lock.json
         continue-on-error: true
           
       - name: Setup Node.js (fallback without cache)

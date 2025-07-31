@@ -41,6 +41,13 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+        continue-on-error: true
+          
+      - name: Setup Node.js (fallback without cache)
+        if: failure()
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
           
       - name: Cache Python dependencies
         uses: actions/cache@v3
@@ -198,6 +205,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup-environment.outputs.node-version }}
+          cache: 'npm'
+        continue-on-error: true
+          
+      - name: Setup Node.js (fallback without cache)
+        if: failure()
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup-environment.outputs.node-version }}
           
       - name: Install Node.js linting tools
         run: |
@@ -319,6 +334,14 @@ jobs:
           python-version: ${{ needs.setup-environment.outputs.python-version }}
           
       - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup-environment.outputs.node-version }}
+          cache: 'npm'
+        continue-on-error: true
+          
+      - name: Setup Node.js (fallback without cache)
+        if: failure()
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup-environment.outputs.node-version }}

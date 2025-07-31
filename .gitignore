@@ -321,3 +321,16 @@ backup_data/
 # OS generated files
 .directory
 *.directory
+
+# Data processing temporary files
+temp_data_processing/
+*.tmp
+*.temp
+processing_*
+backup_*
+
+# Database dumps and migration artifacts
+*.dump
+*.bak
+*.backup
+migration_logs/

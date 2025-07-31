@@ -15,8 +15,24 @@ const PORT = process.env.PORT || 3000;
 // Spotify OAuth configuration
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || `http://localhost:${PORT}/auth/callback`;
-const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:${PORT}`;
+
+// Environment-aware redirect URI fallback
+const getDefaultRedirectUri = () => {
+    if (process.env.NODE_ENV === 'production') {
+        return 'https://primosphere.studio/auth/callback';
+    }
+    return `http://localhost:${PORT}/auth/callback`;
+};
+
+const getDefaultFrontendUrl = () => {
+    if (process.env.NODE_ENV === 'production') {
+        return 'https://primosphere.studio';
+    }
+    return `http://localhost:${PORT}`;
+};
+
+const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedirectUri();
+const FRONTEND_URL = process.env.FRONTEND_URL || getDefaultFrontendUrl();
 
 // Middleware
 app.use(cors({

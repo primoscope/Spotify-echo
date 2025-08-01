@@ -22,6 +22,7 @@
 - [Core Features](#-core-features)
 - [System Architecture](#️-system-architecture)
 - [Quick Start for Developers](#-quick-start-for-developers)
+- [Gemini Code Assist Setup & Configuration](#-gemini-code-assist-setup--configuration)
 - [Automated Development Workflow](#-automated-development-workflow)
 - [Production Deployment](#-production-deployment)
 - [Development Roadmap](#-development-roadmap)
@@ -54,6 +55,14 @@ This project is fully optimized for automated development workflows with compreh
  * **Intent Recognition**: Understands complex requests like "Find upbeat indie folk for a rainy afternoon coding session"
  * **Multi-Modal Responses**: Text, audio previews, and interactive playlist interfaces
  * **Learning Feedback Loop**: Continuously improves based on user interactions and explicit feedback
+
+### 🧠 Gemini Code Assist Integration
+ * **Advanced Code Suggestions**: Context-aware code completion powered by Google's Gemini 2.0 Flash model
+ * **Intelligent Code Reviews**: Automated security, performance, and quality analysis with actionable feedback
+ * **Music Domain Expertise**: Specialized knowledge for Spotify API, audio features, and recommendation algorithms
+ * **Auto-Documentation**: Generates comprehensive JSDoc comments and API documentation
+ * **Change Logging**: Tracks all code modifications with detailed action logs for transparency
+ * **Workflow Automation**: Integrates with GitHub Actions for seamless CI/CD and automated README updates
 
 ### 🔧 Automation & Integration
  * **MCP Server Integration**: Browser automation for Spotify Web Player using Puppeteer
@@ -165,6 +174,181 @@ docker-compose up --build
 # The application will be available at http://localhost:3000
 # MCP server runs on http://localhost:3001
 ```
+
+## 🧠 Gemini Code Assist Setup & Configuration
+
+EchoTune AI integrates Google's Gemini Code Assist for intelligent development support, automated code reviews, and enhanced productivity.
+
+### 🔧 Prerequisites
+- **Google AI Studio API Key**: Get from [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **GitHub Repository Access**: For automated code reviews and workflow integration
+- **Node.js 20+**: Required for Gemini integration tools
+
+### ⚙️ Configuration Files
+
+The project includes optimized Gemini configurations in the `.gemini/` directory:
+
+#### 1. **Main Configuration** (`.gemini/config.json`)
+```json
+{
+  "version": "1.0",
+  "settings": {
+    "model": "gemini-2.0-flash-exp",
+    "temperature": 0.7,
+    "maxTokens": 4096,
+    "autoSuggestions": true,
+    "codeReview": {
+      "enabled": true,
+      "securityAnalysis": true,
+      "performanceAnalysis": true
+    },
+    "logging": {
+      "enabled": true,
+      "changeTracking": true,
+      "actionLogging": true
+    }
+  }
+}
+```
+
+#### 2. **Domain-Specific Rules** (`.gemini/rules.md`)
+- **Music API Integration**: Spotify Web API best practices, OAuth flows, rate limiting
+- **Security Guidelines**: API key management, input validation, authentication patterns  
+- **Performance Optimization**: Database queries, memory management, caching strategies
+- **Code Quality**: ESLint rules, TypeScript patterns, documentation standards
+
+#### 3. **Workflow Integration** (`.gemini/workflow.yml`)
+- **Auto Code Suggestions**: Real-time completions while coding
+- **Pull Request Reviews**: Comprehensive analysis on PR creation
+- **Documentation Generation**: Auto-generated JSDoc and API docs
+- **Test Generation**: Automated unit and integration test creation
+
+### 🚀 Environment Setup
+
+Add to your `.env` file:
+```env
+# Gemini Code Assist Configuration
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.0-flash-exp
+GEMINI_TEMPERATURE=0.7
+GEMINI_MAX_TOKENS=4096
+
+# GitHub Integration (for automated reviews)
+GITHUB_TOKEN=your_github_token_here
+```
+
+### 🔄 GitHub Actions Integration
+
+The enhanced workflow (`.github/workflows/gemini-enhanced.yml`) provides:
+
+#### **Automated Code Reviews**
+```yaml
+- name: Enhanced Gemini Code Review
+  uses: truongnh1992/gemini-ai-code-reviewer@v6.5.0
+  with:
+    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    GEMINI_MODEL: "gemini-2.0-flash-exp"
+    INPUT_INCLUDE: "src,scripts,mcp-server,tests"
+```
+
+#### **Enhanced Logging & Monitoring**
+- **Detailed Workflow Context**: Event triggers, file changes, version tracking
+- **Comprehensive Test Results**: Unit, integration, and security test logging
+- **Performance Metrics**: Build times, memory usage, test coverage
+- **Artifact Management**: Automated storage of logs, test results, and reports
+
+#### **Automatic README Updates**
+- **Version Synchronization**: Auto-updates version badges and project info
+- **Release Integration**: Updates documentation on new releases
+- **Change Detection**: Smart detection of meaningful changes requiring documentation updates
+
+### 🎯 Features & Capabilities
+
+#### **Code Suggestions**
+- **Context-Aware Completions**: Understands Spotify API patterns, music domain logic
+- **Multi-Line Suggestions**: Complete function and class implementations
+- **Error Prevention**: Catches common mistakes before they happen
+- **Best Practice Enforcement**: Suggests secure, performant coding patterns
+
+#### **Automated Reviews**
+- **Security Analysis**: Detects potential vulnerabilities, hardcoded secrets
+- **Performance Optimization**: Identifies bottlenecks, memory leaks, inefficient queries
+- **Code Quality**: Enforces consistent style, proper error handling, documentation
+- **Music Domain Validation**: Verifies audio feature usage, recommendation logic
+
+#### **Change Logging**
+All Gemini interactions are logged with:
+- **Action Timestamps**: When suggestions were made or reviews completed
+- **Change Tracking**: What code was modified based on suggestions
+- **Review Comments**: Detailed explanations of recommended changes
+- **Performance Impact**: Before/after metrics for optimizations
+
+### 📊 Usage Examples
+
+#### **Getting Code Suggestions**
+```javascript
+// Start typing - Gemini provides context-aware suggestions
+async function createSpotifyPlaylist(userId, tracks) {
+  // Gemini suggests: proper error handling, input validation, API patterns
+}
+```
+
+#### **Manual Code Review**
+```bash
+# Trigger manual review for specific files
+gh workflow run gemini-enhanced.yml -f analysis_type=code-review-only
+```
+
+#### **Documentation Generation**
+```bash
+# Generate JSDoc comments for new functions
+npm run gemini-docs
+```
+
+### 🔍 Best Practices
+
+1. **API Key Security**
+   - Store keys in GitHub Secrets, never in code
+   - Use separate keys for development and production
+   - Rotate keys regularly
+
+2. **Review Quality**
+   - Review Gemini suggestions before accepting
+   - Use domain-specific prompts for music functionality
+   - Maintain human oversight for critical changes
+
+3. **Performance Optimization**
+   - Configure appropriate token limits
+   - Use caching for repeated operations
+   - Monitor API usage and costs
+
+### 🚨 Troubleshooting
+
+#### **Common Issues**
+- **API Rate Limits**: Implement exponential backoff, use caching
+- **Token Limits**: Optimize prompts, split large files
+- **Context Loss**: Provide clear, specific prompts
+
+#### **Debugging**
+```bash
+# Check Gemini integration status
+npm run gemini-health
+
+# View recent activity logs
+cat .gemini/logs/activity.log
+
+# Test API connectivity
+npm run test:gemini-integration
+```
+
+### 📚 Additional Resources
+
+- **[Official Gemini Documentation](https://ai.google.dev/docs)**: Comprehensive API reference
+- **[Gemini Code Assist Guide](https://cloud.google.com/gemini/docs/codeassist)**: Best practices and usage patterns
+- **[GitHub Actions Integration](https://github.com/marketplace/actions/gemini-ai-code-reviewer)**: Workflow automation
+- **[Music Domain Prompts](/.gemini/prompts.md)**: Specialized prompts for music applications
+
+---
 
 ### Environment Configuration
 Copy `.env.example` to `.env` and configure:

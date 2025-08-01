@@ -208,7 +208,8 @@ class CustomAPIProvider extends BaseLLMProvider {
       return `${this.baseURL}/openai/deployments/${this.defaultModel}/chat/completions?api-version=2023-12-01-preview`;
     }
     
-    return `${this.baseURL}/v1/chat/completions`;
+    // For OpenRouter and other providers, the base URL already includes /v1 if needed
+    return `${this.baseURL}/chat/completions`;
   }
 
   parseAPIResponse(responseData, model) {
@@ -262,9 +263,9 @@ class CustomAPIProvider extends BaseLLMProvider {
   static createOpenRouterConfig(config) {
     return {
       provider: 'openrouter',
-      baseURL: 'https://openrouter.ai/api',
+      baseURL: 'https://openrouter.ai/api/v1',
       apiKey: config.apiKey,
-      model: config.model || 'openai/gpt-3.5-turbo',
+      model: config.model || 'deepseek/deepseek-r1-0528:free',
       customHeaders: {
         'HTTP-Referer': config.referer || 'https://echotune.ai',
         'X-Title': 'EchoTune AI'
@@ -273,6 +274,8 @@ class CustomAPIProvider extends BaseLLMProvider {
       supportsFunctionCalling: true,
       maxTokens: 32768,
       supportedModels: [
+        'deepseek/deepseek-r1-0528:free',
+        'deepseek/deepseek-chat-v3-0324:free',
         'openai/gpt-3.5-turbo',
         'openai/gpt-4',
         'anthropic/claude-2',

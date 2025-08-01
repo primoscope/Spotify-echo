@@ -48,8 +48,8 @@ class ConversationManager {
         ...options.context
       },
       metadata: {
-        llmProvider: options.llmProvider || 'openai',
-        model: options.model || 'gpt-4o-mini',
+        llmProvider: options.llmProvider || 'mock',
+        model: options.model || this.getDefaultModelForProvider(options.llmProvider || 'mock'),
         language: options.language || 'en',
         sessionType: options.sessionType || 'general',
         contextVersion: 1,
@@ -792,6 +792,21 @@ Guidelines:
       console.error('Error loading session from database:', error);
       return null;
     }
+  }
+
+  /**
+   * Get default model for a specific provider
+   */
+  getDefaultModelForProvider(provider) {
+    const defaultModels = {
+      'openai': 'gpt-4o-mini',
+      'gemini': 'gemini-1.5-flash', 
+      'openrouter': 'deepseek/deepseek-r1-0528:free',
+      'azure': 'gpt-35-turbo',
+      'mock': 'mock-music-assistant'
+    };
+    
+    return defaultModels[provider] || 'mock-music-assistant';
   }
 
   /**

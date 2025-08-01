@@ -22,7 +22,7 @@ const chatbotConfig = {
     },
     openrouter: {
       apiKey: process.env.OPENROUTER_API_KEY,
-      model: process.env.OPENROUTER_MODEL || 'openai/gpt-3.5-turbo'
+      model: process.env.OPENROUTER_MODEL || process.env.DEFAULT_LLM_MODEL || 'deepseek/deepseek-r1-0528:free'
     }
   },
   defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'mock', // Use mock as default fallback

@@ -14,11 +14,91 @@ NC='\033[0m' # No Color
 
 # Configuration
 APP_USER="echotune"
-APP_DIR="/opt/echotunes"
+APP_DIR="/opt/echotune"
 DOMAIN="${DOMAIN:-primosphere.studio}"
 REPO_URL="https://github.com/dzp5103/Spotify-echo.git"
 
 # Helper functions
+detect_and_source_env() {
+    local env_file=""
+    local env_locations=(
+        ".env"
+        "$APP_DIR/.env"
+        "/opt/echotune/.env"
+        "$(pwd)/.env"
+    )
+    
+    log_info "Detecting and sourcing environment configuration..."
+    
+    # Try to find .env file in priority order
+    for location in "${env_locations[@]}"; do
+        if [ -f "$location" ]; then
+            env_file="$location"
+            log_info "Found environment file: $env_file"
+            break
+        fi
+    done
+    
+    if [ -n "$env_file" ]; then
+        # Source environment file safely
+        set -a
+        source "$env_file"
+        set +a
+        log_success "Environment variables loaded from $env_file"
+        return 0
+    else
+        log_warning "No .env file found in any of the expected locations"
+        return 1
+    fi
+}
+
+validate_or_prompt_env() {
+    log_info "Validating environment configuration..."
+    
+    # Define required environment variables for setup
+    local required_vars=(
+        "DOMAIN"
+        "NODE_ENV"
+    )
+    
+    local optional_vars=(
+        "SPOTIFY_CLIENT_ID"
+        "SPOTIFY_CLIENT_SECRET"
+        "MONGODB_URI"
+        "PORT"
+        "FRONTEND_URL"
+    )
+    
+    # Use detected values or fall back to defaults
+    export DOMAIN="${DOMAIN:-primosphere.studio}"
+    export NODE_ENV="${NODE_ENV:-production}"
+    export PORT="${PORT:-3000}"
+    export FRONTEND_URL="${FRONTEND_URL:-https://$DOMAIN}"
+    export SPOTIFY_REDIRECT_URI="${SPOTIFY_REDIRECT_URI:-https://$DOMAIN/auth/callback}"
+    
+    log_success "Environment configuration validated with defaults applied"
+    
+    # Show current configuration
+    log_info "Current environment configuration:"
+    echo "  - DOMAIN: $DOMAIN"
+    echo "  - NODE_ENV: $NODE_ENV"
+    echo "  - PORT: $PORT"
+    echo "  - FRONTEND_URL: $FRONTEND_URL"
+    echo "  - SPOTIFY_REDIRECT_URI: $SPOTIFY_REDIRECT_URI"
+    
+    if [ -n "$SPOTIFY_CLIENT_ID" ]; then
+        echo "  - SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:0:8}..."
+    else
+        echo "  - SPOTIFY_CLIENT_ID: [Not set - will need to be configured]"
+    fi
+    
+    if [ -n "$MONGODB_URI" ]; then
+        echo "  - MONGODB_URI: [Configured]"
+    else
+        echo "  - MONGODB_URI: [Not set - optional]"
+    fi
+}
+
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -316,7 +396,31 @@ setup_environment() {
     
     cd "$APP_DIR"
     
-    if [ ! -f ".env" ]; then
+    # First try to detect existing .env file
+    if detect_and_source_env; then
+        log_success "Using existing environment configuration"
+        
+        # Update production-specific settings if not already set correctly
+        if [ "$NODE_ENV" != "production" ]; then
+            log_info "Updating NODE_ENV to production in .env file"
+            sudo -u "$APP_USER" sed -i "s|NODE_ENV=.*|NODE_ENV=production|" .env
+        fi
+        
+        if [[ "$FRONTEND_URL" == *"localhost"* ]]; then
+            log_info "Updating FRONTEND_URL for production in .env file"
+            sudo -u "$APP_USER" sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://$DOMAIN|" .env
+        fi
+        
+        if [[ "$SPOTIFY_REDIRECT_URI" == *"localhost"* ]]; then
+            log_info "Updating SPOTIFY_REDIRECT_URI for production in .env file"
+            sudo -u "$APP_USER" sed -i "s|SPOTIFY_REDIRECT_URI=.*|SPOTIFY_REDIRECT_URI=https://$DOMAIN/auth/callback|" .env
+        fi
+        
+        log_success "Environment configuration updated for production"
+    else
+        # Create new .env file from template
+        log_info "Creating new environment file from template..."
+        
         if [ -f ".env.production.example" ]; then
             sudo -u "$APP_USER" cp .env.production.example .env
         elif [ -f ".env.example" ]; then
@@ -332,10 +436,11 @@ setup_environment() {
         sudo -u "$APP_USER" sed -i "s|SPOTIFY_REDIRECT_URI=.*|SPOTIFY_REDIRECT_URI=https://$DOMAIN/auth/callback|" .env
         
         log_success "Environment file created from template"
-        log_warning "Please edit $APP_DIR/.env with your actual Spotify credentials"
-    else
-        log_success "Environment file already exists"
+        log_warning "Please edit $APP_DIR/.env with your actual Spotify credentials and other required values"
     fi
+    
+    # Validate final configuration
+    validate_or_prompt_env
 }
 
 install_app_dependencies() {
@@ -506,6 +611,10 @@ main() {
     echo "🎵 EchoTune AI - Enhanced Digital Ocean Setup"
     echo "============================================="
     echo ""
+    
+    # Early environment detection for configuration
+    detect_and_source_env || true  # Don't fail if no .env found initially
+    validate_or_prompt_env
     
     check_root
     check_system_requirements

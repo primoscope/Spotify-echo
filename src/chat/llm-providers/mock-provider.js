@@ -99,48 +99,58 @@ class MockLLMProvider extends BaseLLMProvider {
   }
 
   generateMusicResponse(userMessage) {
-    // Check for specific music-related keywords and contexts
-    if (userMessage.includes('workout') || userMessage.includes('exercise') || userMessage.includes('gym')) {
-      return this.musicResponses.workout;
+    const matchedCategory = this._findMessageCategory(userMessage);
+    return this._getResponseForCategory(matchedCategory);
+  }
+
+  /**
+   * Find the category that best matches the user message
+   */
+  _findMessageCategory(userMessage) {
+    const keywordCategories = {
+      workout: ['workout', 'exercise', 'gym'],
+      study: ['study', 'focus', 'concentration'],
+      chill: ['chill', 'relax', 'calm'],
+      party: ['party', 'dance', 'celebration'],
+      road: ['road trip', 'driving', 'travel'],
+      playlist: ['playlist'],
+      recommend: ['recommend', 'suggest', 'music'],
+      analyze: ['analyze', 'habits', 'taste'],
+      greeting: ['hello', 'hi', 'hey'],
+      help: ['help', 'what can you do']
+    };
+
+    for (const [category, keywords] of Object.entries(keywordCategories)) {
+      if (keywords.some(keyword => userMessage.includes(keyword))) {
+        return category;
+      }
     }
-    
-    if (userMessage.includes('study') || userMessage.includes('focus') || userMessage.includes('concentration')) {
-      return this.musicResponses.study;
+
+    return 'default';
+  }
+
+  /**
+   * Get the appropriate response for a message category
+   */
+  _getResponseForCategory(category) {
+    const responses = {
+      workout: this.musicResponses.workout,
+      study: this.musicResponses.study,
+      chill: this.musicResponses.chill,
+      party: this.musicResponses.party,
+      road: this.musicResponses.road,
+      playlist: 'I\'d be happy to help you create a playlist! To make the perfect one, I need to know more about what you\'re looking for. What\'s the occasion? Are you thinking about:\n\n• A specific mood (happy, relaxed, energetic)?\n• An activity (working out, studying, driving)?\n• A genre preference?\n• A particular time of day?\n\nOnce I know more, I can suggest tracks with the right energy, tempo, and vibe for your needs!',
+      recommend: 'I\'d love to recommend some music for you! To give you the best suggestions, tell me:\n\n🎵 **What\'s your current mood?** (happy, chill, energetic, contemplative)\n🎯 **What\'s the setting?** (work, exercise, relaxation, social)\n🎨 **Any genre preferences?** (or open to anything!)\n\nI can analyze audio features like energy, danceability, and valence to find tracks that perfectly match what you\'re looking for. What sounds good to you?',
+      analyze: 'I\'d love to analyze your music taste! While this is a demo version, here\'s what I could do with your Spotify data:\n\n📊 **Listening Patterns Analysis:**\n• Your top genres and how they\'ve evolved\n• Most active listening times and patterns\n• Audio feature preferences (energy, danceability, valence)\n• Discovery vs. repeat listening habits\n\n🎯 **Personalized Insights:**\n• Mood-based listening trends\n• Seasonal music preferences\n• Artist diversity in your library\n• Recommendations based on your unique taste profile\n\nTo get this analysis, you\'d need to connect your Spotify account. Would you like me to explain more about any of these features?',
+      greeting: 'Hello! 🎵 I\'m EchoTune AI, your personal music assistant! I\'m here to help you discover amazing music, create perfect playlists, and explore your musical taste.\n\n**I can help you with:**\n• 🎯 Personalized music recommendations\n• 📝 Custom playlist creation\n• 📊 Music taste analysis\n• 🎨 Mood-based suggestions\n• 🔍 Artist and genre discovery\n\n*Note: This is demo mode - connect your Spotify account for the full experience!*\n\nWhat kind of music adventure shall we start with today?',
+      help: '🎵 **EchoTune AI - Your Music Assistant**\n\nI\'m designed to be your personal music curator! Here\'s what I can help you with:\n\n**🎯 Music Discovery:**\n• Get recommendations based on mood, activity, or genre\n• Discover new artists similar to your favorites\n• Find perfect songs for any occasion\n\n**📝 Playlist Creation:**\n• Build custom playlists for workouts, study, parties, etc.\n• Mix familiar favorites with new discoveries\n• Balance energy levels and moods perfectly\n\n**📊 Music Analysis:**\n• Understand your listening patterns and preferences\n• Get insights into your musical evolution\n• Explore audio features like energy, danceability, and mood\n\n**🔧 Smart Features:**\n• Context-aware suggestions (time of day, weather, activity)\n• Audio feature analysis for precise matching\n• Integration with your Spotify library\n\nJust tell me what you\'re in the mood for, and I\'ll help you find the perfect soundtrack!'
+    };
+
+    if (responses[category]) {
+      return responses[category];
     }
-    
-    if (userMessage.includes('chill') || userMessage.includes('relax') || userMessage.includes('calm')) {
-      return this.musicResponses.chill;
-    }
-    
-    if (userMessage.includes('party') || userMessage.includes('dance') || userMessage.includes('celebration')) {
-      return this.musicResponses.party;
-    }
-    
-    if (userMessage.includes('road trip') || userMessage.includes('driving') || userMessage.includes('travel')) {
-      return this.musicResponses.road;
-    }
-    
-    if (userMessage.includes('playlist')) {
-      return 'I\'d be happy to help you create a playlist! To make the perfect one, I need to know more about what you\'re looking for. What\'s the occasion? Are you thinking about:\n\n• A specific mood (happy, relaxed, energetic)?\n• An activity (working out, studying, driving)?\n• A genre preference?\n• A particular time of day?\n\nOnce I know more, I can suggest tracks with the right energy, tempo, and vibe for your needs!';
-    }
-    
-    if (userMessage.includes('recommend') || userMessage.includes('suggest') || userMessage.includes('music')) {
-      return 'I\'d love to recommend some music for you! To give you the best suggestions, tell me:\n\n🎵 **What\'s your current mood?** (happy, chill, energetic, contemplative)\n🎯 **What\'s the setting?** (work, exercise, relaxation, social)\n🎨 **Any genre preferences?** (or open to anything!)\n\nI can analyze audio features like energy, danceability, and valence to find tracks that perfectly match what you\'re looking for. What sounds good to you?';
-    }
-    
-    if (userMessage.includes('analyze') || userMessage.includes('habits') || userMessage.includes('taste')) {
-      return 'I\'d love to analyze your music taste! While this is a demo version, here\'s what I could do with your Spotify data:\n\n📊 **Listening Patterns Analysis:**\n• Your top genres and how they\'ve evolved\n• Most active listening times and patterns\n• Audio feature preferences (energy, danceability, valence)\n• Discovery vs. repeat listening habits\n\n🎯 **Personalized Insights:**\n• Mood-based listening trends\n• Seasonal music preferences\n• Artist diversity in your library\n• Recommendations based on your unique taste profile\n\nTo get this analysis, you\'d need to connect your Spotify account. Would you like me to explain more about any of these features?';
-    }
-    
-    if (userMessage.includes('hello') || userMessage.includes('hi') || userMessage.includes('hey')) {
-      return 'Hello! 🎵 I\'m EchoTune AI, your personal music assistant! I\'m here to help you discover amazing music, create perfect playlists, and explore your musical taste.\n\n**I can help you with:**\n• 🎯 Personalized music recommendations\n• 📝 Custom playlist creation\n• 📊 Music taste analysis\n• 🎨 Mood-based suggestions\n• 🔍 Artist and genre discovery\n\n*Note: This is demo mode - connect your Spotify account for the full experience!*\n\nWhat kind of music adventure shall we start with today?';
-    }
-    
-    if (userMessage.includes('help') || userMessage.includes('what can you do')) {
-      return '🎵 **EchoTune AI - Your Music Assistant**\n\nI\'m designed to be your personal music curator! Here\'s what I can help you with:\n\n**🎯 Music Discovery:**\n• Get recommendations based on mood, activity, or genre\n• Discover new artists similar to your favorites\n• Find perfect songs for any occasion\n\n**📝 Playlist Creation:**\n• Build custom playlists for workouts, study, parties, etc.\n• Mix familiar favorites with new discoveries\n• Balance energy levels and moods perfectly\n\n**📊 Music Analysis:**\n• Understand your listening patterns and preferences\n• Get insights into your musical evolution\n• Explore audio features like energy, danceability, and mood\n\n**🔧 Smart Features:**\n• Context-aware suggestions (time of day, weather, activity)\n• Audio feature analysis for precise matching\n• Integration with your Spotify library\n\nJust tell me what you\'re in the mood for, and I\'ll help you find the perfect soundtrack!';
-    }
-    
-    // Default responses for general conversation
+
+    // Default response for unrecognized categories
     const randomResponse = this.responses[Math.floor(Math.random() * this.responses.length)];
     return randomResponse + '\n\n*This is demo mode - connect your Spotify account for personalized recommendations based on your actual listening history!*';
   }

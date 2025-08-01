@@ -18,6 +18,7 @@ LOG_DIR="${APP_DIR}/logs"
 BACKUP_DIR="${APP_DIR}/backups"
 SSL_DIR="${APP_DIR}/ssl"
 DOMAIN="${DOMAIN:-primosphere.studio}"
+REPO_URL="${REPO_URL:-https://github.com/dzp5103/Spotify-echo.git}"
 HEALTH_ENDPOINT="http://localhost:3000/health"
 MAX_HEALTH_RETRIES=5
 HEALTH_RETRY_DELAY=10
@@ -44,9 +45,22 @@ detect_and_source_env() {
     
     if [ -n "$env_file" ]; then
         # Source environment file safely
+        if ! (set -a; source "$env_file"; set +a); then
+            exit_with_help "Failed to load environment file: $env_file" \
+                "Environment file exists but contains errors.
+Please check:
+1. File syntax is correct (no invalid bash syntax)
+2. File permissions allow reading
+3. No special characters in values that need escaping
+
+You can test the file manually: source $env_file"
+        fi
+        
+        # Re-source for the current shell
         set -a
         source "$env_file"
         set +a
+        
         log_success "Environment variables loaded from $env_file"
         
         # Export key variables for services
@@ -59,7 +73,6 @@ detect_and_source_env() {
         for location in "${env_locations[@]}"; do
             echo "  - $location"
         done
-        log_error "Please create a .env file with required configuration"
         return 1
     fi
 }
@@ -78,6 +91,32 @@ log_warning() {
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+}
+
+log_step() {
+    echo -e "${BLUE}[STEP]${NC} $1"
+}
+
+exit_with_help() {
+    local error_message="$1"
+    local help_text="$2"
+    
+    echo ""
+    log_error "$error_message"
+    echo ""
+    if [ -n "$help_text" ]; then
+        echo -e "${YELLOW}💡 Helpful guidance:${NC}"
+        echo "$help_text"
+        echo ""
+    fi
+    
+    echo -e "${YELLOW}📚 For more help:${NC}"
+    echo "  - Check the deployment documentation: DIGITALOCEAN_DEPLOYMENT.md"
+    echo "  - Review environment setup: .env.example or .env.production.example"
+    echo "  - Verify prerequisites are installed (Docker, Node.js, etc.)"
+    echo "  - Check logs in: $LOG_DIR"
+    echo ""
+    exit 1
 }
 
 check_root() {
@@ -126,14 +165,20 @@ validate_environment() {
     
     # Report missing variables
     if [ ${#missing_vars[@]} -ne 0 ]; then
-        log_error "Missing required environment variables:"
+        local missing_list=""
         for var in "${missing_vars[@]}"; do
-            echo "  - $var"
+            missing_list="$missing_list\n  - $var"
         done
-        log_error "Please update your .env file with the missing variables"
-        echo ""
-        log_info "You can find examples in .env.example or .env.production.example"
-        exit 1
+        
+        exit_with_help "Missing required environment variables:$missing_list" \
+            "Please update your .env file with the missing variables.
+You can find examples in .env.example or .env.production.example.
+
+Common setup steps:
+1. Copy template: cp .env.example .env
+2. Edit file: nano .env
+3. Set your Spotify credentials from https://developer.spotify.com/
+4. Verify all required variables are set"
     fi
     
     # Report warnings
@@ -171,7 +216,7 @@ validate_environment() {
 }
 
 setup_directories() {
-    log_info "Setting up application directories..."
+    log_step "Setting up application directories..."
     
     # Create necessary directories
     mkdir -p "$LOG_DIR" "$BACKUP_DIR" "$SSL_DIR"
@@ -181,6 +226,61 @@ setup_directories() {
     chmod 700 "$SSL_DIR"
     
     log_success "Directories configured"
+}
+
+setup_repository() {
+    log_step "Setting up application repository..."
+    
+    # Check if we're already in the correct directory with a git repository
+    if [ -d ".git" ]; then
+        log_info "Found existing git repository"
+        
+        # Verify it's the correct repository
+        local current_remote
+        current_remote=$(git remote get-url origin 2>/dev/null || echo "")
+        
+        if [[ "$current_remote" == *"Spotify-echo"* ]] || [[ "$current_remote" == "$REPO_URL" ]]; then
+            log_success "Repository verified: $current_remote"
+            return 0
+        else
+            exit_with_help "Directory contains wrong git repository: $current_remote" \
+                "The current directory contains a different git repository.
+Please either:
+1. Run this script from a clean directory, or
+2. Run from the correct Spotify-echo repository directory, or  
+3. Set REPO_URL environment variable to match your repository"
+        fi
+    fi
+    
+    # Check if directory exists but is not a git repository
+    if [ -n "$(ls -A . 2>/dev/null)" ]; then
+        exit_with_help "Directory $APP_DIR exists but is not a git repository" \
+            "The application directory contains files but is not a git repository.
+Please either:
+1. Remove the directory: sudo rm -rf $APP_DIR
+2. Move to a different directory before running deployment
+3. Initialize as a git repository manually"
+    fi
+    
+    # Directory is empty or doesn't exist, safe to clone
+    log_info "Cloning repository from $REPO_URL..."
+    
+    if ! git clone "$REPO_URL" .; then
+        exit_with_help "Failed to clone repository from $REPO_URL" \
+            "Repository cloning failed. This could be due to:
+1. Network connectivity issues
+2. Invalid repository URL
+3. Permission issues (if private repository)
+4. Git not installed
+
+Please verify:
+- Internet connection is working
+- Repository URL is correct: $REPO_URL
+- Git is installed: git --version
+- Repository is accessible (if private, ensure SSH keys or credentials are set up)"
+    fi
+    
+    log_success "Repository cloned successfully"
 }
 
 setup_ssl_certificates() {
@@ -317,49 +417,89 @@ EOF
 }
 
 build_application() {
-    log_info "Building application..."
+    log_step "Building application..."
     
     # Pull latest code if in git repository
     if [ -d ".git" ]; then
         log_info "Updating code from repository..."
-        git pull origin main 2>/dev/null || log_warning "Could not update from git"
+        if ! git pull origin main 2>/dev/null; then
+            log_warning "Could not update from git repository"
+            log_info "Continuing with current code version..."
+        else
+            log_success "Code updated successfully"
+        fi
+    fi
+    
+    # Check for required files
+    if [ ! -f "docker-compose.yml" ]; then
+        exit_with_help "docker-compose.yml file not found" \
+            "The deployment requires a docker-compose.yml file.
+Please ensure:
+1. You're in the correct repository directory
+2. The repository contains the necessary Docker configuration
+3. The repository clone was successful"
     fi
     
     # Build with Docker Compose
+    log_info "Building Docker containers..."
     if ! docker-compose build --no-cache; then
-        log_error "Application build failed"
-        exit 1
+        exit_with_help "Application build failed" \
+            "Docker build process failed. This could be due to:
+1. Docker not running: sudo systemctl start docker
+2. Insufficient disk space: df -h
+3. Build dependencies missing
+4. Network issues downloading dependencies
+
+Check the build logs above for specific errors.
+You can also try:
+- Restart Docker: sudo systemctl restart docker
+- Clean Docker cache: docker system prune -f
+- Check Docker logs: journalctl -u docker"
     fi
     
     log_success "Application built successfully"
 }
 
 deploy_application() {
-    log_info "Deploying application..."
+    log_step "Deploying application..."
     
     # Stop existing services gracefully
     log_info "Stopping existing services..."
-    docker-compose down --timeout 30
+    if ! docker-compose down --timeout 30; then
+        log_warning "Some services may not have stopped cleanly"
+    else
+        log_success "Existing services stopped"
+    fi
     
     # Start services
     log_info "Starting services..."
     if ! docker-compose up -d; then
-        log_error "Failed to start services"
-        exit 1
+        exit_with_help "Failed to start services" \
+            "Service startup failed. This could be due to:
+1. Port conflicts: netstat -tlnp | grep ':80\|:443\|:3000'
+2. Resource constraints: free -h && df -h
+3. Configuration errors in docker-compose.yml
+4. Missing environment variables
+
+Try these troubleshooting steps:
+- Check service logs: docker-compose logs
+- Verify ports are available: sudo lsof -i :80,443,3000
+- Restart Docker: sudo systemctl restart docker
+- Check system resources are sufficient"
     fi
     
-    log_success "Services started"
+    log_success "Services started successfully"
 }
 
 wait_for_health() {
-    log_info "Waiting for application to be healthy..."
+    log_step "Performing application health check..."
     
     local retries=0
     while [ $retries -lt $MAX_HEALTH_RETRIES ]; do
         log_info "Health check attempt $((retries + 1))/$MAX_HEALTH_RETRIES..."
         
         if curl -f -s "$HEALTH_ENDPOINT" > /dev/null 2>&1; then
-            log_success "Application is healthy!"
+            log_success "Application is healthy and responding!"
             return 0
         fi
         
@@ -371,9 +511,30 @@ wait_for_health() {
     done
     
     log_error "Application health check failed after $MAX_HEALTH_RETRIES attempts"
-    log_info "Checking application logs for errors..."
-    docker-compose logs --tail=50 app
-    return 1
+    echo ""
+    log_info "Gathering diagnostic information..."
+    echo ""
+    echo "🔍 Service Status:"
+    docker-compose ps
+    echo ""
+    echo "📋 Recent Application Logs:"
+    docker-compose logs --tail=20 app 2>/dev/null || echo "No app logs available"
+    echo ""
+    
+    exit_with_help "Application failed to become healthy" \
+        "The application did not pass health checks. Common issues:
+1. Application startup errors - check logs above
+2. Port binding issues - verify ports 80,443,3000 are available
+3. Database connection problems - check MongoDB/database connectivity
+4. Configuration errors - verify .env file settings
+5. Resource constraints - check memory and disk space
+
+Troubleshooting steps:
+- Check detailed logs: docker-compose logs -f
+- Verify configuration: cat .env
+- Test manually: curl -v $HEALTH_ENDPOINT
+- Check resources: free -h && df -h
+- Restart services: docker-compose restart"
 }
 
 setup_monitoring() {
@@ -472,32 +633,92 @@ main() {
     echo "=============================================="
     echo ""
     
-    # Change to app directory
-    cd "$APP_DIR" || exit 1
+    log_step "🏁 Starting deployment process..."
+    echo ""
     
-    # Detect and load environment variables
-    if ! detect_and_source_env; then
-        exit 1
+    # Ensure we're in the app directory, create if needed
+    if [ ! -d "$APP_DIR" ]; then
+        log_info "Creating application directory: $APP_DIR"
+        sudo mkdir -p "$APP_DIR"
+        sudo chown "$USER:$USER" "$APP_DIR"
     fi
     
-    # Run deployment steps
+    # Change to app directory
+    if ! cd "$APP_DIR"; then
+        exit_with_help "Cannot access application directory: $APP_DIR" \
+            "Failed to change to application directory.
+Please ensure:
+1. Directory exists and is accessible
+2. Current user has appropriate permissions
+3. Disk space is available
+
+You may need to run: sudo mkdir -p $APP_DIR && sudo chown \$USER:\$USER $APP_DIR"
+    fi
+    
+    log_success "Working in directory: $(pwd)"
+    echo ""
+    
+    # Step 1: Environment Detection
+    log_step "🔧 Step 1: Detecting and loading environment configuration..."
+    if ! detect_and_source_env; then
+        exit_with_help "Environment configuration not found or invalid" \
+            "No valid .env file found or environment loading failed.
+Please ensure:
+1. Create .env file: cp .env.example .env
+2. Configure required variables (see DIGITALOCEAN_DEPLOYMENT.md)
+3. Verify file permissions allow reading"
+    fi
+    echo ""
+    
+    # Step 2: Prerequisites Check
+    log_step "✅ Step 2: Checking deployment prerequisites..."
     check_root
     validate_environment
+    echo ""
+    
+    # Step 3: Repository Setup
+    log_step "📁 Step 3: Setting up repository and directories..."
     setup_directories
+    setup_repository
+    echo ""
+    
+    # Step 4: Infrastructure Setup
+    log_step "🔒 Step 4: Setting up infrastructure (SSL, database, etc.)..."
     setup_ssl_certificates
     setup_database
-    backup_current_deployment
-    build_application
-    deploy_application
+    echo ""
     
-    # Wait for health check
+    # Step 5: Backup Current Deployment
+    log_step "💾 Step 5: Creating backup of current deployment..."
+    backup_current_deployment
+    echo ""
+    
+    # Step 6: Build Application
+    log_step "🔨 Step 6: Building application..."
+    build_application
+    echo ""
+    
+    # Step 7: Deploy Application
+    log_step "🚀 Step 7: Deploying application..."
+    deploy_application
+    echo ""
+    
+    # Step 8: Health Check
+    log_step "🏥 Step 8: Verifying application health..."
     if wait_for_health; then
+        echo ""
+        
+        # Step 9: Final Setup
+        log_step "⚙️  Step 9: Finalizing deployment (monitoring, firewall, etc.)..."
         setup_monitoring
         configure_firewall
         generate_deployment_report
-        
         echo ""
+        
+        # Success summary
+        echo "════════════════════════════════════════"
         log_success "🎉 Deployment completed successfully!"
+        echo "════════════════════════════════════════"
         echo ""
         echo "📊 Service Status:"
         docker-compose ps
@@ -518,9 +739,13 @@ main() {
         echo "   - Backups: $BACKUP_DIR"
         echo "   - SSL Certificates: $SSL_DIR"
         echo ""
+        echo "✨ Your EchoTune AI deployment is ready!"
     else
-        log_error "Deployment failed - application is not healthy"
-        exit 1
+        echo ""
+        exit_with_help "Application health check failed - deployment incomplete" \
+            "The deployment process completed but the application is not responding.
+This means the services started but something is preventing proper operation.
+Check the diagnostic information above and troubleshoot accordingly."
     fi
 }
 

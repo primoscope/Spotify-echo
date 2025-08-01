@@ -1,3 +1,4 @@
+// React is needed for JSX
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -493,11 +494,11 @@ function GeneratePlaylistModal({ onClose, onGenerate, isGenerating }) {
   };
 
   const examplePrompts = [
-    "Create an upbeat workout playlist",
-    "Make a chill study music playlist",
-    "Generate romantic dinner music",
-    "Create energetic party songs",
-    "Make a relaxing bedtime playlist"
+    'Create an upbeat workout playlist',
+    'Make a chill study music playlist',
+    'Generate romantic dinner music',
+    'Create energetic party songs',
+    'Make a relaxing bedtime playlist'
   ];
 
   return (

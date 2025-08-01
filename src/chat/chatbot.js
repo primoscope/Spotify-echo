@@ -574,8 +574,7 @@ class EchoTuneChatbot {
       
       // Get access token and user ID from session context
       const accessToken = session.context?.spotifyAccessToken;
-      const userId = session.context?.spotifyUserId || session.userId;
-      
+      // userId removed - was unused
       if (!accessToken) {
         return {
           error: 'Spotify access token not available',

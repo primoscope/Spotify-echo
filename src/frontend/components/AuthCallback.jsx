@@ -1,3 +1,4 @@
+// React is needed for JSX
 import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 

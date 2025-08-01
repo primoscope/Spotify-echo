@@ -484,8 +484,7 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
         // Process audio features if requested
         let enrichedData = csvData;
         if (processAudioFeatures) {
-          const uniqueTrackIds = [...new Set(csvData.map(item => item.track_id))];
-          
+          // uniqueTrackIds removed - was unused
           // Process in smaller batches to avoid overwhelming the API
           enrichedData = await spotifyService.enrichListeningHistory(
             csvData,

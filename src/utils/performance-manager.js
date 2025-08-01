@@ -570,4 +570,3 @@ if (typeof window !== 'undefined') {
     performanceManager
   };
 }
-}

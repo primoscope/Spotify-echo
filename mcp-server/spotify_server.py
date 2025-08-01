@@ -796,7 +796,7 @@ class SpotifyMCPServer:
 
             habits["completion_stats"] = {
                 "average_completion_rate": round(df['completion_rate'].mean(), 3),
-                        "tracks_completed_fully": int((df['completion_rate'] >= 0.8).sum()),
+                "tracks_completed_fully": int((df['completion_rate'] >= 0.8).sum()),
                 "tracks_skipped_early": int((df['completion_rate'] < 0.3).sum())
             }
 

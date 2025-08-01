@@ -12,6 +12,7 @@ dotenv.config();
 const chatRoutes = require('./api/routes/chat');
 const recommendationRoutes = require('./api/routes/recommendations');
 const spotifyRoutes = require('./api/routes/spotify');
+const providersRoutes = require('./api/routes/providers');
 const { 
   extractUser, 
   ensureDatabase, 
@@ -385,6 +386,7 @@ app.post('/api/chat', async (req, res) => {
 app.use('/api/chat', chatRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/spotify', spotifyRoutes);
+app.use('/api/providers', providersRoutes);
 
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars

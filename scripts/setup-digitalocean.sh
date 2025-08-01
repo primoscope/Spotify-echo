@@ -145,17 +145,59 @@ install_nodejs() {
     log_info "Installing Node.js and npm..."
     
     if ! command -v node &> /dev/null; then
-        # Install Node.js 18.x LTS
-        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+        # Install Node.js 20.x LTS (Current LTS version)
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
         sudo apt-get install -y nodejs
         
         log_success "Node.js $(node --version) installed"
     else
-        log_success "Node.js $(node --version) already installed"
+        # Check if existing Node.js version is compatible
+        local node_version
+        local major_version
+        node_version=$(node --version | sed 's/v//')
+        major_version=$(echo "$node_version" | cut -d. -f1)
+        
+        if [ "$major_version" -lt 20 ]; then
+            log_warning "Node.js version $node_version is outdated. Upgrading to 20.x LTS..."
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            log_success "Node.js upgraded to $(node --version)"
+        else
+            log_success "Node.js $(node --version) already installed (compatible version)"
+        fi
     fi
     
-    # Update npm to latest
-    sudo npm install -g npm@latest
+    # Update npm with fallback handling
+    log_info "Updating npm..."
+    local npm_current
+    npm_current=$(npm --version)
+    
+    if sudo npm install -g npm@latest 2>/dev/null; then
+        local npm_new
+        npm_new=$(npm --version)
+        log_success "npm updated from $npm_current to $npm_new"
+    else
+        log_warning "Failed to update npm to latest. Checking compatibility..."
+        
+        # Try to install a compatible npm version for Node.js 20.x
+        if sudo npm install -g npm@^10.0.0 2>/dev/null; then
+            local npm_new
+            npm_new=$(npm --version)
+            log_success "npm updated to compatible version $npm_new"
+        else
+            log_warning "npm update failed. Using existing version $npm_current"
+            log_info "This may cause compatibility issues with some packages"
+        fi
+    fi
+    
+    # Verify npm and Node.js compatibility
+    log_info "Verifying Node.js and npm compatibility..."
+    if npm --version &>/dev/null; then
+        log_success "Node.js $(node --version) and npm $(npm --version) are working correctly"
+    else
+        log_error "npm compatibility check failed"
+        exit 1
+    fi
 }
 
 install_python() {

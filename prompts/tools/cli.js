@@ -67,9 +67,18 @@ Options:
   async runTool(toolName, args = []) {
     return new Promise((resolve, reject) => {
       const toolPath = path.join(__dirname, `${toolName}.js`);
-      const child = spawn('node', [toolPath, ...args], {
+      
+      // Fix relative paths - if argument looks like a relative path, make it absolute
+      const fixedArgs = args.map(arg => {
+        if (arg.startsWith('prompts/') && !path.isAbsolute(arg)) {
+          return path.join(process.cwd(), arg);
+        }
+        return arg;
+      });
+      
+      const child = spawn('node', [toolPath, ...fixedArgs], {
         stdio: 'inherit',
-        cwd: __dirname
+        cwd: process.cwd() // Use project root as working directory
       });
 
       child.on('close', (code) => {

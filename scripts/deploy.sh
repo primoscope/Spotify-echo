@@ -30,13 +30,14 @@ detect_and_source_env() {
         ".env"
         "/opt/echotune/.env"
         "$(pwd)/.env"
+        "${APP_DIR}/.env"
     )
     
     log_info "Detecting and sourcing environment configuration..."
     
     # Try to find .env file in priority order
     for location in "${env_locations[@]}"; do
-        if [ -f "$location" ]; then
+        if [ -f "$location" ] && [ -r "$location" ]; then
             env_file="$location"
             log_info "Found environment file: $env_file"
             break
@@ -44,34 +45,81 @@ detect_and_source_env() {
     done
     
     if [ -n "$env_file" ]; then
-        # Source environment file safely
-        if ! (set -a; source "$env_file"; set +a); then
-            exit_with_help "Failed to load environment file: $env_file" \
-                "Environment file exists but contains errors.
+        # Test environment file syntax before sourcing
+        if ! bash -n "$env_file" 2>/dev/null; then
+            exit_with_help "Environment file has syntax errors: $env_file" \
+                "Environment file contains bash syntax errors.
 Please check:
 1. File syntax is correct (no invalid bash syntax)
-2. File permissions allow reading
-3. No special characters in values that need escaping
+2. Quotes are properly closed
+3. No special characters that need escaping
+
+You can test the file manually: bash -n $env_file"
+        fi
+        
+        # Source environment file safely with error handling
+        if ! (set -a; source "$env_file" 2>/dev/null; set +a); then
+            exit_with_help "Failed to load environment file: $env_file" \
+                "Environment file exists but failed to load.
+Please check:
+1. File permissions allow reading: chmod 644 $env_file
+2. No special characters in values that need escaping
+3. All variables are properly formatted
 
 You can test the file manually: source $env_file"
         fi
         
-        # Re-source for the current shell
+        # Re-source for the current shell with validation
         set -a
-        source "$env_file"
+        if ! source "$env_file" 2>/dev/null; then
+            set +a
+            exit_with_help "Failed to source environment file: $env_file" \
+                "Unable to load environment variables from file.
+This may be due to:
+1. Invalid variable assignments
+2. Special characters in values
+3. Missing quotes around values with spaces
+
+Please validate your .env file format."
+        fi
         set +a
         
         log_success "Environment variables loaded from $env_file"
         
-        # Export key variables for services
-        export NODE_ENV SPOTIFY_CLIENT_ID SPOTIFY_CLIENT_SECRET
-        export FRONTEND_URL SPOTIFY_REDIRECT_URI PORT DOMAIN
-        export MONGODB_URI REDIS_URL
+        # Export key variables for services with validation
+        export NODE_ENV="${NODE_ENV:-production}"
+        export PORT="${PORT:-3000}"
+        export DOMAIN="${DOMAIN:-localhost}"
+        
+        # Validate critical variables are not empty
+        if [ -n "$SPOTIFY_CLIENT_ID" ]; then
+            export SPOTIFY_CLIENT_ID
+        fi
+        if [ -n "$SPOTIFY_CLIENT_SECRET" ]; then
+            export SPOTIFY_CLIENT_SECRET
+        fi
+        if [ -n "$FRONTEND_URL" ]; then
+            export FRONTEND_URL
+        fi
+        if [ -n "$SPOTIFY_REDIRECT_URI" ]; then
+            export SPOTIFY_REDIRECT_URI
+        fi
+        if [ -n "$MONGODB_URI" ]; then
+            export MONGODB_URI
+        fi
+        if [ -n "$REDIS_URL" ]; then
+            export REDIS_URL
+        fi
+        
         return 0
     else
         log_error "No .env file found in any of the expected locations:"
         for location in "${env_locations[@]}"; do
-            echo "  - $location"
+            if [ -f "$location" ] && [ ! -r "$location" ]; then
+                echo "  - $location (exists but not readable - check permissions)"
+            else
+                echo "  - $location"
+            fi
         done
         return 1
     fi
@@ -218,12 +266,46 @@ Common setup steps:
 setup_directories() {
     log_step "Setting up application directories..."
     
-    # Create necessary directories
-    mkdir -p "$LOG_DIR" "$BACKUP_DIR" "$SSL_DIR"
+    # Ensure parent directory exists and is accessible
+    if [ ! -d "$(dirname "$APP_DIR")" ]; then
+        sudo mkdir -p "$(dirname "$APP_DIR")"
+    fi
     
-    # Set appropriate permissions
-    chmod 755 "$LOG_DIR" "$BACKUP_DIR"
-    chmod 700 "$SSL_DIR"
+    # Create app directory if it doesn't exist
+    if [ ! -d "$APP_DIR" ]; then
+        log_info "Creating application directory: $APP_DIR"
+        sudo mkdir -p "$APP_DIR"
+        
+        # Set ownership if we created the directory
+        if [ -n "$USER" ] && id "$USER" &>/dev/null; then
+            sudo chown "$USER:$USER" "$APP_DIR"
+        fi
+    fi
+    
+    # Create necessary subdirectories with proper error handling
+    local dirs_to_create=("$LOG_DIR" "$BACKUP_DIR" "$SSL_DIR")
+    for dir in "${dirs_to_create[@]}"; do
+        if ! mkdir -p "$dir" 2>/dev/null; then
+            # Try with sudo if regular mkdir fails
+            log_info "Creating directory with elevated permissions: $dir"
+            sudo mkdir -p "$dir"
+            if [ -n "$USER" ] && id "$USER" &>/dev/null; then
+                sudo chown "$USER:$USER" "$dir"
+            fi
+        fi
+    done
+    
+    # Set appropriate permissions with error handling
+    chmod 755 "$LOG_DIR" "$BACKUP_DIR" 2>/dev/null || {
+        sudo chmod 755 "$LOG_DIR" "$BACKUP_DIR"
+    }
+    
+    chmod 700 "$SSL_DIR" 2>/dev/null || {
+        sudo chmod 700 "$SSL_DIR"
+        if [ -n "$USER" ] && id "$USER" &>/dev/null; then
+            sudo chown "$USER:$USER" "$SSL_DIR"
+        fi
+    }
     
     log_success "Directories configured"
 }
@@ -495,13 +577,29 @@ wait_for_health() {
     log_step "Performing application health check..."
     
     local retries=0
+    local health_url="$HEALTH_ENDPOINT"
+    
+    # Try different health endpoints if main one fails
+    local health_endpoints=(
+        "http://localhost:3000/health"
+        "http://localhost:$PORT/health"
+        "http://127.0.0.1:3000/health"
+        "http://127.0.0.1:$PORT/"
+        "http://localhost:3000/"
+    )
+    
     while [ $retries -lt $MAX_HEALTH_RETRIES ]; do
         log_info "Health check attempt $((retries + 1))/$MAX_HEALTH_RETRIES..."
         
-        if curl -f -s "$HEALTH_ENDPOINT" > /dev/null 2>&1; then
-            log_success "Application is healthy and responding!"
-            return 0
-        fi
+        # Try each endpoint until one succeeds
+        local success=false
+        for endpoint in "${health_endpoints[@]}"; do
+            log_info "Testing endpoint: $endpoint"
+            if curl -f -s --connect-timeout 10 --max-time 30 "$endpoint" > /dev/null 2>&1; then
+                log_success "Application is healthy and responding at $endpoint!"
+                return 0
+            fi
+        done
         
         retries=$((retries + 1))
         if [ $retries -lt $MAX_HEALTH_RETRIES ]; then
@@ -515,10 +613,21 @@ wait_for_health() {
     log_info "Gathering diagnostic information..."
     echo ""
     echo "🔍 Service Status:"
-    docker-compose ps
+    if command -v docker-compose &> /dev/null; then
+        docker-compose ps || echo "Could not get service status"
+    else
+        echo "Docker Compose not available"
+    fi
     echo ""
     echo "📋 Recent Application Logs:"
-    docker-compose logs --tail=20 app 2>/dev/null || echo "No app logs available"
+    if command -v docker-compose &> /dev/null; then
+        docker-compose logs --tail=20 app 2>/dev/null || echo "No app logs available"
+    else
+        echo "Docker Compose logs not available"
+    fi
+    echo ""
+    echo "🌐 Network Status:"
+    netstat -tlnp 2>/dev/null | grep -E ':(80|443|3000)' || echo "No network status available"
     echo ""
     
     exit_with_help "Application failed to become healthy" \
@@ -528,12 +637,14 @@ wait_for_health() {
 3. Database connection problems - check MongoDB/database connectivity
 4. Configuration errors - verify .env file settings
 5. Resource constraints - check memory and disk space
+6. Docker issues - ensure Docker is running properly
 
 Troubleshooting steps:
 - Check detailed logs: docker-compose logs -f
 - Verify configuration: cat .env
-- Test manually: curl -v $HEALTH_ENDPOINT
+- Test manually: curl -v http://localhost:3000/
 - Check resources: free -h && df -h
+- Check Docker: docker ps && docker-compose ps
 - Restart services: docker-compose restart"
 }
 

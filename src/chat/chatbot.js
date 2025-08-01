@@ -5,6 +5,7 @@ const MockLLMProvider = require('./llm-providers/mock-provider');
 const ConversationManager = require('./conversation-manager');
 const RecommendationEngine = require('../ml/recommendation-engine');
 const SpotifyAudioFeaturesService = require('../spotify/audio-features');
+const SpotifyAPIService = require('../spotify/api-service');
 
 /**
  * Main Chatbot Class for EchoTune AI
@@ -18,6 +19,7 @@ class EchoTuneChatbot {
     this.conversationManager = new ConversationManager();
     this.recommendationEngine = new RecommendationEngine();
     this.spotifyService = new SpotifyAudioFeaturesService();
+    this.spotifyAPI = new SpotifyAPIService();
     
     // Initialize providers based on config
     this.initializeProviders();
@@ -514,37 +516,120 @@ class EchoTuneChatbot {
   /**
    * Search for tracks
    */
-  async searchTracks(args) {
-    // This would integrate with Spotify API to search tracks
-    // For now, return mock data
-    return {
-      tracks: [
-        {
-          id: 'track1',
-          name: 'Example Song',
-          artists: ['Example Artist'],
-          preview_url: 'https://example.com/preview.mp3'
-        }
-      ],
-      total: 1,
-      query: args.query
-    };
+  async searchTracks(args, session) {
+    try {
+      const { query, limit = 10, mood, energy, danceability } = args;
+      
+      // Get access token from session context
+      const accessToken = session.context?.spotifyAccessToken;
+      
+      if (!accessToken) {
+        return {
+          error: 'Spotify access token not available',
+          message: 'Please connect your Spotify account to search for tracks'
+        };
+      }
+
+      // Search tracks using real Spotify API
+      const searchResults = await this.spotifyAPI.searchTracks(query, {
+        limit,
+        mood,
+        energy,
+        danceability,
+        accessToken
+      });
+
+      // Enrich with audio features if needed
+      const trackIds = searchResults.tracks.map(track => track.id);
+      const audioFeatures = await this.spotifyService.getCachedAudioFeatures(trackIds);
+      const audioFeaturesMap = new Map(audioFeatures.map(af => [af.track_id, af]));
+
+      const enrichedTracks = searchResults.tracks.map(track => ({
+        ...track,
+        audio_features: audioFeaturesMap.get(track.id)
+      }));
+
+      return {
+        tracks: enrichedTracks,
+        total: searchResults.total,
+        query: searchResults.query,
+        message: `Found ${enrichedTracks.length} tracks matching "${query}"`
+      };
+
+    } catch (error) {
+      console.error('Error searching tracks:', error);
+      return {
+        error: error.message,
+        message: 'Sorry, I encountered an error while searching for tracks. Please try again.'
+      };
+    }
   }
 
   /**
    * Create a playlist
    */
-  async createPlaylist(args) {
-    // This would integrate with Spotify API to create playlists
-    return {
-      playlist: {
-        id: 'playlist123',
-        name: args.name,
-        description: args.description,
-        tracks_count: args.tracks?.length || 0
-      },
-      success: true
-    };
+  async createPlaylist(args, session, options) {
+    try {
+      const { name, description, tracks = [], public: isPublic = false } = args;
+      
+      // Get access token and user ID from session context
+      const accessToken = session.context?.spotifyAccessToken;
+      const userId = session.context?.spotifyUserId || session.userId;
+      
+      if (!accessToken) {
+        return {
+          error: 'Spotify access token not available',
+          message: 'Please connect your Spotify account to create playlists'
+        };
+      }
+
+      // Create playlist using real Spotify API
+      const playlist = await this.spotifyAPI.createPlaylist(userId, {
+        name: name || 'EchoTune AI Playlist',
+        description: description || 'Created by EchoTune AI',
+        public: isPublic
+      }, { accessToken });
+
+      // Add tracks if provided
+      let addedTracks = 0;
+      if (tracks && tracks.length > 0) {
+        // Convert track IDs to URIs
+        const trackUris = tracks.map(track => 
+          typeof track === 'string' ? `spotify:track:${track}` : `spotify:track:${track.id}`
+        );
+        
+        const addResult = await this.spotifyAPI.addTracksToPlaylist(
+          playlist.id, 
+          trackUris, 
+          { accessToken }
+        );
+        addedTracks = addResult.added_tracks;
+      }
+
+      // Store playlist creation in user activity
+      await this.logUserActivity(session.userId, {
+        action: 'playlist_created',
+        playlist_id: playlist.id,
+        playlist_name: playlist.name,
+        tracks_added: addedTracks
+      });
+
+      return {
+        playlist: {
+          ...playlist,
+          tracks_added: addedTracks
+        },
+        success: true,
+        message: `Successfully created playlist "${playlist.name}"${addedTracks > 0 ? ` with ${addedTracks} tracks` : ''}`
+      };
+
+    } catch (error) {
+      console.error('Error creating playlist:', error);
+      return {
+        error: error.message,
+        message: 'Sorry, I encountered an error while creating the playlist. Please try again.'
+      };
+    }
   }
 
   /**
@@ -574,17 +659,93 @@ class EchoTuneChatbot {
   /**
    * Analyze listening habits
    */
-  async analyzeListeningHabits() {
-    // This would analyze user's listening data
-    return {
-      analysis: {
-        top_genres: ['Pop', 'Rock', 'Electronic'],
-        top_artists: ['Artist 1', 'Artist 2'],
-        listening_time: '50 hours',
-        most_active_time: 'Evening'
-      },
-      insights: 'You have diverse musical taste with a preference for upbeat tracks.'
-    };
+  async analyzeListeningHabits(args, session) {
+    try {
+      const { time_period = 'medium_term', include_audio_features = true } = args;
+      
+      // Get access token from session context
+      const accessToken = session.context?.spotifyAccessToken;
+      
+      if (!accessToken) {
+        return {
+          error: 'Spotify access token not available',
+          message: 'Please connect your Spotify account to analyze your listening habits'
+        };
+      }
+
+      // Get user's top tracks and artists from Spotify
+      const [topTracks, topArtists] = await Promise.all([
+        this.spotifyAPI.getUserTopTracks({
+          time_range: time_period,
+          limit: 50,
+          accessToken
+        }),
+        this.spotifyAPI.getUserTopArtists({
+          time_range: time_period,
+          limit: 20,
+          accessToken
+        })
+      ]);
+
+      // Get listening history from database
+      const listeningHistory = await this.recommendationEngine.getUserListeningHistory(
+        session.userId, 
+        { limit: 1000 }
+      );
+
+      // Analyze audio features if requested
+      let audioAnalysis = null;
+      if (include_audio_features && topTracks.tracks.length > 0) {
+        const trackIds = topTracks.tracks.map(track => track.id);
+        const audioFeatures = await this.spotifyService.getCachedAudioFeatures(trackIds);
+        
+        if (audioFeatures.length > 0) {
+          audioAnalysis = this.calculateAudioFeatureStats(audioFeatures);
+        }
+      }
+
+      // Extract genres from top artists
+      const allGenres = topArtists.artists.flatMap(artist => artist.genres);
+      const genreCounts = {};
+      allGenres.forEach(genre => {
+        genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+      });
+      
+      const topGenres = Object.entries(genreCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([genre, count]) => ({ genre, count }));
+
+      // Calculate listening patterns
+      const listeningPatterns = this.analyzeListeningPatterns(listeningHistory);
+
+      const analysis = {
+        time_period,
+        top_tracks: topTracks.tracks.slice(0, 10),
+        top_artists: topArtists.artists.slice(0, 10),
+        top_genres: topGenres,
+        listening_patterns: listeningPatterns,
+        audio_features_profile: audioAnalysis,
+        total_tracks_analyzed: topTracks.tracks.length,
+        database_history_count: listeningHistory.length
+      };
+
+      // Generate insights
+      const insights = this.generateListeningInsights(analysis);
+
+      return {
+        analysis,
+        insights,
+        message: `Analysis complete! Found ${topTracks.tracks.length} top tracks and ${topArtists.artists.length} top artists.`
+      };
+
+    } catch (error) {
+      console.error('Error analyzing listening habits:', error);
+      return {
+        error: error.message,
+        message: 'Sorry, I encountered an error while analyzing your listening habits. Please try again.'
+      };
+    }
   }
 
   /**
@@ -689,6 +850,162 @@ Just ask me anything about music and I'll help you discover your next favorite s
       availableProviders: providersStatus.length,
       providers: providersStatus
     };
+  }
+
+  /**
+   * Log user activity for analytics
+   */
+  async logUserActivity(userId, activity) {
+    try {
+      const db = require('../database/mongodb').getDb();
+      const userActivityCollection = db.collection('user_activity');
+      
+      await userActivityCollection.insertOne({
+        user_id: userId,
+        ...activity,
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error('Error logging user activity:', error);
+      // Don't throw - activity logging shouldn't break the main flow
+    }
+  }
+
+  /**
+   * Calculate audio feature statistics
+   */
+  calculateAudioFeatureStats(audioFeatures) {
+    if (audioFeatures.length === 0) return null;
+
+    const features = ['energy', 'danceability', 'valence', 'acousticness', 'instrumentalness', 'speechiness', 'liveness'];
+    const stats = {};
+
+    features.forEach(feature => {
+      const values = audioFeatures.map(af => af[feature]).filter(v => v !== undefined);
+      if (values.length > 0) {
+        stats[feature] = {
+          average: values.reduce((sum, val) => sum + val, 0) / values.length,
+          min: Math.min(...values),
+          max: Math.max(...values)
+        };
+      }
+    });
+
+    // Calculate tempo stats separately
+    const tempoValues = audioFeatures.map(af => af.tempo).filter(v => v !== undefined);
+    if (tempoValues.length > 0) {
+      stats.tempo = {
+        average: tempoValues.reduce((sum, val) => sum + val, 0) / tempoValues.length,
+        min: Math.min(...tempoValues),
+        max: Math.max(...tempoValues)
+      };
+    }
+
+    return stats;
+  }
+
+  /**
+   * Analyze listening patterns from history
+   */
+  analyzeListeningPatterns(listeningHistory) {
+    if (listeningHistory.length === 0) {
+      return {
+        most_active_hours: [],
+        most_active_days: [],
+        listening_streaks: [],
+        total_listening_time: 0
+      };
+    }
+
+    // Analyze by hour of day
+    const hourCounts = new Array(24).fill(0);
+    const dayCounts = new Array(7).fill(0);
+    let totalDuration = 0;
+
+    listeningHistory.forEach(item => {
+      const playedAt = new Date(item.played_at);
+      hourCounts[playedAt.getHours()]++;
+      dayCounts[playedAt.getDay()]++;
+      
+      if (item.duration_ms) {
+        totalDuration += item.duration_ms;
+      }
+    });
+
+    // Find most active hours
+    const mostActiveHours = hourCounts
+      .map((count, hour) => ({ hour, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Find most active days
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const mostActiveDays = dayCounts
+      .map((count, day) => ({ day: dayNames[day], count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    return {
+      most_active_hours: mostActiveHours,
+      most_active_days: mostActiveDays,
+      total_listening_time: Math.round(totalDuration / 1000 / 60), // minutes
+      total_tracks: listeningHistory.length
+    };
+  }
+
+  /**
+   * Generate insights from listening analysis
+   */
+  generateListeningInsights(analysis) {
+    const insights = [];
+
+    // Genre diversity insight
+    if (analysis.top_genres.length > 5) {
+      insights.push("You have very diverse musical taste across multiple genres!");
+    } else if (analysis.top_genres.length > 0) {
+      insights.push(`Your music taste is focused primarily on ${analysis.top_genres[0].genre} music.`);
+    }
+
+    // Audio features insights
+    if (analysis.audio_features_profile) {
+      const features = analysis.audio_features_profile;
+      
+      if (features.energy?.average > 0.7) {
+        insights.push("You prefer high-energy, upbeat music that gets you moving!");
+      } else if (features.energy?.average < 0.3) {
+        insights.push("You enjoy calm, low-energy music that's perfect for relaxation.");
+      }
+
+      if (features.danceability?.average > 0.7) {
+        insights.push("Your tracks have high danceability - you love music you can dance to!");
+      }
+
+      if (features.valence?.average > 0.7) {
+        insights.push("Your music tends to be very positive and uplifting!");
+      } else if (features.valence?.average < 0.3) {
+        insights.push("You're drawn to more melancholic or introspective music.");
+      }
+
+      if (features.acousticness?.average > 0.7) {
+        insights.push("You have a strong preference for acoustic and organic sounds.");
+      }
+    }
+
+    // Listening patterns insights
+    if (analysis.listening_patterns.most_active_hours.length > 0) {
+      const topHour = analysis.listening_patterns.most_active_hours[0];
+      if (topHour.hour >= 6 && topHour.hour < 12) {
+        insights.push("You're most active listening to music in the morning!");
+      } else if (topHour.hour >= 12 && topHour.hour < 18) {
+        insights.push("Afternoon is your prime music listening time!");
+      } else if (topHour.hour >= 18 && topHour.hour < 22) {
+        insights.push("You're an evening music lover!");
+      } else {
+        insights.push("You're a night owl when it comes to music!");
+      }
+    }
+
+    return insights;
   }
 }
 

@@ -27,7 +27,7 @@ def print_step(step_num, description):
 
 def main():
     print_header("MONGODB CONNECTION SETUP - ECHOTUNE AI")
-    
+
     print("""
 This demonstration shows the complete MongoDB setup process using the provided
 credentials for the EchoTune AI Spotify recommendation system.
@@ -39,13 +39,13 @@ Connection Details:
 - Database: spotify_analytics
 - Collection: listening_history
 """)
-    
+
     print_step(1, "Testing MongoDB Connection")
     print("Running connection test...")
     try:
         # Use subprocess instead of os.system for security
         script_path = os.path.join(os.path.dirname(__file__), 'test_mongodb_connection.py')
-        result = subprocess.run([sys.executable, script_path], 
+        result = subprocess.run([sys.executable, script_path],
                               capture_output=True, text=True, timeout=30)
         if result.returncode == 0:
             print("✅ Connection test completed successfully")
@@ -54,42 +54,42 @@ Connection Details:
     except (subprocess.TimeoutExpired, FileNotFoundError) as e:
         print(f"⚠️ Could not run connection test: {e}")
         print("Please run manually: python scripts/test_mongodb_connection.py")
-    
+
     print_step(2, "Sample Data Migration")
     print("The migration has already been tested with sample data.")
     print("Current database state:")
-    
+
     # Show current database state
     from pymongo import MongoClient
-    
+
     mongodb_uri = os.getenv('MONGODB_URI')
     database_name = os.getenv('MONGODB_DATABASE', 'spotify_analytics')
     collection_name = os.getenv('MONGODB_COLLECTION', 'listening_history')
-    
+
     client = MongoClient(mongodb_uri)
     db = client[database_name]
     collection = db[collection_name]
-    
+
     count = collection.count_documents({})
     users = collection.distinct("user.username")
     tracks = collection.distinct("spotify_track_uri")
-    
+
     print(f"  ✅ Total documents: {count:,}")
     print(f"  ✅ Unique users: {len(users):,}")
     print(f"  ✅ Unique tracks: {len(tracks):,}")
-    
+
     # Show indexes
     indexes = list(collection.list_indexes())
     print(f"  ✅ Database indexes: {len(indexes)} created")
-    
+
     # Show sample document
     sample = collection.find_one()
     if sample:
         print(f"  ✅ Sample document ID: {sample.get('_id', 'N/A')}")
         print(f"  ✅ Sample track: {sample.get('track', {}).get('name', 'N/A')} by {sample.get('track', {}).get('artist', 'N/A')}")
-    
+
     client.close()
-    
+
     print_step(3, "Available Commands")
     print("""
 Key scripts and commands available:
@@ -108,7 +108,7 @@ Key scripts and commands available:
    MONGODB_DATABASE=spotify_analytics
    MONGODB_COLLECTION=listening_history
 """)
-    
+
     print_step(4, "Production Migration")
     print("""
 For production migration of the full dataset:
@@ -120,7 +120,7 @@ For production migration of the full dataset:
 
 Estimated migration time: 5-10 minutes for full dataset.
 """)
-    
+
     print_step(5, "Database Schema")
     print("""
 The MongoDB collection uses the following document structure:
@@ -158,7 +158,7 @@ The MongoDB collection uses the following document structure:
   }
 }
 """)
-    
+
     print_header("SETUP COMPLETE")
     print("""
 ✅ MongoDB connection tested and working

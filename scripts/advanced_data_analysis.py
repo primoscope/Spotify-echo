@@ -15,12 +15,12 @@ from migrate_to_mongodb import MongoDBMigrator
 
 class AdvancedDataAnalyzer:
     """Advanced analytics for Spotify listening history in MongoDB"""
-    
+
     def __init__(self):
         self.migrator = MongoDBMigrator()
         self.migrator.connect()
         self.collection = self.migrator.collection
-    
+
     def get_listening_patterns(self):
         """Analyze listening patterns by time of day and day of week"""
         pipeline = [
@@ -48,9 +48,9 @@ class AdvancedDataAnalyzer:
             },
             {"$sort": {"_id.dayOfWeek": 1, "_id.hour": 1}}
         ]
-        
+
         return list(self.collection.aggregate(pipeline))
-    
+
     def get_music_discovery_timeline(self):
         """Track music discovery over time"""
         pipeline = [
@@ -75,9 +75,9 @@ class AdvancedDataAnalyzer:
             },
             {"$sort": {"_id.year": 1, "_id.month": 1}}
         ]
-        
+
         return list(self.collection.aggregate(pipeline))
-    
+
     def get_top_artists_evolution(self, limit=20):
         """Track how top artists change over time"""
         pipeline = [
@@ -119,9 +119,9 @@ class AdvancedDataAnalyzer:
             },
             {"$sort": {"_id": 1}}
         ]
-        
+
         return list(self.collection.aggregate(pipeline))
-    
+
     def get_skip_behavior_analysis(self):
         """Analyze skip behavior and completion rates"""
         pipeline = [
@@ -149,9 +149,9 @@ class AdvancedDataAnalyzer:
                 }
             }
         ]
-        
+
         return list(self.collection.aggregate(pipeline))
-    
+
     def get_audio_features_analysis(self):
         """Analyze audio features preferences over time"""
         pipeline = [
@@ -172,9 +172,9 @@ class AdvancedDataAnalyzer:
             },
             {"$sort": {"_id": 1}}
         ]
-        
+
         return list(self.collection.aggregate(pipeline))
-    
+
     def get_seasonal_preferences(self):
         """Analyze how music preferences change by season"""
         pipeline = [
@@ -218,9 +218,9 @@ class AdvancedDataAnalyzer:
                 }
             }
         ]
-        
+
         return list(self.collection.aggregate(pipeline))
-    
+
     def _get_basic_statistics(self):
         """Get basic dataset statistics"""
         total_docs = self.collection.count_documents({})
@@ -234,14 +234,14 @@ class AdvancedDataAnalyzer:
                 "total_time": {"$sum": "$listening.ms_played"}
             }}
         ]))[0]
-        
+
         return {
             'total_docs': total_docs,
             'unique_tracks': unique_tracks,
             'unique_artists': unique_artists,
             'date_range': date_range
         }
-    
+
     def _print_dataset_overview(self, stats):
         """Print dataset overview section"""
         print("📊 DATASET OVERVIEW")
@@ -252,14 +252,14 @@ class AdvancedDataAnalyzer:
         print(f"Date range: {stats['date_range']['min_date']} to {stats['date_range']['max_date']}")
         print(f"Total listening time: {stats['date_range']['total_time'] / 3600000:.0f} hours")
         print()
-    
+
     def _print_listening_patterns(self):
         """Print listening patterns section"""
         print("🕐 LISTENING PATTERNS BY TIME")
         print("-" * 40)
         patterns = self.get_listening_patterns()
         day_names = ["", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-        
+
         # Find peak listening times
         peak_times = sorted(patterns, key=lambda x: x['listening_sessions'], reverse=True)[:5]
         print("Top 5 listening times:")
@@ -269,7 +269,7 @@ class AdvancedDataAnalyzer:
             sessions = time_slot['listening_sessions']
             print(f"  {i}. {day} at {hour:02d}:00 - {sessions:,} listening sessions")
         print()
-    
+
     def _print_music_discovery(self):
         """Print music discovery timeline section"""
         print("🎵 MUSIC DISCOVERY TIMELINE")
@@ -284,7 +284,7 @@ class AdvancedDataAnalyzer:
                 hours = period['total_listening_hours']
                 print(f"  {year}-{month:02d}: {tracks:,} new tracks, {artists:,} new artists, {hours:.0f}h listening")
         print()
-    
+
     def _print_skip_behavior(self):
         """Print skip behavior analysis section"""
         print("⏭️  SKIP BEHAVIOR ANALYSIS")
@@ -298,7 +298,7 @@ class AdvancedDataAnalyzer:
                     avg_time = bucket['avg_play_time'] / 1000  # Convert to seconds
                     print(f"  Completion ~{completion_range}: {count:,} tracks (avg {avg_time:.0f}s played)")
         print()
-    
+
     def _print_audio_preferences(self):
         """Print audio preferences evolution section"""
         print("🎶 AUDIO PREFERENCES EVOLUTION")
@@ -307,7 +307,7 @@ class AdvancedDataAnalyzer:
         if audio_evolution and len(audio_evolution) >= 2:
             recent = audio_evolution[-1]
             previous = audio_evolution[-2] if len(audio_evolution) > 1 else audio_evolution[0]
-            
+
             print(f"Music taste evolution ({previous['_id']} → {recent['_id']}):")
             if recent.get('avg_energy') and previous.get('avg_energy'):
                 energy_change = recent['avg_energy'] - previous['avg_energy']
@@ -319,7 +319,7 @@ class AdvancedDataAnalyzer:
                 dance_change = recent['avg_danceability'] - previous['avg_danceability']
                 print(f"  Danceability: {dance_change:+.2f} ({'more danceable' if dance_change > 0 else 'less danceable'})")
         print()
-    
+
     def _print_seasonal_preferences(self):
         """Print seasonal preferences section"""
         print("🌞 SEASONAL MUSIC PREFERENCES")
@@ -332,7 +332,7 @@ class AdvancedDataAnalyzer:
             valence = season_data.get('avg_valence', 0)
             print(f"  {season}: {count:,} tracks (Energy: {energy:.2f}, Mood: {valence:.2f})")
         print()
-    
+
     def _print_top_artists(self):
         """Print top artists evolution section"""
         print("👑 TOP ARTISTS EVOLUTION")
@@ -347,7 +347,7 @@ class AdvancedDataAnalyzer:
                 hours = artist['total_time'] / 3600000
                 print(f"  {i}. {name}: {plays:,} plays ({hours:.1f}h)")
         print()
-    
+
     def _print_ml_recommendations(self):
         """Print ML recommendations section"""
         print("🚀 RECOMMENDATIONS FOR ML MODELS")
@@ -366,10 +366,10 @@ class AdvancedDataAnalyzer:
         print("=" * 80)
         print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
         print()
-        
+
         # Get basic statistics
         stats = self._get_basic_statistics()
-        
+
         # Print all sections
         self._print_dataset_overview(stats)
         self._print_listening_patterns()
@@ -379,11 +379,11 @@ class AdvancedDataAnalyzer:
         self._print_seasonal_preferences()
         self._print_top_artists()
         self._print_ml_recommendations()
-        
+
         print("=" * 80)
         print("Advanced analytics complete. Data ready for machine learning pipelines.")
         print("=" * 80)
-    
+
     def disconnect(self):
         """Close MongoDB connection"""
         self.migrator.disconnect()

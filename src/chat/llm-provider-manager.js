@@ -280,11 +280,11 @@ class LLMProviderManager {
     });
 
     // OpenRouter refresh handler
-    this.keyRefreshHandlers.set('openrouter', async (_config) => {
+    this.keyRefreshHandlers.set('openrouter', async (config) => {
       try {
         // OpenRouter doesn't have a standard refresh endpoint
         // We would need to implement their specific auth flow
-        console.warn('OpenRouter key refresh not implemented - please update manually');
+        console.warn('OpenRouter key refresh not implemented - please update manually', config);
         return { success: false, error: 'Manual refresh required' };
       } catch (error) {
         return { success: false, error: error.message };
@@ -292,7 +292,7 @@ class LLMProviderManager {
     });
 
     // Azure refresh handler
-    this.keyRefreshHandlers.set('azure', async (_config) => {
+    this.keyRefreshHandlers.set('azure', async (config) => {
       try {
         // Azure OpenAI uses AAD tokens that can be refreshed
         if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET) {

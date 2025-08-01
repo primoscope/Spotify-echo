@@ -1,35 +1,62 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "name": "EchoTune AI Gemini Code Assist Configuration",
-  "description": "Optimized Gemini Code Assist configuration for music recommendation system development",
+  "description": "Enhanced Gemini Code Assist configuration for music recommendation system development with advanced AI capabilities",
+  "lastUpdated": "2024-01-28T00:00:00Z",
   "settings": {
     "model": "gemini-2.0-flash-exp",
+    "fallbackModel": "gemini-1.5-pro",
     "temperature": 0.7,
-    "maxTokens": 4096,
+    "maxTokens": 8192,
     "topK": 40,
     "topP": 0.9,
     "autoSuggestions": true,
-    "contextWindow": 32768,
+    "contextWindow": 128000,
+    "streamingResponse": true,
+    "safetySettings": {
+      "harassment": "BLOCK_NONE",
+      "hateSpeech": "BLOCK_NONE", 
+      "sexuallyExplicit": "BLOCK_NONE",
+      "dangerousContent": "BLOCK_NONE"
+    },
     "codeCompletion": {
       "enabled": true,
       "multiline": true,
       "documentationGeneration": true,
-      "testGeneration": true
+      "testGeneration": true,
+      "refactoringSuggestions": true,
+      "errorDetection": true,
+      "performanceOptimization": true,
+      "securityAnalysis": true
     },
     "codeReview": {
       "enabled": true,
       "autoReview": true,
+      "deepAnalysis": true,
       "securityAnalysis": true,
       "performanceAnalysis": true,
       "codeQuality": true,
-      "bestPractices": true
+      "bestPractices": true,
+      "musicDomainSpecific": true,
+      "spotifyAPIOptimization": true,
+      "mlModelValidation": true
+    },
+    "intelligentSuggestions": {
+      "contextAware": true,
+      "projectSpecific": true,
+      "musicIndustryPatterns": true,
+      "apiIntegrationPatterns": true,
+      "mlPipelineOptimization": true,
+      "realtimeSystemsOptimization": true
     },
     "logging": {
       "enabled": true,
-      "level": "info",
+      "level": "debug",
       "changeTracking": true,
       "actionLogging": true,
-      "reviewComments": true
+      "reviewComments": true,
+      "performanceMetrics": true,
+      "userInteractionTracking": true
     }
   },
   "fileTypes": {
@@ -37,57 +64,96 @@
       "extensions": [".js", ".mjs", ".cjs"],
       "priority": "high",
       "suggestions": true,
-      "analysis": true
+      "analysis": true,
+      "patterns": ["async/await", "error-handling", "api-integration", "socket-io"]
     },
     "typescript": {
       "extensions": [".ts", ".tsx"],
       "priority": "high",
       "suggestions": true,
-      "analysis": true
+      "analysis": true,
+      "patterns": ["type-safety", "interface-definitions", "generic-types"]
+    },
+    "react": {
+      "extensions": [".jsx", ".tsx"],
+      "priority": "high",
+      "suggestions": true,
+      "analysis": true,
+      "patterns": ["hooks", "context", "jsx-a11y", "performance-optimization"]
     },
     "python": {
       "extensions": [".py"],
-      "priority": "medium",
+      "priority": "high",
       "suggestions": true,
-      "analysis": true
+      "analysis": true,
+      "patterns": ["ml-models", "data-processing", "pandas", "scikit-learn"]
     },
     "yaml": {
       "extensions": [".yml", ".yaml"],
       "priority": "medium",
       "suggestions": true,
-      "analysis": false
+      "analysis": true,
+      "patterns": ["github-actions", "docker-compose", "configurations"]
     },
     "json": {
       "extensions": [".json"],
-      "priority": "low",
+      "priority": "medium",
       "suggestions": true,
-      "analysis": false
+      "analysis": false,
+      "patterns": ["package-json", "config-files", "api-schemas"]
     },
     "markdown": {
       "extensions": [".md"],
+      "priority": "medium",
+      "suggestions": true,
+      "analysis": true,
+      "patterns": ["documentation", "api-docs", "technical-writing"]
+    },
+    "css": {
+      "extensions": [".css", ".scss", ".sass"],
       "priority": "low",
       "suggestions": true,
-      "analysis": false
+      "analysis": true,
+      "patterns": ["responsive-design", "css-modules", "animations"]
     }
   },
   "contextRules": {
     "musicDomain": {
-      "description": "Music industry and Spotify API context",
-      "keywords": ["spotify", "music", "recommendation", "playlist", "audio", "track", "album", "artist"],
+      "description": "Music industry and Spotify API context with advanced audio analysis",
+      "keywords": ["spotify", "music", "recommendation", "playlist", "audio", "track", "album", "artist", "audio-features", "acousticness", "danceability", "energy", "valence"],
       "enhancedSuggestions": true,
-      "domainKnowledge": "music_recommendations"
+      "domainKnowledge": "music_recommendations",
+      "specializedPrompts": true,
+      "apiPatterns": ["spotify-web-api", "oauth2", "rate-limiting", "pagination"]
     },
     "aiIntegration": {
-      "description": "AI and machine learning context",
-      "keywords": ["ai", "ml", "gemini", "openai", "chat", "llm", "model"],
+      "description": "AI and machine learning context with Gemini-specific optimizations",
+      "keywords": ["ai", "ml", "gemini", "openai", "chat", "llm", "model", "generative-ai", "neural-networks", "deep-learning"],
       "enhancedSuggestions": true,
-      "domainKnowledge": "ai_development"
+      "domainKnowledge": "ai_development",
+      "specializedPrompts": true,
+      "patterns": ["prompt-engineering", "llm-chaining", "embeddings", "vector-search"]
     },
     "webDevelopment": {
-      "description": "Web development and Node.js context",
-      "keywords": ["express", "api", "server", "mongodb", "database", "rest"],
+      "description": "Full-stack web development with Node.js and React",
+      "keywords": ["express", "api", "server", "mongodb", "database", "rest", "websocket", "socket.io", "real-time"],
       "enhancedSuggestions": true,
-      "domainKnowledge": "web_backend"
+      "domainKnowledge": "web_backend",
+      "patterns": ["microservices", "middleware", "authentication", "session-management"]
+    },
+    "dataProcessing": {
+      "description": "Data science and analytics for music data",
+      "keywords": ["pandas", "numpy", "data-analysis", "csv", "preprocessing", "feature-engineering", "analytics"],
+      "enhancedSuggestions": true,
+      "domainKnowledge": "data_science",
+      "patterns": ["etl-pipelines", "data-validation", "statistical-analysis"]
+    },
+    "realtimeSystems": {
+      "description": "Real-time communication and streaming systems",
+      "keywords": ["websocket", "socket.io", "streaming", "real-time", "pub-sub", "event-driven"],
+      "enhancedSuggestions": true,
+      "domainKnowledge": "realtime_systems",
+      "patterns": ["event-sourcing", "message-queues", "connection-management"]
     }
   },
   "excludePatterns": [
@@ -96,9 +162,16 @@
     "build/**",
     "coverage/**",
     ".git/**",
+    ".github/ISSUE_TEMPLATE/**",
     "*.min.js",
+    "*.min.css",
     "package-lock.json",
-    "*.log"
+    "yarn.lock",
+    "*.log",
+    "*.cache",
+    ".DS_Store",
+    "*.tmp",
+    "*.temp"
   ],
   "includePatterns": [
     "src/**",
@@ -106,6 +179,55 @@
     "mcp-server/**",
     "tests/**",
     ".github/workflows/**",
-    "*.md"
-  ]
+    "prompts/**",
+    "docs/**",
+    "*.md",
+    "*.json",
+    "*.yml",
+    "*.yaml",
+    "Dockerfile*",
+    "docker-compose*"
+  ],
+  "smartFeatures": {
+    "autoImportSuggestions": true,
+    "dependencyUpdates": true,
+    "vulnerabilityDetection": true,
+    "performanceOptimization": true,
+    "codeSmellDetection": true,
+    "architecturalPatterns": true,
+    "testCoverageAnalysis": true,
+    "documentationGeneration": true
+  },
+  "customCommands": {
+    "explainCode": {
+      "description": "Explain complex code sections with music domain context",
+      "enabled": true,
+      "shortcut": "/explain"
+    },
+    "optimizePerformance": {
+      "description": "Suggest performance optimizations for music data processing",
+      "enabled": true,
+      "shortcut": "/optimize"
+    },
+    "generateTests": {
+      "description": "Generate unit and integration tests",
+      "enabled": true,
+      "shortcut": "/test"
+    },
+    "reviewSecurity": {
+      "description": "Review code for security vulnerabilities",
+      "enabled": true,
+      "shortcut": "/security"
+    },
+    "suggestRefactor": {
+      "description": "Suggest code refactoring opportunities",
+      "enabled": true,
+      "shortcut": "/refactor"
+    },
+    "documentAPI": {
+      "description": "Generate API documentation",
+      "enabled": true,
+      "shortcut": "/docs"
+    }
+  }
 }

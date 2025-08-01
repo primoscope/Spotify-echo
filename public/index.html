@@ -597,6 +597,93 @@
             transform: translateY(-1px);
         }
 
+        /* Provider Panel Styles */
+        .provider-panel {
+            padding: 15px 25px;
+            background: rgba(29, 185, 84, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .provider-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .provider-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .provider-select {
+            background: var(--background-dark);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            min-width: 160px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .provider-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.1);
+        }
+
+        .provider-select option {
+            background: var(--background-dark);
+            color: var(--text-primary);
+        }
+
+        .provider-settings-btn, .refresh-providers-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            min-width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .provider-settings-btn:hover, .refresh-providers-btn:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .provider-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .provider-status.connected .status-text {
+            color: var(--success-color);
+        }
+
+        .provider-status.error .status-text {
+            color: var(--error-color);
+        }
+
         @media (max-width: 1024px) {
             .container {
                 padding: 15px;
@@ -910,6 +997,27 @@
                 <div class="chat-subtitle">Ask me for music recommendations, playlist creation, or mood-based suggestions</div>
             </div>
             
+            <!-- LLM Provider Configuration Panel -->
+            <div class="provider-panel" id="provider-panel">
+                <div class="provider-controls">
+                    <label for="provider-select" class="provider-label">🤖 AI Provider:</label>
+                    <select id="provider-select" class="provider-select">
+                        <option value="mock">Demo Mode (Mock)</option>
+                        <option value="gemini">Google Gemini</option>
+                        <option value="openai">OpenAI GPT</option>
+                        <option value="azure">Azure OpenAI</option>
+                        <option value="openrouter">OpenRouter</option>
+                    </select>
+                    
+                    <button id="provider-settings-btn" class="provider-settings-btn" title="Provider Settings">⚙️</button>
+                    <button id="refresh-providers-btn" class="refresh-providers-btn" title="Refresh Providers">🔄</button>
+                </div>
+                
+                <div class="provider-status" id="provider-status">
+                    <span class="status-text">Ready</span>
+                </div>
+            </div>
+            
             <div class="chat-messages" id="chat-messages">
                 <div class="message assistant fade-in">
                     <div class="message-content">
@@ -939,12 +1047,11 @@
                         id="chat-input" 
                         placeholder="Ask me about music recommendations, playlists, or anything music-related..."
                         rows="1"
-                        disabled
                     ></textarea>
-                    <button type="button" class="voice-button" id="voice-button" title="Voice input" disabled>
+                    <button type="button" class="voice-button" id="voice-button" title="Voice input">
                         🎤
                     </button>
-                    <button type="submit" class="send-button" id="send-button" disabled>
+                    <button type="submit" class="send-button" id="send-button">
                         <span class="loading hidden" id="send-loading"></span>
                         <span id="send-text">Send</span>
                     </button>
@@ -969,6 +1076,9 @@
                 this.checkAuthStatus();
                 this.initializeVoiceRecognition();
                 this.setInitialTime();
+                
+                // Enable chat by default for demo mode
+                this.enableChat();
             }
 
             initializeElements() {
@@ -986,6 +1096,15 @@
                 this.chatStatus = document.getElementById('chat-status');
                 this.errorContainer = document.getElementById('error-container');
                 this.successContainer = document.getElementById('success-container');
+                
+                // Provider panel elements
+                this.providerSelect = document.getElementById('provider-select');
+                this.providerStatus = document.getElementById('provider-status');
+                this.providerSettingsBtn = document.getElementById('provider-settings-btn');
+                this.refreshProvidersBtn = document.getElementById('refresh-providers-btn');
+                
+                // Current provider info
+                this.currentProvider = 'mock'; // Start with mock provider
             }
 
             bindEvents() {
@@ -1001,6 +1120,11 @@
                 this.chatInput.addEventListener('input', () => this.adjustTextareaHeight());
                 
                 this.voiceButton.addEventListener('click', () => this.toggleVoiceRecording());
+                
+                // Provider panel event listeners
+                this.providerSelect.addEventListener('change', (e) => this.handleProviderChange(e));
+                this.refreshProvidersBtn.addEventListener('click', () => this.refreshProviders());
+                this.providerSettingsBtn.addEventListener('click', () => this.showProviderSettings());
 
                 // Auto-resize textarea
                 this.adjustTextareaHeight();
@@ -1148,32 +1272,50 @@
                 this.setTyping(true);
                 
                 try {
-                    const response = await fetch('/api/chat', {
+                    // Use test endpoint for demo mode when no authentication
+                    const isDemo = !this.userInfo;
+                    const endpoint = isDemo ? '/api/chat/test' : '/api/chat';
+                    
+                    const requestBody = isDemo ? 
+                        { 
+                            message: message,
+                            provider: this.currentProvider 
+                        } : 
+                        {
+                            message: message,
+                            user_context: this.userInfo,
+                            conversation_history: this.conversationHistory.slice(-10),
+                            provider: this.currentProvider
+                        };
+
+                    const response = await fetch(endpoint, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            message: message,
-                            user_context: this.userInfo,
-                            conversation_history: this.conversationHistory.slice(-10) // Last 10 messages for context
-                        })
+                        body: JSON.stringify(requestBody)
                     });
 
                     const data = await response.json();
                     
                     if (response.ok) {
-                        this.addMessage('assistant', data.response);
+                        const assistantResponse = isDemo ? data.response : data.response;
+                        this.addMessage('assistant', assistantResponse);
                         
                         // Store conversation
                         this.conversationHistory.push(
                             { role: 'user', content: message },
-                            { role: 'assistant', content: data.response }
+                            { role: 'assistant', content: assistantResponse }
                         );
                         
                         // Handle special actions
                         if (data.action) {
                             this.handleSpecialAction(data.action, data.data);
+                        }
+                        
+                        // Show demo mode indicator if in demo
+                        if (isDemo && data.testMode) {
+                            this.addSystemMessage('Demo mode active - Connect Spotify for personalized features');
                         }
                     } else {
                         this.addMessage('assistant', `I apologize, but I encountered an error: ${data.message || 'Please try again.'}`);
@@ -1317,6 +1459,108 @@
                 setTimeout(() => {
                     container.innerHTML = '';
                 }, 5000);
+            }
+            
+            // Provider Management Functions
+            async handleProviderChange(e) {
+                const newProvider = e.target.value;
+                if (newProvider === this.currentProvider) return;
+                
+                this.updateProviderStatus('Switching...', 'warning');
+                
+                try {
+                    // Test the provider first
+                    const testResponse = await fetch('/api/chat/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: 'Hello',
+                            provider: newProvider
+                        })
+                    });
+                    
+                    if (testResponse.ok) {
+                        this.currentProvider = newProvider;
+                        this.updateProviderStatus('Connected', 'connected');
+                        this.addSystemMessage(`Switched to ${this.getProviderDisplayName(newProvider)} provider`);
+                    } else {
+                        throw new Error('Provider test failed');
+                    }
+                } catch (error) {
+                    console.error('Provider switch error:', error);
+                    this.updateProviderStatus('Error', 'error');
+                    this.showError(`Failed to switch to ${newProvider}. Using mock provider instead.`);
+                    
+                    // Revert to mock provider
+                    this.providerSelect.value = 'mock';
+                    this.currentProvider = 'mock';
+                    this.updateProviderStatus('Demo Mode', 'connected');
+                }
+            }
+            
+            async refreshProviders() {
+                this.updateProviderStatus('Refreshing...', 'warning');
+                
+                try {
+                    const response = await fetch('/api/chat/providers');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.updateProviderDropdown(data.providers);
+                        this.updateProviderStatus('Ready', 'connected');
+                        this.addSystemMessage('Providers refreshed successfully');
+                    } else {
+                        throw new Error('Failed to fetch providers');
+                    }
+                } catch (error) {
+                    console.error('Refresh providers error:', error);
+                    this.updateProviderStatus('Error', 'error');
+                    this.showError('Failed to refresh providers');
+                }
+            }
+            
+            showProviderSettings() {
+                // For now, show a simple alert with provider info
+                const currentProviderName = this.getProviderDisplayName(this.currentProvider);
+                const message = `Current Provider: ${currentProviderName}\n\n` +
+                    `Available Providers:\n` +
+                    `• Demo Mode (Mock) - Always available\n` +
+                    `• Google Gemini - Requires GEMINI_API_KEY\n` +
+                    `• OpenAI GPT - Requires OPENAI_API_KEY\n` +
+                    `• Azure OpenAI - Requires AZURE_OPENAI_API_KEY\n` +
+                    `• OpenRouter - Requires OPENROUTER_API_KEY\n\n` +
+                    `Configure API keys in environment variables to enable additional providers.`;
+                    
+                alert(message);
+            }
+            
+            updateProviderStatus(text, status = 'ready') {
+                if (this.providerStatus) {
+                    const statusText = this.providerStatus.querySelector('.status-text');
+                    if (statusText) {
+                        statusText.textContent = text;
+                    }
+                    
+                    // Update status class
+                    this.providerStatus.className = `provider-status ${status}`;
+                }
+            }
+            
+            updateProviderDropdown(providers) {
+                // This would update the dropdown with available providers
+                // For now, we'll keep the static options
+                console.log('Available providers:', providers);
+            }
+            
+            getProviderDisplayName(provider) {
+                const names = {
+                    mock: 'Demo Mode',
+                    gemini: 'Google Gemini',
+                    openai: 'OpenAI GPT',
+                    azure: 'Azure OpenAI',
+                    openrouter: 'OpenRouter'
+                };
+                return names[provider] || provider;
             }
         }
 

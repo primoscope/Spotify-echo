@@ -155,7 +155,7 @@ class SpotifyAudioFeaturesPopulator:
         # Handle different URI formats
         if spotify_uri.startswith('spotify:track:'):
             return spotify_uri.split(':')[-1]
-        elif spotify_uri.startswith('https://open.spotify.com / track/'):
+        elif spotify_uri.startswith('https://open.spotify.com/track/'):
             return spotify_uri.split('/')[-1].split('?')[0]
         else:
             # Assume it's already a track ID

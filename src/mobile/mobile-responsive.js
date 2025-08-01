@@ -23,8 +23,9 @@ class MobileResponsiveManager {
    * Detect current device type based on screen size and user agent
    */
   detectDeviceType() {
+    if (typeof window === 'undefined') return 'desktop';
+    
     const width = window.innerWidth;
-    const userAgent = navigator.userAgent.toLowerCase();
     
     if (width <= this.breakpoints.mobile) {
       return 'mobile';
@@ -41,6 +42,8 @@ class MobileResponsiveManager {
    * Detect device orientation
    */
   detectOrientation() {
+    if (typeof window === 'undefined') return 'landscape';
+    
     if (window.screen && window.screen.orientation) {
       return window.screen.orientation.angle === 0 || window.screen.orientation.angle === 180 ? 'portrait' : 'landscape';
     }
@@ -51,6 +54,7 @@ class MobileResponsiveManager {
    * Detect touch support
    */
   detectTouchSupport() {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   }
 
@@ -58,6 +62,8 @@ class MobileResponsiveManager {
    * Setup responsive event listeners
    */
   setupEventListeners() {
+    if (typeof window === 'undefined') return;
+    
     // Resize handler with debouncing
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -108,6 +114,8 @@ class MobileResponsiveManager {
    * Setup touch-specific optimizations
    */
   setupTouchOptimizations() {
+    if (typeof document === 'undefined') return;
+    
     // Add touch-friendly classes
     document.body.classList.add('touch-device');
     
@@ -130,6 +138,8 @@ class MobileResponsiveManager {
    * Update layout based on current device type
    */
   updateLayoutForDevice() {
+    if (typeof document === 'undefined') return;
+    
     const body = document.body;
     
     // Remove existing device classes
@@ -152,6 +162,8 @@ class MobileResponsiveManager {
    * Update chat interface for mobile responsiveness
    */
   updateChatInterfaceLayout() {
+    if (typeof document === 'undefined') return;
+    
     const chatContainer = document.querySelector('.chat-container');
     const chatInput = document.querySelector('.chat-input-container');
     
@@ -182,6 +194,8 @@ class MobileResponsiveManager {
    * Update player controls for mobile
    */
   updatePlayerControlsLayout() {
+    if (typeof document === 'undefined') return;
+    
     const playerControls = document.querySelector('.player-controls');
     if (!playerControls) return;
     
@@ -202,6 +216,8 @@ class MobileResponsiveManager {
    * Update navigation for mobile
    */
   updateNavigationLayout() {
+    if (typeof document === 'undefined') return;
+    
     const nav = document.querySelector('nav');
     if (!nav) return;
     
@@ -218,6 +234,7 @@ class MobileResponsiveManager {
    * Create mobile hamburger menu
    */
   createMobileMenu() {
+    if (typeof document === 'undefined') return;
     if (document.querySelector('.mobile-menu-toggle')) return;
     
     const nav = document.querySelector('nav');
@@ -237,6 +254,8 @@ class MobileResponsiveManager {
    * Remove mobile menu elements
    */
   removeMobileMenu() {
+    if (typeof document === 'undefined') return;
+    
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     if (menuToggle) {
       menuToggle.remove();
@@ -252,6 +271,8 @@ class MobileResponsiveManager {
    * Optimize layout for orientation
    */
   optimizeForOrientation() {
+    if (typeof document === 'undefined') return;
+    
     const body = document.body;
     body.classList.remove('portrait', 'landscape');
     body.classList.add(this.orientation);
@@ -269,6 +290,8 @@ class MobileResponsiveManager {
    * Dispatch custom responsive event
    */
   dispatchResponsiveEvent() {
+    if (typeof window === 'undefined' || typeof CustomEvent === 'undefined') return;
+    
     const event = new CustomEvent('responsiveChange', {
       detail: {
         deviceType: this.currentDeviceType,
@@ -304,6 +327,16 @@ class MobileResponsiveManager {
    * Get current device info
    */
   getDeviceInfo() {
+    if (typeof window === 'undefined') {
+      return {
+        type: this.currentDeviceType,
+        orientation: this.orientation,
+        touchSupport: this.touchSupport,
+        screenWidth: 1920,
+        screenHeight: 1080
+      };
+    }
+    
     return {
       type: this.currentDeviceType,
       orientation: this.orientation,
@@ -317,6 +350,7 @@ class MobileResponsiveManager {
    * Apply mobile-specific CSS optimizations
    */
   applyMobileOptimizations() {
+    if (typeof document === 'undefined') return;
     if (!this.isMobile()) return;
     
     // Create mobile-specific styles
@@ -501,7 +535,10 @@ class ReactNativeFoundation {
     
     // Create native bridges
     this.createNativeBridge('Dimensions', {
-      get: (dimension) => {
+      get: () => {
+        if (typeof window === 'undefined') {
+          return { width: 1920, height: 1080 };
+        }
         return {
           width: window.innerWidth,
           height: window.innerHeight
@@ -522,6 +559,8 @@ class ReactNativeFoundation {
    * Detect platform for React Native compatibility
    */
   detectPlatform() {
+    if (typeof navigator === 'undefined') return 'web';
+    
     const userAgent = navigator.userAgent.toLowerCase();
     
     if (/android/.test(userAgent)) {

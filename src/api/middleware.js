@@ -148,7 +148,7 @@ const corsMiddleware = cors({
 /**
  * Error handling middleware
  */
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res) {
   console.error('Error:', err);
   
   // Default error response
@@ -173,6 +173,83 @@ function errorHandler(err, req, res, next) {
   });
 }
 
+/**
+ * Security headers middleware
+ */
+function securityHeaders(req, res, next) {
+  // Basic security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Content Security Policy
+  const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' https://api.spotify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.scdn.co; connect-src 'self' https://api.spotify.com https://accounts.spotify.com; media-src 'self' https://p.scdn.co; frame-src https://open.spotify.com";
+  res.setHeader('Content-Security-Policy', csp);
+  
+  next();
+}
+
+/**
+ * Input sanitization middleware
+ */
+function sanitizeInput(req, res, next) {
+  // Basic XSS protection for text inputs
+  function sanitizeValue(value) {
+    if (typeof value === 'string') {
+      return value
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '');
+    }
+    return value;
+  }
+
+  function sanitizeObject(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+      return sanitizeValue(obj);
+    }
+
+    const sanitized = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (Array.isArray(value)) {
+        sanitized[key] = value.map(sanitizeObject);
+      } else if (typeof value === 'object') {
+        sanitized[key] = sanitizeObject(value);
+      } else {
+        sanitized[key] = sanitizeValue(value);
+      }
+    }
+    return sanitized;
+  }
+
+  if (req.body) {
+    req.body = sanitizeObject(req.body);
+  }
+
+  if (req.query) {
+    req.query = sanitizeObject(req.query);
+  }
+
+  next();
+}
+
+/**
+ * Request size limiting middleware
+ */
+function requestSizeLimit(req, res, next) {
+  const maxSize = 10485760; // 10MB default
+  
+  if (req.headers['content-length'] && parseInt(req.headers['content-length']) > maxSize) {
+    return res.status(413).json({
+      error: 'Payload Too Large',
+      message: `Request size exceeds ${maxSize} bytes`
+    });
+  }
+  
+  next();
+}
+
 module.exports = {
   requireAuth,
   extractUser,
@@ -180,5 +257,8 @@ module.exports = {
   ensureDatabase,
   requestLogger,
   corsMiddleware,
-  errorHandler
+  errorHandler,
+  securityHeaders,
+  sanitizeInput,
+  requestSizeLimit
 };

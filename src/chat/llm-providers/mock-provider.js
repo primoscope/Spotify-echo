@@ -52,7 +52,7 @@ class MockLLMProvider extends BaseLLMProvider {
     };
   }
 
-  async generateCompletion(messages, options = {}) {
+  async generateCompletion(messages) {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
 
@@ -77,7 +77,7 @@ class MockLLMProvider extends BaseLLMProvider {
     };
   }
 
-  async* generateStreamingCompletion(messages, options = {}) {
+  async* generateStreamingCompletion(messages) {
     const lastMessage = messages[messages.length - 1];
     const userMessage = lastMessage?.content?.toLowerCase() || '';
     

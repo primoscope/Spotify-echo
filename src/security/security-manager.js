@@ -34,6 +34,193 @@ class SecurityManager {
     this.securityEvents = [];
     this.threatPatterns = this.initializeThreatPatterns();
     
+    // Initialize session manager
+    this.sessionManager = {
+      create: (userId, metadata = {}) => {
+        const sessionId = this.generateSecureToken();
+        const session = {
+          id: sessionId,
+          userId,
+          createdAt: Date.now(),
+          lastActivity: Date.now(),
+          expiresAt: Date.now() + this.config.session.timeout,
+          metadata: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+            ip: metadata.ip || 'unknown',
+            location: metadata.location || 'unknown',
+            ...metadata
+          },
+          flags: {
+            suspicious: false,
+            requiresReauth: false
+          }
+        };
+        
+        // Check for concurrent sessions
+        const userSessions = Array.from(this.sessions.values())
+          .filter(s => s.userId === userId);
+        
+        if (userSessions.length >= this.config.session.maxConcurrent) {
+          // Remove oldest session
+          const oldest = userSessions.reduce((prev, current) => 
+            prev.createdAt < current.createdAt ? prev : current
+          );
+          this.sessions.delete(oldest.id);
+          this.logSecurityEvent('session_limit_exceeded', { userId, removedSession: oldest.id });
+        }
+        
+        this.sessions.set(sessionId, session);
+        this.logSecurityEvent('session_created', { sessionId, userId });
+        
+        return sessionId;
+      },
+
+      validate: (sessionId) => {
+        const session = this.sessions.get(sessionId);
+        
+        if (!session) {
+          return { valid: false, reason: 'session_not_found' };
+        }
+        
+        if (Date.now() > session.expiresAt) {
+          this.sessions.delete(sessionId);
+          this.logSecurityEvent('session_expired', { sessionId });
+          return { valid: false, reason: 'session_expired' };
+        }
+        
+        if (session.flags.suspicious) {
+          return { valid: false, reason: 'session_suspicious' };
+        }
+        
+        // Update last activity
+        session.lastActivity = Date.now();
+        
+        // Check if session needs renewal
+        const timeToExpiry = session.expiresAt - Date.now();
+        const needsRenewal = timeToExpiry < this.config.session.renewThreshold;
+        
+        return { 
+          valid: true, 
+          session,
+          needsRenewal
+        };
+      },
+
+      renew: (sessionId) => {
+        const session = this.sessions.get(sessionId);
+        if (session) {
+          session.expiresAt = Date.now() + this.config.session.timeout;
+          session.lastActivity = Date.now();
+          this.logSecurityEvent('session_renewed', { sessionId });
+          return true;
+        }
+        return false;
+      },
+
+      destroy: (sessionId) => {
+        const session = this.sessions.get(sessionId);
+        if (session) {
+          this.sessions.delete(sessionId);
+          this.logSecurityEvent('session_destroyed', { sessionId });
+          return true;
+        }
+        return false;
+      },
+
+      flagSuspicious: (sessionId, reason) => {
+        const session = this.sessions.get(sessionId);
+        if (session) {
+          session.flags.suspicious = true;
+          this.logSecurityEvent('session_flagged', { sessionId, reason });
+        }
+      }
+    };
+
+    // Initialize input validator
+    this.inputValidator = {
+      sanitizeString: (input, maxLength = 1000) => {
+        if (typeof input !== 'string') return '';
+        
+        return input
+          .slice(0, maxLength)
+          .replace(/[<>"'&]/g, (match) => {
+            const entities = {
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              '\'': '&#x27;',
+              '&': '&amp;'
+            };
+            return entities[match] || match;
+          });
+      },
+
+      validateEmail: (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email) && email.length <= 254;
+      },
+
+      validateSpotifyURI: (uri) => {
+        const spotifyURIRegex = /^spotify:(track|album|artist|playlist):[a-zA-Z0-9]{22}$/;
+        return spotifyURIRegex.test(uri);
+      },
+
+      detectSQLInjection: (input) => {
+        const sqlPatterns = [
+          /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC)\b)/i,
+          /(UNION|OR|AND)\s+\d+\s*=\s*\d+/i,
+          /(\bOR\b|\bAND\b)\s+\d+\s*=\s*\d+/i,
+          /'.+--/,
+          /\b(WAITFOR|DELAY)\b/i
+        ];
+        
+        return sqlPatterns.some(pattern => pattern.test(input));
+      },
+
+      detectXSS: (input) => {
+        const xssPatterns = [
+          /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+          /javascript:/i,
+          /on\w+\s*=/i,
+          /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+          /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi
+        ];
+        
+        return xssPatterns.some(pattern => pattern.test(input));
+      },
+
+      validateInput: (input, type = 'string') => {
+        if (typeof input !== 'string') {
+          return { valid: false, reason: 'invalid_type' };
+        }
+        
+        // Check for malicious patterns
+        if (this.detectSQLInjection(input)) {
+          return { valid: false, reason: 'sql_injection_detected' };
+        }
+        
+        if (this.detectXSS(input)) {
+          return { valid: false, reason: 'xss_detected' };
+        }
+        
+        // Type-specific validation
+        switch (type) {
+          case 'email':
+            return this.validateEmail(input) 
+              ? { valid: true } 
+              : { valid: false, reason: 'invalid_email' };
+          
+          case 'spotify_uri':
+            return this.validateSpotifyURI(input)
+              ? { valid: true }
+              : { valid: false, reason: 'invalid_spotify_uri' };
+          
+          default:
+            return { valid: true };
+        }
+      }
+    };
+    
     this.initializeSecurity();
   }
 
@@ -51,13 +238,15 @@ class SecurityManager {
    * Content Security Policy setup
    */
   setupCSPHeaders() {
+    if (typeof document === 'undefined') return;
+    
     const csp = {
-      'default-src': ["'self'"],
-      'script-src': ["'self'", "'unsafe-inline'", 'https://api.spotify.com'],
-      'style-src': ["'self'", "'unsafe-inline'"],
-      'img-src': ["'self'", 'data:', 'https://i.scdn.co'],
-      'connect-src': ["'self'", 'https://api.spotify.com', 'https://accounts.spotify.com'],
-      'media-src': ["'self'", 'https://p.scdn.co'],
+      'default-src': ['\'self\''],
+      'script-src': ['\'self\'', '\'unsafe-inline\'', 'https://api.spotify.com'],
+      'style-src': ['\'self\'', '\'unsafe-inline\''],
+      'img-src': ['\'self\'', 'data:', 'https://i.scdn.co'],
+      'connect-src': ['\'self\'', 'https://api.spotify.com', 'https://accounts.spotify.com'],
+      'media-src': ['\'self\'', 'https://p.scdn.co'],
       'frame-src': ['https://open.spotify.com'],
       'upgrade-insecure-requests': []
     };
@@ -86,197 +275,6 @@ class SecurityManager {
       });
     });
   }
-
-  /**
-   * Secure session management
-   */
-  sessionManager = {
-    create: (userId, metadata = {}) => {
-      const sessionId = this.generateSecureToken();
-      const session = {
-        id: sessionId,
-        userId,
-        createdAt: Date.now(),
-        lastActivity: Date.now(),
-        expiresAt: Date.now() + this.config.session.timeout,
-        metadata: {
-          userAgent: navigator.userAgent,
-          ip: metadata.ip || 'unknown',
-          location: metadata.location || 'unknown',
-          ...metadata
-        },
-        flags: {
-          suspicious: false,
-          requiresReauth: false
-        }
-      };
-      
-      // Check for concurrent sessions
-      const userSessions = Array.from(this.sessions.values())
-        .filter(s => s.userId === userId);
-      
-      if (userSessions.length >= this.config.session.maxConcurrent) {
-        // Remove oldest session
-        const oldest = userSessions.reduce((prev, current) => 
-          prev.createdAt < current.createdAt ? prev : current
-        );
-        this.sessions.delete(oldest.id);
-        this.logSecurityEvent('session_limit_exceeded', { userId, removedSession: oldest.id });
-      }
-      
-      this.sessions.set(sessionId, session);
-      this.logSecurityEvent('session_created', { sessionId, userId });
-      
-      return sessionId;
-    },
-
-    validate: (sessionId) => {
-      const session = this.sessions.get(sessionId);
-      
-      if (!session) {
-        return { valid: false, reason: 'session_not_found' };
-      }
-      
-      if (Date.now() > session.expiresAt) {
-        this.sessions.delete(sessionId);
-        this.logSecurityEvent('session_expired', { sessionId });
-        return { valid: false, reason: 'session_expired' };
-      }
-      
-      if (session.flags.suspicious) {
-        return { valid: false, reason: 'session_suspicious' };
-      }
-      
-      // Update last activity
-      session.lastActivity = Date.now();
-      
-      // Check if session needs renewal
-      const timeToExpiry = session.expiresAt - Date.now();
-      const needsRenewal = timeToExpiry < this.config.session.renewThreshold;
-      
-      return { 
-        valid: true, 
-        session,
-        needsRenewal
-      };
-    },
-
-    renew: (sessionId) => {
-      const session = this.sessions.get(sessionId);
-      if (session) {
-        session.expiresAt = Date.now() + this.config.session.timeout;
-        session.lastActivity = Date.now();
-        this.logSecurityEvent('session_renewed', { sessionId });
-        return true;
-      }
-      return false;
-    },
-
-    destroy: (sessionId) => {
-      const session = this.sessions.get(sessionId);
-      if (session) {
-        this.sessions.delete(sessionId);
-        this.logSecurityEvent('session_destroyed', { sessionId });
-        return true;
-      }
-      return false;
-    },
-
-    flagSuspicious: (sessionId, reason) => {
-      const session = this.sessions.get(sessionId);
-      if (session) {
-        session.flags.suspicious = true;
-        this.logSecurityEvent('session_flagged', { sessionId, reason });
-      }
-    }
-  };
-
-  /**
-   * Input validation and sanitization
-   */
-  inputValidator = {
-    sanitizeString: (input, maxLength = 1000) => {
-      if (typeof input !== 'string') return '';
-      
-      return input
-        .slice(0, maxLength)
-        .replace(/[<>\"'&]/g, (match) => {
-          const entities = {
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#x27;',
-            '&': '&amp;'
-          };
-          return entities[match] || match;
-        });
-    },
-
-    validateEmail: (email) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email) && email.length <= 254;
-    },
-
-    validateSpotifyURI: (uri) => {
-      const spotifyURIRegex = /^spotify:(track|album|artist|playlist):[a-zA-Z0-9]{22}$/;
-      return spotifyURIRegex.test(uri);
-    },
-
-    detectSQLInjection: (input) => {
-      const sqlPatterns = [
-        /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC)\b)/i,
-        /(UNION|OR|AND)\s+\d+\s*=\s*\d+/i,
-        /(\bOR\b|\bAND\b)\s+\d+\s*=\s*\d+/i,
-        /'.+--/,
-        /\b(WAITFOR|DELAY)\b/i
-      ];
-      
-      return sqlPatterns.some(pattern => pattern.test(input));
-    },
-
-    detectXSS: (input) => {
-      const xssPatterns = [
-        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-        /javascript:/i,
-        /on\w+\s*=/i,
-        /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
-        /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi
-      ];
-      
-      return xssPatterns.some(pattern => pattern.test(input));
-    },
-
-    validateInput: (input, type = 'string') => {
-      if (typeof input !== 'string') {
-        return { valid: false, reason: 'invalid_type' };
-      }
-      
-      // Check for malicious patterns
-      if (this.detectSQLInjection(input)) {
-        return { valid: false, reason: 'sql_injection_detected' };
-      }
-      
-      if (this.detectXSS(input)) {
-        return { valid: false, reason: 'xss_detected' };
-      }
-      
-      // Type-specific validation
-      switch (type) {
-        case 'email':
-          return this.validateEmail(input) 
-            ? { valid: true } 
-            : { valid: false, reason: 'invalid_email' };
-        
-        case 'spotify_uri':
-          return this.validateSpotifyURI(input)
-            ? { valid: true }
-            : { valid: false, reason: 'invalid_spotify_uri' };
-        
-        default:
-          return { valid: true };
-      }
-    }
-  };
 
   /**
    * Rate limiting with security features
@@ -438,6 +436,10 @@ class SecurityManager {
    * Utility methods
    */
   generateSecureToken() {
+    if (typeof window === 'undefined' || !window.crypto) {
+      // Fallback for Node.js environment
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
     const array = new Uint8Array(32);
     window.crypto.getRandomValues(array);
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
@@ -474,7 +476,7 @@ class SecurityManager {
     console.warn('Security Alert:', event);
     
     // Could integrate with external alerting systems
-    if (window.securityAlertCallback) {
+    if (typeof window !== 'undefined' && window.securityAlertCallback) {
       window.securityAlertCallback(event);
     }
   }
@@ -486,6 +488,8 @@ class SecurityManager {
   }
 
   setupSecurityEventListeners() {
+    if (typeof document === 'undefined') return;
+    
     // Listen for security-related DOM events
     document.addEventListener('securityviolation', (event) => {
       this.logSecurityEvent('csp_violation', {
@@ -495,10 +499,12 @@ class SecurityManager {
       });
     });
     
-    // Monitor for suspicious navigation
-    window.addEventListener('beforeunload', () => {
-      this.logSecurityEvent('page_unload', { timestamp: Date.now() });
-    });
+    if (typeof window !== 'undefined') {
+      // Monitor for suspicious navigation
+      window.addEventListener('beforeunload', () => {
+        this.logSecurityEvent('page_unload', { timestamp: Date.now() });
+      });
+    }
   }
 
   /**

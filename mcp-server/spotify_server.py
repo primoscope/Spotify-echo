@@ -707,8 +707,8 @@ class SpotifyMCPServer:
                         "span_days": (df['timestamp'].max() - df['timestamp'].min()).days
                     }
                 })
-            except:
-                logger.warning("Could not parse timestamp data")
+            except (ValueError, TypeError, pd.errors.ParserError) as e:
+                logger.warning(f"Could not parse timestamp data: {e}")
         
         # Top items
         if 'master_metadata_track_name' in df.columns:

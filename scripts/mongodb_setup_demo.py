@@ -9,6 +9,7 @@ import sys
 import json
 from datetime import datetime
 from dotenv import load_dotenv
+import subprocess
 
 # Load environment variables
 load_dotenv()
@@ -41,7 +42,18 @@ Connection Details:
     
     print_step(1, "Testing MongoDB Connection")
     print("Running connection test...")
-    os.system("cd /home/runner/work/Spotify-echo/Spotify-echo && python scripts/test_mongodb_connection.py")
+    try:
+        # Use subprocess instead of os.system for security
+        script_path = os.path.join(os.path.dirname(__file__), 'test_mongodb_connection.py')
+        result = subprocess.run([sys.executable, script_path], 
+                              capture_output=True, text=True, timeout=30)
+        if result.returncode == 0:
+            print("✅ Connection test completed successfully")
+        else:
+            print(f"⚠️ Connection test completed with warnings: {result.stderr}")
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        print(f"⚠️ Could not run connection test: {e}")
+        print("Please run manually: python scripts/test_mongodb_connection.py")
     
     print_step(2, "Sample Data Migration")
     print("The migration has already been tested with sample data.")

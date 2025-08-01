@@ -221,15 +221,8 @@ class AdvancedDataAnalyzer:
         
         return list(self.collection.aggregate(pipeline))
     
-    def generate_comprehensive_report(self):
-        """Generate a comprehensive analytics report"""
-        print("=" * 80)
-        print("ECHOTUNE AI - ADVANCED DATA ANALYTICS REPORT")
-        print("=" * 80)
-        print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
-        print()
-        
-        # Basic statistics
+    def _get_basic_statistics(self):
+        """Get basic dataset statistics"""
         total_docs = self.collection.count_documents({})
         unique_tracks = len(self.collection.distinct("spotify_track_uri"))
         unique_artists = len(self.collection.distinct("track.artist"))
@@ -242,16 +235,26 @@ class AdvancedDataAnalyzer:
             }}
         ]))[0]
         
+        return {
+            'total_docs': total_docs,
+            'unique_tracks': unique_tracks,
+            'unique_artists': unique_artists,
+            'date_range': date_range
+        }
+    
+    def _print_dataset_overview(self, stats):
+        """Print dataset overview section"""
         print("📊 DATASET OVERVIEW")
         print("-" * 40)
-        print(f"Total listening records: {total_docs:,}")
-        print(f"Unique tracks: {unique_tracks:,}")
-        print(f"Unique artists: {unique_artists:,}")
-        print(f"Date range: {date_range['min_date']} to {date_range['max_date']}")
-        print(f"Total listening time: {date_range['total_time'] / 3600000:.0f} hours")
+        print(f"Total listening records: {stats['total_docs']:,}")
+        print(f"Unique tracks: {stats['unique_tracks']:,}")
+        print(f"Unique artists: {stats['unique_artists']:,}")
+        print(f"Date range: {stats['date_range']['min_date']} to {stats['date_range']['max_date']}")
+        print(f"Total listening time: {stats['date_range']['total_time'] / 3600000:.0f} hours")
         print()
-        
-        # Listening patterns
+    
+    def _print_listening_patterns(self):
+        """Print listening patterns section"""
         print("🕐 LISTENING PATTERNS BY TIME")
         print("-" * 40)
         patterns = self.get_listening_patterns()
@@ -266,8 +269,9 @@ class AdvancedDataAnalyzer:
             sessions = time_slot['listening_sessions']
             print(f"  {i}. {day} at {hour:02d}:00 - {sessions:,} listening sessions")
         print()
-        
-        # Music discovery timeline
+    
+    def _print_music_discovery(self):
+        """Print music discovery timeline section"""
         print("🎵 MUSIC DISCOVERY TIMELINE")
         print("-" * 40)
         discovery = self.get_music_discovery_timeline()
@@ -280,8 +284,9 @@ class AdvancedDataAnalyzer:
                 hours = period['total_listening_hours']
                 print(f"  {year}-{month:02d}: {tracks:,} new tracks, {artists:,} new artists, {hours:.0f}h listening")
         print()
-        
-        # Skip behavior
+    
+    def _print_skip_behavior(self):
+        """Print skip behavior analysis section"""
         print("⏭️  SKIP BEHAVIOR ANALYSIS")
         print("-" * 40)
         skip_analysis = self.get_skip_behavior_analysis()
@@ -293,8 +298,9 @@ class AdvancedDataAnalyzer:
                     avg_time = bucket['avg_play_time'] / 1000  # Convert to seconds
                     print(f"  Completion ~{completion_range}: {count:,} tracks (avg {avg_time:.0f}s played)")
         print()
-        
-        # Audio features evolution
+    
+    def _print_audio_preferences(self):
+        """Print audio preferences evolution section"""
         print("🎶 AUDIO PREFERENCES EVOLUTION")
         print("-" * 40)
         audio_evolution = self.get_audio_features_analysis()
@@ -313,8 +319,9 @@ class AdvancedDataAnalyzer:
                 dance_change = recent['avg_danceability'] - previous['avg_danceability']
                 print(f"  Danceability: {dance_change:+.2f} ({'more danceable' if dance_change > 0 else 'less danceable'})")
         print()
-        
-        # Seasonal preferences
+    
+    def _print_seasonal_preferences(self):
+        """Print seasonal preferences section"""
         print("🌞 SEASONAL MUSIC PREFERENCES")
         print("-" * 40)
         seasonal = self.get_seasonal_preferences()
@@ -325,8 +332,9 @@ class AdvancedDataAnalyzer:
             valence = season_data.get('avg_valence', 0)
             print(f"  {season}: {count:,} tracks (Energy: {energy:.2f}, Mood: {valence:.2f})")
         print()
-        
-        # Top artists evolution
+    
+    def _print_top_artists(self):
+        """Print top artists evolution section"""
         print("👑 TOP ARTISTS EVOLUTION")
         print("-" * 40)
         artists_evolution = self.get_top_artists_evolution(5)
@@ -339,7 +347,9 @@ class AdvancedDataAnalyzer:
                 hours = artist['total_time'] / 3600000
                 print(f"  {i}. {name}: {plays:,} plays ({hours:.1f}h)")
         print()
-        
+    
+    def _print_ml_recommendations(self):
+        """Print ML recommendations section"""
         print("🚀 RECOMMENDATIONS FOR ML MODELS")
         print("-" * 40)
         print("• Use listening patterns for time-aware recommendations")
@@ -348,6 +358,27 @@ class AdvancedDataAnalyzer:
         print("• Incorporate seasonal preferences for contextual recommendations")
         print("• Track artist evolution for discovering new music preferences")
         print()
+
+    def generate_comprehensive_report(self):
+        """Generate a comprehensive analytics report"""
+        print("=" * 80)
+        print("ECHOTUNE AI - ADVANCED DATA ANALYTICS REPORT")
+        print("=" * 80)
+        print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        print()
+        
+        # Get basic statistics
+        stats = self._get_basic_statistics()
+        
+        # Print all sections
+        self._print_dataset_overview(stats)
+        self._print_listening_patterns()
+        self._print_music_discovery()
+        self._print_skip_behavior()
+        self._print_audio_preferences()
+        self._print_seasonal_preferences()
+        self._print_top_artists()
+        self._print_ml_recommendations()
         
         print("=" * 80)
         print("Advanced analytics complete. Data ready for machine learning pipelines.")

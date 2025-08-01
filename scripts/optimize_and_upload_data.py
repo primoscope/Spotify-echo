@@ -85,24 +85,16 @@ class DataOptimizer:
         
         return analysis
     
-    def optimize_file_structure(self, analysis: Dict[str, Any], keep_splits: bool = True) -> Dict[str, Any]:
-        """Optimize the file structure by organizing and removing duplicates"""
-        logger.info("Optimizing file structure...")
-        
-        optimization_report = {
-            'files_moved': [],
-            'files_removed': [],
-            'space_saved': 0,
-            'directories_created': []
-        }
-        
-        # Create organized directory structure
+    def _create_organized_directory(self, optimization_report):
+        """Create organized directory structure"""
         organized_data_dir = self.data_dir / "organized"
         if not organized_data_dir.exists():
             organized_data_dir.mkdir(parents=True, exist_ok=True)
             optimization_report['directories_created'].append(str(organized_data_dir))
-        
-        # Handle main file - ensure it's in the right place
+        return organized_data_dir
+    
+    def _handle_main_file(self, analysis, optimization_report):
+        """Handle main file placement"""
         if analysis['main_file']:
             main_file = analysis['main_file']['path']
             target_path = self.data_dir / "spotify_listening_history_combined.csv"
@@ -115,56 +107,89 @@ class DataOptimizer:
                     'from': str(main_file),
                     'to': str(target_path)
                 })
-        
-        # Handle split files - move them to organized directory
-        if keep_splits and analysis['split_files']:
-            splits_dir = organized_data_dir / "split_files"
-            if not splits_dir.exists():
-                splits_dir.mkdir(parents=True, exist_ok=True)
-                optimization_report['directories_created'].append(str(splits_dir))
+    
+    def _organize_split_files(self, analysis, organized_data_dir, optimization_report):
+        """Organize split files and remove duplicates"""
+        if not analysis['split_files']:
+            return
             
-            # Keep only one copy of each split file (prefer the one in databases/)
-            split_files_by_name = {}
-            for split_file in analysis['split_files']:
-                name = split_file['path'].name
-                if name not in split_files_by_name:
-                    split_files_by_name[name] = []
-                split_files_by_name[name].append(split_file)
-            
-            for name, files in split_files_by_name.items():
-                # Keep the one in databases/ directory, remove others
-                preferred_file = None
-                for file_info in files:
-                    if 'databases' in str(file_info['relative_path']):
-                        preferred_file = file_info
-                        break
-                
-                if not preferred_file:
-                    preferred_file = files[0]  # Keep the first one if none in databases/
-                
-                # Move preferred file to organized location
-                target_path = splits_dir / name
-                if preferred_file['path'] != target_path:
-                    shutil.move(str(preferred_file['path']), str(target_path))
-                    optimization_report['files_moved'].append({
-                        'from': str(preferred_file['path']),
-                        'to': str(target_path)
-                    })
-                
-                # Remove duplicates
-                for file_info in files:
-                    if file_info != preferred_file and file_info['path'].exists():
-                        optimization_report['space_saved'] += file_info['size']
-                        file_info['path'].unlink()
-                        optimization_report['files_removed'].append(str(file_info['path']))
+        splits_dir = organized_data_dir / "split_files"
+        if not splits_dir.exists():
+            splits_dir.mkdir(parents=True, exist_ok=True)
+            optimization_report['directories_created'].append(str(splits_dir))
         
-        # Remove any remaining duplicate files in root directory
+        # Group split files by name
+        split_files_by_name = {}
+        for split_file in analysis['split_files']:
+            name = split_file['path'].name
+            if name not in split_files_by_name:
+                split_files_by_name[name] = []
+            split_files_by_name[name].append(split_file)
+        
+        # Process each group of files with the same name
+        for name, files in split_files_by_name.items():
+            self._handle_split_file_group(name, files, splits_dir, optimization_report)
+    
+    def _handle_split_file_group(self, name, files, splits_dir, optimization_report):
+        """Handle a group of split files with the same name"""
+        # Keep the one in databases/ directory, remove others
+        preferred_file = None
+        for file_info in files:
+            if 'databases' in str(file_info['relative_path']):
+                preferred_file = file_info
+                break
+        
+        if not preferred_file:
+            preferred_file = files[0]  # Keep the first one if none in databases/
+        
+        # Move preferred file to organized location
+        target_path = splits_dir / name
+        if preferred_file['path'] != target_path:
+            shutil.move(str(preferred_file['path']), str(target_path))
+            optimization_report['files_moved'].append({
+                'from': str(preferred_file['path']),
+                'to': str(target_path)
+            })
+        
+        # Remove duplicates
+        for file_info in files:
+            if file_info != preferred_file and file_info['path'].exists():
+                optimization_report['space_saved'] += file_info['size']
+                file_info['path'].unlink()
+                optimization_report['files_removed'].append(str(file_info['path']))
+    
+    def _clean_root_duplicates(self, optimization_report):
+        """Remove any remaining duplicate files in root directory"""
         root_csvs = list(self.base_path.glob("*.csv"))
         for csv_file in root_csvs:
             if csv_file.name.startswith('split_data_part_'):
                 optimization_report['space_saved'] += csv_file.stat().st_size
                 csv_file.unlink()
                 optimization_report['files_removed'].append(str(csv_file))
+
+    def optimize_file_structure(self, analysis: Dict[str, Any], keep_splits: bool = True) -> Dict[str, Any]:
+        """Optimize the file structure by organizing and removing duplicates"""
+        logger.info("Optimizing file structure...")
+        
+        optimization_report = {
+            'files_moved': [],
+            'files_removed': [],
+            'space_saved': 0,
+            'directories_created': []
+        }
+        
+        # Create organized directory structure
+        organized_data_dir = self._create_organized_directory(optimization_report)
+        
+        # Handle main file - ensure it's in the right place
+        self._handle_main_file(analysis, optimization_report)
+        
+        # Handle split files - move them to organized directory
+        if keep_splits:
+            self._organize_split_files(analysis, organized_data_dir, optimization_report)
+        
+        # Remove any remaining duplicate files in root directory
+        self._clean_root_duplicates(optimization_report)
         
         return optimization_report
     

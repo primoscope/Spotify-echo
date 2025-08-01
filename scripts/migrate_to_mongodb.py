@@ -74,7 +74,7 @@ class MongoDBMigrator:
                 return None
             try:
                 return pd.to_datetime(ts_str)
-            except:
+            except (ValueError, TypeError, pd.errors.ParserError):
                 return None
         
         # Helper function to parse genres

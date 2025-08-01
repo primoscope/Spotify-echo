@@ -17,6 +17,7 @@ import base64
 from urllib.parse import urlencode
 import sqlite3
 from tqdm import tqdm
+import tempfile
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,7 +38,7 @@ class SpotifyAudioFeaturesPopulator:
         self.last_request_time = 0
         
         # Cache database for API responses
-        self.cache_db_path = '/tmp/spotify_audio_features_cache.db'
+        self.cache_db_path = os.path.join(tempfile.gettempdir(), 'spotify_audio_features_cache.db')
         self.init_cache_db()
         
         if not self.client_id or not self.client_secret:

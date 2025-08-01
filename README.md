@@ -119,7 +119,7 @@ pip install -r requirements.txt
 # Install Node.js dependencies
 npm install
 
-# Install MCP server dependencies
+# Install MCP server dependencies (optional)
 cd mcp-server && npm install && cd ..
 
 # Configure environment
@@ -136,8 +136,10 @@ python scripts/merge_csv_data.py          # Merge CSV files
 python scripts/populate_audio_features.py # Enrich with audio features
 
 # Start development services
-npm run dev                    # Main application
-npm run mcp-server            # MCP automation server (separate terminal)
+npm start                      # Main application on http://localhost:3000
+
+# Optional: Start MCP automation server (separate terminal)
+npm run mcp-server            # MCP automation server on http://localhost:3001
 ```
 
 ### Docker Development (Alternative)
@@ -153,10 +155,21 @@ docker-compose up --build
 Copy `.env.example` to `.env` and configure:
 
 ```env
-# Spotify API (Required)
+# Spotify API (Required for full functionality)
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 SPOTIFY_REDIRECT_URI=http://localhost:3000/auth/callback
+
+# LLM Provider Configuration (Optional - Mock provider used if none configured)
+# OPENAI_API_KEY=your_openai_api_key_here
+# GEMINI_API_KEY=your_gemini_api_key_here
+# AZURE_OPENAI_API_KEY=your_azure_openai_api_key_here
+# AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+# OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# Default LLM Provider (mock, openai, gemini, azure, openrouter)
+DEFAULT_LLM_PROVIDER=mock
+DEFAULT_LLM_MODEL=mock-music-assistant
 
 # Database Options (Choose one or more)
 # MongoDB (Recommended for ML/Analytics)
@@ -171,10 +184,36 @@ DATABASE_URL=postgresql://username:password@db.your-project.supabase.co:5432/pos
 # Application Settings
 NODE_ENV=development
 PORT=3000
-MCP_SERVER_PORT=3001
 LOG_LEVEL=INFO
 DEBUG=true
 ```
+
+### Demo Mode
+EchoTune AI includes a **demo mode** that works without any API keys:
+- **Mock LLM Provider**: Provides realistic music assistant responses
+- **Sample Analytics Dashboard**: Shows example music data and insights
+- **Full UI Experience**: Test all features without external API dependencies
+
+To enable demo mode:
+1. Don't configure any LLM API keys
+2. Set `DEFAULT_LLM_PROVIDER=mock` in your `.env` file
+3. Start the application - the mock provider will automatically activate
+
+### LLM Provider Configuration
+EchoTune AI supports multiple LLM providers with automatic fallback:
+
+#### Supported Providers
+- **OpenAI** (GPT-3.5, GPT-4, GPT-4o)
+- **Google Gemini** (Gemini Pro)
+- **Azure OpenAI** (GPT models via Azure)
+- **OpenRouter** (Access to multiple models)
+- **Mock Provider** (Demo mode - no API key required)
+
+#### Provider Priority
+1. If API keys are configured, real providers are used
+2. If no API keys are found, mock provider activates automatically
+3. Users can switch between providers in the chat interface
+4. Graceful fallback ensures the application always works
 
 ## 🤖 Automated Development Workflow
 
@@ -228,11 +267,19 @@ Automated workflows include:
 ## 🚀 Production Deployment
 
 ### Quick Deploy to DigitalOcean
+
+#### Prerequisites
+- Ubuntu 22.04 droplet
+- Domain name (optional, but recommended)
+- Spotify API credentials
+- LLM API keys (optional, demo mode works without them)
+
+#### Automated Setup
 ```bash
-# 1. Create Ubuntu 22.04 droplet
+# 1. Create Ubuntu 22.04 droplet on DigitalOcean
 ssh root@YOUR_DROPLET_IP
 
-# 2. Run automated setup
+# 2. Download and run automated setup script
 curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/setup-digitalocean.sh | bash
 
 # 3. Configure environment
@@ -240,7 +287,17 @@ cd /opt/echotune
 cp .env.production.example .env
 nano .env  # Add your credentials
 
-# 4. Setup SSL certificates
+# Required configuration:
+# SPOTIFY_CLIENT_ID=your_spotify_client_id
+# SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+# SPOTIFY_REDIRECT_URI=https://yourdomain.com/auth/callback
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+
+# Optional LLM providers (demo mode works without them):
+# OPENAI_API_KEY=your_openai_api_key
+# GEMINI_API_KEY=your_gemini_api_key
+
+# 4. Setup SSL certificates (if using domain)
 sudo certbot --nginx -d yourdomain.com
 
 # 5. Deploy application
@@ -248,6 +305,33 @@ sudo certbot --nginx -d yourdomain.com
 
 # 6. Optional: Harden security
 ./scripts/security-hardening.sh
+```
+
+#### Manual Setup
+```bash
+# Install Node.js and Python
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs python3 python3-pip mongodb nginx
+
+# Clone and setup application
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+npm install
+pip3 install -r requirements.txt
+
+# Configure environment
+cp .env.production.example .env
+# Edit .env with your configuration
+
+# Setup systemd service
+sudo cp echotune.service /etc/systemd/system/
+sudo systemctl enable echotune
+sudo systemctl start echotune
+
+# Configure Nginx
+sudo cp nginx.conf /etc/nginx/sites-available/echotune
+sudo ln -s /etc/nginx/sites-available/echotune /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ### Docker Production Deployment
@@ -263,13 +347,61 @@ docker-compose up --scale web=3 --scale worker=2
 ```
 
 ### Production Features
-- **SSL/TLS Encryption** with automatic certificate renewal
+- **SSL/TLS Encryption** with automatic certificate renewal via Let's Encrypt
 - **Nginx Reverse Proxy** with load balancing and caching
 - **Rate Limiting** and DDoS protection
 - **Database Optimization** for high-throughput analytics
 - **Health Monitoring** with automated recovery
 - **Backup Systems** for data protection
 - **Security Hardening** following industry best practices
+- **Demo Mode Support** - works without LLM API keys for quick deployment
+
+### Production Environment Variables
+```env
+# Production Configuration
+NODE_ENV=production
+PORT=3000
+FRONTEND_URL=https://yourdomain.com
+
+# Spotify API (Required)
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+SPOTIFY_REDIRECT_URI=https://yourdomain.com/auth/callback
+
+# Database (Required)
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_DATABASE=spotify_analytics
+
+# LLM Providers (Optional - demo mode if not configured)
+OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+DEFAULT_LLM_PROVIDER=openai
+
+# Security
+LOG_LEVEL=WARN
+DEBUG=false
+```
+
+### Health Check
+Once deployed, verify your deployment:
+```bash
+# Check application health
+curl -f https://yourdomain.com/health
+
+# Expected response:
+{
+  "status": "healthy",
+  "version": "2.0.0",
+  "spotify_configured": true,
+  "database": {"status": "healthy"},
+  "features": {
+    "ai_chat": true,
+    "recommendations": true,
+    "audio_features": true,
+    "mongodb": true
+  }
+}
+```
 
 ### Comprehensive Documentation
 For detailed setup and configuration, see:

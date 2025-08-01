@@ -25,8 +25,9 @@ const chatbotConfig = {
       model: process.env.OPENROUTER_MODEL || 'openai/gpt-3.5-turbo'
     }
   },
-  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'openai',
-  defaultModel: process.env.DEFAULT_LLM_MODEL || 'gpt-3.5-turbo'
+  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'mock', // Use mock as default fallback
+  defaultModel: process.env.DEFAULT_LLM_MODEL || 'mock-music-assistant',
+  enableMockProvider: true // Always enable mock provider for demo functionality
 };
 
 let chatbot = null;

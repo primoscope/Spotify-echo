@@ -1,6 +1,7 @@
 const OpenAIProvider = require('./llm-providers/openai-provider');
 const GeminiProvider = require('./llm-providers/gemini-provider');
 const CustomAPIProvider = require('./llm-providers/custom-provider');
+const MockLLMProvider = require('./llm-providers/mock-provider');
 const ConversationManager = require('./conversation-manager');
 const RecommendationEngine = require('../ml/recommendation-engine');
 const SpotifyAudioFeaturesService = require('../spotify/audio-features');
@@ -30,17 +31,20 @@ class EchoTuneChatbot {
    */
   initializeProviders() {
     const providerConfigs = this.config.llmProviders || {};
+    let hasConfiguredProvider = false;
 
     // OpenAI Provider
     if (providerConfigs.openai?.apiKey) {
       const openaiProvider = new OpenAIProvider(providerConfigs.openai);
       this.providers.set('openai', openaiProvider);
+      hasConfiguredProvider = true;
     }
 
     // Gemini Provider
     if (providerConfigs.gemini?.apiKey) {
       const geminiProvider = new GeminiProvider(providerConfigs.gemini);
       this.providers.set('gemini', geminiProvider);
+      hasConfiguredProvider = true;
     }
 
     // Azure OpenAI Provider
@@ -48,6 +52,7 @@ class EchoTuneChatbot {
       const azureConfig = CustomAPIProvider.createAzureConfig(providerConfigs.azure);
       const azureProvider = new CustomAPIProvider(azureConfig);
       this.providers.set('azure', azureProvider);
+      hasConfiguredProvider = true;
     }
 
     // OpenRouter Provider
@@ -55,6 +60,7 @@ class EchoTuneChatbot {
       const openrouterConfig = CustomAPIProvider.createOpenRouterConfig(providerConfigs.openrouter);
       const openrouterProvider = new CustomAPIProvider(openrouterConfig);
       this.providers.set('openrouter', openrouterProvider);
+      hasConfiguredProvider = true;
     }
 
     // Custom API Providers
@@ -63,11 +69,20 @@ class EchoTuneChatbot {
         const config = CustomAPIProvider.createCustomConfig(customConfig);
         const customProvider = new CustomAPIProvider(config);
         this.providers.set(`custom_${index}`, customProvider);
+        hasConfiguredProvider = true;
       });
     }
 
+    // Add Mock Provider as fallback if no real providers are configured
+    if (!hasConfiguredProvider || this.config.enableMockProvider) {
+      const mockProvider = new MockLLMProvider({ enabledByDefault: !hasConfiguredProvider });
+      this.providers.set('mock', mockProvider);
+      console.log(`🎭 Mock provider added ${!hasConfiguredProvider ? '(no API keys configured)' : '(demo mode enabled)'}`);
+    }
+
     // Set default provider
-    this.currentProvider = this.config.defaultProvider || 'openai';
+    this.currentProvider = this.config.defaultProvider || 
+                          (hasConfiguredProvider ? 'openai' : 'mock');
     
     console.log(`🤖 Initialized ${this.providers.size} LLM providers`);
   }
@@ -94,13 +109,18 @@ class EchoTuneChatbot {
     console.log(`🎯 Available providers: ${availableProviders.join(', ')}`);
     
     if (availableProviders.length === 0) {
-      throw new Error('No LLM providers are available. Check your configuration.');
+      console.warn('⚠️ No LLM providers are available. The system may not function properly.');
+      // Don't throw error, let mock provider handle it
     }
 
     // Use first available provider if current is not available
     if (!availableProviders.includes(this.currentProvider)) {
-      this.currentProvider = availableProviders[0];
-      console.log(`🔄 Switched to ${this.currentProvider} provider`);
+      if (availableProviders.length > 0) {
+        this.currentProvider = availableProviders[0];
+        console.log(`🔄 Switched to ${this.currentProvider} provider`);
+      } else {
+        console.log(`🎭 Using mock provider for demo functionality`);
+      }
     }
   }
 

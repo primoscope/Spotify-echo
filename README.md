@@ -162,10 +162,10 @@ SPOTIFY_REDIRECT_URI=http://localhost:3000/auth/callback
 
 # LLM Provider Configuration (Optional - Mock provider used if none configured)
 # ✅ Google Gemini - WORKING with gemini-1.5-flash model
-GEMINI_API_KEY=AIzaSyBWZMFT-QRim0VYkB_610mMJix13s01ynk
+GEMINI_API_KEY=your_gemini_api_key_here
 
 # ❌ OpenRouter - Requires valid API key (provided key expired/invalid)  
-# OPENROUTER_API_KEY=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
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 # 🔄 Other providers ready for configuration
 # OPENAI_API_KEY=your_openai_api_key_here
@@ -205,6 +205,17 @@ To enable demo mode:
 1. Don't configure any LLM API keys (or use invalid keys)
 2. Set `DEFAULT_LLM_PROVIDER=mock` in your `.env` file  
 3. Start the application - the mock provider will automatically activate
+
+### Enabling Advanced ML Features
+
+The full recommendation power of EchoTune AI requires processing your Spotify data. To enable the advanced machine learning features, run the following scripts from the `scripts/` directory in order:
+
+1. `python scripts/merge_csv_data.py`: To combine your exported Spotify history
+2. `python scripts/populate_audio_features.py`: To enrich the data with audio features from the Spotify API
+3. `python scripts/prepare_ml_datasets.py`: To build the datasets for model training
+4. `python scripts/migrate_to_mongodb.py`: To load the final data into MongoDB
+
+**Note**: These steps are required only if you want to use your personal Spotify data for personalized recommendations. The application works in demo mode with sample data without running these scripts.
 
 ### LLM Provider Configuration
 EchoTune AI supports multiple LLM providers with automatic fallback:

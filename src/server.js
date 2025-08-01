@@ -61,9 +61,6 @@ app.use(ensureDatabase);
 // User extraction middleware for all routes
 app.use(extractUser);
 
-// Store for temporary state (in production, use Redis or database)
-const authStates = new Map();
-
 // Utility functions
 const generateRandomString = (length) => {
     return crypto.randomBytes(Math.ceil(length / 2))
@@ -111,7 +108,7 @@ app.get('/', (req, res) => {
 });
 
 // Spotify authentication initiation
-app.get('/auth/spotify', (req, res) => {
+app.get('/auth/spotify', async (req, res) => {
     if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET) {
         return res.status(500).json({
             error: 'Spotify credentials not configured',
@@ -119,33 +116,37 @@ app.get('/auth/spotify', (req, res) => {
         });
     }
 
-    const state = generateRandomString(16);
-    const scope = 'user-read-private user-read-email playlist-modify-public playlist-modify-private user-read-recently-played user-top-read';
-    
-    // Store state for verification
-    authStates.set(state, {
-        timestamp: Date.now(),
-        ip: req.ip
-    });
+    try {
+        const state = generateRandomString(16);
+        const scope = 'user-read-private user-read-email playlist-modify-public playlist-modify-private user-read-recently-played user-top-read';
+        
+        // Store state in MongoDB for verification
+        const mongoManager = require('./database/mongodb');
+        await mongoManager.connect();
+        const authStatesCollection = mongoManager.getCollection('auth_states');
+        
+        await authStatesCollection.insertOne({
+            state: state,
+            createdAt: new Date()
+        });
 
-    // Clean up old states (older than 10 minutes)
-    const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
-    for (const [key, value] of authStates.entries()) {
-        if (value.timestamp < tenMinutesAgo) {
-            authStates.delete(key);
-        }
+        const authURL = 'https://accounts.spotify.com/authorize?' +
+            new URLSearchParams({
+                response_type: 'code',
+                client_id: SPOTIFY_CLIENT_ID,
+                scope: scope,
+                redirect_uri: SPOTIFY_REDIRECT_URI,
+                state: state
+            }).toString();
+
+        res.redirect(authURL);
+    } catch (error) {
+        console.error('Error storing auth state:', error);
+        res.status(500).json({
+            error: 'Authentication error',
+            message: 'Failed to initiate authentication'
+        });
     }
-
-    const authURL = 'https://accounts.spotify.com/authorize?' +
-        new URLSearchParams({
-            response_type: 'code',
-            client_id: SPOTIFY_CLIENT_ID,
-            scope: scope,
-            redirect_uri: SPOTIFY_REDIRECT_URI,
-            state: state
-        }).toString();
-
-    res.redirect(authURL);
 });
 
 // Spotify OAuth callback
@@ -161,16 +162,20 @@ app.get('/auth/callback', async (req, res) => {
         return res.redirect(`${FRONTEND_URL}?error=invalid_request`);
     }
 
-    // Verify state
-    const storedState = authStates.get(state);
-    if (!storedState) {
-        return res.redirect(`${FRONTEND_URL}?error=state_mismatch`);
-    }
-
-    // Remove used state
-    authStates.delete(state);
-
     try {
+        // Verify state using MongoDB
+        const mongoManager = require('./database/mongodb');
+        await mongoManager.connect();
+        const authStatesCollection = mongoManager.getCollection('auth_states');
+        
+        const storedState = await authStatesCollection.findOne({ state: state });
+        if (!storedState) {
+            return res.redirect(`${FRONTEND_URL}?error=state_mismatch`);
+        }
+
+        // Remove used state to prevent reuse
+        await authStatesCollection.deleteOne({ state: state });
+
         // Exchange code for access token
         const tokenResponse = await axios.post(
             'https://accounts.spotify.com/api/token',
@@ -333,51 +338,6 @@ app.post('/api/spotify/playlist', async (req, res) => {
         res.status(500).json({
             error: 'Failed to create playlist',
             message: error.response?.data?.error?.message || error.message
-        });
-    }
-});
-
-// Chatbot endpoint (basic implementation)
-app.post('/api/chat', async (req, res) => {
-    try {
-        const { message } = req.body;
-        // Note: user_context available for future personalization features
-
-        if (!message) {
-            return res.status(400).json({ error: 'Message is required' });
-        }
-
-        // Simple intent recognition (in production, use proper NLP)
-        const lowerMessage = message.toLowerCase();
-        let response = '';
-        let action = null;
-
-        if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
-            response = 'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
-            action = 'recommend';
-        } else if (lowerMessage.includes('playlist')) {
-            response = 'I can help you create a personalized playlist! What would you like to name it and what kind of vibe are you going for?';
-            action = 'create_playlist';
-        } else if (lowerMessage.includes('mood') || lowerMessage.includes('feel')) {
-            response = 'Tell me more about your mood! Are you looking for something upbeat and energetic, or maybe something more chill and relaxing?';
-            action = 'mood_analysis';
-        } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-            response = 'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
-        } else {
-            response = 'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
-        }
-
-        res.json({
-            response: response,
-            action: action,
-            timestamp: new Date().toISOString()
-        });
-
-    } catch (error) {
-        console.error('Chat error:', error);
-        res.status(500).json({
-            error: 'Failed to process message',
-            message: 'Sorry, I encountered an error. Please try again.'
         });
     }
 });

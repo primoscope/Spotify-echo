@@ -144,6 +144,13 @@ class MongoDBManager {
         { key: { playlist_type: 1 } }
       ]);
 
+      // Auth states collection with TTL index (e.g., 10 minutes)
+      const authStatesCollection = db.collection('auth_states');
+      await authStatesCollection.createIndex(
+        { createdAt: 1 },
+        { expireAfterSeconds: 600 }
+      );
+
       console.log('✅ Database indexes created successfully');
     } catch (error) {
       console.error('❌ Error creating indexes:', error.message);

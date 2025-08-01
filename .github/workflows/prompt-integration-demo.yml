@@ -1,0 +1,141 @@
+name: EchoTune AI - Prompt Integration Demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      demo_type:
+        description: 'Type of demo to run'
+        required: true
+        type: choice
+        options:
+          - 'code-review'
+          - 'workflow-optimization'
+          - 'comprehensive-analysis'
+        default: 'code-review'
+      target_files:
+        description: 'Files to analyze (comma-separated)'
+        required: false
+        type: string
+        default: 'src/index.js,package.json'
+
+jobs:
+  demo-prompt-integration:
+    name: 🎬 Prompt Integration Demo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Prepare demo data
+        id: prepare
+        run: |
+          echo "🎬 Preparing demo for: ${{ inputs.demo_type }}"
+          
+          # Read project files for analysis
+          project_readme=""
+          if [[ -f "README.md" ]]; then
+            project_readme=$(cat README.md)
+          fi
+          
+          # Get code files
+          code_files=""
+          IFS=',' read -ra FILES <<< "${{ inputs.target_files }}"
+          for file in "${FILES[@]}"; do
+            if [[ -f "$file" ]]; then
+              echo "📄 Reading file: $file"
+              code_files="${code_files}\n\n### $file\n\`\`\`\n$(cat "$file")\n\`\`\`"
+            fi
+          done
+          
+          # Prepare variables based on demo type
+          case "${{ inputs.demo_type }}" in
+            "code-review")
+              variables=$(cat << EOF
+          {
+            "project_readme": $(echo "$project_readme" | jq -Rs .),
+            "project_goals": "Create a scalable music recommendation platform with AI integration",
+            "code_files": $(echo -e "$code_files" | jq -Rs .)
+          }
+          EOF
+          )
+              echo "prompt_name=coding-agent/code-review-analysis" >> $GITHUB_OUTPUT
+              ;;
+              
+            "workflow-optimization")
+              current_workflow=$(cat .github/workflows/main.yml 2>/dev/null || echo "No workflow found")
+              variables=$(cat << EOF
+          {
+            "projectType": "TypeScript Music Recommendation System",
+            "currentIssues": "Long build times, no advanced caching, security improvements needed",
+            "performanceGoals": "Sub-3 minute builds, comprehensive testing, optimized caching",
+            "securityRequirements": "Dependency scanning, secret management, minimal permissions",
+            "currentWorkflow": $(echo "$current_workflow" | jq -Rs .),
+            "dependencies": "npm, Node.js, Python, MongoDB",
+            "buildTools": "npm scripts, Docker",
+            "testingFramework": "Jest",
+            "deploymentTarget": "DigitalOcean Droplet"
+          }
+          EOF
+          )
+              echo "prompt_name=workflow/workflow-optimizer" >> $GITHUB_OUTPUT
+              ;;
+              
+            "comprehensive-analysis")
+              variables=$(cat << EOF
+          {
+            "project_readme": $(echo "$project_readme" | jq -Rs .),
+            "analysis_type": "comprehensive",
+            "focus_areas": "architecture, performance, security, maintainability"
+          }
+          EOF
+          )
+              echo "prompt_name=coding-agent/code-review-analysis" >> $GITHUB_OUTPUT
+              ;;
+          esac
+          
+          echo "variables<<EOF" >> $GITHUB_OUTPUT
+          echo "$variables" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "📋 Variables prepared for prompt execution"
+
+      - name: Execute AI Prompt
+        uses: ./.github/workflows/prompt-orchestrator.yml
+        with:
+          prompt_name: ${{ steps.prepare.outputs.prompt_name }}
+          variables: ${{ steps.prepare.outputs.variables }}
+          model: 'gpt-4o'
+          save_result: true
+          test_mode: false
+          
+      - name: Demo Summary
+        run: |
+          echo "# 🎬 EchoTune AI Prompt Integration Demo" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Demo Type:** ${{ inputs.demo_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Prompt Used:** ${{ steps.prepare.outputs.prompt_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Files:** ${{ inputs.target_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Status:** Demo completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This demo showcases the new unified prompt system that can:" >> $GITHUB_STEP_SUMMARY
+          echo "- Execute prompts interchangeably across different categories" >> $GITHUB_STEP_SUMMARY
+          echo "- Validate prompt formats automatically" >> $GITHUB_STEP_SUMMARY
+          echo "- Integrate seamlessly with GitHub Actions workflows" >> $GITHUB_STEP_SUMMARY
+          echo "- Provide consistent results with proper error handling" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📚 **Available Categories:**" >> $GITHUB_STEP_SUMMARY
+          echo "- coding-agent: Code review and development assistance" >> $GITHUB_STEP_SUMMARY
+          echo "- workflow: CI/CD and automation optimization" >> $GITHUB_STEP_SUMMARY
+          echo "- analysis: Security and performance analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- documentation: API and project documentation" >> $GITHUB_STEP_SUMMARY

@@ -554,7 +554,13 @@ if (typeof window !== 'undefined') {
   performanceManager.createRateLimiter('openai', performanceManager.config.rateLimit.openAI);
 }
 
-module.exports = {
-  PerformanceManager,
-  performanceManager
-};
+// Browser-compatible exports
+if (typeof window !== 'undefined') {
+  window.PerformanceManager = PerformanceManager;
+  window.performanceManager = performanceManager;
+} else if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    PerformanceManager,
+    performanceManager
+  };
+}

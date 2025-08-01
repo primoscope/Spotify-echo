@@ -554,9 +554,17 @@ if (typeof window !== 'undefined') {
   }
 }
 
-module.exports = {
-  MobileResponsiveManager,
-  ReactNativeFoundation,
-  mobileResponsive,
-  reactNative
-};
+// Browser-compatible exports
+if (typeof window !== 'undefined') {
+  window.MobileResponsiveManager = MobileResponsiveManager;
+  window.ReactNativeFoundation = ReactNativeFoundation;
+  window.mobileResponsive = mobileResponsive;
+  window.reactNative = reactNative;
+} else if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    MobileResponsiveManager,
+    ReactNativeFoundation,
+    mobileResponsive,
+    reactNative
+  };
+}

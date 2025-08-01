@@ -10,6 +10,45 @@ import json
 from datetime import datetime
 from dotenv import load_dotenv
 
+# Import shared MongoDB utilities
+try:
+    from mongodb_utils import get_sample_document_json_structure
+except ImportError:
+    # Fallback if mongodb_utils is not available
+    def get_sample_document_json_structure():
+        return """{
+  "_id": "unique_identifier",
+  "spotify_track_uri": "spotify:track:...",
+  "timestamp": "2010-05-03 09:14:32",
+  "user": {
+    "username": "user_name",
+    "platform": "platform_info",
+    "country": "country_code"
+  },
+  "track": {
+    "name": "Track Name",
+    "artist": "Artist Name",
+    "album": "Album Name",
+    "duration_ms": 210000,
+    "popularity": 75
+  },
+  "listening": {
+    "ms_played": 180000,
+    "skipped": false,
+    "completion_rate": 0.857
+  },
+  "audio_features": {
+    "danceability": 0.7,
+    "energy": 0.8,
+    "valence": 0.6,
+    "tempo": 120.0
+  },
+  "metadata": {
+    "explicit": false,
+    "created_at": "timestamp"
+  }
+}"""
+
 # Load environment variables
 load_dotenv()
 
@@ -112,40 +151,8 @@ Estimated migration time: 5-10 minutes for full dataset.
     print_step(5, "Database Schema")
     print("""
 The MongoDB collection uses the following document structure:
-
-{
-  "_id": "unique_identifier",
-  "spotify_track_uri": "spotify:track:...",
-  "timestamp": "2010-05-03 09:14:32",
-  "user": {
-    "username": "user_name",
-    "platform": "platform_info",
-    "country": "country_code"
-  },
-  "track": {
-    "name": "Track Name",
-    "artist": "Artist Name",
-    "album": "Album Name",
-    "duration_ms": 210000,
-    "popularity": 75
-  },
-  "listening": {
-    "ms_played": 180000,
-    "skipped": false,
-    "completion_rate": 0.857
-  },
-  "audio_features": {
-    "danceability": 0.7,
-    "energy": 0.8,
-    "valence": 0.6,
-    "tempo": 120.0
-  },
-  "metadata": {
-    "explicit": false,
-    "created_at": "timestamp"
-  }
-}
 """)
+    print(get_sample_document_json_structure())
     
     print_header("SETUP COMPLETE")
     print("""

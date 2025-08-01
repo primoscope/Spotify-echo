@@ -25,6 +25,45 @@ except ImportError as e:
     print(f"Error: python-dotenv not installed. Run: pip install python-dotenv")
     sys.exit(1)
 
+# Import shared MongoDB utilities
+try:
+    from mongodb_utils import get_sample_listening_history_document
+except ImportError:
+    # Fallback if mongodb_utils is not available
+    def get_sample_listening_history_document():
+        return {
+            "_id": "sample_schema_doc",
+            "spotify_track_uri": "spotify:track:example",
+            "timestamp": datetime.now(timezone.utc),
+            "user": {
+                "username": "sample_user",
+                "platform": "web_player",
+                "country": "US"
+            },
+            "track": {
+                "name": "Sample Track",
+                "artist": "Sample Artist",
+                "album": "Sample Album",
+                "duration_ms": 210000,
+                "popularity": 75
+            },
+            "listening": {
+                "ms_played": 180000,
+                "skipped": False,
+                "completion_rate": 0.857
+            },
+            "audio_features": {
+                "danceability": 0.7,
+                "energy": 0.8,
+                "valence": 0.6,
+                "tempo": 120.0
+            },
+            "metadata": {
+                "explicit": False,
+                "created_at": datetime.now(timezone.utc)
+            }
+        }
+
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -149,39 +188,8 @@ class MongoDBConnectionTester:
         logger.info("Creating sample schema and indexes...")
         
         try:
-            # Sample document structure for listening history
-            sample_doc = {
-                "_id": "sample_schema_doc",
-                "spotify_track_uri": "spotify:track:example",
-                "timestamp": datetime.now(timezone.utc),
-                "user": {
-                    "username": "sample_user",
-                    "platform": "web_player",
-                    "country": "US"
-                },
-                "track": {
-                    "name": "Sample Track",
-                    "artist": "Sample Artist",
-                    "album": "Sample Album",
-                    "duration_ms": 210000,
-                    "popularity": 75
-                },
-                "listening": {
-                    "ms_played": 180000,
-                    "skipped": False,
-                    "completion_rate": 0.857
-                },
-                "audio_features": {
-                    "danceability": 0.7,
-                    "energy": 0.8,
-                    "valence": 0.6,
-                    "tempo": 120.0
-                },
-                "metadata": {
-                    "explicit": False,
-                    "created_at": datetime.now(timezone.utc)
-                }
-            }
+            # Get sample document structure using shared utility
+            sample_doc = get_sample_listening_history_document()
             
             # Insert sample document
             self.collection.insert_one(sample_doc)

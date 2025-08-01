@@ -600,7 +600,13 @@ if (typeof window !== 'undefined') {
   securityManager = new SecurityManager();
 }
 
-module.exports = {
-  SecurityManager,
-  securityManager
-};
+// Browser-compatible exports
+if (typeof window !== 'undefined') {
+  window.SecurityManager = SecurityManager;
+  window.securityManager = securityManager;
+} else if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    SecurityManager,
+    securityManager
+  };
+}

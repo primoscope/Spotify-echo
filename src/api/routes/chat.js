@@ -347,4 +347,60 @@ router.get('/health', async (req, res) => {
   }
 });
 
+/**
+ * Test LLM providers without authentication (for development)
+ * POST /api/chat/test
+ */
+router.post('/test', chatRateLimit, async (req, res) => {
+  try {
+    const chatbotInstance = await initializeChatbot();
+    const { message, provider, model } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        error: 'Missing message',
+        message: 'Please provide a message to test'
+      });
+    }
+
+    // Create a session first
+    const testUserId = 'test_user';
+    
+    // Start a conversation session (this will generate a new sessionId)
+    const session = await chatbotInstance.startConversation(testUserId, {
+      provider: provider || chatbotInstance.config.defaultProvider,
+      model: model || chatbotInstance.config.defaultModel
+    });
+
+    console.log('Test session created:', session.sessionId);
+
+    // Send the message using the session ID that was actually created
+    const response = await chatbotInstance.sendMessage(session.sessionId, message, {
+      provider: provider || chatbotInstance.config.defaultProvider,
+      model: model || chatbotInstance.config.defaultModel,
+      userId: testUserId
+    });
+
+    res.json({
+      success: true,
+      testMode: true,
+      sessionCreated: { sessionId: session.sessionId, provider: session.llmProvider },
+      providersAvailable: chatbotInstance.getAvailableProviders().map(p => ({
+        id: p.id,
+        name: p.name,
+        isActive: p.isActive
+      })),
+      ...response
+    });
+
+  } catch (error) {
+    console.error('Error in test chat:', error);
+    res.status(500).json({
+      error: 'Failed to test chat',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 module.exports = router;

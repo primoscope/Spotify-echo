@@ -258,10 +258,10 @@ class LLMProviderManager {
    */
   setupRefreshHandlers() {
     // Gemini refresh handler
-    this.keyRefreshHandlers.set('gemini', async (_config) => {
+    this.keyRefreshHandlers.set('gemini', async (providedConfig) => {
       // Google API keys don't typically expire, but we can validate them
       try {
-        const response = await fetch(`${config.endpoint}/${config.model}:generateContent?key=${config.apiKey}`, {
+        const response = await fetch(`${providedConfig.endpoint}/${providedConfig.model}:generateContent?key=${providedConfig.apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -273,7 +273,7 @@ class LLMProviderManager {
           throw new Error('API key invalid or expired');
         }
 
-        return { success: true, newKey: config.apiKey };
+        return { success: true, newKey: providedConfig.apiKey };
       } catch (error) {
         return { success: false, error: error.message };
       }

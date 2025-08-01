@@ -1,5 +1,4 @@
-// React is needed for JSX
-// Commented out unused import: useState
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ChatInterface from './components/ChatInterface';
 import Dashboard from './components/Dashboard';

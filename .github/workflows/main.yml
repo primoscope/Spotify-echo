@@ -1,4 +1,4 @@
-            - name: Gemini AI Code Reviewer
+ - name: Gemini AI Code Reviewer
   # You may pin to the exact commit or the version.
   # uses: truongnh1992/gemini-ai-code-reviewer@af1034dd2f6616858a9c8540bb5460f1f3f28b1d
   uses: truongnh1992/gemini-ai-code-reviewer@v6.5.0

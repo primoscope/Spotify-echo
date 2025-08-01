@@ -1,4 +1,4 @@
-                       - name: Gemini AI Code Reviewer
+- name: Gemini AI Code Reviewer
   uses: truongnh1992/gemini-ai-code-reviewer@v6.5.0
   with:
     # GitHub token to interact with the repository (use GitHub's built-in secret)

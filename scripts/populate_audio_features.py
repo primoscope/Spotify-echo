@@ -104,7 +104,7 @@ class SpotifyAudioFeaturesPopulator:
             return self.access_token
 
         # Request new token
-        auth_url = 'https://accounts.spotify.com / api/token'
+        auth_url = 'https://accounts.spotify.com/api/token'
 
         # Encode credentials
         auth_header = base64.b64encode(

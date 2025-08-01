@@ -37,6 +37,7 @@
     "mcp-test-all": "node scripts/mcp-manager.js test",
     "mcp-health": "node scripts/mcp-manager.js health",
     "mcp-report": "node scripts/mcp-manager.js report",
+    "mcp-validate": "node scripts/validate-mcp-integration.js",
     "merge-csv": "python scripts/merge_csv_data.py",
     "setup-db": "python scripts/database_setup.py",
     "populate-audio": "python scripts/populate_audio_features.py",
@@ -163,7 +164,7 @@
       "filesystem": {
         "command": "node",
         "args": [
-          "node_modules/FileScopeMCP/dist/index.js"
+          "node_modules/FileScopeMCP/dist/mcp-server.js"
         ],
         "env": {
           "ALLOWED_DIRECTORIES": "${PWD},${PWD}/src,${PWD}/scripts,${PWD}/mcp-server"

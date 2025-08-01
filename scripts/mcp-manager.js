@@ -46,7 +46,7 @@ class MCPServerManager {
                 name: 'FileScopeMCP',
                 path: this.projectRoot,
                 command: 'node',
-                args: ['node_modules/FileScopeMCP/dist/index.js'],
+                args: ['node_modules/FileScopeMCP/dist/mcp-server.js'],
                 health: 'ready',
                 env: {
                     ALLOWED_DIRECTORIES: `${this.projectRoot},${this.projectRoot}/src,${this.projectRoot}/scripts,${this.projectRoot}/mcp-server`

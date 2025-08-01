@@ -59,102 +59,107 @@ class PerformanceManager {
 
     // Service worker for offline caching
     this.initializeServiceWorker();
+    
+    // Initialize cache methods
+    this.cache = this.createCacheManager();
   }
 
   /**
-   * Intelligent caching system with TTL and LRU eviction
+   * Create cache management methods
    */
-  cache = {
-    set: (key, value, options = {}) => {
-      const ttl = options.ttl || this.config.cache.defaultTTL;
-      const priority = options.priority || 1;
-      const prefetchable = options.prefetchable || false;
-      
-      // Evict LRU items if cache is full
-      if (this.cacheStorage.size >= this.config.cache.maxSize) {
-        this.evictLRUItems();
-      }
-      
-      const cacheEntry = {
-        value,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + ttl,
-        accessCount: 0,
-        lastAccessed: Date.now(),
-        priority,
-        prefetchable,
-        size: this.calculateObjectSize(value)
-      };
-      
-      this.cacheStorage.set(key, cacheEntry);
-      
-      // Set up prefetch if enabled
-      if (prefetchable && options.prefetchFn) {
-        setTimeout(() => {
-          this.prefetchIfNeeded(key, options.prefetchFn);
-        }, ttl * this.config.cache.prefetchThreshold);
-      }
-      
-      return true;
-    },
-
-    get: (key) => {
-      const entry = this.cacheStorage.get(key);
-      
-      if (!entry) {
-        this.performanceMetrics.cacheMisses++;
-        return null;
-      }
-      
-      // Check expiration
-      if (Date.now() > entry.expiresAt) {
-        this.cacheStorage.delete(key);
-        this.performanceMetrics.cacheMisses++;
-        return null;
-      }
-      
-      // Update access stats
-      entry.accessCount++;
-      entry.lastAccessed = Date.now();
-      
-      this.performanceMetrics.cacheHits++;
-      return entry.value;
-    },
-
-    has: (key) => {
-      const entry = this.cacheStorage.get(key);
-      return entry && Date.now() <= entry.expiresAt;
-    },
-
-    delete: (key) => {
-      return this.cacheStorage.delete(key);
-    },
-
-    clear: () => {
-      this.cacheStorage.clear();
-    },
-
-    getStats: () => {
-      let totalSize = 0;
-      let expiredCount = 0;
-      const now = Date.now();
-      
-      this.cacheStorage.forEach((entry) => {
-        totalSize += entry.size;
-        if (now > entry.expiresAt) {
-          expiredCount++;
+  createCacheManager() {
+    return {
+      set: (key, value, options = {}) => {
+        const ttl = options.ttl || this.config.cache.defaultTTL;
+        const priority = options.priority || 1;
+        const prefetchable = options.prefetchable || false;
+        
+        // Evict LRU items if cache is full
+        if (this.cacheStorage.size >= this.config.cache.maxSize) {
+          this.evictLRUItems();
         }
-      });
-      
-      return {
-        entries: this.cacheStorage.size,
-        totalSize,
-        expiredCount,
-        hitRate: this.performanceMetrics.cacheHits / 
-                (this.performanceMetrics.cacheHits + this.performanceMetrics.cacheMisses) || 0
-      };
-    }
-  };
+        
+        const cacheEntry = {
+          value,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + ttl,
+          accessCount: 0,
+          lastAccessed: Date.now(),
+          priority,
+          prefetchable,
+          size: this.calculateObjectSize(value)
+        };
+        
+        this.cacheStorage.set(key, cacheEntry);
+        
+        // Set up prefetch if enabled
+        if (prefetchable && options.prefetchFn) {
+          setTimeout(() => {
+            this.prefetchIfNeeded(key, options.prefetchFn);
+          }, ttl * this.config.cache.prefetchThreshold);
+        }
+        
+        return true;
+      },
+
+      get: (key) => {
+        const entry = this.cacheStorage.get(key);
+        
+        if (!entry) {
+          this.performanceMetrics.cacheMisses++;
+          return null;
+        }
+        
+        // Check expiration
+        if (Date.now() > entry.expiresAt) {
+          this.cacheStorage.delete(key);
+          this.performanceMetrics.cacheMisses++;
+          return null;
+        }
+        
+        // Update access stats
+        entry.accessCount++;
+        entry.lastAccessed = Date.now();
+        
+        this.performanceMetrics.cacheHits++;
+        return entry.value;
+      },
+
+      has: (key) => {
+        const entry = this.cacheStorage.get(key);
+        return entry && Date.now() <= entry.expiresAt;
+      },
+
+      delete: (key) => {
+        return this.cacheStorage.delete(key);
+      },
+
+      clear: () => {
+        this.cacheStorage.clear();
+      },
+
+      getStats: () => {
+        let totalSize = 0;
+        let expiredCount = 0;
+        const now = Date.now();
+        
+        this.cacheStorage.forEach((entry) => {
+          totalSize += entry.size;
+          if (now > entry.expiresAt) {
+            expiredCount++;
+          }
+        });
+        
+        return {
+          entries: this.cacheStorage.size,
+          totalSize,
+          expiredCount,
+          hitRate: this.performanceMetrics.cacheHits / 
+                  (this.performanceMetrics.cacheHits + this.performanceMetrics.cacheMisses) || 0
+        };
+      }
+    };
+  }
 
   /**
    * Advanced rate limiting with sliding window

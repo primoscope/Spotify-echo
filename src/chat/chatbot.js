@@ -119,7 +119,7 @@ class EchoTuneChatbot {
         this.currentProvider = availableProviders[0];
         console.log(`🔄 Switched to ${this.currentProvider} provider`);
       } else {
-        console.log(`🎭 Using mock provider for demo functionality`);
+        console.log('🎭 Using mock provider for demo functionality');
       }
     }
   }

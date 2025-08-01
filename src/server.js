@@ -4,9 +4,23 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 const crypto = require('crypto');
 const { URLSearchParams } = require('url');
+const compression = require('compression');
 
 // Load environment variables
 dotenv.config();
+
+// Import configuration and validation
+const { validateProductionConfig, getEnvironmentConfig } = require('./config/production');
+
+// Validate production configuration
+try {
+  validateProductionConfig();
+} catch (error) {
+  console.error('Configuration Error:', error.message);
+  process.exit(1);
+}
+
+const config = getEnvironmentConfig();
 
 // Import API routes and middleware
 const chatRoutes = require('./api/routes/chat');
@@ -18,11 +32,21 @@ const {
   ensureDatabase, 
   errorHandler, 
   requestLogger, 
-  corsMiddleware 
+  corsMiddleware,
+  createRateLimit,
+  createAuthRateLimit,
+  securityHeaders,
+  sanitizeInput,
+  requestSizeLimit,
 } = require('./api/middleware');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.server.port;
+
+// Trust proxy if in production (for proper IP detection behind reverse proxy)
+if (config.server.trustProxy) {
+  app.set('trust proxy', 1);
+}
 
 // Spotify OAuth configuration
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
@@ -31,14 +55,14 @@ const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 // Environment-aware redirect URI fallback
 const getDefaultRedirectUri = () => {
     if (process.env.NODE_ENV === 'production') {
-        return 'https://primosphere.studio/auth/callback';
+        return `https://${process.env.DOMAIN || 'primosphere.studio'}/auth/callback`;
     }
     return `http://localhost:${PORT}/auth/callback`;
 };
 
 const getDefaultFrontendUrl = () => {
     if (process.env.NODE_ENV === 'production') {
-        return 'https://primosphere.studio';
+        return `https://${process.env.DOMAIN || 'primosphere.studio'}`;
     }
     return `http://localhost:${PORT}`;
 };
@@ -46,14 +70,78 @@ const getDefaultFrontendUrl = () => {
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedirectUri();
 const FRONTEND_URL = process.env.FRONTEND_URL || getDefaultFrontendUrl();
 
-// Middleware
+// Security and performance middleware
+app.use(securityHeaders);
+
+// Compression middleware
+if (config.server.compression) {
+  app.use(compression({
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+    level: 6,
+    threshold: 1024,
+  }));
+}
+
+// Global rate limiting
+const globalRateLimit = createRateLimit({
+  windowMs: config.security.rateLimit.windowMs,
+  max: config.security.rateLimit.max,
+  message: 'Too many requests from this IP, please try again later',
+});
+app.use(globalRateLimit);
+
+// Request logging and monitoring
 app.use(requestLogger);
+
+// CORS with production configuration
 app.use(corsMiddleware);
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, '../public')));
-// Serve src directory for JavaScript modules
-app.use('/src', express.static(path.join(__dirname)));
+
+// Request size limiting
+app.use(requestSizeLimit);
+
+// Body parsing with size limits
+app.use(express.json({ 
+  limit: config.server.maxRequestSize,
+  verify: (req, res, buf) => {
+    // Additional payload verification if needed
+    req.rawBody = buf;
+  }
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: config.server.maxRequestSize 
+}));
+
+// Input sanitization
+app.use(sanitizeInput);
+
+// Static file serving with caching headers
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+  }
+}));
+
+// Serve src directory for JavaScript modules with no-cache in development
+app.use('/src', express.static(path.join(__dirname), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+  etag: false,
+  setHeaders: (res) => {
+    if (process.env.NODE_ENV !== 'production') {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+}));
 
 // Database connection middleware
 app.use(ensureDatabase);
@@ -77,32 +165,68 @@ const base64encode = (str) => {
 
 // Routes
 
-// Health check endpoint
+// Enhanced health check endpoints
+const HealthCheckSystem = require('./utils/health-check');
+const healthChecker = new HealthCheckSystem();
+
+// Comprehensive health check endpoint
 app.get('/health', async (req, res) => {
     try {
-        const mongoManager = require('./database/mongodb');
-        const dbHealth = await mongoManager.healthCheck();
+        const healthReport = await healthChecker.runAllChecks();
         
-        res.json({
-            status: 'healthy',
-            timestamp: new Date().toISOString(),
-            version: '2.0.0',
-            spotify_configured: !!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET),
-            database: dbHealth,
-            features: {
-                ai_chat: true,
-                recommendations: true,
-                audio_features: true,
-                mongodb: dbHealth.status === 'healthy'
-            }
-        });
+        // Set appropriate HTTP status based on health
+        const statusCode = healthReport.status === 'healthy' ? 200 : 
+                          healthReport.status === 'warning' ? 200 : 503;
+        
+        res.status(statusCode).json(healthReport);
     } catch (error) {
         res.status(500).json({
-            status: 'unhealthy',
+            status: 'error',
+            message: 'Health check system failure',
             error: error.message,
             timestamp: new Date().toISOString()
         });
     }
+});
+
+// Individual health check endpoints
+app.get('/health/:check', async (req, res) => {
+    try {
+        const checkName = req.params.check;
+        const result = await healthChecker.runCheck(checkName);
+        
+        const statusCode = result.status === 'healthy' ? 200 : 
+                          result.status === 'warning' ? 200 : 503;
+        
+        res.status(statusCode).json({
+            check: checkName,
+            ...result
+        });
+    } catch (error) {
+        res.status(400).json({
+            error: 'Invalid health check',
+            message: error.message,
+            availableChecks: Array.from(healthChecker.checks.keys())
+        });
+    }
+});
+
+// Simple readiness probe (lightweight check for load balancers)
+app.get('/ready', (req, res) => {
+    res.status(200).json({
+        status: 'ready',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+// Simple liveness probe (basic application response)
+app.get('/alive', (req, res) => {
+    res.status(200).json({
+        status: 'alive',
+        timestamp: new Date().toISOString(),
+        pid: process.pid
+    });
 });
 
 // Main page

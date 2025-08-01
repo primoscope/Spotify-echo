@@ -31,8 +31,8 @@
 ### ❌ Integration Tests
 - **Status**: error
 - **Details**: Command failed: npm run test:integration -- tests/integration/mcp-servers.test.js
-PASS tests/integration/mcp-servers.test.js (6.526 s)
-FAIL tests/integration/deployment.test.js (30.397 s)
+PASS tests/integration/mcp-servers.test.js (6.543 s)
+FAIL tests/integration/deployment.test.js (30.441 s)
   ● Deployment Integration Tests › Health Endpoints › GET /health should return comprehensive health status
 
     thrown: "Exceeded timeout of 30000 ms for a hook.
@@ -148,7 +148,7 @@ FAIL tests/integration/deployment.test.js (30.397 s)
 Test Suites: 1 failed, 1 passed, 2 total
 Tests:       7 failed, 11 passed, 18 total
 Snapshots:   0 total
-Time:        30.642 s, estimated 31 s
+Time:        30.678 s, estimated 31 s
 Ran all test suites matching /tests\/integration|tests\/integration\/mcp-servers.test.js/i.
 
 

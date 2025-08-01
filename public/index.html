@@ -1334,6 +1334,19 @@
         // Initialize the app when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             window.echoTuneApp = new EchoTuneApp();
+            
+            // Initialize new modules
+            if (typeof mobileResponsive !== 'undefined') {
+                mobileResponsive.applyMobileOptimizations();
+            }
+            
+            if (typeof performanceManager !== 'undefined') {
+                console.log('Performance Manager initialized');
+            }
+            
+            if (typeof securityManager !== 'undefined') {
+                console.log('Security Manager initialized');
+            }
         });
 
         // Add some keyboard shortcuts
@@ -1348,5 +1361,10 @@
             }
         });
     </script>
+    
+    <!-- Enhanced modules -->
+    <script src="/src/utils/performance-manager.js"></script>
+    <script src="/src/mobile/mobile-responsive.js"></script>
+    <script src="/src/security/security-manager.js"></script>
 </body>
 </html>

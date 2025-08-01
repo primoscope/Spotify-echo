@@ -541,6 +541,12 @@ app.use('/api/providers', providersRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
 
+// Enhanced real-time features
+const realtimeRecommendationsRoutes = require('./api/routes/realtime-recommendations');
+const playlistAutomationRoutes = require('./api/routes/playlist-automation');
+app.use('/api/recommendations', realtimeRecommendationsRoutes);
+app.use('/api/playlists', playlistAutomationRoutes);
+
 // Socket.IO Real-time Chat Integration
 const EchoTuneChatbot = require('./chat/chatbot');
 
@@ -565,8 +571,12 @@ const chatbotConfig = {
       model: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1-0528:free'
     }
   },
-  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'mock',
-  defaultModel: process.env.DEFAULT_LLM_MODEL || 'mock-music-assistant',
+  // Determine the best available provider based on API keys - prioritize Gemini
+  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 
+                  (process.env.GEMINI_API_KEY ? 'gemini' : 
+                   process.env.OPENAI_API_KEY ? 'openai' : 
+                   process.env.OPENROUTER_API_KEY ? 'openrouter' : 'mock'),
+  defaultModel: process.env.DEFAULT_LLM_MODEL || 'gemini-1.5-flash',
   enableMockProvider: true
 };
 

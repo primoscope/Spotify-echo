@@ -56,7 +56,13 @@ function ProviderPanel() {
           onChange={handleProviderChange}
           disabled={loading}
         >
-          {Object.entries(providers).map(([key, provider]) => (
+          {Object.entries(providers)
+            .sort(([a], [b]) => {
+              // Sort to prioritize Gemini first, then others, with mock last
+              const order = ['gemini', 'openai', 'azure', 'openrouter', 'mock'];
+              return order.indexOf(a) - order.indexOf(b);
+            })
+            .map(([key, provider]) => (
             <option 
               key={key} 
               value={key}

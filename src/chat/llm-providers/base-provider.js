@@ -22,7 +22,7 @@ class BaseLLMProvider {
    * @param {Object} options - Generation options
    * @returns {Object} Response object
    */
-  async generateCompletion(messages, options = {}) {
+  async generateCompletion() {
     throw new Error('generateCompletion must be implemented by subclass');
   }
 
@@ -32,8 +32,10 @@ class BaseLLMProvider {
    * @param {Object} options - Generation options
    * @returns {AsyncGenerator} Stream of response chunks
    */
-  async* generateStreamingCompletion(messages, options = {}) {
+  async* generateStreamingCompletion() {
     throw new Error('generateStreamingCompletion must be implemented by subclass');
+    // eslint-disable-next-line no-unreachable
+    yield; // This will never execute but satisfies the generator requirement
   }
 
   /**

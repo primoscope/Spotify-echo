@@ -24,14 +24,14 @@ class RecommendationEngine {
     const {
       limit = 20,
       context = null,
-      mood = null,
-      activity = null,
       timeOfDay = null,
-      includeNewMusic = true,
       excludeRecentlyPlayed = true
     } = options;
+    // Note: includeNewMusic, mood, activity flags available for future enhancement
 
     try {
+      // Note: Future enhancement to use db for advanced recommendations
+      // eslint-disable-next-line no-unused-vars
       const db = mongoManager.getDb();
       
       // Get user profile and listening history
@@ -40,7 +40,7 @@ class RecommendationEngine {
       
       if (!userProfile || listeningHistory.length === 0) {
         // New user - provide popular recommendations
-        return this.generatePopularRecommendations(limit, { mood, activity });
+        return this.generatePopularRecommendations(limit);
       }
 
       // Generate different types of recommendations
@@ -58,11 +58,9 @@ class RecommendationEngine {
       );
 
       // Apply context-based filtering
-      if (context || mood || activity || timeOfDay) {
+      if (context || timeOfDay) {
         recommendations = await this.applyContextFiltering(recommendations, {
           context,
-          mood,
-          activity,
           timeOfDay,
           userProfile
         });
@@ -98,7 +96,7 @@ class RecommendationEngine {
         recommendations: finalRecommendations,
         metadata: {
           user_profile: userProfile,
-          context: { mood, activity, timeOfDay },
+          context: { timeOfDay },
           algorithm_weights: this.weights,
           diversity_stats: this.calculateDiversityStats(finalRecommendations)
         }
@@ -287,8 +285,8 @@ class RecommendationEngine {
   /**
    * Generate recommendations for new users based on popular tracks
    */
-  async generatePopularRecommendations(limit, options = {}) {
-    const { mood, activity } = options;
+  async generatePopularRecommendations(limit) {
+    // Note: Future enhancement to consider mood and activity for recommendations
     
     try {
       const db = mongoManager.getDb();

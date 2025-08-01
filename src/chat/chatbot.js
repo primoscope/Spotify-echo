@@ -88,8 +88,8 @@ class EchoTuneChatbot {
     await Promise.allSettled(initPromises);
     
     const availableProviders = Array.from(this.providers.entries())
-      .filter(([_, provider]) => provider.isAvailable())
-      .map(([name, _]) => name);
+      .filter(([, provider]) => provider.isAvailable())
+      .map(([name]) => name);
 
     console.log(`🎯 Available providers: ${availableProviders.join(', ')}`);
     
@@ -361,7 +361,7 @@ class EchoTuneChatbot {
   /**
    * Handle special commands
    */
-  async handleSpecialCommands(message, session, options) {
+  async handleSpecialCommands(message, session) {
     const lowerMessage = message.toLowerCase().trim();
 
     // Playlist creation command
@@ -429,7 +429,7 @@ class EchoTuneChatbot {
   /**
    * Search for tracks
    */
-  async searchTracks(args, session) {
+  async searchTracks(args) {
     // This would integrate with Spotify API to search tracks
     // For now, return mock data
     return {
@@ -449,7 +449,7 @@ class EchoTuneChatbot {
   /**
    * Create a playlist
    */
-  async createPlaylist(args, session, options) {
+  async createPlaylist(args) {
     // This would integrate with Spotify API to create playlists
     return {
       playlist: {
@@ -489,7 +489,7 @@ class EchoTuneChatbot {
   /**
    * Analyze listening habits
    */
-  async analyzeListeningHabits(args, session) {
+  async analyzeListeningHabits() {
     // This would analyze user's listening data
     return {
       analysis: {
@@ -507,7 +507,7 @@ class EchoTuneChatbot {
    */
   getAvailableProviders() {
     return Array.from(this.providers.entries())
-      .filter(([_, provider]) => provider.isAvailable())
+      .filter(([, provider]) => provider.isAvailable())
       .map(([name, provider]) => ({
         name,
         capabilities: provider.getCapabilities(),

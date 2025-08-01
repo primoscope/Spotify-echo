@@ -107,6 +107,7 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
     "testMatch": [
       "**/__tests__/**/*.test.{js,ts}",
       "**/tests/**/*.test.{js,ts}"
@@ -114,7 +115,9 @@
     "collectCoverageFrom": [
       "src/**/*.{js,ts}",
       "!src/**/*.d.ts"
-    ]
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"]
   },
   "eslintConfig": {
     "extends": [

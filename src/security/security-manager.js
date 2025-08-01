@@ -34,8 +34,72 @@ class SecurityManager {
     this.securityEvents = [];
     this.threatPatterns = this.initializeThreatPatterns();
     
-    // Initialize session manager
-    this.sessionManager = {
+    // Initialize method objects
+    this.sessionManager = this.createSessionManager();
+    this.inputValidator = this.createInputValidator();
+    
+    this.initializeSecurity();
+  }
+
+  /**
+   * Initialize security subsystems
+   */
+  initializeSecurity() {
+    this.setupCSPHeaders();
+    this.initializeRateLimiters();
+    this.setupSecurityEventListeners();
+    this.startSecurityMonitoring();
+  }
+
+  /**
+   * Content Security Policy setup
+   */
+  setupCSPHeaders() {
+    if (typeof document === 'undefined') return;
+    
+    const csp = {
+      'default-src': ['\'self\''],
+      'script-src': ['\'self\'', '\'unsafe-inline\'', 'https://api.spotify.com'],
+      'style-src': ['\'self\'', '\'unsafe-inline\''],
+      'img-src': ['\'self\'', 'data:', 'https://i.scdn.co'],
+      'connect-src': ['\'self\'', 'https://api.spotify.com', 'https://accounts.spotify.com'],
+      'media-src': ['\'self\'', 'https://p.scdn.co'],
+      'frame-src': ['https://open.spotify.com'],
+      'upgrade-insecure-requests': []
+    };
+    
+    const cspString = Object.entries(csp)
+      .map(([directive, sources]) => `${directive} ${sources.join(' ')}`)
+      .join('; ');
+    
+    // Set CSP meta tag if not already present (browser environment only)
+    if (typeof document !== 'undefined' && !document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
+      const meta = document.createElement('meta');
+      meta.setAttribute('http-equiv', 'Content-Security-Policy');
+      meta.setAttribute('content', cspString);
+      document.head.appendChild(meta);
+    }
+  }
+
+  /**
+   * Initialize rate limiters for different endpoints
+   */
+  initializeRateLimiters() {
+    Object.entries(this.config.rateLimit).forEach(([name, config]) => {
+      this.rateLimiters.set(name, {
+        requests: [],
+        config
+      });
+    });
+  }
+
+  /**
+<<<<<<< HEAD
+=======
+   * Create session management methods
+   */
+  createSessionManager() {
+    return {
       create: (userId, metadata = {}) => {
         const sessionId = this.generateSecureToken();
         const session = {
@@ -135,9 +199,13 @@ class SecurityManager {
         }
       }
     };
+  }
 
-    // Initialize input validator
-    this.inputValidator = {
+  /**
+   * Create input validation methods
+   */
+  createInputValidator() {
+    return {
       sanitizeString: (input, maxLength = 1000) => {
         if (typeof input !== 'string') return '';
         
@@ -220,63 +288,10 @@ class SecurityManager {
         }
       }
     };
-    
-    this.initializeSecurity();
   }
 
   /**
-   * Initialize security subsystems
-   */
-  initializeSecurity() {
-    this.setupCSPHeaders();
-    this.initializeRateLimiters();
-    this.setupSecurityEventListeners();
-    this.startSecurityMonitoring();
-  }
-
-  /**
-   * Content Security Policy setup
-   */
-  setupCSPHeaders() {
-    if (typeof document === 'undefined') return;
-    
-    const csp = {
-      'default-src': ['\'self\''],
-      'script-src': ['\'self\'', '\'unsafe-inline\'', 'https://api.spotify.com'],
-      'style-src': ['\'self\'', '\'unsafe-inline\''],
-      'img-src': ['\'self\'', 'data:', 'https://i.scdn.co'],
-      'connect-src': ['\'self\'', 'https://api.spotify.com', 'https://accounts.spotify.com'],
-      'media-src': ['\'self\'', 'https://p.scdn.co'],
-      'frame-src': ['https://open.spotify.com'],
-      'upgrade-insecure-requests': []
-    };
-    
-    const cspString = Object.entries(csp)
-      .map(([directive, sources]) => `${directive} ${sources.join(' ')}`)
-      .join('; ');
-    
-    // Set CSP meta tag if not already present
-    if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
-      const meta = document.createElement('meta');
-      meta.setAttribute('http-equiv', 'Content-Security-Policy');
-      meta.setAttribute('content', cspString);
-      document.head.appendChild(meta);
-    }
-  }
-
-  /**
-   * Initialize rate limiters for different endpoints
-   */
-  initializeRateLimiters() {
-    Object.entries(this.config.rateLimit).forEach(([name, config]) => {
-      this.rateLimiters.set(name, {
-        requests: [],
-        config
-      });
-    });
-  }
-
-  /**
+>>>>>>> 1e0d5360242314d703de74bc50f71e0cb63d6a0b
    * Rate limiting with security features
    */
   checkRateLimit(type, identifier) {

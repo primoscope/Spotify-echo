@@ -33,8 +33,42 @@ class PerformanceManager {
       }
     };
 
-    // Initialize cache system
-    this.cache = {
+    this.initializePerformanceMonitoring();
+  }
+
+  /**
+   * Initialize performance monitoring
+   */
+  initializePerformanceMonitoring() {
+    // Memory usage monitoring
+    if (performance.memory) {
+      setInterval(() => {
+        this.checkMemoryUsage();
+      }, 30000); // Check every 30 seconds
+    }
+
+    // Performance observer for measuring API timing
+    if (typeof PerformanceObserver !== 'undefined') {
+      const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          this.recordPerformanceMetric(entry);
+        });
+      });
+      observer.observe({ entryTypes: ['measure', 'navigation'] });
+    }
+
+    // Service worker for offline caching
+    this.initializeServiceWorker();
+    
+    // Initialize cache methods
+    this.cache = this.createCacheManager();
+  }
+
+  /**
+   * Create cache management methods
+   */
+  createCacheManager() {
+    return {
       set: (key, value, options = {}) => {
         const ttl = options.ttl || this.config.cache.defaultTTL;
         const priority = options.priority || 1;
@@ -125,36 +159,10 @@ class PerformanceManager {
         };
       }
     };
-    
-    this.initializePerformanceMonitoring();
   }
 
   /**
-   * Initialize performance monitoring
-   */
-  initializePerformanceMonitoring() {
-    // Memory usage monitoring
-    if (performance.memory) {
-      setInterval(() => {
-        this.checkMemoryUsage();
-      }, 30000); // Check every 30 seconds
-    }
-
-    // Performance observer for measuring API timing
-    if (typeof PerformanceObserver !== 'undefined') {
-      const observer = new PerformanceObserver((list) => {
-        list.getEntries().forEach((entry) => {
-          this.recordPerformanceMetric(entry);
-        });
-      });
-      observer.observe({ entryTypes: ['measure', 'navigation'] });
-    }
-
-    // Service worker for offline caching
-    this.initializeServiceWorker();
-  }
-
-  /**
+>>>>>>> 1e0d5360242314d703de74bc50f71e0cb63d6a0b
    * Advanced rate limiting with sliding window
    */
   createRateLimiter(name, options = {}) {

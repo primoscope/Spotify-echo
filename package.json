@@ -53,7 +53,10 @@
     "prompts:test": "node prompts/tools/executor.js test",
     "prompts:list": "node prompts/tools/executor.js list",
     "prompts:fix": "node prompts/tools/validator.js fix",
-    "prompts:server": "node prompts/tools/cli.js server"
+    "prompts:server": "node prompts/tools/cli.js server",
+    "gemini-test": "node scripts/test-gemini-integration.js",
+    "gemini-health": "node scripts/test-gemini-integration.js",
+    "test:gemini-integration": "node scripts/test-gemini-integration.js"
   },
   "keywords": [
     "music",

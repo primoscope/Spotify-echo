@@ -366,3 +366,11 @@ validate
 prompt-results/
 *.backup
 analysis-results/
+
+# Gemini Code Assist
+.gemini/logs/
+.gemini/cache/
+gemini-*.log
+lint-results.txt
+test-results-*.txt
+security-audit.txt

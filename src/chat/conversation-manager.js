@@ -269,7 +269,7 @@ Current user context:`;
       }
     }
 
-    systemContent += `\n\nBe conversational, helpful, and enthusiastic about music. Use this context to provide personalized recommendations and responses.`;
+    systemContent += '\n\nBe conversational, helpful, and enthusiastic about music. Use this context to provide personalized recommendations and responses.';
 
     return {
       role: 'system',

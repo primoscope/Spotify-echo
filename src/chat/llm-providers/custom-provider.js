@@ -303,7 +303,7 @@ class CustomAPIProvider extends BaseLLMProvider {
   async handleMusicQuery(query, context = {}) {
     const systemPrompt = {
       role: 'system',
-      content: `You are EchoTune AI, a music recommendation assistant. Help users discover music, create playlists, and understand their listening habits. Be conversational and enthusiastic about music.`
+      content: 'You are EchoTune AI, a music recommendation assistant. Help users discover music, create playlists, and understand their listening habits. Be conversational and enthusiastic about music.'
     };
 
     const messages = [

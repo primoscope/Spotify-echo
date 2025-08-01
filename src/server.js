@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 const axios = require('axios');
@@ -8,6 +7,18 @@ const { URLSearchParams } = require('url');
 
 // Load environment variables
 dotenv.config();
+
+// Import API routes and middleware
+const chatRoutes = require('./api/routes/chat');
+const recommendationRoutes = require('./api/routes/recommendations');
+const spotifyRoutes = require('./api/routes/spotify');
+const { 
+  extractUser, 
+  ensureDatabase, 
+  errorHandler, 
+  requestLogger, 
+  corsMiddleware 
+} = require('./api/middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,16 +46,17 @@ const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedir
 const FRONTEND_URL = process.env.FRONTEND_URL || getDefaultFrontendUrl();
 
 // Middleware
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? ['https://primosphere.studio', 'https://www.primosphere.studio']
-        : ['http://localhost:3000', 'http://127.0.0.1:3000'],
-    credentials: true
-}));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
+app.use(corsMiddleware);
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Database connection middleware
+app.use(ensureDatabase);
+
+// User extraction middleware for all routes
+app.use(extractUser);
 
 // Store for temporary state (in production, use Redis or database)
 const authStates = new Map();
@@ -63,13 +75,31 @@ const base64encode = (str) => {
 // Routes
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        spotify_configured: !!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)
-    });
+app.get('/health', async (req, res) => {
+    try {
+        const mongoManager = require('./database/mongodb');
+        const dbHealth = await mongoManager.healthCheck();
+        
+        res.json({
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            version: '2.0.0',
+            spotify_configured: !!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET),
+            database: dbHealth,
+            features: {
+                ai_chat: true,
+                recommendations: true,
+                audio_features: true,
+                mongodb: dbHealth.status === 'healthy'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'unhealthy',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 
 // Main page
@@ -349,15 +379,14 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// API Routes
+app.use('/api/chat', chatRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/spotify', spotifyRoutes);
+
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
-app.use((err, req, res, _next) => {
-    console.error('Server error:', err);
-    res.status(500).json({
-        error: 'Internal server error',
-        message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : err.message
-    });
-});
+app.use(errorHandler);
 
 // 404 handler
 app.use((req, res) => {
@@ -368,14 +397,27 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
     console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
     console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔑 Spotify configured: ${!!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)}`);
     
+    // Initialize database connection and indexes
+    try {
+        const mongoManager = require('./database/mongodb');
+        await mongoManager.connect();
+        await mongoManager.createIndexes();
+        console.log('🗄️ Database initialized successfully');
+    } catch (error) {
+        console.error('❌ Database initialization failed:', error.message);
+    }
+    
     if (process.env.NODE_ENV !== 'production') {
         console.log(`🔗 Local access: http://localhost:${PORT}`);
         console.log(`🎤 Health check: http://localhost:${PORT}/health`);
+        console.log(`🤖 Chat API: http://localhost:${PORT}/api/chat`);
+        console.log(`🎯 Recommendations API: http://localhost:${PORT}/api/recommendations`);
+        console.log(`🎵 Spotify API: http://localhost:${PORT}/api/spotify`);
     }
 });
 

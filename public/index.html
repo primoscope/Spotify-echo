@@ -606,6 +606,10 @@
             .chat-container {
                 max-height: 70vh;
             }
+            
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
@@ -623,6 +627,11 @@
 
             .features-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .feature-card {
+                padding: 15px;
             }
 
             .message {
@@ -639,6 +648,15 @@
                 gap: 10px;
             }
 
+            .chat-input {
+                min-height: 45px;
+            }
+
+            .send-button, .voice-button {
+                min-height: 45px;
+                min-width: 45px;
+            }
+
             .user-actions {
                 flex-direction: column;
                 align-items: center;
@@ -647,6 +665,153 @@
             .auth-button.secondary {
                 margin-left: 0;
                 margin-top: 10px;
+            }
+
+            .quick-suggestions {
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .suggestion-chip {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+
+            .header {
+                padding: 30px 0;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+                margin-bottom: 25px;
+            }
+
+            .auth-button {
+                padding: 14px 28px;
+                font-size: 1rem;
+            }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .chat-title {
+                font-size: 1.3rem;
+            }
+
+            .chat-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .message {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+
+            .chat-input-container {
+                padding: 15px;
+            }
+
+            .suggestion-chip {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Touch-friendly improvements for mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .auth-button, .send-button, .voice-button, .suggestion-chip {
+                min-height: 44px; /* Apple's minimum touch target */
+                min-width: 44px;
+            }
+
+            .feature-card:hover {
+                transform: none; /* Disable hover effects on touch devices */
+            }
+
+            .suggestion-chip:hover {
+                transform: none;
+            }
+        }
+
+        /* Progressive Web App enhancements */
+        @media (display-mode: standalone) {
+            .header {
+                padding-top: 60px; /* Account for status bar */
+            }
+
+            .container {
+                padding-top: 0;
+            }
+        }
+
+        /* High DPI / Retina display optimizations */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+            .logo {
+                text-shadow: 0 2px 4px rgba(29, 185, 84, 0.3);
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .chat-container {
+                max-height: 50vh;
+            }
+
+            .header {
+                padding: 20px 0;
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Dark mode support (respects system preference) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-dark: #000000;
+                --background-light: #111111;
+                --secondary-color: #1a1a1a;
+                --text-primary: #ffffff;
+                --text-secondary: #cccccc;
+            }
+        }
+
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary-color: #00ff00;
+                --text-primary: #ffffff;
+                --text-secondary: #cccccc;
+                --border-radius: 4px;
+            }
+
+            .message.user {
+                border: 2px solid var(--primary-color);
+            }
+
+            .message.assistant {
+                border: 2px solid #ffffff;
             }
         }
 

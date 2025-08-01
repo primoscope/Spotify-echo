@@ -1,53 +1,97 @@
-const mongoManager = require('../database/mongodb');
-const ContentBasedFilter = require('./content-filter');
-const CollaborativeFilter = require('./collaborative-filter');
+const databaseManager = require('../database/database-manager');
 
 /**
- * Hybrid Recommendation Engine for EchoTune AI
- * Combines content-based and collaborative filtering with context awareness
+ * Enhanced Real-time Recommendation Engine for EchoTune AI
+ * Integrates ML algorithms to learn user preferences and provide dynamic music recommendations
  */
 class RecommendationEngine {
   constructor() {
-    this.contentFilter = new ContentBasedFilter();
-    this.collaborativeFilter = new CollaborativeFilter();
+    this.userProfiles = new Map();
+    this.recommendations = new Map();
+    this.feedbackQueue = [];
+    this.initialized = false;
+    
+    // Algorithm weights for hybrid recommendations
     this.weights = {
-      content_based: 0.6,
+      content_based: 0.4,
       collaborative: 0.3,
-      popularity: 0.1
+      context_aware: 0.2,
+      trending: 0.1
     };
+  }
+
+  /**
+   * Initialize the recommendation engine
+   */
+  async initialize() {
+    try {
+      console.log('🎯 Initializing Real-time Recommendation Engine...');
+      
+      // Start background processing
+      this.startBackgroundProcessing();
+      
+      this.initialized = true;
+      console.log('✅ Recommendation Engine initialized');
+      return true;
+    } catch (error) {
+      console.error('Recommendation Engine initialization failed:', error);
+      return false;
+    }
   }
 
   /**
    * Generate personalized recommendations for a user
    */
   async generateRecommendations(userId, options = {}) {
-    const {
-      limit = 20,
-      context = null,
-      timeOfDay = null,
-      excludeRecentlyPlayed = true
-    } = options;
-    // Note: includeNewMusic, mood, activity flags available for future enhancement
-
     try {
-      // Note: Future enhancement to use db for advanced recommendations
-      // eslint-disable-next-line no-unused-vars
-      const db = mongoManager.getDb();
-      
-      // Get user profile and listening history
-      const userProfile = await this.getUserProfile(userId);
-      const listeningHistory = await this.getUserListeningHistory(userId, { limit: 1000 });
-      
-      if (!userProfile || listeningHistory.length === 0) {
-        // New user - provide popular recommendations
-        return this.generatePopularRecommendations(limit);
-      }
+      const {
+        limit = 20,
+        context = {},
+        mood = null,
+        activity = null,
+        timeOfDay = null
+      } = options;
 
-      // Generate different types of recommendations
-      const [contentRecommendations, collaborativeRecommendations, popularRecommendations] = await Promise.all([
-        this.contentFilter.getRecommendations(userId, listeningHistory, { limit: limit * 2 }),
-        this.collaborativeFilter.getRecommendations(userId, { limit: limit * 2 }),
-        this.getPopularTracks({ limit: limit, excludeUserTracks: listeningHistory.map(h => h.track_id) })
+      // Get user profile
+      const userProfile = await this.getUserProfile(userId);
+      
+      // Get listening history
+      const listeningHistory = await this.getListeningHistory(userId, { limit: 100 });
+      
+      // Generate context-aware recommendations
+      const recommendations = await this.computeRecommendations(
+        userProfile,
+        listeningHistory,
+        {
+          mood,
+          activity,
+          timeOfDay: timeOfDay || this.getCurrentTimeContext(),
+          limit
+        }
+      );
+
+      // Store recommendations for future reference
+      this.recommendations.set(userId, {
+        recommendations,
+        timestamp: Date.now(),
+        context: { mood, activity, timeOfDay }
+      });
+
+      return {
+        success: true,
+        recommendations,
+        userProfile: userProfile.summary,
+        context: { mood, activity, timeOfDay }
+      };
+    } catch (error) {
+      console.error('Generate recommendations error:', error);
+      return {
+        success: false,
+        error: error.message,
+        recommendations: []
+      };
+    }
+  }
       ]);
 
       // Apply context filters

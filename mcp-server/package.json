@@ -10,8 +10,6 @@
     "spotify-server": "python spotify_server.py"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.1.0",
-    "@modelcontextprotocol/server-puppeteer": "^0.1.0",
     "puppeteer": "^21.0.0",
     "express": "^4.18.0",
     "ws": "^8.14.0",

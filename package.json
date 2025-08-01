@@ -32,6 +32,12 @@
     "mcp-server-start": "cd mcp-server && npm run orchestrator",
     "mcp-test-integration": "node scripts/test-mcp-integration.js",
     "mcp-health-check": "curl -s http://localhost:3001/health | jq '.' || echo 'MCP server not running'",
+    "mcp-manage": "node scripts/mcp-manager.js",
+    "mcp-install": "node scripts/mcp-manager.js install",
+    "mcp-test-all": "node scripts/mcp-manager.js test",
+    "mcp-health": "node scripts/mcp-manager.js health",
+    "mcp-report": "node scripts/mcp-manager.js report",
+    "mcp-validate": "node scripts/validate-mcp-integration.js",
     "merge-csv": "python scripts/merge_csv_data.py",
     "setup-db": "python scripts/database_setup.py",
     "populate-audio": "python scripts/populate_audio_features.py",
@@ -158,7 +164,7 @@
       "filesystem": {
         "command": "node",
         "args": [
-          "node_modules/FileScopeMCP/dist/index.js"
+          "node_modules/FileScopeMCP/dist/mcp-server.js"
         ],
         "env": {
           "ALLOWED_DIRECTORIES": "${PWD},${PWD}/src,${PWD}/scripts,${PWD}/mcp-server"
@@ -173,6 +179,20 @@
           "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
           "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}"
         }
+      },
+      "sequential-thinking": {
+        "command": "node",
+        "args": [
+          "mcp-servers/sequential-thinking/dist/index.js"
+        ],
+        "description": "Structured thinking and reasoning capabilities for complex tasks"
+      },
+      "screenshot-website": {
+        "command": "node",
+        "args": [
+          "mcp-servers/screenshot-website/dist/index.js"
+        ],
+        "description": "Fast website screenshot capabilities for automation"
       }
     }
   },

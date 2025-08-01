@@ -303,12 +303,37 @@ npm run setup-digitalocean    # Initial server setup
 ```
 
 ### MCP Server Features
-The Model Context Protocol server provides:
+The Model Context Protocol servers provide enhanced automation and coding capabilities:
+
+#### Core MCP Servers
+- **Sequential Thinking Server**: Structured reasoning and complex problem solving for coding tasks
+- **Screenshot Website Fast**: Rapid website screenshot generation for testing and documentation
+- **FileScopeMCP**: Advanced file system operations with security scope control
+- **Browserbase**: Cloud-based browser automation for comprehensive web testing
+
+#### Spotify Integration
 - **Browser Automation**: Automated Spotify Web Player interactions
 - **API Testing**: Comprehensive Spotify API workflow testing
 - **Data Collection**: Real-time listening data gathering
 - **Playlist Management**: Automated playlist creation and curation
 - **Cross-platform Testing**: Ensures compatibility across different environments
+
+#### MCP Management
+```bash
+# Install all MCP servers
+npm run mcp-install
+
+# Health check all servers
+npm run mcp-health
+
+# Test all servers
+npm run mcp-test-all
+
+# Generate detailed report
+npm run mcp-report
+```
+
+For detailed MCP server configuration, see [MCP Servers Guide](./docs/mcp-servers.md).
 
 ### GitHub Actions Workflow
 Automated workflows include:

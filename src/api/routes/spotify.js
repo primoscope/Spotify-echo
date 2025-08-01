@@ -367,18 +367,188 @@ router.post('/clear-cache', requireAuth, async (req, res) => {
  */
 router.post('/upload-csv', requireAuth, async (req, res) => {
   try {
-    // This would handle file upload and CSV parsing
-    // For now, return a placeholder response
-    res.json({
-      success: true,
-      message: 'CSV upload endpoint ready',
-      note: 'File upload functionality to be implemented with multer middleware'
+    const multer = require('multer');
+    const csv = require('csv-parser');
+    const fs = require('fs');
+    const path = require('path');
+
+    // Configure multer for file upload
+    const storage = multer.diskStorage({
+      destination: (req, file, cb) => {
+        const uploadDir = path.join(__dirname, '../../../uploads/csv');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const uniqueName = `${req.userId}_${Date.now()}_${file.originalname}`;
+        cb(null, uniqueName);
+      }
+    });
+
+    const upload = multer({
+      storage,
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only CSV files are allowed'));
+        }
+      },
+      limits: {
+        fileSize: 50 * 1024 * 1024 // 50MB limit
+      }
+    }).single('csvFile');
+
+    // Handle file upload
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({
+          error: 'File upload failed',
+          message: err.message
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          error: 'No file uploaded',
+          message: 'Please select a CSV file to upload'
+        });
+      }
+
+      const { accessToken, processAudioFeatures = true } = req.body;
+
+      if (!accessToken) {
+        // Clean up uploaded file
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({
+          error: 'Missing access token',
+          message: 'Spotify access token is required for processing'
+        });
+      }
+
+      const csvData = [];
+      const errors = [];
+      let rowCount = 0;
+
+      // Parse CSV file
+      const parsePromise = new Promise((resolve, reject) => {
+        fs.createReadStream(req.file.path)
+          .pipe(csv())
+          .on('data', (row) => {
+            rowCount++;
+            
+            // Validate required columns
+            if (!row.track_id && !row.trackId && !row['Track ID']) {
+              errors.push(`Row ${rowCount}: Missing track_id`);
+              return;
+            }
+
+            // Normalize column names
+            const normalizedRow = {
+              track_id: row.track_id || row.trackId || row['Track ID'],
+              track_name: row.track_name || row.trackName || row['Track Name'] || '',
+              artist_name: row.artist_name || row.artistName || row['Artist Name'] || '',
+              played_at: row.played_at || row.playedAt || row['Played At'] || new Date().toISOString(),
+              duration_ms: parseInt(row.duration_ms || row.durationMs || row['Duration (ms)'] || 0),
+              user_id: req.userId
+            };
+
+            // Validate track_id format (Spotify track IDs are 22 characters)
+            if (normalizedRow.track_id.length !== 22) {
+              errors.push(`Row ${rowCount}: Invalid track_id format`);
+              return;
+            }
+
+            csvData.push(normalizedRow);
+          })
+          .on('end', resolve)
+          .on('error', reject);
+      });
+
+      try {
+        await parsePromise;
+
+        // Clean up uploaded file
+        fs.unlinkSync(req.file.path);
+
+        if (csvData.length === 0) {
+          return res.status(400).json({
+            error: 'No valid data found',
+            message: 'CSV file contained no valid listening history records',
+            errors: errors.slice(0, 10) // Return first 10 errors
+          });
+        }
+
+        // Process audio features if requested
+        let enrichedData = csvData;
+        if (processAudioFeatures) {
+          const uniqueTrackIds = [...new Set(csvData.map(item => item.track_id))];
+          
+          // Process in smaller batches to avoid overwhelming the API
+          enrichedData = await spotifyService.enrichListeningHistory(
+            csvData,
+            accessToken,
+            {
+              includeMetadata: true,
+              onProgress: (progress) => {
+                console.log(`Processing CSV: ${progress.stage} - ${progress.processed}/${progress.total}`);
+              }
+            }
+          );
+        }
+
+        // Store in database
+        const db = require('../../database/mongodb').getDb();
+        const listeningHistoryCollection = db.collection('listening_history');
+
+        const operations = enrichedData.map(item => ({
+          updateOne: {
+            filter: {
+              user_id: req.userId,
+              track_id: item.track_id,
+              played_at: item.played_at
+            },
+            update: { $set: item },
+            upsert: true
+          }
+        }));
+
+        const bulkResult = await listeningHistoryCollection.bulkWrite(operations);
+
+        res.json({
+          success: true,
+          processed: {
+            total_rows: rowCount,
+            valid_records: csvData.length,
+            stored_records: bulkResult.upsertedCount + bulkResult.modifiedCount,
+            audio_features_processed: processAudioFeatures,
+            errors_count: errors.length
+          },
+          errors: errors.slice(0, 5), // Return first 5 errors for debugging
+          sample_data: enrichedData.slice(0, 3), // Return first 3 records as sample
+          message: `Successfully processed ${csvData.length} listening history records from CSV file`
+        });
+
+      } catch (parseError) {
+        // Clean up uploaded file on error
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        
+        console.error('Error parsing CSV:', parseError);
+        res.status(500).json({
+          error: 'CSV processing failed',
+          message: parseError.message
+        });
+      }
     });
 
   } catch (error) {
-    console.error('Error uploading CSV:', error);
+    console.error('Error in CSV upload endpoint:', error);
     res.status(500).json({
-      error: 'Failed to upload CSV',
+      error: 'Failed to process CSV upload',
       message: error.message
     });
   }

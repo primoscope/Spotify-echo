@@ -358,4 +358,4 @@ backups/
 # Environment-specific configs
 .env.production
 .env.staging
-.env.local
+.env.localuploads/

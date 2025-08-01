@@ -25,8 +25,12 @@ const chatbotConfig = {
       model: process.env.OPENROUTER_MODEL || process.env.DEFAULT_LLM_MODEL || 'deepseek/deepseek-r1-0528:free'
     }
   },
-  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'mock', // Use mock as default fallback
-  defaultModel: process.env.DEFAULT_LLM_MODEL || 'mock-music-assistant',
+  // Determine the best available provider based on API keys
+  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 
+                  (process.env.GEMINI_API_KEY ? 'gemini' : 
+                   process.env.OPENAI_API_KEY ? 'openai' : 
+                   process.env.OPENROUTER_API_KEY ? 'openrouter' : 'mock'),
+  defaultModel: process.env.DEFAULT_LLM_MODEL || 'gemini-1.5-flash',
   enableMockProvider: true // Always enable mock provider for demo functionality
 };
 

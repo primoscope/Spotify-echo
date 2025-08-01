@@ -184,7 +184,7 @@ function securityHeaders(req, res, next) {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
   // Content Security Policy
-  const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' https://api.spotify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.scdn.co; connect-src 'self' https://api.spotify.com https://accounts.spotify.com; media-src 'self' https://p.scdn.co; frame-src https://open.spotify.com";
+  const csp = 'default-src \'self\'; script-src \'self\' \'unsafe-inline\' https://api.spotify.com; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https://i.scdn.co; connect-src \'self\' https://api.spotify.com https://accounts.spotify.com; media-src \'self\' https://p.scdn.co; frame-src https://open.spotify.com';
   res.setHeader('Content-Security-Policy', csp);
   
   next();

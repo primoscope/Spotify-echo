@@ -51,6 +51,8 @@ app.use(corsMiddleware);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
+// Serve src directory for JavaScript modules
+app.use('/src', express.static(path.join(__dirname)));
 
 // Database connection middleware
 app.use(ensureDatabase);

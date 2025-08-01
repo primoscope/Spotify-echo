@@ -1,3 +1,4 @@
+// React is needed for JSX
 import React, { useState, useRef, useEffect } from 'react';
 
 function ChatInput({ onSendMessage, disabled, placeholder }) {

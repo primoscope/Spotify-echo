@@ -258,7 +258,7 @@ class LLMProviderManager {
    */
   setupRefreshHandlers() {
     // Gemini refresh handler
-    this.keyRefreshHandlers.set('gemini', async (config) => {
+    this.keyRefreshHandlers.set('gemini', async (_config) => {
       // Google API keys don't typically expire, but we can validate them
       try {
         const response = await fetch(`${config.endpoint}/${config.model}:generateContent?key=${config.apiKey}`, {
@@ -280,7 +280,7 @@ class LLMProviderManager {
     });
 
     // OpenRouter refresh handler
-    this.keyRefreshHandlers.set('openrouter', async (config) => {
+    this.keyRefreshHandlers.set('openrouter', async (_config) => {
       try {
         // OpenRouter doesn't have a standard refresh endpoint
         // We would need to implement their specific auth flow
@@ -292,7 +292,7 @@ class LLMProviderManager {
     });
 
     // Azure refresh handler
-    this.keyRefreshHandlers.set('azure', async (config) => {
+    this.keyRefreshHandlers.set('azure', async (_config) => {
       try {
         // Azure OpenAI uses AAD tokens that can be refreshed
         if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET) {

@@ -49,15 +49,15 @@ class SecurityMiddleware {
         return helmet({
         contentSecurityPolicy: {
             directives: {
-                defaultSrc: ["'self'"],
-                styleSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
-                scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
-                imgSrc: ["'self'", 'data:', 'https:'],
-                connectSrc: ["'self'", 'https://api.spotify.com', 'https://accounts.spotify.com'],
-                fontSrc: ["'self'", 'https://cdnjs.cloudflare.com'],
-                objectSrc: ["'none'"],
-                mediaSrc: ["'self'"],
-                frameSrc: ["'none'"],
+                defaultSrc: ['\'self\''],
+                styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://cdnjs.cloudflare.com'],
+                scriptSrc: ['\'self\'', '\'unsafe-inline\'', 'https://cdnjs.cloudflare.com'],
+                imgSrc: ['\'self\'', 'data:', 'https:'],
+                connectSrc: ['\'self\'', 'https://api.spotify.com', 'https://accounts.spotify.com'],
+                fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com'],
+                objectSrc: ['\'none\''],
+                mediaSrc: ['\'self\''],
+                frameSrc: ['\'none\''],
             },
         },
         crossOriginEmbedderPolicy: false
@@ -131,10 +131,12 @@ class SecurityMiddleware {
     }
 
     // Request size limiting
-    static requestSizeLimit = {
-        json: { limit: '10mb' },
-        urlencoded: { limit: '10mb', extended: true }
-    };
+    static getRequestSizeLimit() {
+        return {
+            json: { limit: '10mb' },
+            urlencoded: { limit: '10mb', extended: true }
+        };
+    }
 }
 
 module.exports = SecurityMiddleware;

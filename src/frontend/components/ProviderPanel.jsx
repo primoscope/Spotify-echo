@@ -1,3 +1,4 @@
+// React is needed for JSX
 import React from 'react';
 import { useLLM } from '../contexts/LLMContext';
 

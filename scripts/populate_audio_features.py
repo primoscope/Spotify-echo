@@ -190,7 +190,7 @@ class SpotifyAudioFeaturesPopulator:
         self.rate_limit_wait()
 
         token = self.get_access_token()
-        url = 'https://api.spotify.com / v1 / audio - features'
+        url = 'https://api.spotify.com/v1/audio-features'
 
         headers = {
             'Authorization': f'Bearer {token}'

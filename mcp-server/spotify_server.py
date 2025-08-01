@@ -1019,6 +1019,8 @@ class SpotifyMCPServer:
         
         logger.info(f"Integration tests completed: {test_results['success_rate']}% success rate")
         
+        return test_results
+        
 # MCP Protocol Handler
 class MCPHandler:
     """Handle MCP protocol messages"""

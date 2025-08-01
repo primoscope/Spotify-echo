@@ -5,131 +5,442 @@
 EchoTune AI is a next-generation music recommendation system designed to deliver a deeply personalized and interactive music discovery experience. By leveraging the Spotify API, advanced machine learning, and a conversational AI interface, EchoTune acts as a personal music sommelier, understanding nuanced user preferences to curate the perfect soundtrack for any moment. Our goal is to move beyond simple "you might also like" recommendations and create a dynamic, conversational partnership between the user and their music library.
 
 ## 🤖 For GitHub Coding Agents
-This project is optimized for automated development workflows. See [CODING_AGENT_GUIDE.md](./CODING_AGENT_GUIDE.md) for detailed instructions on:
-- Automated testing and CI/CD
-- MCP server integration for browser automation
-- Spotify API workflow automation
-- Database optimization and CSV processing
-- Code generation patterns and best practices
+This project is fully optimized for automated development workflows with comprehensive tooling and documentation. See [CODING_AGENT_GUIDE.md](./CODING_AGENT_GUIDE.md) for detailed instructions on:
+- **Automated Testing & CI/CD**: Multi-platform testing with GitHub Actions
+- **MCP Server Integration**: Browser automation and Spotify API workflows  
+- **Database Optimization**: MongoDB, Supabase, and PostgreSQL management
+- **ML Pipeline Automation**: Model training, evaluation, and deployment
+- **Code Generation Patterns**: Templates and best practices for rapid development
+- **Production Deployment**: Automated DigitalOcean setup and security hardening
+- **Data Processing Workflows**: CSV processing, feature extraction, and analytics
 
 ## ✨ Core Features
- * Deep History Analysis: Ingests and processes large CSV files containing a user's complete extended listening history (e.g., from a Spotify data privacy export). This file, with every song played, skipped, or added, serves as the foundational dataset for creating a highly accurate and personalized taste model.
- * Dynamic Preference Modeling: A self-improving machine learning model that analyzes a user's listening history, explicit feedback (likes/dislikes), and nuanced audio features (e.g., danceability, energy, valence) to build a sophisticated profile of their musical taste.
- * AI-Powered Conversational Interface: A chatbot, powered by a large language model (LLM), serves as the primary user interface. Users can make requests in natural language like, "Find me some upbeat indie folk for a rainy afternoon" or "Create a playlist that sounds like a mix between Tame Impala and Daft Punk."
- * Context-Aware Recommendations: The system generates suggestions not just on taste, but also on context. Users can request music for specific activities (workout, focus, relaxing), times of day, or moods.
- * Personalized Playlist Curation: Instantly generates and saves tailored playlists directly to the user's Spotify account based on their conversational prompts and underlying preference model.
- * Listening Habit Insights: Provides users with interactive visualizations and summaries of their listening habits, such as top genres by mood, most-listened-to artists during specific hours, and discovery trends.
+
+### 🎵 Advanced Music Intelligence
+ * **Deep History Analysis**: Processes complete Spotify listening history from CSV exports, analyzing every track played, skipped, or saved to build comprehensive taste profiles
+ * **Dynamic Preference Modeling**: Self-improving ML models using collaborative filtering, content-based analysis, and deep learning to understand nuanced musical preferences
+ * **Audio Feature Intelligence**: Advanced analysis of danceability, energy, valence, acousticness, and 10+ audio characteristics using Spotify's API and librosa
+ * **Context-Aware Recommendations**: Generates suggestions based on mood, activity, time of day, weather, and listening context
+
+### 🤖 AI-Powered Interaction
+ * **Conversational Interface**: Natural language processing with support for OpenAI GPT and Google Gemini models
+ * **Intent Recognition**: Understands complex requests like "Find upbeat indie folk for a rainy afternoon coding session"
+ * **Multi-Modal Responses**: Text, audio previews, and interactive playlist interfaces
+ * **Learning Feedback Loop**: Continuously improves based on user interactions and explicit feedback
+
+### 🔧 Automation & Integration
+ * **MCP Server Integration**: Browser automation for Spotify Web Player using Puppeteer
+ * **Automated Playlist Creation**: Instantly generates and saves playlists directly to Spotify accounts
+ * **Real-time Data Sync**: Continuous integration with Spotify API for live listening data
+ * **Cross-Platform Automation**: Seamless operation across web interfaces and mobile platforms
+
+### 📊 Analytics & Insights
+ * **Listening Habit Visualization**: Interactive charts of listening patterns, genre preferences, and discovery trends
+ * **Temporal Analysis**: Insights into music preferences by time of day, day of week, and seasonal patterns
+ * **Mood Mapping**: Correlation between audio features and listening contexts
+ * **Discovery Analytics**: Track how musical taste evolves and identifies emerging preferences
+
+### 🏗️ Production-Ready Infrastructure
+ * **Multi-Database Support**: MongoDB for analytics, Supabase for real-time features, PostgreSQL for structured data
+ * **Docker Containerization**: Full production deployment with docker-compose
+ * **Security Hardening**: Rate limiting, DDoS protection, SSL/TLS encryption, and secure authentication
+ * **Scalable Architecture**: Designed for horizontal scaling and high availability
+ * **Health Monitoring**: Automated health checks, logging, and error recovery systems
 
 ## 🛠️ System Architecture
- * Data Ingestion & Processing
-   * Bulk History Parser: The primary ingestion mechanism. Includes a robust, memory-efficient parser for large-scale CSV files (e.g., Spotify's extended streaming history) to process a user's entire historical data. This captures fine-grained interactions like tracks played, ms played, and skips, forming the backbone of the personalization engine.
-   * Spotify API Sync: After the initial bulk import, it connects to the Spotify API to fetch ongoing user data, including new listening history, saved tracks, and playlists, keeping the model current.
-   * Feature Enrichment: Extracts audio features for every unique track from the history file using Spotify's analysis endpoints.
-   * All data is cleaned, normalized, and stored in a robust database.
- * Machine Learning Core
-   * Preference Model: A model (e.g., collaborative filtering, content-based filtering, or a hybrid approach) trained on the comprehensive historical data and audio features. It generates a vector representation of a user's taste, giving strong weights to positive interactions (long plays, additions) and negative weights to skips.
-   * Dynamic Updates: The model is periodically retrained to adapt to the user's evolving preferences based on new listening data from the API sync and direct feedback.
- * Recommendation Engine
-   * Takes input from the user's preference model and any contextual prompts (mood, activity).
-   * Queries the Spotify API for tracks that match the desired audio feature profile.
-   * Ranks and filters results to ensure novelty and relevance, avoiding overly repetitive suggestions.
- * Conversational AI Layer (LLM Integration)
-   * Processes natural language prompts from the user to extract key intents, entities (artists, genres), and context (mood, activity).
-   * Translates user requests into structured queries for the Recommendation Engine.
-   * Generates conversational, human-like responses and presents the music recommendations.
- * Scalable Database
-   * A high-performance database (e.g., PostgreSQL with vector support or a dedicated NoSQL solution) designed to store user data, track features, and model outputs efficiently.
-   * Ensures low latency and high availability as the user base and data volume grow.
+
+### Core Components
+ * **Data Ingestion & Processing**
+   * **Bulk History Parser**: Memory-efficient parser for large-scale CSV files (Spotify's extended streaming history) processing entire user historical data with fine-grained interactions
+   * **Spotify API Sync**: Real-time connection to Spotify API for ongoing user data, listening history, saved tracks, and playlists
+   * **Feature Enrichment**: Extracts audio features for every unique track using Spotify's analysis endpoints
+   * **Data Pipeline**: Automated scripts for CSV merging, data cleaning, normalization, and database optimization
+
+ * **Machine Learning Core**
+   * **Preference Model**: Hybrid recommendation system using collaborative filtering, content-based filtering, and deep learning approaches
+   * **Dynamic Learning**: Continuously adapts to user preferences with new listening data and explicit feedback
+   * **Audio Feature Analysis**: Advanced analysis using librosa and Spotify's audio features API
+   * **ML Pipeline**: Automated model training, evaluation, and deployment workflows
+
+ * **MCP (Model Context Protocol) Server**
+   * **Browser Automation**: Puppeteer-based automation for Spotify Web Player interactions
+   * **API Automation**: Automated playlist creation, track management, and user preference collection
+   * **Cross-Platform Integration**: Seamless integration between web interfaces and backend services
+   * **Real-time Data Collection**: Live monitoring of user interactions and listening patterns
+
+ * **Multi-Database Architecture**
+   * **MongoDB**: Primary database for analytics, ML datasets, and listening history storage
+   * **Supabase (PostgreSQL)**: Application database for user management, real-time features, and structured data
+   * **Vector Support**: Optimized for ML model outputs and similarity searches
+   * **Data Migration Tools**: Automated scripts for database setup, migration, and optimization
+
+ * **Production Infrastructure**
+   * **Docker Containerization**: Full containerized deployment with docker-compose
+   * **DigitalOcean Integration**: Automated deployment scripts and infrastructure setup
+   * **Nginx Reverse Proxy**: SSL termination, load balancing, and security headers
+   * **Security Hardening**: Rate limiting, DDoS protection, and security monitoring
+   * **Health Monitoring**: Automated health checks, logging, and error recovery
+
+ * **Conversational AI Layer**
+   * **LLM Integration**: Support for OpenAI GPT and Google Gemini models
+   * **Natural Language Processing**: Advanced intent recognition and entity extraction
+   * **Context-Aware Responses**: Mood, activity, and temporal context understanding
+   * **Multi-modal Interface**: Web chat, API endpoints, and future voice integration
 ## 🚀 Quick Start for Developers
 
 ### Prerequisites
 - Python 3.8+
 - Node.js 16+
 - Spotify Developer Account
-- MCP Server for browser automation
+- MongoDB or Supabase account (optional, for production features)
+- Docker (optional, for containerized development)
 
-### Setup
+### Development Setup
 ```bash
 # Clone repository
 git clone https://github.com/dzp5103/Spotify-echo.git
 cd Spotify-echo
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Install Node.js dependencies
 npm install
+
+# Install MCP server dependencies
+cd mcp-server && npm install && cd ..
 
 # Configure environment
 cp .env.example .env
-# Edit .env with your Spotify API credentials
+# Edit .env with your credentials (see Environment Configuration below)
 
-# Initialize database
-python scripts/merge_csv_data.py
-python scripts/database_setup.py
+# Initialize database (choose one or multiple)
+python scripts/database_setup.py          # Basic SQLite setup
+python scripts/migrate_to_mongodb.py      # MongoDB setup
+python scripts/migrate_to_supabase.py     # Supabase setup
 
-# Start development server
-npm run dev
+# Process your Spotify data (optional)
+python scripts/merge_csv_data.py          # Merge CSV files
+python scripts/populate_audio_features.py # Enrich with audio features
+
+# Start development services
+npm run dev                    # Main application
+npm run mcp-server            # MCP automation server (separate terminal)
 ```
 
-### Environment Variables
+### Docker Development (Alternative)
+```bash
+# Quick start with Docker
+docker-compose up --build
+
+# The application will be available at http://localhost:3000
+# MCP server runs on http://localhost:3001
+```
+
+### Environment Configuration
+Copy `.env.example` to `.env` and configure:
+
 ```env
-SPOTIFY_CLIENT_ID=your_client_id
-SPOTIFY_CLIENT_SECRET=your_client_secret
-SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
-DATABASE_URL=sqlite:///echotune.db
+# Spotify API (Required)
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+SPOTIFY_REDIRECT_URI=http://localhost:3000/auth/callback
+
+# Database Options (Choose one or more)
+# MongoDB (Recommended for ML/Analytics)
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_DATABASE=spotify_analytics
+
+# Supabase (Recommended for real-time features)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
+DATABASE_URL=postgresql://username:password@db.your-project.supabase.co:5432/postgres
+
+# Application Settings
+NODE_ENV=development
+PORT=3000
 MCP_SERVER_PORT=3001
+LOG_LEVEL=INFO
+DEBUG=true
 ```
 
 ## 🤖 Automated Development Workflow
 
-This project includes:
-- **GitHub Actions** for CI/CD automation
-- **MCP Server** for browser and Spotify API automation  
-- **Automated testing** with pytest and jest
-- **Code quality** checks with eslint, black, and mypy
-- **Database migrations** and CSV optimization scripts
+This project includes comprehensive automation for development and deployment:
+
+### Development Tools
+- **GitHub Actions** for CI/CD automation with multi-platform testing
+- **MCP Server** for browser automation and Spotify API testing  
+- **Automated Testing** with pytest (Python) and jest (Node.js)
+- **Code Quality** checks with ESLint, Black, MyPy, and Prettier
+- **Database Tools** for migration, optimization, and CSV processing
+
+### Available Scripts
+```bash
+# Development
+npm run dev                    # Start development server
+npm run mcp-server            # Start MCP automation server
+npm run test                  # Run all tests
+npm run lint                  # Check code quality
+npm run format                # Format code
+
+# Data Processing
+npm run merge-csv             # Merge CSV data files
+npm run setup-db              # Initialize database
+npm run populate-audio        # Fetch audio features
+npm run analyze-data          # Generate listening analytics
+npm run train-model           # Train ML recommendation model
+
+# Production
+npm run build                 # Build for production
+npm run deploy                # Deploy to DigitalOcean
+npm run setup-digitalocean    # Initial server setup
+```
+
+### MCP Server Features
+The Model Context Protocol server provides:
+- **Browser Automation**: Automated Spotify Web Player interactions
+- **API Testing**: Comprehensive Spotify API workflow testing
+- **Data Collection**: Real-time listening data gathering
+- **Playlist Management**: Automated playlist creation and curation
+- **Cross-platform Testing**: Ensures compatibility across different environments
 
 ### GitHub Actions Workflow
-The project uses automated workflows for:
-- Code quality checks and linting
-- Automated testing on multiple Python/Node versions
-- Database optimization and CSV processing
-- MCP server deployment and testing
-- Spotify API integration testing
+Automated workflows include:
+- Code quality checks and linting on pull requests
+- Multi-version testing (Python 3.8-3.11, Node.js 16-20)
+- Database optimization and CSV processing validation
+- MCP server deployment and integration testing
+- Security scanning and dependency updates
 
-### MCP Server Integration
-- Browser automation for Spotify Web Player interaction
-- Automated playlist creation and management
-- Real-time listening data collection
-- Cross-platform testing automation
+## 🚀 Production Deployment
 
-## 🤖 Actionable Roadmap for Development Agent
-This project will be built in phases. The following tasks are prioritized for initial development and are optimized for automated coding workflows.
+### Quick Deploy to DigitalOcean
+```bash
+# 1. Create Ubuntu 22.04 droplet
+ssh root@YOUR_DROPLET_IP
 
-### Phase 1: Core Backend & Data Foundation
- * [ ] Task 1: Bulk History Ingestion
-   * [ ] Design a schema for the extended history CSV format (identifying key columns like ts, ms_played, master_metadata_track_name, reason_end, etc.).
-   * [ ] Implement a high-performance parser to process the large CSV file and load the data into the database.
-   * [ ] Develop a service to enrich the imported data by fetching audio features from Spotify for all unique tracks.
- * [ ] Task 2: Spotify API Sync & Authentication
-   * [ ] Implement OAuth 2.0 for secure user authentication with Spotify.
-   * [ ] Develop a service to fetch a user's recent listening history to supplement the bulk import.
- * [ ] Task 3: Initial Machine Learning Model
-   * [ ] Develop a feature engineering pipeline based on the ingested historical data (e.g., creating labels based on ms_played and reason_end='fwdbtn').
-   * [ ] Implement a baseline content-based filtering model that predicts user preference.
-   * [ ] Create a script for training and evaluating the model on the historical dataset.
+# 2. Run automated setup
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/setup-digitalocean.sh | bash
 
-### Phase 2: Recommendation & API Endpoints
- * [ ] Task 4: Recommendation Engine
-   * [ ] Build a core service that takes a user ID and generates a list of recommended track IDs based on the ML model.
-   * [ ] Develop a REST API endpoint (e.g., GET /recommendations/{user_id}) to expose the recommendations.
- * [ ] Task 5: Playlist Curation
-   * [ ] Create a service that uses the Spotify API to generate a new playlist and populate it with a list of track IDs.
-   * [ ] Develop a REST API endpoint (e.g., POST /playlists) that accepts a user ID and track list.
+# 3. Configure environment
+cd /opt/echotune
+cp .env.production.example .env
+nano .env  # Add your credentials
 
-### Phase 3: Conversational Interface & User Interaction
- * [ ] Task 6: LLM Integration
-   * [ ] Set up an interface to an LLM provider (e.g., OpenAI API).
-   * [ ] Develop a prompt engineering module that translates natural language into structured API calls for the recommendation and playlist services.
- * [ ] Task 7: Chatbot UI
-   * [ ] Build a simple, user-friendly web-based chat interface.
-   * [ ] Connect the chatbot front-end to the backend AI and recommendation services.
+# 4. Setup SSL certificates
+sudo certbot --nginx -d yourdomain.com
+
+# 5. Deploy application
+./scripts/deploy.sh
+
+# 6. Optional: Harden security
+./scripts/security-hardening.sh
+```
+
+### Docker Production Deployment
+```bash
+# Build and deploy with Docker
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Monitor logs
+docker-compose logs -f
+
+# Scale services
+docker-compose up --scale web=3 --scale worker=2
+```
+
+### Production Features
+- **SSL/TLS Encryption** with automatic certificate renewal
+- **Nginx Reverse Proxy** with load balancing and caching
+- **Rate Limiting** and DDoS protection
+- **Database Optimization** for high-throughput analytics
+- **Health Monitoring** with automated recovery
+- **Backup Systems** for data protection
+- **Security Hardening** following industry best practices
+
+### Comprehensive Documentation
+For detailed setup and configuration, see:
+- [Production README](./PRODUCTION_README.md) - Complete production deployment guide
+- [DigitalOcean Deployment](./DIGITALOCEAN_DEPLOYMENT.md) - Platform-specific instructions
+- [Database Architecture](./DATABASE_ARCHITECTURE_GUIDE.md) - Database design and optimization
+- [Coding Agent Guide](./CODING_AGENT_GUIDE.md) - Automated development workflows
+- [MongoDB Setup](./MONGODB_SETUP.md) - MongoDB configuration and optimization
+- [Data Management](./DATA_MANAGEMENT.md) - Data processing and analytics workflows
+
+## 🤖 Development Roadmap
+
+### ✅ Completed Features
+
+#### Phase 1: Core Backend & Data Foundation ✅
+ * [x] **Bulk History Ingestion**
+   * [x] CSV parser for extended Spotify history files (`merge_csv_data.py`)
+   * [x] High-performance data processing and database loading
+   * [x] Audio feature enrichment service (`populate_audio_features.py`)
+ * [x] **Spotify API Integration**
+   * [x] OAuth 2.0 authentication implementation
+   * [x] Real-time listening history sync
+   * [x] Comprehensive API testing suite
+ * [x] **Machine Learning Foundation**
+   * [x] Feature engineering pipeline
+   * [x] Baseline recommendation models
+   * [x] Model training and evaluation scripts (`train_recommendation_model.py`)
+
+#### Phase 2: Production Infrastructure ✅
+ * [x] **Multi-Database Architecture**
+   * [x] MongoDB integration for analytics (`migrate_to_mongodb.py`)
+   * [x] Supabase/PostgreSQL support (`migrate_to_supabase.py`)
+   * [x] Database migration and optimization tools
+ * [x] **MCP Server Implementation**
+   * [x] Browser automation with Puppeteer
+   * [x] Spotify Web Player integration
+   * [x] Automated playlist creation and management
+ * [x] **Production Deployment**
+   * [x] Docker containerization
+   * [x] DigitalOcean deployment automation
+   * [x] Nginx configuration and SSL setup
+   * [x] Security hardening scripts
+
+#### Phase 3: Advanced Features ✅
+ * [x] **Data Analytics**
+   * [x] Listening pattern analysis (`analyze_listening_data.py`)
+   * [x] Advanced data visualization tools
+   * [x] ML dataset preparation (`prepare_ml_datasets.py`)
+ * [x] **Development Automation**
+   * [x] GitHub Actions CI/CD pipeline
+   * [x] Automated testing frameworks
+   * [x] Code quality and formatting tools
+
+### 🚧 Current Development (Phase 4)
+
+#### Enhanced AI & ML Capabilities
+ * [ ] **Advanced Recommendation Models**
+   * [ ] Deep learning-based collaborative filtering
+   * [ ] Neural matrix factorization implementation
+   * [ ] Transformer-based sequence modeling for listening patterns
+   * [ ] Multi-task learning for preference prediction
+ * [ ] **Real-time Learning System**
+   * [ ] Online learning algorithms for immediate preference adaptation
+   * [ ] A/B testing framework for recommendation strategies
+   * [ ] Reinforcement learning for long-term user engagement
+ * [ ] **Advanced Audio Analysis**
+   * [ ] Custom audio feature extraction using librosa
+   * [ ] Genre classification with neural networks
+   * [ ] Mood detection from audio signals
+
+#### User Experience Enhancements
+ * [ ] **Conversational AI Improvements**
+   * [ ] Multi-turn conversation context management
+   * [ ] Voice interface integration
+   * [ ] Personality-based recommendation explanations
+   * [ ] Multilingual support for global users
+ * [ ] **Advanced Analytics Dashboard**
+   * [ ] Real-time listening analytics
+   * [ ] Personalized music discovery insights
+   * [ ] Social listening pattern comparisons
+   * [ ] Predictive listening behavior modeling
+
+### 🔮 Future Roadmap (Phase 5+)
+
+#### Platform Expansion
+ * [ ] **Mobile Applications**
+   * [ ] React Native mobile app development
+   * [ ] Offline listening analysis capabilities
+   * [ ] Mobile-specific UI/UX optimizations
+   * [ ] Push notifications for new recommendations
+ * [ ] **Multi-Platform Integration**
+   * [ ] Apple Music API integration
+   * [ ] YouTube Music compatibility
+   * [ ] Last.fm scrobbling support
+   * [ ] Social media sharing features
+
+#### Social & Community Features
+ * [ ] **Collaborative Recommendations**
+   * [ ] Friend-based music discovery
+   * [ ] Collaborative playlist creation
+   * [ ] Music taste similarity analysis
+   * [ ] Social recommendation sharing
+ * [ ] **Community Features**
+   * [ ] Public playlist sharing and discovery
+   * [ ] Music taste communities and groups
+   * [ ] Crowdsourced music tagging and reviews
+   * [ ] Live listening party features
+
+#### Advanced Infrastructure
+ * [ ] **Performance & Scalability**
+   * [ ] Redis caching for recommendation serving
+   * [ ] GraphQL API implementation
+   * [ ] Microservices architecture migration
+   * [ ] CDN integration for global performance
+ * [ ] **Enterprise Features**
+   * [ ] Multi-tenant architecture
+   * [ ] Advanced analytics for music businesses
+   * [ ] API rate limiting and monetization
+   * [ ] GDPR compliance and data privacy tools
+
+#### Emerging Technologies
+ * [ ] **AI/ML Innovation**
+   * [ ] Large Language Model fine-tuning for music
+   * [ ] Computer vision for album art analysis
+   * [ ] Federated learning for privacy-preserving recommendations
+   * [ ] Quantum computing experiments for optimization
+ * [ ] **Next-Gen Interfaces**
+   * [ ] AR/VR music discovery experiences
+   * [ ] IoT device integration (smart speakers, cars)
+   * [ ] Brain-computer interface experimentation
+   * [ ] Gesture-based music control
+
+## 🔒 Security & Privacy
+
+### Security Features
+- **OAuth 2.0 Authentication**: Secure Spotify API integration with proper token management
+- **Rate Limiting**: Configurable request throttling to prevent abuse
+- **SSL/TLS Encryption**: End-to-end encryption for all communications
+- **Security Headers**: Comprehensive security headers (HSTS, CSP, etc.)
+- **Input Validation**: Robust validation for all user inputs and API requests
+- **Environment Isolation**: Secure environment variable management
+
+### Privacy Considerations
+- **Data Minimization**: Only collect necessary listening data
+- **User Consent**: Clear consent mechanisms for data collection and processing
+- **Data Retention**: Configurable data retention policies
+- **GDPR Compliance**: Built-in support for data protection regulations
+- **Local Processing**: ML models can run locally to minimize data sharing
+- **Anonymization**: Options for anonymous usage analytics
+
+### Production Security Checklist
+- [ ] Enable SSL certificates with automated renewal
+- [ ] Configure firewall rules and fail2ban
+- [ ] Set up monitoring and intrusion detection
+- [ ] Regular security updates and vulnerability scanning
+- [ ] Backup encryption and secure storage
+- [ ] Access logging and audit trails
+
+For detailed security configuration, see [Security Hardening Guide](./scripts/security-hardening.sh).
+
+## 🔗 Additional Resources
+
+### Comprehensive Documentation
+- **[Production Deployment Guide](./PRODUCTION_README.md)** - Complete production setup
+- **[Coding Agent Guide](./CODING_AGENT_GUIDE.md)** - Automated development workflows  
+- **[Database Architecture](./DATABASE_ARCHITECTURE_GUIDE.md)** - Database design and optimization
+- **[DigitalOcean Deployment](./DIGITALOCEAN_DEPLOYMENT.md)** - Cloud deployment guide
+- **[MongoDB Setup](./MONGODB_SETUP.md)** - MongoDB configuration
+- **[Data Management](./DATA_MANAGEMENT.md)** - Data processing workflows
+- **[Docker Build Notes](./DOCKER_BUILD_NOTES.md)** - Container configuration
+
+### Development Resources
+- **GitHub Repository**: [dzp5103/Spotify-echo](https://github.com/dzp5103/Spotify-echo)
+- **Issues & Feature Requests**: [GitHub Issues](https://github.com/dzp5103/Spotify-echo/issues)
+- **Spotify API Documentation**: [Spotify for Developers](https://developer.spotify.com/)
+- **MCP Protocol**: [Model Context Protocol](https://modelcontextprotocol.io/)
+
+### Community & Support
+- **Contributing**: See [CODING_AGENT_GUIDE.md](./CODING_AGENT_GUIDE.md) for development guidelines
+- **Bug Reports**: Use GitHub Issues with detailed reproduction steps
+- **Feature Requests**: Submit enhancement requests via GitHub Issues
+- **Security Issues**: Contact maintainers directly for security vulnerabilities
+
+---
+
+**EchoTune AI** - Transforming music discovery through AI-powered personalization and automation.

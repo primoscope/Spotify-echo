@@ -244,7 +244,10 @@ jobs:
                   
                   # Test integration tests
                   integration = await server.run_integration_tests()
-                  print(f'✅ Integration tests: {integration[\"success_rate\"]}% success')
+                  if integration is not None and 'success_rate' in integration:
+                      print(f'✅ Integration tests: {integration[\"success_rate\"]}% success')
+                  else:
+                      print('❌ Integration tests failed: No results returned or missing success_rate')
                   
                   return True
               except Exception as e:

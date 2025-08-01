@@ -1,6 +1,18 @@
 
 # 🎵 EchoTune AI - Spotify Music Recommendation System
 
+## Table of Contents
+- [Project Vision](#project-vision)
+- [For GitHub Coding Agents](#-for-github-coding-agents)
+- [Core Features](#-core-features)
+- [System Architecture](#️-system-architecture)
+- [Quick Start for Developers](#-quick-start-for-developers)
+- [Automated Development Workflow](#-automated-development-workflow)
+- [Production Deployment](#-production-deployment)
+- [Development Roadmap](#-development-roadmap)
+- [Security & Privacy](#-security--privacy)
+- [Additional Resources](#-additional-resources)
+
 ## Project Vision
 EchoTune AI is a next-generation music recommendation system designed to deliver a deeply personalized and interactive music discovery experience. By leveraging the Spotify API, advanced machine learning, and a conversational AI interface, EchoTune acts as a personal music sommelier, understanding nuanced user preferences to curate the perfect soundtrack for any moment. Our goal is to move beyond simple "you might also like" recommendations and create a dynamic, conversational partnership between the user and their music library.
 

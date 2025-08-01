@@ -162,152 +162,217 @@ class EchoTuneChatbot {
     const startTime = Date.now();
     
     try {
-      // Get session
-      const session = this.conversationManager.activeSessions.get(sessionId);
-      if (!session) {
-        throw new Error('Session not found. Please start a new conversation.');
-      }
-
-      // Switch provider if requested
-      if (options.provider && this.providers.has(options.provider)) {
-        this.currentProvider = options.provider;
-      }
-
-      const provider = this.providers.get(this.currentProvider);
-      if (!provider || !provider.isAvailable()) {
-        throw new Error(`Provider ${this.currentProvider} is not available`);
-      }
-
-      // Add user message to conversation
-      await this.conversationManager.addMessage(sessionId, {
-        role: 'user',
-        content: message
-      });
-
-      // Check for special commands
-      const commandResponse = await this.handleSpecialCommands(message, session, options);
+      const session = await this._validateSession(sessionId);
+      const provider = await this._setupProvider(options);
+      
+      await this._addUserMessage(sessionId, message);
+      
+      const commandResponse = await this._handleSpecialCommands(message, session, options, startTime);
       if (commandResponse) {
-        await this.conversationManager.addMessage(sessionId, {
-          role: 'assistant',
-          content: commandResponse.content
-        }, {
-          responseTime: Date.now() - startTime,
-          ...commandResponse.metadata
-        });
-
-        return {
-          response: commandResponse.content,
-          sessionId,
-          provider: this.currentProvider,
-          metadata: commandResponse.metadata,
-          responseTime: Date.now() - startTime
-        };
+        return commandResponse;
       }
-
-      // Get conversation history for LLM
-      const messages = this.conversationManager.getMessagesForLLM(sessionId, {
-        maxMessages: options.maxHistory || 10
-      });
-
-      // Generate response
-      const llmResponse = await provider.generateCompletion(messages, {
-        model: options.model || session.metadata.model,
-        temperature: options.temperature || 0.7,
-        maxTokens: options.maxTokens || 1500,
-        functions: this.getMusicFunctions(),
-        ...options.llmOptions
-      });
-
-      if (llmResponse.error) {
-        throw new Error(llmResponse.message);
-      }
-
-      // Handle function calls if present
-      let finalResponse = llmResponse.content;
-      let functionResults = null;
-
-      if (llmResponse.functionCall || llmResponse.toolCalls) {
-        functionResults = await this.handleFunctionCalls(
-          llmResponse.functionCall || llmResponse.toolCalls,
-          session,
-          options
-        );
-        
-        if (functionResults) {
-          // Generate follow-up response with function results
-          const followUpMessages = [
-            ...messages,
-            {
-              role: 'assistant',
-              content: llmResponse.content,
-              function_call: llmResponse.functionCall
-            },
-            {
-              role: 'function',
-              content: JSON.stringify(functionResults),
-              name: llmResponse.functionCall?.name
-            }
-          ];
-
-          const followUpResponse = await provider.generateCompletion(followUpMessages, {
-            model: options.model || session.metadata.model,
-            temperature: 0.7,
-            maxTokens: 1000
-          });
-
-          finalResponse = followUpResponse.content || finalResponse;
-        }
-      }
-
-      // Add assistant message to conversation
-      const responseMetadata = {
-        responseTime: Date.now() - startTime,
-        provider: this.currentProvider,
-        model: llmResponse.model,
-        tokens: llmResponse.usage?.totalTokens || 0,
-        functionCalls: functionResults ? 1 : 0
-      };
-
-      await this.conversationManager.addMessage(sessionId, {
-        role: 'assistant',
-        content: finalResponse
-      }, responseMetadata);
-
-      return {
-        response: finalResponse,
-        sessionId,
-        provider: this.currentProvider,
-        functionResults,
-        metadata: responseMetadata
-      };
-
+      
+      const llmResponse = await this._generateLLMResponse(sessionId, session, provider, options);
+      const finalResponse = await this._processFunctionCalls(llmResponse, session, provider, options);
+      
+      return await this._finalizeResponse(sessionId, finalResponse, llmResponse, startTime);
+      
     } catch (error) {
-      console.error('Error in sendMessage:', error);
-      
-      const errorResponse = 'I apologize, but I encountered an error while processing your message. Please try again or rephrase your request.';
-      
-      try {
-        await this.conversationManager.addMessage(sessionId, {
-          role: 'assistant',
-          content: errorResponse
-        }, {
-          responseTime: Date.now() - startTime,
-          error: error.message
-        });
-      } catch (dbError) {
-        console.error('Error saving error message:', dbError);
-      }
+      return await this._handleSendMessageError(error, sessionId, startTime);
+    }
+  }
+
+  /**
+   * Validate session exists
+   */
+  async _validateSession(sessionId) {
+    const session = this.conversationManager.activeSessions.get(sessionId);
+    if (!session) {
+      throw new Error('Session not found. Please start a new conversation.');
+    }
+    return session;
+  }
+
+  /**
+   * Setup and validate provider
+   */
+  async _setupProvider(options) {
+    if (options.provider && this.providers.has(options.provider)) {
+      this.currentProvider = options.provider;
+    }
+
+    const provider = this.providers.get(this.currentProvider);
+    if (!provider || !provider.isAvailable()) {
+      throw new Error(`Provider ${this.currentProvider} is not available`);
+    }
+    return provider;
+  }
+
+  /**
+   * Add user message to conversation
+   */
+  async _addUserMessage(sessionId, message) {
+    await this.conversationManager.addMessage(sessionId, {
+      role: 'user',
+      content: message
+    });
+  }
+
+  /**
+   * Handle special commands and return response if applicable
+   */
+  async _handleSpecialCommands(message, session, options, startTime) {
+    const commandResponse = await this.handleSpecialCommands(message, session, options);
+    if (commandResponse) {
+      await this.conversationManager.addMessage(session.sessionId, {
+        role: 'assistant',
+        content: commandResponse.content
+      }, {
+        responseTime: Date.now() - startTime,
+        ...commandResponse.metadata
+      });
 
       return {
-        response: errorResponse,
-        sessionId,
-        error: error.message,
-        metadata: {
-          responseTime: Date.now() - startTime,
-          error: true
-        }
+        response: commandResponse.content,
+        sessionId: session.sessionId,
+        provider: this.currentProvider,
+        metadata: commandResponse.metadata,
+        responseTime: Date.now() - startTime
       };
     }
+    return null;
+  }
+
+  /**
+   * Generate LLM response
+   */
+  async _generateLLMResponse(sessionId, session, provider, options) {
+    const messages = this.conversationManager.getMessagesForLLM(sessionId, {
+      maxMessages: options.maxHistory || 10
+    });
+
+    const llmResponse = await provider.generateCompletion(messages, {
+      model: options.model || session.metadata.model,
+      temperature: options.temperature || 0.7,
+      maxTokens: options.maxTokens || 1500,
+      functions: this.getMusicFunctions(),
+      ...options.llmOptions
+    });
+
+    if (llmResponse.error) {
+      throw new Error(llmResponse.message);
+    }
+
+    return llmResponse;
+  }
+
+  /**
+   * Process function calls and generate follow-up response
+   */
+  async _processFunctionCalls(llmResponse, session, provider, options) {
+    let finalResponse = llmResponse.content;
+    
+    if (llmResponse.functionCall || llmResponse.toolCalls) {
+      const functionResults = await this.handleFunctionCalls(
+        llmResponse.functionCall || llmResponse.toolCalls,
+        session,
+        options
+      );
+      
+      if (functionResults) {
+        finalResponse = await this._generateFollowUpResponse(
+          llmResponse, functionResults, session, provider, options
+        );
+      }
+    }
+    
+    return finalResponse;
+  }
+
+  /**
+   * Generate follow-up response with function results
+   */
+  async _generateFollowUpResponse(llmResponse, functionResults, session, provider, options) {
+    const followUpMessages = [
+      ...this.conversationManager.getMessagesForLLM(session.sessionId, {
+        maxMessages: options.maxHistory || 10
+      }),
+      {
+        role: 'assistant',
+        content: llmResponse.content,
+        function_call: llmResponse.functionCall
+      },
+      {
+        role: 'function',
+        content: JSON.stringify(functionResults),
+        name: llmResponse.functionCall?.name
+      }
+    ];
+
+    const followUpResponse = await provider.generateCompletion(followUpMessages, {
+      model: options.model || session.metadata.model,
+      temperature: 0.7,
+      maxTokens: 1000
+    });
+
+    return followUpResponse.content || llmResponse.content;
+  }
+
+  /**
+   * Finalize response and add to conversation
+   */
+  async _finalizeResponse(sessionId, finalResponse, llmResponse, startTime) {
+    const responseMetadata = {
+      responseTime: Date.now() - startTime,
+      provider: this.currentProvider,
+      model: llmResponse.model,
+      tokens: llmResponse.usage?.totalTokens || 0,
+      functionCalls: llmResponse.functionCall || llmResponse.toolCalls ? 1 : 0
+    };
+
+    await this.conversationManager.addMessage(sessionId, {
+      role: 'assistant',
+      content: finalResponse
+    }, responseMetadata);
+
+    return {
+      response: finalResponse,
+      sessionId,
+      provider: this.currentProvider,
+      functionResults: llmResponse.functionCall || llmResponse.toolCalls ? true : null,
+      metadata: responseMetadata
+    };
+  }
+
+  /**
+   * Handle errors in sendMessage
+   */
+  async _handleSendMessageError(error, sessionId, startTime) {
+    console.error('Error in sendMessage:', error);
+    
+    const errorResponse = 'I apologize, but I encountered an error while processing your message. Please try again or rephrase your request.';
+    
+    try {
+      await this.conversationManager.addMessage(sessionId, {
+        role: 'assistant',
+        content: errorResponse
+      }, {
+        responseTime: Date.now() - startTime,
+        error: error.message
+      });
+    } catch (dbError) {
+      console.error('Error saving error message:', dbError);
+    }
+
+    return {
+      response: errorResponse,
+      sessionId,
+      error: error.message,
+      metadata: {
+        responseTime: Date.now() - startTime,
+        error: true
+      }
+    };
   }
 
   /**

@@ -359,3 +359,10 @@ backups/
 .env.production
 .env.staging
 .env.localuploads/
+
+# Prompt system temporary files
+prompts.log
+validate
+prompt-results/
+*.backup
+analysis-results/

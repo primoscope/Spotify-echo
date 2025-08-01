@@ -44,7 +44,7 @@ router.post('/create', async (req, res) => {
     const playlist = {
       id: playlistId,
       name,
-      description: description || `AI-generated playlist created by EchoTune AI`,
+      description: description || 'AI-generated playlist created by EchoTune AI',
       tracks: tracks.map(track => ({
         id: track.id || track.trackId,
         name: track.name || track.trackName,

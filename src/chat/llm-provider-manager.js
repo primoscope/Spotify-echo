@@ -1,4 +1,3 @@
-const BaseProvider = require('./base-provider');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -374,28 +373,32 @@ class LLMProviderManager {
     const config = this.providerConfigs.get(providerId);
     
     switch (providerId) {
-      case 'gemini':
-        const GeminiProvider = require('./gemini-provider');
+      case 'gemini': {
+        const GeminiProvider = require('./llm-providers/gemini-provider');
         this.providers.set(providerId, new GeminiProvider(config.apiKey, { model: config.model }));
         break;
-      case 'openai':
-        const OpenAIProvider = require('./openai-provider');
+      }
+      case 'openai': {
+        const OpenAIProvider = require('./llm-providers/openai-provider');
         this.providers.set(providerId, new OpenAIProvider(config.apiKey, { model: config.model }));
         break;
-      case 'azure':
-        const AzureProvider = require('./openai-provider');
+      }
+      case 'azure': {
+        const AzureProvider = require('./llm-providers/openai-provider');
         this.providers.set(providerId, new AzureProvider(config.apiKey, {
           baseURL: config.endpoint,
           defaultQuery: { 'api-version': '2023-12-01-preview' }
         }));
         break;
-      case 'openrouter':
-        const OpenRouterProvider = require('./openai-provider');
+      }
+      case 'openrouter': {
+        const OpenRouterProvider = require('./llm-providers/openai-provider');
         this.providers.set(providerId, new OpenRouterProvider(config.apiKey, {
           baseURL: 'https://openrouter.ai/api/v1',
           model: config.model
         }));
         break;
+      }
     }
 
     // Test the reinitialized provider

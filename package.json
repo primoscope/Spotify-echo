@@ -78,6 +78,7 @@
     "@babel/preset-react": "^7.27.1",
     "@browserbasehq/mcp-server-browserbase": "github:browserbase/mcp-server-browserbase",
     "@google/generative-ai": "^0.2.1",
+    "@supabase/supabase-js": "^2.53.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "axios": "^1.5.0",
@@ -216,7 +217,10 @@
     },
     "parserOptions": {
       "ecmaVersion": 2021,
-      "sourceType": "module"
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
     },
     "rules": {
       "no-unused-vars": "error",

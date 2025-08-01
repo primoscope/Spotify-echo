@@ -14,15 +14,15 @@ class ProviderManager {
       openrouter: [
         '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',
         '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',
-        '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',
+        'sk-or-v1-3e798d593ede901dadbd0bee0b4ec69f7e90930f33b23be3c865893c2a11297dv',
         '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',
         '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',
         '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',
-        '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',
+        'sk-or-v1-f5dc1b35427dcad76a17f5d90d552ff54d38e5d72087361be5ae3117e632c04cq',
         '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'
       ],
       gemini: [
-        'AIzaSyCv8Dd_4oURTJLOyuaD7aA11wnFfytvsCk',
+        'AIzaSyCv8Dd_4oURTJLOyuaD7aA11wnFfytvsCkAe',
         'AIzaSyAVqHaHBRos1lRKk5hi62mC9W7ssz3bzTw',
         'AIzaSyChRuLP-xS8ucyyu1xbBiE-hrHTti_Ks5E',
         'AIzaSyBFKq4XRb505EOdPiy3O7Gt3D192siUr30',
@@ -203,10 +203,13 @@ class ProviderManager {
       throw new Error('No Gemini API key available');
     }
     
-    const provider = new GeminiProvider(config.apiKey, {
+    const provider = new GeminiProvider({
+      apiKey: config.apiKey,
       model: config.model,
       timeout: config.timeout
     });
+    
+    await provider.initialize();
     
     this.providers.set('gemini', provider);
     config.status = 'initialized';
@@ -222,7 +225,8 @@ class ProviderManager {
       throw new Error('No OpenRouter API key available');
     }
     
-    const provider = new OpenAIProvider(config.apiKey, {
+    const provider = new OpenAIProvider({
+      apiKey: config.apiKey,
       baseURL: 'https://openrouter.ai/api/v1',
       model: config.model,
       timeout: config.timeout,
@@ -231,6 +235,8 @@ class ProviderManager {
         'X-Title': 'EchoTune AI Music Recommendation'
       }
     });
+    
+    await provider.initialize();
     
     this.providers.set('openrouter', provider);
     config.status = 'initialized';

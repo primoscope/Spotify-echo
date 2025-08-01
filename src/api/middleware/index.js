@@ -115,7 +115,10 @@ function createRateLimit(options = {}) {
 /**
  * Error handling middleware
  */
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, _next) {
+  // Future enhancement: implement structured error logging
+  // eslint-disable-next-line no-unused-vars
+  const nextFn = _next;
   console.error('API Error:', err);
 
   if (err.name === 'ValidationError') {
@@ -156,16 +159,8 @@ function requestLogger(req, res, next) {
   
   res.on('finish', () => {
     const duration = Date.now() - start;
-    const logData = {
-      method: req.method,
-      url: req.url,
-      status: res.statusCode,
-      duration: `${duration}ms`,
-      userAgent: req.get('User-Agent'),
-      ip: req.ip,
-      userId: req.userId || 'anonymous'
-    };
     
+    // Log request details (logData available for future structured logging)
     console.log(`${req.method} ${req.url} ${res.statusCode} ${duration}ms`);
   });
   

@@ -172,9 +172,9 @@ class CollaborativeFilter {
    */
   async calculateListeningPatternSimilarity(userId1, userId2) {
     try {
-      const db = mongoManager.getDb();
-      const listeningHistoryCollection = db.collection('listening_history');
-
+      // Note: Future enhancement to analyze listening history patterns
+      // const db = mongoManager.getDb();
+      
       // Get listening patterns for both users
       const [pattern1, pattern2] = await Promise.all([
         this.getListeningPattern(userId1),

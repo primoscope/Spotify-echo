@@ -52,36 +52,37 @@
     "python": ">=3.8"
   },
   "dependencies": {
-    "express": "^4.18.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.0",
-    "ws": "^8.14.0",
-    "axios": "^1.5.0",
-    "socket.io": "^4.7.0",
-    "multer": "^1.4.5-lts.1",
-    "mongodb": "^6.3.0",
-    "openai": "^4.24.0",
     "@google/generative-ai": "^0.2.1",
+    "axios": "^1.5.0",
+    "cors": "^2.8.5",
     "csv-parser": "^3.0.0",
+    "dotenv": "^16.3.0",
+    "express": "^4.18.0",
     "lodash": "^4.17.21",
-    "uuid": "^9.0.1"
+    "mongodb": "^6.3.0",
+    "multer": "^1.4.5-lts.1",
+    "openai": "^4.24.0",
+    "socket.io": "^4.7.0",
+    "uuid": "^9.0.1",
+    "ws": "^8.14.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/express": "^4.17.0",
     "@types/cors": "^2.8.0",
+    "@types/express": "^4.17.0",
+    "@types/jest": "^29.0.0",
     "@types/multer": "^1.4.0",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.0.0",
-    "@types/jest": "^29.0.0",
-    "ts-jest": "^29.0.0",
-    "typescript": "^5.0.0",
+    "jest-environment-jsdom": "^30.0.5",
     "nodemon": "^3.0.0",
     "prettier": "^3.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0",
     "webpack": "^5.0.0",
     "webpack-cli": "^5.0.0"
   },
@@ -89,14 +90,18 @@
     "servers": {
       "browser": {
         "command": "npx",
-        "args": ["@modelcontextprotocol/server-puppeteer"],
+        "args": [
+          "@modelcontextprotocol/server-puppeteer"
+        ],
         "env": {
           "PUPPETEER_HEADLESS": "true"
         }
       },
       "spotify": {
         "command": "python",
-        "args": ["mcp-server/spotify_server.py"],
+        "args": [
+          "mcp-server/spotify_server.py"
+        ],
         "env": {
           "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
           "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}"
@@ -106,7 +111,10 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ],
     "testMatch": [
       "**/__tests__/**/*.test.{js,ts}",
       "**/tests/**/*.test.{js,ts}"
@@ -114,7 +122,21 @@
     "collectCoverageFrom": [
       "src/**/*.{js,ts}",
       "!src/**/*.d.ts"
-    ]
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "globals": {
+      "ts-jest": {
+        "useESM": true
+      }
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -131,8 +153,14 @@
     "rules": {
       "no-unused-vars": "error",
       "no-console": "off",
-      "semi": ["error", "always"],
-      "quotes": ["error", "single"]
+      "semi": [
+        "error",
+        "always"
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ]
     }
   },
   "prettier": {

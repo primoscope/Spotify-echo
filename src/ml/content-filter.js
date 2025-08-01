@@ -144,10 +144,8 @@ class ContentBasedFilter {
   /**
    * Calculate genre preferences from listening history
    */
-  calculateGenrePreferences(listeningHistory) {
-    const genreCounts = new Map();
-    
-    // This would need to be populated from track metadata
+  calculateGenrePreferences() {
+    // Future enhancement: analyze listening history for genre preferences
     // For now, return empty array
     return [];
   }
@@ -173,7 +171,8 @@ class ContentBasedFilter {
    * Get candidate tracks for recommendations
    */
   async getCandidateTracks(listeningHistory, options = {}) {
-    const { includeNewMusic = true, excludeUserTracks = [] } = options;
+    const { excludeUserTracks = [] } = options;
+    // Note: includeNewMusic flag available for future enhancement
 
     try {
       const db = mongoManager.getDb();
@@ -376,7 +375,7 @@ class ContentBasedFilter {
   updateWeights(feedback) {
     // Adjust weights based on which features led to positive/negative feedback
     Object.keys(feedback).forEach(feature => {
-      if (this.audioFeatureWeights.hasOwnProperty(feature)) {
+      if (Object.prototype.hasOwnProperty.call(this.audioFeatureWeights, feature)) {
         const adjustment = feedback[feature] * 0.01; // Small adjustment
         this.audioFeatureWeights[feature] = Math.max(0.01, 
           Math.min(0.5, this.audioFeatureWeights[feature] + adjustment)

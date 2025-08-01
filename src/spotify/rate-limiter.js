@@ -123,7 +123,7 @@ class RateLimiter {
   getOptimalBatchSize(totalItems, timeLimit = 60000) {
     const availableRequestsPerMinute = Math.max(this.requestsPerMinute - this.requests.length, 10);
     const timeRemaining = timeLimit;
-    const requestsPerItem = 1; // Assuming 1 request per item
+    // Note: requestsPerItem calculation available for future enhancement
     
     return Math.min(
       availableRequestsPerMinute,

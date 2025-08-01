@@ -205,7 +205,7 @@ class SpotifyAudioFeaturesPopulator:
 
             if response.status_code == 429:
                 # Rate limited - wait and retry
-                retry_after = int(response.headers.get('Retry - After', 60))
+                retry_after = int(response.headers.get('Retry-After', 60))
                 logger.warning(f"Rate limited. Waiting {retry_after} seconds...")
                 time.sleep(retry_after)
                 return self.fetch_audio_features_batch(track_ids)

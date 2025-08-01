@@ -1,11 +1,22 @@
-- name: Gemini AI Code Reviewer
-  uses: truongnh1992/gemini-ai-code-reviewer@v6.5.0
-  with:
-    # GitHub token to interact with the repository (use GitHub's built-in secret)
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    # Google Gemini API key (store your key as a repository or org secret named GEMINI_API_KEY)
-    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-    # The Gemini model to use for code review (optional)
-    GEMINI_MODEL: gemini-2.5-flash-lite # optional, default is gemini-1.5-flash-002
-    # Comma-separated list of file patterns to exclude (optional)
-    INPUT_EXCLUDE: ""
+name: Gemini Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+jobs:
+  code_review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gemini AI Code Reviewer
+        uses: truongnh1992/gemini-ai-code-reviewer@v6.5.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-flash-lite # optional, default is gemini-1.5-flash-002
+          INPUT_EXCLUDE: ""

@@ -136,6 +136,32 @@ class SpotifyMCPServer:
         
         self.request_history.append(time.time())
             
+    async def _make_auth_request(self, auth_data: Dict[str, str]) -> Dict[str, Any]:
+        """Common method for making authentication requests to Spotify API"""
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.auth_url, data=auth_data, timeout=self.request_timeout) as response:
+                if response.status == 200:
+                    token_data = await response.json()
+                    self.access_token = token_data['access_token']
+                    expires_in = token_data.get('expires_in', 3600)
+                    self.token_expires_at = datetime.now() + timedelta(seconds=expires_in)
+                    
+                    # Update refresh token if provided
+                    if 'refresh_token' in token_data:
+                        self.refresh_token = token_data['refresh_token']
+                    
+                    return {
+                        "status": "authenticated", 
+                        "expires_in": expires_in,
+                        "token_type": token_data.get('token_type', 'Bearer')
+                    }
+                else:
+                    error_data = await response.json()
+                    return {
+                        "status": "error",
+                        "error": error_data.get('error', 'Authentication failed')
+                    }
+
     async def authenticate(self, refresh: bool = False) -> Dict[str, Any]:
         """Enhanced authentication with Spotify API including token refresh"""
         if self.mock_mode:
@@ -155,30 +181,16 @@ class SpotifyMCPServer:
                 'client_secret': self.client_secret
             }
             
-            async with aiohttp.ClientSession() as session:
-                async with session.post(self.auth_url, data=auth_data, timeout=self.request_timeout) as response:
-                    if response.status == 200:
-                        token_data = await response.json()
-                        self.access_token = token_data['access_token']
-                        expires_in = token_data.get('expires_in', 3600)
-                        self.token_expires_at = datetime.now() + timedelta(seconds=expires_in)
-                        
-                        self.health_status['auth_status'] = 'authenticated'
-                        logger.info("Successfully authenticated with Spotify API")
-                        
-                        return {
-                            "status": "authenticated", 
-                            "expires_in": expires_in,
-                            "token_type": token_data.get('token_type', 'Bearer')
-                        }
-                    else:
-                        error_data = await response.json()
-                        logger.error(f"Authentication failed: {error_data}")
-                        self.health_status['auth_status'] = 'failed'
-                        return {
-                            "status": "error",
-                            "error": error_data.get('error', 'Authentication failed')
-                        }
+            result = await self._make_auth_request(auth_data)
+            
+            if result["status"] == "authenticated":
+                self.health_status['auth_status'] = 'authenticated'
+                logger.info("Successfully authenticated with Spotify API")
+            else:
+                logger.error(f"Authentication failed: {result.get('error')}")
+                self.health_status['auth_status'] = 'failed'
+            
+            return result
                         
         except Exception as e:
             logger.error(f"Authentication error: {e}")
@@ -195,23 +207,14 @@ class SpotifyMCPServer:
                 'client_secret': self.client_secret
             }
             
-            async with aiohttp.ClientSession() as session:
-                async with session.post(self.auth_url, data=auth_data, timeout=self.request_timeout) as response:
-                    if response.status == 200:
-                        token_data = await response.json()
-                        self.access_token = token_data['access_token']
-                        expires_in = token_data.get('expires_in', 3600)
-                        self.token_expires_at = datetime.now() + timedelta(seconds=expires_in)
-                        
-                        # Update refresh token if provided
-                        if 'refresh_token' in token_data:
-                            self.refresh_token = token_data['refresh_token']
-                        
-                        logger.info("Successfully refreshed access token")
-                        return {"status": "authenticated", "expires_in": expires_in}
-                    else:
-                        logger.error("Failed to refresh token")
-                        return {"status": "error", "error": "Failed to refresh token"}
+            result = await self._make_auth_request(auth_data)
+            
+            if result["status"] == "authenticated":
+                logger.info("Successfully refreshed access token")
+            else:
+                logger.error("Failed to refresh token")
+            
+            return result
                         
         except Exception as e:
             logger.error(f"Token refresh error: {e}")

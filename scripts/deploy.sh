@@ -23,6 +23,47 @@ MAX_HEALTH_RETRIES=5
 HEALTH_RETRY_DELAY=10
 
 # Helper functions
+detect_and_source_env() {
+    local env_file=""
+    local env_locations=(
+        ".env"
+        "/opt/echotune/.env"
+        "$(pwd)/.env"
+    )
+    
+    log_info "Detecting and sourcing environment configuration..."
+    
+    # Try to find .env file in priority order
+    for location in "${env_locations[@]}"; do
+        if [ -f "$location" ]; then
+            env_file="$location"
+            log_info "Found environment file: $env_file"
+            break
+        fi
+    done
+    
+    if [ -n "$env_file" ]; then
+        # Source environment file safely
+        set -a
+        source "$env_file"
+        set +a
+        log_success "Environment variables loaded from $env_file"
+        
+        # Export key variables for services
+        export NODE_ENV SPOTIFY_CLIENT_ID SPOTIFY_CLIENT_SECRET
+        export FRONTEND_URL SPOTIFY_REDIRECT_URI PORT DOMAIN
+        export MONGODB_URI REDIS_URL
+        return 0
+    else
+        log_error "No .env file found in any of the expected locations:"
+        for location in "${env_locations[@]}"; do
+            echo "  - $location"
+        done
+        log_error "Please create a .env file with required configuration"
+        return 1
+    fi
+}
+
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -57,25 +98,73 @@ validate_environment() {
     )
     
     local missing_vars=()
+    local warning_vars=()
     
+    # Check required variables
     for var in "${required_vars[@]}"; do
         if [ -z "${!var}" ]; then
             missing_vars+=("$var")
         fi
     done
     
+    # Check for common misconfigurations
+    if [ -n "$SPOTIFY_CLIENT_ID" ] && [[ ! "$SPOTIFY_CLIENT_ID" =~ ^[a-f0-9]{32}$ ]]; then
+        warning_vars+=("SPOTIFY_CLIENT_ID format looks suspicious")
+    fi
+    
+    if [ -n "$SPOTIFY_CLIENT_SECRET" ] && [[ ! "$SPOTIFY_CLIENT_SECRET" =~ ^[a-f0-9]{32}$ ]]; then
+        warning_vars+=("SPOTIFY_CLIENT_SECRET format looks suspicious")
+    fi
+    
+    if [ "$NODE_ENV" != "production" ] && [ "$NODE_ENV" != "development" ]; then
+        warning_vars+=("NODE_ENV should be 'production' or 'development', got: $NODE_ENV")
+    fi
+    
+    if [[ "$FRONTEND_URL" == *"localhost"* ]] && [ "$NODE_ENV" = "production" ]; then
+        warning_vars+=("FRONTEND_URL contains localhost but NODE_ENV is production")
+    fi
+    
+    # Report missing variables
     if [ ${#missing_vars[@]} -ne 0 ]; then
         log_error "Missing required environment variables:"
         for var in "${missing_vars[@]}"; do
             echo "  - $var"
         done
-        log_error "Please update your .env file"
+        log_error "Please update your .env file with the missing variables"
+        echo ""
+        log_info "You can find examples in .env.example or .env.production.example"
         exit 1
     fi
     
-    # Validate Spotify credentials format
-    if [[ ! "$SPOTIFY_CLIENT_ID" =~ ^[a-f0-9]{32}$ ]]; then
-        log_warning "SPOTIFY_CLIENT_ID format looks suspicious. Please verify it's correct."
+    # Report warnings
+    if [ ${#warning_vars[@]} -ne 0 ]; then
+        log_warning "Environment configuration warnings:"
+        for warning in "${warning_vars[@]}"; do
+            echo "  - $warning"
+        done
+        echo ""
+    fi
+    
+    # Display current configuration (with sensitive data masked)
+    log_info "Current environment configuration:"
+    echo "  - NODE_ENV: $NODE_ENV"
+    echo "  - PORT: $PORT"
+    echo "  - DOMAIN: ${DOMAIN:-[Not set]}"
+    echo "  - FRONTEND_URL: ${FRONTEND_URL:-[Not set]}"
+    echo "  - SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:0:8}..."
+    echo "  - SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:0:8}..."
+    echo "  - SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-[Not set]}"
+    
+    if [ -n "$MONGODB_URI" ]; then
+        echo "  - MONGODB_URI: [Configured]"
+    else
+        echo "  - MONGODB_URI: [Not set]"
+    fi
+    
+    if [ -n "$REDIS_URL" ]; then
+        echo "  - REDIS_URL: [Configured]"
+    else
+        echo "  - REDIS_URL: [Not set]"
     fi
     
     log_success "Environment validation passed"
@@ -386,14 +475,8 @@ main() {
     # Change to app directory
     cd "$APP_DIR" || exit 1
     
-    # Load environment variables
-    if [ -f ".env" ]; then
-        set -a
-        source .env
-        set +a
-        log_success "Environment variables loaded"
-    else
-        log_error ".env file not found. Please create it from .env.production.example"
+    # Detect and load environment variables
+    if ! detect_and_source_env; then
         exit 1
     fi
     

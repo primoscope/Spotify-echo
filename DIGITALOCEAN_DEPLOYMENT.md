@@ -68,7 +68,9 @@ usermod -aG sudo echotune
 su - echotune
 ```
 
-### Step 3: Run Enhanced Setup Script
+### Step 3: Enhanced Automated Setup
+
+The setup script now provides **intelligent environment detection and configuration**:
 
 ```bash
 # Download and run the comprehensive setup script
@@ -77,12 +79,30 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+**What the enhanced setup script does:**
+- ✅ **Auto-detects existing .env files** from previous installations
+- ✅ **Preserves existing configuration** while updating for production
+- ✅ **Validates system requirements** with recommendations
+- ✅ **Installs all dependencies** (Docker, Node.js, Python, nginx, Redis)
+- ✅ **Creates secure application structure** with proper permissions
+- ✅ **Configures production optimizations** automatically
+- ✅ **Prepares SSL certificate setup** with automation
+- ✅ **Applies security hardening** and firewall configuration
+
+**Intelligent Environment Handling:**
+- If `.env` exists: Uses existing configuration and updates for production
+- If no `.env`: Creates from template with production defaults
+- Automatically updates localhost URLs to production domains
+- Preserves custom database configurations and API keys
+- Validates configuration format and provides warnings
+
 The enhanced setup script will:
 - ✅ Check system requirements and recommendations
 - ✅ Install and configure Docker, Docker Compose, Node.js, Python
 - ✅ Install nginx, Redis, and monitoring tools
 - ✅ Create application user and directory structure
 - ✅ Clone the repository and install dependencies
+- ✅ **Detect and configure environment automatically**
 - ✅ Configure system optimizations for production
 - ✅ Prepare SSL certificate setup
 - ✅ Configure firewall and security tools
@@ -113,27 +133,50 @@ nslookup primosphere.studio 8.8.8.8
 
 ## Application Deployment
 
-### Step 1: Configure Environment Variables
+### Step 1: Environment Configuration (Automated)
 
+The deployment process now **automatically detects and uses existing .env files**. The scripts will search for .env files in the following order:
+
+1. Current directory (`./.env`)
+2. Application directory (`/opt/echotune/.env`)
+3. Working directory (`$(pwd)/.env`)
+
+**Automated Environment Detection:**
+```bash
+# The deployment scripts automatically:
+# ✅ Detect existing .env files
+# ✅ Validate required environment variables
+# ✅ Use existing values where possible
+# ✅ Apply production defaults automatically
+# ✅ Provide clear error messages for missing variables
+```
+
+**If you already have a .env file configured**, simply run:
+```bash
+cd /opt/echotune
+./scripts/deploy.sh
+```
+
+**If you need to create a new .env file**, the setup script will guide you:
 ```bash
 cd /opt/echotune
 sudo nano .env
 ```
 
-**Required Configuration:**
+**Required Configuration (automatically validated):**
 ```env
 # Spotify API (REQUIRED)
 SPOTIFY_CLIENT_ID=your_actual_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_actual_spotify_client_secret
 SPOTIFY_REDIRECT_URI=https://primosphere.studio/auth/callback
 
-# Production Settings
+# Production Settings (auto-configured for production)
 NODE_ENV=production
 PORT=3000
 DOMAIN=primosphere.studio
 FRONTEND_URL=https://primosphere.studio
 
-# Security (REQUIRED)
+# Security (REQUIRED for production)
 SESSION_SECRET=generate_secure_32_char_random_string
 JWT_SECRET=generate_secure_32_char_random_string
 
@@ -141,6 +184,12 @@ JWT_SECRET=generate_secure_32_char_random_string
 ALERT_EMAIL=admin@primosphere.studio
 LETSENCRYPT_EMAIL=admin@primosphere.studio
 ```
+
+**Automatic Production Updates:**
+The deployment scripts will automatically update development settings to production values:
+- `NODE_ENV` → `production`
+- `FRONTEND_URL` → `https://your-domain.com`
+- `SPOTIFY_REDIRECT_URI` → `https://your-domain.com/auth/callback`
 
 **Generate Secure Secrets:**
 ```bash
@@ -151,36 +200,69 @@ openssl rand -hex 32
 openssl rand -base64 32
 ```
 
-### Step 2: Configure Database Connections (Optional)
+### Step 2: Automated Database Configuration
 
-**MongoDB Atlas Setup:**
+The deployment script automatically **detects and validates database connections** from your .env file:
+
+**MongoDB Atlas (automatically tested):**
 ```env
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/echotune_prod
 MONGODB_DATABASE=echotune_production
 ```
 
-**Redis Configuration:**
+**Redis Configuration (automatically tested):**
 ```env
 REDIS_URL=redis://localhost:6379
 REDIS_PASSWORD=your_redis_password
 ```
 
-### Step 3: Deploy Application
+**Digital Ocean Databases (automatically detected):**
+```env
+DO_DATABASE_URL=postgresql://username:password@db-cluster.db.ondigitalocean.com:25060/defaultdb?sslmode=require
+```
+
+### Step 3: One-Command Deployment
+
+The enhanced deployment script now provides **fully automated deployment**:
 
 ```bash
 cd /opt/echotune
 ./scripts/deploy.sh
 ```
 
-The enhanced deployment script will:
-- ✅ Validate all environment variables
-- ✅ Set up SSL certificates automatically
-- ✅ Test database connections
-- ✅ Create backup before deployment
-- ✅ Build and start all services
-- ✅ Perform comprehensive health checks
-- ✅ Configure monitoring and alerting
-- ✅ Generate deployment report
+**What the automated deployment does:**
+- ✅ **Auto-detects .env files** from multiple locations
+- ✅ **Validates all environment variables** with clear error messages
+- ✅ **Tests database connections** before deployment
+- ✅ **Creates backups** before deploying new version
+- ✅ **Sets up SSL certificates** automatically using Let's Encrypt
+- ✅ **Builds and starts services** with health checks
+- ✅ **Configures monitoring** and alerting
+- ✅ **Generates deployment reports** with system status
+- ✅ **Validates application health** before completion
+
+**Example output:**
+```bash
+🚀 EchoTune AI - Enhanced Production Deployment
+==============================================
+
+[INFO] Detecting and sourcing environment configuration...
+[INFO] Found environment file: /opt/echotune/.env
+[SUCCESS] Environment variables loaded from /opt/echotune/.env
+[INFO] Validating environment configuration...
+[SUCCESS] Environment validation passed
+[INFO] Testing MongoDB connection...
+[SUCCESS] MongoDB connection verified
+[INFO] Creating backup of current deployment...
+[SUCCESS] Backup created at /opt/echotune/backups/backup_20240101_120000
+[INFO] Building application...
+[SUCCESS] Application built successfully
+[INFO] Deploying application...
+[SUCCESS] Services started
+[INFO] Waiting for application to be healthy...
+[SUCCESS] Application is healthy!
+🎉 Deployment completed successfully!
+```
 
 ## SSL Configuration
 
@@ -426,7 +508,74 @@ journalctl -f -u echotune-monitor
 
 ## Troubleshooting
 
+### Automated Edge Case Handling
+
+The improved deployment scripts now handle common edge cases automatically:
+
+**Missing .env File:**
+```bash
+# The scripts will automatically:
+# 1. Search multiple locations for .env files
+# 2. Create from template if none found
+# 3. Apply production defaults
+# 4. Provide clear guidance on required values
+
+[ERROR] No .env file found in any of the expected locations:
+  - ./.env
+  - /opt/echotune/.env
+  - /opt/echotune/.env
+[ERROR] Please create a .env file with required configuration
+[INFO] You can find examples in .env.example or .env.production.example
+```
+
+**Partial Environment Configuration:**
+```bash
+# Automatic validation catches missing variables:
+[ERROR] Missing required environment variables:
+  - SPOTIFY_CLIENT_ID
+  - SPOTIFY_CLIENT_SECRET
+[ERROR] Please update your .env file with the missing variables
+```
+
+**Invalid Configuration Format:**
+```bash
+# Smart validation detects common issues:
+[WARNING] Environment configuration warnings:
+  - SPOTIFY_CLIENT_ID format looks suspicious
+  - FRONTEND_URL contains localhost but NODE_ENV is production
+```
+
+**Environment File Location Priority:**
+1. **Current directory**: `./.env` (highest priority)
+2. **Application directory**: `/opt/echotune/.env`
+3. **Working directory**: `$(pwd)/.env`
+
+**Automatic Production Updates:**
+The scripts automatically update development settings:
+- `NODE_ENV=development` → `NODE_ENV=production`
+- `FRONTEND_URL=http://localhost:3000` → `FRONTEND_URL=https://your-domain.com`
+- `SPOTIFY_REDIRECT_URI=http://localhost:3000/auth/callback` → `SPOTIFY_REDIRECT_URI=https://your-domain.com/auth/callback`
+
 ### Common Issues and Solutions
+
+**Environment Configuration Problems:**
+```bash
+# Test environment detection and validation
+cd /opt/echotune
+
+# Check which .env file is being used
+./scripts/deploy.sh --dry-run 2>&1 | grep "Found environment file"
+
+# Validate environment without deploying
+source scripts/deploy.sh
+detect_and_source_env && validate_environment
+
+# Check current environment configuration
+docker-compose exec app env | grep -E "(SPOTIFY|NODE_ENV|DOMAIN)"
+
+# Test with production settings
+NODE_ENV=production validate_environment
+```
 
 **Application Won't Start:**
 ```bash
@@ -436,10 +585,13 @@ docker-compose ps
 # View detailed logs
 docker-compose logs app
 
-# Check environment configuration
-docker-compose exec app env | grep SPOTIFY
+# Validate environment is properly loaded
+source scripts/deploy.sh && detect_and_source_env && validate_environment
 
-# Restart services
+# Check environment configuration in container
+docker-compose exec app env | grep -E "(SPOTIFY|NODE_ENV|DOMAIN)"
+
+# Restart services with fresh environment
 docker-compose down && docker-compose up -d
 ```
 

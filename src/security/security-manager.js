@@ -481,9 +481,11 @@ class SecurityManager {
       // Node.js environment
       try {
         const crypto = require('crypto');
-        return crypto.randomBytes(32).toString('hex');
+        const buffer = crypto.randomBytes(32);
+        return buffer.toString('hex');
       } catch (error) {
         // Fallback for environments without crypto
+        console.warn('Crypto not available, using fallback token generation');
         return Date.now().toString(36) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       }
     }

@@ -3,7 +3,7 @@ const GeminiProvider = require('./llm-providers/gemini-provider');
 const CustomAPIProvider = require('./llm-providers/custom-provider');
 const MockLLMProvider = require('./llm-providers/mock-provider');
 const ConversationManager = require('./conversation-manager');
-const RecommendationEngine = require('../ml/recommendation-engine');
+const recommendationEngine = require('../ml/recommendation-engine'); // Import the singleton instance
 const SpotifyAudioFeaturesService = require('../spotify/audio-features');
 const SpotifyAPIService = require('../spotify/api-service');
 
@@ -17,7 +17,7 @@ class EchoTuneChatbot {
     this.providers = new Map();
     this.currentProvider = null;
     this.conversationManager = new ConversationManager();
-    this.recommendationEngine = new RecommendationEngine();
+    this.recommendationEngine = recommendationEngine; // Use the singleton instance
     this.spotifyService = new SpotifyAudioFeaturesService();
     this.spotifyAPI = new SpotifyAPIService();
     

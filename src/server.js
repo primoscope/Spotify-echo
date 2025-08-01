@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const path = require('path');
 const dotenv = require('dotenv');
 const axios = require('axios');
@@ -42,6 +44,19 @@ const {
 } = require('./api/middleware');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production' 
+      ? [`https://${process.env.DOMAIN || 'primosphere.studio'}`]
+      : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    methods: ['GET', 'POST'],
+    credentials: true
+  },
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000
+});
 const PORT = config.server.port;
 
 // Trust proxy if in production (for proper IP detection behind reverse proxy)
@@ -526,6 +541,200 @@ app.use('/api/providers', providersRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
 
+// Socket.IO Real-time Chat Integration
+const EchoTuneChatbot = require('./chat/chatbot');
+
+// Initialize chatbot for Socket.IO
+const chatbotConfig = {
+  llmProviders: {
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY,
+      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo'
+    },
+    gemini: {
+      apiKey: process.env.GEMINI_API_KEY,
+      model: process.env.GEMINI_MODEL || 'gemini-1.5-flash'
+    },
+    azure: {
+      apiKey: process.env.AZURE_OPENAI_API_KEY,
+      endpoint: process.env.AZURE_OPENAI_ENDPOINT,
+      deployment: process.env.AZURE_OPENAI_DEPLOYMENT
+    },
+    openrouter: {
+      apiKey: process.env.OPENROUTER_API_KEY,
+      model: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1-0528:free'
+    }
+  },
+  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'mock',
+  defaultModel: process.env.DEFAULT_LLM_MODEL || 'mock-music-assistant',
+  enableMockProvider: true
+};
+
+let socketChatbot = null;
+
+async function initializeSocketChatbot() {
+  if (!socketChatbot) {
+    socketChatbot = new EchoTuneChatbot(chatbotConfig);
+    await socketChatbot.initialize();
+    console.log('🔗 Socket.IO Chatbot initialized');
+  }
+  return socketChatbot;
+}
+
+// Socket.IO connection handling
+io.on('connection', async (socket) => {
+  console.log(`🔗 Client connected: ${socket.id}`);
+  
+  try {
+    // Initialize chatbot
+    const chatbot = await initializeSocketChatbot();
+    
+    // Send connection confirmation
+    socket.emit('connected', {
+      message: 'Connected to EchoTune AI',
+      socketId: socket.id,
+      timestamp: new Date().toISOString(),
+      providers: chatbot.getAvailableProviders()
+    });
+
+    // Handle chat messages
+    socket.on('chat_message', async (data) => {
+      try {
+        const { message, sessionId, provider, userId = `socket_${socket.id}` } = data;
+        
+        if (!message) {
+          socket.emit('error', { message: 'Message is required' });
+          return;
+        }
+
+        // Emit typing indicator
+        socket.emit('typing_start', { timestamp: new Date().toISOString() });
+
+        let activeSessionId = sessionId;
+        
+        // Create session if not provided
+        if (!activeSessionId) {
+          const session = await chatbot.startConversation(userId, { provider });
+          activeSessionId = session.sessionId;
+          socket.emit('session_created', { sessionId: activeSessionId });
+        }
+
+        // Send message to chatbot
+        const response = await chatbot.sendMessage(activeSessionId, message, {
+          provider: provider || chatbot.config.defaultProvider,
+          userId
+        });
+
+        // Stop typing indicator
+        socket.emit('typing_stop');
+
+        // Send response
+        socket.emit('chat_response', {
+          ...response,
+          sessionId: activeSessionId,
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (error) {
+        console.error('Socket chat error:', error);
+        socket.emit('typing_stop');
+        socket.emit('error', {
+          message: 'Failed to process message',
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Handle streaming messages
+    socket.on('chat_stream', async (data) => {
+      try {
+        const { message, sessionId, provider, userId = `socket_${socket.id}` } = data;
+        
+        if (!message) {
+          socket.emit('error', { message: 'Message is required' });
+          return;
+        }
+
+        let activeSessionId = sessionId;
+        
+        if (!activeSessionId) {
+          const session = await chatbot.startConversation(userId, { provider });
+          activeSessionId = session.sessionId;
+          socket.emit('session_created', { sessionId: activeSessionId });
+        }
+
+        // Start streaming
+        socket.emit('stream_start', { sessionId: activeSessionId });
+
+        for await (const chunk of chatbot.streamMessage(activeSessionId, message, { provider })) {
+          if (chunk.error) {
+            socket.emit('stream_error', { error: chunk.error });
+            break;
+          } else if (chunk.type === 'chunk') {
+            socket.emit('stream_chunk', {
+              content: chunk.content,
+              isPartial: chunk.isPartial,
+              sessionId: activeSessionId
+            });
+          } else if (chunk.type === 'complete') {
+            socket.emit('stream_complete', {
+              sessionId: activeSessionId,
+              totalTime: chunk.totalTime,
+              timestamp: new Date().toISOString()
+            });
+            break;
+          }
+        }
+
+      } catch (error) {
+        console.error('Socket stream error:', error);
+        socket.emit('stream_error', {
+          message: 'Failed to stream message',
+          error: error.message
+        });
+      }
+    });
+
+    // Handle provider switching
+    socket.on('switch_provider', async (data) => {
+      try {
+        const { provider } = data;
+        const result = await chatbot.switchProvider(provider);
+        
+        socket.emit('provider_switched', {
+          success: true,
+          provider: result.provider,
+          message: `Switched to ${provider}`,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        socket.emit('provider_switch_error', {
+          message: 'Failed to switch provider',
+          error: error.message
+        });
+      }
+    });
+
+    // Handle disconnect
+    socket.on('disconnect', () => {
+      console.log(`🔌 Client disconnected: ${socket.id}`);
+    });
+
+    // Handle errors
+    socket.on('error', (error) => {
+      console.error(`Socket error from ${socket.id}:`, error);
+    });
+
+  } catch (error) {
+    console.error('Socket connection initialization error:', error);
+    socket.emit('initialization_error', {
+      message: 'Failed to initialize chat service',
+      error: error.message
+    });
+  }
+});
+
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
 app.use(errorHandler);
@@ -539,7 +748,7 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', async () => {
+server.listen(PORT, '0.0.0.0', async () => {
     console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
     console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔑 Spotify configured: ${!!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)}`);
@@ -581,6 +790,7 @@ app.listen(PORT, '0.0.0.0', async () => {
         console.log(`🔗 Local access: http://localhost:${PORT}`);
         console.log(`🎤 Health check: http://localhost:${PORT}/health`);
         console.log(`🤖 Chat API: http://localhost:${PORT}/api/chat`);
+        console.log(`📡 Socket.IO: ws://localhost:${PORT}`);
         console.log(`🎯 Recommendations API: http://localhost:${PORT}/api/recommendations`);
         console.log(`🎵 Spotify API: http://localhost:${PORT}/api/spotify`);
     }

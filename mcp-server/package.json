@@ -4,10 +4,12 @@
   "description": "MCP server for EchoTune AI automation and browser integration",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node enhanced-mcp-orchestrator.js",
+    "dev": "nodemon enhanced-mcp-orchestrator.js",
     "test": "jest",
-    "spotify-server": "python spotify_server.py"
+    "spotify-server": "python spotify_server.py",
+    "orchestrator": "node enhanced-mcp-orchestrator.js",
+    "legacy-server": "node enhanced-server.js"
   },
   "dependencies": {
     "puppeteer": "^21.0.0",
@@ -28,6 +30,28 @@
         "PUPPETEER_HEADLESS": "true",
         "PUPPETEER_ARGS": "--no-sandbox --disable-setuid-sandbox"
       }
+    },
+    "browserbase": {
+      "command": "npx",
+      "args": ["@browserbasehq/mcp-server-browserbase"],
+      "env": {
+        "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
+        "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}",
+        "BROWSERBASE_SESSION_ID": "${BROWSERBASE_SESSION_ID}"
+      }
+    },
+    "mermaid": {
+      "command": "npx",
+      "args": ["mcp-mermaid"],
+      "description": "Mermaid diagram generation for workflow visualization"
+    },
+    "filesystem": {
+      "command": "node",
+      "args": ["../node_modules/FileScopeMCP/dist/index.js"],
+      "env": {
+        "ALLOWED_DIRECTORIES": "${PWD}/..,${PWD}/../src,${PWD}/../scripts,${PWD}"
+      },
+      "description": "File system operations and repository management"
     },
     "spotify": {
       "command": "python",

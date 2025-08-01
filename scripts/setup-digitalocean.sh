@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 APP_USER="echotune"
-APP_DIR="/opt/echotune"
+APP_DIR="/opt/echotunes"
 DOMAIN="${DOMAIN:-primosphere.studio}"
 REPO_URL="https://github.com/dzp5103/Spotify-echo.git"
 

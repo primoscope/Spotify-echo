@@ -10,8 +10,8 @@ class LLMProviderManager {
     this.providers = new Map();
     this.providerConfigs = new Map();
     this.keyRefreshHandlers = new Map();
-    this.fallbackOrder = ['mock', 'gemini', 'openai', 'azure', 'openrouter'];
-    this.currentProvider = 'mock';
+    this.fallbackOrder = ['gemini', 'openai', 'openrouter', 'mock']; // Prioritize Gemini first
+    this.currentProvider = 'gemini'; // Default to Gemini
     this.initialized = false;
   }
 

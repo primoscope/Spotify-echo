@@ -12,10 +12,10 @@ export const useLLM = () => {
 };
 
 export function LLMProvider({ children }) {
-  const [currentProvider, setCurrentProvider] = useState('mock');
+  const [currentProvider, setCurrentProvider] = useState('gemini'); // Default to Gemini
   const [providers, setProviders] = useState({
+    gemini: { name: 'Google Gemini', status: 'unknown', available: false }, // Gemini first
     mock: { name: 'Demo Mode (Mock)', status: 'connected', available: true },
-    gemini: { name: 'Google Gemini', status: 'unknown', available: false },
     openai: { name: 'OpenAI GPT', status: 'unknown', available: false },
     azure: { name: 'Azure OpenAI', status: 'unknown', available: false },
     openrouter: { name: 'OpenRouter', status: 'unknown', available: false }
@@ -50,15 +50,17 @@ export function LLMProvider({ children }) {
         
         setProviders(updatedProviders);
         
-        // Auto-select first available provider if current is not available
+        // Auto-select best available provider - prioritize Gemini first
+        const providerPriority = ['gemini', 'openai', 'openrouter', 'mock'];
+        let selectedProvider = currentProvider;
+        
         if (!updatedProviders[currentProvider]?.available) {
-          const availableProvider = Object.keys(updatedProviders).find(
-            key => updatedProviders[key].available
-          );
-          if (availableProvider) {
-            setCurrentProvider(availableProvider);
-          }
+          selectedProvider = providerPriority.find(
+            key => updatedProviders[key]?.available
+          ) || 'mock';
         }
+        
+        setCurrentProvider(selectedProvider);
       }
     } catch (error) {
       console.error('Failed to refresh providers:', error);

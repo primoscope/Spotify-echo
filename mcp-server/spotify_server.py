@@ -921,7 +921,7 @@ class SpotifyMCPServer:
             rec_result = await self.get_recommendations(
                 user_id="test_user",
                 limit=5,
-                        seed_genres=["pop", "rock"]
+                seed_genres=["pop", "rock"]
             )
             test_results["tests"].append({
                 "test_name": "get_recommendations",

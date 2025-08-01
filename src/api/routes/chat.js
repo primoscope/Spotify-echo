@@ -13,7 +13,7 @@ const chatbotConfig = {
     },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY,
-      model: process.env.GEMINI_MODEL || 'gemini-pro'
+      model: process.env.GEMINI_MODEL || 'gemini-1.5-flash'
     },
     azure: {
       apiKey: process.env.AZURE_OPENAI_API_KEY,
@@ -22,11 +22,12 @@ const chatbotConfig = {
     },
     openrouter: {
       apiKey: process.env.OPENROUTER_API_KEY,
-      model: process.env.OPENROUTER_MODEL || 'openai/gpt-3.5-turbo'
+      model: process.env.OPENROUTER_MODEL || process.env.DEFAULT_LLM_MODEL || 'deepseek/deepseek-r1-0528:free'
     }
   },
-  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'openai',
-  defaultModel: process.env.DEFAULT_LLM_MODEL || 'gpt-3.5-turbo'
+  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 'mock', // Use mock as default fallback
+  defaultModel: process.env.DEFAULT_LLM_MODEL || 'mock-music-assistant',
+  enableMockProvider: true // Always enable mock provider for demo functionality
 };
 
 let chatbot = null;

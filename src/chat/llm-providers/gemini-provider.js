@@ -9,12 +9,12 @@ class GeminiProvider extends BaseLLMProvider {
   constructor(config) {
     super(config);
     this.client = null;
-    this.defaultModel = config.model || 'gemini-pro';
+    this.defaultModel = config.model || 'gemini-1.5-flash';
     this.supportedModels = [
-      'gemini-pro',
-      'gemini-pro-vision',
+      'gemini-1.5-flash',
       'gemini-1.5-pro',
-      'gemini-1.5-flash'
+      'gemini-pro',
+      'gemini-pro-vision'
     ];
   }
 
@@ -63,8 +63,11 @@ class GeminiProvider extends BaseLLMProvider {
         throw new Error('Gemini provider not initialized or configured');
       }
 
+      // Always use Gemini's default model, don't inherit from other providers
+      const modelName = (options.model && options.model.includes('gemini')) ? options.model : this.defaultModel;
+      
       const model = this.client.getGenerativeModel({ 
-        model: options.model || this.defaultModel,
+        model: modelName,
         generationConfig: {
           maxOutputTokens: options.maxTokens || 2000,
           temperature: options.temperature ?? 0.7,
@@ -94,7 +97,7 @@ class GeminiProvider extends BaseLLMProvider {
       return this.parseResponse({
         content,
         role: 'assistant',
-        model: options.model || this.defaultModel,
+        model: modelName,
         usage: {
           promptTokens: response.response.usageMetadata?.promptTokenCount || 0,
           completionTokens: response.response.usageMetadata?.candidatesTokenCount || 0,

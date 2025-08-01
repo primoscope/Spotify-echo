@@ -3,7 +3,7 @@ const GeminiProvider = require('./llm-providers/gemini-provider');
 const CustomAPIProvider = require('./llm-providers/custom-provider');
 const MockLLMProvider = require('./llm-providers/mock-provider');
 const ConversationManager = require('./conversation-manager');
-const RecommendationEngine = require('../ml/recommendation-engine');
+const recommendationEngine = require('../ml/recommendation-engine'); // Import the singleton instance
 const SpotifyAudioFeaturesService = require('../spotify/audio-features');
 const SpotifyAPIService = require('../spotify/api-service');
 
@@ -17,7 +17,7 @@ class EchoTuneChatbot {
     this.providers = new Map();
     this.currentProvider = null;
     this.conversationManager = new ConversationManager();
-    this.recommendationEngine = new RecommendationEngine();
+    this.recommendationEngine = recommendationEngine; // Use the singleton instance
     this.spotifyService = new SpotifyAudioFeaturesService();
     this.spotifyAPI = new SpotifyAPIService();
     
@@ -961,7 +961,7 @@ Just ask me anything about music and I'll help you discover your next favorite s
 
     // Genre diversity insight
     if (analysis.top_genres.length > 5) {
-      insights.push("You have very diverse musical taste across multiple genres!");
+      insights.push('You have very diverse musical taste across multiple genres!');
     } else if (analysis.top_genres.length > 0) {
       insights.push(`Your music taste is focused primarily on ${analysis.top_genres[0].genre} music.`);
     }
@@ -971,23 +971,23 @@ Just ask me anything about music and I'll help you discover your next favorite s
       const features = analysis.audio_features_profile;
       
       if (features.energy?.average > 0.7) {
-        insights.push("You prefer high-energy, upbeat music that gets you moving!");
+        insights.push('You prefer high-energy, upbeat music that gets you moving!');
       } else if (features.energy?.average < 0.3) {
-        insights.push("You enjoy calm, low-energy music that's perfect for relaxation.");
+        insights.push('You enjoy calm, low-energy music that\'s perfect for relaxation.');
       }
 
       if (features.danceability?.average > 0.7) {
-        insights.push("Your tracks have high danceability - you love music you can dance to!");
+        insights.push('Your tracks have high danceability - you love music you can dance to!');
       }
 
       if (features.valence?.average > 0.7) {
-        insights.push("Your music tends to be very positive and uplifting!");
+        insights.push('Your music tends to be very positive and uplifting!');
       } else if (features.valence?.average < 0.3) {
-        insights.push("You're drawn to more melancholic or introspective music.");
+        insights.push('You\'re drawn to more melancholic or introspective music.');
       }
 
       if (features.acousticness?.average > 0.7) {
-        insights.push("You have a strong preference for acoustic and organic sounds.");
+        insights.push('You have a strong preference for acoustic and organic sounds.');
       }
     }
 
@@ -995,13 +995,13 @@ Just ask me anything about music and I'll help you discover your next favorite s
     if (analysis.listening_patterns.most_active_hours.length > 0) {
       const topHour = analysis.listening_patterns.most_active_hours[0];
       if (topHour.hour >= 6 && topHour.hour < 12) {
-        insights.push("You're most active listening to music in the morning!");
+        insights.push('You\'re most active listening to music in the morning!');
       } else if (topHour.hour >= 12 && topHour.hour < 18) {
-        insights.push("Afternoon is your prime music listening time!");
+        insights.push('Afternoon is your prime music listening time!');
       } else if (topHour.hour >= 18 && topHour.hour < 22) {
-        insights.push("You're an evening music lover!");
+        insights.push('You\'re an evening music lover!');
       } else {
-        insights.push("You're a night owl when it comes to music!");
+        insights.push('You\'re a night owl when it comes to music!');
       }
     }
 

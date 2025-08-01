@@ -21,7 +21,8 @@ class SecurityMiddleware {
     }
 
     // API rate limiting (more restrictive)
-    static apiRateLimit = this.createRateLimiter({
+    static getApiRateLimit() {
+        return this.createRateLimiter({
         windowMs: 15 * 60 * 1000,
         max: 50,
         message: {
@@ -29,19 +30,23 @@ class SecurityMiddleware {
             retryAfter: '15 minutes'
         }
     });
+    }
 
     // Auth rate limiting (very restrictive)
-    static authRateLimit = this.createRateLimiter({
+    static getAuthRateLimit() {
+        return this.createRateLimiter({
         windowMs: 15 * 60 * 1000,
         max: 5,
         message: {
             error: 'Too many authentication attempts, please try again later',
             retryAfter: '15 minutes'
         }
-    });
+        });
+    }
 
     // Helmet security headers
-    static helmet = helmet({
+    static getHelmet() {
+        return helmet({
         contentSecurityPolicy: {
             directives: {
                 defaultSrc: ["'self'"],
@@ -56,10 +61,12 @@ class SecurityMiddleware {
             },
         },
         crossOriginEmbedderPolicy: false
-    });
+        });
+    }
 
     // CORS configuration
-    static corsOptions = {
+    static getCorsOptions() {
+        return {
         origin: function (origin, callback) {
             // Allow requests with no origin (mobile apps, etc.)
             if (!origin) return callback(null, true);
@@ -81,7 +88,8 @@ class SecurityMiddleware {
         },
         credentials: true,
         optionsSuccessStatus: 200
-    };
+        };
+    }
 
     // Input sanitization
     static sanitizeInput(req, res, next) {

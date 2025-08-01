@@ -38,6 +38,7 @@ describe('MobileResponsiveManager', () => {
       createElement: jest.fn(() => ({
         setAttribute: jest.fn(),
         appendChild: jest.fn(),
+        addEventListener: jest.fn(),
         style: {}
       })),
       head: {
@@ -93,8 +94,11 @@ describe('MobileResponsiveManager', () => {
     });
 
     test('should detect landscape orientation', () => {
-      mockWindow.innerHeight = 600;
-      mockWindow.innerWidth = 1024;
+      // Recreate the global window object with new dimensions  
+      global.window.innerHeight = 600;
+      global.window.innerWidth = 1024;
+      // Also update screen orientation for landscape
+      global.window.screen.orientation.angle = 90;
       const orientation = mobileManager.detectOrientation();
       expect(orientation).toBe('landscape');
     });
@@ -108,20 +112,20 @@ describe('MobileResponsiveManager', () => {
 
   describe('Touch Support Detection', () => {
     test('should detect touch support correctly', () => {
-      mockWindow.ontouchstart = true;
+      global.window.ontouchstart = true;
       const hasTouch = mobileManager.detectTouchSupport();
       expect(hasTouch).toBe(true);
     });
 
     test('should detect no touch support', () => {
-      mockWindow.ontouchstart = undefined;
-      mockWindow.navigator.maxTouchPoints = 0;
+      delete global.window.ontouchstart;  // Remove the property entirely
+      global.window.navigator.maxTouchPoints = 0;
       const hasTouch = mobileManager.detectTouchSupport();
       expect(hasTouch).toBe(false);
     });
 
     test('should detect touch via maxTouchPoints', () => {
-      mockWindow.navigator.maxTouchPoints = 5;
+      global.window.navigator.maxTouchPoints = 5;
       const hasTouch = mobileManager.detectTouchSupport();
       expect(hasTouch).toBe(true);
     });

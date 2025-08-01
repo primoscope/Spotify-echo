@@ -262,26 +262,47 @@ class SecurityManager {
           return { valid: false, reason: 'invalid_type' };
         }
         
-        // Check for malicious patterns
-        if (this.detectSQLInjection(input)) {
+        // Inline SQL injection detection
+        const sqlPatterns = [
+          /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC)\b)/i,
+          /(UNION|OR|AND)\s+\d+\s*=\s*\d+/i,
+          /(\bOR\b|\bAND\b)\s+\d+\s*=\s*\d+/i,
+          /'.+--/,
+          /\b(WAITFOR|DELAY)\b/i
+        ];
+        
+        if (sqlPatterns.some(pattern => pattern.test(input))) {
           return { valid: false, reason: 'sql_injection_detected' };
         }
         
-        if (this.detectXSS(input)) {
+        // Inline XSS detection
+        const xssPatterns = [
+          /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+          /javascript:/i,
+          /on\w+\s*=/i,
+          /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+          /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi
+        ];
+        
+        if (xssPatterns.some(pattern => pattern.test(input))) {
           return { valid: false, reason: 'xss_detected' };
         }
         
         // Type-specific validation
         switch (type) {
-          case 'email':
-            return this.validateEmail(input) 
+          case 'email': {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(input) && input.length <= 254
               ? { valid: true } 
               : { valid: false, reason: 'invalid_email' };
+          }
           
-          case 'spotify_uri':
-            return this.validateSpotifyURI(input)
+          case 'spotify_uri': {
+            const spotifyURIRegex = /^spotify:(track|album|artist|playlist):[a-zA-Z0-9]{22}$/;
+            return spotifyURIRegex.test(input)
               ? { valid: true }
               : { valid: false, reason: 'invalid_spotify_uri' };
+          }
           
           default:
             return { valid: true };
@@ -451,13 +472,23 @@ class SecurityManager {
    * Utility methods
    */
   generateSecureToken() {
-    if (typeof window === 'undefined' || !window.crypto) {
-      // Fallback for Node.js environment
-      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    if (typeof window !== 'undefined' && window.crypto) {
+      // Browser environment
+      const array = new Uint8Array(32);
+      window.crypto.getRandomValues(array);
+      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    } else {
+      // Node.js environment
+      try {
+        const crypto = require('crypto');
+        const buffer = crypto.randomBytes(32);
+        return buffer.toString('hex');
+      } catch (error) {
+        // Fallback for environments without crypto
+        console.warn('Crypto not available, using fallback token generation');
+        return Date.now().toString(36) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      }
     }
-    const array = new Uint8Array(32);
-    window.crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 
   getEventSeverity(eventType) {

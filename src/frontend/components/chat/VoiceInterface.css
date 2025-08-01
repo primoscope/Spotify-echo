@@ -292,7 +292,7 @@
 }
 
 .chat-title p {
-  margin: 5px 0 0 0;
+  margin: 5px 0 0;
   color: var(--text-secondary);
   font-size: 0.9rem;
 }

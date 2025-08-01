@@ -583,7 +583,7 @@ class EchoTuneChatbot {
       }
 
       // Create playlist using real Spotify API
-      const playlist = await this.spotifyAPI.createPlaylist(userId, {
+      const playlist = await this.spotifyAPI.createPlaylist(session.userId || 'default_user', {
         name: name || 'EchoTune AI Playlist',
         description: description || 'Created by EchoTune AI',
         public: isPublic

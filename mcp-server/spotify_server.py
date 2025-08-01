@@ -1,4 +1,4 @@
-#!/usr / bin/env python3
+#!/usr/bin/env python3
 """
 Enhanced Spotify MCP Server for EchoTune AI
 Provides comprehensive tools for Spotify API automation, music recommendation workflows,
@@ -28,14 +28,14 @@ class SpotifyMCPServer:
     def __init__(self):
         self.client_id = os.getenv('SPOTIFY_CLIENT_ID')
         self.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://localhost:3000 / callback')
+        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://localhost:3000/callback')
         self.access_token = None
         self.refresh_token = None
         self.token_expires_at = None
 
         # Enhanced configuration
-        self.api_base_url = "https://api.spotify.com / v1"
-        self.auth_url = "https://accounts.spotify.com / api/token"
+        self.api_base_url = "https://api.spotify.com/v1"
+        self.auth_url = "https://accounts.spotify.com/api/token"
         self.request_timeout = 30
         self.rate_limit_calls = 100
         self.rate_limit_period = 60
@@ -349,8 +349,8 @@ class SpotifyMCPServer:
                 "track_name": f"{genre.title()} Track {i + 1}",
                 "artist_name": artist,
                 "album_name": f"{genre.title()} Album",
-                "external_url": f"https://open.spotify.com / track/mock_{i}",
-                "preview_url": f"https://p.scdn.co / mp3 - preview / mock_{i}",
+                "external_url": f"https://open.spotify.com/track/mock_{i}",
+                "preview_url": f"https://p.scdn.co/mp3-preview/mock_{i}",
                 "duration_ms": np.random.randint(120000, 300000),
                 "popularity": np.random.randint(20, 100),
                 "features": features,
@@ -395,7 +395,7 @@ class SpotifyMCPServer:
     async def _create_mock_playlist(self, name: str, tracks: List[str],
                                   description: str, public: bool) -> Dict[str, Any]:
         """Create a mock playlist for testing purposes"""
-        playlist_id = f"mock_playlist_{datetime.now().strftime('%Y % m%d_ % H%M % S')}"
+        playlist_id = f"mock_playlist_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
         return {
             "playlist_id": playlist_id,
@@ -404,7 +404,7 @@ class SpotifyMCPServer:
             "track_count": len(tracks),
             "tracks_added": tracks,
             "public": public,
-            "external_url": f"https://open.spotify.com / playlist/{playlist_id}",
+            "external_url": f"https://open.spotify.com/playlist/{playlist_id}",
             "created_at": datetime.now().isoformat(),
             "collaborative": False,
             "followers": 0,
@@ -472,7 +472,7 @@ class SpotifyMCPServer:
                     "test_name": "player_controls",
                     "status": "passed",
                     "duration_ms": 800,
-                    "description": "Play / pause controls function correctly"
+                    "description": "Play/pause controls function correctly"
                 },
                 {
                     "test_name": "volume_control",
@@ -486,7 +486,7 @@ class SpotifyMCPServer:
             "failed_tests": 0,
             "total_duration_ms": 6100,
             "browser_info": {
-                "user_agent": "Chrome / 91.0.4472.124",
+                "user_agent": "Chrome/91.0.4472.124",
                 "viewport": "1920x1080",
                 "javascript_enabled": True
             },
@@ -539,7 +539,7 @@ class SpotifyMCPServer:
                 }
             ],
             "playlist_created": True,
-            "playlist_url": f"https://open.spotify.com / playlist/ui_test_{int(time.time())}",
+            "playlist_url": f"https://open.spotify.com/playlist/ui_test_{int(time.time())}",
             "status": "success"
         }
 
@@ -770,7 +770,7 @@ class SpotifyMCPServer:
                 "pop": np.random.randint(20, 40),
                 "rock": np.random.randint(15, 30),
                 "electronic": np.random.randint(10, 25),
-                "hip - hop": np.random.randint(5, 20),
+                "hip-hop": np.random.randint(5, 20),
                 "indie": np.random.randint(5, 15),
                 "classical": np.random.randint(0, 10)
             },

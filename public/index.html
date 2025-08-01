@@ -1069,6 +1069,10 @@
                 this.isRecording = false;
                 this.recognition = null;
                 this.conversationHistory = [];
+                this.socket = null;
+                this.currentSessionId = null;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
                 
                 this.initializeElements();
                 this.bindEvents();
@@ -1076,6 +1080,7 @@
                 this.checkAuthStatus();
                 this.initializeVoiceRecognition();
                 this.setInitialTime();
+                this.initializeSocketIO();
                 
                 // Enable chat by default for demo mode
                 this.enableChat();
@@ -1128,6 +1133,156 @@
 
                 // Auto-resize textarea
                 this.adjustTextareaHeight();
+            }
+
+            initializeSocketIO() {
+                try {
+                    // Initialize Socket.IO connection
+                    this.socket = io('/', {
+                        transports: ['websocket', 'polling'],
+                        timeout: 20000,
+                        reconnection: true,
+                        reconnectionAttempts: this.maxReconnectAttempts,
+                        reconnectionDelay: 1000,
+                        reconnectionDelayMax: 5000
+                    });
+
+                    // Connection event handlers
+                    this.socket.on('connect', () => {
+                        console.log('🔗 Connected to Socket.IO server');
+                        this.reconnectAttempts = 0;
+                        this.updateProviderStatus('Connected (Real-time)', 'connected');
+                        this.addSystemMessage('🔗 Real-time chat connection established');
+                    });
+
+                    this.socket.on('connected', (data) => {
+                        console.log('Server connection confirmed:', data);
+                        this.updateProviderDropdown(data.providers);
+                    });
+
+                    this.socket.on('disconnect', (reason) => {
+                        console.log('🔌 Disconnected from Socket.IO server:', reason);
+                        this.updateProviderStatus('Disconnected', 'error');
+                        if (reason === 'io server disconnect') {
+                            // Server initiated disconnect, try to reconnect
+                            this.socket.connect();
+                        }
+                    });
+
+                    this.socket.on('reconnect', (attemptNumber) => {
+                        console.log(`🔄 Reconnected after ${attemptNumber} attempts`);
+                        this.updateProviderStatus('Reconnected', 'connected');
+                        this.addSystemMessage('🔄 Real-time connection restored');
+                    });
+
+                    this.socket.on('reconnect_failed', () => {
+                        console.error('❌ Failed to reconnect to Socket.IO server');
+                        this.updateProviderStatus('Connection Failed', 'error');
+                        this.addSystemMessage('❌ Real-time connection failed. Using fallback API.');
+                    });
+
+                    // Chat event handlers
+                    this.socket.on('session_created', (data) => {
+                        this.currentSessionId = data.sessionId;
+                        console.log('Session created:', data.sessionId);
+                    });
+
+                    this.socket.on('typing_start', () => {
+                        this.showTypingIndicator();
+                    });
+
+                    this.socket.on('typing_stop', () => {
+                        this.hideTypingIndicator();
+                    });
+
+                    this.socket.on('chat_response', (data) => {
+                        this.hideTypingIndicator();
+                        this.addMessage('assistant', data.response);
+                        this.conversationHistory.push(
+                            { role: 'assistant', content: data.response }
+                        );
+                        
+                        if (data.provider !== this.currentProvider) {
+                            this.addSystemMessage(`🔄 Response from ${this.getProviderDisplayName(data.provider)} provider`);
+                        }
+                    });
+
+                    // Streaming handlers
+                    this.socket.on('stream_start', (data) => {
+                        this.currentStreamMessage = '';
+                        this.addMessage('assistant', '', true); // Add empty message for streaming
+                    });
+
+                    this.socket.on('stream_chunk', (data) => {
+                        this.currentStreamMessage += data.content;
+                        this.updateLastMessage(this.currentStreamMessage);
+                    });
+
+                    this.socket.on('stream_complete', (data) => {
+                        this.finalizeStreamMessage();
+                        this.conversationHistory.push(
+                            { role: 'assistant', content: this.currentStreamMessage }
+                        );
+                        this.currentStreamMessage = '';
+                    });
+
+                    // Provider switching
+                    this.socket.on('provider_switched', (data) => {
+                        this.currentProvider = data.provider;
+                        this.updateProviderStatus(`Connected (${this.getProviderDisplayName(data.provider)})`, 'connected');
+                        this.addSystemMessage(data.message);
+                    });
+
+                    this.socket.on('provider_switch_error', (data) => {
+                        this.showError(`Failed to switch provider: ${data.error}`);
+                    });
+
+                    // Error handlers
+                    this.socket.on('error', (data) => {
+                        console.error('Socket.IO error:', data);
+                        this.showError(data.message || 'Real-time communication error');
+                        this.hideTypingIndicator();
+                    });
+
+                    this.socket.on('stream_error', (data) => {
+                        console.error('Streaming error:', data);
+                        this.showError(data.message || 'Streaming error occurred');
+                        this.hideTypingIndicator();
+                    });
+
+                    this.socket.on('initialization_error', (data) => {
+                        console.error('Initialization error:', data);
+                        this.showError('Failed to initialize real-time chat. Using fallback mode.');
+                    });
+
+                } catch (error) {
+                    console.error('Socket.IO initialization error:', error);
+                    this.showError('Failed to initialize real-time chat. Using fallback API mode.');
+                }
+            }
+
+            updateLastMessage(content) {
+                const messages = this.chatMessages.querySelectorAll('.message.assistant');
+                const lastMessage = messages[messages.length - 1];
+                if (lastMessage) {
+                    const contentDiv = lastMessage.querySelector('.message-content');
+                    if (contentDiv) {
+                        contentDiv.innerHTML = this.formatMessage(content);
+                    }
+                }
+            }
+
+            finalizeStreamMessage() {
+                const messages = this.chatMessages.querySelectorAll('.message.assistant');
+                const lastMessage = messages[messages.length - 1];
+                if (lastMessage && lastMessage.dataset.streaming) {
+                    delete lastMessage.dataset.streaming;
+                    // Add timestamp
+                    const timeDiv = document.createElement('div');
+                    timeDiv.className = 'message-time';
+                    timeDiv.textContent = new Date().toLocaleTimeString();
+                    lastMessage.appendChild(timeDiv);
+                }
             }
 
             setInitialTime() {
@@ -1272,6 +1427,32 @@
                 this.setTyping(true);
                 
                 try {
+                    // Store user message in conversation history
+                    this.conversationHistory.push({ role: 'user', content: message });
+
+                    // Check if Socket.IO is connected and use it, otherwise fallback to API
+                    if (this.socket && this.socket.connected) {
+                        // Use real-time Socket.IO
+                        this.socket.emit('chat_message', {
+                            message: message,
+                            sessionId: this.currentSessionId,
+                            provider: this.currentProvider,
+                            userId: this.userInfo ? this.userInfo.id : 'demo_user'
+                        });
+                    } else {
+                        // Fallback to REST API
+                        await this.sendMessageViaAPI(message);
+                    }
+                } catch (error) {
+                    this.addMessage('assistant', 'I seem to be having connection issues. Please check your internet connection and try again.');
+                    console.error('Chat error:', error);
+                } finally {
+                    this.setTyping(false);
+                }
+            }
+
+            async sendMessageViaAPI(message) {
+                try {
                     // Use test endpoint for demo mode when no authentication
                     const isDemo = !this.userInfo;
                     const endpoint = isDemo ? '/api/chat/test' : '/api/chat';
@@ -1304,7 +1485,6 @@
                         
                         // Store conversation
                         this.conversationHistory.push(
-                            { role: 'user', content: message },
                             { role: 'assistant', content: assistantResponse }
                         );
                         
@@ -1322,9 +1502,7 @@
                     }
                 } catch (error) {
                     this.addMessage('assistant', 'I seem to be having connection issues. Please check your internet connection and try again.');
-                    console.error('Chat error:', error);
-                } finally {
-                    this.setTyping(false);
+                    console.error('API Chat error:', error);
                 }
             }
 
@@ -1359,9 +1537,13 @@
                 }, 1000);
             }
 
-            addMessage(sender, content) {
+            addMessage(sender, content, isStreaming = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${sender} fade-in`;
+                
+                if (isStreaming) {
+                    messageDiv.dataset.streaming = 'true';
+                }
                 
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'message-content';
@@ -1369,7 +1551,7 @@
                 
                 messageDiv.appendChild(contentDiv);
                 
-                if (sender !== 'system') {
+                if (sender !== 'system' && !isStreaming) {
                     const timeDiv = document.createElement('div');
                     timeDiv.className = 'message-time';
                     timeDiv.textContent = new Date().toLocaleTimeString();
@@ -1469,22 +1651,27 @@
                 this.updateProviderStatus('Switching...', 'warning');
                 
                 try {
-                    // Test the provider first
-                    const testResponse = await fetch('/api/chat/test', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            message: 'Hello',
-                            provider: newProvider
-                        })
-                    });
-                    
-                    if (testResponse.ok) {
-                        this.currentProvider = newProvider;
-                        this.updateProviderStatus('Connected', 'connected');
-                        this.addSystemMessage(`Switched to ${this.getProviderDisplayName(newProvider)} provider`);
+                    // Use Socket.IO if connected, otherwise fallback to API
+                    if (this.socket && this.socket.connected) {
+                        this.socket.emit('switch_provider', { provider: newProvider });
                     } else {
-                        throw new Error('Provider test failed');
+                        // Fallback to API test
+                        const testResponse = await fetch('/api/chat/test', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: 'Hello',
+                                provider: newProvider
+                            })
+                        });
+                        
+                        if (testResponse.ok) {
+                            this.currentProvider = newProvider;
+                            this.updateProviderStatus('Connected', 'connected');
+                            this.addSystemMessage(`Switched to ${this.getProviderDisplayName(newProvider)} provider`);
+                        } else {
+                            throw new Error('Provider test failed');
+                        }
                     }
                 } catch (error) {
                     console.error('Provider switch error:', error);
@@ -1609,5 +1796,8 @@
     <script src="/src/utils/performance-manager.js"></script>
     <script src="/src/mobile/mobile-responsive.js"></script>
     <script src="/src/security/security-manager.js"></script>
+    
+    <!-- Socket.IO Client -->
+    <script src="/socket.io/socket.io.js"></script>
 </body>
 </html>

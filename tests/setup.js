@@ -2,6 +2,13 @@
  * Test setup and configuration
  */
 
+// Import OpenAI shims for Node.js environment (conditionally)
+try {
+  require('openai/shims/node');
+} catch (e) {
+  // OpenAI shims may not be available in all test environments
+}
+
 // Set test environment
 process.env.NODE_ENV = 'test';
 
@@ -66,7 +73,10 @@ global.testHelpers = {
 
 // Console override for cleaner test output
 if (process.env.NODE_ENV === 'test') {
-  console.log = jest.fn();
-  console.warn = jest.fn();
-  console.error = jest.fn();
+  // Only override console if jest is available
+  if (typeof jest !== 'undefined') {
+    console.log = jest.fn();
+    console.warn = jest.fn();
+    console.error = jest.fn();
+  }
 }

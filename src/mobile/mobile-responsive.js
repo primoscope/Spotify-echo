@@ -24,7 +24,6 @@ class MobileResponsiveManager {
    */
   detectDeviceType() {
     const width = window.innerWidth;
-    const userAgent = navigator.userAgent.toLowerCase();
     
     if (width <= this.breakpoints.mobile) {
       return 'mobile';
@@ -501,7 +500,7 @@ class ReactNativeFoundation {
     
     // Create native bridges
     this.createNativeBridge('Dimensions', {
-      get: (dimension) => {
+      get: () => {
         return {
           width: window.innerWidth,
           height: window.innerHeight

@@ -148,7 +148,7 @@ const corsMiddleware = cors({
 /**
  * Error handling middleware
  */
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res) {
   console.error('Error:', err);
   
   // Default error response

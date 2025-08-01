@@ -4,6 +4,10 @@
 
 const { MobileResponsiveManager } = require('../../src/mobile/mobile-responsive');
 
+// Debug the import
+console.log('MobileResponsiveManager:', MobileResponsiveManager);
+console.log('Type:', typeof MobileResponsiveManager);
+
 describe('MobileResponsiveManager', () => {
   let mockWindow;
   let mockDocument;

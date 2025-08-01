@@ -163,7 +163,7 @@ function createAuthRateLimit() {
     max: config.security.authRateLimit.max,
     message: 'Too many authentication attempts, please try again later',
     keyGenerator: (req) => `auth:${getClientIP(req)}`,
-    onLimitReached: (req, res) => {
+    onLimitReached: (req) => {
       // Log potential brute force attempt
       console.warn(`Potential brute force attempt from ${getClientIP(req)}`);
     },

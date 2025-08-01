@@ -34,7 +34,6 @@ const {
   requestLogger, 
   corsMiddleware,
   createRateLimit,
-  createAuthRateLimit,
   securityHeaders,
   sanitizeInput,
   requestSizeLimit,

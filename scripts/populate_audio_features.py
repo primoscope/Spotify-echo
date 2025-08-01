@@ -113,7 +113,7 @@ class SpotifyAudioFeaturesPopulator:
 
         headers = {
             'Authorization': f'Basic {auth_header}',
-            'Content - Type': 'application / x-www - form-urlencoded'
+            'Content-Type': 'application/x-www-form-urlencoded'
         }
 
         data = {

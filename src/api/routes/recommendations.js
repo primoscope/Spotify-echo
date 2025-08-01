@@ -1,9 +1,8 @@
 const express = require('express');
-const RecommendationEngine = require('../../ml/recommendation-engine');
+const recommendationEngine = require('../../ml/recommendation-engine');
 const { requireAuth, createRateLimit } = require('../middleware');
 
 const router = express.Router();
-const recommendationEngine = new RecommendationEngine();
 
 // Rate limiting for recommendation endpoints
 const recommendationRateLimit = createRateLimit({

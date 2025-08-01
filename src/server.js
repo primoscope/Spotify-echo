@@ -27,6 +27,8 @@ const chatRoutes = require('./api/routes/chat');
 const recommendationRoutes = require('./api/routes/recommendations');
 const spotifyRoutes = require('./api/routes/spotify');
 const providersRoutes = require('./api/routes/providers');
+const databaseRoutes = require('./api/routes/database');
+const playlistRoutes = require('./api/routes/playlists');
 const { 
   extractUser, 
   ensureDatabase, 
@@ -127,6 +129,17 @@ app.use(express.static(path.join(__dirname, '../public'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
       res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+  }
+}));
+
+// Serve React frontend files
+app.use('/frontend', express.static(path.join(__dirname, 'frontend'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+  etag: false,
+  setHeaders: (res) => {
+    if (process.env.NODE_ENV !== 'production') {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
   }
 }));
@@ -510,6 +523,8 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/spotify', spotifyRoutes);
 app.use('/api/providers', providersRoutes);
+app.use('/api/database', databaseRoutes);
+app.use('/api/playlists', playlistRoutes);
 
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
@@ -529,14 +544,37 @@ app.listen(PORT, '0.0.0.0', async () => {
     console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔑 Spotify configured: ${!!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)}`);
     
-    // Initialize database connection and indexes
+    // Initialize database manager with fallback support
     try {
-        const mongoManager = require('./database/mongodb');
-        await mongoManager.connect();
-        await mongoManager.createIndexes();
-        console.log('🗄️ Database initialized successfully');
+        const databaseManager = require('./database/database-manager');
+        // const llmProviderManager = require('./chat/llm-provider-manager');
+        
+        // Initialize database manager
+        const dbInitialized = await databaseManager.initialize();
+        if (dbInitialized) {
+            console.log('🗄️ Database manager initialized successfully');
+            const dbInfo = databaseManager.getActiveDatabase();
+            console.log(`📊 Active databases: ${dbInfo.databases.join(', ')}`);
+            if (dbInfo.fallbackMode) {
+                console.log('📦 Running in fallback mode (SQLite)');
+            }
+        } else {
+            console.error('❌ Database initialization failed - running without database');
+        }
+        
+        // TODO: Initialize LLM provider manager
+        // const llmInitialized = await llmProviderManager.initialize();
+        // if (llmInitialized) {
+        //     console.log('🤖 LLM Provider Manager initialized successfully');
+        //     const providerStatus = llmProviderManager.getProviderStatus();
+        //     const available = Object.values(providerStatus.providers).filter(p => p.available).length;
+        //     console.log(`🔌 Available LLM providers: ${available}`);
+        // } else {
+        //     console.error('❌ LLM Provider Manager initialization failed');
+        // }
+        console.log('🤖 LLM Provider Manager: Using existing chat system');
     } catch (error) {
-        console.error('❌ Database initialization failed:', error.message);
+        console.error('❌ System initialization failed:', error.message);
     }
     
     if (process.env.NODE_ENV !== 'production') {

@@ -55,6 +55,8 @@ class SecurityManager {
    * Content Security Policy setup
    */
   setupCSPHeaders() {
+    if (typeof document === 'undefined') return;
+    
     const csp = {
       'default-src': ['\'self\''],
       'script-src': ['\'self\'', '\'unsafe-inline\'', 'https://api.spotify.com'],
@@ -92,6 +94,8 @@ class SecurityManager {
   }
 
   /**
+<<<<<<< HEAD
+=======
    * Create session management methods
    */
   createSessionManager() {
@@ -287,6 +291,7 @@ class SecurityManager {
   }
 
   /**
+>>>>>>> 1e0d5360242314d703de74bc50f71e0cb63d6a0b
    * Rate limiting with security features
    */
   checkRateLimit(type, identifier) {
@@ -446,6 +451,10 @@ class SecurityManager {
    * Utility methods
    */
   generateSecureToken() {
+    if (typeof window === 'undefined' || !window.crypto) {
+      // Fallback for Node.js environment
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
     const array = new Uint8Array(32);
     window.crypto.getRandomValues(array);
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
@@ -482,7 +491,7 @@ class SecurityManager {
     console.warn('Security Alert:', event);
     
     // Could integrate with external alerting systems
-    if (window.securityAlertCallback) {
+    if (typeof window !== 'undefined' && window.securityAlertCallback) {
       window.securityAlertCallback(event);
     }
   }
@@ -494,6 +503,8 @@ class SecurityManager {
   }
 
   setupSecurityEventListeners() {
+    if (typeof document === 'undefined') return;
+    
     // Listen for security-related DOM events
     document.addEventListener('securityviolation', (event) => {
       this.logSecurityEvent('csp_violation', {
@@ -503,10 +514,12 @@ class SecurityManager {
       });
     });
     
-    // Monitor for suspicious navigation
-    window.addEventListener('beforeunload', () => {
-      this.logSecurityEvent('page_unload', { timestamp: Date.now() });
-    });
+    if (typeof window !== 'undefined') {
+      // Monitor for suspicious navigation
+      window.addEventListener('beforeunload', () => {
+        this.logSecurityEvent('page_unload', { timestamp: Date.now() });
+      });
+    }
   }
 
   /**

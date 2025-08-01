@@ -32,7 +32,7 @@ class PerformanceManager {
         cpuThreshold: 80 // 80% CPU usage
       }
     };
-    
+
     this.initializePerformanceMonitoring();
   }
 
@@ -162,6 +162,7 @@ class PerformanceManager {
   }
 
   /**
+>>>>>>> 1e0d5360242314d703de74bc50f71e0cb63d6a0b
    * Advanced rate limiting with sliding window
    */
   createRateLimiter(name, options = {}) {

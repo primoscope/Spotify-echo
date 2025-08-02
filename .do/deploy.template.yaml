@@ -1,0 +1,30 @@
+# Official DigitalOcean App Platform Template
+# Minimal configuration based on digitalocean/sample-nodejs
+
+name: echotune-ai
+
+services:
+- name: web
+  environment_slug: node-js
+  github:
+    repo: dzp5103/Spotify-echo
+    branch: main
+    deploy_on_push: true
+  
+  # Production build command
+  build_command: npm ci --only=production
+  run_command: npm start
+  
+  # Required for web service
+  http_port: 3000
+  
+  # Basic resource allocation
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  
+  # Essential environment variables only
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "3000"

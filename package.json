@@ -12,6 +12,10 @@
     "test:integration": "jest --config tests/jest.config.js tests/integration",
     "test:unit": "jest --config tests/jest.config.js tests/unit",
     "test:e2e": "jest --config tests/jest.config.js tests/e2e",
+    "test:performance": "jest --config tests/jest.config.js tests/performance",
+    "test:mcp": "jest --config tests/jest.config.js tests/integration/enhanced-mcp-tools.test.js",
+    "test:mcp-performance": "jest --config tests/jest.config.js tests/performance/mcp-performance.test.js",
+    "test:mcp-integration": "node mcp-servers/mcp-integration-tester.js",
     "lint": "eslint src/ --ext .js,.ts,.jsx,.tsx",
     "lint:fix": "eslint src/ --ext .js,.ts,.jsx,.tsx --fix",
     "format": "prettier --write src/",
@@ -58,7 +62,12 @@
     "gemini-health": "node scripts/test-gemini-integration.js",
     "test:gemini-integration": "node scripts/test-gemini-integration.js",
     "production-check": "./scripts/production-readiness-check.sh",
-    "production-deploy": "./scripts/deploy-digitalocean.sh"
+    "production-deploy": "./scripts/deploy-digitalocean.sh",
+    "workflow:analyze": "node scripts/workflow-optimizer.js analyze",
+    "workflow:optimize": "node scripts/workflow-optimizer.js optimize",
+    "workflow:optimize:apply": "node scripts/workflow-optimizer.js optimize --apply",
+    "workflow:status": "node scripts/workflow-optimizer.js status",
+    "workflow:report": "node scripts/workflow-optimizer.js report"
   },
   "keywords": [
     "music",
@@ -89,6 +98,8 @@
     "@babel/preset-react": "^7.27.1",
     "@browserbasehq/mcp-server-browserbase": "github:browserbase/mcp-server-browserbase",
     "@google/generative-ai": "^0.2.1",
+    "@modelcontextprotocol/server-filesystem": "^2025.7.29",
+    "@modelcontextprotocol/server-sequential-thinking": "^2025.7.1",
     "@supabase/supabase-js": "^2.53.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
@@ -201,6 +212,27 @@
           "mcp-servers/screenshot-website/dist/index.js"
         ],
         "description": "Fast website screenshot capabilities for automation"
+      },
+      "enhanced-file-utilities": {
+        "command": "node",
+        "args": [
+          "mcp-servers/enhanced-file-utilities.js"
+        ],
+        "description": "Enhanced file handling with validation and security"
+      },
+      "enhanced-browser-tools": {
+        "command": "node",
+        "args": [
+          "mcp-servers/enhanced-browser-tools.js"
+        ],
+        "description": "Improved browser automation with error checking"
+      },
+      "comprehensive-validator": {
+        "command": "node",
+        "args": [
+          "mcp-servers/comprehensive-validator.js"
+        ],
+        "description": "System-wide validation and monitoring"
       }
     }
   },

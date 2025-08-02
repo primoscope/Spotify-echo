@@ -442,6 +442,11 @@ function getCurrentTimeContext() {
  */
 async function processLearningData(_data) {
   try {
+    // Validate input data
+    if (_data && typeof _data !== 'object') {
+      throw new Error('Invalid data format');
+    }
+    
     // Mock learning processing
     return {
       preferencesUpdated: true,

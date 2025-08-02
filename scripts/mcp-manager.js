@@ -16,17 +16,17 @@ class MCPServerManager {
         this.servers = {
             'sequential-thinking': {
                 name: 'Sequential Thinking',
-                path: path.join(this.mcpServersDir, 'sequential-thinking'),
+                path: this.mcpServersDir,
                 command: 'node',
-                args: ['dist/index.js'],
+                args: ['sequential-thinking/dist/index.js'],
                 health: 'ready',
                 description: 'Structured thinking and reasoning capabilities'
             },
             'screenshot-website': {
-                name: 'Screenshot Website Fast',
-                path: path.join(this.mcpServersDir, 'screenshot-website'),
+                name: 'Screenshot Website Fast', 
+                path: this.mcpServersDir,
                 command: 'node',
-                args: ['dist/index.js'],
+                args: ['screenshot-website/index.js'],
                 health: 'ready',
                 description: 'Fast website screenshot capabilities'
             },
@@ -43,15 +43,15 @@ class MCPServerManager {
                 description: 'Cloud browser automation'
             },
             'filesystem': {
-                name: 'FileScopeMCP',
+                name: 'Enhanced File Utilities',
                 path: this.projectRoot,
                 command: 'node',
-                args: ['node_modules/FileScopeMCP/dist/mcp-server.js'],
+                args: ['mcp-servers/enhanced-file-utilities.js'],
                 health: 'ready',
                 env: {
                     ALLOWED_DIRECTORIES: `${this.projectRoot},${this.projectRoot}/src,${this.projectRoot}/scripts,${this.projectRoot}/mcp-server`
                 },
-                description: 'File system operations with scope control'
+                description: 'Enhanced file system operations with security and validation'
             }
         };
     }

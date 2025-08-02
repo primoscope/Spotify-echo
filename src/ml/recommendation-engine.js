@@ -323,7 +323,7 @@ class RecommendationEngine {
   /**
    * Find similar users for collaborative filtering
    */
-  async findSimilarUsers(userProfile) {
+  async findSimilarUsers(_userProfile) {
     // Mock implementation - would use cosine similarity in real app
     return [
       { userId: 'user2', similarity: 0.85 },
@@ -335,7 +335,7 @@ class RecommendationEngine {
   /**
    * Get collaborative filtering recommendations
    */
-  async getCollaborativeRecommendations(similarUsers) {
+  async getCollaborativeRecommendations(_similarUsers) {
     // Mock collaborative recommendations
     return [
       {
@@ -358,7 +358,7 @@ class RecommendationEngine {
   /**
    * Get content-based recommendations
    */
-  async getContentBasedRecommendations(userProfile, context) {
+  async getContentBasedRecommendations(userProfile, _context) {
     // Mock content-based recommendations based on audio features
     const preferences = userProfile.preferences.audioFeatures;
     
@@ -460,7 +460,7 @@ class RecommendationEngine {
   /**
    * Get trending recommendations
    */
-  async getTrendingRecommendations(context) {
+  async getTrendingRecommendations(_context) {
     return [
       {
         trackId: 'trending1',
@@ -567,7 +567,7 @@ class RecommendationEngine {
   /**
    * Get fallback recommendations when ML fails
    */
-  getFallbackRecommendations(context) {
+  getFallbackRecommendations(_context) {
     return [
       {
         trackId: 'fallback1',
@@ -599,11 +599,11 @@ class RecommendationEngine {
     return Math.min(uniqueArtists / totalTracks, 1.0);
   }
 
-  async extractDominantGenres(userId) {
+  async extractDominantGenres(_userId) {
     return ['Pop', 'Rock', 'Electronic'];
   }
 
-  async analyzeListeningPatterns(userId) {
+  async analyzeListeningPatterns(_userId) {
     return {
       peakHours: ['19:00', '20:00', '21:00'],
       weekdayPattern: 'evening_focused',

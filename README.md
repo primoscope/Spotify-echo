@@ -1,7 +1,7 @@
 
 # 🎵 EchoTune AI - Next-Generation Music Discovery Platform
 
-## 🚀 **ONE-CLICK DEPLOYMENT - PRODUCTION READY**
+## 🚀 **QUICK DEPLOYMENT GUIDE - Production Ready**
 
 <div align="center">
 
@@ -9,64 +9,132 @@
 
 [![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
 
-[![Deploy with Docker](https://img.shields.io/badge/Deploy%20with%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/dzp5103/Spotify-echo#-docker-deployment)
-[![Quick Deploy Script](https://img.shields.io/badge/Quick%20Deploy%20Script-00D4AA?style=for-the-badge&logo=terminal&logoColor=white)](#-one-click-deploy-script)
+[![Deploy with Docker](https://img.shields.io/badge/Deploy%20with%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-docker-deployment)
+[![Quick Deploy Script](https://img.shields.io/badge/Quick%20Deploy%20Script-00D4AA?style=for-the-badge&logo=terminal&logoColor=white)](#-universal-deployment)
 
-**🌐 Live Demo:** [echotune-ai.ondigitalocean.app](https://echotune-ai.ondigitalocean.app) | **📚 Documentation:** [Full Guide](#-production-deployment)
+**🌐 Live Demo:** [echotune-ai.ondigitalocean.app](https://echotune-ai.ondigitalocean.app) | **📚 Full Guide:** [Production Deployment](#-production-deployment)
 
 </div>
 
 ---
 
-## 🚀 **Ultra-Clean Deployment - Choose Your Adventure**
+### 🎯 **Choose Your Deployment Method**
 
-### 🧙‍♂️ **Interactive Wizard (Perfect for Beginners)**
+| Method | Best For | Time | Difficulty | Features |
+|--------|----------|------|------------|----------|
+| 🔮 **Universal Script** | All environments | 2 min | ⭐ Easy | Auto-detection, SSL, Security |
+| 🐳 **Docker** | Cloud & Local | 3 min | ⭐⭐ Medium | Containers, Scalability |
+| ☁️ **DigitalOcean** | Production | 1 min | ⭐ Easy | Managed, CDN, Auto-scaling |
+| 🔧 **Manual** | Custom setups | 10 min | ⭐⭐⭐ Advanced | Full control |
+
+---
+
+## 🔮 **Universal Deployment (Recommended)**
+
+**🎯 One script that works everywhere - intelligently detects your environment and deploys optimally**
+
+### **Quick Start**
 ```bash
-# Step-by-step guided deployment with zero technical knowledge required
-curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-wizard.sh | bash
-```
+# Download and run universal deployment
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-universal.sh | bash
 
-### ⚡ **Clean Deploy (Quick & Automatic)**
-```bash
-# One-command deployment with smart auto-detection
-curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-clean.sh | bash
-```
-
-### 🌊 **Original One-Click (Battle-tested)**
-
-```bash
-# 1. Download and run the original one-click deploy script
-curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-one-click.sh | bash
-
-# 2. Or clone and deploy locally
+# Or clone and deploy locally
 git clone https://github.com/dzp5103/Spotify-echo.git
 cd Spotify-echo
-./deploy-one-click.sh
-
-# 3. Access your app at http://localhost:3000 🎉
+./deploy-universal.sh
 ```
 
-**🎯 Choose What Works for You:**
-- 🧙‍♂️ **New User?** → Use the Interactive Wizard
-- ⚡ **Want Speed?** → Use Clean Deploy  
-- 🏗️ **Need Control?** → Use Original One-Click
-- ☁️ **Want Cloud?** → Use DigitalOcean Button Below
+### **Production Deployment**
+```bash
+# Production deployment with SSL and security hardening
+./deploy-universal.sh \
+  --production \
+  --domain yourdomain.com \
+  --email admin@yourdomain.com
 
-**✨ What the script does:**
-- 🔍 **Auto-detects** your environment (DigitalOcean, Docker, Node.js, Linux)
+# Alternative with environment variables
+export DOMAIN=yourdomain.com
+export LETSENCRYPT_EMAIL=admin@yourdomain.com
+./deploy-universal.sh --production
+```
+
+### **Advanced Options**
+```bash
+# Force specific deployment method
+./deploy-universal.sh --method docker --domain localhost
+
+# Debug mode for troubleshooting
+./deploy-universal.sh --debug
+
+# Force reinstallation
+./deploy-universal.sh --force --production
+
+# All options
+./deploy-universal.sh --help
+```
+
+**✨ What the Universal Script Does:**
+- 🔍 **Auto-detects** your environment (DigitalOcean, Docker, Linux, Node.js)
 - 📦 **Installs** all dependencies automatically
 - ⚙️ **Configures** environment with secure defaults
+- 🔒 **Sets up SSL** certificates with Let's Encrypt
+- 🛡️ **Hardens security** with modern configurations
 - 🚀 **Deploys** using the optimal method for your system
-- 🏥 **Verifies** deployment health
+- 🏥 **Validates** deployment health and functionality
 - 🎵 **Ready to use** in under 3 minutes!
 
 ---
 
-## 🌊 **DigitalOcean App Platform Deployment**
+## 🐳 **Docker Deployment**
 
-**Managed deployment with zero server maintenance:**
+**Perfect for any server or cloud platform with containerization**
 
-1. **Click the Deploy Button:** [![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
+### **Quick Docker Start**
+```bash
+# Simple Docker run
+docker run -d -p 3000:3000 --name echotune-ai \
+  -e SPOTIFY_CLIENT_ID=your_client_id \
+  -e SPOTIFY_CLIENT_SECRET=your_client_secret \
+  dzp5103/echotune-ai:latest
+```
+
+### **Production Docker Compose**
+```bash
+# Clone repository
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+
+# Set environment variables
+export DOMAIN=yourdomain.com
+export LETSENCRYPT_EMAIL=admin@yourdomain.com
+
+# Deploy with production configuration
+docker-compose up -d --build
+
+# Check status
+docker-compose ps
+docker-compose logs -f
+```
+
+### **Docker Features**
+- ✅ **Multi-stage builds** for optimized images
+- ✅ **Security hardening** with non-root users
+- ✅ **Health checks** and automatic restarts
+- ✅ **SSL termination** with Nginx reverse proxy
+- ✅ **MongoDB and Redis** included
+- ✅ **Log management** and monitoring
+- ✅ **Resource limits** and optimization
+
+**🎯 Docker Works On:** AWS, Google Cloud, Azure, DigitalOcean, VPS, localhost
+
+---
+
+## ☁️ **DigitalOcean App Platform**
+
+**Managed deployment with zero server maintenance**
+
+### **One-Click Deploy**
+1. **Click Deploy:** [![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
 
 2. **Configure (Optional):**
    - Add your Spotify Client ID/Secret for full functionality
@@ -75,59 +143,239 @@ cd Spotify-echo
 
 3. **Deploy & Enjoy:** Your app will be live at `your-app-name.ondigitalocean.app`
 
-**💰 Cost:** Starting at $5/month | **⚡ Performance:** Global CDN, auto-scaling | **🔒 Security:** HTTPS included
+### **DigitalOcean Features**
+- 💰 **Cost:** Starting at $5/month
+- ⚡ **Performance:** Global CDN, auto-scaling
+- 🔒 **Security:** HTTPS included, DDoS protection
+- 🔄 **Auto-deploy:** GitHub integration
+- 📊 **Monitoring:** Built-in metrics and alerting
 
 ---
 
-## 🐳 **Docker Deployment**
+## 🔧 **Manual Deployment**
 
-**Perfect for any server or cloud platform:**
+**For advanced users who want full control**
 
+### **Prerequisites**
+- Ubuntu 22.04+ or Debian 11+
+- Node.js 18+ and npm
+- MongoDB or MongoDB Atlas
+- Domain with DNS access (for SSL)
+
+### **Step-by-Step Setup**
+
+1. **Install Dependencies**
 ```bash
-# Quick start with Docker
-docker run -d -p 3000:3000 --name echotune-ai \
-  -e SPOTIFY_CLIENT_ID=your_client_id \
-  -e SPOTIFY_CLIENT_SECRET=your_client_secret \
-  dzp5103/echotune-ai:latest
+# Update system
+sudo apt update && sudo apt upgrade -y
 
-# Or use docker-compose
+# Install Node.js 20
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install additional dependencies
+sudo apt install -y nginx certbot python3-certbot-nginx mongodb redis-server
+```
+
+2. **Clone and Setup Application**
+```bash
+# Clone repository
 git clone https://github.com/dzp5103/Spotify-echo.git
 cd Spotify-echo
-docker-compose up -d
+
+# Install dependencies
+npm install
+pip3 install -r requirements.txt
+
+# Copy and configure environment
+cp .env.production.example .env
+nano .env  # Add your configuration
 ```
 
-**🎯 Works on:** AWS, Google Cloud, Azure, DigitalOcean Droplets, VPS, localhost
+3. **Configure SSL Certificates**
+```bash
+# Setup SSL with our enhanced script
+sudo ./scripts/ssl-setup.sh
 
-**📚 Need help?** See the [Complete Deployment Guide](./ONE-CLICK-DEPLOY.md) for detailed instructions.
+# Or manually with certbot
+sudo certbot --nginx -d yourdomain.com
+```
+
+4. **Configure Nginx**
+```bash
+# Copy nginx configuration
+sudo cp nginx/nginx.conf.template /etc/nginx/nginx.conf
+sudo cp nginx/default.conf.template /etc/nginx/sites-available/echotune
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/echotune /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+5. **Setup System Service**
+```bash
+# Create systemd service
+sudo cp echotune.service /etc/systemd/system/
+sudo systemctl enable echotune
+sudo systemctl start echotune
+
+# Check status
+sudo systemctl status echotune
+```
 
 ---
 
-## 📋 **Quick Commands Summary**
+## 🔍 **Deployment Verification**
 
+### **Health Check Commands**
 ```bash
-# 🧙‍♂️ Interactive wizard (recommended for beginners)
-curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-wizard.sh | bash
+# Universal health check
+curl -f http://localhost:3000/health
 
-# ⚡ Clean deployment (smart auto-detection)
-curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-clean.sh | bash
+# Production HTTPS check
+curl -f https://yourdomain.com/health
 
-# 🚀 Original one-click deploy
-curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-one-click.sh | bash
+# Docker health check
+docker-compose ps
+docker-compose logs app
 
-# 🐳 Docker (recommended for cloud)
-docker run -d -p 3000:3000 --name echotune-ai dzp5103/echotune-ai:latest
-
-# 📦 NPM commands (after setup)
-npm run deploy:wizard         # Interactive deployment wizard
-npm run deploy:clean          # Clean deployment script
-npm run deploy:one-click      # Original one-click deployment
-npm run validate-deployment   # Validate deployment health
-npm start                     # Start development server
+# Service status (manual deployment)
+sudo systemctl status echotune
 ```
 
-**📚 Need detailed instructions?** See our [Clean Deployment Guide](./CLEAN_DEPLOYMENT_GUIDE.md)
+### **Expected Response**
+```json
+{
+  "status": "healthy",
+  "version": "2.0.0",
+  "timestamp": "2025-01-01T12:00:00.000Z",
+  "uptime": 300.5,
+  "features": {
+    "ai_chat": true,
+    "recommendations": true,
+    "spotify_oauth": true,
+    "ssl_enabled": true
+  }
+}
+```
 
-**💡 All methods work in demo mode without API keys!**
+---
+
+## 🚨 **Troubleshooting Quick Fixes**
+
+### **Common Issues & Solutions**
+
+#### **🔴 Application Won't Start**
+```bash
+# Check logs
+tail -f logs/app.log
+
+# Verify dependencies
+node --version  # Should be 18+
+npm --version
+
+# Check ports
+sudo netstat -tlnp | grep :3000
+```
+
+#### **🔴 SSL Certificate Issues**
+```bash
+# Validate SSL setup
+./scripts/ssl-setup.sh validate
+
+# Renew certificates
+sudo certbot renew
+
+# Check certificate expiry
+openssl x509 -enddate -noout -in /etc/nginx/ssl/yourdomain.com.crt
+```
+
+#### **🔴 Docker Issues**
+```bash
+# Rebuild containers
+docker-compose down
+docker-compose up -d --build
+
+# Check container logs
+docker-compose logs -f app
+
+# Reset Docker environment
+docker system prune -f
+```
+
+#### **🔴 Nginx Configuration**
+```bash
+# Test nginx configuration
+sudo nginx -t
+
+# Reload nginx
+sudo systemctl reload nginx
+
+# Check nginx status
+sudo systemctl status nginx
+```
+
+### **🆘 Get Help**
+- **📝 Check logs:** Most issues are visible in application logs
+- **🔍 Validate environment:** Ensure all required environment variables are set
+- **🌐 Test connectivity:** Verify domain DNS and firewall settings
+- **📚 Documentation:** See [detailed guides](./docs/) for specific environments
+- **🐛 Report issues:** [GitHub Issues](https://github.com/dzp5103/Spotify-echo/issues)
+
+---
+
+## ⚙️ **Environment Configuration**
+
+### **Required Environment Variables**
+```bash
+# Spotify API (Required for full functionality)
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+SPOTIFY_REDIRECT_URI=https://yourdomain.com/auth/callback
+
+# Security (Generate new values for production)
+SESSION_SECRET=your_secure_session_secret_32_chars_min
+JWT_SECRET=your_secure_jwt_secret_32_chars_min
+
+# Domain Configuration
+DOMAIN=yourdomain.com
+NODE_ENV=production
+```
+
+### **Optional Enhancements**
+```bash
+# AI Providers (Demo mode works without these)
+GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key
+
+# Database (MongoDB Atlas recommended)
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/
+
+# SSL Configuration
+LETSENCRYPT_EMAIL=admin@yourdomain.com
+```
+
+**💡 Demo Mode:** EchoTune AI works perfectly without any API keys using intelligent mock providers!
+
+---
+
+## 📊 **Deployment Comparison**
+
+| Feature | Universal Script | Docker | DigitalOcean | Manual |
+|---------|------------------|--------|--------------|--------|
+| **Setup Time** | 2-3 minutes | 3-5 minutes | 1 minute | 10-15 minutes |
+| **SSL Automation** | ✅ Automatic | ✅ Automatic | ✅ Included | ⚙️ Manual |
+| **Security Hardening** | ✅ Built-in | ✅ Built-in | ✅ Managed | ⚙️ Manual |
+| **Scalability** | ⚙️ Basic | ✅ Excellent | ✅ Auto-scaling | ⚙️ Manual |
+| **Maintenance** | ✅ Automated | ⚙️ Medium | ✅ Managed | ❌ Manual |
+| **Cost** | 💰 Server cost | 💰 Server cost | 💰💰 $5+/month | 💰 Server cost |
+| **Control** | ⚙️ Medium | ✅ High | ⚙️ Limited | ✅ Full |
+
+**🎯 Recommendation:** 
+- **Beginners:** Universal Script or DigitalOcean
+- **Developers:** Docker
+- **Production:** DigitalOcean or Docker with manual SSL
+- **Enterprise:** Manual deployment with custom configurations
 
 ---
 

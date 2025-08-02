@@ -73,7 +73,7 @@ quick_system_setup() {
     sudo systemctl enable docker
     
     # Add current user to docker group
-    sudo usermod -aG docker $USER
+    sudo usermod -aG docker "$USER"
     
     # Basic firewall setup
     sudo ufw --force enable
@@ -124,7 +124,7 @@ setup_app_directory() {
     fi
     
     # Check if directory exists but is not a git repository
-    if [ -n "$(ls -A . 2>/dev/null | head -1)" ]; then
+    if [ -n "$(find . -maxdepth 1 -type f -print -quit 2>/dev/null)" ]; then
         log_error "Directory $APP_DIR exists but is not a git repository"
         log_error "Found existing files in the directory"
         log_info "Please either:"

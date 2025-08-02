@@ -131,7 +131,8 @@ check_system_requirements() {
     fi
     
     # Check available memory (recommend 2GB minimum)
-    local mem_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+    local mem_kb
+    mem_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
     local mem_gb=$((mem_kb / 1024 / 1024))
     
     if [ $mem_gb -lt 2 ]; then
@@ -142,7 +143,8 @@ check_system_requirements() {
     fi
     
     # Check available disk space (recommend 20GB minimum)
-    local disk_available=$(df / | tail -1 | awk '{print $4}')
+    local disk_available
+    disk_available=$(df / | tail -1 | awk '{print $4}')
     local disk_gb=$((disk_available / 1024 / 1024))
     
     if [ $disk_gb -lt 20 ]; then
@@ -186,7 +188,7 @@ install_docker() {
         # Install Docker
         curl -fsSL https://get.docker.com -o get-docker.sh
         sudo sh get-docker.sh
-        sudo usermod -aG docker $USER
+        sudo usermod -aG docker "$USER"
         rm get-docker.sh
         
         # Configure Docker daemon for production
@@ -407,7 +409,7 @@ clone_repository() {
     fi
     
     # Check if directory exists but is not a git repository
-    if [ -n "$(sudo ls -A "$APP_DIR" 2>/dev/null | head -1)" ]; then
+    if [ -n "$(sudo find "$APP_DIR" -maxdepth 1 -type f -print -quit 2>/dev/null)" ]; then
         log_error "Directory $APP_DIR exists but is not a git repository"
         log_error "Found existing files in the directory"
         log_info "Please either:"
@@ -682,9 +684,9 @@ main() {
     setup_ssl_preparation
     
     # Ensure user can access Docker without sudo (requires re-login)
-    if ! groups $USER | grep -q docker; then
+    if ! groups "$USER" | grep -q docker; then
         log_info "Adding current user to docker group..."
-        sudo usermod -aG docker $USER
+        sudo usermod -aG docker "$USER"
         log_warning "You need to log out and log back in for Docker permissions to take effect"
     fi
     

@@ -56,104 +56,8 @@ HEALTH_RETRY_DELAY=10
 
 # Helper functions
 detect_and_source_env() {
-    local env_file=""
-    local env_locations=(
-        ".env"
-        "/opt/echotune/.env"
-        "$(pwd)/.env"
-        "${APP_DIR}/.env"
-    )
-    
-    log_info "Detecting and sourcing environment configuration..."
-    
-    # Try to find .env file in priority order
-    for location in "${env_locations[@]}"; do
-        if [ -f "$location" ] && [ -r "$location" ]; then
-            env_file="$location"
-            log_info "Found environment file: $env_file"
-            break
-        fi
-    done
-    
-    if [ -n "$env_file" ]; then
-        # Test environment file syntax before sourcing
-        if ! bash -n "$env_file" 2>/dev/null; then
-            exit_with_help "Environment file has syntax errors: $env_file" \
-                "Environment file contains bash syntax errors.
-Please check:
-1. File syntax is correct (no invalid bash syntax)
-2. Quotes are properly closed
-3. No special characters that need escaping
-
-You can test the file manually: bash -n $env_file"
-        fi
-        
-        # Source environment file safely with error handling
-        if ! (set -a; source "$env_file" 2>/dev/null; set +a); then
-            exit_with_help "Failed to load environment file: $env_file" \
-                "Environment file exists but failed to load.
-Please check:
-1. File permissions allow reading: chmod 644 $env_file
-2. No special characters in values that need escaping
-3. All variables are properly formatted
-
-You can test the file manually: source $env_file"
-        fi
-        
-        # Re-source for the current shell with validation
-        set -a
-        if ! source "$env_file" 2>/dev/null; then
-            set +a
-            exit_with_help "Failed to source environment file: $env_file" \
-                "Unable to load environment variables from file.
-This may be due to:
-1. Invalid variable assignments
-2. Special characters in values
-3. Missing quotes around values with spaces
-
-Please validate your .env file format."
-        fi
-        set +a
-        
-        log_success "Environment variables loaded from $env_file"
-        
-        # Export key variables for services with validation
-        export NODE_ENV="${NODE_ENV:-production}"
-        export PORT="${PORT:-3000}"
-        export DOMAIN="${DOMAIN:-localhost}"
-        
-        # Validate critical variables are not empty
-        if [ -n "$SPOTIFY_CLIENT_ID" ]; then
-            export SPOTIFY_CLIENT_ID
-        fi
-        if [ -n "$SPOTIFY_CLIENT_SECRET" ]; then
-            export SPOTIFY_CLIENT_SECRET
-        fi
-        if [ -n "$FRONTEND_URL" ]; then
-            export FRONTEND_URL
-        fi
-        if [ -n "$SPOTIFY_REDIRECT_URI" ]; then
-            export SPOTIFY_REDIRECT_URI
-        fi
-        if [ -n "$MONGODB_URI" ]; then
-            export MONGODB_URI
-        fi
-        if [ -n "$REDIS_URL" ]; then
-            export REDIS_URL
-        fi
-        
-        return 0
-    else
-        log_error "No .env file found in any of the expected locations:"
-        for location in "${env_locations[@]}"; do
-            if [ -f "$location" ] && [ ! -r "$location" ]; then
-                echo "  - $location (exists but not readable - check permissions)"
-            else
-                echo "  - $location"
-            fi
-        done
-        return 1
-    fi
+    # Use the robust environment detection function
+    detect_and_source_env_robust
 }
 
 log_info() {
@@ -206,92 +110,8 @@ check_root() {
 }
 
 validate_environment() {
-    log_info "Validating environment configuration..."
-    
-    local required_vars=(
-        "SPOTIFY_CLIENT_ID"
-        "SPOTIFY_CLIENT_SECRET"
-        "NODE_ENV"
-        "PORT"
-    )
-    
-    local missing_vars=()
-    local warning_vars=()
-    
-    # Check required variables
-    for var in "${required_vars[@]}"; do
-        if [ -z "${!var}" ]; then
-            missing_vars+=("$var")
-        fi
-    done
-    
-    # Check for common misconfigurations
-    if [ -n "$SPOTIFY_CLIENT_ID" ] && [[ ! "$SPOTIFY_CLIENT_ID" =~ ^[a-f0-9]{32}$ ]]; then
-        warning_vars+=("SPOTIFY_CLIENT_ID format looks suspicious")
-    fi
-    
-    if [ -n "$SPOTIFY_CLIENT_SECRET" ] && [[ ! "$SPOTIFY_CLIENT_SECRET" =~ ^[a-f0-9]{32}$ ]]; then
-        warning_vars+=("SPOTIFY_CLIENT_SECRET format looks suspicious")
-    fi
-    
-    if [ "$NODE_ENV" != "production" ] && [ "$NODE_ENV" != "development" ]; then
-        warning_vars+=("NODE_ENV should be 'production' or 'development', got: $NODE_ENV")
-    fi
-    
-    if [[ "$FRONTEND_URL" == *"localhost"* ]] && [ "$NODE_ENV" = "production" ]; then
-        warning_vars+=("FRONTEND_URL contains localhost but NODE_ENV is production")
-    fi
-    
-    # Report missing variables
-    if [ ${#missing_vars[@]} -ne 0 ]; then
-        local missing_list=""
-        for var in "${missing_vars[@]}"; do
-            missing_list="$missing_list\n  - $var"
-        done
-        
-        exit_with_help "Missing required environment variables:$missing_list" \
-            "Please update your .env file with the missing variables.
-You can find examples in .env.example or .env.production.example.
-
-Common setup steps:
-1. Copy template: cp .env.example .env
-2. Edit file: nano .env
-3. Set your Spotify credentials from https://developer.spotify.com/
-4. Verify all required variables are set"
-    fi
-    
-    # Report warnings
-    if [ ${#warning_vars[@]} -ne 0 ]; then
-        log_warning "Environment configuration warnings:"
-        for warning in "${warning_vars[@]}"; do
-            echo "  - $warning"
-        done
-        echo ""
-    fi
-    
-    # Display current configuration (with sensitive data masked)
-    log_info "Current environment configuration:"
-    echo "  - NODE_ENV: $NODE_ENV"
-    echo "  - PORT: $PORT"
-    echo "  - DOMAIN: ${DOMAIN:-[Not set]}"
-    echo "  - FRONTEND_URL: ${FRONTEND_URL:-[Not set]}"
-    echo "  - SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:0:8}..."
-    echo "  - SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:0:8}..."
-    echo "  - SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-[Not set]}"
-    
-    if [ -n "$MONGODB_URI" ]; then
-        echo "  - MONGODB_URI: [Configured]"
-    else
-        echo "  - MONGODB_URI: [Not set]"
-    fi
-    
-    if [ -n "$REDIS_URL" ]; then
-        echo "  - REDIS_URL: [Configured]"
-    else
-        echo "  - REDIS_URL: [Not set]"
-    fi
-    
-    log_success "Environment validation passed"
+    # Use comprehensive environment validation
+    validate_environment_comprehensive
 }
 
 setup_directories() {
@@ -319,58 +139,8 @@ setup_directories() {
 }
 
 setup_repository() {
-    log_step "Setting up application repository..."
-    
-    # Check if we're already in the correct directory with a git repository
-    if [ -d ".git" ]; then
-        log_info "Found existing git repository"
-        
-        # Verify it's the correct repository
-        local current_remote
-        current_remote=$(git remote get-url origin 2>/dev/null || echo "")
-        
-        if [[ "$current_remote" == *"Spotify-echo"* ]] || [[ "$current_remote" == "$REPO_URL" ]]; then
-            log_success "Repository verified: $current_remote"
-            return 0
-        else
-            exit_with_help "Directory contains wrong git repository: $current_remote" \
-                "The current directory contains a different git repository.
-Please either:
-1. Run this script from a clean directory, or
-2. Run from the correct Spotify-echo repository directory, or  
-3. Set REPO_URL environment variable to match your repository"
-        fi
-    fi
-    
-    # Check if directory exists but is not a git repository
-    if [ -n "$(ls -A . 2>/dev/null)" ]; then
-        exit_with_help "Directory $APP_DIR exists but is not a git repository" \
-            "The application directory contains files but is not a git repository.
-Please either:
-1. Remove the directory: sudo rm -rf $APP_DIR
-2. Move to a different directory before running deployment
-3. Initialize as a git repository manually"
-    fi
-    
-    # Directory is empty or doesn't exist, safe to clone
-    log_info "Cloning repository from $REPO_URL..."
-    
-    if ! git clone "$REPO_URL" .; then
-        exit_with_help "Failed to clone repository from $REPO_URL" \
-            "Repository cloning failed. This could be due to:
-1. Network connectivity issues
-2. Invalid repository URL
-3. Permission issues (if private repository)
-4. Git not installed
-
-Please verify:
-- Internet connection is working
-- Repository URL is correct: $REPO_URL
-- Git is installed: git --version
-- Repository is accessible (if private, ensure SSH keys or credentials are set up)"
-    fi
-    
-    log_success "Repository cloned successfully"
+    # Use the robust repository setup function
+    setup_repository_robust "$REPO_URL" "." "Spotify-echo"
 }
 
 setup_ssl_certificates() {
@@ -553,107 +323,15 @@ You can also try:
 deploy_application() {
     log_step "Deploying application..."
     
-    # Stop existing services gracefully
-    log_info "Stopping existing services..."
-    if ! docker-compose down --timeout 30; then
-        log_warning "Some services may not have stopped cleanly"
-    else
-        log_success "Existing services stopped"
-    fi
-    
-    # Start services
-    log_info "Starting services..."
-    if ! docker-compose up -d; then
-        exit_with_help "Failed to start services" \
-            "Service startup failed. This could be due to:
-1. Port conflicts: netstat -tlnp | grep ':80\|:443\|:3000'
-2. Resource constraints: free -h && df -h
-3. Configuration errors in docker-compose.yml
-4. Missing environment variables
-
-Try these troubleshooting steps:
-- Check service logs: docker-compose logs
-- Verify ports are available: sudo lsof -i :80,443,3000
-- Restart Docker: sudo systemctl restart docker
-- Check system resources are sufficient"
-    fi
-    
-    log_success "Services started successfully"
+    # Use the robust Docker Compose deployment
+    docker_compose_up_robust "docker-compose.yml" "" "false"
 }
 
 wait_for_health() {
     log_step "Performing application health check..."
     
-    local retries=0
-    local health_url="$HEALTH_ENDPOINT"
-    
-    # Try different health endpoints if main one fails
-    local health_endpoints=(
-        "http://localhost:3000/health"
-        "http://localhost:$PORT/health"
-        "http://127.0.0.1:3000/health"
-        "http://127.0.0.1:$PORT/"
-        "http://localhost:3000/"
-    )
-    
-    while [ $retries -lt $MAX_HEALTH_RETRIES ]; do
-        log_info "Health check attempt $((retries + 1))/$MAX_HEALTH_RETRIES..."
-        
-        # Try each endpoint until one succeeds
-        local success=false
-        for endpoint in "${health_endpoints[@]}"; do
-            log_info "Testing endpoint: $endpoint"
-            if curl -f -s --connect-timeout 10 --max-time 30 "$endpoint" > /dev/null 2>&1; then
-                log_success "Application is healthy and responding at $endpoint!"
-                return 0
-            fi
-        done
-        
-        retries=$((retries + 1))
-        if [ $retries -lt $MAX_HEALTH_RETRIES ]; then
-            log_info "Waiting ${HEALTH_RETRY_DELAY}s before next check..."
-            sleep $HEALTH_RETRY_DELAY
-        fi
-    done
-    
-    log_error "Application health check failed after $MAX_HEALTH_RETRIES attempts"
-    echo ""
-    log_info "Gathering diagnostic information..."
-    echo ""
-    echo "🔍 Service Status:"
-    if command -v docker-compose &> /dev/null; then
-        docker-compose ps || echo "Could not get service status"
-    else
-        echo "Docker Compose not available"
-    fi
-    echo ""
-    echo "📋 Recent Application Logs:"
-    if command -v docker-compose &> /dev/null; then
-        docker-compose logs --tail=20 app 2>/dev/null || echo "No app logs available"
-    else
-        echo "Docker Compose logs not available"
-    fi
-    echo ""
-    echo "🌐 Network Status:"
-    netstat -tlnp 2>/dev/null | grep -E ':(80|443|3000)' || echo "No network status available"
-    echo ""
-    
-    exit_with_help "Application failed to become healthy" \
-        "The application did not pass health checks. Common issues:
-1. Application startup errors - check logs above
-2. Port binding issues - verify ports 80,443,3000 are available
-3. Database connection problems - check MongoDB/database connectivity
-4. Configuration errors - verify .env file settings
-5. Resource constraints - check memory and disk space
-6. Docker issues - ensure Docker is running properly
-
-Troubleshooting steps:
-- Check detailed logs: docker-compose logs -f
-- Verify configuration: cat .env
-- Test manually: curl -v http://localhost:3000/
-- Check resources: free -h && df -h
-- Check Docker: docker ps && docker-compose ps
-- Restart services: docker-compose restart"
+    # Use the enhanced health check function
+    wait_for_app_health "$HEALTH_ENDPOINT" "$MAX_HEALTH_RETRIES" "$HEALTH_RETRY_DELAY"
 }
 
 setup_monitoring() {

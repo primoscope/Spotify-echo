@@ -40,24 +40,53 @@ class MCPIntegrationTest {
         name,
         status: 'failed',
         error: error.message,
+        stack: error.stack,
         timestamp: new Date().toISOString()
       });
       this.testResults.failedTests++;
-      console.log(`❌ Test failed: ${name} - ${error.message}`);
-      throw error;
+      console.error(`❌ Test failed: ${name} - ${error.message}`);
+      // Log the stack trace for debugging
+      if (process.env.DEBUG === 'true') {
+        console.error(`Stack trace: ${error.stack}`);
+      }
+      return null; // Don't throw, let the test suite continue
     }
   }
 
   async testHealthCheck() {
-    const response = await axios.get(`${this.baseURL}/health`);
-    if (response.status !== 200) {
-      throw new Error(`Health check failed with status: ${response.status}`);
+    const maxRetries = 3;
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`  Health check attempt ${attempt}/${maxRetries}...`);
+        const response = await axios.get(`${this.baseURL}/health`, {
+          timeout: 10000,
+          validateStatus: function (status) {
+            return status < 500; // Resolve only if the status code is less than 500
+          }
+        });
+        
+        if (response.status === 200) {
+          return {
+            status: response.data.status,
+            totalServers: response.data.totalServers || 0,
+            uptime: response.data.uptime || 'unknown'
+          };
+        } else {
+          throw new Error(`Health check returned status: ${response.status}`);
+        }
+      } catch (error) {
+        lastError = error;
+        console.log(`  Attempt ${attempt} failed: ${error.message}`);
+        if (attempt < maxRetries) {
+          console.log(`  Waiting 2 seconds before retry...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
     }
-    return {
-      status: response.data.status,
-      totalServers: response.data.totalServers,
-      uptime: response.data.uptime
-    };
+    
+    throw new Error(`Health check failed after ${maxRetries} attempts. Last error: ${lastError.message}`);
   }
 
   async testServersList() {
@@ -280,17 +309,26 @@ curl -X POST http://localhost:3001/browser/automate \\
     console.log('=' .repeat(50));
 
     try {
-      // Basic connectivity tests
-      await this.runTest('Health Check', () => this.testHealthCheck());
-      await this.runTest('Servers List', () => this.testServersList());
+      // Basic connectivity tests - these are critical and should stop execution if they fail
+      const healthResult = await this.runTest('Health Check', () => this.testHealthCheck());
+      if (!healthResult) {
+        console.error('\n💥 Critical test failed: Health Check');
+        console.error('Cannot proceed without MCP server connectivity.');
+        return this.generateFailureReport();
+      }
 
-      // Individual server tests
+      const serversResult = await this.runTest('Servers List', () => this.testServersList());
+      if (!serversResult) {
+        console.log('\n⚠️  Warning: Servers list test failed, but continuing with other tests...');
+      }
+
+      // Individual server tests - these can fail independently
       await this.runTest('Mermaid Diagrams', () => this.testMermaidDiagrams());
       await this.runTest('File Operations', () => this.testFileOperations());
       await this.runTest('Browser Automation', () => this.testBrowserAutomation());
       await this.runTest('Spotify Integration', () => this.testSpotifyIntegration());
 
-      // Comprehensive integration test
+      // Comprehensive integration test - optional
       await this.runTest('Comprehensive Integration', () => this.testComprehensiveIntegration());
 
       // Generate report
@@ -298,7 +336,10 @@ curl -X POST http://localhost:3001/browser/automate \\
       console.log(`\n📄 Test report generated: ${reportPath}`);
 
     } catch (error) {
-      console.error(`\n❌ Test suite failed: ${error.message}`);
+      console.error(`\n💥 Test suite encountered unexpected error: ${error.message}`);
+      if (process.env.DEBUG === 'true') {
+        console.error(`Stack trace: ${error.stack}`);
+      }
     }
 
     // Print summary
@@ -307,15 +348,43 @@ curl -X POST http://localhost:3001/browser/automate \\
     console.log(`Total Tests: ${this.testResults.totalTests}`);
     console.log(`Passed: ${this.testResults.passedTests}`);
     console.log(`Failed: ${this.testResults.failedTests}`);
-    console.log(`Success Rate: ${Math.round((this.testResults.passedTests / this.testResults.totalTests) * 100)}%`);
+    
+    const successRate = this.testResults.totalTests > 0 
+      ? Math.round((this.testResults.passedTests / this.testResults.totalTests) * 100)
+      : 0;
+    console.log(`Success Rate: ${successRate}%`);
 
     if (this.testResults.failedTests === 0) {
       console.log('\n🎉 All MCP integrations working correctly!');
+      process.exit(0);
     } else {
       console.log('\n⚠️  Some tests failed. Check the report for details.');
+      
+      // Log failed tests for debugging
+      const failedTests = this.testResults.tests.filter(test => test.status === 'failed');
+      if (failedTests.length > 0) {
+        console.log('\n❌ Failed tests:');
+        failedTests.forEach(test => {
+          console.log(`  - ${test.name}: ${test.error}`);
+        });
+      }
+      
+      // Exit with non-zero code to indicate failure
+      process.exit(1);
     }
 
     return this.testResults;
+  }
+
+  generateFailureReport() {
+    console.log('\n' + '=' .repeat(50));
+    console.log('💥 MCP Integration Test FAILED - Critical Error');
+    console.log(`Total Tests Attempted: ${this.testResults.totalTests}`);
+    console.log(`Passed: ${this.testResults.passedTests}`);
+    console.log(`Failed: ${this.testResults.failedTests}`);
+    console.log('\n🚨 Critical tests failed - MCP server may not be running or accessible');
+    
+    process.exit(1);
   }
 }
 
@@ -323,17 +392,55 @@ curl -X POST http://localhost:3001/browser/automate \\
 if (require.main === module) {
   const testSuite = new MCPIntegrationTest();
   
-  // Check if MCP server is running
-  axios.get('http://localhost:3001/health')
-    .then(() => {
-      console.log('✅ MCP server is running, starting tests...\n');
-      return testSuite.runAllTests();
-    })
-    .catch(() => {
-      console.error('❌ MCP server is not running. Please start it first:');
-      console.error('   cd mcp-server && npm run orchestrator');
+  // Enhanced MCP server connectivity check
+  console.log('🔍 Checking MCP server connectivity...');
+  
+  const checkServer = async () => {
+    const maxAttempts = 5;
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        console.log(`Connection attempt ${attempt}/${maxAttempts}...`);
+        await axios.get('http://localhost:3001/health', { 
+          timeout: 5000,
+          validateStatus: function (status) {
+            return status < 500;
+          }
+        });
+        console.log('✅ MCP server is running, starting tests...\n');
+        return true;
+      } catch (error) {
+        lastError = error;
+        console.log(`Attempt ${attempt} failed: ${error.message}`);
+        if (attempt < maxAttempts) {
+          console.log('Waiting 3 seconds before retry...');
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      }
+    }
+    
+    console.error(`❌ MCP server is not accessible after ${maxAttempts} attempts.`);
+    console.error(`Last error: ${lastError.message}`);
+    console.error('\n🔧 Troubleshooting steps:');
+    console.error('   1. Start MCP server: cd mcp-server && npm run orchestrator');
+    console.error('   2. Check if port 3001 is available: netstat -tlnp | grep 3001');
+    console.error('   3. Verify MCP server configuration');
+    console.error('   4. Check MCP server logs for errors');
+    console.error('   5. Ensure all MCP environment variables are set');
+    
+    process.exit(1);
+  };
+  
+  checkServer().then(() => {
+    testSuite.runAllTests().catch((error) => {
+      console.error('\n💥 Unexpected error in test execution:', error.message);
+      if (process.env.DEBUG === 'true') {
+        console.error('Stack trace:', error.stack);
+      }
       process.exit(1);
     });
+  });
 }
 
 module.exports = MCPIntegrationTest;

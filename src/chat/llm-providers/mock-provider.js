@@ -171,6 +171,17 @@ class MockLLMProvider extends BaseLLMProvider {
       metadata: { provider: 'mock', recovered: true }
     };
   }
+
+  /**
+   * Legacy generateResponse method for compatibility
+   * @param {string} prompt - User message
+   * @returns {Promise<string>} Response text
+   */
+  async generateResponse(prompt) {
+    const messages = [{ role: 'user', content: prompt }];
+    const completion = await this.generateCompletion(messages);
+    return completion.content;
+  }
 }
 
 module.exports = MockLLMProvider;

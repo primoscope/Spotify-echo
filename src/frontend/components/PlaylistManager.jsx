@@ -14,8 +14,8 @@ function PlaylistManager() {
   const [generating, setGenerating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [generatedTracks, setGeneratedTracks] = useState([]);
-  const [generatedPlaylistData, setGeneratedPlaylistData] = useState(null);
+  const [_generatedTracks, setGeneratedTracks] = useState([]);
+  const [_generatedPlaylistData, setGeneratedPlaylistData] = useState(null);
 
   useEffect(() => {
     if (user) {

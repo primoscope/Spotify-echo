@@ -1,7 +1,7 @@
 // Enhanced Error Handling Middleware for EchoTune AI
 
 class ErrorHandler {
-    static handle(err, req, res, next) {
+    static handle(err, req, res, _next) {
         console.error('Error occurred:', {
             error: err.message,
             stack: err.stack,

@@ -98,7 +98,7 @@ ${!hasActiveDatabase() ? '**Demo Mode Active** - Connect your Spotify account fo
     if (!message.trim() || isTyping) return;
 
     // Add user message
-    const userMessage = addMessage('user', message);
+    const _userMessage = addMessage('user', message);
     
     // Update conversation history
     const newHistory = [...conversationHistory, { role: 'user', content: message }];

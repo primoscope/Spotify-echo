@@ -1,20 +1,12 @@
 // React is needed for JSX
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function VoiceRecording({ onVoiceInput, disabled }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState(null);
   const [isSupported, setIsSupported] = useState(false);
 
-  useEffect(() => {
-    // Check for speech recognition support
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      setIsSupported(true);
-      initializeSpeechRecognition();
-    }
-  }, []);
-
-  const initializeSpeechRecognition = () => {
+  const initializeSpeechRecognition = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognitionInstance = new SpeechRecognition();
     
@@ -41,7 +33,15 @@ function VoiceRecording({ onVoiceInput, disabled }) {
     };
 
     setRecognition(recognitionInstance);
-  };
+  }, [onVoiceInput]);
+
+  useEffect(() => {
+    // Check for speech recognition support
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      setIsSupported(true);
+      initializeSpeechRecognition();
+    }
+  }, [initializeSpeechRecognition]);
 
   const toggleRecording = () => {
     if (!recognition || disabled) return;

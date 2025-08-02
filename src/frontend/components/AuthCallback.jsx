@@ -1,5 +1,5 @@
 // React is needed for JSX
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
@@ -9,11 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 function AuthCallback() {
   const { checkAuthStatus } = useAuth();
 
-  useEffect(() => {
-    handleAuthCallback();
-  }, []);
-
-  const handleAuthCallback = async () => {
+  const handleAuthCallback = useCallback(async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const authStatus = urlParams.get('auth');
     const error = urlParams.get('error');
@@ -33,7 +29,11 @@ function AuthCallback() {
     } else {
       window.location.href = '/';
     }
-  };
+  }, [checkAuthStatus]);
+
+  useEffect(() => {
+    handleAuthCallback();
+  }, [handleAuthCallback]);
 
   return (
     <div className="auth-callback">

@@ -1,28 +1,28 @@
-# Simplified DigitalOcean App Platform Configuration
-# Based on official digitalocean/sample-nodejs template
+# DigitalOcean App Platform Configuration
+# EchoTune AI - AI-Powered Music Discovery Platform
 
-name: echotune-ai # App name differs from repo for branding purposes
+name: echotune-ai
 
 services:
-
+- name: web
   environment_slug: node-js
   github:
     repo: dzp5103/Spotify-echo
     branch: main
     deploy_on_push: true
   
-  # Essential commands
+  # Build and run configuration
   build_command: npm ci --only=production
   run_command: npm start
   
-  # Basic HTTP configuration
+  # HTTP configuration
   http_port: 3000
   
-  # Minimal resource allocation
+  # Resource allocation for cost optimization
   instance_count: 1
   instance_size_slug: basic-xxs
   
-  # Essential environment variables
+  # Environment variables
   envs:
   - key: NODE_ENV
     value: production
@@ -32,8 +32,16 @@ services:
     value: mock
   - key: HEALTH_CHECK_ENABLED
     value: "true"
+  - key: DEMO_MODE
+    value: "true"
+  - key: SESSION_SECRET
+    type: SECRET
+    value: GENERATED_SESSION_SECRET
+  - key: JWT_SECRET
+    type: SECRET  
+    value: GENERATED_JWT_SECRET
   
-  # Basic health check
+  # Health check configuration
   health_check:
     http_path: /health
     initial_delay_seconds: 30
@@ -42,6 +50,6 @@ services:
     success_threshold: 1
     failure_threshold: 3
   
-  # Default route
+  # Route configuration
   routes:
   - path: /

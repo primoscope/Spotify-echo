@@ -18,12 +18,24 @@
 
 ---
 
-## 🚀 **One-Click Deploy Script**
+## 🚀 **Ultra-Clean Deployment - Choose Your Adventure**
 
-**Ultra-fast deployment in 3 steps:**
+### 🧙‍♂️ **Interactive Wizard (Perfect for Beginners)**
+```bash
+# Step-by-step guided deployment with zero technical knowledge required
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-wizard.sh | bash
+```
+
+### ⚡ **Clean Deploy (Quick & Automatic)**
+```bash
+# One-command deployment with smart auto-detection
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-clean.sh | bash
+```
+
+### 🌊 **Original One-Click (Battle-tested)**
 
 ```bash
-# 1. Download and run the one-click deploy script
+# 1. Download and run the original one-click deploy script
 curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-one-click.sh | bash
 
 # 2. Or clone and deploy locally
@@ -33,6 +45,12 @@ cd Spotify-echo
 
 # 3. Access your app at http://localhost:3000 🎉
 ```
+
+**🎯 Choose What Works for You:**
+- 🧙‍♂️ **New User?** → Use the Interactive Wizard
+- ⚡ **Want Speed?** → Use Clean Deploy  
+- 🏗️ **Need Control?** → Use Original One-Click
+- ☁️ **Want Cloud?** → Use DigitalOcean Button Below
 
 **✨ What the script does:**
 - 🔍 **Auto-detects** your environment (DigitalOcean, Docker, Node.js, Linux)
@@ -87,17 +105,27 @@ docker-compose up -d
 ## 📋 **Quick Commands Summary**
 
 ```bash
-# 🚀 One-click deploy anywhere
+# 🧙‍♂️ Interactive wizard (recommended for beginners)
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-wizard.sh | bash
+
+# ⚡ Clean deployment (smart auto-detection)
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-clean.sh | bash
+
+# 🚀 Original one-click deploy
 curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-one-click.sh | bash
 
 # 🐳 Docker (recommended for cloud)
 docker run -d -p 3000:3000 --name echotune-ai dzp5103/echotune-ai:latest
 
-# 📦 NPM commands
-npm run deploy:one-click     # Run one-click deployment
-npm run validate-deployment  # Validate deployment health
-npm start                    # Start development server
+# 📦 NPM commands (after setup)
+npm run deploy:wizard         # Interactive deployment wizard
+npm run deploy:clean          # Clean deployment script
+npm run deploy:one-click      # Original one-click deployment
+npm run validate-deployment   # Validate deployment health
+npm start                     # Start development server
 ```
+
+**📚 Need detailed instructions?** See our [Clean Deployment Guide](./CLEAN_DEPLOYMENT_GUIDE.md)
 
 **💡 All methods work in demo mode without API keys!**
 

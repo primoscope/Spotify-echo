@@ -1,5 +1,5 @@
 // React is needed for JSX
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLLM } from '../contexts/LLMContext';
 import { useDatabase } from '../contexts/DatabaseContext';
@@ -16,7 +16,7 @@ import io from 'socket.io-client';
  */
 function ChatInterface() {
   const { user } = useAuth();
-  const { currentProvider, sendMessage } = useLLM();
+  const { currentProvider, providers, sendMessage } = useLLM();
   const { hasActiveDatabase, fallbackMode } = useDatabase();
   
   const [messages, setMessages] = useState([]);
@@ -25,37 +25,7 @@ function ChatInterface() {
   const [socket, setSocket] = useState(null);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    // Initialize WebSocket connection for real-time features
-    const newSocket = io('/', {
-      transports: ['websocket', 'polling']
-    });
-
-    newSocket.on('connect', () => {
-      console.log('Connected to chat server');
-    });
-
-    newSocket.on('message', (data) => {
-      addMessage('assistant', data.message, data.timestamp);
-    });
-
-    newSocket.on('typing', (data) => {
-      setIsTyping(data.isTyping);
-    });
-
-    setSocket(newSocket);
-
-    // Add initial welcome message
-    addMessage('assistant', getWelcomeMessage(), new Date().toISOString());
-
-    return () => newSocket.close();
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const getWelcomeMessage = () => {
+  const getWelcomeMessage = useCallback(() => {
     if (user) {
       return `Hello ${user.display_name || user.id}! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood or activity.
 
@@ -72,12 +42,15 @@ ${!hasActiveDatabase() ? '**Demo Mode Active** - Connect your Spotify account fo
 
 **Try asking me:**
 • "Recommend some upbeat songs for working out"
-• "Create a chill playlist for studying"  
+• "Create a chill playlist for studying"
 • "I'm feeling nostalgic, what should I listen to?"
-• "Find me some new indie artists to discover"`;
-  };
+• "Find songs similar to my recent favorites"
 
-  const addMessage = (sender, content, timestamp = null) => {
+**Available Models:**
+${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
+  }, [user, hasActiveDatabase, providers]);
+
+  const addMessage = useCallback((sender, content, timestamp = null) => {
     const newMessage = {
       id: Date.now() + Math.random(),
       sender,
@@ -88,7 +61,41 @@ ${!hasActiveDatabase() ? '**Demo Mode Active** - Connect your Spotify account fo
     
     setMessages(prev => [...prev, newMessage]);
     return newMessage;
-  };
+  }, [currentProvider]);
+
+  const addMessageCallback = useCallback((role, message, timestamp) => {
+    addMessage(role, message, timestamp);
+  }, [addMessage]);
+
+  useEffect(() => {
+    // Initialize WebSocket connection for real-time features
+    const newSocket = io('/', {
+      transports: ['websocket', 'polling']
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Connected to chat server');
+    });
+
+    newSocket.on('message', (data) => {
+      addMessageCallback('assistant', data.message, data.timestamp);
+    });
+
+    newSocket.on('typing', (data) => {
+      setIsTyping(data.isTyping);
+    });
+
+    setSocket(newSocket);
+
+    // Add initial welcome message  
+    addMessageCallback('assistant', getWelcomeMessage(), new Date().toISOString());
+
+    return () => newSocket.close();
+  }, [addMessageCallback, getWelcomeMessage]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const addSystemMessage = (content) => {
     addMessage('system', content);

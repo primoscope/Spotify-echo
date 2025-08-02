@@ -79,7 +79,7 @@ describe('MCP Servers Integration', () => {
             const serverPath = path.join(projectRoot, 'mcp-servers/screenshot-website');
             expect(fs.existsSync(serverPath)).toBe(true);
             expect(fs.existsSync(path.join(serverPath, 'package.json'))).toBe(true);
-            expect(fs.existsSync(path.join(serverPath, 'dist/index.js'))).toBe(true);
+            expect(fs.existsSync(path.join(serverPath, 'index.js'))).toBe(true);
         });
 
         test('Package.json should include MCP server configurations', () => {

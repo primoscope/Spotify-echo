@@ -3,8 +3,8 @@
  * Implements automatic failover, key rotation, and real-time monitoring
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+const _fs = require('fs').promises;
+const _path = require('path');
 
 class ProviderManager {
   constructor() {
@@ -289,29 +289,33 @@ class ProviderManager {
       throw new Error('Provider not found');
     }
 
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
       const timeoutId = setTimeout(() => {
         resolve(false);
       }, timeout);
 
-      try {
-        const testMessage = [{ role: 'user', content: 'Hi, please respond with just "OK" to confirm you are working.' }];
-        const response = await provider.generateCompletion(testMessage);
+      const testProvider = async () => {
+        try {
+          const testMessage = [{ role: 'user', content: 'Hi, please respond with just "OK" to confirm you are working.' }];
+          const response = await provider.generateCompletion(testMessage);
         
-        clearTimeout(timeoutId);
-        
-        if (response && response.content && typeof response.content === 'string' && response.content.length > 0) {
-          config.lastTested = new Date().toISOString();
-          config.responseTime = Date.now() - (config.testStartTime || Date.now());
-          resolve(true);
-        } else {
+          clearTimeout(timeoutId);
+          
+          if (response && response.content && typeof response.content === 'string' && response.content.length > 0) {
+            config.lastTested = new Date().toISOString();
+            config.responseTime = Date.now() - (config.testStartTime || Date.now());
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } catch (error) {
+          clearTimeout(timeoutId);
+          config.error = error.message;
           resolve(false);
         }
-      } catch (error) {
-        clearTimeout(timeoutId);
-        config.error = error.message;
-        resolve(false);
-      }
+      };
+      
+      testProvider();
     });
   }
 

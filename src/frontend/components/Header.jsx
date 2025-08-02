@@ -1,5 +1,5 @@
 // React is needed for JSX
-import React from 'react';
+
 import { useAuth } from '../contexts/AuthContext';
 
 /**

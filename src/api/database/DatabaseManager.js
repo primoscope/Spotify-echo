@@ -107,7 +107,6 @@ class DatabaseManager {
    */
   async initializeSQLite() {
     try {
-      const sqlite3 = require('sqlite3').verbose();
       const { Database } = require('sqlite3');
       
       // Ensure data directory exists
@@ -239,9 +238,6 @@ class DatabaseManager {
     ];
 
     return new Promise((resolve, reject) => {
-      let completed = 0;
-      const total = schemas.length + indexes.length;
-
       const executeQueries = async (queries) => {
         for (const query of queries) {
           await new Promise((resolveQuery, rejectQuery) => {
@@ -252,7 +248,6 @@ class DatabaseManager {
                 return;
               }
               
-              completed++;
               resolveQuery();
             });
           });

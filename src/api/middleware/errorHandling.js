@@ -3,7 +3,7 @@
  * Implements timeout management, retry logic, and graceful degradation
  */
 
-const path = require('path');
+const _path = require('path');
 
 /**
  * Timeout middleware with user feedback
@@ -220,8 +220,8 @@ const rateLimiter = (options = {}) => {
     max = 100, // limit each IP to 100 requests per windowMs
     message = 'Too many requests, please try again later.',
     keyGenerator = (req) => req.ip,
-    skipSuccessfulRequests = false,
-    skipFailedRequests = false
+    _skipSuccessfulRequests = false,
+    _skipFailedRequests = false
   } = options;
 
   const requests = new Map();

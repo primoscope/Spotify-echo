@@ -122,9 +122,9 @@ class LLMProviderManager {
    * Initialize providers based on configurations
    */
   async initializeProviders() {
-    const MockProvider = require('./mock-provider');
-    const GeminiProvider = require('./gemini-provider');
-    const OpenAIProvider = require('./openai-provider');
+    const MockProvider = require('./llm-providers/mock-provider');
+    const GeminiProvider = require('./llm-providers/gemini-provider');
+    const OpenAIProvider = require('./llm-providers/openai-provider');
     
     for (const [key, config] of this.providerConfigs) {
       try {
@@ -296,7 +296,7 @@ class LLMProviderManager {
       try {
         // Azure OpenAI uses AAD tokens that can be refreshed
         if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET) {
-          const tokenResponse = await fetch(config.refreshEndpoint, {
+          const tokenResponse = await fetch(_config.refreshEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({

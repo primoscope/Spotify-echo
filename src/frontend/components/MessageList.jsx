@@ -1,5 +1,5 @@
 // React is needed for JSX
-import React from 'react';
+
 
 function MessageList({ messages, isTyping, currentProvider }) {
   const formatMessage = (content) => {

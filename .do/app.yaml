@@ -1,92 +1,47 @@
-# DigitalOcean App Platform Configuration
-# This file enables one-click deployment to DigitalOcean App Platform
+# Simplified DigitalOcean App Platform Configuration
+# Based on official digitalocean/sample-nodejs template
 
 name: echotune-ai
-region: nyc1
 
-# Environment variables
-envs:
-- key: NODE_ENV
-  value: production
-- key: PORT
-  value: "3000"
-- key: DEFAULT_LLM_PROVIDER
-  value: mock
-- key: HEALTH_CHECK_ENABLED
-  value: "true"
-- key: LOG_LEVEL
-  value: info
-- key: DEBUG
-  value: "false"
-- key: TRUST_PROXY
-  value: "true"
-
-# Optional user-configurable environment variables
-- key: SPOTIFY_CLIENT_ID
-  value: ""
-  type: SECRET
-- key: SPOTIFY_CLIENT_SECRET
-  value: ""
-  type: SECRET
-- key: GEMINI_API_KEY
-  value: ""
-  type: SECRET
-- key: OPENAI_API_KEY
-  value: ""
-  type: SECRET
-- key: MONGODB_URI
-  value: ""
-  type: SECRET
-
-# Main application service
 services:
 - name: web
-  # Source configuration
-  source_dir: /
+  environment_slug: node-js
   github:
     repo: dzp5103/Spotify-echo
     branch: main
     deploy_on_push: true
   
-  # Build configuration
-  build_command: |
-    echo "🚀 Building EchoTune AI..."
-    npm ci --only=production
-    echo "✅ Build complete"
-  
-  # Runtime configuration
+  # Essential commands
+  build_command: npm ci --only=production
   run_command: npm start
   
-  # HTTP configuration
+  # Basic HTTP configuration
   http_port: 3000
   
-  # Health check
+  # Minimal resource allocation
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  
+  # Essential environment variables
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "3000"
+  - key: DEFAULT_LLM_PROVIDER
+    value: mock
+  - key: HEALTH_CHECK_ENABLED
+    value: "true"
+  
+  # Basic health check
   health_check:
     http_path: /health
-    initial_delay_seconds: 60
+    initial_delay_seconds: 30
     period_seconds: 10
     timeout_seconds: 5
     success_threshold: 1
     failure_threshold: 3
   
-  # Resource configuration
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  
-  # Environment
-  environment_slug: node-js
-  
-  # Routes
+  # Default route
   routes:
   - path: /
-
-# Static files (if needed)
-static_sites:
-- name: assets
-  source_dir: /public
-  github:
-    repo: dzp5103/Spotify-echo
-    branch: main
-  routes:
-  - path: /static
-  build_command: echo "Static files ready"

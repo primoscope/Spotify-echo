@@ -1,105 +1,47 @@
-# DigitalOcean App Platform Configuration for EchoTune AI
-# This file enables one-click deployment to DigitalOcean App Platform
+# Simplified DigitalOcean App Platform Configuration
+# Based on official digitalocean/sample-nodejs template
+
 name: echotune-ai
-region: nyc1
 
-# Environment variables - these will be configurable during deployment
-envs:
-- key: NODE_ENV
-  value: production
-- key: PORT
-  value: "3000"
-- key: DEFAULT_LLM_PROVIDER
-  value: mock
-- key: HEALTH_CHECK_ENABLED
-  value: "true"
-- key: LOG_LEVEL
-  value: info
-- key: DEBUG
-  value: "false"
-- key: TRUST_PROXY
-  value: "true"
-
-# User-configurable environment variables (optional)
-- key: SPOTIFY_CLIENT_ID
-  value: ""
-  type: SECRET
-- key: SPOTIFY_CLIENT_SECRET
-  value: ""
-  type: SECRET
-- key: GEMINI_API_KEY
-  value: ""
-  type: SECRET
-- key: OPENAI_API_KEY
-  value: ""
-  type: SECRET
-- key: MONGODB_URI
-  value: ""
-  type: SECRET
-
-# Main application service
 services:
 - name: web
-  # Use the main branch for deployment
-  source_dir: /
+  environment_slug: node-js
   github:
     repo: dzp5103/Spotify-echo
     branch: main
     deploy_on_push: true
   
-  # Build configuration - simplified for reliability
+  # Essential commands
   build_command: npm ci --only=production
-  
-  # Run configuration - use npm start for consistency
   run_command: npm start
   
-  # HTTP configuration
+  # Basic HTTP configuration
   http_port: 3000
   
-  # Health check
+  # Minimal resource allocation
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  
+  # Essential environment variables
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "3000"
+  - key: DEFAULT_LLM_PROVIDER
+    value: mock
+  - key: HEALTH_CHECK_ENABLED
+    value: "true"
+  
+  # Basic health check
   health_check:
     http_path: /health
-    initial_delay_seconds: 60
+    initial_delay_seconds: 30
     period_seconds: 10
     timeout_seconds: 5
     success_threshold: 1
     failure_threshold: 3
   
-  # Resource configuration
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  
-  # Routes configuration
+  # Default route
   routes:
   - path: /
-  
-  # Environment-specific configuration
-  environment_slug: node-js
-
-# Static site for documentation (optional)
-static_sites:
-- name: docs
-  source_dir: /docs
-  github:
-    repo: dzp5103/Spotify-echo
-    branch: main
-  routes:
-  - path: /docs
-  build_command: echo "Documentation served statically"
-
-# Optional background job for health monitoring
-jobs:
-- name: health-monitor
-  source_dir: /
-  github:
-    repo: dzp5103/Spotify-echo
-    branch: main
-  run_command: |
-    echo "🔍 EchoTune AI Health Monitor"
-    while true; do
-      sleep 300
-      curl -f http://localhost:3000/health || echo "Health check warning"
-    done
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  kind: WORKER

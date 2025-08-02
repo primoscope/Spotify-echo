@@ -1,40 +1,188 @@
-# Docker Compose for EchoTune AI - Production Setup
+# Modern Docker Compose for EchoTune AI - Production Setup
 version: '3.8'
 
+# Define reusable configurations
+x-common-variables: &common-variables
+  NODE_ENV: ${NODE_ENV:-production}
+  DOMAIN: ${DOMAIN:-primosphere.studio}
+  FRONTEND_URL: ${FRONTEND_URL:-https://primosphere.studio}
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "100m"
+    max-file: "3"
+
+# Networks
+networks:
+  echotune-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  ssl-certs:
+    driver: local
+  nginx-logs:
+    driver: local
+  app-logs:
+    driver: local
+  certbot-data:
+    driver: local
+  static-files:
+    driver: local
+
 services:
+  # Main application service
   app:
-    build: .
-    ports:
-      - "3000:3000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
+    container_name: echotune-app
+    restart: unless-stopped
     environment:
-      - NODE_ENV=production
-      - PORT=3000
+      <<: *common-variables
+      PORT: 3000
     env_file:
       - .env
-    restart: unless-stopped
+    volumes:
+      - app-logs:/app/logs
+      - static-files:/app/dist:ro
     networks:
-      - echotune-network
+      echotune-network:
+        ipv4_address: 172.20.0.10
+    depends_on:
+      - mongodb
+      - redis
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
 
+  # Nginx reverse proxy and static file server
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: echotune-nginx
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      <<: *common-variables
+      BACKEND_HOST: app
+      BACKEND_PORT: 3000
+      MAX_REQUEST_SIZE: ${MAX_REQUEST_SIZE:-10m}
+      API_RATE_LIMIT: ${API_RATE_LIMIT:-10r/s}
+      AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-5r/m}
+      GENERAL_RATE_LIMIT: ${GENERAL_RATE_LIMIT:-20r/s}
+      SSL_CERT_PATH: ${SSL_CERT_PATH:-/etc/nginx/ssl/cert.pem}
+      SSL_KEY_PATH: ${SSL_KEY_PATH:-/etc/nginx/ssl/key.pem}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-admin@primosphere.studio}
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - ssl-certs:/etc/nginx/ssl
+      - nginx-logs:/var/log/nginx
+      - certbot-data:/var/www/certbot
+      - static-files:/var/www/html:ro
+    networks:
+      echotune-network:
+        ipv4_address: 172.20.0.20
     depends_on:
       - app
-    restart: unless-stopped
-    networks:
-      - echotune-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
 
-networks:
-  echotune-network:
-    driver: bridge
+  # MongoDB for analytics and ML data
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: echotune-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:-secure_password}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-echotune_production}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    networks:
+      echotune-network:
+        ipv4_address: 172.20.0.30
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7.2-alpine
+    container_name: echotune-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-secure_redis_password}"]
+    volumes:
+      - redis-data:/data
+    networks:
+      echotune-network:
+        ipv4_address: 172.20.0.40
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD:-secure_redis_password}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+
+  # Monitoring service (optional)
+  monitoring:
+    image: prom/node-exporter:latest
+    container_name: echotune-monitoring
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      echotune-network:
+        ipv4_address: 172.20.0.50
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - monitoring
+
+# Additional volumes for persistence
+volumes:
+  mongodb-data:
+    driver: local
+  mongodb-config:
+    driver: local
+  redis-data:
+    driver: local

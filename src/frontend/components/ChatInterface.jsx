@@ -9,10 +9,11 @@ import ChatInput from './ChatInput';
 import VoiceRecording from './VoiceRecording';
 import QuickSuggestions from './QuickSuggestions';
 import io from 'socket.io-client';
+import '../styles/ModernChatInterface.css';
 
 /**
  * Modern React-based Chat Interface
- * Replaces the basic HTML/CSS/JS implementation with real-time features
+ * Sleek, minimalistic design with enhanced UX
  */
 function ChatInterface() {
   const { user } = useAuth();
@@ -23,15 +24,17 @@ function ChatInterface() {
   const [isTyping, setIsTyping] = useState(false);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [socket, setSocket] = useState(null);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
   const messagesEndRef = useRef(null);
+  const chatInputRef = useRef(null);
 
   const getWelcomeMessage = useCallback(() => {
     if (user) {
-      return `Hello ${user.display_name || user.id}! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood or activity.
+      return `Hello **${user.display_name || user.id}**! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood or activity.
 
 **Try asking me:**
 • "Recommend some upbeat songs for working out"
-• "Create a chill playlist for studying"
+• "Create a chill playlist for studying"  
 • "I'm feeling nostalgic, what should I listen to?"
 • "Analyze my music taste and suggest similar artists"`;
     }

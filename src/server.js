@@ -256,8 +256,13 @@ app.get('/alive', (req, res) => {
     });
 });
 
-// Main page
+// Main page - Modern Interface
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/modern-index.html'));
+});
+
+// Legacy interface (for comparison)
+app.get('/legacy', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 

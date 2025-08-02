@@ -100,7 +100,7 @@ class DatabaseManager {
       );
 
       // Test connection
-      const { data, error } = await this.supabase
+      const { data: _data, error } = await this.supabase
         .from('test')
         .select('*')
         .limit(1);
@@ -153,7 +153,7 @@ class DatabaseManager {
         const db = this.mongodb.db(process.env.MONGODB_DATABASE || 'spotify_analytics');
         const collection = db.collection('users');
         
-        const result = await collection.replaceOne(
+        const _result = await collection.replaceOne(
           { id: userData.id },
           { ...userData, updated_at: new Date() },
           { upsert: true }
@@ -362,7 +362,7 @@ class DatabaseManager {
     // Check Supabase
     if (this.supabase) {
       try {
-        const { data, error } = await this.supabase.from('test').select('*').limit(1);
+        const { data: _data, error: _error } = await this.supabase.from('test').select('*').limit(1);
         status.supabase = { connected: true, status: 'healthy' };
       } catch (error) {
         status.supabase = { connected: false, status: 'error', error: error.message };

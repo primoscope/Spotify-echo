@@ -234,7 +234,7 @@ class SQLiteManager {
         JSON.stringify(userData)
       ];
 
-      const result = await this.runQuery(query, params);
+      const _result = await this.runQuery(query, params);
       return { success: true, id: userData.id };
     } catch (error) {
       console.error('Save user error:', error);

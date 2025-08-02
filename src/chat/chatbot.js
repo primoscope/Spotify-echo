@@ -568,7 +568,7 @@ class EchoTuneChatbot {
   /**
    * Create a playlist
    */
-  async createPlaylist(args, session, options) {
+  async createPlaylist(args, session, _options) {
     try {
       const { name, description, tracks = [], public: isPublic = false } = args;
       

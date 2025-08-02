@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../realtime/SocketContext';
 import { useAuth } from '../auth/AuthContext';
 import { useSpotifyPlayer } from '../player/SpotifyPlayerContext';
@@ -30,7 +30,7 @@ const ChatInterface = () => {
   const [currentProvider, setCurrentProvider] = useState('mock');
   const [streamingMessage, setStreamingMessage] = useState('');
   const [showVoiceInterface, setShowVoiceInterface] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [_voiceEnabled, setVoiceEnabled] = useState(false);
   
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);

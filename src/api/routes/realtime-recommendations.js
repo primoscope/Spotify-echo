@@ -260,7 +260,7 @@ async function getUserContext(userId) {
 /**
  * Generate real-time recommendations
  */
-async function generateRealtimeRecommendations(params, userContext) {
+async function generateRealtimeRecommendations(params, _userContext) {
   try {
     // Mock implementation - in production, use ML models
     const baseRecommendations = [
@@ -380,7 +380,7 @@ async function analyzeUserContext(data) {
 /**
  * Infer current activity from context
  */
-function inferActivity(timeOfDay, data) {
+function inferActivity(timeOfDay, _data) {
   // Simple activity inference - could be enhanced with ML
   if (timeOfDay === 'morning') return 'commute';
   if (timeOfDay === 'afternoon') return 'work';
@@ -440,7 +440,7 @@ function getCurrentTimeContext() {
 /**
  * Process learning data
  */
-async function processLearningData(data) {
+async function processLearningData(_data) {
   try {
     // Mock learning processing
     return {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { SocketProvider } from './realtime/SocketContext';
@@ -30,7 +30,7 @@ function App() {
     const initializeApp = async () => {
       try {
         // Check authentication status
-        const authStatus = localStorage.getItem('echotune_user');
+        const _authStatus = localStorage.getItem('echotune_user');
         
         // Initialize health check
         const healthResponse = await fetch('/health');

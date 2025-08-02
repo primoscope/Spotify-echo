@@ -225,7 +225,7 @@ class HealthChecker {
         // Check disk space for current working directory
         let diskInfo = { available: 'unknown', usage: 'unknown' };
         try {
-            const stats = await stat(process.cwd());
+            const _stats = await stat(process.cwd());
             diskInfo = {
                 path: process.cwd(),
                 accessible: true

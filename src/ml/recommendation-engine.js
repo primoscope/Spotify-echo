@@ -46,7 +46,7 @@ class RecommendationEngine {
     try {
       const {
         limit = 20,
-        context = {},
+        context: _context = {},
         mood = null,
         activity = null,
         timeOfDay = null
@@ -165,7 +165,7 @@ class RecommendationEngine {
   /**
    * Get user listening history
    */
-  async getListeningHistory(userId, options = {}) {
+  async getListeningHistory(userId, _options = {}) {
     try {
       // Mock implementation - in real app would query database
       return [

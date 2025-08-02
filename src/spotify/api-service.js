@@ -396,7 +396,7 @@ class SpotifyAPIService {
   /**
    * Normalize search results
    */
-  normalizeSearchResults(data, type) {
+  normalizeSearchResults(data, _type) {
     const result = {
       total: 0,
       tracks: [],

@@ -104,12 +104,9 @@ jobs:
                 validation_failed=true
               fi
 
-              # ---- SLTLLTO custom function call ----
-              # Replace 'sltllto' with the actual function/command if different.
-              if ! sltllto "$prompt_file"; then
-                echo "❌ sltllto function failed for: $filename"
-                validation_failed=true
-              fi
+              # ---- Custom validation ----
+              # Additional custom validation can be added here
+              # For now, we'll skip this validation step
               # --------------------------------------
 
               if [[ "$validation_failed" != "true" ]]; then

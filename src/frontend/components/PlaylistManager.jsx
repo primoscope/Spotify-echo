@@ -1,5 +1,4 @@
-// React is needed for JSX
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
@@ -15,6 +14,8 @@ function PlaylistManager() {
   const [generating, setGenerating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [_generatedTracks, setGeneratedTracks] = useState([]);
+  const [_generatedPlaylistData, setGeneratedPlaylistData] = useState(null);
 
   useEffect(() => {
     if (user) {

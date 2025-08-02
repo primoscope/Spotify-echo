@@ -24,6 +24,8 @@
     "deploy": "./scripts/deploy.sh",
     "deploy:simple": "./scripts/deploy-simple.sh",
     "deploy:digitalocean": "./scripts/deploy-digitalocean.sh",
+    "deploy:one-click": "./deploy-one-click.sh",
+    "validate-deployment": "./validate-deployment.sh",
     "setup-digitalocean": "./scripts/setup-digitalocean.sh",
     "integrate-mcp": "./scripts/integrate-mcp.sh",
     "complete-integrations": "./scripts/complete-integrations.sh",

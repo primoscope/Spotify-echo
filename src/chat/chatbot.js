@@ -1006,6 +1006,21 @@ Just ask me anything about music and I'll help you discover your next favorite s
 
     return insights;
   }
+
+  /**
+   * Legacy chat method for compatibility
+   * @param {string} message - User message  
+   * @param {string} sessionId - Session identifier
+   * @returns {Promise<Object>} Chat response
+   */
+  async chat(message, sessionId) {
+    const response = await this.sendMessage(sessionId, message);
+    return {
+      text: response.content || response.text || 'I\'m having trouble processing that request.',
+      provider: this.currentProvider,
+      sessionId: sessionId
+    };
+  }
 }
 
 module.exports = EchoTuneChatbot;

@@ -201,6 +201,27 @@
           "mcp-servers/screenshot-website/dist/index.js"
         ],
         "description": "Fast website screenshot capabilities for automation"
+      },
+      "enhanced-file-utilities": {
+        "command": "node",
+        "args": [
+          "mcp-servers/enhanced-file-utilities.js"
+        ],
+        "description": "Enhanced file handling with validation and security"
+      },
+      "enhanced-browser-tools": {
+        "command": "node",
+        "args": [
+          "mcp-servers/enhanced-browser-tools.js"
+        ],
+        "description": "Improved browser automation with error checking"
+      },
+      "comprehensive-validator": {
+        "command": "node",
+        "args": [
+          "mcp-servers/comprehensive-validator.js"
+        ],
+        "description": "System-wide validation and monitoring"
       }
     }
   },

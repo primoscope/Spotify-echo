@@ -781,13 +781,20 @@ server.listen(PORT, '0.0.0.0', async () => {
             console.error('❌ Database initialization failed - running without database');
         }
         
-        // TODO: Initialize LLM provider manager
-        // const llmInitialized = await llmProviderManager.initialize();
-        // if (llmInitialized) {
-        //     console.log('🤖 LLM Provider Manager initialized successfully');
-        //     const providerStatus = llmProviderManager.getProviderStatus();
-        //     const available = Object.values(providerStatus.providers).filter(p => p.available).length;
-        //     console.log(`🔌 Available LLM providers: ${available}`);
+        // Initialize LLM provider manager
+        console.log('🤖 LLM Provider Manager: Using existing chat system');
+        const llmProviderManager = require('./chat/llm-provider-manager');
+        try {
+            await llmProviderManager.initialize();
+            console.log('✅ LLM Provider Manager initialized successfully');
+            const providerStatus = llmProviderManager.getProviderStatus();
+            const available = Object.values(providerStatus.providers).filter(p => p.available).length;
+            console.log(`🔌 Available LLM providers: ${available}`);
+            console.log(`🎯 Active provider: ${providerStatus.currentProvider}`);
+        } catch (error) {
+            console.warn('⚠️ LLM Provider Manager initialization warning:', error.message);
+            console.log('📦 Running with default mock provider for chat functionality');
+        }
         // } else {
         //     console.error('❌ LLM Provider Manager initialization failed');
         // }

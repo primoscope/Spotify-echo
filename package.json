@@ -56,7 +56,9 @@
     "prompts:server": "node prompts/tools/cli.js server",
     "gemini-test": "node scripts/test-gemini-integration.js",
     "gemini-health": "node scripts/test-gemini-integration.js",
-    "test:gemini-integration": "node scripts/test-gemini-integration.js"
+    "test:gemini-integration": "node scripts/test-gemini-integration.js",
+    "production-check": "./scripts/production-readiness-check.sh",
+    "production-deploy": "./scripts/deploy-digitalocean.sh"
   },
   "keywords": [
     "music",
@@ -105,6 +107,7 @@
     "mongodb": "^6.3.0",
     "multer": "^1.4.5-lts.1",
     "openai": "^4.24.0",
+    "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.7.1",
@@ -236,7 +239,10 @@
       "plugin:react/recommended",
       "plugin:react-hooks/recommended"
     ],
-    "plugins": ["react", "react-hooks"],
+    "plugins": [
+      "react",
+      "react-hooks"
+    ],
     "env": {
       "node": true,
       "browser": true,
@@ -273,7 +279,8 @@
         "single"
       ],
       "react/react-in-jsx-scope": "off",
-      "react/jsx-uses-react": "off"
+      "react/jsx-uses-react": "off",
+      "react/prop-types": "off"
     },
     "overrides": [
       {

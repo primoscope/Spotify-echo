@@ -122,9 +122,9 @@ class LLMProviderManager {
    * Initialize providers based on configurations
    */
   async initializeProviders() {
-    const MockProvider = require('./mock-provider');
-    const GeminiProvider = require('./gemini-provider');
-    const OpenAIProvider = require('./openai-provider');
+    const MockProvider = require('./llm-providers/mock-provider');
+    const GeminiProvider = require('./llm-providers/gemini-provider');
+    const OpenAIProvider = require('./llm-providers/openai-provider');
     
     for (const [key, config] of this.providerConfigs) {
       try {

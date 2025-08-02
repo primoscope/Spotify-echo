@@ -1,10 +1,8 @@
 # Simplified DigitalOcean App Platform Configuration
 # Based on official digitalocean/sample-nodejs template
 
-name: echotune-ai
-
 services:
-
+- name: web
   environment_slug: node-js
   github:
     repo: dzp5103/Spotify-echo

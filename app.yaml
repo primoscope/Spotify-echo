@@ -1,7 +1,7 @@
 # Simplified DigitalOcean App Platform Configuration
 # Based on official digitalocean/sample-nodejs template
 
-name: echotune-ai
+name: echotune-ai # App name differs from repo for branding purposes
 
 services:
 

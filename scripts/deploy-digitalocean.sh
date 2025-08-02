@@ -98,13 +98,59 @@ setup_app_directory() {
     # Navigate to app directory
     cd "$APP_DIR"
     
-    # Clone or update repository
-    if [ ! -d ".git" ]; then
-        log_info "Cloning repository..."
-        git clone "$REPO_URL" .
-    else
-        log_info "Updating repository..."
-        git pull origin main
+    # Check if we're already in the correct directory with a git repository
+    if [ -d ".git" ]; then
+        log_info "Found existing git repository"
+        
+        # Verify it's the correct repository
+        local current_remote
+        current_remote=$(git remote get-url origin 2>/dev/null || echo "")
+        
+        if [[ "$current_remote" == *"Spotify-echo"* ]] || [[ "$current_remote" == "$REPO_URL" ]]; then
+            log_success "Repository verified: $current_remote"
+            log_info "Updating repository..."
+            if git pull origin main 2>/dev/null; then
+                log_success "Repository updated"
+            else
+                log_warning "Could not update repository, continuing with current version"
+            fi
+            return 0
+        else
+            log_error "Directory contains wrong git repository: $current_remote"
+            log_error "Expected: $REPO_URL"
+            log_error "Please remove $APP_DIR and run setup again"
+            exit 1
+        fi
+    fi
+    
+    # Check if directory exists but is not a git repository
+    if [ -n "$(ls -A . 2>/dev/null | head -1)" ]; then
+        log_error "Directory $APP_DIR exists but is not a git repository"
+        log_error "Found existing files in the directory"
+        log_info "Please either:"
+        log_info "1. Remove the directory: sudo rm -rf $APP_DIR"
+        log_info "2. Move existing files to backup location"
+        log_info "3. Initialize as git repository manually"
+        exit 1
+    fi
+    
+    # Directory is empty or doesn't exist, safe to clone
+    log_info "Cloning repository from $REPO_URL..."
+    
+    if ! git clone "$REPO_URL" .; then
+        log_error "Failed to clone repository from $REPO_URL"
+        log_info "This could be due to:"
+        log_info "1. Network connectivity issues"
+        log_info "2. Invalid repository URL"
+        log_info "3. Permission issues (if private repository)"
+        log_info "4. Git not installed"
+        log_info ""
+        log_info "Please verify:"
+        log_info "- Internet connection is working"
+        log_info "- Repository URL is correct: $REPO_URL"
+        log_info "- Git is installed: git --version"
+        log_info "- Repository is accessible"
+        exit 1
     fi
     
     log_success "Application directory ready"

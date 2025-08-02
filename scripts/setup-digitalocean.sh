@@ -131,7 +131,8 @@ check_system_requirements() {
     fi
     
     # Check available memory (recommend 2GB minimum)
-    local mem_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+    local mem_kb
+    mem_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
     local mem_gb=$((mem_kb / 1024 / 1024))
     
     if [ $mem_gb -lt 2 ]; then
@@ -142,7 +143,8 @@ check_system_requirements() {
     fi
     
     # Check available disk space (recommend 20GB minimum)
-    local disk_available=$(df / | tail -1 | awk '{print $4}')
+    local disk_available
+    disk_available=$(df / | tail -1 | awk '{print $4}')
     local disk_gb=$((disk_available / 1024 / 1024))
     
     if [ $disk_gb -lt 20 ]; then
@@ -186,7 +188,7 @@ install_docker() {
         # Install Docker
         curl -fsSL https://get.docker.com -o get-docker.sh
         sudo sh get-docker.sh
-        sudo usermod -aG docker $USER
+        sudo usermod -aG docker "$USER"
         rm get-docker.sh
         
         # Configure Docker daemon for production
@@ -377,18 +379,66 @@ setup_app_directory() {
 }
 
 clone_repository() {
-    log_info "Cloning application repository..."
+    log_info "Setting up application repository..."
     
     cd "$APP_DIR"
     
-    if [ ! -d ".git" ]; then
-        sudo -u "$APP_USER" git clone "$REPO_URL" .
-        log_success "Repository cloned"
-    else
-        log_info "Repository already exists, updating..."
-        sudo -u "$APP_USER" git pull origin main
-        log_success "Repository updated"
+    # Check if we're already in the correct directory with a git repository
+    if [ -d ".git" ]; then
+        log_info "Found existing git repository"
+        
+        # Verify it's the correct repository
+        local current_remote
+        current_remote=$(sudo -u "$APP_USER" git remote get-url origin 2>/dev/null || echo "")
+        
+        if [[ "$current_remote" == *"Spotify-echo"* ]] || [[ "$current_remote" == "$REPO_URL" ]]; then
+            log_success "Repository verified: $current_remote"
+            log_info "Updating repository..."
+            if sudo -u "$APP_USER" git pull origin main 2>/dev/null; then
+                log_success "Repository updated"
+            else
+                log_warning "Could not update repository, continuing with current version"
+            fi
+            return 0
+        else
+            log_error "Directory contains wrong git repository: $current_remote"
+            log_error "Expected: $REPO_URL"
+            log_error "Please remove $APP_DIR and run setup again"
+            exit 1
+        fi
     fi
+    
+    # Check if directory exists but is not a git repository
+    if [ -n "$(sudo find "$APP_DIR" -maxdepth 1 -type f -print -quit 2>/dev/null)" ]; then
+        log_error "Directory $APP_DIR exists but is not a git repository"
+        log_error "Found existing files in the directory"
+        log_info "Please either:"
+        log_info "1. Remove the directory: sudo rm -rf $APP_DIR"
+        log_info "2. Move existing files to backup location"
+        log_info "3. Initialize as git repository manually"
+        exit 1
+    fi
+    
+    # Directory is empty or doesn't exist, safe to clone
+    log_info "Cloning repository from $REPO_URL..."
+    
+    if ! sudo -u "$APP_USER" git clone "$REPO_URL" .; then
+        log_error "Failed to clone repository from $REPO_URL"
+        log_info "This could be due to:"
+        log_info "1. Network connectivity issues"
+        log_info "2. Invalid repository URL"
+        log_info "3. Permission issues (if private repository)"
+        log_info "4. Git not installed"
+        log_info ""
+        log_info "Please verify:"
+        log_info "- Internet connection is working"
+        log_info "- Repository URL is correct: $REPO_URL"
+        log_info "- Git is installed: git --version"
+        log_info "- Repository is accessible"
+        exit 1
+    fi
+    
+    log_success "Repository cloned successfully"
 }
 
 setup_environment() {
@@ -634,9 +684,9 @@ main() {
     setup_ssl_preparation
     
     # Ensure user can access Docker without sudo (requires re-login)
-    if ! groups $USER | grep -q docker; then
+    if ! groups "$USER" | grep -q docker; then
         log_info "Adding current user to docker group..."
-        sudo usermod -aG docker $USER
+        sudo usermod -aG docker "$USER"
         log_warning "You need to log out and log back in for Docker permissions to take effect"
     fi
     

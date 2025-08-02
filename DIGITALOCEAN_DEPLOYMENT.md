@@ -556,6 +556,36 @@ The scripts automatically update development settings:
 - `FRONTEND_URL=http://localhost:3000` → `FRONTEND_URL=https://your-domain.com`
 - `SPOTIFY_REDIRECT_URI=http://localhost:3000/auth/callback` → `SPOTIFY_REDIRECT_URI=https://your-domain.com/auth/callback`
 
+**Repository Cloning Issues:**
+```bash
+# If you encounter: "fatal: destination path '.' already exists and is not an empty directory"
+# The improved deployment scripts now handle this automatically:
+
+[ERROR] Directory /opt/echotune exists but is not a git repository
+[ERROR] Found existing files in the directory
+[INFO] Please either:
+[INFO] 1. Remove the directory: sudo rm -rf /opt/echotune
+[INFO] 2. Move existing files to backup location
+[INFO] 3. Initialize as git repository manually
+
+# Resolution options:
+# Option 1: Clean and restart (recommended for fresh setups)
+sudo rm -rf /opt/echotune
+./scripts/setup-digitalocean.sh
+
+# Option 2: Backup and clean
+sudo mv /opt/echotune /opt/echotune.backup.$(date +%Y%m%d_%H%M%S)
+sudo mkdir -p /opt/echotune
+./scripts/setup-digitalocean.sh
+
+# Option 3: Manual git initialization (if you have important files)
+cd /opt/echotune
+git init
+git remote add origin https://github.com/dzp5103/Spotify-echo.git
+git fetch origin main
+git reset --hard origin/main
+```
+
 ### Common Issues and Solutions
 
 **Environment Configuration Problems:**

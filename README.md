@@ -223,6 +223,238 @@ The project includes optimized Gemini configurations in the `.gemini/` directory
 - **Documentation Generation**: Auto-generated JSDoc and API docs
 - **Test Generation**: Automated unit and integration test creation
 
+## 🔧 Enhanced MCP Tools Integration
+
+EchoTune AI features a comprehensive suite of **Enhanced Model Context Protocol (MCP) tools** that provide advanced automation, validation, and monitoring capabilities.
+
+### 🛠️ Available MCP Tools
+
+#### 1. **Enhanced File Utilities** (`mcp-servers/enhanced-file-utilities.js`)
+- **Advanced file operations** with comprehensive security validation
+- **Performance monitoring** with detailed analytics
+- **Batch operations** with rollback capabilities
+- **Audit trail** with complete operation logging
+- **Security scanning** for dangerous patterns and path traversal
+
+**Usage:**
+```bash
+# Health check
+node mcp-servers/enhanced-file-utilities.js health
+
+# Read file with validation
+node mcp-servers/enhanced-file-utilities.js read package.json
+
+# List directory with metadata
+node mcp-servers/enhanced-file-utilities.js list src
+
+# Validate file security
+node mcp-servers/enhanced-file-utilities.js validate package.json
+
+# View audit trail
+node mcp-servers/enhanced-file-utilities.js audit 20
+
+# Performance analytics
+node mcp-servers/enhanced-file-utilities.js performance
+```
+
+#### 2. **Enhanced Browser Tools** (`mcp-servers/enhanced-browser-tools.js`)
+- **Spotify Web Player automation** with comprehensive error handling
+- **Screenshot capture** with size validation and compression
+- **Cross-browser testing** support with Chromium, Firefox, Safari
+- **Performance monitoring** for browser operations
+- **Security validation** for allowed domains and resources
+
+**Usage:**
+```bash
+# Health check
+node mcp-servers/enhanced-browser-tools.js health
+
+# Navigate to URL
+node mcp-servers/enhanced-browser-tools.js navigate "https://open.spotify.com"
+
+# Capture screenshot
+node mcp-servers/enhanced-browser-tools.js screenshot pageId screenshot.png
+
+# Performance metrics
+node mcp-servers/enhanced-browser-tools.js performance
+```
+
+#### 3. **Comprehensive Validator** (`mcp-servers/comprehensive-validator.js`)
+- **System-wide validation** covering resources, security, and performance
+- **Auto-recovery mechanisms** for detected issues
+- **Performance benchmarking** with trend analysis
+- **Security scanning** for vulnerabilities and misconfigurations
+- **Detailed reporting** with actionable recommendations
+
+**Usage:**
+```bash
+# Full system validation
+node mcp-servers/comprehensive-validator.js health
+
+# Quick system check
+node mcp-servers/comprehensive-validator.js system
+
+# Validation with auto-recovery
+node mcp-servers/comprehensive-validator.js validate
+```
+
+#### 4. **MCP Integration Tester** (`mcp-servers/mcp-integration-tester.js`)
+- **Comprehensive test suite** for all MCP tools
+- **Performance benchmarking** with detailed metrics
+- **Integration testing** for cross-tool workflows
+- **Error handling validation** with recovery scenarios
+- **Automated reporting** with JSON output
+
+**Usage:**
+```bash
+# Run full integration test suite
+node mcp-servers/mcp-integration-tester.js
+
+# Results saved to mcp-integration-test-results.json
+```
+
+### 🔧 MCP Server Configuration
+
+All enhanced MCP tools are configured in `package.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "enhanced-file-utilities": {
+        "command": "node",
+        "args": ["mcp-servers/enhanced-file-utilities.js"],
+        "description": "Enhanced file handling with validation and security"
+      },
+      "enhanced-browser-tools": {
+        "command": "node", 
+        "args": ["mcp-servers/enhanced-browser-tools.js"],
+        "description": "Improved browser automation with error checking"
+      },
+      "comprehensive-validator": {
+        "command": "node",
+        "args": ["mcp-servers/comprehensive-validator.js"],
+        "description": "System-wide validation and monitoring"
+      }
+    }
+  }
+}
+```
+
+### 📊 MCP Management Commands
+
+```bash
+# Install all MCP servers
+npm run mcp-install
+
+# Health check all servers
+npm run mcp-health
+
+# Test all servers
+npm run mcp-test-all
+
+# Generate detailed report
+npm run mcp-report
+
+# Validate MCP integration
+npm run mcp-validate
+
+# Enhanced utilities
+npm run mcp-integrate          # Run integration tester
+npm run mcp-manage             # Interactive MCP management
+```
+
+### 🚀 Integration Examples
+
+#### File Operations with Enhanced Security
+```javascript
+const { EnhancedFileMCP } = require('./mcp-servers/enhanced-file-utilities');
+
+const fileMCP = new EnhancedFileMCP({
+  allowedDirectories: ['/project/src', '/project/scripts'],
+  allowedExtensions: ['.js', '.json', '.md']
+});
+
+// Secure file reading with validation
+const result = await fileMCP.readFile('src/config.js');
+console.log('File content:', result.content);
+console.log('Security validation:', result.metadata);
+
+// Batch operations with rollback
+const operations = [
+  { type: 'read', path: 'package.json' },
+  { type: 'write', path: 'backup.json', content: '{}' }
+];
+const batchResult = await fileMCP.batchOperations(operations);
+```
+
+#### System Validation and Monitoring
+```javascript
+const { ComprehensiveValidator } = require('./mcp-servers/comprehensive-validator');
+
+const validator = new ComprehensiveValidator();
+
+// Complete system health check
+const healthReport = await validator.getHealthReport();
+console.log('System status:', healthReport.validation.overallStatus);
+
+// Auto-recovery for detected issues
+if (healthReport.validation.overallStatus === 'critical') {
+  const recovery = await validator.attemptAutoRecovery(healthReport.validation);
+  console.log('Recovery attempted:', recovery);
+}
+```
+
+#### Browser Automation for Spotify
+```javascript
+const { EnhancedBrowserTools } = require('./mcp-servers/enhanced-browser-tools');
+
+const browser = new EnhancedBrowserTools({ headless: false });
+
+// Navigate to Spotify Web Player
+const page = await browser.navigateToUrl('https://open.spotify.com', {
+  waitForSelector: '[data-testid="login-button"]'
+});
+
+// Perform Spotify-specific actions
+const playerState = await browser.spotifyWebPlayerActions(page.pageId, 'getPlayerState');
+console.log('Current track:', playerState.state.currentTrack);
+```
+
+### 🔍 Performance Monitoring
+
+Enhanced MCP tools provide detailed performance analytics:
+
+```bash
+# View performance metrics
+node mcp-servers/enhanced-file-utilities.js performance
+
+# Sample output:
+{
+  "read": {
+    "averageMs": 2.5,
+    "minMs": 1,
+    "maxMs": 15,
+    "count": 247
+  },
+  "write": {
+    "averageMs": 5.2,
+    "minMs": 2,
+    "maxMs": 25,
+    "count": 89
+  }
+}
+```
+
+### 🛡️ Security Features
+
+- **Path validation** - Prevents directory traversal attacks
+- **Extension filtering** - Blocks unauthorized file types
+- **Content scanning** - Detects dangerous patterns in files
+- **Permission checking** - Validates file access permissions
+- **Audit logging** - Complete operation history
+- **Auto-recovery** - Automatic cleanup and error correction
+
 ### 🚀 Environment Setup
 
 Add to your `.env` file:

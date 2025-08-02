@@ -3,14 +3,45 @@
 # EchoTune AI - Enhanced Production Deployment Script
 # Comprehensive deployment with environment validation, SSL, monitoring, and security
 
-set -e
+# Load deployment utilities for consistent operations
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/deployment-utils.sh" ]; then
+    source "$SCRIPT_DIR/deployment-utils.sh"
+elif [ -f "scripts/deployment-utils.sh" ]; then
+    source "scripts/deployment-utils.sh"
+else
+    echo "Warning: deployment-utils.sh not found, using basic functions"
+    # Fallback basic functions
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    NC='\033[0m'
+    
+    log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+    log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+    log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+    log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+    log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+    
+    exit_with_help() {
+        local error_message="$1"
+        local help_text="$2"
+        echo ""
+        log_error "$error_message"
+        echo ""
+        if [ -n "$help_text" ]; then
+            echo -e "${YELLOW}💡 Helpful guidance:${NC}"
+            echo "$help_text"
+            echo ""
+        fi
+        exit 1
+    }
+fi
 
-# Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Enable strict error handling
+set -e
+set -o pipefail
 
 # Configuration
 APP_DIR="/opt/echotune"
@@ -268,44 +299,21 @@ setup_directories() {
     
     # Ensure parent directory exists and is accessible
     if [ ! -d "$(dirname "$APP_DIR")" ]; then
-        sudo mkdir -p "$(dirname "$APP_DIR")"
+        create_directory_safe "$(dirname "$APP_DIR")" "root" "755"
     fi
     
-    # Create app directory if it doesn't exist
-    if [ ! -d "$APP_DIR" ]; then
-        log_info "Creating application directory: $APP_DIR"
-        sudo mkdir -p "$APP_DIR"
-        
-        # Set ownership if we created the directory
-        if [ -n "$USER" ] && id "$USER" &>/dev/null; then
-            sudo chown "$USER:$USER" "$APP_DIR"
-        fi
-    fi
+    # Create app directory if it doesn't exist using utility function
+    create_directory_safe "$APP_DIR" "$USER" "755"
     
     # Create necessary subdirectories with proper error handling
     local dirs_to_create=("$LOG_DIR" "$BACKUP_DIR" "$SSL_DIR")
     for dir in "${dirs_to_create[@]}"; do
-        if ! mkdir -p "$dir" 2>/dev/null; then
-            # Try with sudo if regular mkdir fails
-            log_info "Creating directory with elevated permissions: $dir"
-            sudo mkdir -p "$dir"
-            if [ -n "$USER" ] && id "$USER" &>/dev/null; then
-                sudo chown "$USER:$USER" "$dir"
-            fi
+        local permissions="755"
+        if [[ "$dir" == *"ssl"* ]]; then
+            permissions="700"  # More restrictive for SSL directory
         fi
+        create_directory_safe "$dir" "$USER" "$permissions"
     done
-    
-    # Set appropriate permissions with error handling
-    chmod 755 "$LOG_DIR" "$BACKUP_DIR" 2>/dev/null || {
-        sudo chmod 755 "$LOG_DIR" "$BACKUP_DIR"
-    }
-    
-    chmod 700 "$SSL_DIR" 2>/dev/null || {
-        sudo chmod 700 "$SSL_DIR"
-        if [ -n "$USER" ] && id "$USER" &>/dev/null; then
-            sudo chown "$USER:$USER" "$SSL_DIR"
-        fi
-    }
     
     log_success "Directories configured"
 }
@@ -747,6 +755,36 @@ main() {
     log_step "🏁 Starting deployment process..."
     echo ""
     
+    # Enhanced cleanup function
+    cleanup_on_error() {
+        log_error "Production deployment failed or was interrupted"
+        log_info "Cleaning up partial installation..."
+        
+        # Stop any running Docker containers
+        if command_exists docker-compose && [ -f "docker-compose.yml" ]; then
+            docker-compose down --timeout 10 2>/dev/null || true
+        fi
+        
+        echo ""
+        log_error "Production deployment was interrupted or failed"
+        echo ""
+        echo -e "${YELLOW}🔍 Troubleshooting Steps:${NC}"
+        echo "   1. Check system requirements and environment configuration"
+        echo "   2. Verify all prerequisites are installed"
+        echo "   3. Check available disk space: df -h"
+        echo "   4. Review logs for specific errors"
+        echo ""
+        echo -e "${YELLOW}💡 Common Solutions:${NC}"
+        echo "   - Restart Docker: sudo systemctl restart docker"
+        echo "   - Update environment: cp .env.example .env && nano .env"
+        echo "   - Check permissions: sudo chown -R \$USER:\$USER /opt/echotune"
+        echo "   - Free disk space: docker system prune -f"
+        echo ""
+    }
+    
+    # Set error handler
+    trap cleanup_on_error ERR INT TERM
+    
     # Ensure we're in the app directory, create if needed
     if [ ! -d "$APP_DIR" ]; then
         log_info "Creating application directory: $APP_DIR"
@@ -825,6 +863,9 @@ Please ensure:
         configure_firewall
         generate_deployment_report
         echo ""
+        
+        # Clear error trap on success
+        trap - ERR INT TERM
         
         # Success summary
         echo "════════════════════════════════════════"

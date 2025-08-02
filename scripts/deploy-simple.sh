@@ -3,14 +3,32 @@
 # EchoTune AI - Simplified Deployment Script
 # Quick and easy deployment for DigitalOcean and development environments
 
-set -e
+# Load deployment utilities for consistent operations
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/deployment-utils.sh" ]; then
+    source "$SCRIPT_DIR/deployment-utils.sh"
+elif [ -f "../scripts/deployment-utils.sh" ]; then
+    source "../scripts/deployment-utils.sh"
+else
+    # Fallback basic functions
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    NC='\033[0m'
+    
+    log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+    log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+    log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+    log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+    log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+    
+    command_exists() { command -v "$1" >/dev/null 2>&1; }
+fi
 
-# Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Enable strict error handling
+set -e
+set -o pipefail
 
 # Configuration with sensible defaults
 APP_DIR="${APP_DIR:-/opt/echotune}"
@@ -18,7 +36,32 @@ DOMAIN="${DOMAIN:-localhost}"
 PORT="${PORT:-3000}"
 NODE_ENV="${NODE_ENV:-production}"
 
-# Helper functions
+# Enhanced cleanup function for simple deployment
+cleanup_on_error() {
+    log_error "Simple deployment failed or was interrupted"
+    log_info "Cleaning up partial installation..."
+    
+    # Stop any running Docker containers
+    if command_exists docker-compose && [ -f "docker-compose.yml" ]; then
+        docker-compose down --timeout 10 2>/dev/null || true
+    fi
+    
+    echo ""
+    log_error "Simple deployment was interrupted or failed"
+    echo ""
+    echo -e "${YELLOW}🔍 Troubleshooting Steps:${NC}"
+    echo "   1. Check that Docker is running: docker ps"
+    echo "   2. Verify you're in the correct directory"
+    echo "   3. Check available disk space: df -h"
+    echo "   4. Review logs for specific errors"
+    echo ""
+    echo -e "${YELLOW}💡 Common Solutions:${NC}"
+    echo "   - Restart Docker: sudo systemctl restart docker"
+    echo "   - Clean Docker cache: docker system prune -f"
+    echo "   - Check internet connectivity"
+    echo "   - Ensure proper file permissions"
+    echo ""
+}
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -106,28 +149,34 @@ detect_environment() {
 check_docker() {
     log_step "Checking Docker availability..."
     
-    if ! command -v docker &> /dev/null; then
+    if ! command_exists docker; then
         log_error "Docker is not installed"
         echo "Please install Docker first:"
         echo "  curl -fsSL https://get.docker.com | sudo sh"
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
+    if ! command_exists docker-compose && ! docker compose version >/dev/null 2>&1; then
         log_error "Docker Compose is not installed"
-        echo "Please install Docker Compose first"
+        echo "Please install Docker Compose first:"
+        echo "  # For Docker Compose V2 (recommended):"
+        echo "  sudo apt update && sudo apt install docker-compose-plugin"
+        echo "  # Or for Docker Compose V1:"
+        echo "  sudo apt update && sudo apt install docker-compose"
         exit 1
     fi
     
-    # Check if Docker is running
-    if ! docker ps &> /dev/null; then
-        log_error "Docker daemon is not running"
-        echo "Please start Docker:"
+    # Check if Docker is running with wait functionality
+    if ! wait_for_docker 30; then
+        log_error "Docker daemon is not running or not accessible"
+        echo "Please start Docker and ensure current user has permissions:"
         echo "  sudo systemctl start docker"
+        echo "  sudo usermod -aG docker \$USER"
+        echo "  # Then logout and login again"
         exit 1
     fi
     
-    log_success "Docker and Docker Compose are available"
+    log_success "Docker and Docker Compose are available and running"
 }
 
 # Stop existing services
@@ -265,17 +314,24 @@ main() {
     echo "====================================="
     echo ""
     
+    # Set error handler
+    trap cleanup_on_error ERR INT TERM
+    
     check_directory
     detect_environment
     check_docker
     stop_services
     build_and_start
     health_check
+    
+    # Clear error trap on success
+    trap - ERR INT TERM
+    
     show_summary
 }
 
-# Handle script interruption
-trap 'echo -e "\n${RED}Deployment interrupted!${NC}"; exit 1' INT TERM
+# Handle script interruption  
+trap 'cleanup_on_error; exit 1' INT TERM
 
 # Run main function
 main "$@"

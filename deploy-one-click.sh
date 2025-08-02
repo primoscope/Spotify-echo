@@ -1,19 +1,35 @@
 #!/bin/bash
 
-# 🚀 EchoTune AI - One-Click Deploy Script
+# 🚀 EchoTune AI - One-Click Deploy Script  
 # Ultra-fast deployment optimized for maximum convenience and minimal setup
 
-set -e
+# Load deployment utilities for consistent error handling and operations
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/scripts/deployment-utils.sh" ]; then
+    source "$SCRIPT_DIR/scripts/deployment-utils.sh"
+elif [ -f "scripts/deployment-utils.sh" ]; then
+    source "scripts/deployment-utils.sh"
+else
+    # Fallback color codes if utils not available
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    PURPLE='\033[0;35m'
+    CYAN='\033[0;36m'
+    WHITE='\033[1;37m'
+    NC='\033[0m' # No Color
+    
+    log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+    log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+    log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+    log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+    log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+fi
 
-# Color codes for beautiful output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[1;37m'
-NC='\033[0m' # No Color
+# Enable strict error handling
+set -e
+set -o pipefail
 
 # Configuration
 REPO_URL="https://github.com/dzp5103/Spotify-echo.git"
@@ -30,24 +46,38 @@ print_header() {
     echo ""
 }
 
-log_step() {
-    echo -e "${BLUE}🔄 [STEP]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}✅ [SUCCESS]${NC} $1"
-}
-
-log_info() {
-    echo -e "${CYAN}ℹ️  [INFO]${NC} $1"
-}
-
-log_warning() {
-    echo -e "${YELLOW}⚠️  [WARNING]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}❌ [ERROR]${NC} $1"
+# Enhanced cleanup function
+cleanup_on_error() {
+    log_error "Deployment failed during one-click setup"
+    log_info "Cleaning up partial installation..."
+    
+    # Stop any running Docker containers
+    if command_exists docker-compose && [ -f "docker-compose.yml" ]; then
+        docker-compose down --timeout 10 2>/dev/null || true
+    fi
+    
+    # Clean up temporary files
+    rm -f /tmp/echotune-deploy-* 2>/dev/null || true
+    
+    echo ""
+    log_error "One-click deployment was interrupted or failed"
+    echo ""
+    echo -e "${YELLOW}🔍 Troubleshooting Steps:${NC}"
+    echo "   1. Check system requirements (Node.js 18+, Docker, or Linux)"
+    echo "   2. Verify internet connectivity"
+    echo "   3. Check available disk space: df -h"
+    echo "   4. Review logs for specific errors"
+    echo ""
+    echo -e "${YELLOW}💡 Common Solutions:${NC}"
+    echo "   - Install Docker: curl -fsSL https://get.docker.com | sh"
+    echo "   - Update Node.js: https://nodejs.org/en/download/"
+    echo "   - Free disk space: docker system prune -f"
+    echo "   - Restart services: sudo systemctl restart docker"
+    echo ""
+    echo -e "${CYAN}📚 Get Help:${NC}"
+    echo "   - GitHub Issues: https://github.com/dzp5103/Spotify-echo/issues"
+    echo "   - Documentation: https://github.com/dzp5103/Spotify-echo#readme"
+    echo ""
 }
 
 # Detect the best deployment method
@@ -105,38 +135,100 @@ setup_minimal_dependencies() {
     case $DEPLOY_METHOD in
         "digitalocean_droplet")
             log_step "Setting up DigitalOcean droplet dependencies..."
+            
+            # Set non-interactive mode to prevent package installation prompts
             export DEBIAN_FRONTEND=noninteractive
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq curl git docker.io docker-compose
-            sudo systemctl start docker
+            
+            # Use robust package installation
+            local packages=(curl git docker.io docker-compose)
+            if ! install_packages_apt "${packages[@]}"; then
+                exit_with_help "Failed to install required packages" \
+                    "Package installation failed. This could be due to:
+1. Network connectivity issues
+2. Package repository problems
+3. Insufficient disk space
+4. Permission issues
+
+Try these solutions:
+- Check internet connection: ping 8.8.8.8
+- Update package lists: sudo apt update
+- Check disk space: df -h
+- Try manual installation: sudo apt install docker.io" "cleanup_on_error"
+            fi
+            
+            # Start and configure Docker with error handling
+            if ! sudo systemctl start docker 2>/dev/null; then
+                log_warning "Failed to start Docker service, attempting reset"
+                sudo systemctl restart docker || {
+                    exit_with_help "Docker service failed to start" \
+                        "Docker installation may be incomplete or corrupted.
+Try these solutions:
+- Reinstall Docker: curl -fsSL https://get.docker.com | sh
+- Check Docker status: sudo systemctl status docker
+- Check Docker logs: sudo journalctl -u docker"
+                }
+            fi
+            
             sudo systemctl enable docker
-            sudo usermod -aG docker "$USER"
+            add_user_to_group "$USER" "docker"
             log_success "DigitalOcean dependencies ready"
             ;;
         "docker")
             log_step "Verifying Docker setup..."
-            if ! docker info &>/dev/null; then
-                log_warning "Docker daemon not running, attempting to start..."
-                if command -v systemctl &>/dev/null; then
-                    sudo systemctl start docker
-                fi
+            if ! wait_for_docker 30; then
+                exit_with_help "Docker is not available or not functioning properly" \
+                    "Docker verification failed. Please ensure:
+1. Docker is installed: docker --version
+2. Docker daemon is running: sudo systemctl start docker
+3. Current user has Docker permissions: sudo usermod -aG docker \$USER
+4. After adding to Docker group, logout and login again
+
+Quick fix: sudo systemctl restart docker && sudo usermod -aG docker \$USER"
             fi
             log_success "Docker setup verified"
             ;;
         "native_linux")
             log_step "Installing minimal dependencies on Linux..."
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq curl git nodejs npm
+            
+            # Set non-interactive mode to prevent package installation prompts  
+            export DEBIAN_FRONTEND=noninteractive
+            
+            local packages=(curl git nodejs npm)
+            if ! install_packages_apt "${packages[@]}"; then
+                exit_with_help "Failed to install Node.js dependencies" \
+                    "Package installation failed. Try these solutions:
+- Update package lists: sudo apt update
+- Install manually: sudo apt install nodejs npm
+- Use NodeSource repository for latest Node.js:
+  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  sudo apt-get install -y nodejs"
+            fi
             log_success "Linux dependencies installed"
             ;;
         "nodejs")
             log_step "Verifying Node.js setup..."
-            node_version=$(node --version | sed 's/v//')
-            if [ "$(echo "$node_version" | cut -d. -f1)" -lt 18 ]; then
-                log_error "Node.js version $node_version is too old. Please upgrade to 18+."
-                exit 1
+            if ! command_exists node || ! command_exists npm; then
+                exit_with_help "Node.js or npm not found" \
+                    "Node.js setup is incomplete. Please:
+1. Install Node.js 18+: https://nodejs.org/en/download/
+2. Verify installation: node --version && npm --version
+3. Ensure both node and npm are in PATH"
             fi
-            log_success "Node.js setup verified"
+            
+            local node_version
+            node_version=$(node --version | sed 's/v//')
+            local major_version
+            major_version=$(echo "$node_version" | cut -d. -f1)
+            
+            if [ "$major_version" -lt 18 ]; then
+                exit_with_help "Node.js version $node_version is too old" \
+                    "EchoTune AI requires Node.js 18 or higher.
+Update Node.js:
+- Download from: https://nodejs.org/en/download/
+- Use nvm: nvm install 18 && nvm use 18
+- Use NodeSource: curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -"
+            fi
+            log_success "Node.js setup verified (version $node_version)"
             ;;
     esac
 }
@@ -148,28 +240,77 @@ setup_app_lightning_fast() {
     # Determine installation directory
     if [ "$DEPLOY_METHOD" = "digitalocean_droplet" ]; then
         INSTALL_DIR="$APP_DIR"
-        sudo mkdir -p "$INSTALL_DIR"
-        sudo chown "$USER:$USER" "$INSTALL_DIR"
+        create_directory_safe "$INSTALL_DIR" "$USER" "755"
     else
         INSTALL_DIR="$HOME/echotune-ai"
-        mkdir -p "$INSTALL_DIR"
+        create_directory_safe "$INSTALL_DIR" "$USER" "755"
     fi
     
-    cd "$INSTALL_DIR"
+    cd "$INSTALL_DIR" || {
+        exit_with_help "Cannot access installation directory: $INSTALL_DIR" \
+            "Failed to change to installation directory.
+This could be due to:
+1. Permission issues
+2. Disk space problems
+3. Directory creation failure
+
+Try these solutions:
+- Check disk space: df -h
+- Check permissions: ls -la $(dirname "$INSTALL_DIR")
+- Create manually: mkdir -p $INSTALL_DIR && cd $INSTALL_DIR"
+    }
     
-    # Clone or update repository
+    # Clone or update repository with enhanced error handling
     if [ -d ".git" ]; then
         log_info "Updating existing repository..."
-        git pull origin main || log_warning "Update failed, continuing with current version"
+        
+        # Verify it's the correct repository
+        local current_remote
+        current_remote=$(git remote get-url origin 2>/dev/null || echo "")
+        
+        if [[ "$current_remote" == *"Spotify-echo"* ]] || [[ "$current_remote" == "$REPO_URL" ]]; then
+            if git pull origin main 2>/dev/null; then
+                log_success "Repository updated successfully"
+            else
+                log_warning "Update failed, continuing with current version"
+            fi
+        else
+            exit_with_help "Directory contains wrong git repository: $current_remote" \
+                "The current directory contains a different git repository.
+Please either:
+1. Remove the directory: rm -rf $INSTALL_DIR
+2. Move to a different directory before running deployment
+3. Set REPO_URL environment variable to match your repository"
+        fi
     else
-        log_info "Cloning repository..."
-        git clone "$REPO_URL" . || {
-            log_error "Failed to clone repository"
-            exit 1
-        }
+        # Check if directory has files but no git repository
+        if [ -n "$(find . -maxdepth 1 -type f -print -quit 2>/dev/null)" ]; then
+            exit_with_help "Directory $INSTALL_DIR exists but is not a git repository" \
+                "The installation directory contains files but is not a git repository.
+Please either:
+1. Remove the directory: rm -rf $INSTALL_DIR
+2. Move existing files to backup location
+3. Initialize as git repository manually"
+        fi
+        
+        log_info "Cloning repository from $REPO_URL..."
+        if ! git clone "$REPO_URL" . 2>/dev/null; then
+            exit_with_help "Failed to clone repository from $REPO_URL" \
+                "Repository cloning failed. This could be due to:
+1. Network connectivity issues
+2. Invalid repository URL
+3. Git not installed
+4. Permission issues
+
+Please verify:
+- Internet connection is working: ping github.com
+- Repository URL is correct: $REPO_URL
+- Git is installed: git --version
+- Directory permissions allow writing" "cleanup_on_error"
+        fi
     fi
     
-    log_success "Application source code ready"
+    log_success "Application source code ready in $INSTALL_DIR"
 }
 
 # Create minimal environment configuration
@@ -431,25 +572,7 @@ show_success_info() {
 
 # Handle deployment errors
 handle_error() {
-    echo ""
-    log_error "Deployment encountered an issue!"
-    echo ""
-    echo -e "${YELLOW}🔍 Troubleshooting Steps:${NC}"
-    echo "   1. Check system requirements (Node.js 18+, Docker, or Linux)"
-    echo "   2. Verify internet connectivity"
-    echo "   3. Check available disk space: df -h"
-    echo "   4. Review logs for specific errors"
-    echo ""
-    echo -e "${YELLOW}💡 Common Solutions:${NC}"
-    echo "   - Install Docker: curl -fsSL https://get.docker.com | sh"
-    echo "   - Update Node.js: https://nodejs.org/en/download/"
-    echo "   - Free disk space: docker system prune -f"
-    echo "   - Restart services: sudo systemctl restart docker"
-    echo ""
-    echo -e "${CYAN}📚 Get Help:${NC}"
-    echo "   - GitHub Issues: https://github.com/dzp5103/Spotify-echo/issues"
-    echo "   - Documentation: https://github.com/dzp5103/Spotify-echo#readme"
-    echo ""
+    cleanup_on_error
     exit 1
 }
 
@@ -458,21 +581,37 @@ main() {
     print_header
     
     # Set error handler
-    trap handle_error ERR
+    trap cleanup_on_error ERR INT TERM
     
     log_step "Starting one-click deployment process..."
     sleep 1
     
+    # Validate deployment steps with detailed error handling
+    log_info "🔍 Step 1: Detecting optimal deployment method..."
     detect_deployment_method
+    
+    log_info "⚙️  Step 2: Setting up system dependencies..."
     setup_minimal_dependencies
+    
+    log_info "📦 Step 3: Preparing application..."
     setup_app_lightning_fast
+    
+    log_info "🔧 Step 4: Configuring environment..."
     create_minimal_env
+    
+    log_info "🚀 Step 5: Deploying application..."
     deploy_application
+    
+    log_info "✅ Step 6: Verifying deployment..."
     verify_deployment
+    
+    # Clear error trap on success
+    trap - ERR INT TERM
+    
     show_success_info
     
     echo ""
-    log_success "🚀 One-click deployment completed in record time!"
+    log_success "🚀 One-click deployment completed successfully!"
 }
 
 # Execute main function

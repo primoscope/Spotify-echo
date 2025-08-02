@@ -3,39 +3,82 @@
 # EchoTune AI - DigitalOcean Quick Deploy Script
 # One-command deployment specifically optimized for DigitalOcean droplets
 
-set -e
+# Load deployment utilities for consistent operations
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/deployment-utils.sh" ]; then
+    source "$SCRIPT_DIR/deployment-utils.sh"
+elif [ -f "scripts/deployment-utils.sh" ]; then
+    source "scripts/deployment-utils.sh"
+else
+    # Fallback basic functions
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    NC='\033[0m'
+    
+    log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+    log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+    log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+    log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+    log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+    
+    install_packages_apt() {
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq "$@"
+    }
+    
+    add_user_to_group() {
+        local username="${1:-$USER}"
+        local group="$2"
+        sudo usermod -aG "$group" "$username"
+    }
+    
+    command_exists() { command -v "$1" >/dev/null 2>&1; }
+fi
 
-# Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Enable strict error handling
+set -e
+set -o pipefail
 
 # DigitalOcean optimized configuration
 APP_DIR="/opt/echotune"
 DOMAIN="${DOMAIN:-$(curl -s http://ipinfo.io/ip).nip.io}"  # Use IP-based domain if none set
 REPO_URL="https://github.com/dzp5103/Spotify-echo.git"
 
-# Helper functions
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-log_step() {
-    echo -e "${BLUE}[STEP]${NC} $1"
+# Enhanced cleanup function
+cleanup_on_error() {
+    log_error "Deployment failed during DigitalOcean setup"
+    log_info "Cleaning up partial installation..."
+    
+    # Stop any running Docker containers
+    if command_exists docker-compose && [ -f "docker-compose.yml" ]; then
+        docker-compose down --timeout 10 2>/dev/null || true
+    fi
+    
+    # Clean up temporary files
+    rm -f /tmp/digitalocean-deploy-* 2>/dev/null || true
+    
+    echo ""
+    log_error "DigitalOcean deployment was interrupted or failed"
+    echo ""
+    echo -e "${YELLOW}🔍 Troubleshooting Steps:${NC}"
+    echo "   1. Check system requirements and internet connectivity"
+    echo "   2. Verify DigitalOcean droplet has sufficient resources"
+    echo "   3. Check available disk space: df -h"
+    echo "   4. Review logs for specific errors"
+    echo ""
+    echo -e "${YELLOW}💡 Common Solutions:${NC}"
+    echo "   - Restart Docker: sudo systemctl restart docker"
+    echo "   - Update packages: sudo apt update && sudo apt upgrade"
+    echo "   - Check network: ping 8.8.8.8"
+    echo "   - Free disk space: docker system prune -f"
+    echo ""
+    echo -e "${CYAN}📚 Get Help:${NC}"
+    echo "   - GitHub Issues: https://github.com/dzp5103/Spotify-echo/issues"
+    echo "   - Documentation: https://github.com/dzp5103/Spotify-echo#readme"
+    echo ""
 }
 
 # Check if running on DigitalOcean
@@ -63,24 +106,54 @@ check_digitalocean() {
 quick_system_setup() {
     log_step "Quick system setup for DigitalOcean..."
     
-    # Update system packages (non-interactive)
-    export DEBIAN_FRONTEND=noninteractive
-    sudo apt-get update -qq
-    sudo apt-get install -y -qq curl wget git docker.io docker-compose python3 python3-pip nodejs npm
+    # Install required packages with robust error handling
+    local packages=(curl wget git docker.io docker-compose python3 python3-pip nodejs npm)
+    if ! install_packages_apt "${packages[@]}"; then
+        log_error "Failed to install required system packages"
+        log_info "This could be due to:"
+        log_info "1. Network connectivity issues"
+        log_info "2. Package repository problems" 
+        log_info "3. Insufficient disk space"
+        log_info "4. Permission issues"
+        log_info ""
+        log_info "Try these solutions:"
+        log_info "- Check internet connection: ping 8.8.8.8"
+        log_info "- Update package lists: sudo apt update"
+        log_info "- Check disk space: df -h"
+        log_info "- Check package availability: apt search docker.io"
+        exit 1
+    fi
     
-    # Start and enable Docker
-    sudo systemctl start docker
+    # Start and enable Docker with error handling
+    if ! sudo systemctl start docker 2>/dev/null; then
+        log_warning "Failed to start Docker service, attempting reset"
+        sudo systemctl restart docker || {
+            log_error "Docker service failed to start"
+            log_info "Docker installation may be incomplete or corrupted."
+            log_info "Try these solutions:"
+            log_info "- Reinstall Docker: curl -fsSL https://get.docker.com | sh"
+            log_info "- Check Docker status: sudo systemctl status docker"
+            log_info "- Check Docker logs: sudo journalctl -u docker"
+            exit 1
+        }
+    fi
+    
     sudo systemctl enable docker
     
-    # Add current user to docker group
-    sudo usermod -aG docker "$USER"
+    # Add user to docker group safely
+    add_user_to_group "$USER" "docker"
     
-    # Basic firewall setup
-    sudo ufw --force enable
-    sudo ufw allow ssh
-    sudo ufw allow 80/tcp
-    sudo ufw allow 443/tcp
-    sudo ufw allow 3000/tcp
+    # Basic firewall setup with error handling
+    if command_exists ufw; then
+        sudo ufw --force enable 2>/dev/null || log_warning "Failed to enable firewall"
+        sudo ufw allow ssh 2>/dev/null || log_warning "Failed to allow SSH in firewall"
+        sudo ufw allow 80/tcp 2>/dev/null || log_warning "Failed to allow port 80 in firewall"
+        sudo ufw allow 443/tcp 2>/dev/null || log_warning "Failed to allow port 443 in firewall"
+        sudo ufw allow 3000/tcp 2>/dev/null || log_warning "Failed to allow port 3000 in firewall"
+        log_success "Basic firewall configured"
+    else
+        log_warning "UFW not available, skipping firewall configuration"
+    fi
     
     log_success "Basic system setup completed"
 }
@@ -432,7 +505,7 @@ main() {
     echo ""
     
     # Set error handler
-    trap handle_error ERR
+    trap cleanup_on_error ERR INT TERM
     
     check_digitalocean
     quick_system_setup
@@ -442,7 +515,17 @@ main() {
     install_dependencies
     deploy_application
     verify_deployment
+    
+    # Clear error trap on success
+    trap - ERR INT TERM
+    
     show_deployment_info
+}
+
+# Handle errors (kept for backward compatibility)
+handle_error() {
+    cleanup_on_error
+    exit 1
 }
 
 # Run main function

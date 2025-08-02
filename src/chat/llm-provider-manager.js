@@ -296,7 +296,7 @@ class LLMProviderManager {
       try {
         // Azure OpenAI uses AAD tokens that can be refreshed
         if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET) {
-          const tokenResponse = await fetch(config.refreshEndpoint, {
+          const tokenResponse = await fetch(_config.refreshEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({

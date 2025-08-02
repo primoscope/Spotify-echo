@@ -117,38 +117,111 @@ create_environment() {
     cd "$APP_DIR"
     
     if [ ! -f ".env" ]; then
-        log_info "Creating basic .env file..."
+        log_info "Creating production .env file..."
+        
+        # Generate secure secrets
+        SESSION_SECRET=$(openssl rand -hex 32 2>/dev/null || echo "please_change_this_session_secret_$(date +%s)")
+        JWT_SECRET=$(openssl rand -hex 32 2>/dev/null || echo "please_change_this_jwt_secret_$(date +%s)")
         
         cat > .env <<EOF
-# EchoTune AI - DigitalOcean Configuration
+# EchoTune AI - DigitalOcean Production Configuration
 NODE_ENV=production
 PORT=3000
 DOMAIN=$DOMAIN
-FRONTEND_URL=http://$DOMAIN:3000
+FRONTEND_URL=https://$DOMAIN
 
-# Spotify API (Update with your credentials)
-SPOTIFY_CLIENT_ID=your_spotify_client_id_here
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
-SPOTIFY_REDIRECT_URI=http://$DOMAIN:3000/auth/callback
+# Spotify API Configuration (REQUIRED - Please update with your credentials)
+SPOTIFY_CLIENT_ID=\${SPOTIFY_CLIENT_ID:-your_spotify_client_id_here}
+SPOTIFY_CLIENT_SECRET=\${SPOTIFY_CLIENT_SECRET:-your_spotify_client_secret_here}
+SPOTIFY_REDIRECT_URI=https://$DOMAIN/auth/callback
 
-# Security (Generate secure secrets in production)
-SESSION_SECRET=demo_session_secret_change_in_production
-JWT_SECRET=demo_jwt_secret_change_in_production
+# Security Configuration (Auto-generated secure secrets)
+SESSION_SECRET=$SESSION_SECRET
+JWT_SECRET=$JWT_SECRET
 
-# Optional: Database connections
-# MONGODB_URI=mongodb://localhost:27017/echotune
-# REDIS_URL=redis://localhost:6379
+# LLM Provider Configuration (Optional - Demo mode if not configured)
+DEFAULT_LLM_PROVIDER=mock
+GEMINI_API_KEY=\${GEMINI_API_KEY:-}
+OPENAI_API_KEY=\${OPENAI_API_KEY:-}
+
+# Database Configuration (Optional - SQLite fallback if not configured)
+MONGODB_URI=\${MONGODB_URI:-}
+SUPABASE_URL=\${SUPABASE_URL:-}
+SUPABASE_ANON_KEY=\${SUPABASE_ANON_KEY:-}
+
+# Production Settings
+LOG_LEVEL=info
+DEBUG=false
+TRUST_PROXY=true
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# CORS Configuration
+ENABLE_CORS=true
+CORS_ORIGINS=https://$DOMAIN,https://www.$DOMAIN
+
+# Health Check Configuration
+HEALTH_CHECK_ENABLED=true
+METRICS_ENABLED=true
 EOF
         
-        log_success "Basic .env file created"
-        log_warning "Please update $APP_DIR/.env with your actual Spotify credentials"
+        log_success "Production .env file created with secure defaults"
+        log_warning "IMPORTANT: Update Spotify credentials in $APP_DIR/.env before production use"
+        
+        # Create environment validation script
+        cat > validate-env.sh <<'EOF'
+#!/bin/bash
+# Environment validation script
+
+MISSING_VARS=""
+
+check_var() {
+    local var_name="$1"
+    local var_value="${!var_name}"
+    local is_required="$2"
+    
+    if [ -z "$var_value" ] || [ "$var_value" = "your_spotify_client_id_here" ] || [ "$var_value" = "your_spotify_client_secret_here" ]; then
+        if [ "$is_required" = "true" ]; then
+            MISSING_VARS="$MISSING_VARS $var_name"
+        fi
+    fi
+}
+
+# Load environment variables
+set -a
+source .env
+set +a
+
+# Check required variables
+check_var "SPOTIFY_CLIENT_ID" "true"
+check_var "SPOTIFY_CLIENT_SECRET" "true"
+
+if [ -n "$MISSING_VARS" ]; then
+    echo "❌ Missing required environment variables:$MISSING_VARS"
+    echo ""
+    echo "Please update the following in .env file:"
+    for var in $MISSING_VARS; do
+        echo "  $var=your_actual_value_here"
+    done
+    echo ""
+    echo "Get Spotify credentials from: https://developer.spotify.com/dashboard"
+    exit 1
+else
+    echo "✅ Environment validation passed"
+    exit 0
+fi
+EOF
+        chmod +x validate-env.sh
+        
     else
         log_success "Using existing .env file"
         
         # Update domain if needed
         sed -i "s|DOMAIN=.*|DOMAIN=$DOMAIN|" .env
-        sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=http://$DOMAIN:3000|" .env
-        sed -i "s|SPOTIFY_REDIRECT_URI=.*|SPOTIFY_REDIRECT_URI=http://$DOMAIN:3000/auth/callback|" .env
+        sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://$DOMAIN|" .env
+        sed -i "s|SPOTIFY_REDIRECT_URI=.*|SPOTIFY_REDIRECT_URI=https://$DOMAIN/auth/callback|" .env
         
         log_info "Updated domain settings in .env"
     fi
@@ -279,6 +352,33 @@ handle_error() {
     exit 1
 }
 
+# Validate environment configuration
+validate_environment() {
+    log_step "Validating environment configuration..."
+    
+    cd "$APP_DIR"
+    
+    if [ -f "validate-env.sh" ]; then
+        log_info "Running environment validation..."
+        if ./validate-env.sh; then
+            log_success "Environment validation passed"
+        else
+            log_error "Environment validation failed"
+            echo ""
+            echo "🔧 To fix this:"
+            echo "1. Edit the .env file: nano $APP_DIR/.env"
+            echo "2. Get Spotify credentials: https://developer.spotify.com/dashboard"
+            echo "3. Update SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET"
+            echo "4. Re-run deployment: $0"
+            echo ""
+            log_warning "Continuing with demo mode (limited functionality)"
+            sleep 3
+        fi
+    else
+        log_warning "Environment validation script not found"
+    fi
+}
+
 # Main deployment function
 main() {
     echo "🚀 EchoTune AI - DigitalOcean Quick Deploy"
@@ -292,6 +392,7 @@ main() {
     quick_system_setup
     setup_app_directory
     create_environment
+    validate_environment
     install_dependencies
     deploy_application
     verify_deployment

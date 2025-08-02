@@ -1,5 +1,5 @@
 // React is needed for JSX
-import React from 'react';
+
 
 function QuickSuggestions({ onSuggestionClick }) {
   const suggestions = [

@@ -5,12 +5,35 @@ const { spawn } = require('child_process');
 
 describe('Deployment Integration Tests', () => {
     const baseURL = process.env.TEST_URL || 'http://localhost:3000';
-    const timeout = 30000;
+    const timeout = 45000; // Increased timeout
+    let serverProcess = null;
 
     beforeAll(async () => {
-        // Wait for application to be ready
-        await waitForApp(baseURL, timeout);
+        // Check if server is already running
+        try {
+            await axios.get(`${baseURL}/alive`, { timeout: 2000 });
+            console.log('Server already running');
+        } catch (error) {
+            // Start the server if not running
+            console.log('Starting server for tests...');
+            serverProcess = spawn('npm', ['start'], {
+                cwd: process.cwd(),
+                stdio: 'pipe'
+            });
+            
+            // Wait for server to start
+            await waitForApp(baseURL, timeout);
+        }
     }, timeout);
+
+    afterAll(async () => {
+        // Clean up if we started the server
+        if (serverProcess) {
+            console.log('Stopping test server...');
+            serverProcess.kill();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    });
 
     describe('Health Endpoints', () => {
         test('GET /health should return comprehensive health status', async () => {

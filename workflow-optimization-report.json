@@ -1,50 +1,11 @@
 {
-  "timestamp": "2025-08-02T05:03:25.208Z",
+  "timestamp": "2025-08-02T05:51:32.768Z",
   "summary": {
-    "totalWorkflows": 11,
-    "redundanciesFound": 11,
+    "totalWorkflows": 6,
+    "redundanciesFound": 7,
     "optimizationsProposed": 0
   },
   "redundantWorkflows": [
-    {
-      "type": "duplicate_jobs",
-      "jobs": [
-        "Gemini.yml:auto-comment",
-        "optimized-pipeline.yml:cleanup"
-      ],
-      "description": "2 similar jobs found",
-      "suggestion": "Consolidate similar jobs to reduce duplication"
-    },
-    {
-      "type": "duplicate_jobs",
-      "jobs": [
-        "coding-agent-workflow.yml:mcp-server-testing",
-        "coding-agent-workflow.yml:data-processing"
-      ],
-      "description": "2 similar jobs found",
-      "suggestion": "Consolidate similar jobs to reduce duplication"
-    },
-    {
-      "type": "duplicate_jobs",
-      "jobs": [
-        "coding-agent-workflow.yml:performance-testing",
-        "mcp-integration.yml:integration-tests",
-        "mcp-integration.yml:validate-workflows",
-        "mcp-integration.yml:deployment-readiness",
-        "prompt-orchestrator.yml:execute-prompt"
-      ],
-      "description": "5 similar jobs found",
-      "suggestion": "Consolidate similar jobs to reduce duplication"
-    },
-    {
-      "type": "duplicate_jobs",
-      "jobs": [
-        "coding-agent-workflow.yml:ai-code-analysis",
-        "prompt-integration-demo.yml:demo-prompt-integration"
-      ],
-      "description": "2 similar jobs found",
-      "suggestion": "Consolidate similar jobs to reduce duplication"
-    },
     {
       "type": "duplicate_jobs",
       "jobs": [
@@ -83,9 +44,19 @@
       "suggestion": "Consolidate similar jobs to reduce duplication"
     },
     {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "mcp-integration.yml:integration-tests",
+        "mcp-integration.yml:validate-workflows",
+        "mcp-integration.yml:deployment-readiness",
+        "prompt-orchestrator.yml:execute-prompt"
+      ],
+      "description": "4 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
       "type": "project_specific",
       "files": [
-        "Gemini.yml",
         "gemini-enhanced.yml",
         "main.yml"
       ],
@@ -99,14 +70,6 @@
       ],
       "description": "Overlapping prompt analysis workflows",
       "suggestion": "Merge functionality into main pipeline"
-    },
-    {
-      "type": "project_specific",
-      "files": [
-        "coding-agent-workflow.yml"
-      ],
-      "description": "Superseded by optimized pipeline",
-      "suggestion": "Remove - functionality integrated"
     }
   ],
   "optimizations": [

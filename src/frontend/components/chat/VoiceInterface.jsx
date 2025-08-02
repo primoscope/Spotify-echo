@@ -422,10 +422,10 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
         <div className="quick-commands">
           <h4>Try saying:</h4>
           <div className="command-examples">
-            <span>"Play some workout music"</span>
-            <span>"Create a chill playlist"</span>
-            <span>"I want upbeat songs"</span>
-            <span>"Recommend jazz music"</span>
+            <span>&quot;Play some workout music&quot;</span>
+            <span>&quot;Create a chill playlist&quot;</span>
+            <span>&quot;I want upbeat songs&quot;</span>
+            <span>&quot;Recommend jazz music&quot;</span>
           </div>
         </div>
       </div>

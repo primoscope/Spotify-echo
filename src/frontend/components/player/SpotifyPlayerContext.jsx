@@ -24,7 +24,7 @@ export const SpotifyPlayerProvider = ({ children }) => {
 
   useEffect(() => {
     // Get access token from local storage or auth context
-    const storedUser = localStorage.getItem('echotune_user');
+    const _storedUser = localStorage.getItem('echotune_user');
     const storedToken = localStorage.getItem('spotify_access_token');
     
     if (storedToken) {

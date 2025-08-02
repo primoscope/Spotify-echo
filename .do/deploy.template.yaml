@@ -1,0 +1,126 @@
+# DigitalOcean App Platform Template Specification
+# This file defines the structure for one-click deployment
+
+spec_version: 1
+
+name: echotune-ai-template
+description: "AI-Powered Music Discovery Platform with Spotify Integration"
+
+# Template metadata
+template:
+  version: "1.0.0"
+  category: "Music & Audio"
+  subcategory: "AI Applications"
+  
+  # Template features
+  features:
+    - "AI-powered music recommendations"
+    - "Real-time Spotify integration" 
+    - "Modern responsive web interface"
+    - "Voice and chat interaction"
+    - "Music analytics and insights"
+
+# App specification
+app:
+  name: echotune-ai
+  region: nyc1
+  
+  # Environment variables with defaults
+  envs:
+  - key: NODE_ENV
+    value: production
+    scope: RUN_TIME
+  - key: PORT
+    value: "3000"
+    scope: RUN_TIME
+  - key: DEFAULT_LLM_PROVIDER
+    value: mock
+    scope: RUN_TIME
+  - key: HEALTH_CHECK_ENABLED
+    value: "true"
+    scope: RUN_TIME
+  - key: LOG_LEVEL
+    value: info
+    scope: RUN_TIME
+
+  # Optional user-configurable variables
+  - key: SPOTIFY_CLIENT_ID
+    value: ""
+    scope: RUN_TIME
+    type: SECRET
+    description: "Spotify Client ID from developer.spotify.com (optional)"
+  - key: SPOTIFY_CLIENT_SECRET
+    value: ""
+    scope: RUN_TIME
+    type: SECRET
+    description: "Spotify Client Secret from developer.spotify.com (optional)"
+  - key: GEMINI_API_KEY
+    value: ""
+    scope: RUN_TIME
+    type: SECRET
+    description: "Google Gemini API Key for enhanced AI features (optional)"
+  - key: OPENAI_API_KEY
+    value: ""
+    scope: RUN_TIME
+    type: SECRET
+    description: "OpenAI API Key for ChatGPT integration (optional)"
+
+  # Services
+  services:
+  - name: web
+    # Source configuration
+    source_dir: /
+    github:
+      repo: dzp5103/Spotify-echo
+      branch: main
+      deploy_on_push: true
+    
+    # Build and run
+    build_command: npm ci --only=production
+    run_command: npm start
+    
+    # Configuration
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 3000
+    
+    # Health check
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    # Routes
+    routes:
+    - path: /
+
+# Deployment instructions
+deployment_instructions: |
+  ## 🎉 EchoTune AI Deployment Instructions
+
+  ### Quick Start:
+  1. Click "Deploy" button
+  2. Wait for build to complete (2-3 minutes)
+  3. Access your app at the provided URL
+
+  ### Optional Configuration:
+  - Add Spotify API credentials for full music integration
+  - Add AI provider API keys for enhanced chat features
+  - Configure custom domain if desired
+
+  ### Post-Deployment:
+  1. Test health endpoint: `your-app-url/health`
+  2. Access main interface: `your-app-url`
+  3. Configure API keys in app settings if needed
+
+  The application works in demo mode without API keys!
+
+# Resource requirements
+requirements:
+  minimum_instance_size: basic-xxs
+  recommended_instance_size: basic-xxs
+  estimated_monthly_cost: "$5-12"

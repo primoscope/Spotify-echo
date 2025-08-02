@@ -1,9 +1,10 @@
-# DigitalOcean App Platform Configuration for EchoTune AI
+# DigitalOcean App Platform Configuration
 # This file enables one-click deployment to DigitalOcean App Platform
+
 name: echotune-ai
 region: nyc1
 
-# Environment variables - these will be configurable during deployment
+# Environment variables
 envs:
 - key: NODE_ENV
   value: production
@@ -20,7 +21,7 @@ envs:
 - key: TRUST_PROXY
   value: "true"
 
-# User-configurable environment variables (optional)
+# Optional user-configurable environment variables
 - key: SPOTIFY_CLIENT_ID
   value: ""
   type: SECRET
@@ -40,17 +41,20 @@ envs:
 # Main application service
 services:
 - name: web
-  # Use the main branch for deployment
+  # Source configuration
   source_dir: /
   github:
     repo: dzp5103/Spotify-echo
     branch: main
     deploy_on_push: true
   
-  # Build configuration - simplified for reliability
-  build_command: npm ci --only=production
+  # Build configuration
+  build_command: |
+    echo "🚀 Building EchoTune AI..."
+    npm ci --only=production
+    echo "✅ Build complete"
   
-  # Run configuration - use npm start for consistency
+  # Runtime configuration
   run_command: npm start
   
   # HTTP configuration
@@ -69,37 +73,20 @@ services:
   instance_count: 1
   instance_size_slug: basic-xxs
   
-  # Routes configuration
+  # Environment
+  environment_slug: node-js
+  
+  # Routes
   routes:
   - path: /
-  
-  # Environment-specific configuration
-  environment_slug: node-js
 
-# Static site for documentation (optional)
+# Static files (if needed)
 static_sites:
-- name: docs
-  source_dir: /docs
+- name: assets
+  source_dir: /public
   github:
     repo: dzp5103/Spotify-echo
     branch: main
   routes:
-  - path: /docs
-  build_command: echo "Documentation served statically"
-
-# Optional background job for health monitoring
-jobs:
-- name: health-monitor
-  source_dir: /
-  github:
-    repo: dzp5103/Spotify-echo
-    branch: main
-  run_command: |
-    echo "🔍 EchoTune AI Health Monitor"
-    while true; do
-      sleep 300
-      curl -f http://localhost:3000/health || echo "Health check warning"
-    done
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  kind: WORKER
+  - path: /static
+  build_command: echo "Static files ready"

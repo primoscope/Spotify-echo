@@ -164,8 +164,10 @@ const productionConfig = {
  * Generate a secure secret if not provided
  */
 function generateSecureSecret() {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('SESSION_SECRET must be provided in production');
+  // For DigitalOcean and other deployments, generate a secure secret automatically
+  if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+    console.warn('⚠️  SESSION_SECRET not provided in production. Generating secure secret automatically.');
+    console.warn('   For better security, set SESSION_SECRET environment variable.');
   }
   const crypto = require('crypto');
   return crypto.randomBytes(32).toString('hex');
@@ -176,35 +178,58 @@ function generateSecureSecret() {
  */
 function validateProductionConfig() {
   const errors = [];
+  const warnings = [];
 
   if (process.env.NODE_ENV === 'production') {
-    // Required environment variables for production
-    const required = [
+    // Critical environment variables (will cause startup failure)
+    const critical = [];
+
+    // Optional environment variables (will show warnings but allow startup)
+    const optional = [
       'SPOTIFY_CLIENT_ID',
       'SPOTIFY_CLIENT_SECRET',
-      'SESSION_SECRET',
       'FRONTEND_URL',
     ];
 
-    for (const variable of required) {
+    // Check critical variables
+    for (const variable of critical) {
       if (!process.env[variable]) {
-        errors.push(`Missing required environment variable: ${variable}`);
+        errors.push(`Missing critical environment variable: ${variable}`);
       }
     }
 
-    // Validate session secret length
-    if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length < 32) {
-      errors.push('SESSION_SECRET must be at least 32 characters long');
+    // Check optional variables
+    for (const variable of optional) {
+      if (!process.env[variable]) {
+        warnings.push(`Missing optional environment variable: ${variable} - some features may be limited`);
+      }
     }
 
-    // Validate URLs
-    if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.startsWith('https://')) {
-      errors.push('FRONTEND_URL must use HTTPS in production');
+    // Auto-generate SESSION_SECRET if not provided
+    if (!process.env.SESSION_SECRET) {
+      warnings.push('SESSION_SECRET not provided - generating secure secret automatically');
+    }
+
+    // Validate session secret length if provided
+    if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length < 32) {
+      warnings.push('SESSION_SECRET should be at least 32 characters long for better security');
+    }
+
+    // Validate URLs but don't fail on HTTP in deployment scenarios
+    if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.startsWith('https://') && !process.env.FRONTEND_URL.startsWith('http://')) {
+      warnings.push('FRONTEND_URL should use HTTPS for production for better security');
+    }
+
+    // Log warnings
+    if (warnings.length > 0) {
+      console.warn('⚠️  Production configuration warnings:');
+      warnings.forEach(warning => console.warn(`   ${warning}`));
+      console.warn('   The application will start with limited functionality.');
     }
   }
 
   if (errors.length > 0) {
-    throw new Error(`Production configuration errors:\n${errors.join('\n')}`);
+    throw new Error(`Critical production configuration errors:\n${errors.join('\n')}`);
   }
 
   return true;

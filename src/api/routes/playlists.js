@@ -62,7 +62,7 @@ router.post('/create', async (req, res) => {
     };
 
     // Save playlist to database
-    const saveResult = await databaseManager.savePlaylist ? 
+    const _saveResult = await databaseManager.savePlaylist ? 
       await databaseManager.savePlaylist(playlist) :
       { success: true, id: playlistId };
 
@@ -213,7 +213,7 @@ router.post('/:playlistId/tracks', async (req, res) => {
  */
 router.get('/user/:userId', async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId: _userId } = req.params;
     const { limit = 20, offset = 0 } = req.query;
 
     // Mock implementation - would query database
@@ -617,7 +617,7 @@ function parsePlaylistPrompt(prompt) {
 /**
  * Helper function to create playlist from generated data
  */
-async function createPlaylistFromData(userId, playlistData, spotifyAccessToken) {
+async function createPlaylistFromData(userId, playlistData, _spotifyAccessToken) {
   // Implementation would call the create endpoint
   // For now, return mock result
   return {

@@ -1,5 +1,5 @@
 // React is needed for JSX
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 function VoiceRecording({ onVoiceInput, disabled }) {
   const [isRecording, setIsRecording] = useState(false);

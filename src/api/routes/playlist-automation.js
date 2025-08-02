@@ -116,7 +116,7 @@ router.post('/create-smart', async (req, res) => {
 router.post('/auto-generate', async (req, res) => {
   try {
     const {
-      userId = 'demo_user',
+      userId: _userId = 'demo_user',
       aiSuggestion, // AI chat response with music recommendations
       contextData = {},
       accessToken,
@@ -449,8 +449,8 @@ async function parseAISuggestion(suggestion, contextData) {
 
     // Extract artist/song mentions
     const artistMatches = suggestion.match(/artist.*?(?:like|such as|including)\s+([^.!?]+)/gi) || [];
-    const songMatches = suggestion.match(/song.*?["']([^"']+)["']/gi) || [];
-    const trackMatches = suggestion.match(/track.*?["']([^"']+)["']/gi) || [];
+    const _songMatches = suggestion.match(/song.*?["']([^"']+)["']/gi) || [];
+    const _trackMatches = suggestion.match(/track.*?["']([^"']+)["']/gi) || [];
 
     // Create mock tracks from mentions
     const tracks = [];

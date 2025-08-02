@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../realtime/SocketContext';
 import { useAuth } from '../auth/AuthContext';
 import { useSpotifyPlayer } from '../player/SpotifyPlayerContext';

@@ -1,5 +1,5 @@
 // React is needed for JSX
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLLM } from '../contexts/LLMContext';
 import { useDatabase } from '../contexts/DatabaseContext';

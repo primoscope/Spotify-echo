@@ -1,0 +1,162 @@
+{
+  "timestamp": "2025-08-02T05:03:25.208Z",
+  "summary": {
+    "totalWorkflows": 11,
+    "redundanciesFound": 11,
+    "optimizationsProposed": 0
+  },
+  "redundantWorkflows": [
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "Gemini.yml:auto-comment",
+        "optimized-pipeline.yml:cleanup"
+      ],
+      "description": "2 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "coding-agent-workflow.yml:mcp-server-testing",
+        "coding-agent-workflow.yml:data-processing"
+      ],
+      "description": "2 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "coding-agent-workflow.yml:performance-testing",
+        "mcp-integration.yml:integration-tests",
+        "mcp-integration.yml:validate-workflows",
+        "mcp-integration.yml:deployment-readiness",
+        "prompt-orchestrator.yml:execute-prompt"
+      ],
+      "description": "5 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "coding-agent-workflow.yml:ai-code-analysis",
+        "prompt-integration-demo.yml:demo-prompt-integration"
+      ],
+      "description": "2 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "gemini-enhanced.yml:build",
+        "prompt-orchestrator.yml:validate-prompt"
+      ],
+      "description": "2 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "gemini-enhanced.yml:update-readme",
+        "mcp-integration.yml:documentation-check"
+      ],
+      "description": "2 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "gemini-enhanced.yml:deployment-trigger",
+        "gemini-enhanced.yml:workflow-summary",
+        "prompt-orchestrator.yml:summary"
+      ],
+      "description": "3 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "duplicate_jobs",
+      "jobs": [
+        "main.yml:code_review",
+        "optimized-pipeline.yml:ai-code-review"
+      ],
+      "description": "2 similar jobs found",
+      "suggestion": "Consolidate similar jobs to reduce duplication"
+    },
+    {
+      "type": "project_specific",
+      "files": [
+        "Gemini.yml",
+        "gemini-enhanced.yml",
+        "main.yml"
+      ],
+      "description": "Multiple Gemini code review workflows",
+      "suggestion": "Consolidate into optimized-pipeline.yml"
+    },
+    {
+      "type": "project_specific",
+      "files": [
+        "prompt-orchestrator.yml"
+      ],
+      "description": "Overlapping prompt analysis workflows",
+      "suggestion": "Merge functionality into main pipeline"
+    },
+    {
+      "type": "project_specific",
+      "files": [
+        "coding-agent-workflow.yml"
+      ],
+      "description": "Superseded by optimized pipeline",
+      "suggestion": "Remove - functionality integrated"
+    }
+  ],
+  "optimizations": [
+    {
+      "type": "consolidation",
+      "description": "Create unified optimized-pipeline.yml",
+      "benefits": [
+        "Single source of truth for CI/CD",
+        "Reduced maintenance overhead",
+        "Consistent caching and optimization",
+        "Better resource utilization"
+      ],
+      "implementation": "Replace multiple workflows with optimized-pipeline.yml"
+    },
+    {
+      "type": "caching",
+      "description": "Implement comprehensive dependency caching",
+      "benefits": [
+        "Faster workflow execution",
+        "Reduced network usage",
+        "Better reliability"
+      ],
+      "implementation": "Add Node.js and Python dependency caching"
+    },
+    {
+      "type": "parallelization",
+      "description": "Optimize job dependencies and parallelization",
+      "benefits": [
+        "Reduced overall pipeline time",
+        "Better resource utilization",
+        "Faster feedback"
+      ],
+      "implementation": "Run independent jobs in parallel"
+    },
+    {
+      "type": "smart_execution",
+      "description": "Add smart change detection",
+      "benefits": [
+        "Skip unnecessary jobs",
+        "Faster PR feedback",
+        "Reduced resource usage"
+      ],
+      "implementation": "Conditional job execution based on file changes"
+    }
+  ],
+  "recommendations": [
+    "Replace all redundant workflows with optimized-pipeline.yml",
+    "Remove unused workflow files after testing",
+    "Implement workflow status notifications",
+    "Add periodic cleanup for old artifacts",
+    "Consider workflow templates for future additions"
+  ]
+}

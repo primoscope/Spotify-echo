@@ -374,3 +374,14 @@ gemini-*.log
 lint-results.txt
 test-results-*.txt
 security-audit.txt
+
+# DigitalOcean deployment artifacts
+# IMPORTANT: Never commit API tokens or credentials
+**/DO_API_TOKEN*
+**/do_api_token*
+digitalocean_credentials*
+doctl_auth*
+# Temporary deployment files
+/tmp/digitalocean-deploy-*
+deployment-temp-*
+*.do.tmp

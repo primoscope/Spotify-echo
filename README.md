@@ -124,6 +124,7 @@ The application includes Playwright/Puppeteer for web automation with optimized 
 
 | 🚀 Method | 🎯 Best For | ⏱️ Time | 📊 Difficulty | ✨ Key Features |
 |-----------|-------------|---------|---------------|-----------------|
+| 🌊 **[DigitalOcean CLI](#-digitalocean-cli-deployment-new)** | **Cloud automation** | **1-2 min** | ⭐ **Easy** | Auto-installs doctl, Secure auth, API demo |
 | 🔮 **[Universal Script](#-universal-deployment)** | **First-time users** | **2-3 min** | ⭐ **Easy** | Auto-detection, SSL, Security |
 | 🐳 **[Docker](#-docker-deployment)** | **Cloud & Containers** | **3-5 min** | ⭐⭐ **Medium** | Scalable, Portable, Isolated |
 | ☁️ **[DigitalOcean](#-digitalocean-app-platform)** | **Managed hosting** | **1 min** | ⭐ **Easy** | Zero maintenance, CDN, Auto-scaling |
@@ -151,6 +152,55 @@ graph LR
     style E fill:#FF9800,stroke:#333,stroke-width:2px,color:#fff
     style F fill:#9C27B0,stroke:#333,stroke-width:2px,color:#fff
 ```
+
+---
+
+## 🌊 **DigitalOcean CLI Deployment (NEW)**
+
+**🎯 One-click deployment to DigitalOcean using `doctl` CLI - perfect for cloud automation**
+
+### **⚡ QUICK START**
+Set up DigitalOcean CLI and authenticate with your account:
+
+```bash
+# Quick setup (installs doctl, authenticates, demonstrates API access)
+./deploy.sh
+
+# Or provide API token via environment variable
+DO_API_TOKEN=your_digitalocean_api_token ./deploy.sh
+```
+
+**✨ What This Does:**
+- 🔧 **Installs DigitalOcean CLI (`doctl`)** if not already present
+- 🔐 **Securely handles your API key** (never hardcoded, only in-memory)
+- ✅ **Authenticates with DigitalOcean** and verifies access
+- 📊 **Demonstrates API access** by listing your Droplets
+- 🚀 **Ready for automation** with deployment examples
+
+**🔒 Security Features:**
+- API key handled securely (never stored in files)
+- Interactive prompt or environment variable options
+- Demo mode available when authentication fails
+- Comprehensive error handling and troubleshooting
+
+### **🌊 Next Steps with doctl**
+Once authenticated, you can automate deployments:
+
+```bash
+# Create a Droplet for EchoTune AI
+doctl compute droplet create echotune-app \
+  --size s-2vcpu-4gb \
+  --image ubuntu-22-04-x64 \
+  --region nyc1
+
+# Deploy to DigitalOcean App Platform
+doctl apps create --spec .do/app.yaml
+
+# Create managed database
+doctl databases create echotune-db --engine mongodb
+```
+
+**📚 Learn More:** See [DigitalOcean CLI Documentation](https://docs.digitalocean.com/reference/doctl/) for advanced automation.
 
 ---
 

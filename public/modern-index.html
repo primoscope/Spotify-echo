@@ -85,6 +85,62 @@
             </div>
         </section>
 
+        <!-- One-Click Deployment Section -->
+        <section class="deployment-section-modern" style="margin: 40px auto; max-width: 1200px; padding: 40px 20px;">
+            <div class="glass-container" style="padding: 40px; text-align: center;">
+                <h2 style="font-size: 2rem; margin-bottom: 20px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    🚀 Deploy Your Own EchoTune AI
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+                    Get your own instance of EchoTune AI running in the cloud with our streamlined deployment options. 
+                    No DevOps experience required!
+                </p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="font-size: 2.5rem; margin-bottom: 15px;">☁️</div>
+                        <h3 style="margin-bottom: 10px; color: var(--text-primary);">DigitalOcean App Platform</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                            Managed hosting with automatic scaling, SSL, and global CDN
+                        </p>
+                        <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai" 
+                           class="btn-modern" target="_blank" rel="noopener" style="text-decoration: none; width: 100%;">
+                            Deploy Now
+                        </a>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="font-size: 2.5rem; margin-bottom: 15px;">🐳</div>
+                        <h3 style="margin-bottom: 10px; color: var(--text-primary);">Docker Container</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                            Run anywhere with Docker support and optimized containers
+                        </p>
+                        <a href="/deploy/" class="btn-modern secondary" style="text-decoration: none; width: 100%;">
+                            Docker Guide
+                        </a>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="font-size: 2.5rem; margin-bottom: 15px;">🔧</div>
+                        <h3 style="margin-bottom: 10px; color: var(--text-primary);">Custom Server</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                            Deploy to your own infrastructure with full control
+                        </p>
+                        <a href="/deploy/" class="btn-modern secondary" style="text-decoration: none; width: 100%;">
+                            All Options
+                        </a>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; font-size: 0.9rem; color: var(--text-secondary);">
+                    <span style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--success-color);">✓</span> Zero Configuration</span>
+                    <span style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--success-color);">✓</span> Auto SSL Certificates</span>
+                    <span style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--success-color);">✓</span> Global CDN</span>
+                    <span style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--success-color);">✓</span> Free Tier Available</span>
+                </div>
+            </div>
+        </section>
+
         <!-- Notifications -->
         <div id="error-container"></div>
         <div id="success-container"></div>

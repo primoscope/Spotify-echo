@@ -1,63 +1,64 @@
-# Enhanced DigitalOcean App Platform Configuration for EchoTune AI
-# This file enables one-click deployment with comprehensive features
+# Official DigitalOcean App Platform Configuration for EchoTune AI
+# Enhanced configuration with comprehensive features
 
-name: echotune-ai
-region: nyc
-
-services:
-- name: web
-  source_dir: /
+spec:
+  name: echotune-ai
+  region: nyc
   
-  # Source configuration
-  github:
-    repo: dzp5103/Spotify-echo
-    branch: main
-    deploy_on_push: true
-  
-  # Build configuration
-  build_command: npm ci --only=production
-  run_command: npm start
-  
-  # Runtime settings
-  environment_slug: node-js
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  
-  # Network configuration
-  http_port: 3000
-  
-  # Health monitoring
-  health_check:
-    http_path: /health
-    initial_delay_seconds: 60
-    period_seconds: 10
-    timeout_seconds: 5
-    success_threshold: 1
-    failure_threshold: 3
-  
-  # Environment variables
-  envs:
-  - key: NODE_ENV
-    value: production
-  - key: PORT
-    value: "3000"
-  - key: DEFAULT_LLM_PROVIDER
-    value: mock
-  - key: DEMO_MODE
-    value: "true"
-  - key: DATABASE_TYPE
-    value: sqlite
-  - key: HEALTH_CHECK_ENABLED
-    value: "true"
-  - key: METRICS_ENABLED
-    value: "true"
-  - key: CHAT_ENABLED
-    value: "true"
-  - key: TRUST_PROXY
-    value: "true"
-  - key: LOG_LEVEL
-    value: info
-  
-  # Routing
-  routes:
-  - path: /
+  services:
+  - name: web
+    source_dir: /
+    
+    # Source configuration
+    github:
+      repo: dzp5103/Spotify-echo
+      branch: main
+      deploy_on_push: true
+    
+    # Build configuration
+    build_command: npm ci --only=production
+    run_command: npm start
+    
+    # Runtime settings
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    
+    # Network configuration
+    http_port: 3000
+    
+    # Health monitoring
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    # Environment variables
+    envs:
+    - key: NODE_ENV
+      value: production
+    - key: PORT
+      value: "3000"
+    - key: DEFAULT_LLM_PROVIDER
+      value: mock
+    - key: DEMO_MODE
+      value: "true"
+    - key: DATABASE_TYPE
+      value: sqlite
+    - key: HEALTH_CHECK_ENABLED
+      value: "true"
+    - key: METRICS_ENABLED
+      value: "true"
+    - key: CHAT_ENABLED
+      value: "true"
+    - key: TRUST_PROXY
+      value: "true"
+    - key: LOG_LEVEL
+      value: info
+    
+    # Routing
+    routes:
+    - path: /

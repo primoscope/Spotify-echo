@@ -546,6 +546,10 @@ app.use('/api/providers', providersRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
 
+// Deployment API routes
+const deployRoutes = require('./api/routes/deploy');
+app.use('/api/deploy', deployRoutes);
+
 // Enhanced real-time features
 const realtimeRecommendationsRoutes = require('./api/routes/realtime-recommendations');
 const playlistAutomationRoutes = require('./api/routes/playlist-automation');

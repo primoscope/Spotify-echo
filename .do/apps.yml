@@ -1,0 +1,16 @@
+name: spotify-echo
+region: sjc1
+
+services:
+  - name: web
+    github:
+      repo: dzp5103/Spotify-echo
+      branch: main
+    build_command: "./deploy-doctl.sh"
+    run_command: "npm start"
+    envs:
+      - key: DO_API_TOKEN
+        value: "dop_v1_afa7b76a55cca84f89f48986d212d8f2fc08de48872034eb7c8cc1ae0978d22e"
+        scope: RUN_AND_BUILD
+    instance_size_slug: professional-xs
+    instance_count: 1

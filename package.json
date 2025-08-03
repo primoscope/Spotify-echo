@@ -39,6 +39,8 @@
     "deploy:dotcl-security": "./deploy-dotcl.sh security",
     "deploy:dotcl-optimize": "./deploy-dotcl.sh optimize",
     "deploy:one-click": "./deploy-one-click.sh",
+    "deploy:open": "echo 'Opening deployment page...' && open http://localhost:3000/deploy/ || xdg-open http://localhost:3000/deploy/ || start http://localhost:3000/deploy/",
+    "deploy:page": "echo 'One-click deployment page: http://localhost:3000/deploy/'",
     "deploy:clean": "./deploy-clean.sh",
     "deploy:wizard": "./deploy-wizard.sh",
     "validate-deployment": "./validate-deployment.sh",

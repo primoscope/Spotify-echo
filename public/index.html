@@ -979,6 +979,33 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- One-Click Deployment Section -->
+                <div class="deployment-section" style="text-align: center; margin: 40px 0; padding: 30px; background: rgba(26, 26, 26, 0.8); border-radius: var(--border-radius); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        🚀 Deploy Your Own EchoTune AI
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        Get your own instance of EchoTune AI up and running in minutes with our one-click deployment options
+                    </p>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                        <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai" 
+                           class="auth-button" target="_blank" rel="noopener" style="text-decoration: none;">
+                            ☁️ Deploy to DigitalOcean
+                        </a>
+                        <a href="/deploy/" class="auth-button secondary" style="text-decoration: none;">
+                            🎯 All Deployment Options
+                        </a>
+                    </div>
+                    
+                    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; font-size: 0.9rem; color: var(--text-secondary);">
+                        <span>✓ Zero Configuration</span>
+                        <span>✓ Auto SSL Certificates</span>
+                        <span>✓ Global CDN</span>
+                        <span>✓ Free Tier Available</span>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -1797,6 +1824,9 @@
     <script src="/src/mobile/mobile-responsive.js"></script>
     <script src="/src/security/security-manager.js"></script>
     <script src="/js/enhanced-music-features.js"></script>
+    
+    <!-- One-Click Deployment Widget -->
+    <script src="/js/deploy-widget.js"></script>
     
     <!-- Socket.IO Client -->
     <script src="/socket.io/socket.io.js"></script>

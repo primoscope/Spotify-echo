@@ -1,18 +1,28 @@
 
 # 🎵 EchoTune AI - Next-Generation Music Discovery Platform
 
-## 🚀 **QUICK DEPLOYMENT GUIDE - Production Ready**
+## 🚀 **ONE-CLICK DEPLOYMENT - Production Ready**
 
 <div align="center">
 
-### ⚡ **Deploy in Under 3 Minutes**
+### ⚡ **Deploy in Under 3 Minutes - Zero Configuration Required**
 
-[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
+[![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy%20to%20DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean&logoColor=white&labelColor=0080FF)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
 
+[![One-Click Deploy Options](https://img.shields.io/badge/🚀%20All%20Deploy%20Options-1DB954?style=for-the-badge&logoColor=white)](https://dzp5103.github.io/Spotify-echo/deploy/)
 [![Deploy with Docker](https://img.shields.io/badge/Deploy%20with%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-docker-deployment)
-[![Quick Deploy Script](https://img.shields.io/badge/Quick%20Deploy%20Script-00D4AA?style=for-the-badge&logo=terminal&logoColor=white)](#-universal-deployment)
+[![Deploy with CLI](https://img.shields.io/badge/Deploy%20with%20CLI-00D4AA?style=for-the-badge&logo=terminal&logoColor=white)](#-cli-deployment)
 
-**🌐 Live Demo:** [echotune-ai.ondigitalocean.app](https://echotune-ai.ondigitalocean.app) | **📚 Full Guide:** [Production Deployment](#-production-deployment)
+**🌐 Live Demo:** [echotune-ai.ondigitalocean.app](https://echotune-ai.ondigitalocean.app) | **📚 Full Guide:** [Complete Deployment Guide](ONE-CLICK-DEPLOY-GUIDE.md)
+
+### 🎯 **Quick Deploy Options**
+
+| Platform | Deploy Time | Configuration | Best For |
+|----------|-------------|---------------|----------|
+| [**DigitalOcean App Platform**](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai) | **< 3 min** | Zero | Production, Auto-scaling |
+| [**One-Click Page**](https://dzp5103.github.io/Spotify-echo/deploy/) | **< 1 min** | Zero | All options, Guides |
+| [**Docker Container**](#-docker-deployment) | **< 5 min** | Minimal | Any server, Local dev |
+| [**CLI Automation**](#-cli-deployment) | **< 10 min** | Custom | Advanced features |
 
 </div>
 

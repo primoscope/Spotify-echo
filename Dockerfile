@@ -35,9 +35,9 @@ WORKDIR /app
 COPY package*.json ./
 COPY requirements-production.txt ./requirements.txt
 
-# Install Node.js dependencies with cache optimization
-RUN npm ci --only=production --no-audit --no-fund && \
-    npm cache clean --force
+# Install Node.js dependencies with error handling
+RUN npm ci --only=production --no-audit --no-fund || npm install --only=production --no-audit --no-fund
+RUN npm cache clean --force || true
 
 # Create optimized Python virtual environment
 RUN python3 -m venv /app/venv && \
@@ -56,12 +56,15 @@ WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js* ./
 
-# Install dev dependencies for building
-RUN npm ci --no-audit --no-fund
+# Install dev dependencies for building (skip scripts to avoid Playwright issues)
+RUN npm install --no-audit --no-fund --ignore-scripts
 
-# Copy frontend source files (if they exist)
-COPY src/frontend* ./src/frontend/ 2>/dev/null || true
-COPY public* ./public/ 2>/dev/null || true
+# Copy frontend source files with safer approach  
+COPY . ./temp_src/
+RUN mkdir -p src/frontend public && \
+    (cp -r temp_src/src/frontend/* src/frontend/ 2>/dev/null || true) && \
+    (cp -r temp_src/public/* public/ 2>/dev/null || true) && \
+    rm -rf temp_src
 
 # Build frontend if source exists, otherwise create empty dist
 RUN if [ -d "src/frontend" ] || [ -d "public" ]; then \

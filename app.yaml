@@ -1,98 +1,32 @@
-# DigitalOcean App Platform Configuration
-# EchoTune AI - AI-Powered Music Discovery Platform
-
 name: echotune-ai
-region: nyc
-
 services:
 - name: web
-  environment_slug: node-js
+  source_dir: /
   github:
     repo: dzp5103/Spotify-echo
     branch: main
-    deploy_on_push: true
-  
-  # Build and run configuration optimized for Playwright dependencies
-  build_command: npm install --production --ignore-scripts && npm run build --if-present
   run_command: npm start
-  
-  # HTTP configuration
-  http_port: 3000
-  
-  # Resource allocation for cost optimization
+  build_command: npm install --production
+  environment_slug: node-js
   instance_count: 1
-  instance_size_slug: basic-xs  # Upgraded for better performance
-  
-  # Environment variables
+  instance_size_slug: basic-xxs
+  routes:
+  - path: /
   envs:
   - key: NODE_ENV
     value: production
   - key: PORT
     value: "3000"
-  
-  # Spotify API Configuration (Required for full functionality)
   - key: SPOTIFY_CLIENT_ID
     value: ${SPOTIFY_CLIENT_ID}
   - key: SPOTIFY_CLIENT_SECRET
-    type: SECRET
     value: ${SPOTIFY_CLIENT_SECRET}
+    type: SECRET
   - key: SPOTIFY_REDIRECT_URI
-    value: ${_self.PUBLIC_URL}/auth/callback
-  
-  # Security Configuration
+    value: https://echotune-ai-YOUR_APP_ID.ondigitalocean.app/auth/callback
   - key: SESSION_SECRET
-    type: SECRET
     value: ${SESSION_SECRET}
+    type: SECRET
   - key: JWT_SECRET
-    type: SECRET  
     value: ${JWT_SECRET}
-  
-  # App Configuration
-  - key: FRONTEND_URL
-    value: ${_self.PUBLIC_URL}
-  - key: DOMAIN
-    value: ${_self.DOMAIN}
-  
-  # LLM Provider Configuration (Optional)
-  - key: LLM_PROVIDER
-    value: ${LLM_PROVIDER}
-  - key: OPENAI_API_KEY
     type: SECRET
-    value: ${OPENAI_API_KEY}
-  - key: GEMINI_API_KEY
-    type: SECRET
-    value: ${GEMINI_API_KEY}
-  
-  # Database Configuration (Optional)
-  - key: MONGODB_URI
-    type: SECRET
-    value: ${MONGODB_URI}
-  - key: REDIS_URL
-    value: ${REDIS_URL}
-  
-  # Browser Automation Configuration (For Playwright/Puppeteer)
-  - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-    value: "true"
-  - key: PUPPETEER_EXECUTABLE_PATH
-    value: "/usr/bin/chromium-browser"
-  - key: PLAYWRIGHT_BROWSERS_PATH
-    value: "/app/.cache/playwright"
-  
-  # Demo Mode and Health Checks
-  - key: HEALTH_CHECK_ENABLED
-    value: "true"
-  - key: DEMO_MODE
-    value: "false"  # Set to false for production
-  
-  # Health check configuration
-  health_check:
-    http_path: /health
-    initial_delay_seconds: 60  # Increased for browser dependency loading
-    period_seconds: 10
-    timeout_seconds: 5
-    success_threshold: 1
-    failure_threshold: 3
-  
-  # Route configuration
-  routes:
-  - path: /

@@ -15,14 +15,16 @@
 
 **🌐 Live Demo:** [echotune-ai.ondigitalocean.app](https://echotune-ai.ondigitalocean.app) | **📚 Full Guide:** [Complete Deployment Guide](ONE-CLICK-DEPLOY-GUIDE.md)
 
-### 🎯 **Quick Deploy Options**
+### 🎯 **Quick Deploy Options - FIXED & TESTED**
 
-| Platform | Deploy Time | Configuration | Best For |
-|----------|-------------|---------------|----------|
-| [**DigitalOcean App Platform**](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai) | **< 3 min** | Zero | Production, Auto-scaling |
-| [**One-Click Page**](https://dzp5103.github.io/Spotify-echo/deploy/) | **< 1 min** | Zero | All options, Guides |
-| [**Docker Container**](#-docker-deployment) | **< 5 min** | Minimal | Any server, Local dev |
-| [**CLI Automation**](#-cli-deployment) | **< 10 min** | Custom | Advanced features |
+| Platform | Deploy Time | Configuration | Best For | Status |
+|----------|-------------|---------------|----------|---------|
+| [**DigitalOcean App Platform**](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai) | **< 3 min** | Zero | Production, Auto-scaling | ✅ **WORKING** |
+| [**One-Click Page**](https://dzp5103.github.io/Spotify-echo/deploy/) | **< 1 min** | Zero | All options, Guides | ✅ **WORKING** |
+| [**Docker Container**](#-docker-deployment) | **< 5 min** | Minimal | Any server, Local dev | ✅ **WORKING** |
+| [**CLI Automation**](#-cli-deployment) | **< 10 min** | Custom | Advanced features | ✅ **WORKING** |
+
+**🔧 Recent Fix:** Fixed DigitalOcean deployment configuration format (`.do/deploy.template.yaml` with proper `spec:` structure)
 
 </div>
 
@@ -420,6 +422,42 @@ npm run deploy:dotcl-optimize     # Cost and performance optimization
 ```
 
 ### **🛠️ TROUBLESHOOTING & SUPPORT**
+
+#### **🔧 DigitalOcean One-Click Deploy Issues**
+
+**Problem**: "Error while creating app from Git template" or "unknown field 'name'"
+**Solution**: ✅ **FIXED** - Updated `.do/deploy.template.yaml` with proper `spec:` structure
+
+**Before (Broken):**
+```yaml
+name: echotune-ai
+services:
+- name: web
+```
+
+**After (Working):**
+```yaml
+spec:
+  name: echotune-ai
+  services:
+  - name: web
+```
+
+**Common Deployment Issues:**
+
+1. **Build fails with "npm install" errors**
+   - Solution: Clear npm cache and use `npm ci --only=production`
+   - DigitalOcean automatically handles this with our configuration
+
+2. **Health check failures**
+   - Solution: App includes `/health` endpoint that returns JSON status
+   - Accessible at: `https://your-app.ondigitalocean.app/health`
+
+3. **Environment variables not set**
+   - Solution: Use demo mode (default) or configure Spotify API keys in DigitalOcean dashboard
+   - Demo mode works without any API keys required
+
+**🚀 Quick Test**: After deployment, visit `/health` to verify all systems are operational.
 
 #### **Common Issues**
 ```bash

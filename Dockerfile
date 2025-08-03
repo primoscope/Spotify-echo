@@ -56,8 +56,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js* ./
 
-# Install dev dependencies for building
-RUN npm ci --no-audit --no-fund
+# Install dev dependencies for building (skip scripts to avoid Playwright issues)
+RUN npm install --no-audit --no-fund --ignore-scripts
 
 # Copy frontend source files with safer approach  
 COPY . ./temp_src/

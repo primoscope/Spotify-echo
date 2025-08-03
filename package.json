@@ -2,9 +2,11 @@
   "name": "echotune-ai",
   "version": "1.0.0",
   "description": "EchoTune AI - Next-generation music recommendation system with conversational AI",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node server.js",
+    "start:original": "node src/index.js",
+    "start:root": "node index.js",
     "dev": "nodemon src/index.js",
     "dev:frontend": "vite",
     "build": "vite build",

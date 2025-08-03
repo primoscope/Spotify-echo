@@ -2,6 +2,7 @@
 # EchoTune AI - AI-Powered Music Discovery Platform
 
 name: echotune-ai
+region: nyc
 
 services:
 - name: web
@@ -11,8 +12,8 @@ services:
     branch: main
     deploy_on_push: true
   
-  # Build and run configuration
-  build_command: npm ci --only=production
+  # Build and run configuration optimized for Playwright dependencies
+  build_command: npm install --production --ignore-scripts && npm run build --if-present
   run_command: npm start
   
   # HTTP configuration
@@ -20,7 +21,7 @@ services:
   
   # Resource allocation for cost optimization
   instance_count: 1
-  instance_size_slug: basic-xxs
+  instance_size_slug: basic-xs  # Upgraded for better performance
   
   # Environment variables
   envs:
@@ -28,23 +29,65 @@ services:
     value: production
   - key: PORT
     value: "3000"
-  - key: DEFAULT_LLM_PROVIDER
-    value: mock
+  
+  # Spotify API Configuration (Required for full functionality)
+  - key: SPOTIFY_CLIENT_ID
+    value: ${SPOTIFY_CLIENT_ID}
+  - key: SPOTIFY_CLIENT_SECRET
+    type: SECRET
+    value: ${SPOTIFY_CLIENT_SECRET}
+  - key: SPOTIFY_REDIRECT_URI
+    value: ${_self.PUBLIC_URL}/auth/callback
+  
+  # Security Configuration
+  - key: SESSION_SECRET
+    type: SECRET
+    value: ${SESSION_SECRET}
+  - key: JWT_SECRET
+    type: SECRET  
+    value: ${JWT_SECRET}
+  
+  # App Configuration
+  - key: FRONTEND_URL
+    value: ${_self.PUBLIC_URL}
+  - key: DOMAIN
+    value: ${_self.DOMAIN}
+  
+  # LLM Provider Configuration (Optional)
+  - key: LLM_PROVIDER
+    value: ${LLM_PROVIDER}
+  - key: OPENAI_API_KEY
+    type: SECRET
+    value: ${OPENAI_API_KEY}
+  - key: GEMINI_API_KEY
+    type: SECRET
+    value: ${GEMINI_API_KEY}
+  
+  # Database Configuration (Optional)
+  - key: MONGODB_URI
+    type: SECRET
+    value: ${MONGODB_URI}
+  - key: REDIS_URL
+    value: ${REDIS_URL}
+  
+  # Browser Automation Configuration (For Playwright/Puppeteer)
+  - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+    value: "true"
+  - key: PUPPETEER_EXECUTABLE_PATH
+    value: "/usr/bin/chromium-browser"
+  - key: PLAYWRIGHT_BROWSERS_PATH
+    value: "/app/.cache/playwright"
+  
+  # Demo Mode and Health Checks
   - key: HEALTH_CHECK_ENABLED
     value: "true"
   - key: DEMO_MODE
-    value: "true"
-  - key: SESSION_SECRET
-    type: SECRET
-    value: GENERATED_SESSION_SECRET
-  - key: JWT_SECRET
-    type: SECRET  
-    value: GENERATED_JWT_SECRET
+    value: "false"  # Set to false for production
   
   # Health check configuration
   health_check:
     http_path: /health
-    initial_delay_seconds: 30
+    initial_delay_seconds: 60  # Increased for browser dependency loading
     period_seconds: 10
     timeout_seconds: 5
     success_threshold: 1

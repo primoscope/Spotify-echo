@@ -47,6 +47,32 @@ graph TD
     style H1 fill:#FF9800,stroke:#333,stroke-width:2px,color:#fff
 ```
 
+## 🔧 **DEPLOYMENT COMPATIBILITY**
+
+### **📦 Entry Point Options**
+EchoTune AI provides multiple entry points for maximum deployment platform compatibility:
+
+- **`server.js`** (root) - Primary entry point for DigitalOcean App Platform, Heroku, and similar platforms
+- **`index.js`** (root) - Alternative entry point for platforms expecting index.js
+- **`src/index.js`** - Original entry point for custom deployments
+
+### **🚀 Platform Support**
+| Platform | Status | Entry Point | Notes |
+|----------|--------|-------------|-------|
+| DigitalOcean App Platform | ✅ | `server.js` | Native support with optimized app.yaml |
+| Docker/Containers | ✅ | `server.js` | Playwright dependencies handled |
+| Heroku | ✅ | `server.js` | Standard Node.js deployment |
+| Vercel | ✅ | `index.js` | Serverless-compatible |
+| Railway | ✅ | `server.js` | Auto-detected |
+| VPS/Dedicated Server | ✅ | Any | Full control deployment |
+
+### **🎯 Browser Automation Support**
+The application includes Playwright/Puppeteer for web automation with optimized Docker builds:
+- ✅ Browser dependencies pre-installed in Docker images
+- ✅ System Chromium integration (no download required)
+- ✅ Alpine Linux optimized for minimal size
+- ✅ Non-root user security compliance
+
 ---
 
 ## ✅ **PRODUCTION DEPLOYMENT CHECKLIST**
@@ -1044,6 +1070,9 @@ graph TB
 - [Gemini Code Assist Setup & Configuration](#-gemini-code-assist-setup--configuration)
 - [Automated Development Workflow](#-automated-development-workflow)
 - [Production Deployment](#-production-deployment)
+  - [DigitalOcean App Platform](#digitalocean-app-platform)
+  - [Docker Deployment](#-docker-deployment)
+  - [Universal Deployment Script](#-universal-deployment)
 - [Development Roadmap](#-development-roadmap)
 - [Security & Privacy](#-security--privacy)
 - [Additional Resources](#-additional-resources)

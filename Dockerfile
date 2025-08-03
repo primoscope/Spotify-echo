@@ -14,7 +14,7 @@ RUN apk add --no-cache \
 # Stage 2: Dependencies builder
 FROM base AS deps-builder
 
-# Install build dependencies
+# Install build dependencies including browser dependencies
 RUN apk add --no-cache \
     python3 \
     py3-pip \
@@ -27,7 +27,14 @@ RUN apk add --no-cache \
     musl-dev \
     libffi-dev \
     openssl-dev \
-    pkgconfig
+    pkgconfig \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
 WORKDIR /app
 
@@ -35,8 +42,21 @@ WORKDIR /app
 COPY package*.json ./
 COPY requirements-production.txt ./requirements.txt
 
-# Install Node.js dependencies with error handling
-RUN npm ci --only=production --no-audit --no-fund || npm install --only=production --no-audit --no-fund
+# Install Node.js dependencies with error handling (exclude scripts initially)
+RUN npm ci --only=production --no-audit --no-fund --ignore-scripts || npm install --only=production --no-audit --no-fund --ignore-scripts
+
+# Install Playwright/Puppeteer browser dependencies as root (before switching users)
+RUN if npm list puppeteer > /dev/null 2>&1; then \
+        echo "Installing Puppeteer browsers..."; \
+        npx puppeteer browsers install chrome --path /app/.cache/puppeteer || true; \
+    fi
+
+# Install Playwright if present
+RUN if npm list playwright > /dev/null 2>&1 || npm list @playwright/test > /dev/null 2>&1; then \
+        echo "Installing Playwright browsers..."; \
+        npx playwright install --with-deps chromium || true; \
+    fi
+
 RUN npm cache clean --force || true
 
 # Create optimized Python virtual environment
@@ -83,6 +103,12 @@ RUN apk add --no-cache \
     tini \
     dumb-init \
     su-exec \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user with specific UID/GID for security
@@ -104,6 +130,7 @@ COPY --chown=echotune:nodejs src/ ./src/
 COPY --chown=echotune:nodejs mcp-server/ ./mcp-server/
 COPY --chown=echotune:nodejs scripts/ ./scripts/
 COPY --chown=echotune:nodejs package*.json ./
+COPY --chown=echotune:nodejs server.js index.js ./
 
 # Create necessary directories with proper permissions
 RUN mkdir -p logs data temp uploads && \
@@ -117,7 +144,10 @@ ENV NODE_ENV=production \
     PORT=3000 \
     NODE_OPTIONS="--max-old-space-size=512" \
     NPM_CONFIG_AUDIT=false \
-    NPM_CONFIG_FUND=false
+    NPM_CONFIG_FUND=false \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PLAYWRIGHT_BROWSERS_PATH=/app/.cache/playwright
 
 # Security: Remove unnecessary packages and files
 RUN rm -rf /tmp/* /var/tmp/* /root/.npm /home/echotune/.npm

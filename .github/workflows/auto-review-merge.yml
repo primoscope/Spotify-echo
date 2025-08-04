@@ -22,7 +22,10 @@ jobs:
     
     # Only run for PRs created by Copilot coding agent
     if: |
-      github.event.pull_request.user.login == 'Copilot' ||
+      (github.event.pull_request.user.login == 'Copilot' &&
+       (github.event.pull_request.author_association == 'MEMBER' ||
+        github.event.pull_request.author_association == 'OWNER' ||
+        github.event.pull_request.author_association == 'COLLABORATOR')) ||
       github.event_name == 'workflow_dispatch'
     
     permissions:

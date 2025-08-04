@@ -371,6 +371,52 @@ class ContinuousAgent {
         }
     }
 
+    async createAndManagePR(prompt) {
+        console.log('🎯 Creating and managing PR for coding agent...');
+        
+        const config = await this.loadConfig();
+        const { repo_owner, repo_name } = config.github_api;
+        
+        try {
+            // First create the issue
+            const issue = await this.createGitHubIssue(prompt);
+            
+            // If auto_merge is enabled, trigger the GitHub Copilot agent
+            if (config.auto_merge && config.coding_agent.auto_review) {
+                console.log('🤖 Auto-merge enabled, triggering coding agent...');
+                
+                // Trigger GitHub Copilot agent via issue comment
+                const triggerComment = {
+                    body: `@Copilot please implement the changes described in this issue. Focus on the highest priority tasks first and ensure all code follows project standards.
+
+**Auto-merge enabled**: This PR will be automatically reviewed and merged once all checks pass.
+
+CC: @${repo_owner}`
+                };
+                
+                await this.makeGitHubRequest(
+                    `https://api.github.com/repos/${repo_owner}/${repo_name}/issues/${issue.number}/comments`,
+                    'POST',
+                    triggerComment
+                );
+                
+                console.log('✅ Coding agent triggered via issue comment');
+                
+                // Update status to indicate PR creation process started
+                const status = await this.loadStatus();
+                status.workflow_state.last_issue_created = new Date().toISOString();
+                status.workflow_state.auto_merge_enabled = true;
+                status.next_action = 'waiting_for_pr_creation';
+                await this.saveStatus(status);
+            }
+            
+            return issue;
+        } catch (error) {
+            console.error('❌ Failed to create and manage PR:', error.message);
+            throw error;
+        }
+    }
+
     formatIssueBody(prompt) {
         return `# ${prompt.title}\n\n` +
             `${prompt.description}\n\n` +
@@ -420,6 +466,63 @@ class ContinuousAgent {
         return await response.json();
     }
 
+    async checkExistingPRs() {
+        console.log('🔍 Checking for existing coding agent PRs...');
+        
+        const config = await this.loadConfig();
+        const { repo_owner, repo_name } = config.github_api;
+        
+        try {
+            // Get open PRs created by Copilot
+            const response = await this.makeGitHubRequest(
+                `https://api.github.com/repos/${repo_owner}/${repo_name}/pulls?state=open&head=${repo_owner}:copilot/`
+            );
+            
+            const copilotPRs = response.filter(pr => 
+                pr.user.login === 'Copilot' && 
+                pr.head.ref.startsWith('copilot/')
+            );
+            
+            if (copilotPRs.length > 0) {
+                console.log(`📋 Found ${copilotPRs.length} existing Copilot PR(s)`);
+                
+                for (const pr of copilotPRs) {
+                    console.log(`   - PR #${pr.number}: ${pr.title} (${pr.draft ? 'draft' : 'ready'})`);
+                    
+                    // If auto-merge is enabled and PR is ready, trigger auto-review
+                    if (config.auto_merge && !pr.draft && config.coding_agent.auto_review) {
+                        console.log(`🤖 Triggering auto-review for PR #${pr.number}...`);
+                        
+                        // Trigger the auto-review workflow
+                        try {
+                            await this.makeGitHubRequest(
+                                `https://api.github.com/repos/${repo_owner}/${repo_name}/actions/workflows/auto-review-merge.yml/dispatches`,
+                                'POST',
+                                {
+                                    ref: 'main',
+                                    inputs: {
+                                        pr_number: pr.number.toString()
+                                    }
+                                }
+                            );
+                            console.log(`✅ Auto-review workflow triggered for PR #${pr.number}`);
+                        } catch (error) {
+                            console.log(`⚠️ Failed to trigger auto-review for PR #${pr.number}: ${error.message}`);
+                        }
+                    }
+                }
+                
+                return copilotPRs;
+            } else {
+                console.log('ℹ️ No existing Copilot PRs found');
+                return [];
+            }
+        } catch (error) {
+            console.error('❌ Failed to check existing PRs:', error.message);
+            return [];
+        }
+    }
+
     async getCurrentCycle() {
         const status = await this.loadStatus();
         return status.cycle || 0;
@@ -449,6 +552,28 @@ class ContinuousAgent {
             const cycle = await this.incrementCycle();
             console.log(`🔄 Starting cycle ${cycle}`);
 
+            // Check for existing PRs that might need attention
+            const existingPRs = await this.checkExistingPRs();
+            
+            // If we have existing PRs and auto-merge is enabled, focus on them first
+            if (existingPRs.length > 0 && config.auto_merge) {
+                console.log('🎯 Focusing on existing PRs with auto-merge enabled');
+                
+                // Update status to reflect PR management mode
+                const status = await this.loadStatus();
+                status.status = 'managing_existing_prs';
+                status.current_prs = existingPRs.map(pr => ({
+                    number: pr.number,
+                    title: pr.title,
+                    draft: pr.draft,
+                    url: pr.html_url
+                }));
+                await this.saveStatus(status);
+                
+                console.log('✅ Existing PR management completed');
+                return;
+            }
+
             let analysis = null;
             if (mode === 'full' || mode === 'analyze') {
                 analysis = await this.analyzeLastPR();
@@ -465,7 +590,7 @@ class ContinuousAgent {
 
             if (config.auto_create_pr && (mode === 'full' || mode === 'create-issue')) {
                 if (this.githubToken) {
-                    await this.createGitHubIssue(prompt);
+                    await this.createAndManagePR(prompt);
                 } else {
                     console.log('ℹ️ Skipping GitHub issue creation - no token available');
                 }

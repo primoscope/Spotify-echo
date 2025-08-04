@@ -4,7 +4,7 @@
   "last_run": null,
   "current_phase": "ready",
   "auto_create_pr": true,
-  "auto_merge": false,
+  "auto_merge": true,
   "analysis_model": "gemini-1.5-flash",
   "max_concurrent_tasks": 3,
   "readme_update_enabled": true,
@@ -16,7 +16,10 @@
   "coding_agent": {
     "platform": "github",
     "auto_assign": true,
-    "review_required": false
+    "review_required": false,
+    "auto_review": true,
+    "auto_approve": true,
+    "merge_method": "squash"
   },
   "task_categories": [
     "feature-development",

@@ -91,7 +91,14 @@
     "workflow:optimize": "node scripts/workflow-optimizer.js optimize",
     "workflow:optimize:apply": "node scripts/workflow-optimizer.js optimize --apply",
     "workflow:status": "node scripts/workflow-optimizer.js status",
-    "workflow:report": "node scripts/workflow-optimizer.js report"
+    "workflow:report": "node scripts/workflow-optimizer.js report",
+    "agent:run": "node scripts/continuous-agent.js",
+    "agent:analyze": "node scripts/continuous-agent.js analyze",
+    "agent:create-issue": "node scripts/continuous-agent.js create-issue",
+    "agent:status": "node scripts/continuous-agent.js status",
+    "agent:config": "cat agent-workflow/config/config.json",
+    "agent:enable": "node -e \"const fs=require('fs'); const config=require('./agent-workflow/config/config.json'); config.enabled=true; fs.writeFileSync('./agent-workflow/config/config.json', JSON.stringify(config,null,2));\"",
+    "agent:disable": "node -e \"const fs=require('fs'); const config=require('./agent-workflow/config/config.json'); config.enabled=false; fs.writeFileSync('./agent-workflow/config/config.json', JSON.stringify(config,null,2));\""
   },
   "keywords": [
     "music",
@@ -140,6 +147,7 @@
     "mcp-mermaid": "^0.1.3",
     "mongodb": "^6.3.0",
     "multer": "^2.0.0",
+    "node-fetch": "^3.3.2",
     "openai": "^4.24.0",
     "prop-types": "^15.8.1",
     "react": "^19.1.1",

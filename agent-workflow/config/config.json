@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "cycle_count": 0,
+  "last_run": null,
+  "current_phase": "ready",
+  "auto_create_pr": true,
+  "auto_merge": false,
+  "analysis_model": "gemini-1.5-flash",
+  "max_concurrent_tasks": 3,
+  "readme_update_enabled": true,
+  "github_api": {
+    "base_url": "https://api.github.com",
+    "repo_owner": "dzp5103", 
+    "repo_name": "Spotify-echo"
+  },
+  "coding_agent": {
+    "platform": "github",
+    "auto_assign": true,
+    "review_required": false
+  },
+  "task_categories": [
+    "feature-development",
+    "bug-fixes", 
+    "performance-optimization",
+    "testing-improvements",
+    "documentation-updates",
+    "security-enhancements"
+  ]
+}

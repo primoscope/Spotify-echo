@@ -182,8 +182,26 @@ The continuous integration pipeline and automated checks have validated:
           
           echo "🔄 Auto-merging PR #$PR_NUMBER with method: $MERGE_METHOD..."
           
-          # Wait a moment for review to be processed
-          sleep 5
+          # Wait for the review to be processed and PR to become mergeable
+          MAX_WAIT=60  # seconds
+          INTERVAL=3   # seconds
+          WAITED=0
+          while true; do
+            # Check if PR is mergeable and has required reviews
+            MERGEABLE=$(gh pr view "$PR_NUMBER" --json mergeable -q ".mergeable")
+            # Optionally, check for review status if needed
+            if [ "$MERGEABLE" = "MERGEABLE" ]; then
+              echo "✅ PR #$PR_NUMBER is mergeable."
+              break
+            fi
+            if [ "$WAITED" -ge "$MAX_WAIT" ]; then
+              echo "❌ Timed out waiting for PR #$PR_NUMBER to become mergeable."
+              exit 1
+            fi
+            echo "⏳ Waiting for PR #$PR_NUMBER to become mergeable... ($WAITED/$MAX_WAIT seconds)"
+            sleep $INTERVAL
+            WAITED=$((WAITED + INTERVAL))
+          done
           
           # Merge the PR
           case $MERGE_METHOD in

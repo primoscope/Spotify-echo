@@ -99,57 +99,85 @@ jobs:
       - name: Setup Copilot PR for Auto-Processing
         if: github.actor == 'Copilot'
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          EVENT_NAME="${{ github.event_name }}"
+          echo "Processing event: $EVENT_NAME"
+          
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             PR_NUMBER="${{ github.event.inputs.pr_number }}"
-          elif [ "${{ github.event_name }}" == "push" ]; then
-            # For push events, find the PR associated with this branch
-            BRANCH_NAME="${{ github.ref_name }}"
-            PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
-          else
-            PR_NUMBER="${{ github.event.pull_request.number }}"
-          fi
-
-          echo "🔧 Setting up Copilot PR #$PR_NUMBER for auto-processing..."
-
-          # Add the required label if it doesn't exist
-          if ! gh pr view $PR_NUMBER --json labels \
-               --jq '.labels[].name' | grep -q "copilot-coding-agent"; then
-            echo "🏷️ Adding copilot-coding-agent label..."
-            gh pr edit $PR_NUMBER --add-label "copilot-coding-agent"
-          fi
-
-          # Convert from draft to ready for review if needed
-          is_draft=$(gh pr view $PR_NUMBER --json draft --jq '.draft')
-          if [ "$is_draft" == "true" ]; then
-            echo "📝 Converting PR from draft to ready for review..."
-            gh pr ready $PR_NUMBER
-          fi
-
-          echo "✅ Copilot PR setup complete"
-
-      - name: Get PR Information
-        id: pr-info
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            PR_NUMBER="${{ github.event.inputs.pr_number }}"
-          elif [ "${{ github.event_name }}" == "push" ]; then
+            echo "Manual workflow dispatch for PR #$PR_NUMBER"
+          elif [ "$EVENT_NAME" = "push" ]; then
             # For push events, find the PR associated with this branch
             BRANCH_NAME="${{ github.ref_name }}"
             echo "Finding PR for branch: $BRANCH_NAME"
             PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
-            if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" == "null" ]; then
+            if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
               echo "❌ No open PR found for branch $BRANCH_NAME"
               exit 1
             fi
           else
             PR_NUMBER="${{ github.event.pull_request.number }}"
+            echo "Pull request event for PR #$PR_NUMBER"
+          fi
+
+          echo "🔧 Setting up Copilot PR #$PR_NUMBER for auto-processing..."
+
+          # Verify PR exists and get current state
+          if ! gh pr view $PR_NUMBER >/dev/null 2>&1; then
+            echo "❌ PR #$PR_NUMBER not found"
+            exit 1
+          fi
+
+          # Add the required label if it doesn't exist
+          if ! gh pr view $PR_NUMBER --json labels \
+               --jq '.labels[].name' | grep -q "copilot-coding-agent"; then
+            echo "🏷️ Adding copilot-coding-agent label..."
+            gh pr edit $PR_NUMBER --add-label "copilot-coding-agent" || {
+              echo "⚠️ Failed to add label, continuing..."
+            }
+          fi
+
+          # Convert from draft to ready for review if needed
+          is_draft=$(gh pr view $PR_NUMBER --json draft --jq '.draft')
+          if [ "$is_draft" = "true" ]; then
+            echo "📝 Converting PR from draft to ready for review..."
+            gh pr ready $PR_NUMBER || {
+              echo "⚠️ Failed to mark as ready, continuing..."
+            }
+          fi
+
+          echo "✅ Copilot PR setup complete for PR #$PR_NUMBER"
+
+      - name: Get PR Information
+        id: pr-info
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          echo "Getting PR info for event: $EVENT_NAME"
+          
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PR_NUMBER="${{ github.event.inputs.pr_number }}"
+            echo "Manual workflow dispatch for PR #$PR_NUMBER"
+          elif [ "$EVENT_NAME" = "push" ]; then
+            # For push events, find the PR associated with this branch
+            BRANCH_NAME="${{ github.ref_name }}"
+            echo "Finding PR for branch: $BRANCH_NAME"
+            PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
+            if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
+              echo "❌ No open PR found for branch $BRANCH_NAME"
+              exit 1
+            fi
+          else
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            echo "Pull request event for PR #$PR_NUMBER"
           fi
 
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           echo "Processing PR #$PR_NUMBER"
 
-          # Get PR details
-          pr_info=$(gh pr view $PR_NUMBER --json title,body,author,draft,mergeable,state)
+          # Get PR details with error handling
+          if ! pr_info=$(gh pr view $PR_NUMBER --json title,body,author,draft,mergeable,state); then
+            echo "❌ Failed to get PR information"
+            exit 1
+          fi
           echo "pr_info=$pr_info" >> $GITHUB_OUTPUT
 
       - name: Validate PR Requirements

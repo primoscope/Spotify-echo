@@ -1,90 +1,129 @@
-# Nginx configuration template for EchoTune AI - Production
+# Enhanced Nginx Configuration Template for EchoTune AI
+# Production-ready configuration for primosphere.studio (DigitalOcean optimized)
 # Environment variables will be substituted at runtime
 
-worker_processes auto;
+user nginx;
+worker_processes ${NGINX_WORKER_PROCESSES:-auto};
 worker_rlimit_nofile 65535;
 error_log /var/log/nginx/error.log warn;
 pid /var/run/nginx.pid;
 
 events {
-    worker_connections 1024;
+    worker_connections ${NGINX_WORKER_CONNECTIONS:-1024};
     use epoll;
     multi_accept on;
+    accept_mutex off;
 }
 
 http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
-    # Logging format
+    # Enhanced logging format with performance metrics
     log_format main '$remote_addr - $remote_user [$time_local] "$request" '
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent" "$http_x_forwarded_for" '
                     'rt=$request_time uct="$upstream_connect_time" '
                     'uht="$upstream_header_time" urt="$upstream_response_time"';
+    
+    log_format detailed '$remote_addr - $remote_user [$time_local] "$request" '
+                       '$status $body_bytes_sent "$http_referer" '
+                       '"$http_user_agent" rt=$request_time '
+                       'uct="$upstream_connect_time" '
+                       'uht="$upstream_header_time" '
+                       'urt="$upstream_response_time" '
+                       'cs=$upstream_cache_status';
 
-    access_log /var/log/nginx/access.log main;
+    access_log /var/log/nginx/access.log detailed;
 
-    # Basic settings
+    # Performance optimization
     sendfile on;
     tcp_nopush on;
     tcp_nodelay on;
     keepalive_timeout 65;
+    keepalive_requests 1000;
     types_hash_max_size 2048;
     client_max_body_size ${MAX_REQUEST_SIZE:-10m};
+    client_body_timeout 12;
+    client_header_timeout 12;
+    send_timeout 10;
     server_tokens off;
+
+    # Buffer sizes optimization
+    client_body_buffer_size 128k;
+    client_header_buffer_size 1k;
+    large_client_header_buffers 4 4k;
+    output_buffers 1 32k;
+    postpone_output 1460;
 
     # Security headers (applied globally)
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header X-Robots-Tag "noindex, nofollow" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    
+    # Content Security Policy for Spotify integration
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.spotify.com https://sdk.scdn.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.spotify.com https://accounts.spotify.com wss: ws:; media-src 'self' https: blob:; object-src 'none'; base-uri 'self'; form-action 'self';" always;
 
-    # Gzip compression
+    # Enhanced Gzip compression
     gzip on;
     gzip_vary on;
     gzip_min_length 1024;
+    gzip_proxied any;
     gzip_comp_level 6;
     gzip_types
         text/plain
         text/css
         text/xml
         text/javascript
+        text/json
         application/javascript
         application/json
         application/xml+rss
         application/atom+xml
-        image/svg+xml;
+        image/svg+xml
+        font/truetype
+        font/opentype
+        application/vnd.ms-fontobject;
 
-    # Rate limiting zones
-    limit_req_zone $binary_remote_addr zone=api:10m rate=${API_RATE_LIMIT:-10r/s};
-    limit_req_zone $binary_remote_addr zone=auth:10m rate=${AUTH_RATE_LIMIT:-5r/m};
-    limit_req_zone $binary_remote_addr zone=general:10m rate=${GENERAL_RATE_LIMIT:-20r/s};
+    # Enhanced rate limiting zones for production
+    limit_req_zone $binary_remote_addr zone=api:10m rate=${API_RATE_LIMIT:-50r/s};
+    limit_req_zone $binary_remote_addr zone=auth:10m rate=${AUTH_RATE_LIMIT:-10r/m};
+    limit_req_zone $binary_remote_addr zone=general:10m rate=${GENERAL_RATE_LIMIT:-100r/s};
 
     # Connection limiting
     limit_conn_zone $binary_remote_addr zone=conn_limit_per_ip:10m;
     limit_conn conn_limit_per_ip 20;
 
-    # Upstream to the Node.js app
+    # Cache configuration for static assets
+    proxy_cache_path /var/cache/nginx/proxy levels=1:2 keys_zone=app_cache:10m max_size=100m inactive=60m use_temp_path=off;
+
+    # Upstream to the Node.js app with health checks
     upstream app {
-        server ${BACKEND_HOST:-app}:${BACKEND_PORT:-3000};
+        server ${BACKEND_HOST:-app}:${BACKEND_PORT:-3000} max_fails=3 fail_timeout=30s;
         keepalive 32;
         keepalive_requests 100;
         keepalive_timeout 60s;
     }
 
-    # Map for handling different file types with appropriate cache headers
+    # Enhanced map for caching and expires headers
     map $sent_http_content_type $expires {
-        default                    off;
-        text/html                  1h;
-        text/css                   1y;
-        application/javascript     1y;
-        ~image/                    1y;
-        ~font/                     1y;
-        application/json           0;
+        default                         off;
+        text/html                       1h;
+        text/css                        1y;
+        application/javascript          1y;
+        ~image/                         1y;
+        ~font/                          1y;
+        application/json                0;
+        application/pdf                 1M;
+        ~audio/                         1M;
+        ~video/                         1M;
     }
 
+    # Include SSL and security configurations
+    include /etc/nginx/conf.d/ssl/*.conf;
+    
     # Include site-specific configurations
     include /etc/nginx/conf.d/*.conf;
 }

@@ -57,8 +57,7 @@ jobs:
 
           # Test GitHub CLI authentication
           if ! gh auth status > /dev/null 2>&1; then
-            echo "❌ GitHub CLI authentication failed"
-            echo "Attempting to setup authentication..."
+            echo "Setting up GitHub CLI authentication..."
             echo "${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}" | gh auth login --with-token
           fi
 
@@ -78,6 +77,10 @@ jobs:
             echo "❌ Repository access denied"
             exit 1
           fi
+
+          # Ensure required labels exist
+          echo "🏷️ Ensuring required labels exist..."
+          ./.github/scripts/ensure-labels.sh
 
       - name: Configure Git
         run: |

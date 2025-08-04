@@ -363,7 +363,14 @@ class ContinuousAgent {
         
         try {
             const readmePath = path.join(this.repoRoot, 'README.md');
-            let readmeContent = await fs.readFile(readmePath, 'utf8');
+            let readmeContent;
+            
+            try {
+                readmeContent = await fs.readFile(readmePath, 'utf8');
+            } catch (error) {
+                console.log('⚠️ README.md not found, skipping update');
+                return;
+            }
             
             // Create progress section
             const progressSection = `\n## 🤖 Continuous Development Progress\n\n` +
@@ -391,6 +398,7 @@ class ContinuousAgent {
             console.log('✅ README updated with progress');
         } catch (error) {
             console.error('❌ Failed to update README:', error.message);
+            // Don't fail the entire process for README updates
         }
     }
 

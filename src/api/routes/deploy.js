@@ -1,7 +1,5 @@
 const express = require('express');
 const { exec } = require('child_process');
-const path = require('path');
-const fs = require('fs');
 
 const router = express.Router();
 
@@ -157,7 +155,7 @@ async function checkGitAvailability() {
     });
 }
 
-function generateDeploymentCommands(method, options = {}) {
+function generateDeploymentCommands(method, _options = {}) {
     const baseCommands = [
         '# EchoTune AI Deployment Commands',
         '# Generated automatically for your convenience',

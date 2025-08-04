@@ -63,31 +63,55 @@ class ContinuousAgent {
         console.log('🔍 Analyzing last merged PR...');
         
         try {
-            // Get the latest merged PR
-            const gitLog = execSync('git log --oneline -10 --grep="Merge pull request"', { 
-                encoding: 'utf8', 
-                cwd: this.repoRoot 
-            });
+            // Configure git if needed
+            try {
+                execSync('git config user.name', { encoding: 'utf8', cwd: this.repoRoot });
+            } catch {
+                execSync('git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"', { cwd: this.repoRoot });
+                execSync('git config --local user.name "github-actions[bot]"', { cwd: this.repoRoot });
+                console.log('✅ Git configured for operations');
+            }
+
+            // Get the latest merged PR with better error handling
+            let gitLog;
+            try {
+                gitLog = execSync('git log --oneline -10 --grep="Merge pull request" 2>/dev/null || git log --oneline -10', { 
+                    encoding: 'utf8', 
+                    cwd: this.repoRoot 
+                });
+            } catch (error) {
+                console.log('⚠️ Git log command failed, using basic log');
+                gitLog = execSync('git log --oneline -5', { 
+                    encoding: 'utf8', 
+                    cwd: this.repoRoot 
+                });
+            }
             
             if (!gitLog.trim()) {
-                console.log('ℹ️ No recent merge commits found');
+                console.log('ℹ️ No recent commits found');
                 return null;
             }
 
             const lines = gitLog.trim().split('\n');
             const latestMerge = lines[0];
-            console.log('📋 Latest merge:', latestMerge);
+            console.log('📋 Latest commit:', latestMerge);
 
             // Extract PR number if available
             const prMatch = latestMerge.match(/#(\d+)/);
             const prNumber = prMatch ? prMatch[1] : null;
 
-            // Get commit details
+            // Get commit details with better error handling
             const commitHash = latestMerge.split(' ')[0];
-            const commitDetails = execSync(`git show --stat ${commitHash}`, { 
-                encoding: 'utf8', 
-                cwd: this.repoRoot 
-            });
+            let commitDetails;
+            try {
+                commitDetails = execSync(`git show --stat ${commitHash}`, { 
+                    encoding: 'utf8', 
+                    cwd: this.repoRoot 
+                });
+            } catch (error) {
+                console.log('⚠️ Failed to get commit details, using basic info');
+                commitDetails = `Commit: ${commitHash}\nMessage: ${latestMerge}`;
+            }
 
             const analysis = {
                 pr_number: prNumber,
@@ -99,9 +123,16 @@ class ContinuousAgent {
                 change_summary: this.generateChangeSummary(commitDetails)
             };
 
-            // Save analysis
-            const analysisPath = path.join(this.agentWorkflowDir, 'summaries', `analysis-${Date.now()}.json`);
-            await fs.writeFile(analysisPath, JSON.stringify(analysis, null, 2));
+            // Save analysis with directory creation
+            const summariesDir = path.join(this.agentWorkflowDir, 'summaries');
+            try {
+                await fs.mkdir(summariesDir, { recursive: true });
+                const analysisPath = path.join(summariesDir, `analysis-${Date.now()}.json`);
+                await fs.writeFile(analysisPath, JSON.stringify(analysis, null, 2));
+                console.log('✅ Analysis saved to:', analysisPath);
+            } catch (error) {
+                console.log('⚠️ Failed to save analysis file:', error.message);
+            }
             
             return analysis;
         } catch (error) {
@@ -224,9 +255,16 @@ class ContinuousAgent {
             created_at: new Date().toISOString()
         });
 
-        // Save tasks
-        const tasksPath = path.join(this.agentWorkflowDir, 'tasks', `tasks-${Date.now()}.json`);
-        await fs.writeFile(tasksPath, JSON.stringify(tasks, null, 2));
+        // Save tasks with directory creation
+        const tasksDir = path.join(this.agentWorkflowDir, 'tasks');
+        try {
+            await fs.mkdir(tasksDir, { recursive: true });
+            const tasksPath = path.join(tasksDir, `tasks-${Date.now()}.json`);
+            await fs.writeFile(tasksPath, JSON.stringify(tasks, null, 2));
+            console.log('✅ Tasks saved to:', tasksPath);
+        } catch (error) {
+            console.log('⚠️ Failed to save tasks file:', error.message);
+        }
         
         return tasks;
     }
@@ -285,7 +323,13 @@ class ContinuousAgent {
         };
 
         const promptPath = path.join(this.agentWorkflowDir, 'prompts', `prompt-${Date.now()}.json`);
-        await fs.writeFile(promptPath, JSON.stringify(prompt, null, 2));
+        try {
+            await fs.mkdir(path.dirname(promptPath), { recursive: true });
+            await fs.writeFile(promptPath, JSON.stringify(prompt, null, 2));
+            console.log('✅ Prompt saved to:', promptPath);
+        } catch (error) {
+            console.log('⚠️ Failed to save prompt file:', error.message);
+        }
         
         return prompt;
     }
@@ -302,7 +346,13 @@ class ContinuousAgent {
         };
 
         const progressPath = path.join(this.agentWorkflowDir, 'progress', `cycle-${cycle}.json`);
-        await fs.writeFile(progressPath, JSON.stringify(progressUpdate, null, 2));
+        try {
+            await fs.mkdir(path.dirname(progressPath), { recursive: true });
+            await fs.writeFile(progressPath, JSON.stringify(progressUpdate, null, 2));
+            console.log('✅ Progress saved to:', progressPath);
+        } catch (error) {
+            console.log('⚠️ Failed to save progress file:', error.message);
+        }
         
         // Update README with progress
         await this.updateReadmeProgress(cycle, tasks);
@@ -313,7 +363,14 @@ class ContinuousAgent {
         
         try {
             const readmePath = path.join(this.repoRoot, 'README.md');
-            let readmeContent = await fs.readFile(readmePath, 'utf8');
+            let readmeContent;
+            
+            try {
+                readmeContent = await fs.readFile(readmePath, 'utf8');
+            } catch (error) {
+                console.log('⚠️ README.md not found, skipping update');
+                return;
+            }
             
             // Create progress section
             const progressSection = `\n## 🤖 Continuous Development Progress\n\n` +
@@ -341,6 +398,7 @@ class ContinuousAgent {
             console.log('✅ README updated with progress');
         } catch (error) {
             console.error('❌ Failed to update README:', error.message);
+            // Don't fail the entire process for README updates
         }
     }
 

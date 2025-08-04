@@ -15,7 +15,6 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState('all');
-  const [_recommendations, _setRecommendations] = useState([]);
 
   const loadAnalytics = useCallback(async () => {
     if (!user) return;

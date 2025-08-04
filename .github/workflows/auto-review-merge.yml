@@ -4,6 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize, ready_for_review]
     branches: [main]
+  push:
+    branches: ['copilot/**']
   workflow_dispatch:
     inputs:
       pr_number:
@@ -22,12 +24,16 @@ jobs:
     
     # Only run for PRs created by Copilot coding agent
     if: |
-      (contains(github.event.pull_request.labels.*.name, 'copilot-coding-agent') &&
-       (github.event.pull_request.user.login == 'github-copilot[bot]' || 
-        github.event.pull_request.user.login == 'Copilot')) ||
       github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.user.login == 'Copilot' && 
-       contains(github.event.pull_request.head.ref, 'copilot/'))
+      (github.event_name == 'push' && 
+       github.actor == 'Copilot' && 
+       contains(github.ref, 'copilot/')) ||
+      (github.event_name == 'pull_request' &&
+       ((contains(github.event.pull_request.labels.*.name, 'copilot-coding-agent') &&
+         (github.event.pull_request.user.login == 'github-copilot[bot]' || 
+          github.event.pull_request.user.login == 'Copilot')) ||
+        (github.event.pull_request.user.login == 'Copilot' && 
+         contains(github.event.pull_request.head.ref, 'copilot/'))))
     
     permissions:
       contents: write
@@ -60,9 +66,17 @@ jobs:
           echo "✅ Dependencies installed"
       
       - name: Setup Copilot PR for Auto-Processing
-        if: github.event.pull_request.user.login == 'Copilot'
+        if: github.actor == 'Copilot'
         run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            PR_NUMBER="${{ github.event.inputs.pr_number }}"
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            # For push events, find the PR associated with this branch
+            BRANCH_NAME="${{ github.ref_name }}"
+            PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
+          else
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          fi
           
           echo "🔧 Setting up Copilot PR #$PR_NUMBER for auto-processing..."
           
@@ -86,6 +100,15 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             PR_NUMBER="${{ github.event.inputs.pr_number }}"
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            # For push events, find the PR associated with this branch
+            BRANCH_NAME="${{ github.ref_name }}"
+            echo "Finding PR for branch: $BRANCH_NAME"
+            PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
+            if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" == "null" ]; then
+              echo "❌ No open PR found for branch $BRANCH_NAME"
+              exit 1
+            fi
           else
             PR_NUMBER="${{ github.event.pull_request.number }}"
           fi
@@ -118,7 +141,7 @@ jobs:
           else
             echo "⚠️ Linting failed, but continuing for Copilot PRs..."
             # For Copilot PRs, we may want to be more lenient with linting
-            if [ "${{ github.event.pull_request.user.login }}" == "Copilot" ]; then
+            if [ "${{ github.actor }}" == "Copilot" ]; then
               echo "🤖 Allowing Copilot PR to proceed despite linting issues"
             else
               echo "validation_passed=false" >> $GITHUB_OUTPUT

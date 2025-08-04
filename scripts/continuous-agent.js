@@ -386,8 +386,12 @@ class ContinuousAgent {
                 console.log('🤖 Auto-merge enabled, triggering coding agent...');
                 
                 // Trigger GitHub Copilot agent via issue comment
+                const copilotUsername = config.coding_agent && config.coding_agent.copilot_username
+                    ? config.coding_agent.copilot_username
+                    : null;
+                const copilotMention = copilotUsername ? `@${copilotUsername}` : '';
                 const triggerComment = {
-                    body: `@Copilot please implement the changes described in this issue. Focus on the highest priority tasks first and ensure all code follows project standards.
+                    body: `${copilotMention ? copilotMention + ' ' : ''}please implement the changes described in this issue. Focus on the highest priority tasks first and ensure all code follows project standards.
 
 **Auto-merge enabled**: This PR will be automatically reviewed and merged once all checks pass.
 

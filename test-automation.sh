@@ -41,9 +41,18 @@ fi
 print_status "Step 1: Validating agent configuration..."
 
 # Check agent configuration
-auto_merge=$(jq -r '.auto_merge' agent-workflow/config/config.json 2>/dev/null || echo "false")
-auto_review=$(jq -r '.coding_agent.auto_review // false' agent-workflow/config/config.json 2>/dev/null || echo "false")
-
+auto_merge=$(jq -e -r '.auto_merge' agent-workflow/config/config.json 2>&1)
+if [ $? -ne 0 ]; then
+    print_error "Failed to parse agent-workflow/config/config.json for 'auto_merge'."
+    echo "$auto_merge"
+    exit 1
+fi
+auto_review=$(jq -e -r '.coding_agent.auto_review // false' agent-workflow/config/config.json 2>&1)
+if [ $? -ne 0 ]; then
+    print_error "Failed to parse agent-workflow/config/config.json for 'coding_agent.auto_review'."
+    echo "$auto_review"
+    exit 1
+fi
 if [ "$auto_merge" == "true" ] && [ "$auto_review" == "true" ]; then
     print_success "Agent configuration is correctly set for auto-merge"
 else

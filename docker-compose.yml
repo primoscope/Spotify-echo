@@ -1,59 +1,47 @@
-# Optimized Docker Compose for EchoTune AI - DigitalOcean Production
 version: '3.8'
 
-# Define reusable configurations
-x-common-variables: &common-variables
+# Common environment variables
+x-env-common: &env-common
   NODE_ENV: ${NODE_ENV:-production}
   DOMAIN: ${DOMAIN:-primosphere.studio}
   FRONTEND_URL: ${FRONTEND_URL:-https://primosphere.studio}
-  DIGITALOCEAN_IP_PRIMARY: ${DIGITALOCEAN_IP_PRIMARY:-159.223.207.187}
-  DIGITALOCEAN_IP_RESERVED: ${DIGITALOCEAN_IP_RESERVED:-209.38.5.39}
+  PORT: ${PORT:-3000}
 
-x-logging: &default-logging
+x-logging: &logging
   driver: "json-file"
   options:
-    max-size: "50m"
-    max-file: "3"
+    max-size: "100m"
+    max-file: "5"
     compress: "true"
-    labels: "service,version"
 
-x-restart-policy: &restart-policy
+x-restart: &restart
   restart: unless-stopped
 
-x-security-opts: &security-opts
+x-security: &security
   security_opt:
     - no-new-privileges:true
-  read_only: false
+  read_only: true
   tmpfs:
     - /tmp:noexec,nosuid,size=128m
 
-# Custom networks for better isolation
 networks:
-  echotune-frontend:
+  frontend:
     driver: bridge
     ipam:
-      driver: default
       config:
         - subnet: 172.20.0.0/24
-          gateway: 172.20.0.1
-  echotune-backend:
+  backend:
     driver: bridge
     ipam:
-      driver: default
       config:
         - subnet: 172.21.0.0/24
-          gateway: 172.21.0.1
-  echotune-database:
+  database:
     driver: bridge
     ipam:
-      driver: default
       config:
         - subnet: 172.22.0.0/24
-          gateway: 172.22.0.1
 
-# Persistent volumes with backup support
 volumes:
-  # SSL and security
   ssl-certs:
     driver: local
     driver_opts:
@@ -66,8 +54,6 @@ volumes:
       type: none
       device: /opt/echotune/letsencrypt
       o: bind
-  
-  # Application data
   app-logs:
     driver: local
     driver_opts:
@@ -86,8 +72,6 @@ volumes:
       type: none
       device: /opt/echotune/static
       o: bind
-  
-  # Database storage with backup paths
   mongodb-data:
     driver: local
     driver_opts:
@@ -106,7 +90,389 @@ volumes:
       type: none
       device: /opt/echotune/redis/data
       o: bind
-  
+  nginx-logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/echotune/nginx/logs
+      o: bind
+  nginx-cache:
+    driver: local
+  certbot-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/echotune/certbot
+      o: bind
+  backup-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/echotune/backups
+      o: bind
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        NODE_ENV: production
+        BUILD_VERSION: ${BUILD_VERSION:-latest}
+        BUILDKIT_INLINE_CACHE: 1
+    image: echotune-ai:${BUILD_VERSION:-latest}
+    container_name: echotune-app
+    <<: *restart
+    <<: *security
+    environment:
+      <<: *env-common
+      # DB/Cache
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/echotune}
+      REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379}
+      # Security
+      SESSION_SECRET: ${SESSION_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      # Spotify API
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+      SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-https://${DOMAIN}/auth/callback}
+      # Performance
+      NODE_OPTIONS: "--max-old-space-size=1024 --enable-source-maps"
+      UV_THREADPOOL_SIZE: 8
+      CLUSTERING: ${CLUSTERING:-true}
+      WORKERS: ${WORKERS:-auto}
+      # Monitoring
+      HEALTH_CHECK_ENABLED: true
+      METRICS_ENABLED: true
+    env_file: .env.production
+    volumes:
+      - app-logs:/app/logs
+      - app-data:/app/data
+      - static-files:/app/dist:ro
+    networks:
+      backend:
+        ipv4_address: 172.21.0.10
+      database:
+        ipv4_address: 172.22.0.10
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: echotune-nginx:${BUILD_VERSION:-latest}
+    container_name: echotune-nginx
+    <<: *restart
+    <<: *security
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      <<: *env-common
+      BACKEND_HOST: app
+      BACKEND_PORT: 3000
+      MAX_REQUEST_SIZE: ${MAX_REQUEST_SIZE:-10m}
+      API_RATE_LIMIT: ${API_RATE_LIMIT:-50r/s}
+      AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-10r/m}
+      GENERAL_RATE_LIMIT: ${GENERAL_RATE_LIMIT:-100r/s}
+      SSL_CERT_PATH: ${SSL_CERT_PATH:-/etc/nginx/ssl/primosphere.studio.crt}
+      SSL_KEY_PATH: ${SSL_KEY_PATH:-/etc/nginx/ssl/primosphere.studio.key}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-admin@primosphere.studio}
+      NGINX_WORKER_PROCESSES: ${NGINX_WORKER_PROCESSES:-auto}
+      NGINX_WORKER_CONNECTIONS: ${NGINX_WORKER_CONNECTIONS:-1024}
+    volumes:
+      - ssl-certs:/etc/nginx/ssl
+      - letsencrypt-data:/etc/letsencrypt
+      - nginx-logs:/var/log/nginx
+      - nginx-cache:/var/cache/nginx
+      - certbot-data:/var/www/certbot
+      - static-files:/var/www/html:ro
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.20
+      backend:
+        ipv4_address: 172.21.0.20
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging: *logging
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: echotune-mongodb
+    <<: *restart
+    <<: *security
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+      - backup-data:/backup:rw
+    networks:
+      database:
+        ipv4_address: 172.22.0.30
+    command: >
+      mongod 
+      --auth 
+      --bind_ip_all 
+      --wiredTigerCacheSizeGB 0.5
+      --wiredTigerCollectionBlockCompressor snappy
+      --wiredTigerIndexPrefixCompression true
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    logging: *logging
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: echotune-redis
+    <<: *restart
+    <<: *security
+    command: >
+      redis-server 
+      --appendonly yes 
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --loglevel warning
+      --tcp-keepalive 60
+      --timeout 0
+    volumes:
+      - redis-data:/data
+    networks:
+      database:
+        ipv4_address: 172.22.0.40
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging: *logging
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  certbot-renew:
+    image: certbot/certbot:latest
+    container_name: echotune-certbot-renew
+    restart: "no"
+    volumes:
+      - letsencrypt-data:/etc/letsencrypt
+      - certbot-data:/var/www/certbot
+      - ssl-certs:/etc/nginx/ssl
+    command: >
+      sh -c "
+        echo 'Setting up SSL certificate renewal...';
+        while true; do
+          certbot renew --quiet --webroot --webroot-path=/var/www/certbot;
+          if [ -f '/etc/letsencrypt/live/${DOMAIN}/fullchain.pem' ]; then
+            cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem /etc/nginx/ssl/${DOMAIN}.crt;
+            cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem /etc/nginx/ssl/${DOMAIN}.key;
+          fi;
+          sleep 43200;
+        done
+      "
+    depends_on:
+      - nginx
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.50
+
+  logrotate:
+    image: alpine:latest
+    container_name: echotune-logrotate
+    <<: *restart
+    volumes:
+      - app-logs:/logs/app
+      - nginx-logs:/logs/nginx
+    command: >
+      sh -c "
+        apk add --no-cache logrotate &&
+        echo '
+        /logs/app/*.log {
+          daily
+          rotate 7
+          compress
+          delaycompress
+          missingok
+          notifempty
+          create 644 root root
+          postrotate
+            killall -USR1 node || true
+          endscript
+        }
+        /logs/nginx/*.log {
+          daily
+          rotate 14
+          compress
+          delaycompress
+          missingok
+          notifempty
+          create 644 root root
+          postrotate
+            docker exec echotune-nginx nginx -s reload || true
+          endscript
+        }
+        ' > /etc/logrotate.conf &&
+        while true; do
+          logrotate /etc/logrotate.conf
+          sleep 86400
+        done
+      "
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.60
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
+
+  monitoring:
+    image: prom/node-exporter:latest
+    container_name: echotune-monitoring
+    <<: *restart
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.cpu'
+      - '--collector.meminfo'
+      - '--collector.diskstats'
+      - '--collector.netdev'
+      - '--collector.loadavg'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.70
+    ports:
+      - "9100:9100"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+
+  backup:
+    image: alpine:latest
+    container_name: echotune-backup
+    <<: *restart
+    environment:
+      MONGODB_URI: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/echotune?authSource=admin
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      BACKUP_COMPRESSION: ${BACKUP_COMPRESSION:-true}
+      DIGITAL_OCEAN_SPACES_KEY: ${DO_SPACES_ACCESS_KEY:-}
+      DIGITAL_OCEAN_SPACES_SECRET: ${DO_SPACES_SECRET_KEY:-}
+    volumes:
+      - mongodb-data:/data/db:ro
+      - app-data:/data/app:ro
+      - backup-data:/backups
+    command: >
+      sh -c "
+        apk add --no-cache mongodb-tools curl aws-cli &&
+        echo 'Starting backup service...' &&
+        echo '$${BACKUP_SCHEDULE} /bin/sh -c \"
+          echo \"Starting backup at \$$(date)\" &&
+          mongodump --uri=\"$${MONGODB_URI}\" --out /backups/mongodb_\$$(date +%Y%m%d_%H%M%S) &&
+          tar -czf /backups/app_data_\$$(date +%Y%m%d_%H%M%S).tar.gz -C /data/app . &&
+          find /backups -type f -mtime +$${BACKUP_RETENTION_DAYS} -delete &&
+          echo \"Backup completed at \$$(date)\"
+        \"' > /etc/crontabs/root &&
+        crond -f
+      "
+    networks:
+      database:
+        ipv4_address: 172.22.0.70
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+
+  health-checker:
+    image: curlimages/curl:latest
+    container_name: echotune-health-checker
+    restart: "no"
+    command: >
+      sh -c "
+        while true; do
+          curl -f http://nginx/health || echo 'Health check failed at $$(date)';
+          sleep 300;
+        done
+      "
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.80
+    depends_on:
+      nginx:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+          cpus: '0.05'  
   # Nginx and reverse proxy
   nginx-logs:
     driver: local

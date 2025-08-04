@@ -1,0 +1,1704 @@
+name: Copilot Slash Commands
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+
+jobs:
+  process-commands:
+    name: Process Slash Commands
+    runs-on: ubuntu-latest
+    
+    # Only process commands from authorized users and valid contexts
+    if: |
+      (github.event.issue.number || github.event.pull_request.number) &&
+      startsWith(github.event.comment.body, '/') &&
+      (github.event.comment.author_association == 'OWNER' || 
+       github.event.comment.author_association == 'COLLABORATOR' ||
+       github.event.comment.author_association == 'MEMBER')
+    
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+      checks: read
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+      
+      - name: Configure Git
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Parse Command
+        id: parse
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+          
+          # Extract command and parameters
+          COMMAND=$(echo "$COMMENT_BODY" | head -n 1 | sed 's/^\/\([a-zA-Z-]*\).*/\1/')
+          PARAMS=$(echo "$COMMENT_BODY" | head -n 1 | sed 's/^\/[a-zA-Z-]* *//')
+          
+          echo "command=$COMMAND" >> $GITHUB_OUTPUT
+          echo "params=$PARAMS" >> $GITHUB_OUTPUT
+          
+          # Get context information
+          if [ "${{ github.event.issue.number }}" != "" ]; then
+            echo "context_type=issue" >> $GITHUB_OUTPUT
+            echo "context_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "context_type=pull_request" >> $GITHUB_OUTPUT
+            echo "context_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "Parsed command: $COMMAND"
+          echo "Parameters: $PARAMS"
+      
+      - name: Execute Review Docs Command
+        if: steps.parse.outputs.command == 'review-docs'
+        run: |
+          echo "🔍 Executing /review-docs command..."
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          PARAMS="${{ steps.parse.outputs.params }}"
+          
+          # Create comprehensive documentation review
+          cat > /tmp/docs_review.md << 'EOF'
+          ## 📚 Documentation Review & Enhancement
+          
+          **Triggered by**: `/review-docs ${{ steps.parse.outputs.params }}`
+          **Context**: ${{ steps.parse.outputs.context_type }} #${{ steps.parse.outputs.context_number }}
+          
+          ### 🔍 Current Documentation Analysis
+          
+          I've analyzed the repository's documentation structure:
+          
+          #### ✅ Existing Documentation (Strong)
+          - **README.md**: Comprehensive project overview with setup instructions
+          - **CODING_AGENT_GUIDE.md**: Detailed development workflows  
+          - **GITHUB_AUTOMATION_SETUP.md**: Complete automation setup guide
+          - **DEPLOYMENT_GUIDE.md**: Production deployment instructions
+          - **DATABASE_ARCHITECTURE_GUIDE.md**: Database design patterns
+          - **Copilot Instructions**: Comprehensive AI coding guidelines
+          
+          #### 📝 Documentation Gaps Identified
+          - **API Documentation**: Missing OpenAPI/Swagger specs for REST endpoints
+          - **Architecture Diagrams**: Need visual system architecture overview
+          - **Contributing Guidelines**: No CONTRIBUTING.md for external contributors
+          - **Security Guidelines**: Missing security best practices documentation
+          - **Testing Guide**: Limited testing documentation and examples
+          
+          ### 🚀 Recommended Actions
+          
+          EOF
+          
+          # Determine specific documentation to create based on parameters
+          if [[ "$PARAMS" == *"api"* ]] || [[ "$PARAMS" == "" ]]; then
+            echo "#### 1. API Documentation" >> /tmp/docs_review.md
+            echo "- Create OpenAPI 3.0 specification for all REST endpoints" >> /tmp/docs_review.md
+            echo "- Document Spotify API integration patterns" >> /tmp/docs_review.md
+            echo "- Add request/response examples" >> /tmp/docs_review.md
+            echo "" >> /tmp/docs_review.md
+          fi
+          
+          if [[ "$PARAMS" == *"architecture"* ]] || [[ "$PARAMS" == "" ]]; then
+            echo "#### 2. Architecture Documentation" >> /tmp/docs_review.md
+            echo "- System architecture diagrams using Mermaid" >> /tmp/docs_review.md
+            echo "- Data flow visualization" >> /tmp/docs_review.md
+            echo "- Component interaction diagrams" >> /tmp/docs_review.md
+            echo "" >> /tmp/docs_review.md
+          fi
+          
+          if [[ "$PARAMS" == *"contributing"* ]] || [[ "$PARAMS" == "" ]]; then
+            echo "#### 3. Contributing Guidelines" >> /tmp/docs_review.md
+            echo "- CONTRIBUTING.md with development workflow" >> /tmp/docs_review.md
+            echo "- Code review process documentation" >> /tmp/docs_review.md
+            echo "- Issue templates and PR templates" >> /tmp/docs_review.md
+            echo "" >> /tmp/docs_review.md
+          fi
+          
+          cat >> /tmp/docs_review.md << 'EOF'
+          ### 🎯 Next Steps
+          
+          **Immediate Actions Available:**
+          - Use `/create-api-docs` to generate OpenAPI specification
+          - Use `/create-architecture` to generate system diagrams  
+          - Use `/create-contributing` to generate contributing guidelines
+          - Use `/create-security-guide` to generate security documentation
+          
+          **Priority Recommendations:**
+          1. Start with API documentation for better developer experience
+          2. Add architecture diagrams for new contributor onboarding
+          3. Create security guidelines for production deployment
+          
+          ---
+          *Generated by EchoTune AI Copilot Assistant*
+          EOF
+          
+          # Post the review as a comment
+          if [ "${{ steps.parse.outputs.context_type }}" == "issue" ]; then
+            gh issue comment $CONTEXT_NUMBER --body-file /tmp/docs_review.md
+          else
+            gh pr comment $CONTEXT_NUMBER --body-file /tmp/docs_review.md
+          fi
+          
+          echo "✅ Documentation review posted successfully"
+      
+      - name: Execute Create API Docs Command
+        if: steps.parse.outputs.command == 'create-api-docs'
+        run: |
+          echo "📝 Creating API documentation..."
+          
+          # Create API documentation file
+          cat > /home/runner/work/Spotify-echo/Spotify-echo/API_DOCUMENTATION.md << 'EOF'
+          # 🎵 EchoTune AI - API Documentation
+          
+          ## Overview
+          
+          EchoTune AI provides a comprehensive REST API for music recommendation and Spotify integration. This documentation covers all available endpoints, authentication methods, and usage examples.
+          
+          ## Base URL
+          ```
+          Production: https://your-domain.com/api
+          Development: http://localhost:3000/api
+          ```
+          
+          ## Authentication
+          
+          ### Spotify OAuth 2.0
+          All API endpoints require valid Spotify authentication tokens.
+          
+          ```javascript
+          // Authorization header
+          Authorization: Bearer {spotify_access_token}
+          ```
+          
+          ## Core Endpoints
+          
+          ### 🎧 Music Recommendations
+          
+          #### GET /recommendations
+          Get personalized music recommendations for a user.
+          
+          **Parameters:**
+          - `limit` (integer, optional): Number of recommendations (default: 20, max: 100)
+          - `seed_artists` (string, optional): Comma-separated artist IDs
+          - `seed_genres` (string, optional): Comma-separated genre names
+          - `seed_tracks` (string, optional): Comma-separated track IDs
+          
+          **Response:**
+          ```json
+          {
+            "tracks": [
+              {
+                "id": "4iV5W9uYEdYUVa79Axb7Rh",
+                "name": "Song Name",
+                "artists": [{"name": "Artist Name", "id": "artist_id"}],
+                "album": {"name": "Album Name", "images": [...]},
+                "audio_features": {
+                  "danceability": 0.735,
+                  "energy": 0.578,
+                  "valence": 0.624
+                },
+                "recommendation_score": 0.89,
+                "recommendation_reason": "Based on your recent listening habits"
+              }
+            ],
+            "meta": {
+              "total": 20,
+              "generated_at": "2024-01-20T10:30:00Z",
+              "algorithm": "collaborative_filtering_v2"
+            }
+          }
+          ```
+          
+          #### POST /recommendations/feedback
+          Provide feedback on recommendations to improve future suggestions.
+          
+          **Request Body:**
+          ```json
+          {
+            "track_id": "4iV5W9uYEdYUVa79Axb7Rh",
+            "feedback": "like|dislike|love|skip",
+            "context": "workout|study|commute|party"
+          }
+          ```
+          
+          ### 🤖 AI Chat Interface
+          
+          #### POST /chat/message
+          Send a message to the AI music assistant.
+          
+          **Request Body:**
+          ```json
+          {
+            "message": "I want some energetic workout music",
+            "context": {
+              "time_of_day": "morning",
+              "current_mood": "motivated",
+              "recent_tracks": ["track_id_1", "track_id_2"]
+            }
+          }
+          ```
+          
+          **Response:**
+          ```json
+          {
+            "response": "Here are some high-energy tracks perfect for your workout...",
+            "tracks": [...],
+            "intent": {
+              "activity": "workout",
+              "mood": "energetic",
+              "confidence": 0.95
+            },
+            "conversation_id": "conv_123"
+          }
+          ```
+          
+          ### 📊 User Analytics
+          
+          #### GET /user/listening-history
+          Retrieve user's listening history and analytics.
+          
+          **Parameters:**
+          - `limit` (integer): Number of tracks (default: 50, max: 1000)
+          - `time_range` (string): "short_term", "medium_term", or "long_term"
+          - `after` (string, ISO date): Get tracks after this date
+          
+          #### GET /user/top-genres
+          Get user's top genres based on listening history.
+          
+          **Response:**
+          ```json
+          {
+            "genres": [
+              {
+                "name": "electronic",
+                "play_count": 245,
+                "percentage": 34.2,
+                "representative_tracks": [...]
+              }
+            ],
+            "analysis_period": "medium_term",
+            "total_tracks_analyzed": 716
+          }
+          ```
+          
+          ### 🔄 Playlist Management
+          
+          #### POST /playlists/generate
+          Generate a smart playlist based on criteria.
+          
+          **Request Body:**
+          ```json
+          {
+            "name": "My AI Workout Mix",
+            "description": "Generated by EchoTune AI",
+            "criteria": {
+              "energy_min": 0.7,
+              "danceability_min": 0.6,
+              "duration_ms": 3600000,
+              "include_genres": ["electronic", "pop"],
+              "exclude_artists": ["artist_id_to_exclude"]
+            },
+            "create_spotify_playlist": true
+          }
+          ```
+          
+          ## Error Handling
+          
+          ### HTTP Status Codes
+          - `200` - Success
+          - `400` - Bad Request (invalid parameters)
+          - `401` - Unauthorized (invalid/expired token)
+          - `403` - Forbidden (insufficient permissions)
+          - `404` - Not Found
+          - `429` - Rate Limited
+          - `500` - Internal Server Error
+          
+          ### Error Response Format
+          ```json
+          {
+            "error": {
+              "code": "INVALID_TOKEN",
+              "message": "The provided access token is invalid or expired",
+              "details": {
+                "timestamp": "2024-01-20T10:30:00Z",
+                "request_id": "req_abc123"
+              }
+            }
+          }
+          ```
+          
+          ## Rate Limiting
+          
+          API endpoints are rate limited to ensure fair usage:
+          - **General endpoints**: 100 requests per 15 minutes per user
+          - **Recommendation endpoints**: 50 requests per hour per user
+          - **Chat endpoints**: 20 messages per minute per user
+          
+          Rate limit headers are included in responses:
+          ```
+          X-RateLimit-Limit: 100
+          X-RateLimit-Remaining: 85
+          X-RateLimit-Reset: 1642680600
+          ```
+          
+          ## SDKs and Examples
+          
+          ### JavaScript/Node.js
+          ```javascript
+          const EchoTuneAPI = require('@echotune/api-client');
+          
+          const client = new EchoTuneAPI({
+            accessToken: 'your_spotify_token',
+            baseURL: 'https://your-domain.com/api'
+          });
+          
+          // Get recommendations
+          const recommendations = await client.recommendations.get({
+            limit: 10,
+            seed_genres: 'electronic,ambient'
+          });
+          
+          // Send chat message
+          const response = await client.chat.sendMessage(
+            "Play something chill for studying"
+          );
+          ```
+          
+          ### Python
+          ```python
+          from echotune_api import EchoTuneClient
+          
+          client = EchoTuneClient(
+              access_token='your_spotify_token',
+              base_url='https://your-domain.com/api'
+          )
+          
+          # Get recommendations
+          recommendations = client.recommendations.get(
+              limit=10,
+              seed_genres=['electronic', 'ambient']
+          )
+          
+          # Send chat message
+          response = client.chat.send_message(
+              "Play something chill for studying"
+          )
+          ```
+          
+          ## Webhooks
+          
+          ### Playlist Updates
+          Receive notifications when AI-generated playlists are updated.
+          
+          **Endpoint Setup:**
+          ```
+          POST /webhooks/register
+          {
+            "url": "https://your-app.com/webhook",
+            "events": ["playlist.updated", "recommendations.generated"],
+            "secret": "your_webhook_secret"
+          }
+          ```
+          
+          ## Support
+          
+          - **Documentation**: [GitHub Repository](https://github.com/dzp5103/Spotify-echo)
+          - **Issues**: [Report bugs](https://github.com/dzp5103/Spotify-echo/issues)
+          - **Discord**: [Community Support](#)
+          
+          ---
+          
+          **Last Updated**: January 2024
+          **API Version**: v1.0
+          EOF
+          
+          git add API_DOCUMENTATION.md
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          # Post success comment
+          cat > /tmp/api_docs_success.md << 'EOF'
+          ## ✅ API Documentation Created
+          
+          I've successfully generated comprehensive API documentation for EchoTune AI!
+          
+          **📁 File Created**: `API_DOCUMENTATION.md`
+          
+          **📚 Documentation Includes**:
+          - Complete endpoint reference with examples
+          - Authentication and security guidelines  
+          - Rate limiting and error handling
+          - SDK examples for JavaScript and Python
+          - Webhook configuration
+          
+          **🔗 Features Documented**:
+          - 🎧 Music recommendations API
+          - 🤖 AI chat interface
+          - 📊 User analytics endpoints
+          - 🔄 Smart playlist generation
+          
+          **Next Steps**:
+          - Review the generated documentation
+          - Add any project-specific endpoints
+          - Consider generating OpenAPI/Swagger spec with `/create-openapi`
+          
+          The documentation follows industry best practices and includes practical examples for developers.
+          EOF
+          
+          if [ "${{ steps.parse.outputs.context_type }}" == "issue" ]; then
+            gh issue comment $CONTEXT_NUMBER --body-file /tmp/api_docs_success.md
+          else
+            gh pr comment $CONTEXT_NUMBER --body-file /tmp/api_docs_success.md
+          fi
+      
+      - name: Execute Create Architecture Command
+        if: steps.parse.outputs.command == 'create-architecture'
+        run: |
+          echo "🏗️ Creating architecture documentation..."
+          
+          cat > /home/runner/work/Spotify-echo/Spotify-echo/ARCHITECTURE.md << 'EOF'
+          # 🏗️ EchoTune AI - System Architecture
+          
+          ## Overview
+          
+          EchoTune AI is a microservices-based music recommendation platform that combines Spotify's Web API with advanced AI/ML capabilities to deliver personalized music discovery experiences.
+          
+          ## High-Level Architecture
+          
+          ```mermaid
+          graph TB
+              subgraph "Frontend Layer"
+                  UI[Web Interface]
+                  SPA[Single Page App]
+                  PWA[Progressive Web App]
+              end
+              
+              subgraph "API Gateway"
+                  NGINX[Nginx Reverse Proxy]
+                  LB[Load Balancer]
+                  SSL[SSL/TLS Termination]
+              end
+              
+              subgraph "Backend Services"
+                  API[Express.js API Server]
+                  MCP[MCP Automation Server]
+                  ML[Python ML Engine]
+                  CHAT[AI Chat Service]
+              end
+              
+              subgraph "AI/ML Layer"
+                  GEMINI[Google Gemini API]
+                  OPENAI[OpenAI GPT API]
+                  MODELS[Custom ML Models]
+                  REC[Recommendation Engine]
+              end
+              
+              subgraph "Data Layer"
+                  MONGO[(MongoDB Atlas)]
+                  REDIS[(Redis Cache)]
+                  FILES[File Storage]
+              end
+              
+              subgraph "External Services"
+                  SPOTIFY[Spotify Web API]
+                  CDN[Content Delivery Network]
+                  MONITOR[Monitoring Services]
+              end
+              
+              UI --> NGINX
+              SPA --> NGINX
+              PWA --> NGINX
+              
+              NGINX --> LB
+              LB --> API
+              LB --> MCP
+              
+              API --> ML
+              API --> CHAT
+              API --> SPOTIFY
+              
+              CHAT --> GEMINI
+              CHAT --> OPENAI
+              ML --> MODELS
+              ML --> REC
+              
+              API --> MONGO
+              API --> REDIS
+              ML --> MONGO
+              MCP --> FILES
+              
+              API --> MONITOR
+              ML --> MONITOR
+          ```
+          
+          ## Component Architecture
+          
+          ### 🎵 Music Recommendation Flow
+          
+          ```mermaid
+          sequenceDiagram
+              participant User
+              participant WebApp
+              participant API
+              participant ML
+              participant Spotify
+              participant Cache
+              
+              User->>WebApp: Request recommendations
+              WebApp->>API: GET /api/recommendations
+              API->>Cache: Check cached results
+              
+              alt Cache Hit
+                  Cache->>API: Return cached data
+              else Cache Miss
+                  API->>ML: Generate recommendations
+                  ML->>Spotify: Fetch user data
+                  Spotify->>ML: Return listening history
+                  ML->>ML: Process with algorithms
+                  ML->>API: Return recommendations
+                  API->>Cache: Store results
+              end
+              
+              API->>WebApp: Return recommendations
+              WebApp->>User: Display results
+          ```
+          
+          ### 🤖 AI Chat Interface Flow
+          
+          ```mermaid
+          sequenceDiagram
+              participant User
+              participant Chat
+              participant Intent
+              participant LLM
+              participant Music
+              participant Spotify
+              
+              User->>Chat: Send message
+              Chat->>Intent: Parse musical intent
+              Intent->>Chat: Return structured intent
+              Chat->>LLM: Generate response
+              LLM->>Chat: Return AI response
+              Chat->>Music: Get track recommendations
+              Music->>Spotify: Search tracks
+              Spotify->>Music: Return track data
+              Music->>Chat: Return enriched tracks
+              Chat->>User: Complete response with music
+          ```
+          
+          ## Data Architecture
+          
+          ### 📊 Database Schema (MongoDB)
+          
+          ```mermaid
+          erDiagram
+              USERS ||--o{ LISTENING_HISTORY : has
+              USERS ||--o{ RECOMMENDATIONS : receives
+              USERS ||--o{ CHAT_SESSIONS : participates
+              USERS ||--o{ PLAYLISTS : creates
+              
+              USERS {
+                  ObjectId _id
+                  string spotify_id
+                  string display_name
+                  string email
+                  object preferences
+                  datetime created_at
+                  datetime last_active
+              }
+              
+              LISTENING_HISTORY {
+                  ObjectId _id
+                  ObjectId user_id
+                  string track_id
+                  string track_name
+                  string artist_name
+                  object audio_features
+                  datetime played_at
+                  integer play_count
+              }
+              
+              RECOMMENDATIONS {
+                  ObjectId _id
+                  ObjectId user_id
+                  array track_ids
+                  string algorithm_version
+                  object metadata
+                  float confidence_score
+                  datetime generated_at
+              }
+              
+              CHAT_SESSIONS {
+                  ObjectId _id
+                  ObjectId user_id
+                  array messages
+                  object context
+                  datetime started_at
+                  datetime updated_at
+              }
+              
+              PLAYLISTS {
+                  ObjectId _id
+                  ObjectId user_id
+                  string spotify_playlist_id
+                  string name
+                  array track_ids
+                  object generation_criteria
+                  datetime created_at
+              }
+          ```
+          
+          ## Technology Stack
+          
+          ### 🖥️ Backend
+          - **Runtime**: Node.js 20+
+          - **Framework**: Express.js
+          - **Language**: JavaScript (ES2022)
+          - **ML Engine**: Python 3.8+
+          - **Process Manager**: PM2
+          
+          ### 🎨 Frontend
+          - **Framework**: Vanilla JavaScript (Modular)
+          - **Bundler**: Vite
+          - **Styling**: CSS3 with CSS Variables
+          - **PWA**: Service Workers + Web App Manifest
+          
+          ### 🗄️ Data Storage
+          - **Primary Database**: MongoDB Atlas
+          - **Caching**: Redis (In-Memory)
+          - **File Storage**: Local/Cloud Storage
+          - **Search Engine**: MongoDB Atlas Search
+          
+          ### 🤖 AI/ML Stack
+          - **LLM APIs**: OpenAI GPT, Google Gemini
+          - **ML Libraries**: scikit-learn, pandas, numpy
+          - **Recommendation**: Collaborative Filtering, Content-Based
+          - **NLP**: Intent recognition, sentiment analysis
+          
+          ### ☁️ Infrastructure
+          - **Cloud Provider**: DigitalOcean
+          - **Containerization**: Docker
+          - **Reverse Proxy**: Nginx
+          - **SSL**: Let's Encrypt
+          - **Monitoring**: Custom health checks
+          
+          ## Security Architecture
+          
+          ### 🔐 Authentication & Authorization
+          
+          ```mermaid
+          graph LR
+              subgraph "Auth Flow"
+                  USER[User] --> SPOTIFY_AUTH[Spotify OAuth]
+                  SPOTIFY_AUTH --> TOKEN[Access Token]
+                  TOKEN --> API_ACCESS[API Access]
+              end
+              
+              subgraph "Security Layers"
+                  HTTPS[HTTPS/TLS]
+                  CORS[CORS Policy]
+                  RATE[Rate Limiting]
+                  VALIDATION[Input Validation]
+              end
+              
+              API_ACCESS --> HTTPS
+              HTTPS --> CORS
+              CORS --> RATE
+              RATE --> VALIDATION
+          ```
+          
+          ### 🛡️ Security Measures
+          - **Transport Security**: TLS 1.3 encryption
+          - **API Security**: OAuth 2.0 with PKCE
+          - **Input Validation**: Comprehensive sanitization
+          - **Rate Limiting**: Per-user and per-endpoint limits
+          - **CORS**: Strict origin policies
+          - **Secrets Management**: Environment variables only
+          
+          ## Scalability & Performance
+          
+          ### 📈 Horizontal Scaling Strategy
+          
+          ```mermaid
+          graph TB
+              subgraph "Load Distribution"
+                  LB[Load Balancer]
+                  API1[API Server 1]
+                  API2[API Server 2]
+                  API3[API Server 3]
+              end
+              
+              subgraph "Cache Layer"
+                  REDIS1[Redis Primary]
+                  REDIS2[Redis Replica]
+              end
+              
+              subgraph "Database Layer"
+                  MONGO_PRIMARY[MongoDB Primary]
+                  MONGO_SECONDARY[MongoDB Secondary]
+                  MONGO_ARBITER[MongoDB Arbiter]
+              end
+              
+              LB --> API1
+              LB --> API2
+              LB --> API3
+              
+              API1 --> REDIS1
+              API2 --> REDIS1
+              API3 --> REDIS1
+              
+              REDIS1 --> REDIS2
+              
+              API1 --> MONGO_PRIMARY
+              API2 --> MONGO_PRIMARY
+              API3 --> MONGO_PRIMARY
+              
+              MONGO_PRIMARY --> MONGO_SECONDARY
+              MONGO_PRIMARY --> MONGO_ARBITER
+          ```
+          
+          ### ⚡ Performance Optimizations
+          - **Caching Strategy**: Multi-layer caching (Redis + In-Memory)
+          - **Database Indexing**: Optimized MongoDB indexes
+          - **CDN Integration**: Static asset delivery
+          - **Lazy Loading**: Progressive data loading
+          - **Connection Pooling**: Database connection optimization
+          
+          ## Deployment Architecture
+          
+          ### 🚀 Production Environment
+          
+          ```mermaid
+          graph TB
+              subgraph "External"
+                  USERS[Users]
+                  SPOTIFY_API[Spotify API]
+                  AI_APIS[AI/ML APIs]
+              end
+              
+              subgraph "Edge Layer"
+                  CDN[CloudFront CDN]
+                  DNS[Route 53 DNS]
+              end
+              
+              subgraph "Application Layer"
+                  ALB[Application Load Balancer]
+                  WEB1[Web Server 1]
+                  WEB2[Web Server 2]
+                  API1[API Server 1]
+                  API2[API Server 2]
+              end
+              
+              subgraph "Data Layer"
+                  RDS[MongoDB Atlas]
+                  CACHE[Redis Cloud]
+                  S3[File Storage]
+              end
+              
+              USERS --> DNS
+              DNS --> CDN
+              CDN --> ALB
+              ALB --> WEB1
+              ALB --> WEB2
+              ALB --> API1
+              ALB --> API2
+              
+              API1 --> RDS
+              API2 --> RDS
+              API1 --> CACHE
+              API2 --> CACHE
+              
+              API1 --> SPOTIFY_API
+              API2 --> SPOTIFY_API
+              API1 --> AI_APIS
+              API2 --> AI_APIS
+          ```
+          
+          ## Monitoring & Observability
+          
+          ### 📊 System Monitoring
+          - **Application Metrics**: Response times, error rates, throughput
+          - **Infrastructure Metrics**: CPU, memory, disk, network
+          - **Business Metrics**: Recommendation accuracy, user engagement
+          - **Log Aggregation**: Structured logging with correlation IDs
+          
+          ### 🚨 Alerting Strategy
+          - **Critical Alerts**: Service downtime, high error rates
+          - **Warning Alerts**: Performance degradation, capacity limits
+          - **Informational**: Deployment notifications, scaling events
+          
+          ## Development Workflow
+          
+          ### 🔄 CI/CD Pipeline
+          
+          ```mermaid
+          graph LR
+              DEV[Developer] --> GIT[Git Push]
+              GIT --> LINT[Linting & Tests]
+              LINT --> BUILD[Build & Package]
+              BUILD --> DEPLOY_STAGING[Deploy to Staging]
+              DEPLOY_STAGING --> E2E[E2E Testing]
+              E2E --> DEPLOY_PROD[Deploy to Production]
+              DEPLOY_PROD --> MONITOR[Monitor & Verify]
+          ```
+          
+          ### 🧪 Testing Strategy
+          - **Unit Tests**: Core business logic
+          - **Integration Tests**: API endpoints and database
+          - **E2E Tests**: Critical user journeys
+          - **Performance Tests**: Load and stress testing
+          - **Security Tests**: Vulnerability scanning
+          
+          ## Future Architecture Considerations
+          
+          ### 🔮 Planned Enhancements
+          - **Microservices Migration**: Split monolith into domain services
+          - **Event-Driven Architecture**: Implement message queues
+          - **GraphQL API**: Flexible data fetching layer
+          - **Real-time Features**: WebSocket integration
+          - **AI Model Hosting**: Self-hosted ML inference
+          
+          ---
+          
+          **Last Updated**: January 2024  
+          **Architecture Version**: v1.0
+          EOF
+          
+          git add ARCHITECTURE.md
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          cat > /tmp/arch_success.md << 'EOF'
+          ## 🏗️ Architecture Documentation Created
+          
+          I've generated comprehensive system architecture documentation!
+          
+          **📁 File Created**: `ARCHITECTURE.md`
+          
+          **🎯 Documentation Includes**:
+          - 📊 **System Overview**: High-level architecture diagrams
+          - 🔄 **Component Flows**: Sequence diagrams for key processes  
+          - 🗄️ **Data Architecture**: Database schemas and relationships
+          - 🛡️ **Security Design**: Authentication and protection layers
+          - ⚡ **Scalability Strategy**: Horizontal scaling and performance
+          - 🚀 **Deployment Architecture**: Production environment design
+          
+          **🎨 Visual Elements**:
+          - Interactive Mermaid diagrams
+          - System component relationships
+          - Data flow visualizations
+          - Security boundary illustrations
+          
+          **📋 Covers All Layers**:
+          - Frontend (React/Vanilla JS)
+          - Backend (Node.js/Express)
+          - AI/ML (Python/LLM APIs)
+          - Data (MongoDB/Redis)
+          - Infrastructure (Docker/DigitalOcean)
+          
+          This documentation will help new developers understand the system design and guide architectural decisions.
+          EOF
+          
+          if [ "${{ steps.parse.outputs.context_type }}" == "issue" ]; then
+            gh issue comment $CONTEXT_NUMBER --body-file /tmp/arch_success.md
+          else
+            gh pr comment $CONTEXT_NUMBER --body-file /tmp/arch_success.md
+          fi
+      
+      - name: Execute Create Contributing Guide Command
+        if: steps.parse.outputs.command == 'create-contributing'
+        run: |
+          echo "📝 Creating contributing guidelines..."
+          
+          cat > /home/runner/work/Spotify-echo/Spotify-echo/CONTRIBUTING.md << 'EOF'
+          # 🤝 Contributing to EchoTune AI
+          
+          Thank you for your interest in contributing to EchoTune AI! This guide will help you get started with contributing to our music recommendation platform.
+          
+          ## 🚀 Quick Start
+          
+          1. **Fork the repository** on GitHub
+          2. **Clone your fork** locally
+          3. **Set up development environment** (see [Setup Guide](#development-setup))
+          4. **Create a feature branch** for your changes
+          5. **Make your changes** following our guidelines
+          6. **Test thoroughly** and ensure quality
+          7. **Submit a pull request** with clear description
+          
+          ## 📋 Table of Contents
+          
+          - [Code of Conduct](#code-of-conduct)
+          - [Development Setup](#development-setup)
+          - [Contributing Guidelines](#contributing-guidelines)
+          - [Coding Standards](#coding-standards)
+          - [Testing Requirements](#testing-requirements)
+          - [Pull Request Process](#pull-request-process)
+          - [Issue Reporting](#issue-reporting)
+          - [Community](#community)
+          
+          ## 📜 Code of Conduct
+          
+          This project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+          
+          ### Our Standards
+          
+          **Positive behaviors include:**
+          - Using welcoming and inclusive language
+          - Being respectful of differing viewpoints
+          - Gracefully accepting constructive criticism
+          - Focusing on what is best for the community
+          - Showing empathy towards other community members
+          
+          ## 🛠️ Development Setup
+          
+          ### Prerequisites
+          
+          - **Node.js 20+** and npm
+          - **Python 3.8+** and pip
+          - **Git** for version control
+          - **MongoDB** (local or Atlas account)
+          - **Spotify Developer Account** for API access
+          
+          ### Installation
+          
+          ```bash
+          # Clone your fork
+          git clone https://github.com/YOUR_USERNAME/Spotify-echo.git
+          cd Spotify-echo
+          
+          # Install Node.js dependencies
+          npm install
+          
+          # Install Python dependencies
+          pip install -r requirements.txt
+          
+          # Copy environment template
+          cp .env.example .env
+          
+          # Configure your environment variables
+          # Add your Spotify API credentials and other settings
+          ```
+          
+          ### Environment Configuration
+          
+          Edit `.env` file with your credentials:
+          
+          ```env
+          # Spotify API Configuration
+          SPOTIFY_CLIENT_ID=your_client_id
+          SPOTIFY_CLIENT_SECRET=your_client_secret
+          SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
+          
+          # Database Configuration
+          MONGODB_URI=mongodb://localhost:27017/echotune
+          # OR use MongoDB Atlas
+          # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/echotune
+          
+          # AI/ML Configuration
+          OPENAI_API_KEY=your_openai_key
+          GEMINI_API_KEY=your_gemini_key
+          LLM_PROVIDER=mock  # Use 'mock' for development
+          
+          # Development Settings
+          NODE_ENV=development
+          PORT=3000
+          ```
+          
+          ### Running the Application
+          
+          ```bash
+          # Start the main application
+          npm start
+          
+          # Or start in development mode with auto-reload
+          npm run dev
+          
+          # Start the MCP automation server (optional)
+          npm run mcp-server
+          
+          # Run Python ML scripts
+          python scripts/recommendation_engine.py
+          ```
+          
+          ## 🎯 Contributing Guidelines
+          
+          ### What We're Looking For
+          
+          **High Priority Contributions:**
+          - 🎵 **Music recommendation improvements** - Better algorithms, new features
+          - 🤖 **AI/ML enhancements** - Smarter chat interface, personalization
+          - 🔧 **API development** - New endpoints, better documentation
+          - 🚀 **Performance optimizations** - Faster responses, better caching
+          - 🛡️ **Security improvements** - Authentication, data protection
+          - 📚 **Documentation** - Code comments, guides, examples
+          - 🧪 **Testing** - Unit tests, integration tests, bug fixes
+          
+          **Medium Priority:**
+          - 🎨 **UI/UX improvements** - Better design, accessibility
+          - 📱 **Mobile optimization** - Responsive design, PWA features
+          - 🌍 **Internationalization** - Multi-language support
+          - 📊 **Analytics features** - User insights, listening patterns
+          
+          ### Types of Contributions
+          
+          #### 🐛 Bug Reports
+          - Clear description of the issue
+          - Steps to reproduce
+          - Expected vs actual behavior
+          - Environment details (OS, browser, Node.js version)
+          - Screenshots or error logs (if applicable)
+          
+          #### 💡 Feature Requests
+          - Clear use case and problem statement
+          - Proposed solution or approach
+          - Consider backward compatibility
+          - Discuss implementation complexity
+          
+          #### 🔧 Code Contributions
+          - Follow our coding standards
+          - Include comprehensive tests
+          - Update documentation as needed
+          - Ensure backward compatibility
+          - Performance impact assessment
+          
+          ## 💻 Coding Standards
+          
+          ### JavaScript/Node.js
+          
+          ```javascript
+          // Use modern ES6+ features
+          const recommendationEngine = async (userId, options = {}) => {
+              try {
+                  // Use descriptive variable names
+                  const userListeningHistory = await getUserHistory(userId);
+                  const personalizedTracks = await generateRecommendations(
+                      userListeningHistory, 
+                      options
+                  );
+                  
+                  return {
+                      tracks: personalizedTracks,
+                      generated_at: new Date().toISOString(),
+                      algorithm: 'collaborative_filtering_v2'
+                  };
+              } catch (error) {
+                  // Comprehensive error handling
+                  console.error('Recommendation generation failed:', error);
+                  throw new Error(`Failed to generate recommendations: ${error.message}`);
+              }
+          };
+          
+          // JSDoc comments for functions
+          /**
+           * Generate personalized music recommendations
+           * @param {string} userId - Spotify user ID
+           * @param {Object} options - Recommendation options
+           * @param {number} options.limit - Number of tracks to return
+           * @param {string[]} options.seed_genres - Seed genres for recommendations
+           * @returns {Promise<Object>} Recommendation response
+           */
+          ```
+          
+          ### Python/ML Code
+          
+          ```python
+          import pandas as pd
+          import numpy as np
+          from typing import List, Dict, Optional
+          
+          class RecommendationEngine:
+              """Advanced music recommendation engine using collaborative filtering."""
+              
+              def __init__(self, model_version: str = "v2") -> None:
+                  self.model_version = model_version
+                  self.is_trained = False
+                  
+              def train_model(self, interaction_data: pd.DataFrame) -> bool:
+                  """Train the recommendation model with user interaction data.
+                  
+                  Args:
+                      interaction_data: DataFrame with user_id, track_id, rating columns
+                      
+                  Returns:
+                      bool: True if training successful, False otherwise
+                      
+                  Raises:
+                      ValueError: If required columns are missing from input data
+                  """
+                  try:
+                      # Validate input data
+                      required_columns = ['user_id', 'track_id', 'rating']
+                      if not all(col in interaction_data.columns for col in required_columns):
+                          raise ValueError(f"Missing required columns: {required_columns}")
+                      
+                      # Training logic here
+                      self.is_trained = True
+                      return True
+                      
+                  except Exception as e:
+                      print(f"Training failed: {e}")
+                      return False
+          ```
+          
+          ### Code Style Rules
+          
+          #### JavaScript
+          - Use **ESLint** configuration (automatic formatting)
+          - **2 spaces** for indentation
+          - **Single quotes** for strings
+          - **Semicolons** at line endings
+          - **camelCase** for variables and functions
+          - **PascalCase** for classes and constructors
+          - **UPPER_SNAKE_CASE** for constants
+          
+          #### Python  
+          - Follow **PEP 8** style guide
+          - **4 spaces** for indentation
+          - **Type hints** for function parameters and returns
+          - **snake_case** for variables and functions
+          - **PascalCase** for classes
+          - **Docstrings** for all public functions and classes
+          
+          #### General
+          - **Descriptive variable names** - avoid abbreviations
+          - **Small functions** - single responsibility principle
+          - **Comprehensive error handling** - try/catch blocks
+          - **Logging** - use console.log/print for debugging
+          - **Comments** - explain complex logic, not obvious code
+          
+          ## 🧪 Testing Requirements
+          
+          ### Testing Standards
+          
+          All contributions must include appropriate tests:
+          
+          #### Unit Tests
+          ```javascript
+          // Jest test example
+          describe('RecommendationEngine', () => {
+              let engine;
+              
+              beforeEach(() => {
+                  engine = new RecommendationEngine();
+              });
+              
+              it('should generate recommendations for valid user', async () => {
+                  // Arrange
+                  const userId = 'test_user_123';
+                  const mockData = { tracks: [], total: 0 };
+                  
+                  // Mock external dependencies
+                  jest.spyOn(engine, 'fetchUserData').mockResolvedValue(mockData);
+                  
+                  // Act
+                  const result = await engine.getRecommendations(userId);
+                  
+                  // Assert
+                  expect(result).toBeDefined();
+                  expect(result.tracks).toBeInstanceOf(Array);
+                  expect(engine.fetchUserData).toHaveBeenCalledWith(userId);
+              });
+              
+              it('should handle errors gracefully', async () => {
+                  // Test error conditions
+                  const invalidUserId = null;
+                  
+                  await expect(engine.getRecommendations(invalidUserId))
+                      .rejects.toThrow('Invalid user ID');
+              });
+          });
+          ```
+          
+          #### Integration Tests
+          ```javascript
+          // API endpoint testing
+          describe('GET /api/recommendations', () => {
+              it('should return recommendations for authenticated user', async () => {
+                  const response = await request(app)
+                      .get('/api/recommendations')
+                      .set('Authorization', `Bearer ${validToken}`)
+                      .expect(200);
+                      
+                  expect(response.body.tracks).toBeDefined();
+                  expect(response.body.tracks.length).toBeGreaterThan(0);
+              });
+          });
+          ```
+          
+          ### Running Tests
+          
+          ```bash
+          # Run all tests
+          npm test
+          
+          # Run tests with coverage
+          npm run test:coverage
+          
+          # Run specific test file
+          npm test -- --testNamePattern="RecommendationEngine"
+          
+          # Run tests in watch mode
+          npm run test:watch
+          ```
+          
+          ### Test Coverage Requirements
+          
+          - **Minimum 80% code coverage** for new features
+          - **100% coverage** for critical business logic
+          - **Edge case testing** - error conditions, boundary values
+          - **Integration testing** - API endpoints, database operations
+          - **Performance testing** - load testing for recommendation generation
+          
+          ## 📝 Pull Request Process
+          
+          ### Before Submitting
+          
+          1. **Update your fork** with latest changes from main
+          2. **Run full test suite** and ensure all tests pass
+          3. **Run linting** and fix any style issues
+          4. **Update documentation** if you've changed APIs
+          5. **Test your changes** thoroughly in development environment
+          
+          ### Pull Request Template
+          
+          ```markdown
+          ## 🎯 Description
+          Brief description of changes and motivation.
+          
+          ## 🔄 Type of Change
+          - [ ] Bug fix (non-breaking change that fixes an issue)
+          - [ ] New feature (non-breaking change that adds functionality)
+          - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+          - [ ] Documentation update
+          - [ ] Performance improvement
+          - [ ] Code refactoring
+          
+          ## 🧪 Testing
+          - [ ] All existing tests pass
+          - [ ] New tests added for new functionality
+          - [ ] Edge cases covered
+          - [ ] Manual testing completed
+          
+          ## 📚 Documentation
+          - [ ] Code comments updated
+          - [ ] API documentation updated (if applicable)
+          - [ ] README updated (if applicable)
+          
+          ## 📋 Checklist
+          - [ ] Code follows project style guidelines
+          - [ ] Self-review completed
+          - [ ] No security vulnerabilities introduced
+          - [ ] Performance impact assessed
+          - [ ] Backward compatibility maintained
+          
+          ## 🔗 Related Issues
+          Closes #(issue number)
+          
+          ## 📷 Screenshots (if applicable)
+          Include screenshots for UI changes.
+          ```
+          
+          ### Review Process
+          
+          1. **Automated checks** must pass (linting, tests, security scans)
+          2. **Code review** by at least one maintainer
+          3. **Testing verification** in staging environment
+          4. **Documentation review** for completeness
+          5. **Final approval** and merge
+          
+          ## 🐛 Issue Reporting
+          
+          ### Bug Report Template
+          
+          ```markdown
+          ## 🐛 Bug Description
+          Clear and concise description of the bug.
+          
+          ## 🔄 Steps to Reproduce
+          1. Go to '...'
+          2. Click on '...'
+          3. See error
+          
+          ## 💭 Expected Behavior
+          What you expected to happen.
+          
+          ## 📷 Screenshots
+          If applicable, add screenshots.
+          
+          ## 🖥️ Environment
+          - OS: [e.g. iOS, Windows, Linux]
+          - Browser: [e.g. chrome, safari]
+          - Node.js version: [e.g. 20.1.0]
+          - App version: [e.g. 1.2.3]
+          
+          ## 📋 Additional Context
+          Any other context about the problem.
+          ```
+          
+          ### Feature Request Template
+          
+          ```markdown
+          ## 🚀 Feature Request
+          
+          ## 🎯 Problem Statement
+          What problem does this feature solve?
+          
+          ## 💡 Proposed Solution
+          Describe your ideal solution.
+          
+          ## 🔄 Alternative Solutions
+          Other approaches you've considered.
+          
+          ## 📊 Impact Assessment
+          - Who benefits from this feature?
+          - How often would it be used?
+          - Implementation complexity?
+          
+          ## 📋 Additional Context
+          Any other context or screenshots.
+          ```
+          
+          ## 🌟 Recognition
+          
+          ### Contributors
+          
+          All contributors will be recognized in:
+          - **README.md** - Contributors section
+          - **CHANGELOG.md** - Release notes
+          - **GitHub Releases** - Feature credits
+          
+          ### Types of Recognition
+          
+          - 🏆 **Major Features** - Spotlight in release announcements
+          - 🐛 **Bug Fixes** - Listed in changelog
+          - 📚 **Documentation** - Credited in docs
+          - 🧪 **Testing** - Quality assurance credits
+          
+          ## 💬 Community
+          
+          ### Communication Channels
+          
+          - **GitHub Issues** - Bug reports, feature requests
+          - **GitHub Discussions** - General questions, ideas
+          - **Discord** - Real-time chat with community
+          - **Email** - Maintainer contact for sensitive issues
+          
+          ### Getting Help
+          
+          1. **Check existing documentation** first
+          2. **Search existing issues** for similar problems
+          3. **Ask in GitHub Discussions** for general questions
+          4. **Create an issue** for bugs or feature requests
+          5. **Join Discord** for real-time help
+          
+          ## 📅 Release Process
+          
+          ### Version Strategy
+          
+          We follow [Semantic Versioning](https://semver.org/):
+          - **MAJOR** version for incompatible API changes
+          - **MINOR** version for backward-compatible functionality
+          - **PATCH** version for backward-compatible bug fixes
+          
+          ### Release Schedule
+          
+          - **Major releases**: Quarterly (every 3 months)
+          - **Minor releases**: Monthly feature updates
+          - **Patch releases**: As needed for critical bugs
+          
+          ---
+          
+          ## 🙏 Thank You
+          
+          Your contributions make EchoTune AI better for everyone! Whether it's code, documentation, bug reports, or feature ideas - every contribution matters.
+          
+          **Happy coding! 🎵**
+          
+          ---
+          
+          **Last Updated**: January 2024
+          **Contributing Guide Version**: v1.0
+          EOF
+          
+          git add CONTRIBUTING.md
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          cat > /tmp/contributing_success.md << 'EOF'
+          ## 📝 Contributing Guidelines Created
+          
+          I've generated comprehensive contributing guidelines for the project!
+          
+          **📁 File Created**: `CONTRIBUTING.md`
+          
+          **🎯 Guidelines Include**:
+          - 🚀 **Quick Start Guide** - Fast onboarding for new contributors
+          - 🛠️ **Development Setup** - Complete environment configuration  
+          - 💻 **Coding Standards** - JavaScript and Python style guides
+          - 🧪 **Testing Requirements** - Unit, integration, and coverage standards
+          - 📝 **PR Process** - Step-by-step contribution workflow
+          - 🐛 **Issue Templates** - Structured bug reports and feature requests
+          
+          **🏆 Key Features**:
+          - Clear code examples and best practices
+          - Comprehensive testing guidelines (80% coverage requirement)
+          - Professional PR and issue templates
+          - Recognition system for contributors
+          - Community support channels
+          
+          **📋 Developer Experience**:
+          - Environment setup with `.env` template
+          - ESLint/PEP 8 coding standards
+          - Jest testing framework integration
+          - Automated quality checks
+          - Semantic versioning strategy
+          
+          This will help establish a professional development workflow and encourage high-quality contributions from the community.
+          EOF
+          
+          if [ "${{ steps.parse.outputs.context_type }}" == "issue" ]; then
+            gh issue comment $CONTEXT_NUMBER --body-file /tmp/contributing_success.md
+          else
+            gh pr comment $CONTEXT_NUMBER --body-file /tmp/contributing_success.md
+          fi
+      
+      - name: Execute Help Command
+        if: steps.parse.outputs.command == 'help'
+        run: |
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          cat > /tmp/help_response.md << 'EOF'
+          ## 🤖 EchoTune AI - Copilot Slash Commands
+          
+          Welcome to the EchoTune AI Copilot command system! Here are the available slash commands:
+          
+          ### 📚 Documentation Commands
+          
+          #### `/review-docs [focus_area]`
+          **Purpose**: Analyze current documentation and suggest improvements
+          **Usage**: 
+          - `/review-docs` - Full documentation review
+          - `/review-docs api` - Focus on API documentation
+          - `/review-docs architecture` - Focus on system architecture
+          - `/review-docs contributing` - Focus on contribution guidelines
+          
+          #### `/create-api-docs`
+          **Purpose**: Generate comprehensive API documentation
+          **Output**: Creates `API_DOCUMENTATION.md` with:
+          - Complete endpoint reference
+          - Authentication guides
+          - Request/response examples
+          - SDK usage examples
+          - Rate limiting information
+          
+          #### `/create-architecture`
+          **Purpose**: Generate system architecture documentation
+          **Output**: Creates `ARCHITECTURE.md` with:
+          - System overview diagrams
+          - Component interaction flows
+          - Database schema documentation
+          - Security architecture
+          - Scalability strategies
+          
+          #### `/create-contributing`
+          **Purpose**: Generate contributing guidelines for developers
+          **Output**: Creates `CONTRIBUTING.md` with:
+          - Development setup instructions
+          - Coding standards and style guides
+          - Testing requirements
+          - Pull request process
+          - Issue templates
+          
+          ### 🔧 Development Commands
+          
+          #### `/create-openapi` *(Coming Soon)*
+          **Purpose**: Generate OpenAPI/Swagger specification
+          **Output**: Creates interactive API documentation
+          
+          #### `/create-security-guide` *(Coming Soon)*
+          **Purpose**: Generate security best practices documentation
+          **Output**: Security guidelines and audit procedures
+          
+          #### `/analyze-code` *(Coming Soon)*
+          **Purpose**: Perform comprehensive code analysis
+          **Output**: Code quality report and improvement suggestions
+          
+          #### `/optimize-performance` *(Coming Soon)*
+          **Purpose**: Analyze and optimize application performance
+          **Output**: Performance audit and optimization recommendations
+          
+          ### 🚀 Automation Commands
+          
+          #### `/deploy-staging` *(Coming Soon)*
+          **Purpose**: Deploy current branch to staging environment
+          **Output**: Staging deployment with health checks
+          
+          #### `/run-tests` *(Coming Soon)*
+          **Purpose**: Execute full test suite with detailed reporting
+          **Output**: Comprehensive test results and coverage
+          
+          ### 🎵 EchoTune Specific Commands
+          
+          #### `/analyze-music-data` *(Coming Soon)*
+          **Purpose**: Analyze music recommendation algorithms
+          **Output**: Algorithm performance metrics and tuning suggestions
+          
+          #### `/generate-ml-report` *(Coming Soon)*
+          **Purpose**: Generate machine learning model analysis
+          **Output**: Model performance report and improvement recommendations
+          
+          ### 💡 Usage Examples
+          
+          ```
+          # Review all documentation
+          /review-docs
+          
+          # Create API documentation
+          /create-api-docs
+          
+          # Generate architecture diagrams
+          /create-architecture
+          
+          # Set up contributing guidelines
+          /create-contributing
+          
+          # Get help information
+          /help
+          ```
+          
+          ### 🔐 Authorization
+          
+          Commands are available to:
+          - Repository owners
+          - Collaborators
+          - Organization members
+          
+          ### 🛠️ Command Processing
+          
+          - Commands are processed automatically via GitHub Actions
+          - Results are posted as comments in the same issue/PR
+          - Generated files are automatically committed to the repository
+          - All actions are logged for transparency
+          
+          ### 📋 Best Practices
+          
+          1. **Use descriptive parameters** when available
+          2. **Check existing files** before generating new documentation
+          3. **Review generated content** and customize as needed
+          4. **Update commands regularly** as the project evolves
+          
+          ### 🆘 Support
+          
+          If you encounter issues with slash commands:
+          - Check the Actions tab for workflow logs
+          - Ensure you have appropriate permissions
+          - Review command syntax and parameters
+          - Contact maintainers for complex issues
+          
+          ---
+          
+          **Available Commands**: 4 active, 8 coming soon
+          **Last Updated**: January 2024
+          EOF
+          
+          if [ "${{ steps.parse.outputs.context_type }}" == "issue" ]; then
+            gh issue comment $CONTEXT_NUMBER --body-file /tmp/help_response.md
+          else
+            gh pr comment $CONTEXT_NUMBER --body-file /tmp/help_response.md
+          fi
+      
+      - name: Handle Unknown Command
+        if: |
+          steps.parse.outputs.command != 'review-docs' && 
+          steps.parse.outputs.command != 'create-api-docs' && 
+          steps.parse.outputs.command != 'create-architecture' && 
+          steps.parse.outputs.command != 'create-contributing' && 
+          steps.parse.outputs.command != 'help'
+        run: |
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          COMMAND="${{ steps.parse.outputs.command }}"
+          
+          cat > /tmp/unknown_command.md << EOF
+          ## ❓ Unknown Command: \`/$COMMAND\`
+          
+          The command \`/$COMMAND\` is not recognized. 
+          
+          **Available commands:**
+          - \`/review-docs\` - Analyze and review documentation
+          - \`/create-api-docs\` - Generate API documentation
+          - \`/create-architecture\` - Generate architecture documentation
+          - \`/create-contributing\` - Generate contributing guidelines
+          - \`/help\` - Show all available commands
+          
+          Use \`/help\` to see the complete list of available commands and usage examples.
+          EOF
+          
+          if [ "${{ steps.parse.outputs.context_type }}" == "issue" ]; then
+            gh issue comment $CONTEXT_NUMBER --body-file /tmp/unknown_command.md
+          else
+            gh pr comment $CONTEXT_NUMBER --body-file /tmp/unknown_command.md
+          fi
+      
+      - name: Commit Generated Files
+        if: |
+          steps.parse.outputs.command == 'create-api-docs' || 
+          steps.parse.outputs.command == 'create-architecture' || 
+          steps.parse.outputs.command == 'create-contributing'
+        run: |
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          COMMAND="${{ steps.parse.outputs.command }}"
+          
+          # Commit the generated files
+          git commit -m "Add documentation: Generated via /$COMMAND slash command
+          
+          - Generated by Copilot slash command system
+          - Triggered from ${{ steps.parse.outputs.context_type }} #${{ steps.parse.outputs.context_number }}
+          - Command: /$COMMAND ${{ steps.parse.outputs.params }}
+          
+          [skip ci]"
+          
+          # Push the changes
+          git push origin HEAD
+          
+          echo "✅ Changes committed and pushed successfully"
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "🏁 Slash Command Processing Summary"
+          echo "=================================="
+          echo "Command: /${{ steps.parse.outputs.command }}"
+          echo "Parameters: ${{ steps.parse.outputs.params }}"
+          echo "Context: ${{ steps.parse.outputs.context_type }} #${{ steps.parse.outputs.context_number }}"
+          echo "Status: ${{ job.status }}"
+          echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"

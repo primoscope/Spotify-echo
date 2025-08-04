@@ -1,12 +1,128 @@
-# EchoTune AI - Troubleshooting Guide
+# 🆘 EchoTune AI - Comprehensive Troubleshooting Guide
 
-This guide helps resolve common issues with EchoTune AI, including MCP tools, workflows, and system integration.
+This guide helps resolve common issues and optimize performance for EchoTune AI.
 
-## 🚨 Common Issues
+## 🔍 Quick Diagnosis
 
-### MCP Tools Issues
+### Health Check First
+```bash
+curl -f http://localhost:3000/health
+# or
+curl -f https://yourdomain.com/health
+```
 
-#### Enhanced File Utilities Not Working
+### Common Status Responses
+- **"healthy"**: All systems operational  
+- **"warning"**: Some optional features unavailable
+- **"unhealthy"**: Critical issues requiring attention
+
+## 🚨 Application Issues
+
+### 1. Application Won't Start
+
+**Symptoms**: Server fails to start, connection refused errors
+
+**Diagnose**:
+```bash
+# Check if port is in use
+sudo netstat -tlnp | grep :3000
+lsof -i :3000
+
+# Check application logs
+npm start  # See startup errors
+sudo journalctl -u echotune --lines=50  # For systemd service
+docker-compose logs app  # For Docker
+```
+
+**Solutions**:
+```bash
+# Kill process using port 3000
+sudo kill -9 <PID>
+
+# Install missing dependencies
+npm install
+pip3 install -r requirements.txt
+
+# Fix environment variables
+cp .env.example .env
+# Edit .env with proper values
+
+# Restart service
+sudo systemctl restart echotune
+docker-compose restart app
+```
+
+### 2. Chat Interface Not Working
+
+**Symptoms**: "No providers configured", chat disabled
+
+**Diagnose**:
+```bash
+curl -s http://localhost:3000/api/chat/providers | jq .
+```
+
+**Solutions**:
+```bash
+# Option 1: Use demo mode (works without API keys)
+echo "DEFAULT_LLM_PROVIDER=mock" >> .env
+
+# Option 2: Add valid API keys
+echo "GEMINI_API_KEY=your_key_here" >> .env
+echo "OPENAI_API_KEY=your_key_here" >> .env
+
+# Restart application
+npm start
+```
+
+### 3. Spotify OAuth Errors
+
+**Symptoms**: Authentication failures, redirect errors
+
+**Common Issues**:
+- ❌ Incorrect redirect URI
+- ❌ Invalid client credentials  
+- ❌ Missing scopes
+
+**Solutions**:
+```bash
+# Check Spotify app configuration
+# Redirect URI must exactly match:
+SPOTIFY_REDIRECT_URI=https://yourdomain.com/auth/callback
+
+# Verify credentials in .env
+SPOTIFY_CLIENT_ID=your_actual_client_id
+SPOTIFY_CLIENT_SECRET=your_actual_client_secret
+
+# Test OAuth endpoint
+curl -f http://localhost:3000/auth/spotify
+```
+
+### 4. Database Connection Issues
+
+**Symptoms**: Health check shows database errors
+
+**MongoDB Issues**:
+```bash
+# Check MongoDB connection string format
+# Correct: mongodb+srv://user:pass@cluster.mongodb.net/dbname
+# Check network access in MongoDB Atlas
+
+# Test connection
+mongosh "mongodb+srv://user:pass@cluster.mongodb.net/test"
+```
+
+**SQLite Fallback** (automatic):
+```bash
+# SQLite files should appear in project directory
+ls -la *.db
+
+# SQLite works without external database
+# Application automatically falls back to SQLite
+```
+
+## 🤖 MCP Tools Issues
+
+### Enhanced File Utilities Not Working
 **Symptoms**: File operations fail with security violations or permission errors
 
 **Solutions**:
@@ -28,6 +144,229 @@ This guide helps resolve common issues with EchoTune AI, including MCP tools, wo
        process.cwd(),
        path.join(process.cwd(), 'src'),
        path.join(process.cwd(), 'scripts')
+     ]
+   });
+   ```
+
+### Browser Automation Issues
+**Symptoms**: Browser operations fail, screenshot capture errors
+
+**Solutions**:
+```bash
+# Install browser dependencies
+npm run mcp-install
+
+# Test browser tools
+node mcp-servers/enhanced-browser-tools.js health
+
+# Check Puppeteer installation
+npx puppeteer install
+```
+
+### Comprehensive Validator Failures
+**Symptoms**: System validation reports critical issues
+
+**Solutions**:
+```bash
+# Run full system validation
+node mcp-servers/comprehensive-validator.js validate
+
+# Check individual components
+node mcp-servers/comprehensive-validator.js system
+```
+
+## ⚡ Performance Issues
+
+### Slow Health Checks
+**Expected Performance**: < 100ms in development, < 500ms in production
+
+**Optimization**:
+```bash
+# Development mode skips slow network checks
+NODE_ENV=development
+
+# Check current performance
+time curl -s http://localhost:3000/health
+```
+
+### Memory Issues
+```bash
+# Check system resources
+free -h  # Memory usage
+df -h    # Disk space
+htop     # CPU usage
+
+# EchoTune AI requirements:
+# - Minimum: 1GB RAM, 5GB disk
+# - Recommended: 2GB RAM, 10GB disk
+```
+
+## 🔒 SSL & Security Issues
+
+### Let's Encrypt Certificate Problems
+```bash
+# Check domain DNS
+dig yourdomain.com +short
+# Should return your server IP
+
+# Verify port 80 is accessible
+curl -I http://yourdomain.com
+
+# Manual certificate generation
+sudo certbot --nginx -d yourdomain.com
+
+# Check certificate status
+sudo certbot certificates
+```
+
+### Security Headers Missing
+```bash
+# Check security headers
+curl -I https://yourdomain.com | grep -E "(Strict-Transport|Content-Security|X-Frame)"
+
+# Test rate limiting
+for i in {1..15}; do curl -s -o /dev/null -w "%{http_code}\n" https://yourdomain.com/api/chat; done
+# Should show 429 (rate limited) after threshold
+```
+
+## 🐳 Docker Issues
+
+### Container Won't Start
+```bash
+# Check Docker daemon
+sudo systemctl status docker
+
+# Check container logs
+docker-compose logs app
+
+# Rebuild containers
+docker-compose down
+docker-compose up -d --build
+
+# Check resource allocation
+docker stats
+```
+
+### Port Conflicts
+```bash
+# Use different ports
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# This uses alternative port configuration
+```
+
+## 🔧 Debug Mode
+
+### Enable Debug Logging
+```bash
+# Add to .env file
+DEBUG=true
+LOG_LEVEL=DEBUG
+VERBOSE_LOGGING=true
+
+# Restart application
+npm start
+```
+
+### Debug Output Examples
+```bash
+# Successful startup
+🎵 EchoTune AI Server running on port 3000
+✅ Database manager initialized
+✅ LLM Provider Manager initialized successfully
+
+# Common warnings (acceptable)
+🔑 Spotify configured: false  # Demo mode active
+📦 Running in fallback mode (SQLite)
+🤖 LLM Provider Manager: Using existing chat system
+```
+
+## 📊 Monitoring & Diagnostics
+
+### Performance Monitoring
+```bash
+# Check endpoint response times
+curl -w "@curl-format.txt" -s http://localhost:3000/api/chat/providers
+
+# Monitor resource usage
+watch -n 1 'free -h && echo "---" && df -h / && echo "---" && ps aux | grep node | head -5'
+```
+
+### Network Diagnostics
+```bash
+# Test external API access
+curl -f https://api.spotify.com  # Spotify API
+curl -f https://api.openai.com   # OpenAI API
+
+# Test DNS resolution
+nslookup api.spotify.com
+```
+
+## 🆘 Getting Help
+
+### Self-Help Resources
+1. **Check Health Endpoint**: Most issues show up in health check
+2. **Review Logs**: Application logs contain detailed error information  
+3. **Validate Environment**: Ensure all required variables are set
+4. **Test Connectivity**: Verify network access to external APIs
+
+### Community Support
+- 📖 [Documentation](docs/)
+- 🐛 [Report Issues](https://github.com/dzp5103/Spotify-echo/issues)
+- 💬 [Discussions](https://github.com/dzp5103/Spotify-echo/discussions)
+
+### When Reporting Issues
+Include the following information:
+
+```bash
+# 1. System information
+uname -a
+node --version
+npm --version
+
+# 2. Health check output
+curl -s http://localhost:3000/health | jq .
+
+# 3. Recent logs
+sudo journalctl -u echotune --lines=50  # systemd
+docker-compose logs --tail=50 app       # Docker
+
+# 4. Environment (without secrets)
+printenv | grep -E "(NODE_ENV|SPOTIFY|MONGO|PORT)" | sed 's/=.*/=***/'
+```
+
+## 🔄 Recovery Procedures
+
+### Complete Reset (Development)
+```bash
+# Stop application
+npm stop
+docker-compose down
+
+# Clean reset
+rm -rf node_modules package-lock.json
+rm -f *.db  # Remove SQLite databases
+npm install
+
+# Restart
+npm start
+```
+
+### Backup & Restore
+```bash
+# Backup SQLite database
+cp echotune.db echotune.db.backup
+
+# Backup configuration
+cp .env .env.backup
+
+# Restore from backup
+cp echotune.db.backup echotune.db
+cp .env.backup .env
+```
+
+---
+
+**🎯 Still having issues?** Create a [detailed issue report](https://github.com/dzp5103/Spotify-echo/issues/new) with the diagnostic information above.
      ]
    });
    ```

@@ -32,7 +32,7 @@ class HealthCheckSystem {
   }
 
   /**
-   * Run all health checks
+   * Run all health checks in parallel for better performance
    */
   async runAllChecks() {
     const results = {
@@ -46,39 +46,53 @@ class HealthCheckSystem {
 
     let overallHealth = true;
 
-    for (const [checkName, checkFunction] of this.checks) {
+    // Run all health checks in parallel
+    const checkPromises = Array.from(this.checks.entries()).map(async ([checkName, checkFunction]) => {
       try {
         const startTime = Date.now();
         const result = await checkFunction();
         const duration = Date.now() - startTime;
 
-        results.checks[checkName] = {
-          ...result,
-          duration: `${duration}ms`,
-          timestamp: new Date().toISOString(),
+        return {
+          name: checkName,
+          result: {
+            ...result,
+            duration: `${duration}ms`,
+            timestamp: new Date().toISOString(),
+          }
         };
-
-        if (result.status !== 'healthy' && result.status !== 'warning') {
-          // Only fail on 'error' status, not 'warning'
-          overallHealth = false;
-        }
       } catch (error) {
         // Some health checks are optional and shouldn't fail the entire system
         const optionalChecks = ['docker', 'ssl', 'network', 'storage'];
         const isOptional = optionalChecks.includes(checkName);
         
-        results.checks[checkName] = {
-          status: isOptional ? 'warning' : 'error',
-          message: error.message,
-          timestamp: new Date().toISOString(),
+        return {
+          name: checkName,
+          result: {
+            status: isOptional ? 'warning' : 'error',
+            details: {
+              error: error.message,
+              optional: isOptional,
+            },
+            duration: '0ms',
+            timestamp: new Date().toISOString(),
+          }
         };
-        
-        // Only fail overall health for critical checks
-        if (!isOptional) {
-          overallHealth = false;
-        }
       }
-    }
+    });
+
+    // Wait for all checks to complete
+    const checkResults = await Promise.all(checkPromises);
+    
+    // Process results
+    checkResults.forEach(({ name, result }) => {
+      results.checks[name] = result;
+      
+      if (result.status !== 'healthy' && result.status !== 'warning') {
+        // Only fail on 'error' status, not 'warning'
+        overallHealth = false;
+      }
+    });
 
     results.status = overallHealth ? 'healthy' : 'unhealthy';
     return results;
@@ -197,8 +211,8 @@ class HealthCheckSystem {
 
     if (process.env.REDIS_URL) {
       try {
-        // Simple Redis ping test
-        const { stdout } = await execAsync(`redis-cli -u "${process.env.REDIS_URL}" ping`);
+        // Simple Redis ping test with timeout
+        const { stdout } = await execAsync(`timeout 2s redis-cli -u "${process.env.REDIS_URL}" ping`);
         if (stdout.trim() === 'PONG') {
           health.details.redis = {
             status: 'healthy',
@@ -300,6 +314,15 @@ class HealthCheckSystem {
       details: {},
     };
 
+    // Skip network checks in development for faster health checks
+    if (process.env.NODE_ENV === 'development') {
+      health.details.connectivity = {
+        status: 'skipped',
+        message: 'Network checks disabled in development for performance'
+      };
+      return health;
+    }
+
     const endpoints = [
       { name: 'spotify_api', url: 'https://api.spotify.com' },
       { name: 'google_dns', url: '8.8.8.8' },
@@ -308,24 +331,42 @@ class HealthCheckSystem {
 
     const results = {};
 
-    for (const endpoint of endpoints) {
+    // Run all network checks in parallel with reduced timeout
+    const checkPromises = endpoints.map(async (endpoint) => {
       try {
         const startTime = Date.now();
-        await execAsync(`timeout 10s curl -f -s ${endpoint.url} > /dev/null`);
+        // Reduced timeout from 10s to 1s for much faster health checks
+        await execAsync(`timeout 1s curl -f -s --max-time 1 ${endpoint.url} > /dev/null`);
         const responseTime = Date.now() - startTime;
         
-        results[endpoint.name] = {
-          status: 'healthy',
-          responseTime: `${responseTime}ms`,
+        return {
+          name: endpoint.name,
+          result: {
+            status: 'healthy',
+            responseTime: `${responseTime}ms`,
+          }
         };
       } catch (error) {
-        results[endpoint.name] = {
-          status: 'unhealthy',
-          error: 'Connection failed',
+        return {
+          name: endpoint.name,
+          result: {
+            status: 'unhealthy',
+            error: 'Connection failed',
+          }
         };
+      }
+    });
+
+    // Wait for all checks to complete in parallel
+    const checkResults = await Promise.all(checkPromises);
+    
+    // Process results
+    checkResults.forEach(({ name, result }) => {
+      results[name] = result;
+      if (result.status === 'unhealthy') {
         health.status = 'warning';
       }
-    }
+    });
 
     health.details.connectivity = results;
     return health;
@@ -346,8 +387,8 @@ class HealthCheckSystem {
     try {
       await fs.access(certPath);
       
-      // Check certificate expiry
-      const { stdout } = await execAsync(`openssl x509 -enddate -noout -in "${certPath}"`);
+      // Check certificate expiry with timeout
+      const { stdout } = await execAsync(`timeout 2s openssl x509 -enddate -noout -in "${certPath}"`);
       const expiryLine = stdout.trim();
       const expiryDate = new Date(expiryLine.split('=')[1]);
       const now = new Date();
@@ -384,16 +425,16 @@ class HealthCheckSystem {
    */
   async checkDockerHealth() {
     const health = {
-      status: 'healthy',
+      status: 'warning',
       details: {},
     };
 
     try {
-      // Check if Docker is running
-      await execAsync('docker --version');
+      // Check if Docker is running with timeout
+      await execAsync('timeout 2s docker --version');
       
       // Check Docker Compose services
-      const { stdout } = await execAsync('docker-compose ps --format json');
+      const { stdout } = await execAsync('timeout 3s docker-compose ps --format json');
       const containers = stdout.trim().split('\n').map(line => {
         try {
           return JSON.parse(line);

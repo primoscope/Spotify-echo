@@ -1,7 +1,7 @@
 {
   "name": "echotune-ai",
-  "version": "1.0.0",
-  "description": "EchoTune AI - Next-generation music recommendation system with conversational AI",
+  "version": "2.1.0",
+  "description": "EchoTune AI - Next-generation music recommendation system with conversational AI (Optimized)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

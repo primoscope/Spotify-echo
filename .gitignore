@@ -367,6 +367,12 @@ prompt-results/
 *.backup
 analysis-results/
 
+# GitHub Actions temporary files
+lint-results.txt
+test-results-*.txt
+security-audit.txt
+README.md.backup
+
 # Gemini Code Assist
 .gemini/logs/
 .gemini/cache/

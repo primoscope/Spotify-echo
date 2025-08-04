@@ -39,6 +39,12 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
       
+      - name: Configure Git
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          echo "✅ Git configured for automated operations"
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

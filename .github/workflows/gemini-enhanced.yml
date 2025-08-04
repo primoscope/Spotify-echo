@@ -355,11 +355,16 @@ jobs:
        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
        needs.setup-and-lint.outputs.should-deploy == 'true')
     
+    permissions:
+      contents: write
+      actions: read
+    
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: 📝 Update README with latest info
         run: |
@@ -399,14 +404,40 @@ jobs:
 
       - name: 💾 Commit README changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          # Configure git with proper credentials
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           
+          # Check if there are any changes to commit
           if ! git diff --quiet README.md; then
+            echo "📝 Changes detected in README.md, committing..."
+            
+            # Add and commit the changes
             git add README.md
-            git commit -m "📝 Auto-update README with latest project info [skip ci]"
-            git push
-            echo "✅ README changes committed and pushed"
+            git commit -m "📝 Auto-update README with latest project info [skip ci]" || {
+              echo "❌ Failed to commit README changes"
+              exit 1
+            }
+            
+            # Push the changes with retry logic
+            max_retries=3
+            retry_count=0
+            while [ $retry_count -lt $max_retries ]; do
+              if git push origin HEAD:${GITHUB_REF##*/}; then
+                echo "✅ README changes committed and pushed successfully"
+                break
+              else
+                retry_count=$((retry_count + 1))
+                echo "⚠️ Push attempt $retry_count failed, retrying..."
+                if [ $retry_count -eq $max_retries ]; then
+                  echo "❌ Failed to push README changes after $max_retries attempts"
+                  # Don't fail the job for README updates
+                  echo "⚠️ Continuing workflow despite README update failure"
+                  exit 0
+                fi
+                sleep 2
+              fi
+            done
           else
             echo "ℹ️ No README changes to commit"
           fi

@@ -70,10 +70,8 @@ class HealthCheckSystem {
           name: checkName,
           result: {
             status: isOptional ? 'warning' : 'error',
-            details: {
-              error: error.message,
-              optional: isOptional,
-            },
+            error: error.message,
+            optional: isOptional,
             duration: '0ms',
             timestamp: new Date().toISOString(),
           }

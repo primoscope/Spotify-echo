@@ -20,39 +20,63 @@
 
 ## 🚀 Quick Start
 
-### Option 1: One-Click Deploy Wizard (Recommended)
+### 🎯 One-Click Deployment Options
+
+| Method | Time | Complexity | Best For |
+|--------|------|------------|----------|
+| **DigitalOcean App Platform** | 2-3 min | ⭐ Easy | Production & Auto-scaling |
+| **Docker** | 3-5 min | ⭐⭐ Medium | Any server with Docker |
+| **Ubuntu Server** | 5-10 min | ⭐⭐⭐ Advanced | Full control & customization |
+
+### Option 1: DigitalOcean One-Click Deploy (Recommended)
+[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
+
+**Features**: Auto-scaling, SSL certificates, monitoring, backups
 ```bash
-# Clone and run the universal deployment wizard
+# Or via CLI
+git clone https://github.com/dzp5103/Spotify-echo.git
+doctl apps create app-platform.yaml
+```
+
+### Option 2: Ubuntu Server Deployment
+**Complete Ubuntu deployment with SSL, nginx, and domain setup**:
+```bash
+# One-command deployment
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-wizard.sh | sudo bash -s -- --domain=your-domain.com --email=admin@your-domain.com
+
+# Or manual deployment
 git clone https://github.com/dzp5103/Spotify-echo.git
 cd Spotify-echo
 sudo ./deploy-wizard.sh
 ```
+📖 **[Complete Ubuntu Deployment Guide](UBUNTU_DEPLOYMENT_GUIDE.md)**
 
-### Option 2: Modular Deployment Scripts
+### Option 3: Docker Deployment
 ```bash
-# Step-by-step deployment with individual scripts
-sudo ./deploy-install.sh      # Install dependencies
-sudo ./deploy-permissions.sh  # Fix permissions
-sudo ./deploy-environment.sh  # Setup environment
-sudo ./deploy-app.sh         # Deploy application
-sudo ./deploy-fix.sh         # Analyze and fix errors
-```
+# Option A: Docker Compose (Full stack)
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+cp .env.production.example .env.production
+# Edit .env.production with your settings
+docker-compose up -d
 
-### Option 3: DigitalOcean One-Click
-[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
+# Option B: Docker Run (Simple)
+docker run -d -p 3000:3000 \
+  -e SPOTIFY_CLIENT_ID=your_client_id \
+  -e SPOTIFY_CLIENT_SECRET=your_client_secret \
+  --name echotune-ai \
+  dzp5103/echotune-ai:latest
+```
 
 ### Option 4: Local Development
 ```bash
 git clone https://github.com/dzp5103/Spotify-echo.git
 cd Spotify-echo
 npm install
+cp .env.production.example .env
+# Edit .env with your Spotify API credentials
 npm start
 # Open http://localhost:3000
-```
-
-### Option 5: Docker
-```bash
-docker run -d -p 3000:3000 dzp5103/echotune-ai:latest
 ```
 
 ## 🚀 Script Documentation
@@ -153,124 +177,59 @@ free -h
 sudo netstat -tlnp | grep -E ':(80|443|3000)'
 ```
 
-## 🛠️ Deployment Options
+## 🚢 Deployment Options
 
-### 🧙‍♂️ Universal Deployment Wizard (Recommended)
-Complete automated deployment with guided setup:
+### 🌐 Production Deployment
 
+| Platform | Features | Setup Time | Cost |
+|----------|----------|------------|------|
+| **DigitalOcean App Platform** | Auto-scaling, SSL, monitoring | 2-3 min | $5+/month |
+| **Ubuntu VPS** | Full control, custom domain | 5-10 min | $5+/month |
+| **Docker** | Portable, consistent environment | 3-5 min | Variable |
+| **Local** | Development and testing | 2 min | Free |
+
+### 🔧 Deployment Guides
+
+- **[📖 Complete Ubuntu Deployment Guide](UBUNTU_DEPLOYMENT_GUIDE.md)** - Comprehensive guide with SSL, nginx, monitoring
+- **[🐳 Docker Hub Images](https://hub.docker.com/r/dzp5103/echotune-ai)** - Pre-built Docker images
+- **[☁️ DigitalOcean App Platform](app-platform.yaml)** - One-click cloud deployment
+- **[🛠️ Manual Scripts](deploy-wizard.sh)** - Automated deployment scripts
+
+### 🔐 Security Features
+
+- **OAuth 2.0** - Secure Spotify authentication
+- **Rate Limiting** - DDoS protection (configurable)
+- **Input Validation** - SQL injection prevention
+- **SSL/TLS** - Automatic HTTPS with Let's Encrypt
+- **Security Headers** - HSTS, CSP, XSS protection
+- **Non-root Docker** - Container security best practices
+
+### 📊 Monitoring & Health Checks
+
+**Health Check Endpoint**:
 ```bash
-# Interactive deployment with wizard
-sudo ./deploy-wizard.sh
-
-# Non-interactive deployment
-sudo ./deploy-wizard.sh --domain=example.com --email=admin@example.com --non-interactive
-
-# Custom deployment options
-sudo ./deploy-wizard.sh --skip-install --verbose --dry-run
+curl https://your-domain.com/health
 ```
 
-**Features:**
-- ✅ Complete end-to-end deployment automation
-- ✅ Interactive configuration prompts
-- ✅ Pre-deployment validation checks
-- ✅ Error recovery and automatic fixes
-- ✅ Post-deployment health validation
-- ✅ Comprehensive logging and reporting
-
-### 🔧 Modular Deployment Scripts
-Individual scripts for granular control:
-
-#### 1. **Installation Script**
-```bash
-sudo ./deploy-install.sh
-```
-- Installs Node.js 20.x, Python 3, Docker, Nginx
-- Sets up system dependencies and build tools
-- Configures deployment user and directories
-- Fully idempotent and safe to re-run
-
-#### 2. **Permissions Script**
-```bash
-sudo ./deploy-permissions.sh
-```
-- Creates deploy user with proper groups
-- Sets 777 permissions for maximum development ease
-- Configures Docker, Nginx, and SSL permissions
-- Sets up sudo access for deployment commands
-
-#### 3. **Environment Setup Script**
-```bash
-sudo ./deploy-environment.sh [domain] [email]
-# Example: sudo ./deploy-environment.sh example.com admin@example.com
-```
-- Fetches .env and .env.production.example templates
-- Generates secure secrets and passwords
-- Configures domain-specific settings
-- Creates both production and development environments
-
-#### 4. **Application Deployment Script**
-```bash
-sudo ./deploy-app.sh
-```
-- Deploys application files and dependencies
-- Configures Nginx with SSL and security headers
-- Sets up systemd service for application
-- Performs health checks and validation
-
-#### 5. **Error Analysis and Fix Script**
-```bash
-sudo ./deploy-fix.sh
-```
-- Analyzes system health and service status
-- Examines logs for common error patterns
-- Automatically fixes permission and dependency issues
-- Generates detailed error reports with recommendations
-
-### 🐳 Docker Deployment
-```bash
-# Using Docker Compose
-docker-compose up -d --build
-
-# Using provided Docker image
-docker run -d -p 3000:3000 \
-  -e SPOTIFY_CLIENT_ID=your_client_id \
-  -e SPOTIFY_CLIENT_SECRET=your_client_secret \
-  dzp5103/echotune-ai:latest
+**Expected Response**:
+```json
+{
+  "status": "healthy",
+  "version": "2.1.0",
+  "uptime": 123.45,
+  "checks": {
+    "application": {"status": "healthy"},
+    "database": {"status": "healthy"},
+    "spotify_api": {"status": "healthy"}
+  }
+}
 ```
 
-### ☁️ DigitalOcean Marketplace
-One-click deployment from DigitalOcean Marketplace with pre-configured infrastructure:
-- SSL certificates automatically configured
-- Monitoring and logging enabled
-- Auto-scaling and backup configured
-- Production-ready security settings
-
-### 📋 Deployment Requirements
-
-#### System Requirements
-- **OS**: Ubuntu 18.04+ or Debian 10+
-- **Memory**: 2GB RAM minimum (4GB recommended)
-- **Storage**: 10GB available disk space
-- **Network**: Internet connection for dependencies
-
-#### Required Credentials
-- **Spotify API**: Client ID and Secret from [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-- **Domain**: Valid domain name for production deployment
-- **Email**: Valid email for SSL certificate generation
-
-#### Optional Enhancements
-- **AI Providers**: OpenAI API key or Google Gemini API key
-- **Database**: MongoDB Atlas connection string
-- **Monitoring**: Sentry DSN for error tracking
-SPOTIFY_REDIRECT_URI=http://localhost:3000/auth/callback
-
-# LLM Providers (optional - uses mock by default)
-GEMINI_API_KEY=your_gemini_key
-OPENAI_API_KEY=your_openai_key
-
-# Database (SQLite used by default)
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/
-```
+**Key Metrics**:
+- ✅ **Response Time**: <50ms for health checks
+- ✅ **Uptime**: 99.9% availability target
+- ✅ **Resource Usage**: Optimized for 512MB RAM minimum
+- ✅ **Auto-scaling**: Based on CPU/memory thresholds
 
 ## 🏗️ Project Structure
 
@@ -318,100 +277,178 @@ npm run build
 
 | Method | Time | Complexity | Best For |
 |--------|------|------------|----------|
-| **DigitalOcean** | 1-3 min | ⭐ Easy | Production |
-| **Docker** | 3-5 min | ⭐⭐ Medium | Any server |
-| **Manual** | 10-15 min | ⭐⭐⭐ Advanced | Custom setups |
+| **DigitalOcean App Platform** | 2-3 min | ⭐ Easy | Production with auto-scaling |
+| **Docker** | 3-5 min | ⭐⭐ Medium | Any server with containerization |
+| **Ubuntu Server** | 5-10 min | ⭐⭐⭐ Advanced | Full control and customization |
 
-## 🤖 AI & ML Features
+### 🤖 AI & ML Features
 
-- **Collaborative Filtering** - User behavior analysis
-- **Content-Based Filtering** - Audio feature matching
-- **Natural Language Processing** - Chat interface
-- **Deep Learning** - Advanced recommendation models
-- **Real-time Learning** - Adaptive user preferences
-
-## 🎯 Health Check
-
-```bash
-curl http://localhost:3000/health
-```
-
-Expected response:
-```json
-{
-  "status": "healthy",
-  "version": "2.0.0",
-  "uptime": 123.45,
-  "checks": {
-    "application": {"status": "healthy"},
-    "database": {"status": "healthy"}
-  }
-}
-```
-
-## 🔒 Security
-
-- OAuth 2.0 authentication
-- Rate limiting & DDoS protection
-- Input validation & sanitization
-- SSL/TLS encryption
-- Security headers (HSTS, CSP, etc.)
+- **🧠 Collaborative Filtering** - Advanced user behavior analysis and pattern recognition
+- **🎵 Content-Based Filtering** - Audio feature matching with Spotify's audio analysis
+- **💬 Natural Language Processing** - Conversational music discovery interface
+- **🔮 Deep Learning** - Neural network-based recommendation models
+- **📈 Real-time Learning** - Adaptive user preferences with continuous improvement
+- **🎯 Mood Detection** - Context-aware recommendations based on listening patterns
+- **📊 Analytics Dashboard** - Deep insights into user listening behavior
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-## 📊 Status
+### Quick Start for Contributors
+```bash
+# Fork the repository and clone your fork
+git clone https://github.com/YOUR_USERNAME/Spotify-echo.git
+cd Spotify-echo
 
-- ✅ **Core Application**: Fully functional
-- ✅ **Spotify OAuth**: Working
-- ✅ **AI Chat**: Multi-provider support
-- ✅ **Health Monitoring**: Optimized (<50ms response)
-- ✅ **Docker**: Production ready
-- 🟡 **Mobile App**: In development
+# Install dependencies
+npm install
+pip install -r requirements.txt
+
+# Set up environment
+cp .env.production.example .env
+# Edit .env with your API keys
+
+# Start development server
+npm run dev
+
+# Run tests
+npm test
+
+# Create a feature branch
+git checkout -b feature/amazing-feature
+
+# Make your changes and commit
+git commit -m 'Add amazing feature'
+
+# Push and create a Pull Request
+git push origin feature/amazing-feature
+```
+
+## 📊 Project Status
+
+- ✅ **Core Application**: Fully functional music recommendation engine
+- ✅ **Spotify OAuth**: Complete authentication & API integration
+- ✅ **AI Chat Interface**: Multi-provider support (OpenAI, Gemini, Mock)
+- ✅ **Health Monitoring**: Optimized monitoring with <50ms response times
+- ✅ **Docker Deployment**: Production-ready containerization
+- ✅ **Ubuntu Deployment**: Complete server setup automation
+- ✅ **SSL Automation**: Let's Encrypt integration
+- ✅ **Security Features**: Rate limiting, input validation, security headers
+- 🟡 **Mobile Optimization**: Progressive Web App features in development
+- 🟡 **Advanced ML Models**: Deep learning enhancements planned
 
 ## 🆘 Troubleshooting
 
+### Quick Diagnostics
+```bash
+# Check application health
+curl https://your-domain.com/health
+
+# Verify services are running
+sudo systemctl status echotune nginx
+
+# Check logs for errors
+sudo journalctl -u echotune -f
+```
+
 ### Common Issues
 
-**Chat not working?**
-- Check `.env` file has correct API keys
-- Demo mode works without any keys
+#### 🔑 Authentication Problems
+- **Issue**: Spotify login not working
+- **Solution**: 
+  1. Verify `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` are correct
+  2. Check `SPOTIFY_REDIRECT_URI` matches your domain exactly
+  3. Ensure Spotify app settings allow your domain
 
-**Slow health checks?**
-- Development mode skips network tests for performance
-- Production enables full monitoring
+#### 🐳 Docker Issues
+- **Issue**: Container won't start
+- **Solution**:
+  ```bash
+  # Check Docker logs
+  docker logs echotune-ai
+  
+  # Restart Docker service
+  sudo systemctl restart docker
+  
+  # Rebuild with no cache
+  docker build --no-cache -t echotune-ai .
+  ```
 
-**Docker issues?**
-- Ensure 4GB+ RAM available
-- Check Docker daemon is running
+#### 🌐 SSL Certificate Problems
+- **Issue**: HTTPS not working
+- **Solution**:
+  ```bash
+  # Check certificate status
+  sudo certbot certificates
+  
+  # Renew certificates
+  sudo certbot renew --force-renewal
+  
+  # Restart nginx
+  sudo systemctl restart nginx
+  ```
+
+#### 🔧 Performance Issues
+- **Issue**: Slow response times
+- **Solution**:
+  ```bash
+  # Check system resources
+  htop
+  free -h
+  df -h
+  
+  # Monitor application logs
+  tail -f /opt/echotune/logs/app.log
+  ```
 
 ### Getting Help
 
-- 📖 [Comprehensive Documentation](docs/)
-- 🐛 [Report Issues](https://github.com/dzp5103/Spotify-echo/issues)
-- 💬 [Discussions](https://github.com/dzp5103/Spotify-echo/discussions)
+- 📖 **[Documentation](docs/)** - Comprehensive guides and API documentation
+- 🐛 **[Report Issues](https://github.com/dzp5103/Spotify-echo/issues)** - Bug reports and feature requests
+- 💬 **[Discussions](https://github.com/dzp5103/Spotify-echo/discussions)** - Community support and questions
+- 📧 **[Email Support](mailto:support@primosphere.studio)** - Direct support for deployment issues
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+### Third-Party Licenses
+- **Spotify Web API**: Subject to [Spotify Developer Terms](https://developer.spotify.com/terms)
+- **OpenAI API**: Subject to [OpenAI Usage Policies](https://openai.com/policies/usage-policies)
+- **Google Gemini**: Subject to [Google AI Terms](https://ai.google.dev/terms)
+
 ## 🙏 Acknowledgments
 
-- Spotify Web API
-- OpenAI & Google Gemini
-- React & Node.js communities
-- All contributors and testers
+- **[Spotify Web API](https://developer.spotify.com/documentation/web-api/)** - Music data and authentication
+- **[OpenAI](https://openai.com/)** & **[Google Gemini](https://ai.google.dev/)** - AI/ML capabilities
+- **[Node.js](https://nodejs.org/)** & **[Express](https://expressjs.com/)** - Backend framework
+- **[Docker](https://www.docker.com/)** & **[DigitalOcean](https://www.digitalocean.com/)** - Deployment infrastructure
+- **All contributors and testers** - Community support and feedback
+
+## 🌟 Support the Project
+
+If you find EchoTune AI useful, please consider:
+
+- ⭐ **Starring the repository** on GitHub
+- 🐛 **Reporting bugs** and suggesting features
+- 📢 **Sharing with friends** and on social media
+- 💝 **Contributing code** or documentation
+- ☕ **Buying us a coffee** (coming soon)
 
 ---
+
+**🎵 Ready to discover your next favorite song?**
+
+[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
 
 **⭐ Star this repo if you find it useful!**
 
 [![GitHub stars](https://img.shields.io/github/stars/dzp5103/Spotify-echo.svg?style=social&label=Star)](https://github.com/dzp5103/Spotify-echo/stargazers)
+
+---
+
+*Last updated: August 2025 | Version 2.1.0*
 
 
 ## 🤖 Continuous Development Progress

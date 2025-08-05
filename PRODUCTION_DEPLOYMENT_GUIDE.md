@@ -41,12 +41,76 @@ docker-compose restart
 
 ---
 
+## 🐧 Ubuntu DigitalOcean Complete Deployment
+
+### Overview
+EchoTune AI provides comprehensive Ubuntu-specific deployment configurations and scripts for DigitalOcean droplets, including complete system setup, Docker orchestration, and production optimization.
+
+### Ubuntu-Specific Deployment Options
+
+#### Option 1: Complete Ubuntu Installation (Recommended)
+```bash
+# Complete Ubuntu DigitalOcean setup with all optimizations
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/ubuntu-digitalocean-install.sh | sudo bash
+
+# Or manual download and run
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+sudo ./scripts/ubuntu-digitalocean-install.sh
+```
+
+This comprehensive script provides:
+- ✅ Ubuntu system optimization and security hardening
+- ✅ Docker and Docker Compose installation
+- ✅ Node.js, Python, and all dependencies
+- ✅ Nginx with SSL certificate automation
+- ✅ Database tools (MongoDB, PostgreSQL, Redis)
+- ✅ UFW firewall and Fail2Ban security
+- ✅ doctl with GitHub PAT integration
+- ✅ Complete EchoTune AI application deployment
+- ✅ Monitoring, logging, and backup systems
+
+#### Option 2: Docker Compose Deployment
+```bash
+# Navigate to application directory
+cd /opt/echotune
+
+# Use Ubuntu-optimized Docker Compose configuration
+cp docker-compose.ubuntu.yml docker-compose.yml
+cp .env.ubuntu.example .env
+nano .env  # Configure your settings
+
+# Deploy all services
+docker-compose up -d
+```
+
+#### Option 3: Automated Deployment Script
+```bash
+# Run the Ubuntu-specific deployment automation
+./scripts/ubuntu-digitalocean-deploy.sh
+
+# With options
+./scripts/ubuntu-digitalocean-deploy.sh --branch main --environment production
+```
+
+### Ubuntu Configuration Files
+
+- **Complete Installation**: `scripts/ubuntu-digitalocean-install.sh`
+- **Deployment Automation**: `scripts/ubuntu-digitalocean-deploy.sh`
+- **Docker Compose**: `docker-compose.ubuntu.yml`
+- **Environment Config**: `.env.ubuntu.example`
+- **Nginx Configuration**: `nginx/nginx.conf` and `nginx/conf.d/echotune.conf`
+
+📖 **Full Ubuntu Guide**: See [UBUNTU_DIGITALOCEAN_DEPLOYMENT_GUIDE.md](./UBUNTU_DIGITALOCEAN_DEPLOYMENT_GUIDE.md) for complete step-by-step instructions.
+
+---
+
 ## 🛠️ doctl Auto-Installation with GitHub PAT
 
 ### Overview
-EchoTune AI now includes automated installation of DigitalOcean CLI (doctl) with GitHub Personal Access Token (GH_PAT) integration for seamless CI/CD deployment workflows.
+EchoTune AI includes automated installation of DigitalOcean CLI (doctl) with GitHub Personal Access Token (GH_PAT) integration for seamless CI/CD deployment workflows. This is included in all Ubuntu deployment options above.
 
-### Quick Installation
+### Standalone doctl Installation
 ```bash
 # Basic installation
 ./scripts/install-doctl-ghpat.sh

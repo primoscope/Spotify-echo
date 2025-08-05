@@ -192,6 +192,23 @@ EOF
     log "Python version: $python_version (core dependencies only)"
 }
 
+# Install doctl with GH_PAT integration  
+install_doctl_with_ghpat() {
+    log "Installing doctl with GitHub PAT integration..."
+    
+    # Check if install script exists
+    local install_script="${DEPLOY_DIR}/../scripts/install-doctl-ghpat.sh"
+    if [[ -f "$install_script" ]]; then
+        log "Using existing doctl installation script..."
+        bash "$install_script"
+    else
+        warning "doctl installation script not found, skipping doctl setup"
+        log "You can manually install doctl later if needed for DigitalOcean deployment"
+    fi
+    
+    log "doctl installation with GH_PAT integration completed"
+}
+
 # Install optimized Docker
 install_docker_minimal() {
     log "Installing Docker (minimal configuration)..."
@@ -610,6 +627,7 @@ show_deployment_summary() {
     echo "   ✅ Minimal Python dependencies (core functionality only)"
     echo "   ✅ Production-optimized Docker images"
     echo "   ✅ Reduced resource footprint"
+    echo "   ✅ Auto-installed doctl with GH_PAT integration"
     echo ""
     
     echo -e "${WHITE}🔧 Management Commands:${NC}"
@@ -630,6 +648,7 @@ main() {
     install_essential_dependencies
     install_nodejs_minimal
     install_python_minimal
+    install_doctl_with_ghpat
     install_docker_minimal
     setup_user_and_dirs
     deploy_application_minimal

@@ -19,16 +19,95 @@
 # 1. SSH into your server
 ssh root@your-server-ip
 
-# 2. Run automated deployment
+# 2. Clone repository and install doctl with GH_PAT
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+# Set GitHub PAT for authentication (if available)
+export GH_PAT=your_github_pat_token
+# Auto-install doctl with GH_PAT integration
+./scripts/install-doctl-ghpat.sh
+
+# 3. Run automated deployment
 curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/deploy-digitalocean.sh | bash
 
-# 3. Configure credentials (REQUIRED)
+# 4. Configure credentials (REQUIRED)
 cd /opt/echotune
 nano .env
 # Update SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET
 
-# 4. Restart services
+# 5. Restart services
 docker-compose restart
+```
+
+---
+
+## 🛠️ doctl Auto-Installation with GitHub PAT
+
+### Overview
+EchoTune AI now includes automated installation of DigitalOcean CLI (doctl) with GitHub Personal Access Token (GH_PAT) integration for seamless CI/CD deployment workflows.
+
+### Quick Installation
+```bash
+# Basic installation
+./scripts/install-doctl-ghpat.sh
+
+# With environment variables
+export GH_PAT=ghp_xxxxxxxxxxxxxxxxxxxx
+export DO_API_TOKEN=dop_v1_xxxxxxxxxxxxxxxxxxxx
+./scripts/install-doctl-ghpat.sh
+
+# In CI/CD pipeline
+export GH_PAT=${{ secrets.GH_PAT }}
+export DO_API_TOKEN=${{ secrets.DO_API_TOKEN }}
+./scripts/install-doctl-ghpat.sh
+```
+
+### Features
+- **Auto-Detection**: Automatically detects platform (Linux/macOS) and architecture
+- **Latest Version**: Downloads and installs the latest doctl version (1.109.0)
+- **GH_PAT Integration**: Uses GitHub Personal Access Token for authentication workflows
+- **Fallback Options**: Provides multiple installation paths and authentication methods
+- **Validation**: Verifies installation and configuration automatically
+
+### Authentication Workflow
+1. **GitHub CLI Authentication**: Uses GH_PAT to authenticate GitHub CLI
+2. **Token Management**: Securely handles GitHub and DigitalOcean API tokens
+3. **doctl Configuration**: Configures doctl authentication with DigitalOcean
+4. **Validation**: Verifies all authentication steps
+
+### Environment Variables
+```env
+# Required for GitHub integration
+GH_PAT=ghp_xxxxxxxxxxxxxxxxxxxx
+
+# Required for DigitalOcean operations
+DO_API_TOKEN=dop_v1_xxxxxxxxxxxxxxxxxxxx
+
+# Optional - fallback authentication
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+```
+
+### Usage in CI/CD
+```yaml
+# GitHub Actions example
+- name: Install doctl with GH_PAT
+  env:
+    GH_PAT: ${{ secrets.GH_PAT }}
+    DO_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
+  run: |
+    ./scripts/install-doctl-ghpat.sh
+    doctl account get
+```
+
+### Manual doctl Setup
+If the auto-installer is not available, you can manually install doctl:
+```bash
+# Download and install doctl manually
+curl -L https://github.com/digitalocean/doctl/releases/download/v1.109.0/doctl-1.109.0-linux-amd64.tar.gz | tar -xz
+sudo mv doctl /usr/local/bin/
+
+# Authenticate with DigitalOcean
+doctl auth init
 ```
 
 ---

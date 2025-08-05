@@ -1,3 +1,5 @@
+> **📋 Last Updated**: August 05, 2025 | **📦 Version**: 2.1.0
+
 # 🎵 EchoTune AI - Next-Generation Music Discovery Platform
 
 [![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy%20to%20DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean&logoColor=white)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)

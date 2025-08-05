@@ -2,7 +2,7 @@
  * Tests for ML Recommendation Engine
  */
 
-const RecommendationEngine = require('../../src/ml/recommendation-engine');
+const { RecommendationEngine } = require('../../src/ml/recommendation-engine');
 
 describe('RecommendationEngine', () => {
   let engine;

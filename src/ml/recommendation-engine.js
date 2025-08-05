@@ -702,4 +702,7 @@ class RecommendationEngine {
 // Singleton instance
 const recommendationEngine = new RecommendationEngine();
 
-module.exports = recommendationEngine;
+module.exports = {
+  RecommendationEngine,
+  recommendationEngine
+};

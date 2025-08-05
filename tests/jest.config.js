@@ -15,6 +15,17 @@ module.exports = {
     maxWorkers: 1, // Prevent worker process issues
     forceExit: true, // Force exit to prevent hanging
     detectOpenHandles: false, // Disable to prevent circular reference issues
+    // Transform ES modules
+    transform: {
+        '^.+\\.js$': 'babel-jest'
+    },
+    transformIgnorePatterns: [
+        'node_modules/(?!(mongodb|bson|@google/generative-ai)/)'
+    ],
+    // Module name mapping for common ES module issues
+    moduleNameMapping: {
+        '^(\\.{1,2}/.*)\\.js$': '$1'
+    },
     projects: [
         {
             displayName: 'node',
@@ -26,7 +37,13 @@ module.exports = {
                 '**/tests/security/**/*.test.js',
                 '**/tests/integration/**/*.test.js'
             ],
-            maxWorkers: 1
+            maxWorkers: 1,
+            transform: {
+                '^.+\\.js$': 'babel-jest'
+            },
+            transformIgnorePatterns: [
+                'node_modules/(?!(mongodb|bson|@google/generative-ai)/)'
+            ]
         },
         {
             displayName: 'jsdom',
@@ -37,7 +54,13 @@ module.exports = {
                 '**/tests/chat/**/*.test.js'
             ],
             setupFilesAfterEnv: ['<rootDir>/setup.js'],
-            maxWorkers: 1
+            maxWorkers: 1,
+            transform: {
+                '^.+\\.js$': 'babel-jest'
+            },
+            transformIgnorePatterns: [
+                'node_modules/(?!(mongodb|bson|@google/generative-ai)/)'
+            ]
         }
     ]
 };

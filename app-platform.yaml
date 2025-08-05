@@ -1,0 +1,71 @@
+# DigitalOcean App Platform Specification for EchoTune AI
+# Optimized for production deployment with auto-scaling and monitoring
+
+name: echotune-ai
+region: nyc
+domains:
+- domain: primosphere.studio
+  type: PRIMARY
+- domain: www.primosphere.studio
+  type: ALIAS
+
+services:
+- name: web
+  source_dir: /
+  github:
+    repo: dzp5103/Spotify-echo
+    branch: main
+    deploy_on_push: true
+  run_command: node src/index.js
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  dockerfile_path: Dockerfile
+  http_port: 3000
+  
+  # Environment variables for production
+  envs:
+  - key: NODE_ENV
+    value: production
+    scope: RUN_AND_BUILD_TIME
+  - key: PORT
+    value: "3000"
+    scope: RUN_AND_BUILD_TIME
+  - key: DOMAIN
+    value: primosphere.studio
+    scope: RUN_AND_BUILD_TIME
+  - key: FRONTEND_URL
+    value: https://primosphere.studio
+    scope: RUN_AND_BUILD_TIME
+  
+  # Health check configuration
+  health_check:
+    http_path: /health
+    initial_delay_seconds: 30
+    period_seconds: 10
+    timeout_seconds: 5
+    success_threshold: 1
+    failure_threshold: 3
+  
+  # Resource limits
+  resources:
+    memory: 1GB
+    cpu: 1
+  
+  # Routes configuration
+  routes:
+  - path: /
+  - path: /api
+  - path: /auth
+  - path: /health
+
+databases:
+- name: mongodb
+  engine: MONGODB
+  version: "7"
+  production: true
+  size: db-s-1vcpu-1gb
+
+# Features
+features:
+- buildpack-stack-22

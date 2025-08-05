@@ -18,7 +18,29 @@
 - 🔍 **Smart Recommendations** - ML-powered personalized suggestions
 - 🎯 **Demo Mode** - Works without API keys for instant testing
 
-## 🚀 Quick Start
+## 🚀 Enhanced API Features (v2.1.0)
+
+### 🎯 New Performance & Security Enhancements
+
+- **📊 Performance Monitoring**: Real-time metrics and response time tracking
+- **🔄 Advanced Caching**: Multi-layer caching system with intelligent cache strategies
+- **🛡️ Enhanced Security**: Advanced rate limiting, input validation, and threat detection
+- **📋 Comprehensive Health Checks**: Detailed system health monitoring with component-specific checks
+- **📝 OpenAPI 3.0 Specification**: Complete interactive API documentation
+- **🔀 API Versioning**: Support for backwards compatibility and version management
+- **📊 Response Formatting**: Standardized API responses with metadata and error handling
+
+### 🎛️ Enhanced Endpoints
+
+| Endpoint | Description | Features |
+|----------|-------------|----------|
+| `/api/health/*` | Comprehensive health monitoring | Individual component checks, metrics, readiness probes |
+| `/api/performance` | Performance metrics dashboard | Real-time stats, response times, system metrics |
+| `/api/cache/stats` | Caching system statistics | Hit rates, cache sizes, performance metrics |
+| `/api/security/stats` | Security monitoring | Rate limiting, suspicious activity, blocked IPs |
+| `/docs/interactive/` | Interactive API documentation | Swagger UI, version selection, live testing |
+
+### 🎯 Quick Start
 
 ### 🎯 One-Click Deployment Options
 

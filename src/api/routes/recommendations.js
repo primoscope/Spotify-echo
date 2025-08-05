@@ -1,6 +1,8 @@
 const express = require('express');
 const recommendationEngine = require('../../ml/recommendation-engine');
 const { requireAuth, createRateLimit } = require('../middleware');
+const cacheManager = require('../cache/cache-manager');
+const performanceMonitor = require('../monitoring/performance-monitor');
 
 const router = express.Router();
 
@@ -16,6 +18,8 @@ const recommendationRateLimit = createRateLimit({
  * POST /api/recommendations/generate
  */
 router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) => {
+  const startTime = performance.now();
+  
   try {
     const {
       limit = 20,
@@ -27,6 +31,32 @@ router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) 
       excludeRecentlyPlayed = true
     } = req.body;
 
+    // Generate cache key for recommendations
+    const cacheKey = cacheManager.generateRecommendationKey({
+      userId: req.userId,
+      limit,
+      context,
+      mood,
+      activity,
+      timeOfDay,
+      includeNewMusic,
+      excludeRecentlyPlayed
+    });
+
+    // Try to get cached recommendations first
+    const cachedRecommendations = cacheManager.get('recommendations', cacheKey);
+    if (cachedRecommendations) {
+      performanceMonitor.recordCustomMetric('recommendations_cache_hit', 1);
+      return res.json({
+        success: true,
+        ...cachedRecommendations.data,
+        cached: true,
+        userId: req.userId,
+        generatedAt: cachedRecommendations.timestamp
+      });
+    }
+
+    // Generate new recommendations
     const recommendations = await recommendationEngine.generateRecommendations(req.userId, {
       limit,
       context,
@@ -37,15 +67,25 @@ router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) 
       excludeRecentlyPlayed
     });
 
+    // Cache the recommendations
+    cacheManager.set('recommendations', cacheKey, recommendations, 900); // Cache for 15 minutes
+
+    // Record performance metrics
+    const endTime = performance.now();
+    performanceMonitor.recordCustomMetric('recommendations_generation', endTime - startTime);
+    performanceMonitor.recordCustomMetric('recommendations_cache_miss', 1);
+
     res.json({
       success: true,
       ...recommendations,
+      cached: false,
       userId: req.userId,
       generatedAt: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('Error generating recommendations:', error);
+    performanceMonitor.recordCustomMetric('recommendations_error', 1);
     res.status(500).json({
       error: 'Failed to generate recommendations',
       message: error.message

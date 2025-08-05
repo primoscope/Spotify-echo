@@ -38,10 +38,15 @@ const {
   requestLogger, 
   corsMiddleware,
   createRateLimit,
-  securityHeaders,
   sanitizeInput,
   requestSizeLimit,
 } = require('./api/middleware');
+
+// Import enhanced systems
+const healthRoutes = require('./api/health/health-routes');
+const cacheManager = require('./api/cache/cache-manager');
+const SecurityManager = require('./api/security/security-manager');
+const performanceMonitor = require('./api/monitoring/performance-monitor');
 
 const app = express();
 const server = http.createServer(app);
@@ -58,6 +63,12 @@ const io = socketIo(server, {
   pingInterval: 25000
 });
 const PORT = config.server.port;
+
+// Initialize enhanced systems
+const securityManager = new SecurityManager();
+
+// Performance monitoring
+app.use(performanceMonitor.requestTracker());
 
 // Trust proxy if in production (for proper IP detection behind reverse proxy)
 if (config.server.trustProxy) {
@@ -87,7 +98,9 @@ const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedir
 const FRONTEND_URL = process.env.FRONTEND_URL || getDefaultFrontendUrl();
 
 // Security and performance middleware
-app.use(securityHeaders);
+app.use(securityManager.securityHeaders);
+app.use(securityManager.detectSuspiciousActivity());
+app.use(securityManager.validateAndSanitizeInput());
 
 // Compression middleware
 if (config.server.compression) {
@@ -170,11 +183,50 @@ app.use('/src', express.static(path.join(__dirname), {
   }
 }));
 
+// Serve docs directory for API documentation
+app.use('/docs', express.static(path.join(__dirname, '../docs'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+      res.setHeader('Content-Type', 'text/yaml');
+    }
+  }
+}));
+
 // Database connection middleware
 app.use(ensureDatabase);
 
 // User extraction middleware for all routes
 app.use(extractUser);
+
+// Enhanced API routes with new systems
+app.use('/api', healthRoutes);
+
+// Add rate limiting to API routes
+app.use('/api/chat', securityManager.chatRateLimit);
+app.use('/api/recommendations', securityManager.recommendationRateLimit);
+app.use('/auth', securityManager.authRateLimit);
+
+// Performance monitoring route
+app.get('/api/performance', (req, res) => {
+  const report = performanceMonitor.getPerformanceReport();
+  res.json(report);
+});
+
+// Cache statistics route
+app.get('/api/cache/stats', (req, res) => {
+  const stats = cacheManager.getStats();
+  res.json(stats);
+});
+
+// Security statistics route (admin only in production)
+app.get('/api/security/stats', (req, res) => {
+  if (process.env.NODE_ENV === 'production' && !req.user?.isAdmin) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  const stats = securityManager.getSecurityStats();
+  res.json(stats);
+});
 
 // Store for temporary state (in production, use Redis or database)
 const authStates = new Map();

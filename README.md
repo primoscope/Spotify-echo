@@ -18,10 +18,28 @@
 
 ## 🚀 Quick Start
 
-### Option 1: One-Click Deploy (Recommended)
+### Option 1: One-Click Deploy Wizard (Recommended)
+```bash
+# Clone and run the universal deployment wizard
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+sudo ./deploy-wizard.sh
+```
+
+### Option 2: Modular Deployment Scripts
+```bash
+# Step-by-step deployment with individual scripts
+sudo ./deploy-install.sh      # Install dependencies
+sudo ./deploy-permissions.sh  # Fix permissions
+sudo ./deploy-environment.sh  # Setup environment
+sudo ./deploy-app.sh         # Deploy application
+sudo ./deploy-fix.sh         # Analyze and fix errors
+```
+
+### Option 3: DigitalOcean One-Click
 [![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
 
-### Option 2: Local Development
+### Option 4: Local Development
 ```bash
 git clone https://github.com/dzp5103/Spotify-echo.git
 cd Spotify-echo
@@ -30,24 +48,218 @@ npm start
 # Open http://localhost:3000
 ```
 
-### Option 3: Docker
+### Option 5: Docker
 ```bash
 docker run -d -p 3000:3000 dzp5103/echotune-ai:latest
 ```
 
-## 📋 Requirements
+## 🚀 Script Documentation
 
-- **Node.js** 20+ 
-- **Python** 3.8+ (for ML features)
-- **Spotify API** credentials (optional - demo mode available)
+### 📁 Deployment Scripts Overview
 
-## ⚙️ Environment Setup
+| Script | Purpose | Usage | Dependencies |
+|--------|---------|-------|-------------|
+| `deploy-wizard.sh` | Complete deployment orchestration | `sudo ./deploy-wizard.sh` | All other scripts |
+| `deploy-install.sh` | System dependencies installation | `sudo ./deploy-install.sh` | Internet connection |
+| `deploy-permissions.sh` | User setup and permissions | `sudo ./deploy-permissions.sh` | None |
+| `deploy-environment.sh` | Environment configuration | `sudo ./deploy-environment.sh [domain] [email]` | .env templates |
+| `deploy-app.sh` | Application deployment | `sudo ./deploy-app.sh` | Previous scripts |
+| `deploy-fix.sh` | Error analysis and repair | `sudo ./deploy-fix.sh` | Deployed application |
 
-Create `.env` file:
-```env
-# Spotify API (optional for demo)
-SPOTIFY_CLIENT_ID=your_client_id
-SPOTIFY_CLIENT_SECRET=your_client_secret
+### 🎯 Quick Command Reference
+
+```bash
+# Complete deployment from scratch
+sudo ./deploy-wizard.sh
+
+# Fix permissions issues
+sudo ./deploy-permissions.sh
+
+# Analyze and fix deployment errors
+sudo ./deploy-fix.sh
+
+# Check application status
+sudo systemctl status echotune-ai
+curl http://localhost:3000/health
+
+# View logs
+tail -f /opt/echotune/logs/app.log
+sudo journalctl -u echotune-ai -f
+
+# Restart services
+sudo systemctl restart echotune-ai nginx
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. Permission Denied Errors
+```bash
+# Fix all permission issues
+sudo ./deploy-permissions.sh
+```
+
+#### 2. Service Not Starting
+```bash
+# Analyze and fix issues
+sudo ./deploy-fix.sh
+
+# Check service status
+sudo systemctl status echotune-ai
+sudo journalctl -u echotune-ai -n 50
+```
+
+#### 3. Port Already in Use
+```bash
+# Find process using port 3000
+sudo lsof -i :3000
+sudo kill -9 <process_id>
+
+# Restart application
+sudo systemctl restart echotune-ai
+```
+
+#### 4. SSL Certificate Issues
+```bash
+# Regenerate SSL certificates
+sudo ./deploy-environment.sh your-domain.com admin@your-domain.com
+sudo ./deploy-app.sh
+```
+
+#### 5. Spotify API Errors
+- Verify credentials in `/opt/echotune/.env`
+- Check redirect URI in Spotify Dashboard
+- Ensure domain matches exactly
+
+### 📊 Health Checks
+
+```bash
+# Application health
+curl http://localhost:3000/health
+
+# Service status
+sudo systemctl is-active echotune-ai nginx
+
+# Disk space
+df -h
+
+# Memory usage
+free -h
+
+# Port status
+sudo netstat -tlnp | grep -E ':(80|443|3000)'
+```
+
+## 🛠️ Deployment Options
+
+### 🧙‍♂️ Universal Deployment Wizard (Recommended)
+Complete automated deployment with guided setup:
+
+```bash
+# Interactive deployment with wizard
+sudo ./deploy-wizard.sh
+
+# Non-interactive deployment
+sudo ./deploy-wizard.sh --domain=example.com --email=admin@example.com --non-interactive
+
+# Custom deployment options
+sudo ./deploy-wizard.sh --skip-install --verbose --dry-run
+```
+
+**Features:**
+- ✅ Complete end-to-end deployment automation
+- ✅ Interactive configuration prompts
+- ✅ Pre-deployment validation checks
+- ✅ Error recovery and automatic fixes
+- ✅ Post-deployment health validation
+- ✅ Comprehensive logging and reporting
+
+### 🔧 Modular Deployment Scripts
+Individual scripts for granular control:
+
+#### 1. **Installation Script**
+```bash
+sudo ./deploy-install.sh
+```
+- Installs Node.js 20.x, Python 3, Docker, Nginx
+- Sets up system dependencies and build tools
+- Configures deployment user and directories
+- Fully idempotent and safe to re-run
+
+#### 2. **Permissions Script**
+```bash
+sudo ./deploy-permissions.sh
+```
+- Creates deploy user with proper groups
+- Sets 777 permissions for maximum development ease
+- Configures Docker, Nginx, and SSL permissions
+- Sets up sudo access for deployment commands
+
+#### 3. **Environment Setup Script**
+```bash
+sudo ./deploy-environment.sh [domain] [email]
+# Example: sudo ./deploy-environment.sh example.com admin@example.com
+```
+- Fetches .env and .env.production.example templates
+- Generates secure secrets and passwords
+- Configures domain-specific settings
+- Creates both production and development environments
+
+#### 4. **Application Deployment Script**
+```bash
+sudo ./deploy-app.sh
+```
+- Deploys application files and dependencies
+- Configures Nginx with SSL and security headers
+- Sets up systemd service for application
+- Performs health checks and validation
+
+#### 5. **Error Analysis and Fix Script**
+```bash
+sudo ./deploy-fix.sh
+```
+- Analyzes system health and service status
+- Examines logs for common error patterns
+- Automatically fixes permission and dependency issues
+- Generates detailed error reports with recommendations
+
+### 🐳 Docker Deployment
+```bash
+# Using Docker Compose
+docker-compose up -d --build
+
+# Using provided Docker image
+docker run -d -p 3000:3000 \
+  -e SPOTIFY_CLIENT_ID=your_client_id \
+  -e SPOTIFY_CLIENT_SECRET=your_client_secret \
+  dzp5103/echotune-ai:latest
+```
+
+### ☁️ DigitalOcean Marketplace
+One-click deployment from DigitalOcean Marketplace with pre-configured infrastructure:
+- SSL certificates automatically configured
+- Monitoring and logging enabled
+- Auto-scaling and backup configured
+- Production-ready security settings
+
+### 📋 Deployment Requirements
+
+#### System Requirements
+- **OS**: Ubuntu 18.04+ or Debian 10+
+- **Memory**: 2GB RAM minimum (4GB recommended)
+- **Storage**: 10GB available disk space
+- **Network**: Internet connection for dependencies
+
+#### Required Credentials
+- **Spotify API**: Client ID and Secret from [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+- **Domain**: Valid domain name for production deployment
+- **Email**: Valid email for SSL certificate generation
+
+#### Optional Enhancements
+- **AI Providers**: OpenAI API key or Google Gemini API key
+- **Database**: MongoDB Atlas connection string
+- **Monitoring**: Sentry DSN for error tracking
 SPOTIFY_REDIRECT_URI=http://localhost:3000/auth/callback
 
 # LLM Providers (optional - uses mock by default)

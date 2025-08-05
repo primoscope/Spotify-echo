@@ -558,6 +558,13 @@ if (typeof window !== 'undefined') {
   // Setup default rate limiters
   performanceManager.createRateLimiter('spotify', performanceManager.config.rateLimit.spotifyAPI);
   performanceManager.createRateLimiter('openai', performanceManager.config.rateLimit.openAI);
+} else {
+  // Node.js environment - create instance for singleton use
+  performanceManager = new PerformanceManager();
+  
+  // Setup default rate limiters  
+  performanceManager.createRateLimiter('spotify', performanceManager.config.rateLimit.spotifyAPI);
+  performanceManager.createRateLimiter('openai', performanceManager.config.rateLimit.openAI);
 }
 
 // Browser-compatible exports
@@ -565,8 +572,8 @@ if (typeof window !== 'undefined') {
   window.PerformanceManager = PerformanceManager;
   window.performanceManager = performanceManager;
 } else if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    PerformanceManager,
-    performanceManager
-  };
+  // Export class constructor for tests and instantiation
+  module.exports = PerformanceManager;
+  // Also export singleton instance for production use
+  module.exports.instance = performanceManager;
 }

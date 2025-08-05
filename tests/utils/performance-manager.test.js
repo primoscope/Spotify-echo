@@ -2,7 +2,7 @@
  * Comprehensive tests for Performance Manager
  */
 
-const { PerformanceManager } = require('../../src/utils/performance-manager');
+const PerformanceManager = require('../../src/utils/performance-manager');
 
 describe('PerformanceManager', () => {
   let performanceManager;

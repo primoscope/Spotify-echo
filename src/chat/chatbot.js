@@ -3,7 +3,7 @@ const GeminiProvider = require('./llm-providers/gemini-provider');
 const CustomAPIProvider = require('./llm-providers/custom-provider');
 const MockLLMProvider = require('./llm-providers/mock-provider');
 const ConversationManager = require('./conversation-manager');
-const recommendationEngine = require('../ml/recommendation-engine'); // Import the singleton instance
+const recommendationEngine = require('../ml/recommendation-engine').instance; // Import the singleton instance
 const SpotifyAudioFeaturesService = require('../spotify/audio-features');
 const SpotifyAPIService = require('../spotify/api-service');
 

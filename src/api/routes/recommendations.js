@@ -1,5 +1,5 @@
 const express = require('express');
-const recommendationEngine = require('../../ml/recommendation-engine');
+const recommendationEngine = require('../../ml/recommendation-engine').instance;
 const { requireAuth, createRateLimit } = require('../middleware');
 const cacheManager = require('../cache/cache-manager');
 const performanceMonitor = require('../monitoring/performance-monitor');

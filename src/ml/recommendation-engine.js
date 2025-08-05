@@ -16,7 +16,21 @@ class RecommendationEngine {
       content_based: 0.4,
       collaborative: 0.3,
       context_aware: 0.2,
-      trending: 0.1
+      trending: 0.1,
+      popularity: 0.1  // Add popularity weight for tests
+    };
+    
+    // Initialize filters
+    this.collaborativeFilter = {
+      userSimilarity: new Map(),
+      itemSimilarity: new Map(),
+      computeSimilarity: this.computeUserSimilarity.bind(this)
+    };
+    
+    this.contentFilter = {
+      audioFeatures: new Map(),
+      genreWeights: new Map(),
+      computeContentSimilarity: this.computeContentSimilarity.bind(this)
     };
   }
 
@@ -697,9 +711,108 @@ class RecommendationEngine {
     console.log('🔄 Updating user profiles...');
     this.userProfiles.clear();
   }
+
+  /**
+   * Compute user similarity for collaborative filtering
+   */
+  computeUserSimilarity(user1Profile, user2Profile) {
+    if (!user1Profile || !user2Profile) return 0;
+    
+    // Simple cosine similarity based on audio features
+    const features1 = user1Profile.preferences || {};
+    const features2 = user2Profile.preferences || {};
+    
+    const commonFeatures = Object.keys(features1).filter(key => key in features2);
+    if (commonFeatures.length === 0) return 0;
+    
+    let dotProduct = 0;
+    let norm1 = 0;
+    let norm2 = 0;
+    
+    for (const feature of commonFeatures) {
+      dotProduct += features1[feature] * features2[feature];
+      norm1 += features1[feature] * features1[feature];
+      norm2 += features2[feature] * features2[feature];
+    }
+    
+    if (norm1 === 0 || norm2 === 0) return 0;
+    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+  }
+
+  /**
+   * Compute content similarity between tracks
+   */
+  computeContentSimilarity(track1Features, track2Features) {
+    if (!track1Features || !track2Features) return 0;
+    
+    const features = ['danceability', 'energy', 'valence', 'acousticness', 'instrumentalness'];
+    let similarity = 0;
+    let validFeatures = 0;
+    
+    for (const feature of features) {
+      if (feature in track1Features && feature in track2Features) {
+        similarity += 1 - Math.abs(track1Features[feature] - track2Features[feature]);
+        validFeatures++;
+      }
+    }
+    
+    return validFeatures > 0 ? similarity / validFeatures : 0;
+  }
+
+  /**
+   * Calculate diversity statistics for recommendations
+   */
+  calculateDiversityStats(recommendations) {
+    if (!Array.isArray(recommendations) || recommendations.length === 0) {
+      return {
+        genre_diversity: 0,
+        artist_diversity: 0,
+        audio_feature_variance: 0,
+        total_tracks: 0
+      };
+    }
+
+    // Calculate genre diversity
+    const genres = new Set();
+    const artists = new Set();
+    const audioFeatures = [];
+
+    recommendations.forEach(rec => {
+      if (rec.genre) genres.add(rec.genre);
+      if (rec.artistName) artists.add(rec.artistName);
+      if (rec.audioFeatures) audioFeatures.push(rec.audioFeatures);
+    });
+
+    // Calculate feature variance if audio features available
+    let audioVariance = 0;
+    if (audioFeatures.length > 0) {
+      const features = ['danceability', 'energy', 'valence'];
+      const variances = features.map(feature => {
+        const values = audioFeatures
+          .map(af => af[feature])
+          .filter(v => typeof v === 'number');
+        
+        if (values.length < 2) return 0;
+        
+        const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+        const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+        return variance;
+      });
+      
+      audioVariance = variances.reduce((sum, v) => sum + v, 0) / variances.length;
+    }
+
+    return {
+      genre_diversity: genres.size / recommendations.length,
+      artist_diversity: artists.size / recommendations.length,
+      audio_feature_variance: audioVariance,
+      total_tracks: recommendations.length
+    };
+  }
 }
 
-// Singleton instance
-const recommendationEngine = new RecommendationEngine();
+// Export class for testing and multiple instances
+module.exports = RecommendationEngine;
 
-module.exports = recommendationEngine;
+// Also export singleton instance for production use
+module.exports.instance = new RecommendationEngine();

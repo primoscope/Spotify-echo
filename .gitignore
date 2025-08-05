@@ -360,6 +360,34 @@ backups/
 .env.staging
 .env.localuploads/
 
+# Production secrets and credentials
+secrets/
+credentials/
+*.secret
+*_secret*
+*_credentials*
+
+# Production build artifacts
+build/
+dist/
+*.min.js
+*.min.css
+
+# Production cache and temp files
+cache/
+tmp/
+temp/
+.cache/
+.temp/
+
+# Production monitoring and logs
+monitoring/
+analytics/
+metrics/
+audit/
+access_logs/
+error_logs/
+
 # Prompt system temporary files
 prompts.log
 validate

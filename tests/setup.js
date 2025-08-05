@@ -167,6 +167,27 @@ global.testHelpers = {
     headers: {},
     body: {},
     userId: 'test_user_id',
+    ip: '127.0.0.1',
+    connection: {
+      remoteAddress: '127.0.0.1'
+    },
+    socket: {
+      remoteAddress: '127.0.0.1'
+    },
+    get: jest.fn((header) => {
+      const defaultHeaders = {
+        'User-Agent': 'Jest Test Agent',
+        'Content-Type': 'application/json'
+      };
+      return defaultHeaders[header] || '';
+    }),
+    header: jest.fn((header) => {
+      const defaultHeaders = {
+        'User-Agent': 'Jest Test Agent',
+        'Content-Type': 'application/json'
+      };
+      return defaultHeaders[header] || '';
+    }),
     ...overrides
   }),
 

@@ -40,15 +40,15 @@ class PerformanceManager {
    * Initialize performance monitoring
    */
   initializePerformanceMonitoring() {
-    // Memory usage monitoring
-    if (performance.memory) {
+    // Memory usage monitoring (browser only)
+    if (typeof window !== 'undefined' && typeof performance !== 'undefined' && performance.memory) {
       setInterval(() => {
         this.checkMemoryUsage();
       }, 30000); // Check every 30 seconds
     }
 
-    // Performance observer for measuring API timing
-    if (typeof PerformanceObserver !== 'undefined') {
+    // Performance observer for measuring API timing (browser only)
+    if (typeof window !== 'undefined' && typeof PerformanceObserver !== 'undefined') {
       const observer = new PerformanceObserver((list) => {
         list.getEntries().forEach((entry) => {
           this.recordPerformanceMetric(entry);
@@ -57,7 +57,7 @@ class PerformanceManager {
       observer.observe({ entryTypes: ['measure', 'navigation'] });
     }
 
-    // Service worker for offline caching
+    // Service worker for offline caching (browser only)
     this.initializeServiceWorker();
     
     // Initialize cache methods
@@ -238,16 +238,18 @@ class PerformanceManager {
       }
     }
     
-    const startTime = performance.now();
+    const startTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     
     try {
       const result = await requestFn();
-      const duration = performance.now() - startTime;
+      const duration = (typeof performance !== 'undefined' && performance.now) ? 
+                       performance.now() - startTime : Date.now() - startTime;
       
       this.recordAPICall(limiterName, duration, true);
       return result;
     } catch (error) {
-      const duration = performance.now() - startTime;
+      const duration = (typeof performance !== 'undefined' && performance.now) ? 
+                       performance.now() - startTime : Date.now() - startTime;
       this.recordAPICall(limiterName, duration, false);
       throw error;
     }
@@ -328,7 +330,7 @@ class PerformanceManager {
   async optimizeMemory() {
     const stats = this.cache.getStats();
     
-    if (performance.memory && 
+    if (typeof performance !== 'undefined' && performance.memory && 
         performance.memory.usedJSHeapSize > this.config.performance.memoryThreshold) {
       
       // Clear expired entries
@@ -353,7 +355,8 @@ class PerformanceManager {
    * Service Worker initialization for offline caching
    */
   initializeServiceWorker() {
-    if ('serviceWorker' in navigator) {
+    // Only initialize service worker in browser environment
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
           console.log('ServiceWorker registered:', registration);
@@ -461,7 +464,7 @@ class PerformanceManager {
   }
 
   checkMemoryUsage() {
-    if (performance.memory) {
+    if (typeof performance !== 'undefined' && performance.memory) {
       const usage = performance.memory.usedJSHeapSize;
       if (usage > this.config.performance.memoryThreshold) {
         this.optimizeMemory();
@@ -493,7 +496,7 @@ class PerformanceManager {
           limiter.getStatus()
         ])
       ),
-      memory: performance.memory ? {
+      memory: (typeof performance !== 'undefined' && performance.memory) ? {
         used: performance.memory.usedJSHeapSize,
         total: performance.memory.totalJSHeapSize,
         limit: performance.memory.jsHeapSizeLimit

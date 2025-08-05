@@ -10,7 +10,7 @@ module.exports = {
     ],
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov', 'html'],
-    setupFilesAfterEnv: ['<rootDir>/setup.js'],
+    setupFilesAfterEnv: ['/home/runner/work/Spotify-echo/Spotify-echo/tests/setup.js'],
     testTimeout: 30000,
     maxWorkers: 1, // Prevent worker process issues
     forceExit: true, // Force exit to prevent hanging
@@ -30,6 +30,7 @@ module.exports = {
                 '**/tests/security/**/*.test.js',
                 '**/tests/integration/**/*.test.js'
             ],
+            setupFilesAfterEnv: ['/home/runner/work/Spotify-echo/Spotify-echo/tests/setup.js'],
             transformIgnorePatterns: [
                 'node_modules/(?!(mongodb|bson)/)',
                 '\\.mjs$'
@@ -44,7 +45,7 @@ module.exports = {
                 '**/tests/mobile/**/*.test.js',
                 '**/tests/chat/**/*.test.js'
             ],
-            setupFilesAfterEnv: ['<rootDir>/setup.js'],
+            setupFilesAfterEnv: ['/home/runner/work/Spotify-echo/Spotify-echo/tests/setup.js'],
             transformIgnorePatterns: [
                 'node_modules/(?!(mongodb|bson)/)',
                 '\\.mjs$'

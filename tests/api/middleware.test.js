@@ -4,15 +4,43 @@
 
 const { requestLogger, errorHandler, corsMiddleware, createRateLimit } = require('../../src/api/middleware/index');
 
+// Test helpers for this file
+const testHelpers = {
+  createMockRequest: (overrides = {}) => ({
+    method: 'GET',
+    url: '/test',
+    headers: {},
+    body: {},
+    userId: 'test_user_id',
+    ip: '127.0.0.1',
+    connection: { remoteAddress: '127.0.0.1' },
+    get: jest.fn(() => 'Test User Agent'),
+    ...overrides
+  }),
+
+  createMockResponse: () => {
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
+      setHeader: jest.fn().mockReturnThis(),
+      end: jest.fn().mockReturnThis(),
+      on: jest.fn(),
+      statusCode: 200
+    };
+    return res;
+  }
+};
+
 describe('API Middleware', () => {
   
   describe('requestLogger', () => {
     test('should log request details', (done) => {
-      const req = global.testHelpers.createMockRequest({
+      const req = testHelpers.createMockRequest({
         method: 'GET',
         url: '/api/test'
       });
-      const res = global.testHelpers.createMockResponse();
+      const res = testHelpers.createMockResponse();
       const next = jest.fn();
 
       // Mock res.on to simulate request completion
@@ -38,8 +66,8 @@ describe('API Middleware', () => {
       err.name = 'ValidationError';
       err.errors = { field: 'required' };
 
-      const req = global.testHelpers.createMockRequest();
-      const res = global.testHelpers.createMockResponse();
+      const req = testHelpers.createMockRequest();
+      const res = testHelpers.createMockResponse();
       const next = jest.fn();
 
       errorHandler(err, req, res, next);
@@ -56,8 +84,8 @@ describe('API Middleware', () => {
       const err = new Error('Database connection failed');
       err.name = 'MongoError';
 
-      const req = global.testHelpers.createMockRequest();
-      const res = global.testHelpers.createMockResponse();
+      const req = testHelpers.createMockRequest();
+      const res = testHelpers.createMockResponse();
       const next = jest.fn();
 
       errorHandler(err, req, res, next);
@@ -72,8 +100,8 @@ describe('API Middleware', () => {
     test('should handle generic errors', () => {
       const err = new Error('Something went wrong');
 
-      const req = global.testHelpers.createMockRequest();
-      const res = global.testHelpers.createMockResponse();
+      const req = testHelpers.createMockRequest();
+      const res = testHelpers.createMockResponse();
       const next = jest.fn();
 
       errorHandler(err, req, res, next);
@@ -88,10 +116,10 @@ describe('API Middleware', () => {
 
   describe('corsMiddleware', () => {
     test('should set CORS headers for allowed origins', () => {
-      const req = global.testHelpers.createMockRequest({
+      const req = testHelpers.createMockRequest({
         headers: { origin: 'http://localhost:3000' }
       });
-      const res = global.testHelpers.createMockResponse();
+      const res = testHelpers.createMockResponse();
       const next = jest.fn();
 
       corsMiddleware(req, res, next);
@@ -101,11 +129,11 @@ describe('API Middleware', () => {
     });
 
     test('should handle preflight requests', () => {
-      const req = global.testHelpers.createMockRequest({
+      const req = testHelpers.createMockRequest({
         method: 'OPTIONS',
         headers: { origin: 'http://localhost:3000' }
       });
-      const res = global.testHelpers.createMockResponse();
+      const res = testHelpers.createMockResponse();
       const next = jest.fn();
 
       corsMiddleware(req, res, next);
@@ -123,8 +151,8 @@ describe('API Middleware', () => {
     });
 
     test('should handle rate limiting', () => {
-      const req = global.testHelpers.createMockRequest();
-      const res = global.testHelpers.createMockResponse();
+      const req = testHelpers.createMockRequest();
+      const res = testHelpers.createMockResponse();
       const next = jest.fn();
 
       const limiter = createRateLimit();

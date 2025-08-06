@@ -3,6 +3,24 @@
  * Provides global mocks and test utilities
  */
 
+// Mock MongoDB before any imports
+jest.mock('mongodb', () => ({
+  MongoClient: jest.fn(() => ({
+    connect: jest.fn(),
+    db: jest.fn(() => ({
+      collection: jest.fn(() => ({
+        findOne: jest.fn(),
+        insertOne: jest.fn(),
+        updateOne: jest.fn(),
+        find: jest.fn(() => ({
+          toArray: jest.fn(() => [])
+        }))
+      }))
+    })),
+    close: jest.fn()
+  }))
+}));
+
 // Import OpenAI shims for Node.js environment (conditionally)
 try {
   require('openai/shims/node');

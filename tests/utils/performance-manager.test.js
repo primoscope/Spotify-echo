@@ -61,8 +61,9 @@ describe('PerformanceManager', () => {
       // Should be available immediately
       expect(performanceManager.cache.get(key)).toEqual(value);
       
-      // Mock time advancement
-      Date.now = jest.fn(() => Date.now() + shortTTL + 1);
+      // Mock time advancement - store original time first
+      const originalTime = Date.now();
+      Date.now = jest.fn(() => originalTime + shortTTL + 1);
       
       // Should be expired
       expect(performanceManager.cache.get(key)).toBeNull();

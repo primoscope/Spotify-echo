@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useLLM } from '../../contexts/LLMContext';
-import { useDatabase } from '../../contexts/DatabaseContext';
+import { useLLM } from '../contexts/LLMContext';
+import { useDatabase } from '../contexts/DatabaseContext';
 import './Settings.css';
 
 /**

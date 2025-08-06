@@ -30,7 +30,7 @@ function App() {
                   <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                   <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
                   <Route path="/playlists" element={<ProtectedRoute><PlaylistManager /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  <Route path="/settings" element={<Settings />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

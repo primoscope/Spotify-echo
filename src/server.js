@@ -151,7 +151,19 @@ app.use(express.urlencoded({
 // Input sanitization
 app.use(sanitizeInput);
 
-// Static file serving with caching headers
+// Serve built React application static files first
+app.use(express.static(path.join(__dirname, '../dist'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+  }
+}));
+
+// Static file serving with caching headers (fallback)
 app.use(express.static(path.join(__dirname, '../public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
   etag: true,
@@ -314,9 +326,9 @@ app.get('/alive', (req, res) => {
     });
 });
 
-// Main page - Modern Interface
+// Main page - React Application
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/modern-index.html'));
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 // Legacy interface (for comparison)
@@ -818,7 +830,21 @@ io.on('connection', async (socket) => {
 // eslint-disable-next-line no-unused-vars
 app.use(errorHandler);
 
-// 404 handler
+// Catch-all handler for React Router (client-side routing)
+app.get('*', (req, res) => {
+    // Only serve the React app for non-API routes
+    if (!req.path.startsWith('/api/') && !req.path.startsWith('/auth/')) {
+        res.sendFile(path.join(__dirname, '../dist/index.html'));
+    } else {
+        // Let the 404 handler take care of API routes
+        res.status(404).json({
+            error: 'Not found',
+            message: 'The requested resource was not found'
+        });
+    }
+});
+
+// 404 handler (this will no longer be reached for non-API routes)
 app.use((req, res) => {
     res.status(404).json({
         error: 'Not found',

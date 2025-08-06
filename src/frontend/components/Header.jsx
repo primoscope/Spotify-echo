@@ -25,6 +25,7 @@ function Header() {
               <a href="/dashboard" className="nav-link">Dashboard</a>
               <a href="/playlists" className="nav-link">Playlists</a>
               <a href="/profile" className="nav-link">Profile</a>
+              <a href="/settings" className="nav-link">Settings</a>
             </>
           )}
         </nav>

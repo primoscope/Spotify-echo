@@ -1,15 +1,18 @@
-# MCP Servers Setup and Configuration Guide
+# MCP Servers - Comprehensive Integration Guide
 
-This document provides comprehensive instructions for setting up and using the Model Context Protocol (MCP) servers integrated into EchoTune AI.
+This document is the **single source of truth** for all Model Context Protocol (MCP) servers integrated into EchoTune AI. It consolidates configuration, usage, and management instructions for all servers.
 
 ## Overview
 
-EchoTune AI now includes four powerful MCP servers to enhance coding, task management, testing, and automation capabilities:
+EchoTune AI integrates with seven powerful MCP servers to enhance coding, automation, testing, and music intelligence capabilities:
 
 1. **Sequential Thinking MCP Server** - Structured reasoning and complex problem solving
-2. **FileScopeMCP** - Advanced file system operations with scope control
+2. **FileScopeMCP** - Advanced file system operations with scope control  
 3. **MCP Screenshot Website Fast** - Rapid website screenshot generation
 4. **MCP Server Browserbase** - Cloud-based browser automation
+5. **Mermaid Diagram Generator** - Workflow diagrams and visual representations
+6. **Browser Automation Server (Puppeteer)** - Local browser automation and web scraping
+7. **Spotify MCP Server** - Custom music intelligence and automation
 
 ## Quick Start
 
@@ -48,8 +51,8 @@ npm run mcp-manage test sequential-thinking
 
 ### 1. Sequential Thinking MCP Server
 
-**Purpose**: Provides structured thinking and reasoning capabilities for complex tasks, optimized for GitHub Coding Agent workflows.
-
+**Repository**: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking  
+**Purpose**: Provides structured thinking and reasoning capabilities for complex tasks, optimized for GitHub Coding Agent workflows.  
 **Location**: `mcp-servers/sequential-thinking/`
 
 **Configuration**:
@@ -71,18 +74,19 @@ npm run mcp-manage test sequential-thinking
 
 ### 2. FileScopeMCP
 
-**Purpose**: Advanced file system operations with scope control, perfect for repository management and automated file operations.
-
+**Repository**: https://github.com/admica/FileScopeMCP  
+**Purpose**: Advanced file system operations with scope control, perfect for repository management and automated file operations.  
 **Location**: `node_modules/FileScopeMCP/` (npm dependency)
 
 **Configuration**:
 ```json
 {
   "command": "node",
-  "args": ["node_modules/FileScopeMCP/dist/index.js"],
+  "args": ["../node_modules/FileScopeMCP/dist/index.js"],
   "env": {
-    "ALLOWED_DIRECTORIES": "${PWD},${PWD}/src,${PWD}/scripts,${PWD}/mcp-server"
-  }
+    "ALLOWED_DIRECTORIES": "${PWD}/..,${PWD}/../src,${PWD}/../scripts,${PWD}"
+  },
+  "description": "File system operations and repository management"
 }
 ```
 
@@ -97,8 +101,8 @@ npm run mcp-manage test sequential-thinking
 
 ### 3. MCP Screenshot Website Fast
 
-**Purpose**: Fast website screenshot capabilities for documentation, testing, and UI validation.
-
+**Repository**: https://github.com/just-every/mcp-screenshot-website-fast  
+**Purpose**: Fast website screenshot capabilities for documentation, testing, and UI validation.  
 **Location**: `mcp-servers/screenshot-website/`
 
 **Configuration**:
@@ -120,8 +124,8 @@ npm run mcp-manage test sequential-thinking
 
 ### 4. MCP Server Browserbase
 
-**Purpose**: Cloud-based browser automation for comprehensive web testing and interaction.
-
+**Repository**: https://github.com/browserbase/mcp-server-browserbase  
+**Purpose**: Cloud-based browser automation for comprehensive web testing and interaction.  
 **Location**: Referenced as npm dependency
 
 **Configuration**:
@@ -131,7 +135,8 @@ npm run mcp-manage test sequential-thinking
   "args": ["@browserbasehq/mcp-server-browserbase"],
   "env": {
     "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
-    "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}"
+    "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}",
+    "BROWSERBASE_SESSION_ID": "${BROWSERBASE_SESSION_ID}"
   }
 }
 ```
@@ -147,6 +152,86 @@ npm run mcp-manage test sequential-thinking
 - `BROWSERBASE_PROJECT_ID`: Your Browserbase project ID
 - `BROWSERBASE_SESSION_ID`: Optional session ID for specific tests
 
+### 5. Mermaid Diagram Generator
+
+**Repository**: https://github.com/mermaidjs/mermaid  
+**Purpose**: Generate workflow diagrams and visual representations for documentation and architecture.  
+**Location**: Referenced as npm dependency
+
+**Configuration**:
+```json
+{
+  "command": "npx",
+  "args": ["mcp-mermaid"],
+  "description": "Mermaid diagram generation for workflow visualization"
+}
+```
+
+**Usage Examples**:
+- Flowcharts for user journeys
+- Sequence diagrams for API interactions
+- Class diagrams for system architecture
+- State diagrams for application flow
+
+**Environment Variables**: None required
+
+### 6. Browser Automation Server (Puppeteer)
+
+**Repository**: https://github.com/modelcontextprotocol/server-puppeteer  
+**Purpose**: Local browser automation using Puppeteer for web scraping and interaction.  
+**Location**: Referenced as npm dependency
+
+**Configuration**:
+```json
+{
+  "command": "npx",
+  "args": ["@modelcontextprotocol/server-puppeteer"],
+  "env": {
+    "PUPPETEER_HEADLESS": "true",
+    "PUPPETEER_ARGS": "--no-sandbox --disable-setuid-sandbox"
+  }
+}
+```
+
+**Usage Examples**:
+- Web scraping and data extraction
+- Automated form filling and submission
+- UI testing and interaction simulation
+- Local browser automation without cloud dependencies
+
+**Environment Variables**:
+- `PUPPETEER_HEADLESS`: Run browser in headless mode (true/false)
+- `PUPPETEER_ARGS`: Additional command line arguments for Chrome
+
+### 7. Spotify MCP Server
+
+**Purpose**: Custom music intelligence and Spotify automation server for EchoTune AI.  
+**Location**: `mcp-server/spotify_server.py`
+
+**Configuration**:
+```json
+{
+  "command": "python",
+  "args": ["spotify_server.py"],
+  "env": {
+    "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
+    "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}",
+    "SPOTIFY_REDIRECT_URI": "${SPOTIFY_REDIRECT_URI}"
+  }
+}
+```
+
+**Usage Examples**:
+- Personalized music recommendations using ML models
+- Automated playlist creation and management
+- Listening data analysis and insights
+- Spotify Web Player automation
+
+**Environment Variables**:
+- `SPOTIFY_CLIENT_ID`: Your Spotify app client ID
+- `SPOTIFY_CLIENT_SECRET`: Your Spotify app client secret
+- `SPOTIFY_REDIRECT_URI`: OAuth redirect URI for authentication
+
 ## Environment Configuration
 
 ### Required Environment Variables
@@ -159,11 +244,23 @@ MCP_SEQUENTIAL_THINKING_ENABLED=true
 MCP_SCREENSHOT_WEBSITE_ENABLED=true
 MCP_BROWSERBASE_ENABLED=false  # Set to true when you have API keys
 MCP_FILESYSTEM_ENABLED=true
+MCP_MERMAID_ENABLED=true
+MCP_BROWSER_ENABLED=true
+MCP_SPOTIFY_ENABLED=true
 
 # Browserbase Configuration (optional)
 BROWSERBASE_API_KEY=your_api_key_here
 BROWSERBASE_PROJECT_ID=your_project_id_here
 BROWSERBASE_SESSION_ID=your_session_id_here
+
+# Spotify API Configuration
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
+
+# Browser Configuration
+PUPPETEER_HEADLESS=true
+PUPPETEER_ARGS=--no-sandbox --disable-setuid-sandbox
 ```
 
 ### Security Configuration
@@ -309,6 +406,22 @@ wait
 
 ## Integration Examples
 
+### Integration Scripts
+
+Run the integration demonstrations:
+
+```bash
+# Run all MCP server demonstrations
+node scripts/integrate-mcp-servers.js
+
+# Test individual servers
+npm run mcp-test-mermaid
+npm run mcp-test-filesystem
+npm run mcp-test-browserbase
+npm run mcp-test-sequential-thinking
+npm run mcp-test-screenshot
+```
+
 ### Coding Agent Workflow
 
 ```javascript
@@ -343,6 +456,34 @@ await fileScope.processFiles({
   pattern: "**/*.js",
   operation: "lint-and-format",
   allowedDirs: ["/src", "/scripts"]
+});
+```
+
+### Music Intelligence Workflow
+
+```javascript
+// Example: Spotify automation and recommendations
+const spotify = new SpotifyMCPClient();
+const recommendations = await spotify.getRecommendations({
+  user_id: "user123",
+  seed_genres: ["electronic", "ambient"],
+  target_features: { energy: 0.7, valence: 0.8 }
+});
+```
+
+### Documentation Generation Workflow
+
+```javascript
+// Example: Mermaid diagram generation
+const mermaid = new MermaidClient();
+const diagram = await mermaid.generateDiagram({
+  type: "flowchart",
+  code: `
+    flowchart TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Process]
+    B -->|No| D[End]
+  `
 });
 ```
 

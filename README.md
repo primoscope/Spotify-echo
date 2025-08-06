@@ -22,6 +22,8 @@
 - 🎵 **Spotify Integration** - Seamless playlist creation and music streaming
 - 📊 **Analytics Dashboard** - Deep insights into listening patterns and preferences  
 - 🔍 **Smart Recommendations** - ML-powered personalized suggestions using collaborative filtering
+- 🔧 **MCP Server Ecosystem** - Advanced automation with 12+ Model Context Protocol servers
+- 🤖 **AI Agent Integration** - GitHub automation, database operations, and web intelligence
 - 🎯 **Demo Mode** - Full functionality without API keys for instant testing
 - 🔊 **Voice Interface** - Voice commands for hands-free music discovery
 - 📱 **Mobile Responsive** - Optimized experience across all devices
@@ -217,10 +219,33 @@ npm run docker:check    # System health check
 ### Technology Stack
 - **Backend**: Node.js, Express.js, Socket.io for real-time features
 - **Frontend**: React, Vite for modern web experience
-- **Database**: MongoDB (primary), SQLite (fallback), Supabase support
+- **Database**: MongoDB (primary), SQLite (fallback), PostgreSQL support
 - **AI/ML**: OpenAI GPT, Google Gemini, custom recommendation algorithms
+- **MCP Ecosystem**: 12+ Model Context Protocol servers for enhanced automation
 - **Infrastructure**: Docker, nginx, SSL automation, health monitoring
 - **Deployment**: DigitalOcean App Platform, Docker Compose, Ubuntu
+
+### MCP Server Ecosystem 🤖
+
+EchoTune AI leverages an extensive ecosystem of Model Context Protocol (MCP) servers for advanced automation and AI agent capabilities:
+
+**Core Infrastructure Servers:**
+- **GitHub MCP Server** - Repository management, automated PRs, issue tracking
+- **File System MCP Server** - Secure file operations and data pipeline automation
+- **SQLite/PostgreSQL MCP Servers** - Database operations with intelligent query building
+- **Memory MCP Server** - Persistent context and knowledge graph storage
+
+**Music Intelligence Servers:**
+- **YouTube MCP Server** - Cross-platform music discovery and content analysis
+- **Audio Analysis Server** - Advanced feature extraction and similarity matching
+- **Web Search Server** - Real-time music trend analysis and discovery
+
+**Development Automation:**
+- **Browser Automation** - Spotify Web Player interaction and testing
+- **Webhook Processing** - Real-time event handling and API integration
+- **Performance Monitoring** - Application health and optimization insights
+
+📖 **[Complete MCP Setup Guide](mcp-server/README.md)** | **[Community Servers Guide](docs/guides/COMMUNITY_MCP_SERVERS.md)**
 
 ### Project Structure
 ```

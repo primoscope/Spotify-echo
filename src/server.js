@@ -31,6 +31,8 @@ const spotifyRoutes = require('./api/routes/spotify');
 const providersRoutes = require('./api/routes/providers');
 const databaseRoutes = require('./api/routes/database');
 const playlistRoutes = require('./api/routes/playlists');
+const settingsRoutes = require('./api/routes/settings');
+const analyticsRoutes = require('./api/routes/analytics');
 const { 
   extractUser, 
   ensureDatabase, 
@@ -601,6 +603,8 @@ app.use('/api/spotify', spotifyRoutes);
 app.use('/api/providers', providersRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

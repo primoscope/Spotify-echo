@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSocket } from '../realtime/SocketContext';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useSpotifyPlayer } from '../player/SpotifyPlayerContext';
 import VoiceInterface from './VoiceInterface';
-import ProviderSwitcher from './ProviderSwitcher';
-import MessageList from './MessageList';
-import ChatInput from './ChatInput';
-import './ChatInterface.css';
+import ProviderSwitcher from '../ProviderPanel';
+import MessageList from '../MessageList';
+import ChatInput from '../ChatInput';
+import '../../styles/ModernChatInterface.css';
 
 /**
  * Enhanced Chat Interface Component

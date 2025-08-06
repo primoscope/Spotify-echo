@@ -44,7 +44,7 @@ class HealthCheckSystem {
       system: await this.getSystemInfo(),
     };
 
-    let overallHealth = true;
+    let hasCriticalErrors = false;
 
     // Run all health checks in parallel
     const checkPromises = Array.from(this.checks.entries()).map(async ([checkName, checkFunction]) => {
@@ -62,8 +62,8 @@ class HealthCheckSystem {
           }
         };
       } catch (error) {
-        // Some health checks are optional and shouldn't fail the entire system
-        const optionalChecks = ['docker', 'ssl', 'network', 'storage'];
+        // Define which checks are optional and shouldn't fail the health check
+        const optionalChecks = ['docker', 'ssl', 'network', 'storage', 'redis', 'database'];
         const isOptional = optionalChecks.includes(checkName);
         
         return {
@@ -86,13 +86,14 @@ class HealthCheckSystem {
     checkResults.forEach(({ name, result }) => {
       results.checks[name] = result;
       
-      if (result.status !== 'healthy' && result.status !== 'warning') {
-        // Only fail on 'error' status, not 'warning'
-        overallHealth = false;
+      // Only treat non-optional errors as critical
+      if (result.status === 'error' && !result.optional) {
+        hasCriticalErrors = true;
       }
     });
 
-    results.status = overallHealth ? 'healthy' : 'unhealthy';
+    // Overall status is only unhealthy if there are critical errors
+    results.status = hasCriticalErrors ? 'unhealthy' : 'healthy';
     return results;
   }
 

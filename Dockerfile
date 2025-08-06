@@ -27,7 +27,7 @@ COPY package*.json ./
 COPY requirements*.txt ./
 
 # Install dependencies
-RUN npm ci --no-audit --no-fund
+RUN npm ci --no-audit --no-fund --prefer-offline
 
 # Copy source code
 COPY . .
@@ -108,8 +108,8 @@ RUN mkdir -p logs data temp uploads cache && \
 # Create enhanced health check script
 RUN echo '#!/bin/sh' > /app/health-check.sh && \
     echo 'set -e' >> /app/health-check.sh && \
-    echo 'HEALTH_URL="http://localhost:${PORT}/health"' >> /app/health-check.sh && \
-    echo 'if curl -f -s --max-time 10 "$HEALTH_URL" | grep -q "healthy"; then' >> /app/health-check.sh && \
+    echo 'HEALTH_URL="http://localhost:${PORT:-3000}/health"' >> /app/health-check.sh && \
+    echo 'if curl -f -s --max-time 10 --connect-timeout 5 "$HEALTH_URL" >/dev/null 2>&1; then' >> /app/health-check.sh && \
     echo '  echo "Health check passed"' >> /app/health-check.sh && \
     echo '  exit 0' >> /app/health-check.sh && \
     echo 'else' >> /app/health-check.sh && \

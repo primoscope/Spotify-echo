@@ -31,6 +31,8 @@ const spotifyRoutes = require('./api/routes/spotify');
 const providersRoutes = require('./api/routes/providers');
 const databaseRoutes = require('./api/routes/database');
 const playlistRoutes = require('./api/routes/playlists');
+const settingsRoutes = require('./api/routes/settings');
+const analyticsRoutes = require('./api/routes/analytics');
 const { 
   extractUser, 
   ensureDatabase, 
@@ -253,9 +255,13 @@ app.get('/health', async (req, res) => {
     try {
         const healthReport = await healthChecker.runAllChecks();
         
-        // Set appropriate HTTP status based on health
-        const statusCode = healthReport.status === 'healthy' ? 200 : 
-                          healthReport.status === 'warning' ? 200 : 503;
+        // For production deployment health checks, only fail on critical errors
+        // Warnings and missing optional services should not cause 503s
+        const hasCriticalErrors = Object.values(healthReport.checks).some(check => 
+            check.status === 'unhealthy' && !check.optional
+        );
+        
+        const statusCode = hasCriticalErrors ? 503 : 200;
         
         res.status(statusCode).json(healthReport);
     } catch (error) {
@@ -597,6 +603,8 @@ app.use('/api/spotify', spotifyRoutes);
 app.use('/api/providers', providersRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

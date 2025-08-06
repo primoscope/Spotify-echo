@@ -4,7 +4,7 @@
  */
 
 const mongoManager = require('../../database/mongodb');
-const { getEnvironmentConfig } = require('../config/production');
+const { getEnvironmentConfig } = require('../../config/production');
 
 const config = getEnvironmentConfig();
 

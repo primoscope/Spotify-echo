@@ -560,13 +560,16 @@ if (typeof window !== 'undefined') {
   performanceManager.createRateLimiter('openai', performanceManager.config.rateLimit.openAI);
 }
 
-// Browser-compatible exports
+// Export the class and instance for different environments
 if (typeof window !== 'undefined') {
+  // Browser environment
   window.PerformanceManager = PerformanceManager;
   window.performanceManager = performanceManager;
-} else if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    PerformanceManager,
-    performanceManager
-  };
+} 
+
+// Always export for Node.js (CommonJS)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PerformanceManager;
+  module.exports.PerformanceManager = PerformanceManager;
+  module.exports.performanceManager = performanceManager;
 }

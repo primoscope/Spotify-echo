@@ -15,6 +15,14 @@ module.exports = {
     maxWorkers: 1, // Prevent worker process issues
     forceExit: true, // Force exit to prevent hanging
     detectOpenHandles: false, // Disable to prevent circular reference issues
+    transformIgnorePatterns: [
+        'node_modules/(?!(mongodb|bson|@opentelemetry)/)'
+    ],
+    moduleFileExtensions: ['js', 'json', 'mjs'],
+    transform: {
+        '^.+\\.js$': 'babel-jest',
+        '^.+\\.mjs$': 'babel-jest'
+    },
     projects: [
         {
             displayName: 'node',
@@ -25,6 +33,9 @@ module.exports = {
                 '**/tests/ml/**/*.test.js',
                 '**/tests/security/**/*.test.js',
                 '**/tests/integration/**/*.test.js'
+            ],
+            transformIgnorePatterns: [
+                'node_modules/(?!(mongodb|bson|@opentelemetry)/)'
             ],
             maxWorkers: 1
         },
@@ -37,6 +48,9 @@ module.exports = {
                 '**/tests/chat/**/*.test.js'
             ],
             setupFilesAfterEnv: ['<rootDir>/setup.js'],
+            transformIgnorePatterns: [
+                'node_modules/(?!(mongodb|bson|@opentelemetry)/)'
+            ],
             maxWorkers: 1
         }
     ]

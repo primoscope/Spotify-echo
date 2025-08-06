@@ -36,6 +36,87 @@ Spotify-echo/
 └── README.md             # Comprehensive project documentation
 ```
 
+## 🔧 MCP Server Integration for Agents
+
+### Using MCP Servers in Development Workflows
+
+EchoTune AI includes several MCP servers that agents can leverage for enhanced automation:
+
+#### 1. FileScopeMCP for Repository Management
+```javascript
+// Example: Automated code organization
+const fileScope = await connectMCP('filesystem');
+await fileScope.organizeFiles({
+  pattern: '**/*.js',
+  destination: 'src/modules/',
+  groupBy: 'functionality'
+});
+```
+
+#### 2. Mermaid for Workflow Visualization
+```javascript
+// Example: Generate architecture diagrams
+const mermaid = await connectMCP('mermaid');
+const diagram = await mermaid.generateDiagram({
+  type: 'flowchart',
+  nodes: ['User', 'API', 'Database', 'MCP Server'],
+  relationships: [
+    ['User', 'API', 'requests'],
+    ['API', 'Database', 'queries'],
+    ['API', 'MCP Server', 'automation']
+  ]
+});
+```
+
+#### 3. Browser Automation for Testing
+```javascript
+// Example: End-to-end testing
+const browser = await connectMCP('browser');
+await browser.navigate('http://localhost:3000');
+await browser.screenshot('./testing_screenshots/homepage.png');
+await browser.interact('.login-button', 'click');
+```
+
+#### 4. Community MCP Servers for Code Intelligence
+```javascript
+// Example: Using mcp-code-intel for analysis
+const codeIntel = await connectMCP('code-intel');
+const analysis = await codeIntel.analyzeFile('mcp-server/spotify_server.py', {
+  includeSecurityScan: true,
+  checkDependencies: true,
+  suggestRefactoring: true
+});
+
+// Apply improvements based on analysis
+for (const suggestion of analysis.suggestions) {
+  if (suggestion.confidence > 0.8) {
+    await codeIntel.applyFix(suggestion);
+  }
+}
+```
+
+### MCP Server Best Practices for Agents
+
+1. **Always validate server availability** before use
+2. **Use appropriate timeouts** for server operations
+3. **Handle errors gracefully** with fallback options
+4. **Cache results** when possible to improve performance
+5. **Monitor resource usage** of MCP servers
+
+```javascript
+// Example: Robust MCP server usage pattern
+async function useMCPServer(serverName, operation) {
+  try {
+    const server = await connectMCP(serverName, { timeout: 30000 });
+    const result = await server[operation.name](operation.params);
+    return { success: true, data: result };
+  } catch (error) {
+    logger.error(`MCP server ${serverName} error:`, error);
+    return { success: false, error: error.message };
+  }
+}
+```
+
 ## 🔧 Development Environment Context
 
 ### Prerequisites
@@ -555,7 +636,8 @@ When suggesting code improvements, prioritize:
 - **CODING_AGENT_GUIDE.md**: Detailed development workflows
 - **Database Architecture**: MongoDB collections and Supabase tables
 - **API Documentation**: Spotify Web API integration patterns
-- **MCP Server**: Browser automation capabilities
+- **MCP Servers**: Comprehensive automation and analysis capabilities (see `docs/mcp-servers.md`)
+- **Community MCP Servers**: Extended functionality via community packages (see `docs/guides/COMMUNITY_MCP_SERVERS.md`)
 
 ## 🤝 Code Review Guidelines
 

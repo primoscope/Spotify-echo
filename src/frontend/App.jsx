@@ -3,6 +3,7 @@ import ChatInterface from './components/ChatInterface';
 import Dashboard from './components/Dashboard';
 import UserProfile from './components/UserProfile';
 import PlaylistManager from './components/PlaylistManager';
+import Settings from './components/Settings';
 import Header from './components/Header';
 import AuthCallback from './components/AuthCallback';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -29,6 +30,7 @@ function App() {
                   <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                   <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
                   <Route path="/playlists" element={<ProtectedRoute><PlaylistManager /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

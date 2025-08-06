@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSocket } from '../realtime/SocketContext';
 import { useAuth } from '../auth/AuthContext';
 import { useSpotifyPlayer } from '../player/SpotifyPlayerContext';
@@ -160,7 +160,7 @@ const ChatInterface = () => {
   /**
    * Handle chat response from server
    */
-  const handleChatResponse = (data) => {
+  const handleChatResponse = useCallback((data) => {
     const newMessage = {
       id: Date.now() + Math.random(),
       sender: 'assistant',
@@ -179,7 +179,7 @@ const ChatInterface = () => {
 
     // Handle music-related actions
     handleMusicActions(data);
-  };
+  }, [currentProvider, ttsEnabled]);
 
   /**
    * Handle streaming message start
@@ -199,7 +199,7 @@ const ChatInterface = () => {
   /**
    * Handle streaming message complete
    */
-  const handleStreamComplete = (data) => {
+  const handleStreamComplete = useCallback((data) => {
     const newMessage = {
       id: Date.now() + Math.random(),
       sender: 'assistant',
@@ -219,7 +219,7 @@ const ChatInterface = () => {
 
     // Handle music-related actions
     handleMusicActions(data);
-  };
+  }, [currentProvider, ttsEnabled, streamingMessage]);
 
   /**
    * Handle provider switch

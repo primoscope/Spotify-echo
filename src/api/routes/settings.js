@@ -325,7 +325,7 @@ class SettingsManager {
     validateSettings(settings) {
         const errors = [];
         
-        Object.entries(this.settingsSchema).forEach(([categoryKey, category]) => {
+        Object.entries(this.settingsSchema).forEach(([_categoryKey, category]) => {
             Object.entries(category.settings).forEach(([settingKey, setting]) => {
                 const value = settings[settingKey];
                 
@@ -493,6 +493,65 @@ router.get('/status', async (req, res) => {
         };
         
         res.json({ success: true, status });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Main settings routes for frontend
+
+// GET /api/settings - Get current settings
+router.get('/', async (req, res) => {
+    try {
+        const settings = await settingsManager.getCurrentSettings();
+        
+        // Mask sensitive values
+        const maskedSettings = {};
+        Object.entries(settings).forEach(([key, value]) => {
+            if (key.includes('SECRET') || key.includes('PASSWORD') || key.includes('KEY')) {
+                maskedSettings[key] = value ? '********' : '';
+            } else {
+                maskedSettings[key] = value;
+            }
+        });
+        
+        res.json({ success: true, settings: maskedSettings });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// POST /api/settings - Update settings
+router.post('/', async (req, res) => {
+    try {
+        const settings = req.body;
+        
+        if (!settings || typeof settings !== 'object') {
+            return res.status(400).json({ success: false, error: 'Settings object is required' });
+        }
+        
+        // Validate settings
+        const validationErrors = settingsManager.validateSettings(settings);
+        if (validationErrors.length > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Validation failed',
+                errors: validationErrors 
+            });
+        }
+        
+        // Update settings
+        const result = await settingsManager.updateSettings(settings);
+        
+        if (result.success) {
+            res.json({ 
+                success: true, 
+                message: 'Settings updated successfully. Some changes may require restart.',
+                requiresRestart: true
+            });
+        } else {
+            res.status(500).json(result);
+        }
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

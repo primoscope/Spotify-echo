@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const SpotifyPlayerContext = createContext();
 
@@ -36,7 +36,7 @@ export const SpotifyPlayerProvider = ({ children }) => {
   /**
    * Initialize Spotify Web Player SDK
    */
-  const initializePlayer = (token) => {
+  const initializePlayer = useCallback((token) => {
     // Load Spotify Web Player SDK
     if (!window.Spotify) {
       const script = document.createElement('script');
@@ -50,7 +50,7 @@ export const SpotifyPlayerProvider = ({ children }) => {
     } else {
       createPlayer(token);
     }
-  };
+  }, [volume]); // Add volume dependency since it's used in createPlayer
 
   /**
    * Create Spotify Player instance

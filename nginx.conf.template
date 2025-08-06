@@ -1,0 +1,168 @@
+# Nginx configuration template for EchoTune AI - Production
+# This template uses environment variables for dynamic configuration
+
+events {
+    worker_connections ${NGINX_WORKER_CONNECTIONS:-1024};
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    # Security headers
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/json
+        application/xml+rss;
+
+    # Rate limiting - configurable via environment variables
+    limit_req_zone $binary_remote_addr zone=api:10m rate=${API_RATE_LIMIT:-10r/s};
+    limit_req_zone $binary_remote_addr zone=auth:10m rate=${AUTH_RATE_LIMIT:-5r/m};
+    limit_req_zone $binary_remote_addr zone=general:10m rate=${GENERAL_RATE_LIMIT:-50r/s};
+
+    # Upstream to the Node.js app
+    upstream app {
+        server ${BACKEND_HOST:-app}:${BACKEND_PORT:-3000};
+        keepalive 32;
+    }
+
+    # HTTP to HTTPS redirect (only if SSL is enabled)
+    server {
+        listen 80;
+        server_name ${DOMAIN} www.${DOMAIN};
+        
+        # Handle Let's Encrypt challenges
+        location /.well-known/acme-challenge/ {
+            root /var/www/html;
+        }
+        
+        # Redirect all other traffic to HTTPS if SSL is enabled
+        location / {
+            if (${SSL_ENABLED:-false}) {
+                return 301 https://$server_name$request_uri;
+            }
+            # If SSL is disabled, proxy to app
+            proxy_pass http://app;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+        }
+    }
+
+    # HTTPS server (only if SSL is enabled)
+    server {
+        listen 443 ssl http2;
+        server_name ${DOMAIN} www.${DOMAIN};
+
+        # SSL configuration - dynamic paths
+        ssl_certificate ${SSL_CERT_PATH:-/etc/nginx/ssl/cert.pem};
+        ssl_certificate_key ${SSL_KEY_PATH:-/etc/nginx/ssl/key.pem};
+        
+        # Optional SSL chain
+        # ssl_trusted_certificate ${SSL_CHAIN_PATH};
+        
+        # SSL security settings
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
+        ssl_prefer_server_ciphers off;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 10m;
+
+        # Security headers
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+        # Logging
+        access_log /var/log/nginx/echotune_access.log;
+        error_log /var/log/nginx/echotune_error.log;
+
+        # Root directory for static files
+        root /var/www/html;
+        index index.html;
+
+        # Handle static files
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            proxy_pass http://app;
+            proxy_cache_valid 200 1h;
+            add_header Cache-Control "public, immutable";
+            expires 1h;
+        }
+
+        # API endpoints with rate limiting
+        location /api/ {
+            limit_req zone=api burst=20 nodelay;
+            proxy_pass http://app;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+        }
+
+        # Auth endpoints with stricter rate limiting
+        location /auth/ {
+            limit_req zone=auth burst=5 nodelay;
+            proxy_pass http://app;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+        }
+
+        # Health check endpoint
+        location /health {
+            proxy_pass http://app;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            access_log off;
+        }
+
+        # Main application
+        location / {
+            limit_req zone=general burst=50 nodelay;
+            proxy_pass http://app;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+        }
+
+        # Error pages
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
+    }
+}

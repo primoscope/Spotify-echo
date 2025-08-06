@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './VoiceInterface.css';
 
 /**
@@ -38,7 +38,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   /**
    * Initialize Speech Recognition API
    */
-  const initializeSpeechRecognition = () => {
+  const initializeSpeechRecognition = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       setErrorMessage('Speech recognition not supported in this browser');
       return;
@@ -135,7 +135,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       { code: 'zh-CN', name: 'Chinese (Simplified)' }
     ];
     setSupportedLanguages(languages);
-  };
+  }, [selectedLanguage]);
 
   /**
    * Initialize audio visualizer
@@ -287,7 +287,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   /**
    * Cleanup resources
    */
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -297,7 +297,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
     }
     
     stopVisualization();
-  };
+  }, []);
 
   /**
    * Handle manual transcript submission

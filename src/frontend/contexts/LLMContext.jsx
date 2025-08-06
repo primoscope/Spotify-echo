@@ -1,5 +1,5 @@
 // React is needed for JSX
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const LLMContext = createContext();
 
@@ -26,7 +26,7 @@ export function LLMProvider({ children }) {
     refreshProviders();
   }, [refreshProviders]); // Add refreshProviders dependency
 
-  const refreshProviders = async () => {
+  const refreshProviders = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch('/api/chat/providers');
@@ -69,7 +69,7 @@ export function LLMProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [providers, currentProvider]);
 
   const switchProvider = async (providerId) => {
     if (!providers[providerId]?.available) {

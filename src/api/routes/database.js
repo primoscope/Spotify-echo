@@ -193,11 +193,31 @@ router.get('/analytics', async (req, res) => {
   try {
     const { userId, dateFrom, dateTo } = req.query;
     
+    // If no userId provided, return MongoDB insights
     if (!userId) {
-      return res.status(400).json({
-        success: false,
-        error: 'User ID is required'
-      });
+      try {
+        const mongodbInsights = await getMongoDBInsights();
+        return res.json({
+          success: true,
+          analytics: mongodbInsights,
+          source: 'mongodb_insights'
+        });
+      } catch (error) {
+        console.error('MongoDB insights error:', error);
+        return res.json({
+          success: true,
+          analytics: {
+            collections: 0,
+            totalDocuments: 0,
+            users: 0,
+            listeningHistory: 0,
+            recommendations: 0,
+            size: 'Unknown'
+          },
+          source: 'fallback',
+          error: 'Could not retrieve MongoDB insights'
+        });
+      }
     }
 
     const options = {};
@@ -228,6 +248,78 @@ router.get('/analytics', async (req, res) => {
     });
   }
 });
+
+/**
+ * Get MongoDB insights and statistics
+ */
+async function getMongoDBInsights() {
+  if (!databaseManager.mongodb) {
+    throw new Error('MongoDB not connected');
+  }
+
+  try {
+    const db = databaseManager.mongodb.db;
+    
+    // Get collections info
+    const collections = await db.listCollections().toArray();
+    const collectionNames = collections.map(c => c.name);
+    
+    const insights = {
+      collections: collections.length,
+      totalDocuments: 0,
+      users: 0,
+      listeningHistory: 0,
+      recommendations: 0,
+      size: 'Unknown'
+    };
+
+    // Count documents in each collection
+    for (const collectionName of collectionNames) {
+      try {
+        const collection = db.collection(collectionName);
+        const count = await collection.countDocuments();
+        insights.totalDocuments += count;
+        
+        // Specific collection counts
+        if (collectionName.includes('user')) {
+          insights.users = count;
+        } else if (collectionName.includes('listening') || collectionName.includes('history')) {
+          insights.listeningHistory = count;
+        } else if (collectionName.includes('recommendation')) {
+          insights.recommendations = count;
+        }
+      } catch (err) {
+        console.warn(`Could not count documents in ${collectionName}:`, err.message);
+      }
+    }
+
+    // Try to get database stats
+    try {
+      const stats = await db.admin().command({ dbStats: 1 });
+      if (stats.dataSize) {
+        insights.size = formatBytes(stats.dataSize);
+      }
+    } catch (err) {
+      console.warn('Could not get database stats:', err.message);
+    }
+
+    return insights;
+  } catch (error) {
+    console.error('MongoDB insights error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Format bytes to human readable string
+ */
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
 
 /**
  * Get database info

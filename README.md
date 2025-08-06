@@ -77,6 +77,107 @@ curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/do
 
 📖 **[Enhanced Docker Guide](DOCKER_ENHANCED_GUIDE.md)** - Comprehensive Docker deployment guide
 
+#### 🐳 Docker Hub Credentials Setup
+
+**For pushing to Docker Hub Container Registry:**
+
+1. **Create Docker Hub Access Token:**
+   ```bash
+   # Go to https://hub.docker.com/settings/security
+   # Create new access token with Read/Write permissions
+   ```
+
+2. **Set up credentials in environment:**
+   ```bash
+   # For local development
+   export DOCKER_HUB_USERNAME=your_username
+   export DOCKER_HUB_TOKEN=your_access_token
+   
+   # For GitHub Actions (add these as repository secrets)
+   DOCKER_HUB_USERNAME=your_username
+   DOCKER_HUB_TOKEN=your_access_token
+   ```
+
+3. **Login and push:**
+   ```bash
+   # Manual login
+   echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+   
+   # Build and push
+   docker build -t your_username/echotune-ai:latest .
+   docker push your_username/echotune-ai:latest
+   ```
+
+**Important Security Notes:**
+- ✅ **Never commit Docker Hub credentials to code**
+- ✅ **Use GitHub Secrets or environment variables**  
+- ✅ **Use access tokens instead of passwords**
+- ✅ **Limit token permissions to only what's needed**
+
+#### 🚨 Docker Troubleshooting
+
+**Common Docker Build Issues:**
+
+1. **Build fails with permission errors:**
+   ```bash
+   # Fix: Ensure Docker daemon is running and user has permissions
+   sudo systemctl start docker
+   sudo usermod -aG docker $USER
+   # Log out and back in
+   ```
+
+2. **Health check failures (503 errors):**
+   ```bash
+   # Check container logs
+   docker logs container_name
+   
+   # Test health endpoint manually
+   docker exec -it container_name curl http://localhost:3000/health
+   
+   # Verify port binding
+   docker ps  # Should show 0.0.0.0:3000->3000/tcp
+   ```
+
+3. **Container won't start:**
+   ```bash
+   # Check environment variables
+   docker run --rm echotune-ai env
+   
+   # Check resource limits
+   docker stats
+   
+   # Run in interactive mode for debugging
+   docker run -it --rm echotune-ai /bin/sh
+   ```
+
+**Ubuntu Server Setup Issues:**
+
+1. **Docker installation fails:**
+   ```bash
+   # Follow official Docker installation for Ubuntu 22.04:
+   curl -fsSL https://get.docker.com -o get-docker.sh
+   sudo sh get-docker.sh
+   sudo systemctl enable docker
+   sudo systemctl start docker
+   ```
+
+2. **Firewall blocking connections:**
+   ```bash
+   # Allow Docker ports (adjust as needed)
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   sudo ufw allow 3000/tcp  # For development
+   ```
+
+3. **SSL certificate issues:**
+   ```bash
+   # Verify domain points to server
+   nslookup yourdomain.com
+   
+   # Check port 80 is accessible for Let's Encrypt
+   sudo netstat -tlnp | grep :80
+   ```
+
 ### 💻 Local Development
 ```bash
 git clone https://github.com/dzp5103/Spotify-echo.git
@@ -337,6 +438,214 @@ git checkout -b feature/amazing-feature
 - 📖 [Documentation](docs/) - Comprehensive guides
 - 🐛 [Report Issues](https://github.com/dzp5103/Spotify-echo/issues) - Bug reports
 - 💬 [Discussions](https://github.com/dzp5103/Spotify-echo/discussions) - Community support
+
+## ❓ Frequently Asked Questions (FAQ)
+
+### 🚀 Deployment & Setup
+
+**Q: Why is my DigitalOcean deployment failing with 503 health check errors?**
+A: Common causes and solutions:
+```bash
+# 1. Check application logs
+doctl apps logs <app-id> --component web
+
+# 2. Verify environment variables are set
+doctl apps spec get <app-id>
+
+# 3. Test health endpoint manually
+curl https://your-domain.com/health
+
+# 4. Common fixes:
+# - Ensure PORT=3000 is set in environment
+# - Verify DOMAIN matches your actual domain
+# - Check SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set
+```
+
+**Q: Docker build fails with "permission denied" errors?**
+A: Fix Docker permissions:
+```bash
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Restart Docker service
+sudo systemctl restart docker
+
+# Log out and back in, then test
+docker --version
+```
+
+**Q: Health check returns warnings - is this normal?**
+A: Yes! The application is designed to work without optional services:
+- ✅ **200 status** = Application healthy (even with warnings)
+- ❌ **503 status** = Critical errors that prevent operation
+- ⚠️ **Warnings** for missing optional services (Redis, SSL, etc.) are normal
+
+### 🐳 Docker & Container Issues
+
+**Q: Container won't start on Ubuntu server?**
+A: Check these common issues:
+```bash
+# 1. Verify Docker installation
+docker --version
+sudo systemctl status docker
+
+# 2. Check if ports are already in use
+sudo netstat -tlnp | grep :3000
+sudo netstat -tlnp | grep :80
+
+# 3. Verify Docker Compose syntax
+docker-compose config
+
+# 4. Check available resources
+df -h  # Disk space
+free -h  # Memory
+```
+
+**Q: How do I push to Docker Hub registry?**
+A: Set up Docker Hub credentials securely:
+```bash
+# 1. Create access token at https://hub.docker.com/settings/security
+# 2. Store credentials safely (never in code!)
+export DOCKER_HUB_USERNAME=your_username  
+export DOCKER_HUB_TOKEN=your_access_token
+
+# 3. Login and push
+echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+docker build -t $DOCKER_HUB_USERNAME/echotune-ai:latest .
+docker push $DOCKER_HUB_USERNAME/echotune-ai:latest
+```
+
+### 🔑 API Keys & Authentication  
+
+**Q: Do I need Spotify API keys to try the application?**
+A: No! The application works in demo mode without any API keys:
+- ✅ **Mock AI provider** works without API keys
+- ✅ **SQLite database** works without external database
+- ✅ **Basic chat interface** works for testing
+- 🎵 **Spotify features** require API keys for full functionality
+
+**Q: Where do I get Spotify API credentials?**
+A: Follow these steps:
+```bash
+# 1. Go to https://developer.spotify.com/dashboard
+# 2. Create new app with these settings:
+#    - App name: Your App Name
+#    - App description: Music recommendation app
+#    - Redirect URI: https://your-domain.com/auth/callback
+#    - API/SDK: Web API
+# 3. Copy Client ID and Client Secret to your .env file
+```
+
+**Q: How do I secure API keys in production?**
+A: Use these best practices:
+- ✅ **Environment variables** - never hardcode in source code
+- ✅ **GitHub Secrets** - for GitHub Actions deployments  
+- ✅ **DigitalOcean App Secrets** - for App Platform deployments
+- ✅ **Docker secrets** - for container deployments
+- ❌ **Never commit .env files** with real credentials
+
+### 🏥 Health Checks & Monitoring
+
+**Q: What does each health check status mean?**
+A: Health check status guide:
+- 🟢 **healthy** - Service working perfectly
+- 🟡 **warning** - Service has issues but app still functional  
+- 🔴 **unhealthy** - Critical service failure
+- ⚪ **not_configured** - Optional service not set up (normal)
+
+**Q: Which services are required vs optional?**
+A: Service requirements:
+```bash
+# ✅ REQUIRED (app won't start without these)
+- Application server (Node.js)
+- Basic memory/CPU resources
+
+# ⚠️ OPTIONAL (warnings OK, app still works)  
+- MongoDB database (SQLite fallback available)
+- Redis cache (in-memory fallback available)
+- SSL certificates (HTTP works for development)
+- Docker (can run directly with Node.js)
+- External network connectivity
+- AI API keys (mock provider available)
+```
+
+### 🌐 Network & SSL Issues
+
+**Q: SSL certificate errors on Ubuntu server?**
+A: Debug SSL setup:
+```bash
+# 1. Verify domain DNS points to server
+nslookup your-domain.com
+
+# 2. Check if port 80 is accessible (required for Let's Encrypt)
+sudo ufw allow 80/tcp
+sudo netstat -tlnp | grep :80
+
+# 3. Test certificate generation manually
+sudo certbot certonly --webroot -w /var/www/html -d your-domain.com
+
+# 4. Check certificate status
+sudo certbot certificates
+```
+
+**Q: Can't access application from outside the server?**
+A: Check firewall and networking:
+```bash
+# 1. Check if application is listening on all interfaces
+sudo netstat -tlnp | grep :3000
+# Should show 0.0.0.0:3000, not 127.0.0.1:3000
+
+# 2. Check firewall rules
+sudo ufw status
+sudo ufw allow 3000/tcp  # For development
+sudo ufw allow 80/tcp    # For HTTP
+sudo ufw allow 443/tcp   # For HTTPS
+
+# 3. For cloud servers, check security groups/firewall rules in provider dashboard
+```
+
+### 🔧 Development & Contributing
+
+**Q: How do I set up the development environment?**
+A: Quick development setup:
+```bash
+# 1. Clone and install dependencies
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+npm install
+
+# 2. Set up environment (minimal for development)
+cp .env.example .env
+# Edit .env with:
+# NODE_ENV=development
+# PORT=3000
+
+# 3. Start development server
+npm start
+# App available at http://localhost:3000
+```
+
+**Q: How do I run tests?**
+A: Run the test suite:
+```bash
+# Run all tests
+npm test
+
+# Run specific test categories  
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+
+# Run tests with coverage
+npm run test -- --coverage
+```
+
+**Q: How do I report bugs or request features?**
+A: Use GitHub for issue tracking:
+- 🐛 **Bug reports**: https://github.com/dzp5103/Spotify-echo/issues
+- 💡 **Feature requests**: https://github.com/dzp5103/Spotify-echo/discussions
+- 📖 **Documentation issues**: Include "docs" label
+- 🚀 **Enhancement proposals**: Use discussion for feedback first
 
 ## 📄 License
 

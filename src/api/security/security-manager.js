@@ -134,12 +134,15 @@ class SecurityManager {
         this.requestThrottle = slowDown({
             windowMs: 15 * 60 * 1000, // 15 minutes
             delayAfter: 500, // Allow 500 requests per 15 minutes at full speed
-            delayMs: 100, // Add 100ms delay per request after delayAfter
+            delayMs: () => 100, // Fixed: Use function format for v2 compatibility
             maxDelayMs: 5000, // Maximum delay of 5 seconds
-            onLimitReached: (req, _res, _options) => {
+            // Removed deprecated onLimitReached - use handler middleware instead
+            validate: { delayMs: false }, // Disable warning about delayMs format
+            handler: (req, res, next) => {
                 const ip = this.getClientIP(req);
                 this.suspiciousIPs.add(ip);
                 console.warn(`Request throttling activated for IP: ${ip}`);
+                next(); // Continue to apply the delay
             }
         });
     }

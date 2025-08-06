@@ -253,9 +253,13 @@ app.get('/health', async (req, res) => {
     try {
         const healthReport = await healthChecker.runAllChecks();
         
-        // Set appropriate HTTP status based on health
-        const statusCode = healthReport.status === 'healthy' ? 200 : 
-                          healthReport.status === 'warning' ? 200 : 503;
+        // For production deployment health checks, only fail on critical errors
+        // Warnings and missing optional services should not cause 503s
+        const hasCriticalErrors = Object.values(healthReport.checks).some(check => 
+            check.status === 'unhealthy' && !check.optional
+        );
+        
+        const statusCode = hasCriticalErrors ? 503 : 200;
         
         res.status(statusCode).json(healthReport);
     } catch (error) {

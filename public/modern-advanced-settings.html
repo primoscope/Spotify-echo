@@ -6,6 +6,10 @@
     <title>EchoTune AI - Advanced Settings</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1db954">
+    
     <!-- External Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -147,6 +151,22 @@
         .nav-link i {
             width: 20px;
             text-align: center;
+        }
+
+        .nav-link.external-link {
+            position: relative;
+        }
+
+        .external-icon {
+            position: absolute;
+            right: 12px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .nav-link.external-link:hover .external-icon {
+            opacity: 1;
+            color: var(--primary-color);
         }
 
         .content {
@@ -319,6 +339,13 @@
                             <a href="#" class="nav-link" data-section="analytics">
                                 <i class="fas fa-chart-bar"></i>
                                 <span>MongoDB Analytics</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/analytics-dashboard.html" class="nav-link external-link" target="_blank">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Real-time Dashboard</span>
+                                <i class="fas fa-external-link-alt external-icon"></i>
                             </a>
                         </li>
                         <li class="nav-item">

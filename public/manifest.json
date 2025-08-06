@@ -1,0 +1,150 @@
+{
+  "name": "EchoTune AI - Music Discovery",
+  "short_name": "EchoTune AI",
+  "description": "AI-powered music recommendation system with conversational interface, Spotify integration, and advanced ML algorithms",
+  "version": "2.1.0",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1db954",
+  "background_color": "#191414",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["music", "entertainment", "productivity"],
+  "screenshots": [
+    {
+      "src": "/assets/screenshots/mobile-chat.png",
+      "type": "image/png",
+      "sizes": "640x1136",
+      "form_factor": "narrow",
+      "label": "AI Music Chat Interface"
+    },
+    {
+      "src": "/assets/screenshots/desktop-dashboard.png", 
+      "type": "image/png",
+      "sizes": "1920x1080",
+      "form_factor": "wide",
+      "label": "Analytics Dashboard"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/assets/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/icons/icon-96x96.png",
+      "sizes": "96x96", 
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Chat with AI",
+      "short_name": "AI Chat",
+      "description": "Start a conversation about music",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "/assets/icons/chat-shortcut.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Analytics Dashboard",
+      "short_name": "Analytics", 
+      "description": "View music analytics and insights",
+      "url": "/analytics",
+      "icons": [
+        {
+          "src": "/assets/icons/analytics-shortcut.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "short_name": "Settings",
+      "description": "Configure AI providers and preferences",
+      "url": "/modern-advanced-settings.html",
+      "icons": [
+        {
+          "src": "/assets/icons/settings-shortcut.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://github.com/dzp5103/Spotify-echo"
+    }
+  ],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "web+echotune",
+      "url": "/?track=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/playlist-import",
+      "accept": {
+        "application/json": [".json"],
+        "text/csv": [".csv"]
+      }
+    }
+  ]
+}

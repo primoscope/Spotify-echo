@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Analytics Dashboard - EchoTune AI</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="theme-color" content="#1db954">
+    <style>
+        :root {
+            --primary-color: #1db954;
+            --primary-dark: #1ed760;
+            --background-dark: #121212;
+            --background-light: #282828;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-color: #e22134;
+            --warning-color: #ff9500;
+            --success-color: #1db954;
+            --info-color: #1e88e5;
+            --gradient: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .dashboard-header {
+            background: var(--gradient);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .dashboard-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--background-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .control-button.active {
+            background: var(--accent-color);
+        }
+
+        .refresh-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .refresh-indicator.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--success-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .analytics-card {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .card-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-live {
+            background: rgba(29, 185, 84, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-cached {
+            background: rgba(255, 149, 0, 0.2);
+            color: var(--warning-color);
+        }
+
+        .status-offline {
+            background: rgba(226, 33, 52, 0.2);
+            color: var(--accent-color);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--text-secondary);
+        }
+
+        .loading-state .spinner {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 15px;
+        }
+
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--accent-color);
+            text-align: center;
+        }
+
+        .error-state .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .offline-notice {
+            background: rgba(226, 33, 52, 0.1);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin: 20px;
+        }
+
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .connection-online {
+            background: rgba(29, 185, 84, 0.9);
+            color: white;
+        }
+
+        .connection-offline {
+            background: rgba(226, 33, 52, 0.9);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .dashboard-controls {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .control-button {
+                font-size: 0.9rem;
+                padding: 10px 16px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <h1>🎵 Real-time Analytics Dashboard</h1>
+        <p>Live insights into your music recommendation system</p>
+    </header>
+
+    <nav class="dashboard-controls">
+        <button class="control-button active" data-view="overview">📊 Overview</button>
+        <button class="control-button" data-view="users">👥 Users</button>
+        <button class="control-button" data-view="music">🎵 Music</button>
+        <button class="control-button" data-view="performance">⚡ Performance</button>
+        <button class="control-button" data-view="realtime">📡 Real-time</button>
+        
+        <div class="refresh-indicator" id="refreshIndicator">
+            <div class="spinner"></div>
+            <span>Live updating...</span>
+        </div>
+    </nav>
+
+    <div class="offline-notice" id="offlineNotice" style="display: none;">
+        🔌 You're offline. Showing cached data from your last session.
+    </div>
+
+    <main class="dashboard-grid" id="dashboardGrid">
+        <!-- Overview Cards -->
+        <div class="analytics-card" data-view="overview">
+            <div class="card-header">
+                <h2 class="card-title">📈 System Overview</h2>
+                <span class="card-status status-live" id="overviewStatus">Live</span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalUsers">--</span>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="activeUsers">--</span>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalRecommendations">--</span>
+                    <div class="stat-label">Recommendations</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="systemHealth">--</span>
+                    <div class="stat-label">System Health</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Analytics -->
+        <div class="analytics-card" data-view="users">
+            <div class="card-header">
+                <h2 class="card-title">👥 User Analytics</h2>
+                <span class="card-status status-live" id="usersStatus">Live</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="userChart"></canvas>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value" id="newUsersToday">--</span>
+                    <div class="stat-label">New Today</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="retentionRate">--</span>
+                    <div class="stat-label">Retention Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Music Analytics -->
+        <div class="analytics-card" data-view="music">
+            <div class="card-header">
+                <h2 class="card-title">🎵 Music Analytics</h2>
+                <span class="card-status status-live" id="musicStatus">Live</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="musicChart"></canvas>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalPlays">--</span>
+                    <div class="stat-label">Total Plays</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="uniqueTracks">--</span>
+                    <div class="stat-label">Unique Tracks</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Monitoring -->
+        <div class="analytics-card" data-view="performance">
+            <div class="card-header">
+                <h2 class="card-title">⚡ Performance Metrics</h2>
+                <span class="card-status status-live" id="performanceStatus">Live</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value" id="avgResponseTime">--ms</span>
+                    <div class="stat-label">Avg Response</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="uptime">--</span>
+                    <div class="stat-label">Uptime</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Activity -->
+        <div class="analytics-card" data-view="realtime">
+            <div class="card-header">
+                <h2 class="card-title">📡 Live Activity</h2>
+                <span class="card-status status-live" id="realtimeStatus">Live</span>
+            </div>
+            <div id="activityFeed" class="activity-feed">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading real-time activity...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Health -->
+        <div class="analytics-card" data-view="overview">
+            <div class="card-header">
+                <h2 class="card-title">🗄️ Database Health</h2>
+                <span class="card-status status-live" id="databaseStatus">Live</span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value" id="dbConnections">--</span>
+                    <div class="stat-label">Connections</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="dbSize">--</span>
+                    <div class="stat-label">Database Size</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="dbOperations">--</span>
+                    <div class="stat-label">Operations/sec</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="dbUptime">--</span>
+                    <div class="stat-label">DB Uptime</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="connection-status connection-online" id="connectionStatus">
+        🟢 Online
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <script>
+        class RealTimeAnalyticsDashboard {
+            constructor() {
+                this.updateInterval = 5000; // 5 seconds
+                this.charts = {};
+                this.currentView = 'overview';
+                this.isOnline = navigator.onLine;
+                this.updateTimer = null;
+                
+                this.init();
+            }
+
+            async init() {
+                this.setupEventListeners();
+                this.initializeCharts();
+                this.updateConnectionStatus();
+                this.startRealTimeUpdates();
+                
+                // Initial data load
+                await this.loadDashboardData();
+            }
+
+            setupEventListeners() {
+                // View switching
+                document.querySelectorAll('.control-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const view = e.target.dataset.view;
+                        this.switchView(view);
+                    });
+                });
+
+                // Online/offline detection
+                window.addEventListener('online', () => {
+                    this.isOnline = true;
+                    this.updateConnectionStatus();
+                    this.startRealTimeUpdates();
+                });
+
+                window.addEventListener('offline', () => {
+                    this.isOnline = false;
+                    this.updateConnectionStatus();
+                    this.stopRealTimeUpdates();
+                });
+
+                // Page visibility for performance optimization
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.stopRealTimeUpdates();
+                    } else {
+                        this.startRealTimeUpdates();
+                    }
+                });
+            }
+
+            switchView(view) {
+                this.currentView = view;
+                
+                // Update button states
+                document.querySelectorAll('.control-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-view="${view}"]`).classList.add('active');
+
+                // Show/hide relevant cards
+                document.querySelectorAll('.analytics-card').forEach(card => {
+                    const cardView = card.dataset.view;
+                    if (cardView === view || cardView === 'overview') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            initializeCharts() {
+                // User Analytics Chart
+                const userCtx = document.getElementById('userChart').getContext('2d');
+                this.charts.users = new Chart(userCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Active Users',
+                            data: [],
+                            borderColor: '#1db954',
+                            backgroundColor: 'rgba(29, 185, 84, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#b3b3b3' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#b3b3b3' }
+                            }
+                        },
+                        plugins: {
+                            legend: { 
+                                labels: { color: '#ffffff' }
+                            }
+                        }
+                    }
+                });
+
+                // Music Analytics Chart
+                const musicCtx = document.getElementById('musicChart').getContext('2d');
+                this.charts.music = new Chart(musicCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Rock', 'Pop', 'Hip-Hop', 'Electronic', 'Jazz', 'Other'],
+                        datasets: [{
+                            data: [25, 20, 18, 15, 12, 10],
+                            backgroundColor: [
+                                '#1db954', '#1ed760', '#ff6b6b', '#4ecdc4', 
+                                '#45b7d1', '#96ceb4'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#ffffff' }
+                            }
+                        }
+                    }
+                });
+
+                // Performance Chart
+                const perfCtx = document.getElementById('performanceChart').getContext('2d');
+                this.charts.performance = new Chart(perfCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['API Response', 'DB Query', 'ML Processing', 'Cache Hit'],
+                        datasets: [{
+                            label: 'Time (ms)',
+                            data: [45, 23, 156, 8],
+                            backgroundColor: ['#1db954', '#1ed760', '#ff9500', '#1e88e5'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#b3b3b3' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#b3b3b3' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            async loadDashboardData() {
+                try {
+                    const [analytics, performance, health] = await Promise.all([
+                        this.fetchAnalytics(),
+                        this.fetchPerformance(),
+                        this.fetchHealth()
+                    ]);
+
+                    this.updateOverviewStats(analytics, health);
+                    this.updateUserStats(analytics.users);
+                    this.updateMusicStats(analytics.music);
+                    this.updatePerformanceStats(performance);
+                    this.updateActivityFeed();
+
+                } catch (error) {
+                    console.error('Failed to load dashboard data:', error);
+                    this.showOfflineData();
+                }
+            }
+
+            async fetchAnalytics() {
+                const response = await fetch('/api/analytics/comprehensive');
+                if (!response.ok) throw new Error('Analytics API failed');
+                return response.json();
+            }
+
+            async fetchPerformance() {
+                const response = await fetch('/api/analytics/performance');
+                if (!response.ok) throw new Error('Performance API failed');
+                return response.json();
+            }
+
+            async fetchHealth() {
+                const response = await fetch('/api/health');
+                if (!response.ok) throw new Error('Health API failed');
+                return response.json();
+            }
+
+            updateOverviewStats(analytics, health) {
+                const data = analytics.data || {};
+                
+                document.getElementById('totalUsers').textContent = 
+                    data.users?.total || '0';
+                document.getElementById('activeUsers').textContent = 
+                    data.users?.active || '0';
+                document.getElementById('totalRecommendations').textContent = 
+                    data.music?.recommendations?.totalRecommendations || '0';
+                document.getElementById('systemHealth').textContent = 
+                    health.status === 'healthy' ? '100%' : '75%';
+
+                // Database stats
+                document.getElementById('dbConnections').textContent = 
+                    data.overview?.server?.connections?.current || '--';
+                document.getElementById('dbSize').textContent = 
+                    data.overview?.database?.dataSize || '--';
+                document.getElementById('dbOperations').textContent = 
+                    data.performance?.activeConnections || '--';
+                document.getElementById('dbUptime').textContent = 
+                    data.overview?.server?.uptime || '--';
+            }
+
+            updateUserStats(userData) {
+                if (!userData) return;
+
+                document.getElementById('newUsersToday').textContent = 
+                    Math.floor(Math.random() * 50) + 10; // Mock data
+                document.getElementById('retentionRate').textContent = 
+                    '85%'; // Mock data
+
+                // Update user chart with trend data
+                if (userData.registrationTrends) {
+                    const chart = this.charts.users;
+                    chart.data.labels = userData.registrationTrends.map(t => t.date);
+                    chart.data.datasets[0].data = userData.registrationTrends.map(t => t.count);
+                    chart.update();
+                }
+            }
+
+            updateMusicStats(musicData) {
+                if (!musicData) return;
+
+                document.getElementById('totalPlays').textContent = 
+                    musicData.recommendations?.totalRecommendations || '0';
+                document.getElementById('uniqueTracks').textContent = 
+                    musicData.topTracks?.length || '0';
+
+                // Update genre distribution if available
+                if (musicData.genreDistribution) {
+                    const chart = this.charts.music;
+                    chart.data.labels = musicData.genreDistribution.map(g => g.genre);
+                    chart.data.datasets[0].data = musicData.genreDistribution.map(g => g.count);
+                    chart.update();
+                }
+            }
+
+            updatePerformanceStats(perfData) {
+                if (!perfData) return;
+
+                document.getElementById('avgResponseTime').textContent = 
+                    Math.floor(Math.random() * 100) + 25 + 'ms'; // Mock data
+                document.getElementById('uptime').textContent = 
+                    '99.9%'; // Mock data
+            }
+
+            updateActivityFeed() {
+                const feed = document.getElementById('activityFeed');
+                const activities = [
+                    { time: new Date(), event: 'New user registered', type: 'user' },
+                    { time: new Date(Date.now() - 30000), event: 'Recommendation generated', type: 'ai' },
+                    { time: new Date(Date.now() - 60000), event: 'Playlist created', type: 'music' },
+                    { time: new Date(Date.now() - 120000), event: 'Chat session started', type: 'chat' }
+                ];
+
+                feed.innerHTML = activities.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-time">${activity.time.toLocaleTimeString()}</div>
+                        <div class="activity-event">${activity.event}</div>
+                    </div>
+                `).join('');
+            }
+
+            showOfflineData() {
+                // Show cached data from localStorage if available
+                const cachedData = localStorage.getItem('dashboard-cache');
+                if (cachedData) {
+                    const data = JSON.parse(cachedData);
+                    this.updateOverviewStats(data.analytics || {}, data.health || {});
+                }
+
+                // Show offline notice
+                document.getElementById('offlineNotice').style.display = 'block';
+                
+                // Update status indicators
+                document.querySelectorAll('.card-status').forEach(status => {
+                    status.textContent = 'Cached';
+                    status.className = 'card-status status-cached';
+                });
+            }
+
+            updateConnectionStatus() {
+                const statusEl = document.getElementById('connectionStatus');
+                if (this.isOnline) {
+                    statusEl.textContent = '🟢 Online';
+                    statusEl.className = 'connection-status connection-online';
+                    document.getElementById('offlineNotice').style.display = 'none';
+                } else {
+                    statusEl.textContent = '🔴 Offline';
+                    statusEl.className = 'connection-status connection-offline';
+                    document.getElementById('offlineNotice').style.display = 'block';
+                }
+            }
+
+            startRealTimeUpdates() {
+                if (!this.isOnline || document.hidden) return;
+
+                this.stopRealTimeUpdates(); // Clear existing timer
+                
+                document.getElementById('refreshIndicator').classList.add('active');
+                
+                this.updateTimer = setInterval(async () => {
+                    try {
+                        await this.loadDashboardData();
+                        
+                        // Cache data for offline use
+                        const cacheData = {
+                            timestamp: Date.now(),
+                            analytics: await this.fetchAnalytics(),
+                            health: await this.fetchHealth()
+                        };
+                        localStorage.setItem('dashboard-cache', JSON.stringify(cacheData));
+                        
+                    } catch (error) {
+                        console.error('Real-time update failed:', error);
+                    }
+                }, this.updateInterval);
+            }
+
+            stopRealTimeUpdates() {
+                if (this.updateTimer) {
+                    clearInterval(this.updateTimer);
+                    this.updateTimer = null;
+                }
+                document.getElementById('refreshIndicator').classList.remove('active');
+            }
+        }
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.analyticsDashboard = new RealTimeAnalyticsDashboard();
+        });
+
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+    </script>
+
+    <style>
+        .activity-feed {
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-width: 80px;
+        }
+
+        .activity-event {
+            flex: 1;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .activity-feed::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .activity-feed::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .activity-feed::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+    </style>
+</body>
+</html>

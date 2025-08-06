@@ -33,6 +33,7 @@ const databaseRoutes = require('./api/routes/database');
 const playlistRoutes = require('./api/routes/playlists');
 const settingsRoutes = require('./api/routes/settings');
 const analyticsRoutes = require('./api/routes/analytics');
+const { router: abTestingRoutes } = require('./api/routes/ab-testing');
 const { 
   extractUser, 
   ensureDatabase, 
@@ -605,6 +606,7 @@ app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/ab-testing', abTestingRoutes);
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

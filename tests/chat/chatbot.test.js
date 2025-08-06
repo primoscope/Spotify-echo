@@ -22,7 +22,7 @@ describe('Chatbot', () => {
     });
 
     test('should initialize with default configuration', () => {
-      expect(chatbot.currentProvider).toBe('openai');
+      expect(chatbot.currentProvider).toBe('mock'); // In test environment, defaults to mock
       expect(chatbot.conversationManager).toBeDefined();
     });
   });

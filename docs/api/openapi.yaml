@@ -1,0 +1,663 @@
+openapi: 3.0.0
+info:
+  title: EchoTune AI - Enhanced Music Recommendation API
+  description: |
+    Advanced music recommendation system with AI-powered chat, explainable recommendations, 
+    and comprehensive feedback system for personalized music discovery.
+  version: 2.1.0
+  contact:
+    name: EchoTune AI Team
+    url: https://github.com/dzp5103/Spotify-echo
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://echotune-ai.com/api
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        message:
+          type: string
+          description: Detailed error description
+        timestamp:
+          type: string
+          format: date-time
+
+    Recommendation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique recommendation identifier
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+        algorithm:
+          type: string
+          enum: [content_based, collaborative, hybrid]
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        context:
+          $ref: '#/components/schemas/Context'
+        createdAt:
+          type: string
+          format: date-time
+
+    Track:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Spotify track ID
+        name:
+          type: string
+          description: Track name
+        artist:
+          type: string
+          description: Primary artist name
+        album:
+          type: string
+          description: Album name
+        duration_ms:
+          type: integer
+          description: Track duration in milliseconds
+        preview_url:
+          type: string
+          description: 30-second preview URL
+        audioFeatures:
+          $ref: '#/components/schemas/AudioFeatures'
+
+    AudioFeatures:
+      type: object
+      properties:
+        danceability:
+          type: number
+          minimum: 0
+          maximum: 1
+        energy:
+          type: number
+          minimum: 0
+          maximum: 1
+        valence:
+          type: number
+          minimum: 0
+          maximum: 1
+        tempo:
+          type: number
+        acousticness:
+          type: number
+          minimum: 0
+          maximum: 1
+        instrumentalness:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    Context:
+      type: object
+      properties:
+        mood:
+          type: string
+          enum: [happy, sad, energetic, calm, romantic, angry, nostalgic, confident]
+        activity:
+          type: string
+          enum: [workout, study, party, sleep, commute, cooking, relaxation, work]
+        genre:
+          type: string
+          enum: [pop, rock, hip-hop, electronic, jazz, classical, country, r&b]
+        timeOfDay:
+          type: string
+          description: Hour of day (0-23) or time description
+
+    Explanation:
+      type: object
+      properties:
+        summary:
+          type: string
+          description: Human-readable explanation summary
+        reasons:
+          type: array
+          items:
+            type: string
+          description: List of specific reasons for recommendation
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        algorithm:
+          type: string
+          description: Primary algorithm used
+        factors:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              description:
+                type: string
+              weight:
+                type: number
+
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Feedback ID
+        type:
+          type: string
+          enum: [recommendation, chat]
+        targetId:
+          type: string
+          description: ID of recommendation or chat session
+        feedback:
+          type: string
+          enum: [like, dislike, love, skip, not_relevant, already_know]
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ContextChip:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        emoji:
+          type: string
+        description:
+          type: string
+
+    ChatMessage:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        message:
+          type: string
+        response:
+          type: string
+        provider:
+          type: string
+        context:
+          $ref: '#/components/schemas/Context'
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+        explanation:
+          $ref: '#/components/schemas/ChatExplanation'
+
+    ChatExplanation:
+      type: object
+      properties:
+        summary:
+          type: string
+        reasoning:
+          type: array
+          items:
+            type: string
+        contextFactors:
+          type: array
+          items:
+            type: object
+            properties:
+              factor:
+                type: string
+              value:
+                type: string
+              influence:
+                type: string
+                enum: [high, medium, low]
+
+paths:
+  # RECOMMENDATION ENDPOINTS
+  /recommendations/generate:
+    post:
+      summary: Generate personalized recommendations
+      description: Creates context-aware music recommendations using AI algorithms
+      tags:
+        - Recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                limit:
+                  type: integer
+                  default: 20
+                  minimum: 1
+                  maximum: 50
+                context:
+                  $ref: '#/components/schemas/Context'
+                mood:
+                  type: string
+                activity:
+                  type: string
+                timeOfDay:
+                  type: string
+                includeNewMusic:
+                  type: boolean
+                  default: true
+                excludeRecentlyPlayed:
+                  type: boolean
+                  default: true
+      responses:
+        200:
+          description: Recommendations generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  recommendations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Track'
+                  metadata:
+                    type: object
+                  cached:
+                    type: boolean
+                  generatedAt:
+                    type: string
+                    format: date-time
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /recommendations/{id}/explain:
+    get:
+      summary: Explain a specific recommendation
+      description: Returns human-readable explanation for why songs were recommended
+      tags:
+        - Recommendations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Recommendation ID
+        - name: trackId
+          in: query
+          schema:
+            type: string
+          description: Specific track ID to explain (optional)
+      responses:
+        200:
+          description: Explanation generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  recommendationId:
+                    type: string
+                  trackId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
+                  generatedAt:
+                    type: string
+                    format: date-time
+        404:
+          description: Recommendation not found
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  # FEEDBACK ENDPOINTS
+  /feedback:
+    post:
+      summary: Submit feedback on recommendations or chat
+      description: Record user feedback for improving AI recommendations
+      tags:
+        - Feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - targetId
+              properties:
+                type:
+                  type: string
+                  enum: [recommendation, chat]
+                  description: Type of content being rated
+                targetId:
+                  type: string
+                  description: ID of recommendation or chat session
+                trackId:
+                  type: string
+                  description: Specific track ID (for music recommendations)
+                feedback:
+                  type: string
+                  enum: [like, dislike, love, skip, not_relevant, already_know]
+                  description: Categorical feedback
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  description: Numerical rating (1-5 stars)
+                comment:
+                  type: string
+                  maxLength: 500
+                  description: Optional text comment
+                context:
+                  type: object
+                  description: Additional context about the feedback
+      responses:
+        200:
+          description: Feedback recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  feedbackId:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Feedback'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      summary: Get user feedback history
+      description: Retrieve user's feedback history with pagination
+      tags:
+        - Feedback
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [recommendation, chat]
+        - name: targetId
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: Feedback history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  feedback:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Feedback'
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      total:
+                        type: integer
+                      pages:
+                        type: integer
+
+  /feedback/analytics:
+    get:
+      summary: Get feedback analytics
+      description: Retrieve user's feedback analytics and patterns
+      tags:
+        - Feedback
+      parameters:
+        - name: timeframe
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 30d
+      responses:
+        200:
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  analytics:
+                    type: object
+                    properties:
+                      timeframe:
+                        type: string
+                      summary:
+                        type: object
+                        properties:
+                          totalFeedback:
+                            type: integer
+                          averageRating:
+                            type: number
+                      distribution:
+                        type: object
+
+  # CHAT ENDPOINTS
+  /chat/message:
+    post:
+      summary: Send enhanced message with context
+      description: Send message to AI chat with persistent context and multi-turn support
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionId
+                - message
+              properties:
+                sessionId:
+                  type: string
+                message:
+                  type: string
+                provider:
+                  type: string
+                  enum: [openai, gemini, mock]
+                model:
+                  type: string
+                context:
+                  $ref: '#/components/schemas/Context'
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 2
+                maxTokens:
+                  type: integer
+      responses:
+        200:
+          description: Message processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /chat/feedback:
+    post:
+      summary: Submit feedback on chatbot responses
+      description: Rate and provide feedback on AI chat responses
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionId
+              properties:
+                sessionId:
+                  type: string
+                messageId:
+                  type: string
+                feedback:
+                  type: string
+                  enum: [helpful, not_helpful, accurate, inaccurate, relevant, irrelevant]
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+                context:
+                  type: object
+      responses:
+        200:
+          description: Chat feedback recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  feedbackId:
+                    type: string
+                  message:
+                    type: string
+
+  /chat/context-chips:
+    get:
+      summary: Get context chips for enhanced interaction
+      description: Retrieve available context chips for mood, genre, activity, etc.
+      tags:
+        - Chat
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [moods, genres, activities, times]
+      responses:
+        200:
+          description: Context chips retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  contextChips:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ContextChip'
+                  userFrequent:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        usageCount:
+                          type: integer
+
+components:
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Recommendations
+    description: AI-powered music recommendation system with explainable results
+  - name: Feedback
+    description: User feedback system for improving recommendations
+  - name: Chat
+    description: Conversational AI for music discovery with context persistence
+  - name: Analytics
+    description: User insights and recommendation analytics

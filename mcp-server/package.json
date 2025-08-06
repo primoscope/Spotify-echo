@@ -28,13 +28,47 @@
       "args": ["mcp-servers/sequential-thinking/dist/index.js"],
       "description": "Structured thinking and reasoning capabilities"
     },
-    "filesystem": {
-      "command": "node",
-      "args": ["../node_modules/FileScopeMCP/dist/index.js"],
+    "github": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
       "env": {
-        "ALLOWED_DIRECTORIES": "${PWD}/..,${PWD}/../src,${PWD}/../scripts,${PWD}"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}"
+      },
+      "description": "Official GitHub integration for repository management, PRs, issues, and Actions"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "--path", "${PWD}/.."],
+      "env": {
+        "ALLOWED_PATHS": "${PWD}/..,${PWD}/../src,${PWD}/../scripts,${PWD}/../data"
       },
       "description": "File system operations and repository management"
+    },
+    "sqlite": {
+      "command": "python",
+      "args": ["-m", "mcp_server_sqlite", "--db-path", "data/echotune.db"],
+      "description": "SQLite database operations with built-in analysis features"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-memory"],
+      "description": "Knowledge graph-based persistent memory system"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${DATABASE_URL}"
+      },
+      "description": "PostgreSQL database integration with schema inspection and query capabilities"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Web search capabilities using Brave's Search API"
     },
     "screenshot-website": {
       "command": "node",
@@ -48,7 +82,8 @@
         "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
         "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}",
         "BROWSERBASE_SESSION_ID": "${BROWSERBASE_SESSION_ID}"
-      }
+      },
+      "description": "Cloud browser automation and interaction"
     },
     "mermaid": {
       "command": "npx",
@@ -61,7 +96,8 @@
       "env": {
         "PUPPETEER_HEADLESS": "true",
         "PUPPETEER_ARGS": "--no-sandbox --disable-setuid-sandbox"
-      }
+      },
+      "description": "Browser automation for web scraping and interaction"
     },
     "spotify": {
       "command": "python",
@@ -70,7 +106,8 @@
         "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
         "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}",
         "SPOTIFY_REDIRECT_URI": "${SPOTIFY_REDIRECT_URI}"
-      }
+      },
+      "description": "Spotify API integration and music intelligence"
     }
   },
   "tools": {

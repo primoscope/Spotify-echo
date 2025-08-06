@@ -1,9 +1,9 @@
-> **📋 Last Updated**: August 05, 2025 | **📦 Version**: 2.1.0
+> **📋 Last Updated**: January 2025 | **📦 Version**: 2.1.0
 
 # 🎵 EchoTune AI - Next-Generation Music Discovery Platform
 
 [![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy%20to%20DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean&logoColor=white)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
-[![Docker](https://img.shields.io/badge/Deploy%20with%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](docs/deployment/docker-deployment.md)
+[![Docker](https://img.shields.io/badge/Deploy%20with%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](DOCKER_ENHANCED_GUIDE.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 > **AI-powered music recommendation system with conversational interface, Spotify integration, and advanced ML algorithms.**
@@ -70,10 +70,10 @@ docker-compose up -d
 **Ubuntu 22.04 with Docker Setup:**
 ```bash
 # Complete setup including Docker installation (following DigitalOcean tutorial)
-curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/docker-ubuntu-setup.sh | bash
+curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/docker/docker-ubuntu-setup.sh | bash
 ```
 
-**🎬 [View Deployment Demo](scripts/deployment-demo.sh)** - See the entire process in action
+**🎬 [View Deployment Demo](scripts/deployment/deployment-demo.sh)** - See the entire process in action
 
 📖 **[Enhanced Docker Guide](DOCKER_ENHANCED_GUIDE.md)** - Comprehensive Docker deployment guide
 
@@ -292,8 +292,8 @@ npm run deploy:one-click    # One-click deployment wizard
 |-------|-------------|
 | [**DigitalOcean Deployment**](DEPLOYMENT.md) | Complete automated deployment guide with GitHub Actions |
 | [**Quick Start Guide**](docs/QUICK_START.md) | Get running in under 5 minutes |
+| [**Enhanced Docker Guide**](DOCKER_ENHANCED_GUIDE.md) | Comprehensive Docker deployment guide |
 | [**Ubuntu Deployment**](docs/deployment/ubuntu-deployment.md) | Complete server setup with SSL |
-| [**Docker Deployment**](docs/deployment/docker-deployment.md) | Containerized deployment guide |
 | [**API Documentation**](docs/api/README.md) | Backend API reference |
 | [**Development Guide**](CODING_AGENT_GUIDE.md) | Setup for contributors |
 | [**Database Architecture**](DATABASE_ARCHITECTURE_GUIDE.md) | Data structure and schema |
@@ -347,7 +347,7 @@ OPENAI_API_KEY             # OpenAI API key
 - Verify environment variables in App Platform dashboard
 - Test health endpoint: `curl https://your-domain.com/health`
 
-📖 **[Complete Troubleshooting Guide](DEPLOYMENT.md#monitoring-and-troubleshooting)**
+📖 **[Complete Troubleshooting Guide](DEPLOYMENT.md#--monitoring-and-troubleshooting)**
 
 ## 🔧 Development
 
@@ -402,6 +402,193 @@ npm run health-check # Application health verification
 - Advanced deep learning recommendation models
 - Enhanced analytics dashboard
 - Real-time collaborative playlists
+
+## 🗺️ Development Roadmap
+
+### Phase 1: Core Foundation ✅ COMPLETED
+**Status: 100% Complete**
+
+- [x] **Basic Music Recommendation Engine**
+  - Collaborative filtering algorithms
+  - Content-based filtering with Spotify audio features
+  - User preference learning system
+  - Basic recommendation scoring
+
+- [x] **Spotify Integration**
+  - OAuth 2.0 authentication flow
+  - Complete Web API integration
+  - Playlist creation and management
+  - User listening history import
+  - Real-time playback control
+
+- [x] **AI Chat Interface**
+  - Multiple LLM provider support (OpenAI, Gemini, Mock)
+  - Natural language music discovery
+  - Conversation context management
+  - Mood and activity detection
+
+- [x] **Production Infrastructure**
+  - Docker containerization
+  - Health monitoring system
+  - Database architecture (MongoDB + SQLite fallback)
+  - Security and authentication
+
+### Phase 2: Enhanced Intelligence 🚧 IN PROGRESS
+**Status: 75% Complete**
+
+- [x] **Advanced ML Models**
+  - Deep neural networks for recommendations
+  - Audio feature analysis and clustering
+  - User behavior pattern recognition
+  - Multi-objective optimization (diversity, novelty, relevance)
+
+- [x] **Improved AI Conversations**
+  - Context-aware responses
+  - Music knowledge base integration
+  - Emotional state detection
+  - Personalized conversation styles
+
+- [ ] **Real-time Analytics**
+  - Live listening behavior tracking
+  - Performance metrics dashboard
+  - A/B testing framework for recommendations
+  - User engagement analytics
+
+- [ ] **Mobile Progressive Web App**
+  - Responsive design optimization
+  - Offline functionality
+  - Push notifications
+  - Mobile-specific UI components
+
+### Phase 3: Social & Collaborative Features 📋 PLANNED
+**Status: 0% Complete • Target: Q2 2025**
+
+- [ ] **Social Music Discovery**
+  - User profiles and following system
+  - Social recommendation engine
+  - Music taste compatibility analysis
+  - Friend activity feeds
+
+- [ ] **Collaborative Playlists**
+  - Real-time collaborative playlist editing
+  - Voting system for track additions
+  - Group listening sessions
+  - Playlist sharing and remixing
+
+- [ ] **Community Features**
+  - Music discussion forums
+  - Genre-based communities
+  - Expert curator system
+  - User-generated content moderation
+
+- [ ] **Advanced Sharing**
+  - Cross-platform playlist export
+  - Social media integration
+  - Music event recommendations
+  - Concert and festival discovery
+
+### Phase 4: Enterprise & Scale 📋 PLANNED
+**Status: 0% Complete • Target: Q3 2025**
+
+- [ ] **Enterprise Features**
+  - Multi-tenant architecture
+  - Admin dashboard and analytics
+  - White-label solutions
+  - Custom branding options
+
+- [ ] **Advanced Analytics**
+  - Music industry insights
+  - Trend prediction algorithms
+  - Market analysis tools
+  - Revenue optimization
+
+- [ ] **Platform Integrations**
+  - Apple Music integration
+  - YouTube Music support
+  - SoundCloud connectivity
+  - Podcast recommendations
+
+- [ ] **Scalability Enhancements**
+  - Microservices architecture
+  - Auto-scaling infrastructure
+  - Global CDN deployment
+  - Performance optimization
+
+### Phase 5: Innovation & Research 💡 VISION
+**Status: 0% Complete • Target: Q4 2025**
+
+- [ ] **Cutting-Edge AI**
+  - Large language model fine-tuning
+  - Multimodal AI (audio, text, visual)
+  - Reinforcement learning for personalization
+  - Federated learning for privacy
+
+- [ ] **Emerging Technologies**
+  - Blockchain integration for artist royalties
+  - NFT-based music collectibles
+  - VR/AR music experiences
+  - Voice-only interface optimization
+
+- [ ] **Research Initiatives**
+  - Music therapy applications
+  - Accessibility improvements
+  - Cross-cultural music discovery
+  - AI ethics in music recommendations
+
+- [ ] **Open Source Ecosystem**
+  - Plugin architecture
+  - Community contributions
+  - Research partnerships
+  - Academic collaborations
+
+## 🎯 Implementation Priorities
+
+### Immediate Goals (Next 30 Days)
+1. **Complete Phase 2 Analytics** - Real-time user behavior tracking
+2. **Mobile PWA Launch** - Responsive design and offline capabilities
+3. **Performance Optimization** - Sub-200ms response times
+4. **Documentation Enhancement** - Complete API documentation
+
+### Short-term Goals (Next 90 Days)
+1. **Social Features Beta** - Limited social recommendation testing
+2. **Advanced ML Models** - Deploy deep learning recommendations
+3. **Multi-platform Support** - Apple Music integration POC
+4. **Enhanced Security** - Advanced authentication and data protection
+
+### Long-term Vision (Next 12 Months)
+1. **Enterprise Product** - B2B offering for music industry
+2. **Global Expansion** - Multi-language and regional support
+3. **Research Partnerships** - Academic and industry collaborations
+4. **Open Source Community** - Public plugin ecosystem
+
+## 💡 Feature Suggestions & Contributions
+
+We welcome community input on our roadmap! Here are ways to contribute:
+
+### For Users
+- **Feature Requests**: Share ideas in [GitHub Discussions](https://github.com/dzp5103/Spotify-echo/discussions)
+- **Bug Reports**: Report issues in [GitHub Issues](https://github.com/dzp5103/Spotify-echo/issues)
+- **User Testing**: Join our beta testing program
+- **Feedback**: Rate and review features in the app
+
+### For Developers
+- **Code Contributions**: See [Development Guide](CODING_AGENT_GUIDE.md)
+- **Plugin Development**: Build custom recommendation algorithms
+- **Documentation**: Improve guides and tutorials
+- **Testing**: Contribute to automated test suites
+
+### For Researchers
+- **ML Model Contributions**: Share new recommendation algorithms
+- **Dataset Collaboration**: Contribute to anonymized research datasets
+- **Academic Partnerships**: Joint research opportunities
+- **Publication Collaboration**: Co-author research papers
+
+### Priority Feature Voting
+Vote on upcoming features by participating in our quarterly roadmap surveys:
+- **Q1 2025 Survey**: [Link to be announced]
+- **Community Priorities**: Updated monthly in discussions
+
+---
 
 ## 🤝 Contributing
 

@@ -25,9 +25,11 @@ echo -e "Domain: ${GREEN}$DOMAIN${NC}"
 echo -e "Ports: HTTP=${GREEN}$HTTP_PORT${NC}, HTTPS=${GREEN}$HTTPS_PORT${NC}, App=${GREEN}$PORT${NC}"
 echo ""
 
-# Load environment variables
+# Load environment variables safely
 if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+    set -a
+    source .env
+    set +a
 fi
 
 # Validation results

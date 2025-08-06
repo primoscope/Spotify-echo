@@ -394,6 +394,56 @@ router.post('/playlist', requireAuth, recommendationRateLimit, async (req, res) 
 });
 
 /**
+ * Explain a specific recommendation
+ * GET /api/recommendations/:id/explain
+ */
+router.get('/:id/explain', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { trackId } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        error: 'Missing recommendation ID'
+      });
+    }
+
+    const db = require('../../database/mongodb').getDb();
+    const recommendationsCollection = db.collection('recommendations');
+
+    // Get the recommendation
+    const recommendation = await recommendationsCollection.findOne({
+      _id: require('mongodb').ObjectId.isValid(id) ? new require('mongodb').ObjectId(id) : id,
+      user_id: req.userId
+    });
+
+    if (!recommendation) {
+      return res.status(404).json({
+        error: 'Recommendation not found'
+      });
+    }
+
+    // Generate explanation based on recommendation type and data
+    const explanation = await generateRecommendationExplanation(recommendation, trackId, req.userId);
+
+    res.json({
+      success: true,
+      recommendationId: id,
+      trackId: trackId || null,
+      explanation,
+      generatedAt: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error explaining recommendation:', error);
+    res.status(500).json({
+      error: 'Failed to explain recommendation',
+      message: error.message
+    });
+  }
+});
+
+/**
  * Get recommendation algorithm insights
  * GET /api/recommendations/insights
  */
@@ -456,5 +506,255 @@ router.get('/insights', requireAuth, async (req, res) => {
     });
   }
 });
+
+/**
+ * Generate human-readable explanation for a recommendation
+ */
+async function generateRecommendationExplanation(recommendation, trackId, userId) {
+  try {
+    const db = require('../../database/mongodb').getDb();
+    
+    // Get user's listening history and preferences for context
+    const userProfile = await getUserListeningProfile(userId, db);
+    
+    const explanation = {
+      summary: '',
+      reasons: [],
+      confidence: recommendation.confidence_score || 0.7,
+      algorithm: recommendation.recommendation_type || 'hybrid',
+      factors: []
+    };
+
+    // Base explanation on algorithm type
+    switch (recommendation.recommendation_type) {
+      case 'content_based':
+        explanation.summary = 'This recommendation is based on the musical characteristics of songs you\'ve enjoyed.';
+        explanation.reasons.push('Analyzes audio features like tempo, energy, and mood');
+        explanation.factors.push({
+          type: 'audio_features',
+          description: 'Musical similarity to your liked tracks',
+          weight: 0.8
+        });
+        break;
+
+      case 'collaborative':
+        explanation.summary = 'This recommendation comes from users with similar music taste to yours.';
+        explanation.reasons.push('Based on listening patterns of users with similar preferences');
+        explanation.factors.push({
+          type: 'user_similarity',
+          description: 'Recommended by users with similar taste',
+          weight: 0.7
+        });
+        break;
+
+      case 'hybrid':
+      default:
+        explanation.summary = 'This recommendation combines multiple AI algorithms for the best results.';
+        explanation.reasons.push('Combines content analysis with user behavior patterns');
+        explanation.factors.push(
+          {
+            type: 'content_similarity',
+            description: 'Musical features match your preferences',
+            weight: 0.4
+          },
+          {
+            type: 'collaborative_filtering',
+            description: 'Liked by similar users',
+            weight: 0.3
+          },
+          {
+            type: 'context_aware',
+            description: 'Fits your current mood and activity',
+            weight: 0.2
+          }
+        );
+        break;
+    }
+
+    // Add context-specific reasons
+    if (recommendation.context?.mood) {
+      explanation.reasons.push(`Matches your current mood: ${recommendation.context.mood}`);
+      explanation.factors.push({
+        type: 'mood_context',
+        description: `Selected for ${recommendation.context.mood} mood`,
+        weight: 0.3
+      });
+    }
+
+    if (recommendation.context?.activity) {
+      explanation.reasons.push(`Perfect for your activity: ${recommendation.context.activity}`);
+      explanation.factors.push({
+        type: 'activity_context',
+        description: `Optimized for ${recommendation.context.activity}`,
+        weight: 0.2
+      });
+    }
+
+    if (recommendation.context?.timeOfDay) {
+      const timeContext = getTimeOfDayDescription(recommendation.context.timeOfDay);
+      explanation.reasons.push(`Recommended for ${timeContext}`);
+    }
+
+    // Add user-specific reasons if we have profile data
+    if (userProfile.topGenres && userProfile.topGenres.length > 0) {
+      explanation.reasons.push(`Includes genres you love: ${userProfile.topGenres.slice(0, 3).join(', ')}`);
+    }
+
+    if (userProfile.recentlyPlayedArtists && userProfile.recentlyPlayedArtists.length > 0) {
+      explanation.reasons.push('Similar to artists you\'ve been listening to recently');
+    }
+
+    // Add specific track explanation if trackId provided
+    if (trackId && recommendation.tracks) {
+      const specificTrack = recommendation.tracks.find(t => t.id === trackId);
+      if (specificTrack) {
+        explanation.trackSpecific = {
+          name: specificTrack.name,
+          artist: specificTrack.artist,
+          reasons: generateTrackSpecificReasons(specificTrack, userProfile, recommendation)
+        };
+      }
+    }
+
+    return explanation;
+
+  } catch (error) {
+    console.error('Error generating recommendation explanation:', error);
+    return {
+      summary: 'This recommendation was generated using our AI algorithms.',
+      reasons: ['Based on your listening history and preferences'],
+      confidence: 0.5,
+      algorithm: 'unknown',
+      factors: []
+    };
+  }
+}
+
+/**
+ * Get user's listening profile for explanation context
+ */
+async function getUserListeningProfile(userId, db) {
+  try {
+    // This would typically come from your user profile collection
+    // For now, we'll create a basic profile from recent activity
+    
+    const listeningHistoryCollection = db.collection('listening_history');
+    const recentTracks = await listeningHistoryCollection
+      .find({ user_id: userId })
+      .sort({ played_at: -1 })
+      .limit(100)
+      .toArray();
+
+    const profile = {
+      topGenres: [],
+      topArtists: [],
+      recentlyPlayedArtists: [],
+      averageAudioFeatures: {},
+      listeningPatterns: {}
+    };
+
+    if (recentTracks.length > 0) {
+      // Extract genres and artists
+      const genreMap = {};
+      const artistMap = {};
+
+      recentTracks.forEach(track => {
+        if (track.genres) {
+          track.genres.forEach(genre => {
+            genreMap[genre] = (genreMap[genre] || 0) + 1;
+          });
+        }
+        if (track.artist) {
+          artistMap[track.artist] = (artistMap[track.artist] || 0) + 1;
+        }
+      });
+
+      profile.topGenres = Object.entries(genreMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(entry => entry[0]);
+
+      profile.topArtists = Object.entries(artistMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(entry => entry[0]);
+
+      profile.recentlyPlayedArtists = recentTracks
+        .slice(0, 20)
+        .map(track => track.artist)
+        .filter((artist, index, arr) => arr.indexOf(artist) === index);
+    }
+
+    return profile;
+
+  } catch (error) {
+    console.error('Error getting user listening profile:', error);
+    return {
+      topGenres: [],
+      topArtists: [],
+      recentlyPlayedArtists: [],
+      averageAudioFeatures: {},
+      listeningPatterns: {}
+    };
+  }
+}
+
+/**
+ * Generate track-specific reasons for recommendation
+ */
+function generateTrackSpecificReasons(track, userProfile, recommendation) {
+  const reasons = [];
+
+  // Check if artist is in user's top artists
+  if (userProfile.topArtists && userProfile.topArtists.includes(track.artist)) {
+    reasons.push(`You frequently listen to ${track.artist}`);
+  }
+
+  // Check genre matching
+  if (track.genres && userProfile.topGenres) {
+    const matchingGenres = track.genres.filter(genre => 
+      userProfile.topGenres.includes(genre)
+    );
+    if (matchingGenres.length > 0) {
+      reasons.push(`Features ${matchingGenres[0]} genre that you enjoy`);
+    }
+  }
+
+  // Audio feature similarity (if available)
+  if (track.audioFeatures) {
+    if (track.audioFeatures.energy > 0.7) {
+      reasons.push('High energy track perfect for active listening');
+    }
+    if (track.audioFeatures.valence > 0.7) {
+      reasons.push('Upbeat and positive vibe');
+    }
+    if (track.audioFeatures.danceability > 0.7) {
+      reasons.push('Great for dancing and movement');
+    }
+  }
+
+  // Context-based reasons
+  if (recommendation.context?.mood === 'energetic' && track.audioFeatures?.energy > 0.6) {
+    reasons.push('Perfect energy level for your current mood');
+  }
+
+  if (recommendation.context?.activity === 'workout' && track.audioFeatures?.tempo > 120) {
+    reasons.push('Ideal tempo for workout activities');
+  }
+
+  return reasons.length > 0 ? reasons : ['Selected by our AI algorithm for your taste'];
+}
+
+/**
+ * Convert time of day to human-readable description
+ */
+function getTimeOfDayDescription(timeOfDay) {
+  const hour = parseInt(timeOfDay);
+  
+  if (hour >= 5 && hour < 12) return 'morning listening';
+  if (hour >= 12 && hour < 17) return 'afternoon vibes';
+  if (hour >= 17 && hour < 22) return 'evening relaxation';
+  return 'late night mood';
+}
 
 module.exports = router;

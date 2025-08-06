@@ -16,7 +16,7 @@ import './Settings.css';
 const Settings = () => {
   // Context hooks
   const { providers, currentProvider, switchProvider, refreshProviders } = useLLM();
-  const { status: dbStatus, refreshStatus } = useDatabase();
+  const { status: _dbStatus, refreshStatus: _refreshStatus } = useDatabase();
 
   // State management
   const [activeTab, setActiveTab] = useState('application');

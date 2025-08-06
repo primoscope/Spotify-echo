@@ -50,12 +50,12 @@ export const SpotifyPlayerProvider = ({ children }) => {
     } else {
       createPlayer(token);
     }
-  }, [volume]); // Add volume dependency since it's used in createPlayer
+  }, [createPlayer]);
 
   /**
    * Create Spotify Player instance
    */
-  const createPlayer = (token) => {
+  const createPlayer = useCallback((token) => {
     const spotifyPlayer = new window.Spotify.Player({
       name: 'EchoTune AI Player',
       getOAuthToken: (cb) => {
@@ -114,7 +114,7 @@ export const SpotifyPlayerProvider = ({ children }) => {
         console.error('❌ Failed to connect Spotify Player');
       }
     });
-  };
+  }, [volume]);
 
   /**
    * Play a track or playlist

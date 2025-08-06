@@ -23,13 +23,23 @@
     "jest": "^29.0.0"
   },
   "servers": {
-    "browser": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-puppeteer"],
+    "sequential-thinking": {
+      "command": "node",
+      "args": ["mcp-servers/sequential-thinking/dist/index.js"],
+      "description": "Structured thinking and reasoning capabilities"
+    },
+    "filesystem": {
+      "command": "node",
+      "args": ["../node_modules/FileScopeMCP/dist/index.js"],
       "env": {
-        "PUPPETEER_HEADLESS": "true",
-        "PUPPETEER_ARGS": "--no-sandbox --disable-setuid-sandbox"
-      }
+        "ALLOWED_DIRECTORIES": "${PWD}/..,${PWD}/../src,${PWD}/../scripts,${PWD}"
+      },
+      "description": "File system operations and repository management"
+    },
+    "screenshot-website": {
+      "command": "node",
+      "args": ["mcp-servers/screenshot-website/dist/index.js"],
+      "description": "Fast website screenshot capabilities"
     },
     "browserbase": {
       "command": "npx",
@@ -45,13 +55,13 @@
       "args": ["mcp-mermaid"],
       "description": "Mermaid diagram generation for workflow visualization"
     },
-    "filesystem": {
-      "command": "node",
-      "args": ["../node_modules/FileScopeMCP/dist/index.js"],
+    "browser": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-puppeteer"],
       "env": {
-        "ALLOWED_DIRECTORIES": "${PWD}/..,${PWD}/../src,${PWD}/../scripts,${PWD}"
-      },
-      "description": "File system operations and repository management"
+        "PUPPETEER_HEADLESS": "true",
+        "PUPPETEER_ARGS": "--no-sandbox --disable-setuid-sandbox"
+      }
     },
     "spotify": {
       "command": "python",

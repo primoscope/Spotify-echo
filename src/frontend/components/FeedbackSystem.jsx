@@ -99,7 +99,7 @@ const FeedbackSystem = ({
       setFeedbackState(prev => ({ ...prev, loading: false }));
       showSnackbar('Failed to submit feedback', 'error');
     }
-  }, [disabled, feedbackState.submitted, submitFeedback]);
+  }, [disabled, feedbackState.submitted, submitFeedback, showSnackbar]);
 
   const handleRating = useCallback(async (rating) => {
     if (disabled || feedbackState.submitted) return;
@@ -120,7 +120,7 @@ const FeedbackSystem = ({
       setFeedbackState(prev => ({ ...prev, loading: false }));
       showSnackbar('Failed to submit rating', 'error');
     }
-  }, [disabled, feedbackState.submitted, submitFeedback]);
+  }, [disabled, feedbackState.submitted, submitFeedback, showSnackbar]);
 
   const handleDetailedFeedback = useCallback(async () => {
     if (!feedbackState.comment.trim()) return;

@@ -135,7 +135,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       { code: 'zh-CN', name: 'Chinese (Simplified)' }
     ];
     setSupportedLanguages(languages);
-  }, [selectedLanguage]);
+  }, [selectedLanguage, startVisualization, processVoiceCommand, confidence]);
 
   /**
    * Initialize audio visualizer
@@ -162,7 +162,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   /**
    * Start audio visualization
    */
-  const startVisualization = () => {
+  const startVisualization = useCallback(() => {
     if (!analyserRef.current) return;
     
     const analyser = analyserRef.current;
@@ -198,7 +198,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
     };
     
     updateVisualizer();
-  };
+  }, [isListening]);
 
   /**
    * Stop audio visualization
@@ -213,7 +213,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   /**
    * Process voice command
    */
-  const processVoiceCommand = (command) => {
+  const processVoiceCommand = useCallback((command) => {
     setIsProcessing(true);
     
     // Enhanced command processing
@@ -227,12 +227,12 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       // Auto-close after successful processing
       setTimeout(onClose, 1000);
     }, 500);
-  };
+  }, [onVoiceInput, onClose, preprocessVoiceCommand]);
 
   /**
    * Preprocess voice command for better AI understanding
    */
-  const preprocessVoiceCommand = (command) => {
+  const preprocessVoiceCommand = useCallback((command) => {
     // Convert common voice patterns to better text
     let processed = command.toLowerCase();
     
@@ -255,7 +255,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
     }
     
     return processed;
-  };
+  }, []);
 
   /**
    * Start listening

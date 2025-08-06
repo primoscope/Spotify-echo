@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSocket } from '../realtime/SocketContext';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useSpotifyPlayer } from '../player/SpotifyPlayerContext';
 import VoiceInterface from './VoiceInterface';
-import ProviderSwitcher from './ProviderSwitcher';
-import MessageList from './MessageList';
-import ChatInput from './ChatInput';
-import './ChatInterface.css';
+import ProviderSwitcher from '../ProviderPanel';
+import MessageList from '../MessageList';
+import ChatInput from '../ChatInput';
+import '../../styles/ModernChatInterface.css';
 
 /**
  * Enhanced Chat Interface Component
@@ -119,7 +119,7 @@ const ChatInterface = () => {
   /**
    * Speak text using Text-to-Speech
    */
-  const speakText = (text) => {
+  const speakText = useCallback((text) => {
     if (!ttsEnabled || !ttsVoice || !text) return;
 
     // Cancel any ongoing speech
@@ -155,7 +155,7 @@ const ChatInterface = () => {
 
       speechSynthesis.speak(utterance);
     }
-  };
+  }, [ttsEnabled, ttsVoice]);
 
   /**
    * Handle chat response from server
@@ -179,7 +179,7 @@ const ChatInterface = () => {
 
     // Handle music-related actions
     handleMusicActions(data);
-  }, [currentProvider, ttsEnabled]);
+  }, [currentProvider, ttsEnabled, speakText, handleMusicActions]);
 
   /**
    * Handle streaming message start
@@ -219,7 +219,7 @@ const ChatInterface = () => {
 
     // Handle music-related actions
     handleMusicActions(data);
-  }, [currentProvider, ttsEnabled, streamingMessage]);
+  }, [currentProvider, ttsEnabled, streamingMessage, speakText, handleMusicActions]);
 
   /**
    * Handle provider switch
@@ -240,7 +240,7 @@ const ChatInterface = () => {
   /**
    * Handle music-related actions from AI response
    */
-  const handleMusicActions = async (data) => {
+  const handleMusicActions = useCallback(async (data) => {
     if (data.action === 'play_track' && data.trackUri) {
       try {
         const success = await playTrack(data.trackUri);
@@ -275,7 +275,7 @@ const ChatInterface = () => {
         console.error('Search tracks error:', error);
       }
     }
-  };
+  }, [playTrack, searchTracks]);
 
   /**
    * Send a message

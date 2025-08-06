@@ -4,14 +4,15 @@ This document is the **single source of truth** for all Model Context Protocol (
 
 ## Overview
 
-EchoTune AI integrates with six powerful MCP servers to enhance coding, automation, testing, and music intelligence capabilities:
+EchoTune AI integrates with seven powerful MCP servers to enhance coding, automation, testing, and music intelligence capabilities:
 
 1. **Sequential Thinking MCP Server** - Structured reasoning and complex problem solving
 2. **FileScopeMCP** - Advanced file system operations with scope control  
 3. **MCP Screenshot Website Fast** - Rapid website screenshot generation
 4. **MCP Server Browserbase** - Cloud-based browser automation
 5. **Mermaid Diagram Generator** - Workflow diagrams and visual representations
-6. **Spotify MCP Server** - Custom music intelligence and automation
+6. **Browser Automation Server (Puppeteer)** - Local browser automation and web scraping
+7. **Spotify MCP Server** - Custom music intelligence and automation
 
 ## Quick Start
 

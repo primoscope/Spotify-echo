@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -24,7 +24,6 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
-  Fade,
   Collapse,
 } from '@mui/material';
 import {
@@ -32,15 +31,12 @@ import {
   SmartToy,
   Person,
   ThumbUp,
-  ThumbDown,
   ExpandMore,
   ExpandLess,
   Psychology,
   Mood,
   LibraryMusic,
   FitnessCenter,
-  Schedule,
-  Refresh,
   VolumeUp,
   Info,
 } from '@mui/icons-material';

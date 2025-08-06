@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { createTheme, ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 import { deepPurple, green, orange, red } from '@mui/material/colors';
@@ -344,10 +344,10 @@ const ThemeProvider = ({ children }) => {
  * Provides a UI control for switching between light/dark modes
  */
 import { IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
-import { Brightness4, Brightness7, Palette, Settings, AutoMode } from '@mui/icons-material';
+import { Brightness4, Brightness7, Palette, AutoMode } from '@mui/icons-material';
 
 export const ThemeToggle = ({ showCustomization = false }) => {
-  const { mode, toggleMode, setThemeMode, isDark } = useTheme();
+  const { toggleMode, setThemeMode, isDark } = useTheme();
   const [menuAnchor, setMenuAnchor] = useState(null);
 
   const handleMenuClose = () => {

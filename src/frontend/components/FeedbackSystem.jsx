@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -18,10 +18,6 @@ import {
   Alert,
   Snackbar,
   Tooltip,
-  List,
-  ListItem,
-  ListItemText,
-  Avatar,
   CircularProgress,
   Fade,
 } from '@mui/material';
@@ -31,9 +27,7 @@ import {
   Favorite,
   FavoriteBorder,
   SkipNext,
-  Report,
   Send,
-  Close,
   CheckCircle,
   MusicNote,
   Chat,
@@ -63,6 +57,30 @@ const FeedbackSystem = ({
   const [detailedFeedbackDialog, setDetailedFeedbackDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  const showSnackbar = useCallback((message, severity) => {
+    setSnackbar({ open: true, message, severity });
+  }, []);
+
+  const submitFeedback = useCallback(async (feedbackData) => {
+    if (!onSubmitFeedback) {
+      throw new Error('No feedback handler provided');
+    }
+
+    const payload = {
+      type,
+      targetId,
+      trackId,
+      ...feedbackData,
+      context: {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        source: 'feedback_system'
+      }
+    };
+
+    return await onSubmitFeedback(payload);
+  }, [onSubmitFeedback, type, targetId, trackId]);
+
   const handleQuickFeedback = useCallback(async (feedback) => {
     if (disabled || feedbackState.submitted) return;
 
@@ -76,13 +94,12 @@ const FeedbackSystem = ({
         submitted: true, 
         loading: false 
       }));
-      
-      showSnackbar('Thank you for your feedback!', 'success');
+      showSnackbar('Feedback submitted!', 'success');
     } catch (error) {
       setFeedbackState(prev => ({ ...prev, loading: false }));
       showSnackbar('Failed to submit feedback', 'error');
     }
-  }, [disabled, feedbackState.submitted]);
+  }, [disabled, feedbackState.submitted, submitFeedback]);
 
   const handleRating = useCallback(async (rating) => {
     if (disabled || feedbackState.submitted) return;
@@ -103,7 +120,7 @@ const FeedbackSystem = ({
       setFeedbackState(prev => ({ ...prev, loading: false }));
       showSnackbar('Failed to submit rating', 'error');
     }
-  }, [disabled, feedbackState.submitted]);
+  }, [disabled, feedbackState.submitted, submitFeedback]);
 
   const handleDetailedFeedback = useCallback(async () => {
     if (!feedbackState.comment.trim()) return;
@@ -129,33 +146,11 @@ const FeedbackSystem = ({
       setFeedbackState(prev => ({ ...prev, loading: false }));
       showSnackbar('Failed to submit feedback', 'error');
     }
-  }, [feedbackState]);
+  }, [feedbackState, submitFeedback, showSnackbar]);
 
-  const submitFeedback = async (feedbackData) => {
-    if (!onSubmitFeedback) {
-      throw new Error('No feedback handler provided');
-    }
+  // Rest of component...
 
-    const payload = {
-      type,
-      targetId,
-      trackId,
-      ...feedbackData,
-      context: {
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        source: 'feedback_system'
-      }
-    };
-
-    return await onSubmitFeedback(payload);
-  };
-
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const getFeedbackIcon = (feedbackType) => {
+  const _getFeedbackIcon = (feedbackType) => {
     switch (feedbackType) {
       case 'like':
         return <ThumbUp />;

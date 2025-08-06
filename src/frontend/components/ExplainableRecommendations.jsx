@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -19,7 +19,6 @@ import {
   Button,
   LinearProgress,
   Stack,
-  Divider,
   Paper,
   Accordion,
   AccordionSummary,
@@ -36,12 +35,9 @@ import {
   Psychology,
   TrendingUp,
   MusicNote,
-  Speed,
-  Favorite,
   Group,
   SmartToy,
   Schedule,
-  Share,
 } from '@mui/icons-material';
 
 /**
@@ -105,7 +101,7 @@ const ExplainableRecommendations = ({
     }
   };
 
-  const getAlgorithmDescription = (algorithm) => {
+  const _getAlgorithmDescription = (algorithm) => {
     switch (algorithm) {
       case 'content_based':
         return 'Based on musical features and audio analysis';
@@ -168,7 +164,7 @@ const ExplainableRecommendations = ({
       </Typography>
 
       <List sx={{ p: 0 }}>
-        {recommendations.map((track, index) => {
+        {recommendations.map((track, _index) => {
           const trackFeedback = feedbackStates[track.id];
           
           return (
@@ -327,7 +323,7 @@ const ExplainableRecommendations = ({
       >
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Psychology color="primary" />
-          Why "{explanationDialog.track?.name}" was recommended
+          Why &quot;{explanationDialog.track?.name}&quot; was recommended
         </DialogTitle>
         
         <DialogContent>
@@ -424,7 +420,7 @@ const ExplainableRecommendations = ({
                       </AccordionSummary>
                       <AccordionDetails>
                         <Typography variant="body2" color="text.secondary" paragraph>
-                          Specific reasons for "{explanationDialog.explanation.trackSpecific.name}":
+                          Specific reasons for &quot;{explanationDialog.explanation.trackSpecific.name}&quot;:
                         </Typography>
                         <List>
                           {explanationDialog.explanation.trackSpecific.reasons.map((reason, idx) => (

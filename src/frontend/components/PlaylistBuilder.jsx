@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -29,7 +29,6 @@ import {
   Add,
   Share,
   PlayArrow,
-  Favorite,
   FavoriteBorder,
   Info,
   LibraryMusic,
@@ -400,7 +399,7 @@ const PlaylistBuilder = ({
         <DialogTitle>Share Playlist</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" paragraph>
-            Share "{playlistName}" with {tracks.length} tracks
+            Share &quot;{playlistName}&quot; with {tracks.length} tracks
           </Typography>
           
           <Stack spacing={2}>

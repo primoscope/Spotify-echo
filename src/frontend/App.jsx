@@ -1,132 +1,337 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
+import { useState } from 'react';
+import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
+import PlaylistBuilder from './components/PlaylistBuilder';
+import ExplainableRecommendations from './components/ExplainableRecommendations';
+import EnhancedChatInterface from './components/EnhancedChatInterface';
+import FeedbackSystem, { FeedbackAnalytics } from './components/FeedbackSystem';
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 // import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
 import './styles/App.css';
 
 /**
- * Simplified Home Component for Testing
- */
-function Home() {
-  // const { user, login } = useAuth();
-
-  return (
-    <div className="home" style={{
-      padding: '2rem',
-      textAlign: 'center',
-      background: 'linear-gradient(135deg, #121212 0%, #191414 100%)',
-      color: '#ffffff',
-      minHeight: '100vh',
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: '#1db954' }}>
-        🎵 EchoTune AI
-      </h1>
-      <p style={{ fontSize: '1.2rem', color: '#b3b3b3', marginBottom: '2rem' }}>
-        Your Personal Music Discovery Assistant powered by Advanced AI
-      </p>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-        gap: '1.5rem',
-        maxWidth: '800px',
-        margin: '2rem auto'
-      }}>
-        <FeatureCard 
-          icon="🤖" 
-          title="AI-Powered Chat"
-          description="Conversational music discovery with multiple LLM providers"
-        />
-        <FeatureCard 
-          icon="🎯" 
-          title="Smart Recommendations"
-          description="Personalized suggestions based on your listening habits"
-        />
-        <FeatureCard 
-          icon="📊" 
-          title="Music Analytics"
-          description="Deep insights into your musical preferences and trends"
-        />
-        <FeatureCard 
-          icon="🎧" 
-          title="Voice Interface"
-          description="Hands-free music discovery with voice commands"
-        />
-      </div>
-
-      <div style={{ marginTop: '3rem' }}>
-        <div>
-          <p style={{ color: '#b3b3b3', marginBottom: '1rem' }}>
-            ✅ React Frontend Successfully Loaded!
-          </p>
-          <p style={{ color: '#1db954', marginBottom: '1rem' }}>
-            🚀 Backend API: Connected and Functional
-          </p>
-          <p style={{ color: '#1db954', marginBottom: '1rem' }}>
-            💾 Database: SQLite Fallback Active  
-          </p>
-          <p style={{ color: '#1db954', marginBottom: '1rem' }}>
-            🤖 Chat API: Real-time Socket.IO Working
-          </p>
-          <a 
-            href="/chat" 
-            style={{
-              background: 'linear-gradient(135deg, #1db954, #1ed760)',
-              color: 'white',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '25px',
-              fontSize: '1rem',
-              textDecoration: 'none',
-              fontWeight: '600',
-              display: 'inline-block',
-              marginTop: '1rem'
-            }}
-          >
-            🤖 Test Chat Interface
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Feature Card Component
- */
-function FeatureCard({ icon, title, description }) {
-  return (
-    <div style={{
-      background: 'rgba(29, 185, 84, 0.1)',
-      border: '1px solid rgba(29, 185, 84, 0.3)',
-      borderRadius: '15px',
-      padding: '1.5rem',
-      textAlign: 'center'
-    }}>
-      <span style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block' }}>{icon}</span>
-      <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#ffffff' }}>{title}</div>
-      <div style={{ color: '#b3b3b3', fontSize: '0.9rem' }}>{description}</div>
-    </div>
-  );
-}
-
-/**
- * Main Application Component - Minimal for Testing
+ * Enhanced EchoTune AI Application
+ * Features modern UI with Material Design, dark/light themes,
+ * explainable recommendations, and advanced chat interface
  */
 function App() {
   return (
-    <Router>
-      <div className="app">
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/chat" element={<div style={{padding: '2rem', color: 'white', background: '#121212', minHeight: '100vh', textAlign: 'center'}}><h1>🤖 Chat Interface Available</h1><p>The REST and Socket.IO chat APIs are working correctly!</p><a href="/" style={{color: '#1db954'}}>← Back to Home</a></div>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainApplication />} />
+          <Route path="/chat" element={<MainApplication initialTab="chat" />} />
+          <Route path="/recommendations" element={<MainApplication initialTab="recommendations" />} />
+          <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
+}
+
+/**
+ * Main Application Component with Tabbed Interface
+ */
+function MainApplication({ initialTab = 'chat' }) {
+  const [currentTab, setCurrentTab] = useState(initialTab);
+  const [sessionId] = useState(`session_${Date.now()}`);
+  const [_recommendations, _setRecommendations] = useState([]);
+  const [_playlistTracks, _setPlaylistTracks] = useState([]);
+
+  // Mock data for demonstration
+  const mockRecommendations = [
+    {
+      id: 'track1',
+      name: 'Blinding Lights',
+      artist: 'The Weeknd',
+      album: { name: 'After Hours' },
+      duration_ms: 200040,
+      confidence: 0.89,
+      algorithm: 'hybrid',
+      recommendationId: 'rec_1',
+      quickReason: 'Based on your recent listening to synth-pop and 80s-inspired tracks',
+      popularity: 95,
+    },
+    {
+      id: 'track2',
+      name: 'Levitating',
+      artist: 'Dua Lipa',
+      album: { name: 'Future Nostalgia' },
+      duration_ms: 203064,
+      confidence: 0.82,
+      algorithm: 'collaborative',
+      recommendationId: 'rec_2',
+      quickReason: 'Users with similar taste love this upbeat disco-pop hit',
+      popularity: 88,
+    },
+    {
+      id: 'track3',
+      name: 'As It Was',
+      artist: 'Harry Styles',
+      album: { name: 'Harry\'s House' },
+      duration_ms: 167000,
+      confidence: 0.76,
+      algorithm: 'content_based',
+      recommendationId: 'rec_3',
+      quickReason: 'Matches your preference for melodic pop with emotional depth',
+      popularity: 92,
+    },
+  ];
+
+  const handleSendChatMessage = async (message, context) => {
+    console.log('Sending message:', message, 'with context:', context);
+    
+    // Mock API call to enhanced chat endpoint
+    try {
+      const response = await fetch('/api/chat/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          context,
+          sessionId,
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          response: data.response,
+          recommendations: mockRecommendations.slice(0, 2), // Mock recommendations
+          explanation: {
+            summary: 'I selected these tracks based on your mood and musical preferences.',
+            reasoning: [
+              `Chose ${context.mood || 'upbeat'} music to match your current mood`,
+              'Included popular tracks that users with similar taste enjoy',
+              'Balanced energy levels for your listening context',
+            ],
+            contextFactors: [
+              { factor: 'mood', value: context.mood || 'happy', influence: 'high' },
+              { factor: 'activity', value: context.activity || 'general', influence: 'medium' },
+            ],
+          },
+          provider: data.provider || 'mock',
+        };
+      }
+    } catch (error) {
+      console.error('Chat API error:', error);
+    }
+    
+    // Fallback response
+    return {
+      response: 'I\'d love to help you discover great music! What kind of mood are you in today?',
+      recommendations: [],
+      provider: 'mock',
+    };
+  };
+
+  const handleGetExplanation = async (recommendationId, trackId) => {
+    console.log('Getting explanation for:', recommendationId, trackId);
+    
+    // Mock explanation based on track
+    const track = mockRecommendations.find(t => t.id === trackId);
+    if (track) {
+      return {
+        summary: `"${track.name}" was recommended because it matches your musical taste profile and current listening context.`,
+        reasons: [
+          `High confidence match (${Math.round(track.confidence * 100)}%) with your preferences`,
+          `${track.algorithm} algorithm identified this as a perfect fit`,
+          `Popular track (${track.popularity}% popularity) with broad appeal`,
+          'Audio features align with your recently played songs',
+        ],
+        confidence: track.confidence,
+        algorithm: track.algorithm,
+        factors: [
+          { type: 'audio_similarity', description: 'Musical features match your taste', weight: 0.4 },
+          { type: 'user_behavior', description: 'Similar users also enjoy this', weight: 0.3 },
+          { type: 'popularity', description: 'Trending and well-received', weight: 0.2 },
+          { type: 'context', description: 'Fits current mood/activity', weight: 0.1 },
+        ],
+        trackSpecific: {
+          name: track.name,
+          artist: track.artist,
+          reasons: [
+            'Matches the energy level you typically prefer',
+            `${track.artist} is in your top listened artists this month`,
+            'Upbeat tempo perfect for your current activity',
+            'Similar to other tracks you\'ve liked recently',
+          ],
+        },
+      };
+    }
+    
+    return {
+      summary: 'This recommendation was generated using our AI algorithms.',
+      reasons: ['Based on your listening history and preferences'],
+      confidence: 0.7,
+      algorithm: 'hybrid',
+      factors: [],
+    };
+  };
+
+  const handleProvideFeedback = async (feedbackData) => {
+    console.log('Submitting feedback:', feedbackData);
+    
+    // Mock API call to feedback endpoint
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedbackData),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Feedback submitted successfully:', data);
+        return data;
+      }
+    } catch (error) {
+      console.error('Feedback API error:', error);
+    }
+    
+    // Mock successful response
+    return {
+      success: true,
+      feedbackId: `feedback_${Date.now()}`,
+      message: 'Feedback recorded successfully',
+    };
+  };
+
+  const handleSavePlaylist = async (playlistData) => {
+    console.log('Saving playlist:', playlistData);
+    // Mock save operation
+    return {
+      success: true,
+      playlistId: `playlist_${Date.now()}`,
+      message: 'Playlist saved successfully',
+    };
+  };
+
+  const handleSharePlaylist = async (playlistData) => {
+    console.log('Sharing playlist:', playlistData);
+    // Mock share operation
+    navigator.clipboard.writeText(`Check out my EchoTune AI playlist: ${playlistData.name}`);
+    return {
+      success: true,
+      shareUrl: `https://echotune.ai/playlist/${Date.now()}`,
+    };
+  };
+
+  return (
+    <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* App Bar */}
+      <AppBar position="static" elevation={1}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+            🎵 EchoTune AI
+            <Typography variant="caption" sx={{ ml: 1, opacity: 0.7 }}>
+              Enhanced Experience
+            </Typography>
+          </Typography>
+          <ThemeToggle showCustomization />
+        </Toolbar>
+      </AppBar>
+
+      {/* Navigation Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Container maxWidth="xl">
+          <Tabs 
+            value={currentTab} 
+            onChange={(_, newValue) => setCurrentTab(newValue)}
+            aria-label="EchoTune AI navigation"
+          >
+            <Tab label="🤖 AI Chat" value="chat" />
+            <Tab label="🎯 Recommendations" value="recommendations" />
+            <Tab label="🎵 Playlist Builder" value="playlist" />
+            <Tab label="📊 Analytics" value="analytics" />
+          </Tabs>
+        </Container>
+      </Box>
+
+      {/* Main Content */}
+      <Box sx={{ flex: 1, overflow: 'hidden' }}>
+        {currentTab === 'chat' && (
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <EnhancedChatInterface
+              sessionId={sessionId}
+              onSendMessage={handleSendChatMessage}
+              onProvideFeedback={handleProvideFeedback}
+              loading={false}
+            />
+          </Container>
+        )}
+
+        {currentTab === 'recommendations' && (
+          <Container maxWidth="xl" sx={{ py: 3 }}>
+            <ExplainableRecommendations
+              recommendations={mockRecommendations}
+              onGetExplanation={handleGetExplanation}
+              onProvideFeedback={handleProvideFeedback}
+              loading={false}
+            />
+          </Container>
+        )}
+
+        {currentTab === 'playlist' && (
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <PlaylistBuilder
+              initialTracks={[]}
+              recommendations={mockRecommendations}
+              onSave={handleSavePlaylist}
+              onShare={handleSharePlaylist}
+              onGetExplanation={handleGetExplanation}
+              onProvideFeedback={handleProvideFeedback}
+            />
+          </Container>
+        )}
+
+        {currentTab === 'analytics' && (
+          <Container maxWidth="xl" sx={{ py: 3 }}>
+            <Typography variant="h4" gutterBottom>
+              📊 Feedback Analytics
+            </Typography>
+            <FeedbackAnalytics
+              analytics={{
+                summary: {
+                  totalFeedback: 47,
+                  averageRating: 4.2,
+                },
+                distribution: {
+                  byFeedback: {
+                    like: 28,
+                    love: 12,
+                    dislike: 4,
+                    skip: 3,
+                  },
+                },
+              }}
+              loading={false}
+            />
+            
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Test Feedback System
+              </Typography>
+              <FeedbackSystem
+                type="recommendation"
+                targetId="demo_recommendation"
+                trackId="demo_track"
+                onSubmitFeedback={handleProvideFeedback}
+                showInline={true}
+                showDetailed={true}
+              />
+            </Box>
+          </Container>
+        )}
+      </Box>
+    </Box>
   );
 }
 

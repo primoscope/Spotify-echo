@@ -82,7 +82,7 @@ router.get('/trending', async (req, res) => {
  * @route GET /api/social/activity
  * @desc Get social activity feed
  */
-router.get('/activity', async (req, res) => {
+router.get('/social/activity', async (req, res) => {
   try {
     const { limit = 20 } = req.query;
     

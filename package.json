@@ -72,6 +72,9 @@
     "enhance:audio-features": "node scripts/enhance-audio-features.js",
     "diagnostic:data": "node scripts/data-diagnostic.js",
     "optimize:database-ai": "node scripts/optimize-database-ai.js",
+    "fetch:missing-audio-features": "node scripts/fetch-missing-audio-features.js",
+    "implement:feature-vectors": "node scripts/implement-feature-vectors.js",
+    "status:redis-roadmap": "node scripts/redis-roadmap-status.js",
     "validate:mcp-server": "node scripts/validate-api-keys.js --mcp-server",
     "validate:security": "node scripts/validate-api-keys.js --security",
     "validate:ssl": "node scripts/validate-api-keys.js --ssl",
@@ -162,7 +165,15 @@
     "docker:check": "./scripts/docker-manager.sh check",
     "docker:report": "./scripts/docker-manager.sh report",
     "deploy:docker": "./scripts/simple-deploy.sh deploy",
-    "deploy:ubuntu": "./scripts/docker-ubuntu-setup.sh && ./scripts/simple-deploy.sh"
+    "deploy:ubuntu": "./scripts/docker-ubuntu-setup.sh && ./scripts/simple-deploy.sh",
+    "setup:redis": "node scripts/setup-redis.js",
+    "configure:redis": "node scripts/configure-redis.js",
+    "validate:redis": "node -e \"const redis = require('./src/utils/redis-manager'); redis.ping().then(() => {console.log('✅ Redis connected'); return redis.close();}).catch(e => {console.error('❌ Redis failed:', e.message); process.exit(1);}).finally(() => process.exit(0))\"",
+    "redis:health": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.healthCheck()).then(h => console.log(JSON.stringify(h, null, 2))).finally(() => r.close())\"",
+    "redis:stats": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.getCacheStats()).then(s => console.log(JSON.stringify(s, null, 2))).finally(() => r.close())\"",
+    "redis:clear": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache()).then(() => console.log('✅ Cache cleared')).finally(() => r.close())\"",
+    "redis:clear-audio": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('audio_features:*')).then(count => console.log('✅ Cleared', count, 'audio features')).finally(() => r.close())\"",
+    "redis:clear-recommendations": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('recommendations:*')).then(count => console.log('✅ Cleared', count, 'recommendations')).finally(() => r.close())\""
   },
   "keywords": [
     "music",

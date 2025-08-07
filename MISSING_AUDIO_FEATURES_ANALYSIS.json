@@ -1,0 +1,306 @@
+{
+  "timestamp": "2025-08-07T06:43:22.935Z",
+  "primary_collection": {
+    "database": "echotune",
+    "collection": "spotify_analytics",
+    "total_tracks": 43303,
+    "with_audio_features": 37358,
+    "missing_audio_features": 5945,
+    "sample_missing_tracks": [
+      {
+        "track_uri": "spotify:track:3EtK9JHFyqEUA9sSucw5Si",
+        "track_name": "The Quiet Place",
+        "artist_name": "In Flames",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:3uXR8I4kT1WtvtHTEj4ZHG",
+        "track_name": "My Last Serenade",
+        "artist_name": "Killswitch Engage",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:4wrWRRCsAViMVHb2FCAobc",
+        "track_name": "My Curse",
+        "artist_name": "Killswitch Engage",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:08JcEv8ZdUGvKV1ER1qTKi",
+        "track_name": "Episode 666",
+        "artist_name": "In Flames",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:4sjLcE0GQ6urc4iUXsUPe9",
+        "track_name": "Kings And Queens",
+        "artist_name": "Thirty Seconds To Mars",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:2J8FymmQmH3Z8vROUsA1q7",
+        "track_name": "Take This Oath",
+        "artist_name": "Killswitch Engage",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:4W9NjEHamSsF0KiAqmj8x4",
+        "track_name": "The Funeral Of Hearts",
+        "artist_name": "HIM",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:7HHJcl04LZDgJ7DnGcZB0B",
+        "track_name": "Killing Loneliness",
+        "artist_name": "HIM",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:1QdXJ6TDYOT7sZyq7WCHhk",
+        "track_name": "Dying in Your Arms",
+        "artist_name": "Trivium",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      },
+      {
+        "track_uri": "spotify:track:5zcCioRYAegp8RPisu6Edi",
+        "track_name": "Pull Harder on the Strings of Your Martyr",
+        "artist_name": "Trivium",
+        "has_audio_features": false,
+        "audio_features_present": 0
+      }
+    ]
+  },
+  "secondary_collection": {
+    "database": "spotify_analytics",
+    "collection": "listening_history",
+    "total_tracks": 203090,
+    "unique_track_uris": 0,
+    "sample_tracks": [
+      {
+        "artist_name": {
+          "genres": []
+        },
+        "available_fields": [
+          "_id",
+          "spotify_track_uri",
+          "timestamp",
+          "user",
+          "track",
+          "album",
+          "artist",
+          "listening",
+          "metadata",
+          "migration"
+        ]
+      },
+      {
+        "artist_name": {
+          "genres": []
+        },
+        "available_fields": [
+          "_id",
+          "spotify_track_uri",
+          "timestamp",
+          "user",
+          "track",
+          "album",
+          "artist",
+          "listening",
+          "metadata",
+          "migration"
+        ]
+      },
+      {
+        "artist_name": {
+          "genres": []
+        },
+        "available_fields": [
+          "_id",
+          "spotify_track_uri",
+          "timestamp",
+          "user",
+          "track",
+          "album",
+          "artist",
+          "listening",
+          "metadata",
+          "migration"
+        ]
+      },
+      {
+        "artist_name": {
+          "genres": []
+        },
+        "available_fields": [
+          "_id",
+          "spotify_track_uri",
+          "timestamp",
+          "user",
+          "track",
+          "album",
+          "artist",
+          "listening",
+          "metadata",
+          "migration"
+        ]
+      },
+      {
+        "artist_name": {
+          "genres": []
+        },
+        "available_fields": [
+          "_id",
+          "spotify_track_uri",
+          "timestamp",
+          "user",
+          "track",
+          "album",
+          "artist",
+          "listening",
+          "metadata",
+          "migration"
+        ]
+      }
+    ],
+    "structure_analysis": {
+      "total_fields": 10,
+      "field_list": [
+        "_id",
+        "spotify_track_uri",
+        "timestamp",
+        "user",
+        "track",
+        "album",
+        "artist",
+        "listening",
+        "metadata",
+        "migration"
+      ],
+      "has_track_uri": false,
+      "has_track_name": false,
+      "has_artist_name": true,
+      "has_audio_features": false
+    }
+  },
+  "audio_features_from_files": {
+    "available_features": 57232,
+    "unique_track_uris": 0,
+    "sample_features": [
+      {
+        "\"Track URI\"": "\"spotify:track:737xuDgcxVtGj6ygIbrKk9\"",
+        "\"Track Name\"": "\"Masif Hardcore 2008 [CD1 - Mixed by Scott Brown]\"",
+        "\"Artist URI(s)\"": "\"spotify:artist:0LyfQWJT6nXafLPZqxe9Of\"",
+        "\"Artist Name(s)\"": "\"Various Artists\"",
+        "\"Album URI\"": "\"spotify:album:2qkf9s85v7PDHJDkcec8bB\"",
+        "\"Album Name\"": "\"Masif Hardcore 2008\"",
+        "\"Album Artist URI(s)\"": "\"spotify:artist:0LyfQWJT6nXafLPZqxe9Of\"",
+        "\"Album Artist Name(s)\"": "\"Various Artists\"",
+        "\"Album Release Date\"": "\"2009-05-03\"",
+        "\"Album Image URL\"": "\"https://i.scdn.co/image/ab67616d0000b273e69e749b1fe1c0ff9f21a708\"",
+        "\"Disc Number\"": "\"1\"",
+        "\"Track Number\"": "\"1\"",
+        "\"Track Duration (ms)\"": "\"4067053\"",
+        "\"Track Preview URL\"": "\"\"",
+        "\"Explicit\"": "\"true\"",
+        "\"Popularity\"": "\"0\"",
+        "\"ISRC\"": "\"USQY50921020\"",
+        "\"Added By\"": "\"spotify:user:willexmen\"",
+        "\"Added At\"": "\"2025-03-31T16:40:54Z\"",
+        "\"Artist Genres\"": "\"champeta\"",
+        "\"Danceability\"": "\"0.449\"",
+        "\"Energy\"": "\"0.926\"",
+        "\"Key\"": "\"7\"",
+        "\"Loudness\"": "\"-9.509\"",
+        "\"Mode\"": "\"1\"",
+        "\"Speechiness\"": "\"0.0637\"",
+        "\"Acousticness\"": "\"0.000408\"",
+        "\"Instrumentalness\"": "\"0.134\"",
+        "\"Liveness\"": "\"0.375\"",
+        "\"Valence\"": "\"0.0706\"",
+        "\"Tempo\"": "\"170.661\"",
+        "\"Time Signature\"": "\"4\"",
+        "\"Album Genres\"": "\"\"",
+        "\"Label\"": "\"Hardcore Masif\"",
+        "\"Copyrights\"": "\"\""
+      }
+    ],
+    "headers": [
+      "\"Track URI\"",
+      "\"Track Name\"",
+      "\"Artist URI(s)\"",
+      "\"Artist Name(s)\"",
+      "\"Album URI\"",
+      "\"Album Name\"",
+      "\"Album Artist URI(s)\"",
+      "\"Album Artist Name(s)\"",
+      "\"Album Release Date\"",
+      "\"Album Image URL\"",
+      "\"Disc Number\"",
+      "\"Track Number\"",
+      "\"Track Duration (ms)\"",
+      "\"Track Preview URL\"",
+      "\"Explicit\"",
+      "\"Popularity\"",
+      "\"ISRC\"",
+      "\"Added By\"",
+      "\"Added At\"",
+      "\"Artist Genres\"",
+      "\"Danceability\"",
+      "\"Energy\"",
+      "\"Key\"",
+      "\"Loudness\"",
+      "\"Mode\"",
+      "\"Speechiness\"",
+      "\"Acousticness\"",
+      "\"Instrumentalness\"",
+      "\"Liveness\"",
+      "\"Valence\"",
+      "\"Tempo\"",
+      "\"Time Signature\"",
+      "\"Album Genres\"",
+      "\"Label\"",
+      "\"Copyrights\""
+    ]
+  },
+  "merge_analysis": {
+    "primary_missing_features": 5945,
+    "secondary_total_uris": 0,
+    "potential_matches": 0,
+    "uri_overlap": 0,
+    "would_improve_coverage": false,
+    "merge_recommendation": "limited_benefit"
+  },
+  "recommendations": [
+    {
+      "priority": "high",
+      "category": "audio_features",
+      "issue": "5945 tracks (13.7%) missing audio features",
+      "current_coverage": "86.3%",
+      "action": "Process remaining tracks through Spotify Audio Features API to achieve 100% coverage",
+      "technical_approach": "Use track URIs to batch fetch missing audio features from Spotify Web API"
+    },
+    {
+      "priority": "medium",
+      "category": "performance",
+      "issue": "Large dataset requires optimization for production use",
+      "action": "Implement data partitioning and caching strategies for better query performance",
+      "technical_approach": "Consider archiving old listening data and focusing on recent/popular tracks"
+    },
+    {
+      "priority": "high",
+      "category": "data_quality",
+      "issue": "Audio features coverage (86.3%) below optimal threshold (90%+)",
+      "action": "Prioritize audio features completion before production deployment",
+      "impact": "Missing audio features significantly impact recommendation quality"
+    }
+  ]
+}

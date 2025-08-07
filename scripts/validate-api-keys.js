@@ -304,37 +304,56 @@ class APIKeyValidator {
         }
     }
 
-    // MongoDB Connection Test
+    // MongoDB Connection Test with Enhanced Validation
     async testMongoDBConnection() {
         const mongoUri = process.env.MONGODB_URI;
+        const requiredUri = 'mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+        const requiredDatabase = 'echotune';
         
         if (!mongoUri) {
             throw new Error('Missing MONGODB_URI');
         }
 
         try {
-            // Simple connection test using Node.js child_process
-            const testScript = `
-                const { MongoClient } = require('mongodb');
-                const client = new MongoClient('${mongoUri}', { 
-                    serverSelectionTimeoutMS: 5000,
-                    connectTimeoutMS: 5000
-                });
-                client.connect()
-                    .then(() => { console.log('SUCCESS'); client.close(); })
-                    .catch(err => { console.log('ERROR:', err.message); });
-            `;
-            
-            const result = execSync(`node -e "${testScript}"`, { 
-                timeout: 10000,
+            // Use helper script to avoid shell escaping issues
+            const helperPath = require('path').join(__dirname, 'test-mongodb-helper.js');
+            const result = execSync(`node "${helperPath}" "${mongoUri}" "${requiredDatabase}"`, { 
+                timeout: 15000,
                 encoding: 'utf8' 
             });
 
+            if (result.includes('RESULT:')) {
+                const jsonMatch = result.match(/RESULT:(.+)/);
+                if (jsonMatch) {
+                    const data = JSON.parse(jsonMatch[1]);
+                    
+                    // Validate connection string matches requirements
+                    const connectionValid = mongoUri.includes('cluster0.ofnyuy.mongodb.net');
+                    const databaseValid = data.database === requiredDatabase;
+                    
+                    return {
+                        status: 'valid',
+                        connection_matches_requirement: connectionValid,
+                        database: data.database,
+                        database_matches_requirement: databaseValid,
+                        collections_count: data.total_collections,
+                        collections: data.collections,
+                        spotify_analytics: {
+                            exists: data.spotify_analytics_exists,
+                            document_count: data.spotify_analytics_count,
+                            has_data: data.spotify_analytics_count > 0,
+                            has_most_data: data.spotify_analytics_count > 100000 // Consider significant data
+                        },
+                        validation_summary: connectionValid && databaseValid && data.spotify_analytics_exists && data.spotify_analytics_count > 0 ? 'fully_compliant' : 'partial_compliance'
+                    };
+                }
+            }
+            
             if (result.includes('SUCCESS')) {
                 return {
                     status: 'valid',
-                    database: process.env.MONGODB_DB_NAME || 'default',
-                    collections_prefix: process.env.MONGODB_COLLECTIONS_PREFIX || 'none'
+                    database: requiredDatabase,
+                    message: 'Basic connection successful'
                 };
             } else {
                 throw new Error('MongoDB connection failed');

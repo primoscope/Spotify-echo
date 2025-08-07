@@ -1,0 +1,58 @@
+{
+  "timestamp": "2025-08-07T08:41:01.269Z",
+  "connection_status": "success",
+  "merge_operations": {
+    "spotify_analytics.listening_history -> echotune.echotune_listening_history": {
+      "source_collection": "spotify_analytics.listening_history",
+      "target_collection": "echotune.echotune_listening_history",
+      "total_documents": 203090,
+      "merged_count": 203090,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 32.68,
+      "documents_per_second": "6214.50",
+      "status": "success"
+    },
+    "spotify_analytics.chat_history -> echotune.echotune_chat_sessions": {
+      "source_collection": "spotify_analytics.chat_history",
+      "target_collection": "echotune.echotune_chat_sessions",
+      "total_documents": 33,
+      "merged_count": 33,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 0.315,
+      "documents_per_second": "104.76",
+      "status": "success"
+    },
+    "spotify_analytics.chat_sessions -> echotune.echotune_chat_sessions": {
+      "source_collection": "spotify_analytics.chat_sessions",
+      "target_collection": "echotune.echotune_chat_sessions",
+      "total_documents": 18,
+      "merged_count": 18,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 0.417,
+      "documents_per_second": "43.17",
+      "status": "success"
+    },
+    "spotify_analytics.user_profiles -> echotune.echotune_user_preferences": {
+      "error": "E11000 duplicate key error collection: echotune.echotune_user_preferences index: userId_1 dup key: { userId: null }",
+      "duration_seconds": 0.313,
+      "status": "failed"
+    }
+  },
+  "total_merged": 203141,
+  "errors": [
+    {
+      "operation": "spotify_analytics.user_profiles -> echotune.echotune_user_preferences",
+      "error": "E11000 duplicate key error collection: echotune.echotune_user_preferences index: userId_1 dup key: { userId: null }"
+    }
+  ],
+  "performance_metrics": {
+    "total_operations": 4,
+    "successful_operations": 3,
+    "total_errors": 0,
+    "average_processing_speed": "1590.61 docs/sec",
+    "merge_success_rate": "100.0%"
+  }
+}

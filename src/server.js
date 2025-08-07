@@ -36,6 +36,7 @@ const analyticsRoutes = require('./api/routes/analytics');
 const feedbackRoutes = require('./api/routes/feedback'); // New feedback system
 const musicDiscoveryRoutes = require('./api/routes/music-discovery'); // New music discovery system
 const llmProvidersRoutes = require('./api/routes/llm-providers'); // Enhanced LLM provider management
+const advancedSettingsRoutes = require('./api/advanced-settings'); // Advanced Settings UI API
 const { 
   extractUser, 
   ensureDatabase, 
@@ -620,6 +621,7 @@ app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/settings', llmProvidersRoutes); // Enhanced LLM provider management
+app.use('/api/settings', advancedSettingsRoutes); // Advanced Settings UI API
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/feedback', feedbackRoutes); // New feedback system
 app.use('/api/music', musicDiscoveryRoutes); // Enhanced music discovery system

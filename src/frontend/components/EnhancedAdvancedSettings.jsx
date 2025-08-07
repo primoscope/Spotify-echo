@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './EnhancedAdvancedSettings.css';
 
 /**
@@ -15,7 +15,7 @@ import './EnhancedAdvancedSettings.css';
 const EnhancedAdvancedSettings = () => {
   // State management
   const [activeTab, setActiveTab] = useState('llm-providers');
-  const [settings, setSettings] = useState({});
+  // const [settings, setSettings] = useState({}); // Commented out unused variable
   const [systemStatus, setSystemStatus] = useState({});
   const [databaseInsights, setDatabaseInsights] = useState({});
   const [loading, setLoading] = useState(false);
@@ -93,12 +93,12 @@ const EnhancedAdvancedSettings = () => {
     loadAllSettings();
     loadSystemStatus();
     loadDatabaseInsights();
-  }, []);
+  }, [loadAllSettings]); // Added missing dependency
 
   /**
    * Load all settings from API
    */
-  const loadAllSettings = async () => {
+  const loadAllSettings = useCallback(async () => {
     setLoading(true);
     try {
       const [settingsResponse, configResponse] = await Promise.all([
@@ -110,7 +110,7 @@ const EnhancedAdvancedSettings = () => {
       const configData = await configResponse.json();
       
       if (settingsData.success) {
-        setSettings(settingsData.config);
+        // setSettings(settingsData.config); // Commented out since settings is unused
       }
       
       if (configData.success) {
@@ -122,7 +122,7 @@ const EnhancedAdvancedSettings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Empty dependency array since no external dependencies
 
   /**
    * Load system status and health
@@ -618,7 +618,7 @@ const EnhancedAdvancedSettings = () => {
     <div className="enhanced-advanced-settings">
       <div className="enhanced-settings-header">
         <h1>⚙️ Advanced Settings</h1>
-        <p>Configure EchoTune AI's advanced features and integrations</p>
+        <p>Configure EchoTune AI&apos;s advanced features and integrations</p>
       </div>
 
       {message && (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -74,18 +74,7 @@ function MobileResponsiveManager() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    updateResponsiveInfo();
-    window.addEventListener('resize', updateResponsiveInfo);
-    window.addEventListener('orientationchange', updateResponsiveInfo);
-    
-    return () => {
-      window.removeEventListener('resize', updateResponsiveInfo);
-      window.removeEventListener('orientationchange', updateResponsiveInfo);
-    };
-  }, [updateResponsiveInfo]);
-
-  const updateResponsiveInfo = () => {
+  const updateResponsiveInfo = useCallback(() => {
     const info = {
       currentBreakpoint: getCurrentBreakpoint(),
       screenSize: {
@@ -99,7 +88,25 @@ function MobileResponsiveManager() {
     };
     
     setResponsiveInfo(info);
-  };
+    
+    // Update CSS classes for responsive optimization
+    document.body.className = document.body.className
+      .replace(/\b(mobile|tablet|desktop)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    document.body.classList.add(info.currentBreakpoint);
+  }, [getCurrentBreakpoint, getConnectionType]);
+
+  useEffect(() => {
+    updateResponsiveInfo();
+    window.addEventListener('resize', updateResponsiveInfo);
+    window.addEventListener('orientationchange', updateResponsiveInfo);
+    
+    return () => {
+      window.removeEventListener('resize', updateResponsiveInfo);
+      window.removeEventListener('orientationchange', updateResponsiveInfo);
+    };
+  }, [updateResponsiveInfo]);
 
   const getCurrentBreakpoint = () => {
     if (isMobile) return 'Mobile (< 600px)';

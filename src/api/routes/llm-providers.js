@@ -57,10 +57,10 @@ const DEFAULT_LLM_CONFIG = {
     enabled: true,
     fallback: true,
     responses: [
-      "Here's a great music recommendation based on your taste!",
-      "I'd suggest exploring this genre - it matches your listening patterns.",
-      "Based on your preferences, you might enjoy these tracks.",
-      "Let me recommend some music that fits your current mood."
+      'Here\'s a great music recommendation based on your taste!',
+      'I\'d suggest exploring this genre - it matches your listening patterns.',
+      'Based on your preferences, you might enjoy these tracks.',
+      'Let me recommend some music that fits your current mood.'
     ]
   }
 };
@@ -144,7 +144,7 @@ function validateApiKey(provider, apiKey) {
 async function testLLMProvider(provider, config) {
   try {
     let response;
-    const testPrompt = "Respond with exactly: 'Test successful'";
+    const testPrompt = 'Respond with exactly: \'Test successful\'';
     
     switch (provider) {
       case 'openai':

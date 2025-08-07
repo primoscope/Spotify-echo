@@ -1,14 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab, Grid } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
 import { useState } from 'react';
 import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
 import PlaylistBuilder from './components/PlaylistBuilder';
 import ExplainableRecommendations from './components/ExplainableRecommendations';
 import EnhancedChatInterface from './components/EnhancedChatInterface';
-import FeedbackSystem, { FeedbackAnalytics } from './components/FeedbackSystem';
-import MCPAutomationStatus from './components/MCPAutomationStatus';
 import EnhancedMusicDiscovery from './components/EnhancedMusicDiscovery';
 import EnhancedAnalyticsDashboard from './components/EnhancedAnalyticsDashboard';
+import MobileResponsiveManager from './components/MobileResponsiveManager';
+import EnhancedConfigPanel from './components/EnhancedConfigPanel';
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 // import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
@@ -30,6 +30,7 @@ function App() {
           <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
           <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
           <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
+          <Route path="/settings" element={<MainApplication initialTab="settings" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
@@ -257,6 +258,7 @@ function MainApplication({ initialTab = 'chat' }) {
             <Tab label="🎵 Playlist Builder" value="playlist" />
             <Tab label="🔍 Discovery" value="discovery" />
             <Tab label="📊 Analytics" value="analytics" />
+            <Tab label="⚙️ Settings" value="settings" />
           </Tabs>
         </Container>
       </Box>
@@ -309,7 +311,37 @@ function MainApplication({ initialTab = 'chat' }) {
             <EnhancedAnalyticsDashboard />
           </Container>
         )}
+
+        {currentTab === 'settings' && (
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <SettingsTabManager />
+          </Container>
+        )}
       </Box>
+    </Box>
+  );
+}
+
+/**
+ * Settings Tab Manager Component
+ * Manages sub-tabs for different configuration areas
+ */
+function SettingsTabManager() {
+  const [settingsTab, setSettingsTab] = useState('general');
+
+  return (
+    <Box>
+      <Tabs 
+        value={settingsTab} 
+        onChange={(event, newValue) => setSettingsTab(newValue)}
+        sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}
+      >
+        <Tab label="⚙️ General" value="general" />
+        <Tab label="📱 Mobile & Responsive" value="mobile" />
+      </Tabs>
+
+      {settingsTab === 'general' && <EnhancedConfigPanel />}
+      {settingsTab === 'mobile' && <MobileResponsiveManager />}
     </Box>
   );
 }

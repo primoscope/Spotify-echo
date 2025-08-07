@@ -35,6 +35,7 @@ const settingsRoutes = require('./api/routes/settings');
 const analyticsRoutes = require('./api/routes/analytics');
 const feedbackRoutes = require('./api/routes/feedback'); // New feedback system
 const musicDiscoveryRoutes = require('./api/routes/music-discovery'); // New music discovery system
+const llmProvidersRoutes = require('./api/routes/llm-providers'); // Enhanced LLM provider management
 const { 
   extractUser, 
   ensureDatabase, 
@@ -618,6 +619,7 @@ app.use('/api/providers', providersRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/settings', llmProvidersRoutes); // Enhanced LLM provider management
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/feedback', feedbackRoutes); // New feedback system
 app.use('/api/music', musicDiscoveryRoutes); // Enhanced music discovery system
@@ -875,6 +877,18 @@ server.listen(PORT, '0.0.0.0', async () => {
             console.log(`📊 Active databases: ${dbInfo.databases.join(', ')}`);
             if (dbInfo.fallbackMode) {
                 console.log('📦 Running in fallback mode (SQLite)');
+            }
+            
+            // Set global database reference for health checks and legacy compatibility
+            if (databaseManager.mongodb) {
+                global.db = databaseManager.getMongoDatabase();
+                global.databaseManager = databaseManager;
+                console.log('🔗 Global database reference set for health checks');
+                console.log('🔍 Debug: databaseManager.mongodb exists:', !!databaseManager.mongodb);
+                console.log('🔍 Debug: global.db exists:', !!global.db);
+                console.log('🔍 Debug: Database name:', global.db ? global.db.databaseName : 'null');
+            } else {
+                console.warn('⚠️ MongoDB not available, cannot set global database reference');
             }
         } else {
             console.error('❌ Database initialization failed - running without database');

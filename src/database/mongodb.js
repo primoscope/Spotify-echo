@@ -156,10 +156,27 @@ class MongoDBManager {
    */
   async healthCheck() {
     try {
+      // Check if client is connected
+      if (!this.client || !this.isConnected) {
+        return { 
+          status: 'unhealthy', 
+          error: 'MongoDB client not connected',
+          details: { connected: this.isConnected, hasClient: !!this.client }
+        };
+      }
+      
       await this.client.db('admin').command({ ping: 1 });
-      return { status: 'healthy', database: this.databaseName };
+      return { 
+        status: 'healthy', 
+        database: this.databaseName,
+        connected: this.isConnected
+      };
     } catch (error) {
-      return { status: 'unhealthy', error: error.message };
+      return { 
+        status: 'unhealthy', 
+        error: error.message,
+        details: { connected: this.isConnected, hasClient: !!this.client }
+      };
     }
   }
 }

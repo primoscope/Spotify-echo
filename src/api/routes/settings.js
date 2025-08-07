@@ -557,6 +557,177 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Enhanced Configuration Management
+// GET /api/settings/config - Get application configuration
+router.get('/config', async (req, res) => {
+    try {
+        // Default configuration
+        const defaultConfig = {
+            // Music Settings
+            recommendationEngine: 'hybrid',
+            audioQuality: 'high',
+            discoveryMode: 'smart',
+            
+            // UI Settings
+            theme: 'auto',
+            animations: true,
+            compactMode: false,
+            
+            // Performance Settings
+            cacheSize: 100,
+            requestTimeout: 30,
+            batchSize: 20,
+            
+            // Privacy Settings
+            anonymousMode: false,
+            dataCollection: true,
+            analytics: true,
+            
+            // MCP Server Settings
+            mcpEnabled: true,
+            mcpServers: {
+                mermaid: true,
+                filesystem: true,
+                browserbase: false,
+                spotify: true,
+                github: false,
+                sqlite: true,
+                memory: true,
+                postgres: false,
+                'brave-search': false,
+                'screenshot-website': true,
+                browser: true,
+                'sequential-thinking': true
+            }
+        };
+
+        // Try to read saved configuration
+        try {
+            const fs = require('fs');
+            const configPath = path.join(__dirname, '..', '..', '..', 'config', 'app-config.json');
+            
+            if (fs.existsSync(configPath)) {
+                const savedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                const mergedConfig = { ...defaultConfig, ...savedConfig };
+                return res.json({ success: true, config: mergedConfig });
+            }
+        } catch (error) {
+            console.log('No saved configuration found, using defaults');
+        }
+
+        res.json({ success: true, config: defaultConfig });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// PUT /api/settings/config - Update application configuration
+router.put('/config', async (req, res) => {
+    try {
+        const { config } = req.body;
+        
+        if (!config) {
+            return res.status(400).json({ success: false, error: 'Configuration is required' });
+        }
+
+        // Ensure config directory exists
+        const fs = require('fs');
+        const configDir = path.join(__dirname, '..', '..', '..', 'config');
+        const configPath = path.join(configDir, 'app-config.json');
+        
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+
+        // Save configuration
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+        // Log configuration update
+        console.log('Configuration updated:', {
+            timestamp: new Date().toISOString(),
+            changes: Object.keys(config)
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'Configuration saved successfully',
+            config: config
+        });
+    } catch (error) {
+        console.error('Error saving configuration:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Mobile Settings Management
+// PUT /api/settings/mobile - Update mobile/responsive configuration
+router.put('/mobile', async (req, res) => {
+    try {
+        const { settings } = req.body;
+        
+        if (!settings) {
+            return res.status(400).json({ success: false, error: 'Mobile settings are required' });
+        }
+
+        const fs = require('fs');
+        const configDir = path.join(__dirname, '..', '..', '..', 'config');
+        const configPath = path.join(configDir, 'mobile-config.json');
+        
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+
+        // Save mobile configuration
+        fs.writeFileSync(configPath, JSON.stringify(settings, null, 2));
+
+        console.log('Mobile settings updated:', {
+            timestamp: new Date().toISOString(),
+            settings: Object.keys(settings)
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'Mobile settings saved successfully',
+            settings: settings
+        });
+    } catch (error) {
+        console.error('Error saving mobile settings:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/settings/mobile - Get mobile/responsive configuration
+router.get('/mobile', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const configPath = path.join(__dirname, '..', '..', '..', 'config', 'mobile-config.json');
+        
+        // Default mobile settings
+        const defaultSettings = {
+            touchOptimization: true,
+            gestureNavigation: true,
+            compactUI: true,
+            fastScrolling: true,
+            autoRotation: false,
+            mobileFriendlyFonts: true,
+            reduceAnimations: false,
+            highContrastMode: false,
+            offlineMode: false,
+            dataSaver: false
+        };
+
+        if (fs.existsSync(configPath)) {
+            const savedSettings = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const mergedSettings = { ...defaultSettings, ...savedSettings };
+            return res.json({ success: true, settings: mergedSettings });
+        }
+
+        res.json({ success: true, settings: defaultSettings });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Generate random secrets
 router.get('/generate-secret', (req, res) => {
     const crypto = require('crypto');

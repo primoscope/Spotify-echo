@@ -75,7 +75,12 @@ class MCPValidator {
     // Map documentation names to package.json names - updated mapping
     const nameMapping = {
       'Sequential Thinking MCP Server': 'sequential-thinking',
+      'GitHub MCP Server': 'github',
       'FileScopeMCP': 'filesystem',
+      'SQLite MCP Server': 'sqlite',
+      'Memory MCP Server': 'memory',
+      'PostgreSQL MCP Server': 'postgres',
+      'Brave Search MCP Server': 'brave-search',
       'MCP Screenshot Website Fast': 'screenshot-website',
       'MCP Server Browserbase': 'browserbase',
       'Mermaid Diagram Generator': 'mermaid',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -23,7 +23,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button,
   Switch,
   FormControlLabel
 } from '@mui/material';
@@ -33,11 +32,9 @@ import {
   Refresh,
   Download,
   Share,
-  Visibility,
   MusicNote,
   People,
   PlayArrow,
-  Favorite,
   Timeline,
   PieChart,
   BarChart,
@@ -56,7 +53,7 @@ function EnhancedAnalyticsDashboard() {
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [realtimeEnabled, setRealtimeEnabled] = useState(false);
-  const [selectedMetrics, setSelectedMetrics] = useState(['listening', 'recommendations', 'engagement']);
+  const [selectedMetrics] = useState(['listening', 'recommendations', 'engagement']);
 
   // Time range options
   const timeRanges = {
@@ -69,7 +66,7 @@ function EnhancedAnalyticsDashboard() {
   };
 
   // Metric configurations
-  const metricConfigs = {
+  const _metricConfigs = {
     listening: {
       name: 'Listening Patterns',
       icon: <MusicNote />,
@@ -340,7 +337,7 @@ function EnhancedAnalyticsDashboard() {
             <PieChart sx={{ mr: 1 }} />
             Top Genres
           </Typography>
-          {listeningPatterns.topGenres.map((genre, index) => (
+          {listeningPatterns.topGenres.map((genre) => (
             <Box key={genre.genre} sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">{genre.genre}</Typography>

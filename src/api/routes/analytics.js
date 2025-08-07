@@ -566,12 +566,13 @@ router.get('/export', async (req, res) => {
         const analyticsData = await getExportableAnalytics(timeRange);
         
         switch (format.toLowerCase()) {
-            case 'csv':
+            case 'csv': {
                 const csv = generateCSV(analyticsData);
                 res.setHeader('Content-Type', 'text/csv');
                 res.setHeader('Content-Disposition', `attachment; filename=analytics-${timeRange}.csv`);
                 res.send(csv);
                 break;
+            }
             
             case 'json':
                 res.setHeader('Content-Type', 'application/json');
@@ -649,7 +650,7 @@ async function getOverviewMetrics(timeRange) {
     };
 }
 
-async function getEnhancedListeningPatterns(timeRange, userId) {
+async function getEnhancedListeningPatterns(_timeRange, _userId) {
     return {
         hourlyDistribution: Array.from({ length: 24 }, (_, hour) => ({
             hour,
@@ -673,7 +674,7 @@ async function getEnhancedListeningPatterns(timeRange, userId) {
     };
 }
 
-async function getEnhancedRecommendationMetrics(timeRange, userId) {
+async function getEnhancedRecommendationMetrics(_timeRange, _userId) {
     return {
         accuracy: 87.3,
         totalRecommendations: 8760,
@@ -689,7 +690,7 @@ async function getEnhancedRecommendationMetrics(timeRange, userId) {
     };
 }
 
-async function getEngagementMetrics(timeRange, userId) {
+async function getEngagementMetrics(_timeRange, _userId) {
     return {
         dailyActiveUsers: Math.floor(Math.random() * 300) + 600,
         weeklyActiveUsers: Math.floor(Math.random() * 400) + 900,
@@ -700,7 +701,7 @@ async function getEngagementMetrics(timeRange, userId) {
     };
 }
 
-async function getDiscoveryMetrics(timeRange, userId) {
+async function getDiscoveryMetrics(_timeRange, _userId) {
     return {
         newTracksDiscovered: Math.floor(Math.random() * 1000) + 2000,
         discoveryRate: Math.round((Math.random() * 20 + 30) * 10) / 10,
@@ -709,7 +710,7 @@ async function getDiscoveryMetrics(timeRange, userId) {
     };
 }
 
-async function getSocialMetrics(timeRange, userId) {
+async function getSocialMetrics(_timeRange, _userId) {
     return {
         playlistsCreated: Math.floor(Math.random() * 100) + 150,
         playlistsShared: Math.floor(Math.random() * 50) + 75,
@@ -728,7 +729,7 @@ async function getSystemPerformanceMetrics() {
     };
 }
 
-async function getTopTracks(timeRange, userId) {
+async function getTopTracks(_timeRange, _userId) {
     return [
         {
             id: 'track1',

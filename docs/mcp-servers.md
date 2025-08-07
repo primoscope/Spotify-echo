@@ -4,15 +4,20 @@ This document is the **single source of truth** for all Model Context Protocol (
 
 ## Overview
 
-EchoTune AI integrates with seven powerful MCP servers to enhance coding, automation, testing, and music intelligence capabilities:
+EchoTune AI integrates with eleven powerful MCP servers to enhance coding, automation, testing, and music intelligence capabilities:
 
 1. **Sequential Thinking MCP Server** - Structured reasoning and complex problem solving
-2. **FileScopeMCP** - Advanced file system operations with scope control  
-3. **MCP Screenshot Website Fast** - Rapid website screenshot generation
-4. **MCP Server Browserbase** - Cloud-based browser automation
-5. **Mermaid Diagram Generator** - Workflow diagrams and visual representations
-6. **Browser Automation Server (Puppeteer)** - Local browser automation and web scraping
-7. **Spotify MCP Server** - Custom music intelligence and automation
+2. **GitHub MCP Server** - Official GitHub integration for repository management, PRs, issues, and Actions
+3. **FileScopeMCP** - Advanced file system operations with scope control  
+4. **SQLite MCP Server** - Database operations with built-in analysis features
+5. **Memory MCP Server** - Knowledge graph-based persistent memory system
+6. **PostgreSQL MCP Server** - Database integration with schema inspection and query capabilities
+7. **Brave Search MCP Server** - Web search capabilities using Brave's Search API
+8. **MCP Screenshot Website Fast** - Rapid website screenshot generation
+9. **MCP Server Browserbase** - Cloud-based browser automation
+10. **Mermaid Diagram Generator** - Workflow diagrams and visual representations
+11. **Browser Automation Server (Puppeteer)** - Local browser automation and web scraping
+12. **Spotify MCP Server** - Custom music intelligence and automation
 
 ## Quick Start
 
@@ -232,6 +237,76 @@ npm run mcp-manage test sequential-thinking
 - `SPOTIFY_CLIENT_SECRET`: Your Spotify app client secret
 - `SPOTIFY_REDIRECT_URI`: OAuth redirect URI for authentication
 
+### 8. GitHub MCP Server
+
+**Purpose**: Official GitHub integration for repository management, PRs, issues, and Actions
+
+**Command**: `docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server`
+
+**Capabilities**:
+- Repository management and file operations
+- Pull request creation and management  
+- Issue tracking and project management
+- GitHub Actions workflow integration
+- Organization and team management
+
+**Environment Variables**:
+- `GITHUB_PAT`: Personal Access Token for GitHub API access
+
+### 9. SQLite MCP Server
+
+**Purpose**: Database operations with built-in analysis features
+
+**Command**: `python -m mcp_server_sqlite --db-path data/echotune.db`
+
+**Capabilities**:
+- Database schema inspection and management
+- SQL query execution with safety checks
+- Data analysis and reporting
+- Database migration support
+
+### 10. Memory MCP Server
+
+**Purpose**: Knowledge graph-based persistent memory system
+
+**Command**: `npx @modelcontextprotocol/server-memory`
+
+**Capabilities**:
+- Persistent knowledge storage and retrieval
+- Entity relationship mapping
+- Context-aware information retrieval
+- Learning and adaptation from interactions
+
+### 11. PostgreSQL MCP Server
+
+**Purpose**: PostgreSQL database integration with schema inspection and query capabilities
+
+**Command**: `npx @modelcontextprotocol/server-postgres`
+
+**Capabilities**:
+- Full PostgreSQL database operations
+- Advanced schema inspection and analysis
+- Query optimization and performance monitoring
+- Transaction management
+
+**Environment Variables**:
+- `DATABASE_URL`: PostgreSQL connection string
+
+### 12. Brave Search MCP Server
+
+**Purpose**: Web search capabilities using Brave's Search API
+
+**Command**: `npx @modelcontextprotocol/server-brave-search`
+
+**Capabilities**:
+- Web search with privacy-focused results
+- Real-time information retrieval
+- Search result filtering and analysis
+- Integration with research workflows
+
+**Environment Variables**:
+- `BRAVE_API_KEY`: API key for Brave Search service
+
 ## Environment Configuration
 
 ### Required Environment Variables
@@ -241,17 +316,31 @@ Add these to your `.env` file:
 ```env
 # MCP Server Configuration
 MCP_SEQUENTIAL_THINKING_ENABLED=true
+MCP_GITHUB_ENABLED=false  # Set to true when you have GitHub PAT
+MCP_FILESYSTEM_ENABLED=true
+MCP_SQLITE_ENABLED=true
+MCP_MEMORY_ENABLED=true
+MCP_POSTGRES_ENABLED=false  # Set to true when you have database URL
+MCP_BRAVE_SEARCH_ENABLED=false  # Set to true when you have API key
 MCP_SCREENSHOT_WEBSITE_ENABLED=true
 MCP_BROWSERBASE_ENABLED=false  # Set to true when you have API keys
-MCP_FILESYSTEM_ENABLED=true
 MCP_MERMAID_ENABLED=true
 MCP_BROWSER_ENABLED=true
 MCP_SPOTIFY_ENABLED=true
+
+# GitHub Integration (optional)
+GITHUB_PAT=your_github_personal_access_token
 
 # Browserbase Configuration (optional)
 BROWSERBASE_API_KEY=your_api_key_here
 BROWSERBASE_PROJECT_ID=your_project_id_here
 BROWSERBASE_SESSION_ID=your_session_id_here
+
+# Database Configuration (optional)
+DATABASE_URL=postgresql://username:password@localhost:5432/database
+
+# Search Configuration (optional)
+BRAVE_API_KEY=your_brave_search_api_key
 
 # Spotify API Configuration
 SPOTIFY_CLIENT_ID=your_spotify_client_id

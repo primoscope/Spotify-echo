@@ -411,6 +411,39 @@ class DatabaseManager {
       primary: this.activeDatabases.find(db => db !== 'sqlite') || 'sqlite'
     };
   }
+
+  /**
+   * Get MongoDB database instance for health checks and direct access
+   */
+  getMongoDatabase(databaseName = null) {
+    if (!this.mongodb) {
+      console.warn('getMongoDatabase: MongoDB client not initialized');
+      return null;
+    }
+    
+    try {
+      const dbName = databaseName || process.env.MONGODB_DATABASE || 'echotune';
+      const db = this.mongodb.db(dbName);
+      console.log('getMongoDatabase: Returning database instance for:', dbName);
+      return db;
+    } catch (error) {
+      console.error('getMongoDatabase: Error getting database instance:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Test MongoDB connection
+   */
+  async testMongoConnection() {
+    if (!this.mongodb) {
+      throw new Error('MongoDB not initialized');
+    }
+    
+    const db = this.getMongoDatabase();
+    await db.admin().ping();
+    return true;
+  }
 }
 
 // Singleton instance

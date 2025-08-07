@@ -2,38 +2,20 @@
   "overall": "insufficient",
   "configurationComplete": false,
   "totalKeys": 1,
-  "validKeys": 1,
+  "validKeys": 0,
   "missingKeys": 0,
-  "failedKeys": 0,
+  "failedKeys": 1,
   "services": {
-    "mongodb": {
-      "status": "valid",
-      "connection_matches_requirement": true,
-      "database": "echotune",
-      "database_matches_requirement": true,
-      "collections_count": 8,
-      "collections": [
-        "echotune_chat_sessions",
-        "echotune_user_preferences",
-        "echotune_listening_history",
-        "echotune_users",
-        "echotune_playlists",
-        "echotune_recommendations",
-        "echotune_analytics_events",
-        "spotify_analytics"
-      ],
-      "spotify_analytics": {
-        "exists": true,
-        "document_count": 43303,
-        "has_data": true,
-        "has_most_data": false
-      },
-      "validation_summary": "fully_compliant",
-      "duration": "1757ms",
-      "timestamp": "2025-08-07T06:31:34.255Z"
+    "mcp-server": {
+      "status": "configured_not_running",
+      "message": "MCP server files exist but server is not running",
+      "port": "3001",
+      "suggestion": "Start with: npm run mcp-server",
+      "duration": "15ms",
+      "timestamp": "2025-08-07T09:52:16.780Z"
     }
   },
-  "timestamp": "2025-08-07T06:31:32.496Z",
+  "timestamp": "2025-08-07T09:52:16.763Z",
   "recommendations": [
     {
       "priority": "HIGH",
@@ -46,12 +28,6 @@
       "category": "LLM Redundancy",
       "message": "Configure multiple LLM providers for fallback",
       "action": "Add Gemini or Anthropic API keys"
-    },
-    {
-      "priority": "MEDIUM",
-      "category": "Automation",
-      "message": "MCP Server not running - advanced automation disabled",
-      "action": "Run: npm run mcp-server"
     }
   ]
 }

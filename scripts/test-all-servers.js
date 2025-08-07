@@ -28,8 +28,8 @@ class ServerTester {
             digitalOcean: {
                 email: 'scapedote@outlook.com',
                 // Updated tokens with full scope/access
-                token: 'dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238',
-                tokenFallback: 'dop_v1_9359807c1cd4103b5c92b21971a51d5364dc300d195ae5046639f3b0cd3dbe16',
+                token: 'dop_v1_93f2eee09a1f183f59c82c8e14c5845f26c1adb6c59eec0c12b05f6685373412',
+                tokenFallback: 'dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238',
                 dockerEmail: 'barrunmail@gmail.com',
                 dockerToken: 'dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7'
             },

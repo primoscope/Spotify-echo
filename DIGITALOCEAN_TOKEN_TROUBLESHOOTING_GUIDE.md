@@ -2,12 +2,18 @@
 
 ## 🚨 Current Issue Status
 
-**Both provided DigitalOcean API tokens are returning 401 Unauthorized errors:**
+**All provided DigitalOcean API tokens are returning 401 Unauthorized errors:**
 
 ```
-Primary Token (Full scope): dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238
-Fallback Token (Full access): dop_v1_9359807c1cd4103b5c92b21971a51d5364dc300d195ae5046639f3b0cd3dbe16
+Latest Token (Full scope): dop_v1_93f2eee09a1f183f59c82c8e14c5845f26c1adb6c59eec0c12b05f6685373412
+Previous Token (Full scope): dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238  
+Previous Token (Full access): dop_v1_9359807c1cd4103b5c92b21971a51d5364dc300d195ae5046639f3b0cd3dbe16
 ```
+
+**Latest Test Results (2025-08-07):**
+- Account API: ❌ 401 Unauthorized
+- Registry API: ❌ 401 Unauthorized
+- Container Registry Login: ❌ Authentication required
 
 **Error Message:** `Unable to authenticate you` - HTTP 401
 

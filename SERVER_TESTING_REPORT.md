@@ -1,6 +1,6 @@
 # 🚀 Server Testing Report
 
-**Generated:** 2025-08-07T01:58:24.351Z
+**Generated:** 2025-08-07T02:49:29.721Z
 **Total Tests:** 13
 **Passed:** 8 ✅
 **Failed:** 5 ❌
@@ -29,14 +29,14 @@ Git commit hash: dc1e1a02
 
 ### ❌ DigitalOcean doctl Authentication
 
-- **Error**: DigitalOcean doctl failed: Command failed: doctl auth init --access-token dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238
-Error: Unable to use supplied token to access API: GET https://cloud.digitalocean.com/v1/oauth/token/info: 401 (request "9fcbb765-3d83-482c-aedc-a83e98ab6835") Unable to authenticate you
+- **Error**: DigitalOcean doctl failed: Command failed: doctl auth init --access-token dop_v1_93f2eee09a1f183f59c82c8e14c5845f26c1adb6c59eec0c12b05f6685373412
+Error: Unable to use supplied token to access API: GET https://cloud.digitalocean.com/v1/oauth/token/info: 401 (request "a9ef437b-b900-4181-9956-b7ce22ae9a4d") Unable to authenticate you
 
 
 ### ❌ DigitalOcean Container Registry
 
 - **Error**: DO Container Registry failed: Both authentication methods failed. doctl: Failed to get registry token: Command failed: doctl registry docker-config --expiry-seconds 3600
-Error: GET https://api.digitalocean.com/v2/registry/docker-credentials?expiry_seconds=3600&read_write=false: 401 (request "32aa55ee-1cd4-431a-aba1-75206ca9caaf") Unable to authenticate you
+Error: GET https://api.digitalocean.com/v2/registry/docker-credentials?expiry_seconds=3600&read_write=false: 401 (request "be3d4499-c758-4bc4-880f-bbad3b46a6aa") Unable to authenticate you
 , credentials: Command failed: echo "dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7" | docker login registry.digitalocean.com --username "barrunmail@gmail.com" --password-stdin
 Error response from daemon: Get "https://registry.digitalocean.com/v2/": unauthorized: authentication required
 
@@ -44,19 +44,19 @@ Error response from daemon: Get "https://registry.digitalocean.com/v2/": unautho
 ### ❌ DigitalOcean App Platform
 
 - **Error**: DO App Platform failed: Command failed: doctl apps list
-Error: GET https://api.digitalocean.com/v2/apps?page=1&per_page=200: 401 (request "fc35c53c-cd8e-4c9c-a9dd-7f5ffa02058b") Unable to authenticate you
+Error: GET https://api.digitalocean.com/v2/apps?page=1&per_page=200: 401 (request "d6f581d2-a954-4a7e-8f9f-b897afa2c57b") Unable to authenticate you
 
 
 ### ❌ DigitalOcean Droplets
 
 - **Error**: DO Droplets failed: Command failed: doctl compute droplet list
-Error: GET https://api.digitalocean.com/v2/droplets?page=1&per_page=200: 401 (request "5e1977a5-009b-42a1-b843-2798f2c07aac") Unable to authenticate you
+Error: GET https://api.digitalocean.com/v2/droplets?page=1&per_page=200: 401 (request "a8ebff48-355f-4781-96de-15367e5c1e77") Unable to authenticate you
 
 
 ### ❌ DigitalOcean Kubernetes
 
 - **Error**: DO Kubernetes failed: Command failed: doctl kubernetes cluster list
-Error: GET https://api.digitalocean.com/v2/kubernetes/clusters?page=1&per_page=200: 401 (request "6d8e90a7-bb30-4fa5-8afa-d198141b728d") Unable to authenticate you
+Error: GET https://api.digitalocean.com/v2/kubernetes/clusters?page=1&per_page=200: 401 (request "13b42281-8179-4a7a-a272-207aa7f458e2") Unable to authenticate you
 
 
 ### ✅ DigitalOcean Spaces

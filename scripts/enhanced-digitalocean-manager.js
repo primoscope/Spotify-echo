@@ -17,9 +17,9 @@ const https = require('https');
 
 class EnhancedDigitalOceanManager {
     constructor() {
-        // Updated tokens with full scope/access from user
-        this.apiToken = 'dop_v1_93f2eee09a1f183f59c82c8e14c5845f26c1adb6c59eec0c12b05f6685373412';
-        this.apiTokenFallback = 'dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238';
+        // Updated tokens with full scope/access from user (Latest: 4bc3902f...)
+        this.apiToken = 'dop_v1_4bc3902fb43fec277797625f6fa97bb7baaf6c7a6c1a450d8e45e99b4601d215';
+        this.apiTokenFallback = 'dop_v1_93f2eee09a1f183f59c82c8e14c5845f26c1adb6c59eec0c12b05f6685373412';
         this.dockerCredentials = {
             email: 'barrunmail@gmail.com',
             token: 'dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7'

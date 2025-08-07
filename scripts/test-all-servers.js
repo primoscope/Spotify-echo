@@ -27,9 +27,9 @@ class ServerTester {
         this.credentials = {
             digitalOcean: {
                 email: 'scapedote@outlook.com',
-                // Updated tokens with full scope/access
-                token: 'dop_v1_93f2eee09a1f183f59c82c8e14c5845f26c1adb6c59eec0c12b05f6685373412',
-                tokenFallback: 'dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238',
+                // Updated tokens with latest token (4bc3902f...)
+                token: 'dop_v1_4bc3902fb43fec277797625f6fa97bb7baaf6c7a6c1a450d8e45e99b4601d215',
+                tokenFallback: 'dop_v1_93f2eee09a1f183f59c82c8e14c5845f26c1adb6c59eec0c12b05f6685373412',
                 dockerEmail: 'barrunmail@gmail.com',
                 dockerToken: 'dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7'
             },

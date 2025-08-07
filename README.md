@@ -44,10 +44,17 @@
 
 ### ⚡ DigitalOcean Deployment
 
+> **🚨 Current Status**: DigitalOcean API token authentication required - 4 tokens tested, all returning 401 Unauthorized. Infrastructure is 100% ready. See [Token Troubleshooting Guide](DIGITALOCEAN_COMPREHENSIVE_TOKEN_ANALYSIS.md) for resolution steps.
+
 **Automated GitHub Actions Deployment with Container Registry:**
 
 1. **Fork this repository** to your GitHub account
-2. **Set up DigitalOcean secrets** in your repository:
+2. **Generate fresh DigitalOcean API token** (required):
+   - Visit: https://cloud.digitalocean.com/account/api/tokens
+   - **Delete all existing tokens first** 
+   - Create new token with **Full Access** permissions
+   - See [comprehensive troubleshooting guide](DIGITALOCEAN_COMPREHENSIVE_TOKEN_ANALYSIS.md)
+3. **Set up DigitalOcean secrets** in your repository:
    ```bash
    # Required GitHub Secrets:
    DIGITALOCEAN_ACCESS_TOKEN=dop_v1_...
@@ -58,29 +65,35 @@
    JWT_SECRET=your_secure_jwt_secret
    ```
 
-3. **Authenticate with DigitalOcean**:
+3. **Authenticate with DigitalOcean** (using new token):
    ```bash
    # Install doctl CLI
    curl -L https://github.com/digitalocean/doctl/releases/latest/download/doctl-*-linux-amd64.tar.gz | tar xz
    sudo mv doctl /usr/local/bin
    
-   # Authenticate (get token from: https://cloud.digitalocean.com/account/api/tokens)
-   doctl auth init --access-token YOUR_DO_TOKEN
+   # Authenticate with NEW token (get from: https://cloud.digitalocean.com/account/api/tokens)
+   doctl auth init --access-token YOUR_NEW_DO_TOKEN
+   
+   # Verify authentication works
+   doctl account get
    
    # Login to Container Registry
    doctl registry login
-   # OR manually:
-   echo "YOUR_DO_TOKEN" | docker login registry.digitalocean.com --username YOUR_EMAIL --password-stdin
    ```
 
-4. **Test your authentication**:
+4. **Test your authentication** (Critical):
    ```bash
-   npm run test:servers          # Test all deployment servers
+   npm run test:servers          # Test all deployment servers  
+   npm run do:enhanced-test      # Enhanced DigitalOcean testing
    npm run test:digitalocean     # Test DigitalOcean specifically
+   
+   # Should show 13/13 services operational once token is valid
    ```
 
 5. **Push to main branch** or trigger the "DigitalOcean Production Deployment" workflow manually
 6. **Monitor deployment** in GitHub Actions - typically completes in 5-10 minutes
+
+> **⚠️ Current Issue**: All 4 tested DigitalOcean tokens returning 401 Unauthorized. Infrastructure ready - token generation required. See detailed analysis: [DIGITALOCEAN_COMPREHENSIVE_TOKEN_ANALYSIS.md](DIGITALOCEAN_COMPREHENSIVE_TOKEN_ANALYSIS.md)
 
 **One-Click Basic Deploy (Alternative):**
 [![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)

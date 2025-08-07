@@ -1,0 +1,227 @@
+{
+  "timestamp": "2025-08-07T06:07:49.005Z",
+  "connection": {
+    "status": "success",
+    "message": "Successfully connected to MongoDB cluster",
+    "connectionString": "mongodb+srv://***:***@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    "database": "echotune",
+    "serverInfo": {
+      "version": "8.0.12"
+    }
+  },
+  "collections": {
+    "echotune_chat_sessions": {
+      "exists": true,
+      "type": "collection"
+    },
+    "echotune_user_preferences": {
+      "exists": true,
+      "type": "collection"
+    },
+    "echotune_listening_history": {
+      "exists": true,
+      "type": "collection"
+    },
+    "echotune_users": {
+      "exists": true,
+      "type": "collection"
+    },
+    "echotune_playlists": {
+      "exists": true,
+      "type": "collection"
+    },
+    "echotune_recommendations": {
+      "exists": true,
+      "type": "collection"
+    },
+    "echotune_analytics_events": {
+      "exists": true,
+      "type": "collection"
+    },
+    "spotify_analytics": {
+      "exists": true,
+      "type": "collection"
+    }
+  },
+  "dataValidation": {
+    "spotify_analytics": {
+      "exists": true,
+      "documentCount": 531964,
+      "sampleDocument": {
+        "source_file": "skip_prediction_dataset.csv",
+        "imported_at": "2025-08-07T06:04:48.172Z",
+        "track_name": "Unknown Track",
+        "artist_name": "Unknown Artist",
+        "album_name": "Unknown Album",
+        "track_uri": "spotify:track:3OxL6MuctgZp1e0zxoAZhH",
+        "ms_played": null,
+        "duration_ms": null,
+        "popularity": null,
+        "danceability": null,
+        "energy": null,
+        "valence": null,
+        "tempo": null,
+        "acousticness": null,
+        "instrumentalness": null,
+        "liveness": null,
+        "speechiness": null,
+        "loudness": null,
+        "key": null,
+        "mode": null,
+        "time_signature": null,
+        "user_id": "willexmen",
+        "played_at": "2025-08-07T06:04:48.172Z",
+        "explicit": null,
+        "data_source": "csv_import",
+        "csv_row_data": {
+          "_id": "spotify:track:3OxL6MuctgZp1e0zxoAZhH_willexmen_2024-03-25 14:13:55+00:00",
+          "track_uri": "spotify:track:3OxL6MuctgZp1e0zxoAZhH",
+          "user_id": "willexmen",
+          "completion_rate": "1.0",
+          "is_skip": "False",
+          "listening_time": "205346",
+          "hour": "14",
+          "day_of_week": "2",
+          "is_weekend": "False",
+          "danceability": "",
+          "energy": "",
+          "valence": "",
+          "tempo": "",
+          "acousticness": "",
+          "speechiness": ""
+        }
+      },
+      "indexes": [
+        {
+          "name": "_id_",
+          "key": {
+            "_id": 1
+          },
+          "unique": false
+        },
+        {
+          "name": "track_name_1",
+          "key": {
+            "track_name": 1
+          },
+          "unique": false
+        },
+        {
+          "name": "artist_name_1",
+          "key": {
+            "artist_name": 1
+          },
+          "unique": false
+        },
+        {
+          "name": "user_id_1_played_at_-1",
+          "key": {
+            "user_id": 1,
+            "played_at": -1
+          },
+          "unique": false
+        },
+        {
+          "name": "played_at_-1",
+          "key": {
+            "played_at": -1
+          },
+          "unique": false
+        },
+        {
+          "name": "track_uri_1",
+          "key": {
+            "track_uri": 1
+          },
+          "unique": false
+        },
+        {
+          "name": "source_collection_1",
+          "key": {
+            "source_collection": 1
+          },
+          "unique": false
+        },
+        {
+          "name": "audio_features.energy_1_audio_features.valence_1",
+          "key": {
+            "audio_features.energy": 1,
+            "audio_features.valence": 1
+          },
+          "unique": false
+        },
+        {
+          "name": "data_quality_score_-1",
+          "key": {
+            "data_quality_score": -1
+          },
+          "unique": false
+        }
+      ],
+      "dataQuality": {
+        "hasRequiredFields": true,
+        "fieldTypes": {
+          "track_name": "string",
+          "artist_name": "string",
+          "album_name": "string",
+          "played_at": "object",
+          "ms_played": "object",
+          "track_uri": "string",
+          "duration_ms": "object"
+        },
+        "uniqueValues": {
+          "artists": 9822,
+          "tracks": 34430
+        },
+        "presentFields": [
+          "_id",
+          "source_file",
+          "imported_at",
+          "track_name",
+          "artist_name",
+          "album_name",
+          "track_uri",
+          "ms_played",
+          "duration_ms",
+          "popularity",
+          "danceability",
+          "energy",
+          "valence",
+          "tempo",
+          "acousticness",
+          "instrumentalness",
+          "liveness",
+          "speechiness",
+          "loudness",
+          "key",
+          "mode",
+          "time_signature",
+          "user_id",
+          "played_at",
+          "explicit",
+          "data_source",
+          "csv_row_data"
+        ]
+      },
+      "storageStats": {
+        "count": 531964,
+        "size": 484501526,
+        "storageSize": 75022336,
+        "avgObjSize": 910
+      }
+    },
+    "collectionCounts": {
+      "echotune_chat_sessions": 0,
+      "echotune_user_preferences": 0,
+      "echotune_listening_history": 0,
+      "echotune_users": 0,
+      "echotune_playlists": 0,
+      "echotune_recommendations": 0,
+      "echotune_analytics_events": 0,
+      "spotify_analytics": 531964
+    },
+    "hasMostData": true
+  },
+  "recommendations": [],
+  "overall": "success"
+}

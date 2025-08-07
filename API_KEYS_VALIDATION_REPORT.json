@@ -24,16 +24,16 @@
       ],
       "spotify_analytics": {
         "exists": true,
-        "document_count": 531964,
+        "document_count": 43303,
         "has_data": true,
-        "has_most_data": true
+        "has_most_data": false
       },
       "validation_summary": "fully_compliant",
-      "duration": "2230ms",
-      "timestamp": "2025-08-07T06:10:12.006Z"
+      "duration": "1757ms",
+      "timestamp": "2025-08-07T06:31:34.255Z"
     }
   },
-  "timestamp": "2025-08-07T06:10:09.775Z",
+  "timestamp": "2025-08-07T06:31:32.496Z",
   "recommendations": [
     {
       "priority": "HIGH",

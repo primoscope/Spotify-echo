@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-08-07T06:29:32.082Z",
+  "processing_summary": {
+    "audio_features_loaded": 57220,
+    "listening_history_loaded": 208933,
+    "merged_records": 43303,
+    "total_inserted": 43303,
+    "unique_tracks": 43303,
+    "unique_artists": 16376,
+    "errors_encountered": 0
+  },
+  "data_quality": {
+    "records_with_audio_features": 37358,
+    "records_with_listening_data": 41918,
+    "high_quality_records": 35973,
+    "medium_quality_records": 7330,
+    "low_quality_records": 0
+  }
+}

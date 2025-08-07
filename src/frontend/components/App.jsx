@@ -9,6 +9,7 @@ import Dashboard from './dashboard/Dashboard';
 import PlaylistManager from './playlists/PlaylistManager';
 import UserProfile from './profile/UserProfile';
 import LandingPage from './pages/LandingPage';
+import EnhancedAdvancedSettings from './EnhancedAdvancedSettings';
 import './App.css';
 
 /**
@@ -88,6 +89,7 @@ function App() {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/playlists" element={<PlaylistManager />} />
                   <Route path="/profile" element={<UserProfile />} />
+                  <Route path="/settings" element={<EnhancedAdvancedSettings />} />
                 </Routes>
               </main>
             </div>

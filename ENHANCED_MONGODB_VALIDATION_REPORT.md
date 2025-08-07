@@ -1,6 +1,6 @@
 # Enhanced MongoDB Validation Report
 
-**Generated:** 2025-08-07T06:31:23.134Z
+**Generated:** 2025-08-07T06:43:50.506Z
 **Database:** echotune
 **Collection:** spotify_analytics
 **Overall Status:** FAILED
@@ -26,8 +26,8 @@
 - **With Listening Data:** 41918 (97%)
 
 #### Quality Distribution
-- **High Quality:** 35973 records
 - **Medium Quality:** 7330 records
+- **High Quality:** 35973 records
 
 #### Top Artists by Track Count
 1. **Aphex Twin** - 210 tracks
@@ -38,7 +38,7 @@
 
 ### 🚀 Performance Metrics
 - **Status:** passed
-- **Average Query Time:** 220ms
+- **Average Query Time:** 223ms
 - **Performance Grade:** good
 
 ### 📈 Analytics Summary

@@ -1,0 +1,849 @@
+{
+  "timestamp": "2025-08-07T06:41:24.676Z",
+  "connection_status": "success",
+  "databases": {
+    "echotune": {
+      "size_bytes": 416616448,
+      "collections": {
+        "echotune_chat_sessions": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 3,
+          "sample_structure": null
+        },
+        "echotune_user_preferences": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 3,
+          "sample_structure": null
+        },
+        "echotune_listening_history": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 6,
+          "sample_structure": null
+        },
+        "echotune_users": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 5,
+          "sample_structure": null
+        },
+        "echotune_playlists": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 4,
+          "sample_structure": null
+        },
+        "echotune_recommendations": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 6,
+          "sample_structure": null
+        },
+        "echotune_analytics_events": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 4,
+          "sample_structure": null
+        },
+        "spotify_analytics": {
+          "document_count": 43303,
+          "avg_document_size": 2184,
+          "storage_size": 179888128,
+          "indexes": 17,
+          "sample_structure": {
+            "total_fields": 25,
+            "has_audio_features": true,
+            "has_listening_data": true,
+            "has_track_info": true,
+            "spotify_uri_present": true,
+            "field_types": {
+              "_id": "string",
+              "track_uri": "string",
+              "track_id": "string",
+              "track_name": "string",
+              "artist_name": "string",
+              "album_name": "string",
+              "artist_uri": "string",
+              "album_uri": "string",
+              "release_date": "string",
+              "duration_ms": "number",
+              "explicit": "boolean",
+              "popularity": "number",
+              "preview_url": "string",
+              "audio_features": "object",
+              "genres": "object",
+              "album_genres": "object",
+              "label": "string",
+              "isrc": "string",
+              "listening_stats": "object",
+              "user_interactions": "object",
+              "data_quality_score": "number",
+              "has_audio_features": "boolean",
+              "has_listening_data": "boolean",
+              "created_at": "object",
+              "updated_at": "object"
+            }
+          }
+        }
+      }
+    },
+    "spotify": {
+      "size_bytes": 8192,
+      "collections": {
+        "echotune": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 1,
+          "sample_structure": null
+        }
+      }
+    },
+    "spotify_analytics": {
+      "size_bytes": 219123712,
+      "collections": {
+        "chat_history": {
+          "document_count": 33,
+          "avg_document_size": 449,
+          "storage_size": 45056,
+          "indexes": 4,
+          "sample_structure": {
+            "total_fields": 7,
+            "has_audio_features": false,
+            "has_listening_data": false,
+            "has_track_info": false,
+            "spotify_uri_present": false,
+            "field_types": {
+              "_id": "string",
+              "user_id": "string",
+              "session_id": "string",
+              "message_type": "string",
+              "content": "string",
+              "timestamp": "object",
+              "metadata": "object"
+            }
+          }
+        },
+        "listening_history": {
+          "document_count": 203090,
+          "avg_document_size": 685,
+          "storage_size": 33116160,
+          "indexes": 24,
+          "sample_structure": {
+            "total_fields": 10,
+            "has_audio_features": false,
+            "has_listening_data": true,
+            "has_track_info": true,
+            "spotify_uri_present": true,
+            "field_types": {
+              "_id": "string",
+              "spotify_track_uri": "string",
+              "timestamp": "object",
+              "user": "object",
+              "track": "object",
+              "album": "object",
+              "artist": "object",
+              "listening": "object",
+              "metadata": "object",
+              "migration": "object"
+            }
+          }
+        },
+        "user_profiles": {
+          "document_count": 9,
+          "avg_document_size": 121,
+          "storage_size": 36864,
+          "indexes": 4,
+          "sample_structure": {
+            "total_fields": 5,
+            "has_audio_features": false,
+            "has_listening_data": false,
+            "has_track_info": false,
+            "spotify_uri_present": false,
+            "field_types": {
+              "_id": "object",
+              "spotify_id": "string",
+              "display_name": "string",
+              "created_at": "object",
+              "preferences": "object"
+            }
+          }
+        },
+        "playlists": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 4,
+          "sample_structure": null
+        },
+        "recommendations": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 4,
+          "sample_structure": null
+        },
+        "audio_features": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 6,
+          "sample_structure": null
+        },
+        "track_metadata": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 4096,
+          "indexes": 6,
+          "sample_structure": null
+        },
+        "auth_states": {
+          "document_count": 0,
+          "avg_document_size": 0,
+          "storage_size": 32768,
+          "indexes": 2,
+          "sample_structure": null
+        },
+        "chat_sessions": {
+          "document_count": 18,
+          "avg_document_size": 606,
+          "storage_size": 36864,
+          "indexes": 1,
+          "sample_structure": {
+            "total_fields": 7,
+            "has_audio_features": false,
+            "has_listening_data": false,
+            "has_track_info": false,
+            "spotify_uri_present": false,
+            "field_types": {
+              "_id": "string",
+              "user_id": "string",
+              "start_time": "object",
+              "last_activity": "object",
+              "context": "object",
+              "metadata": "object",
+              "message_count": "number"
+            }
+          }
+        }
+      }
+    }
+  },
+  "audio_features_analysis": {
+    "echotune.spotify_analytics": {
+      "total_tracks": 43303,
+      "with_complete_audio_features": 37358,
+      "with_partial_audio_features": 43303,
+      "with_track_uris": 43303,
+      "missing_audio_features": 5945,
+      "audio_features_coverage_percent": "86.3",
+      "sample_structures": [
+        {
+          "total_fields": 25,
+          "has_audio_features": true,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "track_uri": "string",
+            "track_id": "string",
+            "track_name": "string",
+            "artist_name": "string",
+            "album_name": "string",
+            "artist_uri": "string",
+            "album_uri": "string",
+            "release_date": "string",
+            "duration_ms": "number",
+            "explicit": "boolean",
+            "popularity": "number",
+            "preview_url": "string",
+            "audio_features": "object",
+            "genres": "object",
+            "album_genres": "object",
+            "label": "string",
+            "isrc": "string",
+            "listening_stats": "object",
+            "user_interactions": "object",
+            "data_quality_score": "number",
+            "has_audio_features": "boolean",
+            "has_listening_data": "boolean",
+            "created_at": "object",
+            "updated_at": "object"
+          }
+        },
+        {
+          "total_fields": 25,
+          "has_audio_features": true,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "track_uri": "string",
+            "track_id": "string",
+            "track_name": "string",
+            "artist_name": "string",
+            "album_name": "string",
+            "artist_uri": "string",
+            "album_uri": "string",
+            "release_date": "string",
+            "duration_ms": "number",
+            "explicit": "boolean",
+            "popularity": "number",
+            "preview_url": "string",
+            "audio_features": "object",
+            "genres": "object",
+            "album_genres": "object",
+            "label": "string",
+            "isrc": "string",
+            "listening_stats": "object",
+            "user_interactions": "object",
+            "data_quality_score": "number",
+            "has_audio_features": "boolean",
+            "has_listening_data": "boolean",
+            "created_at": "object",
+            "updated_at": "object"
+          }
+        },
+        {
+          "total_fields": 25,
+          "has_audio_features": true,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "track_uri": "string",
+            "track_id": "string",
+            "track_name": "string",
+            "artist_name": "string",
+            "album_name": "string",
+            "artist_uri": "string",
+            "album_uri": "string",
+            "release_date": "string",
+            "duration_ms": "number",
+            "explicit": "boolean",
+            "popularity": "number",
+            "preview_url": "string",
+            "audio_features": "object",
+            "genres": "object",
+            "album_genres": "object",
+            "label": "string",
+            "isrc": "string",
+            "listening_stats": "object",
+            "user_interactions": "object",
+            "data_quality_score": "number",
+            "has_audio_features": "boolean",
+            "has_listening_data": "boolean",
+            "created_at": "object",
+            "updated_at": "object"
+          }
+        },
+        {
+          "total_fields": 25,
+          "has_audio_features": true,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "track_uri": "string",
+            "track_id": "string",
+            "track_name": "string",
+            "artist_name": "string",
+            "album_name": "string",
+            "artist_uri": "string",
+            "album_uri": "string",
+            "release_date": "string",
+            "duration_ms": "number",
+            "explicit": "boolean",
+            "popularity": "number",
+            "preview_url": "object",
+            "audio_features": "object",
+            "genres": "object",
+            "album_genres": "object",
+            "label": "string",
+            "isrc": "string",
+            "listening_stats": "object",
+            "user_interactions": "object",
+            "data_quality_score": "number",
+            "has_audio_features": "boolean",
+            "has_listening_data": "boolean",
+            "created_at": "object",
+            "updated_at": "object"
+          }
+        },
+        {
+          "total_fields": 25,
+          "has_audio_features": true,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "track_uri": "string",
+            "track_id": "string",
+            "track_name": "string",
+            "artist_name": "string",
+            "album_name": "string",
+            "artist_uri": "string",
+            "album_uri": "string",
+            "release_date": "string",
+            "duration_ms": "number",
+            "explicit": "boolean",
+            "popularity": "number",
+            "preview_url": "string",
+            "audio_features": "object",
+            "genres": "object",
+            "album_genres": "object",
+            "label": "string",
+            "isrc": "string",
+            "listening_stats": "object",
+            "user_interactions": "object",
+            "data_quality_score": "number",
+            "has_audio_features": "boolean",
+            "has_listening_data": "boolean",
+            "created_at": "object",
+            "updated_at": "object"
+          }
+        }
+      ]
+    },
+    "spotify_analytics.chat_history": {
+      "total_tracks": 33,
+      "with_complete_audio_features": 0,
+      "with_partial_audio_features": 0,
+      "with_track_uris": 0,
+      "missing_audio_features": 33,
+      "audio_features_coverage_percent": "0.0",
+      "sample_structures": [
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "session_id": "string",
+            "message_type": "string",
+            "content": "string",
+            "timestamp": "object",
+            "metadata": "object"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "session_id": "string",
+            "message_type": "string",
+            "content": "string",
+            "timestamp": "object",
+            "metadata": "object"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "session_id": "string",
+            "message_type": "string",
+            "content": "string",
+            "timestamp": "object",
+            "metadata": "object"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "session_id": "string",
+            "message_type": "string",
+            "content": "string",
+            "timestamp": "object",
+            "metadata": "object"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "session_id": "string",
+            "message_type": "string",
+            "content": "string",
+            "timestamp": "object",
+            "metadata": "object"
+          }
+        }
+      ]
+    },
+    "spotify_analytics.listening_history": {
+      "total_tracks": 203090,
+      "with_complete_audio_features": 18,
+      "with_partial_audio_features": 18,
+      "with_track_uris": 203090,
+      "missing_audio_features": 203072,
+      "audio_features_coverage_percent": "0.0",
+      "sample_structures": [
+        {
+          "total_fields": 10,
+          "has_audio_features": false,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "spotify_track_uri": "string",
+            "timestamp": "object",
+            "user": "object",
+            "track": "object",
+            "album": "object",
+            "artist": "object",
+            "listening": "object",
+            "metadata": "object",
+            "migration": "object"
+          }
+        },
+        {
+          "total_fields": 10,
+          "has_audio_features": false,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "spotify_track_uri": "string",
+            "timestamp": "object",
+            "user": "object",
+            "track": "object",
+            "album": "object",
+            "artist": "object",
+            "listening": "object",
+            "metadata": "object",
+            "migration": "object"
+          }
+        },
+        {
+          "total_fields": 10,
+          "has_audio_features": false,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "spotify_track_uri": "string",
+            "timestamp": "object",
+            "user": "object",
+            "track": "object",
+            "album": "object",
+            "artist": "object",
+            "listening": "object",
+            "metadata": "object",
+            "migration": "object"
+          }
+        },
+        {
+          "total_fields": 10,
+          "has_audio_features": false,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "spotify_track_uri": "string",
+            "timestamp": "object",
+            "user": "object",
+            "track": "object",
+            "album": "object",
+            "artist": "object",
+            "listening": "object",
+            "metadata": "object",
+            "migration": "object"
+          }
+        },
+        {
+          "total_fields": 10,
+          "has_audio_features": false,
+          "has_listening_data": true,
+          "has_track_info": true,
+          "spotify_uri_present": true,
+          "field_types": {
+            "_id": "string",
+            "spotify_track_uri": "string",
+            "timestamp": "object",
+            "user": "object",
+            "track": "object",
+            "album": "object",
+            "artist": "object",
+            "listening": "object",
+            "metadata": "object",
+            "migration": "object"
+          }
+        }
+      ]
+    },
+    "spotify_analytics.user_profiles": {
+      "total_tracks": 9,
+      "with_complete_audio_features": 0,
+      "with_partial_audio_features": 0,
+      "with_track_uris": 0,
+      "missing_audio_features": 9,
+      "audio_features_coverage_percent": "0.0",
+      "sample_structures": [
+        {
+          "total_fields": 5,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "object",
+            "spotify_id": "string",
+            "display_name": "string",
+            "created_at": "object",
+            "preferences": "object"
+          }
+        },
+        {
+          "total_fields": 5,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "object",
+            "spotify_id": "string",
+            "display_name": "string",
+            "created_at": "object",
+            "preferences": "object"
+          }
+        },
+        {
+          "total_fields": 5,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "object",
+            "spotify_id": "string",
+            "display_name": "string",
+            "created_at": "object",
+            "preferences": "object"
+          }
+        },
+        {
+          "total_fields": 5,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "object",
+            "spotify_id": "string",
+            "display_name": "string",
+            "created_at": "object",
+            "preferences": "object"
+          }
+        },
+        {
+          "total_fields": 5,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "object",
+            "spotify_id": "string",
+            "display_name": "string",
+            "created_at": "object",
+            "preferences": "object"
+          }
+        }
+      ]
+    },
+    "spotify_analytics.chat_sessions": {
+      "total_tracks": 18,
+      "with_complete_audio_features": 0,
+      "with_partial_audio_features": 0,
+      "with_track_uris": 0,
+      "missing_audio_features": 18,
+      "audio_features_coverage_percent": "0.0",
+      "sample_structures": [
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "start_time": "object",
+            "last_activity": "object",
+            "context": "object",
+            "metadata": "object",
+            "message_count": "number"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "start_time": "object",
+            "last_activity": "object",
+            "context": "object",
+            "metadata": "object",
+            "message_count": "number"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "start_time": "object",
+            "last_activity": "object",
+            "context": "object",
+            "metadata": "object",
+            "message_count": "number"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "start_time": "object",
+            "last_activity": "object",
+            "context": "object",
+            "metadata": "object",
+            "message_count": "number"
+          }
+        },
+        {
+          "total_fields": 7,
+          "has_audio_features": false,
+          "has_listening_data": false,
+          "has_track_info": false,
+          "spotify_uri_present": false,
+          "field_types": {
+            "_id": "string",
+            "user_id": "string",
+            "start_time": "object",
+            "last_activity": "object",
+            "context": "object",
+            "metadata": "object",
+            "message_count": "number"
+          }
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "high",
+      "category": "audio_features",
+      "issue": "5945 tracks (13.7%) missing audio features",
+      "action": "Run audio features enhancement process to match remaining tracks with features data"
+    },
+    {
+      "priority": "medium",
+      "category": "data_completeness",
+      "issue": "Another collection (spotify_analytics.listening_history) has more documents (203090 vs 43303)",
+      "action": "Consider merging data from multiple collections for maximum completeness"
+    }
+  ],
+  "optimal_database": {
+    "database": "echotune",
+    "collection": "spotify_analytics",
+    "full_name": "echotune.spotify_analytics",
+    "score": 90.52374771262961,
+    "reasons": {
+      "document_count": 43303,
+      "audio_features_coverage": "86.3%",
+      "complete_audio_features": 37358,
+      "missing_audio_features": 5945,
+      "indexes": 17,
+      "data_quality": {
+        "total_fields": 25,
+        "has_audio_features": true,
+        "has_listening_data": true,
+        "has_track_info": true,
+        "spotify_uri_present": true,
+        "field_types": {
+          "_id": "string",
+          "track_uri": "string",
+          "track_id": "string",
+          "track_name": "string",
+          "artist_name": "string",
+          "album_name": "string",
+          "artist_uri": "string",
+          "album_uri": "string",
+          "release_date": "string",
+          "duration_ms": "number",
+          "explicit": "boolean",
+          "popularity": "number",
+          "preview_url": "string",
+          "audio_features": "object",
+          "genres": "object",
+          "album_genres": "object",
+          "label": "string",
+          "isrc": "string",
+          "listening_stats": "object",
+          "user_interactions": "object",
+          "data_quality_score": "number",
+          "has_audio_features": "boolean",
+          "has_listening_data": "boolean",
+          "created_at": "object",
+          "updated_at": "object"
+        }
+      }
+    }
+  }
+}

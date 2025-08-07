@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -9,10 +9,6 @@ import {
   Grid,
   TextField,
   Slider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Avatar,
   IconButton,
   Tooltip,
@@ -86,7 +82,7 @@ function EnhancedMusicDiscovery() {
   useEffect(() => {
     loadTrendingMusic();
     loadSocialActivity();
-  }, []);
+  }, [loadTrendingMusic, loadSocialActivity]);
 
   // Load trending music data
   const loadTrendingMusic = useCallback(async () => {

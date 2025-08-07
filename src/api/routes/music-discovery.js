@@ -84,7 +84,7 @@ router.get('/trending', async (req, res) => {
  */
 router.get('/social/activity', async (req, res) => {
   try {
-    const { limit = 20 } = req.query;
+    const { limit: _limit = 20 } = req.query;
     
     // Mock social activity - in production, this would come from user database
     const socialActivity = {
@@ -279,7 +279,7 @@ function extractEntities(query) {
   };
 
   // Simple keyword matching - in production, use proper NER
-  const words = query.toLowerCase().split(' ');
+  const _words = query.toLowerCase().split(' ');
   
   const genreKeywords = ['rock', 'pop', 'jazz', 'classical', 'electronic', 'hip-hop'];
   const moodKeywords = ['happy', 'sad', 'energetic', 'calm', 'chill', 'upbeat'];
@@ -317,7 +317,7 @@ async function getMockDiscoveredTracks(limit, options = {}) {
       id: 'track3',
       name: 'As It Was',
       artist: 'Harry Styles',
-      album: { name: "Harry's House", images: [{ url: '/api/placeholder-album.jpg' }] },
+      album: { name: 'Harry\'s House', images: [{ url: '/api/placeholder-album.jpg' }] },
       duration_ms: 167000,
       confidence: 0.85,
       algorithm: options.type || 'general',

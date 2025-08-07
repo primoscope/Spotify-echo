@@ -1,12 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab, Grid } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
 import { useState } from 'react';
 import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
 import PlaylistBuilder from './components/PlaylistBuilder';
 import ExplainableRecommendations from './components/ExplainableRecommendations';
 import EnhancedChatInterface from './components/EnhancedChatInterface';
-import FeedbackSystem, { FeedbackAnalytics } from './components/FeedbackSystem';
-import MCPAutomationStatus from './components/MCPAutomationStatus';
 import EnhancedMusicDiscovery from './components/EnhancedMusicDiscovery';
 import EnhancedAnalyticsDashboard from './components/EnhancedAnalyticsDashboard';
 // import { AuthProvider, useAuth } from './contexts/AuthContext';

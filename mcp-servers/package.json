@@ -1,0 +1,73 @@
+{
+  "name": "echotune-mcp-servers",
+  "version": "1.0.0",
+  "description": "EchoTune AI MCP Server Ecosystem - Community-integrated servers for enhanced development workflow",
+  "main": "index.js",
+  "scripts": {
+    "start": "node enhanced-mcp-orchestrator.js",
+    "start:package-mgmt": "node mcp-servers/package-management/package-version-mcp.js",
+    "start:code-sandbox": "node mcp-servers/code-sandbox/code-sandbox-mcp.js",
+    "start:analytics": "node mcp-servers/analytics-server/analytics-mcp.js",
+    "start:testing": "node mcp-servers/testing-automation/testing-automation-mcp.js",
+    "test": "npm run test:all-servers",
+    "test:all-servers": "node scripts/test-mcp-servers.js",
+    "validate": "node scripts/validate-mcp-integration.js",
+    "health-check": "node scripts/mcp-health-check.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "semver": "^7.5.4",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "echotune",
+    "spotify",
+    "ai",
+    "music-recommendation",
+    "automation",
+    "testing",
+    "analytics",
+    "package-management"
+  ],
+  "author": "EchoTune AI Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dzp5103/Spotify-echo.git"
+  },
+  "mcpServers": {
+    "packageManagement": {
+      "command": "node",
+      "args": ["mcp-servers/package-management/package-version-mcp.js"],
+      "description": "Automated package version management and security scanning",
+      "capabilities": ["version-checking", "security-scanning", "dependency-updates"]
+    },
+    "codeSandbox": {
+      "command": "node", 
+      "args": ["mcp-servers/code-sandbox/code-sandbox-mcp.js"],
+      "description": "Secure code execution environment for TypeScript, JavaScript, and Python",
+      "capabilities": ["code-execution", "validation", "testing"]
+    },
+    "analytics": {
+      "command": "node",
+      "args": ["mcp-servers/analytics-server/analytics-mcp.js"], 
+      "description": "Comprehensive analytics, telemetry, and performance monitoring",
+      "capabilities": ["event-tracking", "performance-metrics", "user-analytics"]
+    },
+    "testingAutomation": {
+      "command": "node",
+      "args": ["mcp-servers/testing-automation/testing-automation-mcp.js"],
+      "description": "Automated testing suite with unit, integration, API, and UI tests",
+      "capabilities": ["unit-testing", "integration-testing", "api-testing", "ui-testing"]
+    }
+  }
+}

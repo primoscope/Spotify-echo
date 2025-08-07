@@ -1,441 +1,217 @@
-# 🎵 EchoTune AI - Comprehensive API Documentation
+# 🎵 EchoTune AI - API Documentation
 
-> Complete REST API reference for EchoTune AI's next-generation music recommendation system with conversational AI, Spotify integration, and advanced ML algorithms.
+## Overview
 
-## 📋 Table of Contents
+EchoTune AI provides a comprehensive REST API for music recommendation and Spotify integration. This documentation covers all available endpoints, authentication methods, and usage examples.
 
-- [🔐 Authentication](#-authentication)
-- [💬 Chat API](#-chat-api)
-- [🎵 Spotify Integration](#-spotify-integration)
-- [🤖 Recommendations](#-recommendations)
-- [📝 Playlists](#-playlists)
-- [💾 Database](#-database)
-- [🔍 Providers](#-providers)
-- [⚡ Real-time Features](#-real-time-features)
-- [🏥 Health & Monitoring](#-health--monitoring)
-- [📊 Rate Limiting](#-rate-limiting)
-- [🚫 Error Handling](#-error-handling)
-- [🔧 SDK Examples](#-sdk-examples)
-
-## 🔐 Authentication
-
-EchoTune AI uses session-based authentication with Spotify OAuth integration.
-
-### Headers Required
-```http
-Authorization: Bearer <session_token>
-Content-Type: application/json
-X-User-ID: <user_id> (optional)
+## Base URL
+```
+Production: https://your-domain.com/api
+Development: http://localhost:3000/api
 ```
 
-### Authentication Flow
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant A as EchoTune API
-    participant S as Spotify OAuth
-    
-    C->>A: Request auth URL
-    A->>C: Return Spotify OAuth URL
-    C->>S: User authorizes
-    S->>A: Authorization code
-    A->>S: Exchange for tokens
-    S->>A: Access & refresh tokens
-    A->>C: Session token
+## Authentication
+
+### Spotify OAuth 2.0
+All API endpoints require valid Spotify authentication tokens.
+
+```javascript
+// Authorization header
+Authorization: Bearer {spotify_access_token}
 ```
 
-### Endpoints
+## Core Endpoints
 
-#### Get Auth URL
-```http
-GET /auth/spotify
-```
+### 🎧 Music Recommendations
+
+#### GET /recommendations
+Get personalized music recommendations for a user.
+
+**Parameters:**
+- `limit` (integer, optional): Number of recommendations (default: 20, max: 100)
+- `seed_artists` (string, optional): Comma-separated artist IDs
+- `seed_genres` (string, optional): Comma-separated genre names
+- `seed_tracks` (string, optional): Comma-separated track IDs
 
 **Response:**
 ```json
 {
-  "authUrl": "https://accounts.spotify.com/authorize?...",
-  "state": "random_state_string"
-}
-```
-
-#### Complete Authorization
-```http
-POST /auth/callback
-```
-
-**Request Body:**
-```json
-{
-  "code": "authorization_code",
-  "state": "state_string"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "user": {
-    "id": "user_uuid",
-    "spotifyId": "spotify_user_id",
-    "displayName": "User Name",
-    "email": "user@example.com"
-  },
-  "sessionToken": "jwt_session_token",
-  "expiresAt": "2024-12-31T23:59:59Z"
-}
-```
-
-## 💬 Chat API
-
-Conversational music discovery powered by multiple LLM providers (OpenAI, Google Gemini, Azure, OpenRouter).
-
-### Start Conversation
-```http
-POST /api/chat/start
-```
-
-**Request Body:**
-```json
-{
-  "sessionId": "string (optional)",
-  "provider": "openai|gemini|azure|openrouter|mock",
-  "model": "string (optional)",
-  "context": {
-    "timeOfDay": "morning|afternoon|evening|night",
-    "mood": "string",
-    "activity": "string"
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "session": {
-    "id": "session_uuid",
-    "provider": "gemini",
-    "model": "gemini-1.5-flash",
-    "userId": "user_uuid",
-    "createdAt": "2024-01-01T00:00:00Z",
-    "context": {
-      "timeOfDay": "evening",
-      "mood": "relaxed"
-    }
-  },
-  "message": "Conversation started successfully"
-}
-```
-
-### Send Message
-```http
-POST /api/chat/message
-```
-
-**Request Body:**
-```json
-{
-  "sessionId": "string (required)",
-  "message": "string (required)",
-  "provider": "string (optional)",
-  "model": "string (optional)",
-  "temperature": 0.7,
-  "maxTokens": 1000,
-  "includeRecommendations": true,
-  "context": {
-    "currentPlaylist": "playlist_id",
-    "recentTracks": ["track_id_1", "track_id_2"]
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "response": {
-    "message": "Based on your mood, I recommend...",
-    "provider": "gemini",
-    "model": "gemini-1.5-flash",
-    "tokens": {
-      "prompt": 150,
-      "completion": 300,
-      "total": 450
-    }
-  },
-  "recommendations": [
+  "tracks": [
     {
-      "trackId": "spotify_track_id",
-      "trackName": "Song Title",
-      "artist": "Artist Name",
-      "album": "Album Name",
-      "confidence": 0.95,
-      "reason": "Matches your current mood and listening history"
-    }
-  ],
-  "sessionId": "session_uuid",
-  "timestamp": "2024-01-01T00:00:00Z"
-}
-```
-
-## 🎵 Spotify Integration
-
-Comprehensive Spotify Web API integration for music data, playlists, and user preferences.
-
-### Audio Features
-
-#### Get Single Track Audio Features
-```http
-GET /api/spotify/audio-features/:trackId
-```
-
-**Query Parameters:**
-- `accessToken`: Spotify access token (required)
-
-**Response:**
-```json
-{
-  "success": true,
-  "trackId": "spotify_track_id",
-  "audioFeatures": {
-    "danceability": 0.735,
-    "energy": 0.578,
-    "key": 5,
-    "loudness": -11.84,
-    "mode": 0,
-    "speechiness": 0.0461,
-    "acousticness": 0.514,
-    "instrumentalness": 0.0902,
-    "liveness": 0.159,
-    "valence": 0.636,
-    "tempo": 98.002,
-    "duration_ms": 207959,
-    "time_signature": 4
-  }
-}
-```
-
-#### Batch Audio Features
-```http
-POST /api/spotify/audio-features/batch
-```
-
-**Request Body:**
-```json
-{
-  "trackIds": ["track_id_1", "track_id_2", "..."],
-  "accessToken": "spotify_access_token",
-  "options": {
-    "includeAnalysis": true,
-    "includeMetadata": true
-  }
-}
-```
-
-## 🤖 Recommendations
-
-Advanced ML-powered music recommendations using collaborative filtering, content-based analysis, and deep learning.
-
-### Generate Recommendations
-```http
-POST /api/recommendations/generate
-```
-
-**Request Body:**
-```json
-{
-  "limit": 20,
-  "algorithm": "hybrid|collaborative|content|deep_learning",
-  "context": {
-    "mood": "happy|sad|energetic|calm|angry|romantic|focused",
-    "activity": "workout|study|sleep|drive|work|party|relax|cooking",
-    "timeOfDay": "morning|afternoon|evening|night"
-  },
-  "preferences": {
-    "genres": ["pop", "rock", "jazz"],
-    "artists": ["artist_id_1", "artist_id_2"]
-  },
-  "options": {
-    "includeNewMusic": true,
-    "excludeRecentlyPlayed": true,
-    "diversityFactor": 0.7
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "recommendations": [
-    {
-      "trackId": "spotify_track_id",
-      "trackName": "Song Title",
-      "artist": "Artist Name",
-      "album": "Album Name",
-      "score": 0.95,
-      "confidence": 0.87,
-      "reasoning": {
-        "primary": "Strong match with your listening history",
-        "factors": [
-          "Similar audio features to liked tracks",
-          "Recommended by users with similar tastes"
-        ]
+      "id": "4iV5W9uYEdYUVa79Axb7Rh",
+      "name": "Song Name",
+      "artists": [{"name": "Artist Name", "id": "artist_id"}],
+      "album": {"name": "Album Name", "images": [...]},
+      "audio_features": {
+        "danceability": 0.735,
+        "energy": 0.578,
+        "valence": 0.624
       },
-      "metadata": {
-        "popularity": 75,
-        "releaseDate": "2024-01-01",
-        "genres": ["pop", "indie"]
-      }
+      "recommendation_score": 0.89,
+      "recommendation_reason": "Based on your recent listening habits"
     }
   ],
-  "algorithm": "hybrid",
-  "metadata": {
-    "totalCandidates": 10000,
-    "processingTime": 245,
-    "generatedAt": "2024-01-01T00:00:00Z"
+  "meta": {
+    "total": 20,
+    "generated_at": "2024-01-20T10:30:00Z",
+    "algorithm": "collaborative_filtering_v2"
   }
 }
 ```
 
-## 📝 Playlists
-
-Advanced playlist management with AI-powered creation and automation.
-
-### Create AI Playlist
-```http
-POST /api/playlists/create-ai
-```
+#### POST /recommendations/feedback
+Provide feedback on recommendations to improve future suggestions.
 
 **Request Body:**
 ```json
 {
-  "name": "Playlist Name",
-  "description": "AI-generated playlist for...",
-  "prompt": "Create a workout playlist with high energy songs",
-  "targetLength": 60,
-  "preferences": {
-    "genres": ["electronic", "pop"],
-    "mood": "energetic"
-  }
+  "track_id": "4iV5W9uYEdYUVa79Axb7Rh",
+  "feedback": "like|dislike|love|skip",
+  "context": "workout|study|commute|party"
 }
 ```
 
-## 🏥 Health & Monitoring
+### 🤖 AI Chat Interface
 
-System health, monitoring, and diagnostic endpoints.
+#### POST /chat/message
+Send a message to the AI music assistant.
 
-### Health Check
-```http
-GET /health
+**Request Body:**
+```json
+{
+  "message": "I want some energetic workout music",
+  "context": {
+    "time_of_day": "morning",
+    "current_mood": "motivated",
+    "recent_tracks": ["track_id_1", "track_id_2"]
+  }
+}
 ```
 
 **Response:**
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2024-01-01T00:00:00Z",
-  "version": "2.1.0",
-  "services": {
-    "database": "healthy",
-    "spotify_api": "healthy",
-    "llm_providers": {
-      "openai": "healthy",
-      "gemini": "healthy"
-    }
+  "response": "Here are some high-energy tracks perfect for your workout...",
+  "tracks": [...],
+  "intent": {
+    "activity": "workout",
+    "mood": "energetic",
+    "confidence": 0.95
   },
-  "metrics": {
-    "uptime": 86400,
-    "requests_per_minute": 45,
-    "average_response_time": 125
-  }
+  "conversation_id": "conv_123"
 }
 ```
 
-## 📊 Rate Limiting
+### 📊 User Analytics
 
-Rate limits vary by endpoint type and user tier.
+#### GET /user/listening-history
+Retrieve user's listening history and analytics.
 
-### Default Limits (per IP address)
+**Parameters:**
+- `limit` (integer): Number of tracks (default: 50, max: 1000)
+- `time_range` (string): "short_term", "medium_term", or "long_term"
+- `after` (string, ISO date): Get tracks after this date
 
-| Endpoint Category | Requests per 15 min | Burst Limit |
-|------------------|-------------------|-------------|
-| Authentication | 10 | 5 |
-| Chat API | 50 | 10 |
-| Spotify Integration | 200 | 20 |
-| Recommendations | 30 | 5 |
-| Playlists | 60 | 10 |
+#### GET /user/top-genres
+Get user's top genres based on listening history.
 
-### Rate Limit Headers
-```http
-X-RateLimit-Limit: 50
-X-RateLimit-Remaining: 47
-X-RateLimit-Reset: 1640995200
+**Response:**
+```json
+{
+  "genres": [
+    {
+      "name": "electronic",
+      "play_count": 245,
+      "percentage": 34.2,
+      "representative_tracks": [...]
+    }
+  ],
+  "analysis_period": "medium_term",
+  "total_tracks_analyzed": 716
+}
 ```
 
-## 🚫 Error Handling
+### 🔄 Playlist Management
 
-All API errors follow consistent JSON format with detailed information.
+#### POST /playlists/generate
+Generate a smart playlist based on criteria.
+
+**Request Body:**
+```json
+{
+  "name": "My AI Workout Mix",
+  "description": "Generated by EchoTune AI",
+  "criteria": {
+    "energy_min": 0.7,
+    "danceability_min": 0.6,
+    "duration_ms": 3600000,
+    "include_genres": ["electronic", "pop"],
+    "exclude_artists": ["artist_id_to_exclude"]
+  },
+  "create_spotify_playlist": true
+}
+```
+
+## Error Handling
+
+### HTTP Status Codes
+- `200` - Success
+- `400` - Bad Request (invalid parameters)
+- `401` - Unauthorized (invalid/expired token)
+- `403` - Forbidden (insufficient permissions)
+- `404` - Not Found
+- `429` - Rate Limited
+- `500` - Internal Server Error
 
 ### Error Response Format
 ```json
 {
-  "error": "Error Type",
-  "message": "Human-readable error description",
-  "code": "ERROR_CODE",
-  "details": {
-    "field": "Specific field that caused the error",
-    "constraint": "Validation constraint violated"
-  },
-  "timestamp": "2024-01-01T00:00:00Z",
-  "requestId": "req_uuid_for_tracking"
+  "error": {
+    "code": "INVALID_TOKEN",
+    "message": "The provided access token is invalid or expired",
+    "details": {
+      "timestamp": "2024-01-20T10:30:00Z",
+      "request_id": "req_abc123"
+    }
+  }
 }
 ```
 
-### Common Error Codes
+## Rate Limiting
 
-#### Authentication Errors
-- `AUTH_REQUIRED` - Authentication token required
-- `AUTH_INVALID` - Invalid or expired token
-- `AUTH_SPOTIFY_FAILED` - Spotify OAuth failed
+API endpoints are rate limited to ensure fair usage:
+- **General endpoints**: 100 requests per 15 minutes per user
+- **Recommendation endpoints**: 50 requests per hour per user
+- **Chat endpoints**: 20 messages per minute per user
 
-#### Validation Errors
-- `VALIDATION_FAILED` - Request validation failed
-- `MISSING_REQUIRED_FIELD` - Required field missing
-- `INVALID_FORMAT` - Invalid data format
+Rate limit headers are included in responses:
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 85
+X-RateLimit-Reset: 1642680600
+```
 
-## 🔧 SDK Examples
+## SDKs and Examples
 
 ### JavaScript/Node.js
 ```javascript
 const EchoTuneAPI = require('@echotune/api-client');
 
 const client = new EchoTuneAPI({
-  apiKey: 'your_api_key',
-  baseURL: 'https://api.echotune.ai'
+  accessToken: 'your_spotify_token',
+  baseURL: 'https://your-domain.com/api'
 });
 
-// Start a conversation
-const session = await client.chat.start({
-  provider: 'gemini',
-  context: { mood: 'energetic', activity: 'workout' }
+// Get recommendations
+const recommendations = await client.recommendations.get({
+  limit: 10,
+  seed_genres: 'electronic,ambient'
 });
 
-// Send a message
-const response = await client.chat.sendMessage({
-  sessionId: session.id,
-  message: 'Recommend some high-energy workout music',
-  includeRecommendations: true
-});
-
-// Generate recommendations
-const recommendations = await client.recommendations.generate({
-  limit: 20,
-  context: { mood: 'happy', activity: 'driving' },
-  preferences: { genres: ['pop', 'rock'] }
-});
+// Send chat message
+const response = await client.chat.sendMessage(
+  "Play something chill for studying"
+);
 ```
 
 ### Python
@@ -443,33 +219,44 @@ const recommendations = await client.recommendations.generate({
 from echotune_api import EchoTuneClient
 
 client = EchoTuneClient(
-    api_key='your_api_key',
-    base_url='https://api.echotune.ai'
+    access_token='your_spotify_token',
+    base_url='https://your-domain.com/api'
 )
 
-# Start conversation
-session = client.chat.start(
-    provider='gemini',
-    context={'mood': 'relaxed', 'time_of_day': 'evening'}
+# Get recommendations
+recommendations = client.recommendations.get(
+    limit=10,
+    seed_genres=['electronic', 'ambient']
 )
 
-# Generate recommendations
-recommendations = client.recommendations.generate(
-    limit=15,
-    context={'mood': 'focused', 'activity': 'study'},
-    preferences={'genres': ['ambient', 'classical']}
+# Send chat message
+response = client.chat.send_message(
+    "Play something chill for studying"
 )
 ```
 
-## 📚 Additional Resources
+## Webhooks
 
-- **Base URL**: `https://api.echotune.ai`
-- **Documentation**: [Complete Documentation](docs/)
-- **Architecture**: [System Architecture](docs/architecture/ARCHITECTURE.md)
-- **Deployment**: [Deployment Guides](docs/deployment/)
+### Playlist Updates
+Receive notifications when AI-generated playlists are updated.
+
+**Endpoint Setup:**
+```
+POST /webhooks/register
+{
+  "url": "https://your-app.com/webhook",
+  "events": ["playlist.updated", "recommendations.generated"],
+  "secret": "your_webhook_secret"
+}
+```
+
+## Support
+
+- **Documentation**: [GitHub Repository](https://github.com/dzp5103/Spotify-echo)
+- **Issues**: [Report bugs](https://github.com/dzp5103/Spotify-echo/issues)
+- **Discord**: [Community Support](#)
 
 ---
 
-**API Version**: 2.1.0  
-**Last Updated**: January 2024  
-**OpenAPI Specification**: [Download JSON](https://api.echotune.ai/openapi.json)
+**Last Updated**: January 2024
+**API Version**: v1.0

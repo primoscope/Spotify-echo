@@ -1,0 +1,344 @@
+# Production-Optimized Multi-Stage Docker Build
+# 
+# Advanced Docker configuration implementing strategic roadmap Phase 10
+# objectives with performance optimization, security hardening, and
+# minimal attack surface.
+
+# ============================================================================
+# Build Stage: Dependencies and Application Building
+# ============================================================================
+
+FROM node:20-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies required for building
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
+
+# Copy package files
+COPY package*.json ./
+COPY requirements*.txt ./
+
+# Install Node.js dependencies with production optimizations
+RUN npm ci --only=production --silent --no-audit --no-fund \
+    && npm cache clean --force
+
+# Copy application source
+COPY . .
+
+# Build application
+RUN npm run build 2>/dev/null || echo "No build script found"
+
+# Clean up development dependencies
+RUN rm -rf node_modules \
+    && npm ci --only=production --silent --no-audit --no-fund
+
+# ============================================================================
+# Python Dependencies Stage
+# ============================================================================
+
+FROM python:3.11-alpine AS python-builder
+
+WORKDIR /app
+
+# Install Python build dependencies
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    linux-headers \
+    postgresql-dev
+
+# Copy Python requirements
+COPY requirements*.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --user -r requirements.txt || \
+    pip install --no-cache-dir --user -r requirements-production.txt || \
+    echo "No Python requirements found"
+
+# ============================================================================
+# Production Runtime Stage
+# ============================================================================
+
+FROM node:20-alpine AS production
+
+# Metadata
+LABEL maintainer="EchoTune AI Team" \
+      version="2.1.0" \
+      description="EchoTune AI Music Recommendation System - Production Build" \
+      org.opencontainers.image.title="EchoTune AI" \
+      org.opencontainers.image.description="AI-powered music discovery platform" \
+      org.opencontainers.image.vendor="EchoTune AI" \
+      org.opencontainers.image.version="2.1.0" \
+      org.opencontainers.image.schema-version="1.0"
+
+# Install production runtime dependencies
+RUN apk add --no-cache \
+    python3 \
+    cairo \
+    jpeg \
+    pango \
+    musl \
+    giflib \
+    pixman \
+    pangomm \
+    libjpeg-turbo \
+    freetype \
+    ttf-freefont \
+    curl \
+    ca-certificates \
+    tini \
+    dumb-init \
+    su-exec \
+    tzdata \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S echotune \
+    && adduser -S -D -H -u 1001 -s /sbin/nologin -G echotune echotune
+
+# Set up directories with proper permissions
+RUN mkdir -p /app/logs /app/uploads /app/cache /tmp/echotune \
+    && chown -R echotune:echotune /app /tmp/echotune
+
+# Set working directory
+WORKDIR /app
+
+# Copy Python dependencies from builder
+COPY --from=python-builder --chown=echotune:echotune /root/.local /home/echotune/.local
+
+# Copy Node.js application from builder
+COPY --from=builder --chown=echotune:echotune /app/node_modules ./node_modules
+COPY --from=builder --chown=echotune:echotune /app/dist ./dist
+COPY --from=builder --chown=echotune:echotune /app/package*.json ./
+
+# Copy application source (excluding development files)
+COPY --chown=echotune:echotune src ./src
+COPY --chown=echotune:echotune public ./public
+COPY --chown=echotune:echotune mcp-server ./mcp-server
+COPY --chown=echotune:echotune scripts ./scripts
+
+# Copy configuration files
+COPY --chown=echotune:echotune *.json *.js *.md ./
+COPY --chown=echotune:echotune .env.production.example ./.env
+
+# Set environment variables for production
+ENV NODE_ENV=production \
+    PORT=3000 \
+    MCP_SERVER_PORT=3001 \
+    PATH="/home/echotune/.local/bin:$PATH" \
+    PYTHONPATH="/home/echotune/.local/lib/python3.11/site-packages:$PYTHONPATH" \
+    # Node.js optimizations
+    NODE_OPTIONS="--max-old-space-size=2048 --enable-source-maps=false" \
+    UV_THREADPOOL_SIZE=16 \
+    # Security settings
+    NODE_ENV=production \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false \
+    # Application settings
+    ENABLE_CLUSTERING=true \
+    CACHE_ENABLED=true \
+    COMPRESSION=true \
+    TRUST_PROXY=true \
+    BEHIND_REVERSE_PROXY=true
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:$PORT/health || exit 1
+
+# Expose ports
+EXPOSE 3000 3001
+
+# Create startup script for proper initialization
+RUN cat > /app/docker-entrypoint.sh << 'EOF' && chmod +x /app/docker-entrypoint.sh
+#!/bin/sh
+set -e
+
+# Function to log messages
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
+
+log "Starting EchoTune AI Production Container..."
+
+# Wait for database if specified
+if [ -n "$WAIT_FOR_DB" ] && [ "$WAIT_FOR_DB" = "true" ]; then
+    log "Waiting for database connection..."
+    timeout=30
+    while [ $timeout -gt 0 ]; do
+        if node -e "
+            const mongoose = require('mongoose');
+            mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/echotune')
+                .then(() => { console.log('DB connected'); process.exit(0); })
+                .catch(() => process.exit(1));
+        " 2>/dev/null; then
+            log "Database connection successful"
+            break
+        fi
+        timeout=$((timeout - 1))
+        sleep 1
+    done
+    
+    if [ $timeout -eq 0 ]; then
+        log "WARNING: Database connection timeout, continuing anyway..."
+    fi
+fi
+
+# Create necessary directories
+mkdir -p /app/logs /app/uploads /app/cache
+chown -R echotune:echotune /app/logs /app/uploads /app/cache
+
+# Set up log files
+touch /app/logs/app.log /app/logs/error.log /app/logs/access.log
+chown echotune:echotune /app/logs/*.log
+
+# Validate environment configuration
+if [ -z "$MONGODB_URI" ]; then
+    log "WARNING: MONGODB_URI not set, using default"
+fi
+
+if [ -z "$SPOTIFY_CLIENT_ID" ] || [ -z "$SPOTIFY_CLIENT_SECRET" ]; then
+    log "WARNING: Spotify credentials not fully configured"
+fi
+
+# Start MCP server in background if enabled
+if [ "${ENABLE_MCP_SERVER:-true}" = "true" ]; then
+    log "Starting MCP server on port $MCP_SERVER_PORT..."
+    su-exec echotune node mcp-server/enhanced-mcp-orchestrator.js > /app/logs/mcp.log 2>&1 &
+    MCP_PID=$!
+    
+    # Give MCP server time to start
+    sleep 2
+    
+    # Check if MCP server started successfully
+    if kill -0 $MCP_PID 2>/dev/null; then
+        log "MCP server started successfully (PID: $MCP_PID)"
+    else
+        log "WARNING: MCP server failed to start, continuing without it"
+    fi
+fi
+
+# Validate application health before starting
+log "Validating application configuration..."
+if ! su-exec echotune node -e "
+    require('./src/utils/config-validator.js')
+        .validateConfig()
+        .catch(() => process.exit(1));
+" 2>/dev/null; then
+    log "WARNING: Configuration validation failed, starting anyway"
+fi
+
+# Start the main application
+log "Starting main application on port $PORT..."
+
+# Use different startup methods based on clustering setting
+if [ "${ENABLE_CLUSTERING:-false}" = "true" ]; then
+    log "Starting with Node.js clustering enabled"
+    exec su-exec echotune node src/cluster.js
+else
+    log "Starting single-instance mode"
+    exec su-exec echotune node src/index.js
+fi
+EOF
+
+# Create cluster configuration for production
+RUN cat > /app/src/cluster.js << 'EOF'
+const cluster = require('cluster');
+const os = require('os');
+
+if (cluster.isMaster) {
+    const numCPUs = os.cpus().length;
+    const workers = Math.min(numCPUs, parseInt(process.env.MAX_WORKERS || '4'));
+    
+    console.log(`🚀 Master process ${process.pid} starting ${workers} workers`);
+    
+    // Fork workers
+    for (let i = 0; i < workers; i++) {
+        cluster.fork();
+    }
+    
+    // Handle worker exit
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`💀 Worker ${worker.process.pid} died (${signal || code}). Restarting...`);
+        cluster.fork();
+    });
+    
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+        console.log('🛑 Received SIGTERM, shutting down workers gracefully');
+        
+        for (const id in cluster.workers) {
+            cluster.workers[id].kill('SIGTERM');
+        }
+        
+        setTimeout(() => {
+            process.exit(0);
+        }, 30000);
+    });
+    
+} else {
+    // Worker process
+    require('./index.js');
+}
+EOF
+
+# Create configuration validator
+RUN cat > /app/src/utils/config-validator.js << 'EOF'
+const validateConfig = () => {
+    return new Promise((resolve, reject) => {
+        const errors = [];
+        
+        // Check critical environment variables
+        const criticalVars = ['NODE_ENV', 'PORT'];
+        criticalVars.forEach(varName => {
+            if (!process.env[varName]) {
+                errors.push(`Missing critical environment variable: ${varName}`);
+            }
+        });
+        
+        // Validate PORT
+        const port = parseInt(process.env.PORT);
+        if (isNaN(port) || port < 1000 || port > 65535) {
+            errors.push('PORT must be a valid number between 1000 and 65535');
+        }
+        
+        // Check MongoDB URI format
+        if (process.env.MONGODB_URI && !process.env.MONGODB_URI.match(/^mongodb(\+srv)?:\/\//)) {
+            errors.push('Invalid MONGODB_URI format');
+        }
+        
+        if (errors.length > 0) {
+            console.error('Configuration validation failed:');
+            errors.forEach(error => console.error(`  - ${error}`));
+            reject(new Error('Configuration validation failed'));
+        } else {
+            console.log('✅ Configuration validation passed');
+            resolve();
+        }
+    });
+};
+
+module.exports = { validateConfig };
+EOF
+
+# Switch to non-root user
+USER echotune
+
+# Use tini as init system for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start application
+CMD ["/app/docker-entrypoint.sh"]

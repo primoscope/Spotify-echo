@@ -1,0 +1,491 @@
+# Production Docker Compose Configuration
+# 
+# Optimized for production deployment with security hardening,
+# performance optimization, monitoring, and high availability.
+
+services:
+  # Main Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      args:
+        - NODE_ENV=production
+    image: echotune-ai:production
+    container_name: echotune-app
+    restart: unless-stopped
+    
+    # Environment configuration
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MCP_SERVER_PORT=3001
+      - MONGODB_URI=${MONGODB_URI}
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - SPOTIFY_REDIRECT_URI=${SPOTIFY_REDIRECT_URI:-http://localhost:3000/auth/callback}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-mock}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ENABLE_CLUSTERING="true"
+      - CACHE_ENABLED="true"
+      - COMPRESSION="true"
+      - TRUST_PROXY="true"
+      - HEALTH_CHECK_ENABLED="true"
+      - METRICS_ENABLED="true"
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - WAIT_FOR_DB="true"
+    
+    # Port mapping
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    
+    # Volume mounts
+    volumes:
+      - app-logs:/app/logs
+      - app-uploads:/app/uploads
+      - app-cache:/app/cache
+      - ./data:/app/data:ro
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # Set to true if application doesn't need write access
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    
+    # Dependencies
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    # Networks
+    networks:
+      - app-network
+      - db-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: echotune-mongodb
+    restart: unless-stopped
+    
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_ROOT_USER:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=echotune
+    
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+      - ./scripts/mongodb-init.js:/docker-entrypoint-initdb.d/init.js:ro
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    
+    # Networks
+    networks:
+      - db-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: echotune-redis
+    restart: unless-stopped
+    
+    command: >
+      redis-server 
+      --appendonly yes 
+      --maxmemory 256mb 
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    
+    volumes:
+      - redis-data:/data
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    
+    # Networks
+    networks:
+      - app-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: echotune-nginx
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./nginx/production.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/echotune.conf:/etc/nginx/conf.d/default.conf:ro
+      - nginx-cache:/var/cache/nginx
+      - nginx-logs:/var/log/nginx
+      - ssl-certs:/etc/nginx/ssl:ro
+    
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
+      - DOMAIN=${DOMAIN:-localhost}
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    
+    # Dependencies
+    depends_on:
+      app:
+        condition: service_healthy
+    
+    # Networks
+    networks:
+      - app-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: echotune-prometheus
+    restart: unless-stopped
+    
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=30d'
+    
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    
+    ports:
+      - "9090:9090"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    
+    # Networks
+    networks:
+      - monitoring-network
+      - app-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: echotune-grafana
+    restart: unless-stopped
+    
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://${DOMAIN:-localhost}/grafana
+    
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    
+    ports:
+      - "3002:3000"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    
+    # Dependencies
+    depends_on:
+      - prometheus
+    
+    # Networks
+    networks:
+      - monitoring-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Log Aggregation with Loki
+  loki:
+    image: grafana/loki:latest
+    container_name: echotune-loki
+    restart: unless-stopped
+    
+    command: -config.file=/etc/loki/local-config.yaml
+    
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    
+    ports:
+      - "3100:3100"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    
+    # Networks
+    networks:
+      - monitoring-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Backup Service
+  backup:
+    image: alpine:latest
+    container_name: echotune-backup
+    restart: unless-stopped
+    
+    command: >
+      sh -c "
+        apk add --no-cache curl mongodb-tools &&
+        while true; do
+          echo 'Creating backup...' &&
+          mongodump --host mongodb:27017 --out /backup/mongodb_$(date +%Y%m%d_%H%M%S) &&
+          find /backup -name 'mongodb_*' -mtime +7 -exec rm -rf {} + &&
+          sleep 86400
+        done
+      "
+    
+    volumes:
+      - backup-data:/backup
+      - mongodb-data:/data/db:ro
+    
+    environment:
+      - TZ=${TZ:-UTC}
+    
+    # Dependencies
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    
+    # Networks
+    networks:
+      - db-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+# Named Volumes
+volumes:
+  # Application volumes
+  app-logs:
+    driver: local
+  app-uploads:
+    driver: local
+  app-cache:
+    driver: local
+  
+  # Database volumes
+  mongodb-data:
+    driver: local
+  mongodb-config:
+    driver: local
+  redis-data:
+    driver: local
+  
+  # Nginx volumes
+  nginx-cache:
+    driver: local
+  nginx-logs:
+    driver: local
+  ssl-certs:
+    driver: local
+  
+  # Monitoring volumes
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+  
+  # Backup volume
+  backup-data:
+    driver: local
+
+# Networks
+networks:
+  app-network:
+    driver: bridge
+    internal: false
+  
+  db-network:
+    driver: bridge
+    internal: true
+  
+  monitoring-network:
+    driver: bridge
+    internal: false
+
+# Configuration for production deployment
+configs:
+  nginx_config:
+    file: ./nginx/production.conf
+  
+  prometheus_config:
+    file: ./monitoring/prometheus.yml
+  
+  grafana_dashboards:
+    file: ./monitoring/grafana/dashboards/echotune-dashboard.json
+
+# Secrets management (use Docker secrets in production)
+secrets:
+  mongodb_password:
+    external: true
+  
+  session_secret:
+    external: true
+  
+  jwt_secret:
+    external: true

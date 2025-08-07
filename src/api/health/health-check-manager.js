@@ -99,16 +99,43 @@ class HealthCheckManager {
      */
     async checkDatabase() {
         try {
-            // Check MongoDB connection if available
+            // Check global database reference first (set by server initialization)
             if (global.db) {
-                await global.db.admin().ping();
-                return {
-                    status: 'healthy',
-                    details: {
-                        type: 'mongodb',
-                        connected: true
-                    }
-                };
+                try {
+                    await global.db.admin().ping();
+                    return {
+                        status: 'healthy',
+                        details: {
+                            mongodb: {
+                                status: 'healthy',
+                                database: global.db.databaseName,
+                                connected: true
+                            }
+                        }
+                    };
+                } catch (error) {
+                    console.log('Health check: Global db ping failed:', error.message);
+                }
+            }
+
+            // Try database manager as fallback
+            try {
+                const databaseManager = global.databaseManager || require('../../database/database-manager');
+                if (databaseManager && databaseManager.mongodb) {
+                    await databaseManager.testMongoConnection();
+                    return {
+                        status: 'healthy',
+                        details: {
+                            mongodb: {
+                                status: 'healthy',
+                                database: process.env.MONGODB_DATABASE || 'echotune',
+                                connected: true
+                            }
+                        }
+                    };
+                }
+            } catch (error) {
+                console.log('Health check: Database manager test failed:', error.message);
             }
 
             // Check SQLite fallback

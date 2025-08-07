@@ -876,6 +876,18 @@ server.listen(PORT, '0.0.0.0', async () => {
             if (dbInfo.fallbackMode) {
                 console.log('📦 Running in fallback mode (SQLite)');
             }
+            
+            // Set global database reference for health checks and legacy compatibility
+            if (databaseManager.mongodb) {
+                global.db = databaseManager.getMongoDatabase();
+                global.databaseManager = databaseManager;
+                console.log('🔗 Global database reference set for health checks');
+                console.log('🔍 Debug: databaseManager.mongodb exists:', !!databaseManager.mongodb);
+                console.log('🔍 Debug: global.db exists:', !!global.db);
+                console.log('🔍 Debug: Database name:', global.db ? global.db.databaseName : 'null');
+            } else {
+                console.warn('⚠️ MongoDB not available, cannot set global database reference');
+            }
         } else {
             console.error('❌ Database initialization failed - running without database');
         }

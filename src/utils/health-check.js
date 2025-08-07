@@ -173,12 +173,37 @@ class HealthCheckSystem {
       details: {},
     };
 
-    // Check MongoDB
+    // Check MongoDB using global database reference first (if available)
+    if (global.db) {
+      try {
+        await global.db.admin().ping();
+        health.details.mongodb = {
+          status: 'healthy',
+          database: global.db.databaseName,
+          connected: true,
+          source: 'global_reference'
+        };
+        return health;
+      } catch (error) {
+        health.status = 'unhealthy';
+        health.details.mongodb = {
+          status: 'unhealthy',
+          error: error.message,
+          source: 'global_reference'
+        };
+        return health;
+      }
+    }
+
+    // Fallback to separate MongoDB manager
     if (process.env.MONGODB_URI) {
       try {
         const mongoManager = require('../database/mongodb');
         const mongoHealth = await mongoManager.healthCheck();
-        health.details.mongodb = mongoHealth;
+        health.details.mongodb = {
+          ...mongoHealth,
+          source: 'mongodb_manager'
+        };
         
         if (mongoHealth.status !== 'healthy') {
           health.status = 'unhealthy';
@@ -188,6 +213,7 @@ class HealthCheckSystem {
         health.details.mongodb = {
           status: 'error',
           message: error.message,
+          source: 'mongodb_manager'
         };
       }
     } else {

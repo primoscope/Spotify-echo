@@ -159,10 +159,10 @@ const recommendationEngine = async (userId, options = {}) => {
         // Use descriptive variable names
         const userListeningHistory = await getUserHistory(userId);
         const personalizedTracks = await generateRecommendations(
-            userListeningHistory, 
+            userListeningHistory,
             options
         );
-        
+
         return {
             tracks: personalizedTracks,
             generated_at: new Date().toISOString(),
@@ -195,20 +195,20 @@ from typing import List, Dict, Optional
 
 class RecommendationEngine:
     """Advanced music recommendation engine using collaborative filtering."""
-    
+
     def __init__(self, model_version: str = "v2") -> None:
         self.model_version = model_version
         self.is_trained = False
-        
+
     def train_model(self, interaction_data: pd.DataFrame) -> bool:
         """Train the recommendation model with user interaction data.
-        
+
         Args:
             interaction_data: DataFrame with user_id, track_id, rating columns
-            
+
         Returns:
             bool: True if training successful, False otherwise
-            
+
         Raises:
             ValueError: If required columns are missing from input data
         """
@@ -217,11 +217,11 @@ class RecommendationEngine:
             required_columns = ['user_id', 'track_id', 'rating']
             if not all(col in interaction_data.columns for col in required_columns):
                 raise ValueError(f"Missing required columns: {required_columns}")
-            
+
             # Training logic here
             self.is_trained = True
             return True
-            
+
         except Exception as e:
             print(f"Training failed: {e}")
             return False
@@ -238,7 +238,7 @@ class RecommendationEngine:
 - **PascalCase** for classes and constructors
 - **UPPER_SNAKE_CASE** for constants
 
-#### Python  
+#### Python
 - Follow **PEP 8** style guide
 - **4 spaces** for indentation
 - **Type hints** for function parameters and returns
@@ -264,32 +264,32 @@ All contributions must include appropriate tests:
 // Jest test example
 describe('RecommendationEngine', () => {
     let engine;
-    
+
     beforeEach(() => {
         engine = new RecommendationEngine();
     });
-    
+
     it('should generate recommendations for valid user', async () => {
         // Arrange
         const userId = 'test_user_123';
         const mockData = { tracks: [], total: 0 };
-        
+
         // Mock external dependencies
         jest.spyOn(engine, 'fetchUserData').mockResolvedValue(mockData);
-        
+
         // Act
         const result = await engine.getRecommendations(userId);
-        
+
         // Assert
         expect(result).toBeDefined();
         expect(result.tracks).toBeInstanceOf(Array);
         expect(engine.fetchUserData).toHaveBeenCalledWith(userId);
     });
-    
+
     it('should handle errors gracefully', async () => {
         // Test error conditions
         const invalidUserId = null;
-        
+
         await expect(engine.getRecommendations(invalidUserId))
             .rejects.toThrow('Invalid user ID');
     });
@@ -305,7 +305,7 @@ describe('GET /api/recommendations', () => {
             .get('/api/recommendations')
             .set('Authorization', `Bearer ${validToken}`)
             .expect(200);
-            
+
         expect(response.body.tracks).toBeDefined();
         expect(response.body.tracks.length).toBeGreaterThan(0);
     });

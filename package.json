@@ -177,7 +177,18 @@
     "redis:stats": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.getCacheStats()).then(s => console.log(JSON.stringify(s, null, 2))).finally(() => r.close())\"",
     "redis:clear": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache()).then(() => console.log('✅ Cache cleared')).finally(() => r.close())\"",
     "redis:clear-audio": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('audio_features:*')).then(count => console.log('✅ Cleared', count, 'audio features')).finally(() => r.close())\"",
-    "redis:clear-recommendations": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('recommendations:*')).then(count => console.log('✅ Cleared', count, 'recommendations')).finally(() => r.close())\""
+    "redis:clear-recommendations": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('recommendations:*')).then(count => console.log('✅ Cleared', count, 'recommendations')).finally(() => r.close())\"",
+    "automate:comprehensive": "node scripts/comprehensive-mcp-automation.js",
+    "automate:comprehensive-full": "npm run automate:comprehensive && npm run enhance:audio-features-new && npm run implement:ai-feature-vectors && npm run generate:user-profiles",
+    "enhance:audio-features-new": "node scripts/enhanced-audio-features-fetcher.js",
+    "implement:ai-feature-vectors": "node scripts/ai-ml-feature-vectors.js",
+    "generate:user-profiles": "node scripts/generate-user-profiles.js",
+    "ml:complete-pipeline": "npm run enhance:audio-features-new && npm run implement:ai-feature-vectors && npm run generate:user-profiles",
+    "ml:analyze-readiness": "node -e \"console.log('🧠 Checking ML readiness...'); require('./scripts/ai-ml-feature-vectors.js'); console.log('Run: npm run implement:ai-feature-vectors for full analysis')\"",
+    "profiles:analyze": "node -e \"console.log('👥 Analyzing user profiles...'); require('./scripts/generate-user-profiles.js'); console.log('Run: npm run generate:user-profiles for full generation')\"",
+    "mcp:automation-full": "npm run mcp-server-start & sleep 5 && npm run automate:comprehensive-full",
+    "mcp:status-complete": "npm run mcp-health && npm run validate:redis && npm run status:redis-roadmap",
+    "ai:complete-optimization": "npm run automate:comprehensive && npm run ml:complete-pipeline && npm run mcp:status-complete"
   },
   "keywords": [
     "music",

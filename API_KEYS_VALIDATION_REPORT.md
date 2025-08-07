@@ -1,19 +1,19 @@
 # API Keys Validation Report
 
-**Generated**: 2025-08-07T06:31:32.496Z
+**Generated**: 2025-08-07T09:08:24.819Z
 **Overall Status**: INSUFFICIENT
 **Configuration Complete**: ❌ NO
 
 ## Summary
 
 - **Total Services**: 1
-- **Valid/Configured**: 1
-- **Failed**: 0
+- **Valid/Configured**: 0
+- **Failed**: 1
 - **Not Configured**: 0
 
 ## Service Status
 
-- ✅ **mongodb**: VALID
+- ❌ **mcp-server**: CONFIGURED_NOT_RUNNING - MCP server files exist but server is not running
 
 ## Recommendations
 
@@ -24,8 +24,4 @@
 ### MEDIUM Priority: LLM Redundancy
 - **Issue**: Configure multiple LLM providers for fallback
 - **Action**: Add Gemini or Anthropic API keys
-
-### MEDIUM Priority: Automation
-- **Issue**: MCP Server not running - advanced automation disabled
-- **Action**: Run: npm run mcp-server
 

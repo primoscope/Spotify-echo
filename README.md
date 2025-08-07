@@ -14,6 +14,10 @@
 
 # 🎵 EchoTune AI - Next-Generation Music Discovery Platform
 
+[![System Status](https://img.shields.io/badge/System-Operational-green.svg)](http://localhost:3000/health)
+[![MCP Automation](https://img.shields.io/badge/MCP-Active-blue.svg)](http://localhost:3001/servers)
+[![Database](https://img.shields.io/badge/MongoDB-Connected-green.svg)](#)
+
 [![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy%20to%20DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean&logoColor=white)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
 [![Docker](https://img.shields.io/badge/Deploy%20with%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](DOCKER_ENHANCED_GUIDE.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)

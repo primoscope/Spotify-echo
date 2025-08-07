@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-08-07T02:54:23.020Z",
+  "callbackUrl": "http://localhost:3000/callback",
+  "productionCallbackUrl": "http://159.223.207.187:3000/",
+  "tests": {
+    "tokenValidation": {
+      "status": "failed",
+      "error": "Both tokens failed validation"
+    }
+  },
+  "summary": {
+    "passed": 0,
+    "failed": 1
+  }
+}

@@ -48,6 +48,10 @@ class HealthCheckSystem {
 
     // Run all health checks in parallel
     const checkPromises = Array.from(this.checks.entries()).map(async ([checkName, checkFunction]) => {
+      // Define which checks are optional and shouldn't fail the health check
+      const optionalChecks = ['docker', 'ssl', 'network', 'storage', 'redis', 'database'];
+      const isOptional = optionalChecks.includes(checkName);
+      
       try {
         const startTime = Date.now();
         const result = await checkFunction();
@@ -59,13 +63,10 @@ class HealthCheckSystem {
             ...result,
             duration: `${duration}ms`,
             timestamp: new Date().toISOString(),
+            optional: isOptional
           }
         };
       } catch (error) {
-        // Define which checks are optional and shouldn't fail the health check
-        const optionalChecks = ['docker', 'ssl', 'network', 'storage', 'redis', 'database'];
-        const isOptional = optionalChecks.includes(checkName);
-        
         return {
           name: checkName,
           result: {

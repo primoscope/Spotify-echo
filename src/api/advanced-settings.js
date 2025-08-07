@@ -281,11 +281,11 @@ async function testMockProvider() {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
     
     const responses = [
-        "🎵 I'm your AI music assistant! I can help you discover new music based on your preferences.",
-        "🎼 Ready to explore some amazing tunes? Tell me what you're in the mood for!",
-        "🎹 Music recommendation system is working perfectly! What genre interests you today?",
-        "🎤 Hello! I'm here to help you find your next favorite song. What's your vibe?",
-        "🥁 Mock provider test successful! All systems are ready for music discovery."
+        '🎵 I\'m your AI music assistant! I can help you discover new music based on your preferences.',
+        '🎼 Ready to explore some amazing tunes? Tell me what you\'re in the mood for!',
+        '🎹 Music recommendation system is working perfectly! What genre interests you today?',
+        '🎤 Hello! I\'m here to help you find your next favorite song. What\'s your vibe?',
+        '🥁 Mock provider test successful! All systems are ready for music discovery.'
     ];
     
     return responses[Math.floor(Math.random() * responses.length)];
@@ -473,7 +473,6 @@ async function getDatabaseInsights() {
  * Get detailed system health metrics
  */
 function getSystemHealth() {
-    const memUsage = process.memoryUsage();
     const totalMem = os.totalmem();
     const freeMem = os.freemem();
     

@@ -4,7 +4,7 @@
  * database management, and real-time system monitoring
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Card,
@@ -18,8 +18,6 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
-    Switch,
-    FormControlLabel,
     Alert,
     CircularProgress,
     Chip,
@@ -31,8 +29,6 @@ import {
     TableRow,
     Paper,
     LinearProgress,
-    IconButton,
-    Tooltip,
     Grid,
     Dialog,
     DialogTitle,
@@ -48,8 +44,7 @@ import {
     Save as SaveIcon,
     Warning as WarningIcon,
     CheckCircle as CheckIcon,
-    Error as ErrorIcon,
-    Info as InfoIcon
+    Error as ErrorIcon
 } from '@mui/icons-material';
 
 const AdvancedSettingsUI = () => {
@@ -87,7 +82,7 @@ const AdvancedSettingsUI = () => {
         loadSystemHealth();
         const interval = setInterval(loadSystemHealth, 30000); // Refresh every 30 seconds
         return () => clearInterval(interval);
-    }, []);
+    }, [loadSettings, loadSystemHealth]);
 
     /**
      * Load current settings from backend
@@ -105,7 +100,7 @@ const AdvancedSettingsUI = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [addNotification]);
 
     /**
      * Load system health and database insights
@@ -160,7 +155,7 @@ const AdvancedSettingsUI = () => {
         } finally {
             setLoading(false);
         }
-    }, [settings.llm]);
+    }, [settings.llm, addNotification]);
 
     /**
      * Test LLM provider connection
@@ -204,7 +199,7 @@ const AdvancedSettingsUI = () => {
         } finally {
             setLoading(false);
         }
-    }, [settings.llm]);
+    }, [settings.llm, addNotification]);
 
     /**
      * Add notification message

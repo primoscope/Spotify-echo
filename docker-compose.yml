@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Common configurations as YAML anchors
 x-common-variables: &common-variables
   NODE_ENV: ${NODE_ENV:-production}
@@ -149,8 +147,8 @@ services:
       CLUSTERING: ${CLUSTERING:-true}
       WORKERS: ${WORKERS:-auto}
       # Monitoring
-      HEALTH_CHECK_ENABLED: true
-      METRICS_ENABLED: true
+      HEALTH_CHECK_ENABLED: "true"
+      METRICS_ENABLED: "true"
     env_file:
       - .env.production
     volumes:

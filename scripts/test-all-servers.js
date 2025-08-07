@@ -30,6 +30,9 @@ class ServerTester {
                 token: 'dop_v1_09dc79ed930e1cc77ffe866d78a3c5eae14ab6f8fa47389beef94e19cb049eae',
                 dockerEmail: 'barrunmail@gmail.com',
                 dockerToken: 'dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7'
+            },
+            spotify: {
+                redirectUri: 'http://localhost:3000/'
             }
         };
     }
@@ -188,28 +191,88 @@ class ServerTester {
         });
     }
 
-    async testDigitalOceanContainerRegistry() {
+    async getDigitalOceanRegistryToken() {
         return new Promise((resolve, reject) => {
             try {
-                // Test container registry access
+                // Use doctl to get a registry token
+                this.log('Getting DigitalOcean registry token via doctl...', 'info');
+                const registryToken = execSync('doctl registry docker-config --expiry-seconds 3600', { 
+                    encoding: 'utf8', 
+                    timeout: 15000 
+                }).trim();
+                
+                // Parse the docker config to extract the auth token
+                const config = JSON.parse(registryToken);
+                const auth = config.auths && config.auths['registry.digitalocean.com'];
+                
+                if (auth) {
+                    resolve({
+                        token: auth.auth,
+                        registry: 'registry.digitalocean.com',
+                        expiry: '1 hour',
+                        method: 'doctl registry docker-config'
+                    });
+                } else {
+                    reject(new Error('Could not extract registry auth from doctl response'));
+                }
+            } catch (error) {
+                reject(new Error(`Failed to get registry token: ${error.message}`));
+            }
+        });
+    }
+
+    async testDigitalOceanContainerRegistry() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // First try to list registries
                 const registries = execSync('doctl registry list', { encoding: 'utf8' });
                 
-                // Test Docker login to DO registry with working credentials
-                const dockerEmail = this.credentials.digitalOcean.dockerEmail;
-                const dockerToken = this.credentials.digitalOcean.dockerToken;
+                let registryAuth = null;
                 
-                execSync(`echo "${dockerToken}" | docker login registry.digitalocean.com --username "${dockerEmail}" --password-stdin`, {
-                    encoding: 'utf8',
-                    timeout: 15000
-                });
+                // Try multiple authentication methods
+                try {
+                    // Method 1: Use doctl to get registry token
+                    registryAuth = await this.getDigitalOceanRegistryToken();
+                    this.log('✅ Got registry token via doctl', 'success');
+                    
+                    // Login using the token from doctl
+                    execSync(`echo "${registryAuth.token}" | docker login registry.digitalocean.com --username "" --password-stdin`, {
+                        encoding: 'utf8',
+                        timeout: 15000
+                    });
+                    
+                } catch (tokenError) {
+                    this.log(`⚠️ doctl token method failed: ${tokenError.message}`, 'warning');
+                    
+                    // Method 2: Try with provided Docker credentials
+                    const dockerEmail = this.credentials.digitalOcean.dockerEmail;
+                    const dockerToken = this.credentials.digitalOcean.dockerToken;
+                    
+                    try {
+                        execSync(`echo "${dockerToken}" | docker login registry.digitalocean.com --username "${dockerEmail}" --password-stdin`, {
+                            encoding: 'utf8',
+                            timeout: 15000
+                        });
+                        
+                        registryAuth = {
+                            method: 'provided credentials',
+                            email: dockerEmail,
+                            registry: 'registry.digitalocean.com'
+                        };
+                        
+                    } catch (credError) {
+                        throw new Error(`Both authentication methods failed. doctl: ${tokenError.message}, credentials: ${credError.message}`);
+                    }
+                }
 
                 resolve({
                     registries: registries.trim(),
+                    authentication: registryAuth,
                     dockerLogin: 'SUCCESS - Docker authenticated with DO registry',
-                    dockerEmail: dockerEmail,
                     registry: 'registry.digitalocean.com',
                     status: 'DigitalOcean Container Registry accessible and authenticated'
                 });
+                
             } catch (error) {
                 reject(new Error(`DO Container Registry failed: ${error.message}`));
             }

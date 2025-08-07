@@ -34,6 +34,7 @@ const playlistRoutes = require('./api/routes/playlists');
 const settingsRoutes = require('./api/routes/settings');
 const analyticsRoutes = require('./api/routes/analytics');
 const feedbackRoutes = require('./api/routes/feedback'); // New feedback system
+const musicDiscoveryRoutes = require('./api/routes/music-discovery'); // New music discovery system
 const { 
   extractUser, 
   ensureDatabase, 
@@ -619,6 +620,7 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/feedback', feedbackRoutes); // New feedback system
+app.use('/api/music', musicDiscoveryRoutes); // Enhanced music discovery system
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

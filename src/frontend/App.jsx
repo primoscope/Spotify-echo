@@ -7,6 +7,8 @@ import ExplainableRecommendations from './components/ExplainableRecommendations'
 import EnhancedChatInterface from './components/EnhancedChatInterface';
 import FeedbackSystem, { FeedbackAnalytics } from './components/FeedbackSystem';
 import MCPAutomationStatus from './components/MCPAutomationStatus';
+import EnhancedMusicDiscovery from './components/EnhancedMusicDiscovery';
+import EnhancedAnalyticsDashboard from './components/EnhancedAnalyticsDashboard';
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 // import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
@@ -26,6 +28,8 @@ function App() {
           <Route path="/chat" element={<MainApplication initialTab="chat" />} />
           <Route path="/recommendations" element={<MainApplication initialTab="recommendations" />} />
           <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
+          <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
+          <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
@@ -251,6 +255,7 @@ function MainApplication({ initialTab = 'chat' }) {
             <Tab label="🤖 AI Chat" value="chat" />
             <Tab label="🎯 Recommendations" value="recommendations" />
             <Tab label="🎵 Playlist Builder" value="playlist" />
+            <Tab label="🔍 Discovery" value="discovery" />
             <Tab label="📊 Analytics" value="analytics" />
           </Tabs>
         </Container>
@@ -293,53 +298,15 @@ function MainApplication({ initialTab = 'chat' }) {
           </Container>
         )}
 
+        {currentTab === 'discovery' && (
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <EnhancedMusicDiscovery />
+          </Container>
+        )}
+
         {currentTab === 'analytics' && (
-          <Container maxWidth="xl" sx={{ py: 3 }}>
-            <Typography variant="h4" gutterBottom>
-              📊 System Analytics & Automation Status
-            </Typography>
-            
-            <Grid container spacing={3}>
-              {/* MCP Automation Status */}
-              <Grid item xs={12} lg={8}>
-                <MCPAutomationStatus />
-              </Grid>
-              
-              {/* Feedback Analytics */}
-              <Grid item xs={12} lg={4}>
-                <FeedbackAnalytics
-                  analytics={{
-                    summary: {
-                      totalFeedback: 47,
-                      averageRating: 4.2,
-                    },
-                    distribution: {
-                      byFeedback: {
-                        like: 28,
-                        love: 12,
-                        dislike: 4,
-                        skip: 3,
-                      },
-                    },
-                  }}
-                  loading={false}
-                />
-                
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Test Feedback System
-                  </Typography>
-                  <FeedbackSystem
-                    type="recommendation"
-                    targetId="demo_recommendation"
-                    trackId="demo_track"
-                    onSubmitFeedback={handleProvideFeedback}
-                    showInline={true}
-                    showDetailed={true}
-                  />
-                </Box>
-              </Grid>
-            </Grid>
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <EnhancedAnalyticsDashboard />
           </Container>
         )}
       </Box>

@@ -1,143 +1,24 @@
 {
   "overall": "insufficient",
   "configurationComplete": false,
-  "totalKeys": 18,
-  "validKeys": 3,
-  "missingKeys": 10,
-  "failedKeys": 5,
+  "totalKeys": 1,
+  "validKeys": 0,
+  "missingKeys": 0,
+  "failedKeys": 1,
   "services": {
-    "spotify": {
-      "status": "valid",
-      "token_type": "Bearer",
-      "expires_in": 3600,
-      "redirect_uri": "https://primosphere.studio/auth/callback",
-      "has_redirect_uri": true,
-      "duration": "124ms",
-      "timestamp": "2025-08-07T00:28:54.354Z"
-    },
-    "openai": {
-      "status": "failed",
-      "error": "Missing or invalid OPENAI_API_KEY (should start with sk-)",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.355Z"
-    },
-    "gemini": {
-      "status": "failed",
-      "error": "Gemini API test failed: Gemini API failed: 400",
-      "duration": "61ms",
-      "timestamp": "2025-08-07T00:28:54.416Z"
-    },
-    "anthropic": {
-      "status": "not_configured",
-      "message": "ANTHROPIC_API_KEY not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.417Z"
-    },
-    "openrouter": {
-      "status": "not_configured",
-      "message": "OPENROUTER_API_KEY not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.417Z"
-    },
     "mongodb": {
       "status": "failed",
       "error": "MongoDB test failed: Command failed: node -e \"\n                const { MongoClient } = require('mongodb');\n                const client = new MongoClient('mongodb+srv://copilot:DapperMan77@cluster.mongodb.net/echotune_prod', { \n                    serverSelectionTimeoutMS: 5000,\n                    connectTimeoutMS: 5000\n                });\n                client.connect()\n                    .then(() => { console.log('SUCCESS'); client.close(); })\n                    .catch(err => { console.log('ERROR:', err.message); });\n            \"\nnode:internal/modules/cjs/loader:1215\n  throw err;\n  ^\n\nError: Cannot find module 'mongodb'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/[eval]\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)\n    at Module._load (node:internal/modules/cjs/loader:1043:27)\n    at Module.require (node:internal/modules/cjs/loader:1298:19)\n    at require (node:internal/modules/helpers:182:18)\n    at [eval]:2:41\n    at runScriptInThisContext (node:internal/vm:209:10)\n    at node:internal/process/execution:118:14\n    at [eval]-wrapper:6:24\n    at runScript (node:internal/process/execution:101:62)\n    at evalScript (node:internal/process/execution:133:3) {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: [ '/home/runner/work/Spotify-echo/Spotify-echo/[eval]' ]\n}\n\nNode.js v20.19.4\n",
-      "duration": "29ms",
-      "timestamp": "2025-08-07T00:28:54.446Z"
-    },
-    "redis": {
-      "status": "configured",
-      "url": "redis://localhost:6379",
-      "prefix": "none",
-      "duration": "1ms",
-      "timestamp": "2025-08-07T00:28:54.447Z"
-    },
-    "github": {
-      "status": "not_configured",
-      "message": "GITHUB_PAT not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.447Z"
-    },
-    "brave": {
-      "status": "not_configured",
-      "message": "BRAVE_API_KEY not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.447Z"
-    },
-    "youtube": {
-      "status": "not_configured",
-      "message": "YOUTUBE_API_KEY not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.447Z"
-    },
-    "browserbase": {
-      "status": "not_configured",
-      "message": "Browserbase not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.447Z"
-    },
-    "influxdb": {
-      "status": "not_configured",
-      "message": "InfluxDB not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.447Z"
-    },
-    "langfuse": {
-      "status": "not_configured",
-      "message": "Langfuse not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.448Z"
-    },
-    "mcp-server": {
-      "status": "configured_not_running",
-      "message": "MCP server files exist but server is not running",
-      "port": "3001",
-      "suggestion": "Start with: npm run mcp-server",
-      "duration": "2ms",
-      "timestamp": "2025-08-07T00:28:54.450Z"
-    },
-    "ssl": {
-      "status": "disabled",
-      "message": "SSL not enabled",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.450Z"
-    },
-    "docker": {
-      "status": "not_configured",
-      "message": "Docker Hub credentials not configured",
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.450Z"
-    },
-    "database": {
-      "status": "configured",
-      "databases": [
-        "MongoDB"
-      ],
-      "fallback_enabled": true,
-      "analytics_enabled": false,
-      "backup_enabled": false,
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.450Z"
-    },
-    "security": {
-      "status": "weak",
-      "issues": [
-        "SESSION_SECRET and JWT_SECRET should be different"
-      ],
-      "session_secret_length": 62,
-      "jwt_secret_length": 62,
-      "security_headers": true,
-      "force_https": true,
-      "duration": "0ms",
-      "timestamp": "2025-08-07T00:28:54.450Z"
+      "duration": "31ms",
+      "timestamp": "2025-08-07T06:00:03.339Z"
     }
   },
-  "timestamp": "2025-08-07T00:28:54.226Z",
+  "timestamp": "2025-08-07T06:00:03.306Z",
   "recommendations": [
     {
       "priority": "HIGH",
       "category": "Critical Services",
-      "message": "Configure these essential services: openai",
+      "message": "Configure these essential services: spotify, openai, security, database",
       "action": "Add API keys to .env file"
     },
     {
@@ -147,10 +28,10 @@
       "action": "Add Gemini or Anthropic API keys"
     },
     {
-      "priority": "HIGH",
-      "category": "Security",
-      "message": "SSL not enabled - required for production",
-      "action": "Configure SSL certificates and set SSL_ENABLED=true"
+      "priority": "MEDIUM",
+      "category": "Automation",
+      "message": "MCP Server not running - advanced automation disabled",
+      "action": "Run: npm run mcp-server"
     }
   ]
 }

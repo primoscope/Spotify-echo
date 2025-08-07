@@ -1,23 +1,18 @@
 # API Keys Validation Report
 
-**Generated**: 2025-08-07T00:28:54.226Z
+**Generated**: 2025-08-07T06:00:03.306Z
 **Overall Status**: INSUFFICIENT
 **Configuration Complete**: ❌ NO
 
 ## Summary
 
-- **Total Services**: 18
-- **Valid/Configured**: 3
-- **Failed**: 5
-- **Not Configured**: 10
+- **Total Services**: 1
+- **Valid/Configured**: 0
+- **Failed**: 1
+- **Not Configured**: 0
 
 ## Service Status
 
-- ✅ **spotify**: VALID
-- ❌ **openai**: FAILED - Missing or invalid OPENAI_API_KEY (should start with sk-)
-- ❌ **gemini**: FAILED - Gemini API test failed: Gemini API failed: 400
-- ⚠️ **anthropic**: NOT_CONFIGURED - ANTHROPIC_API_KEY not configured
-- ⚠️ **openrouter**: NOT_CONFIGURED - OPENROUTER_API_KEY not configured
 - ❌ **mongodb**: FAILED - MongoDB test failed: Command failed: node -e "
                 const { MongoClient } = require('mongodb');
                 const client = new MongoClient('mongodb+srv://copilot:DapperMan77@cluster.mongodb.net/echotune_prod', { 
@@ -51,30 +46,18 @@ Require stack:
 
 Node.js v20.19.4
 
-- ✅ **redis**: CONFIGURED
-- ⚠️ **github**: NOT_CONFIGURED - GITHUB_PAT not configured
-- ⚠️ **brave**: NOT_CONFIGURED - BRAVE_API_KEY not configured
-- ⚠️ **youtube**: NOT_CONFIGURED - YOUTUBE_API_KEY not configured
-- ⚠️ **browserbase**: NOT_CONFIGURED - Browserbase not configured
-- ⚠️ **influxdb**: NOT_CONFIGURED - InfluxDB not configured
-- ⚠️ **langfuse**: NOT_CONFIGURED - Langfuse not configured
-- ❌ **mcp-server**: CONFIGURED_NOT_RUNNING - MCP server files exist but server is not running
-- ⚠️ **ssl**: DISABLED - SSL not enabled
-- ⚠️ **docker**: NOT_CONFIGURED - Docker Hub credentials not configured
-- ✅ **database**: CONFIGURED
-- ❌ **security**: WEAK
 
 ## Recommendations
 
 ### HIGH Priority: Critical Services
-- **Issue**: Configure these essential services: openai
+- **Issue**: Configure these essential services: spotify, openai, security, database
 - **Action**: Add API keys to .env file
 
 ### MEDIUM Priority: LLM Redundancy
 - **Issue**: Configure multiple LLM providers for fallback
 - **Action**: Add Gemini or Anthropic API keys
 
-### HIGH Priority: Security
-- **Issue**: SSL not enabled - required for production
-- **Action**: Configure SSL certificates and set SSL_ENABLED=true
+### MEDIUM Priority: Automation
+- **Issue**: MCP Server not running - advanced automation disabled
+- **Action**: Run: npm run mcp-server
 

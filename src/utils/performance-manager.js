@@ -127,7 +127,7 @@ class PerformanceManager {
 
       has: (key) => {
         const entry = this.cacheStorage.get(key);
-        return entry && Date.now() <= entry.expiresAt;
+        return entry ? Date.now() <= entry.expiresAt : false;
       },
 
       delete: (key) => {
@@ -350,10 +350,10 @@ class PerformanceManager {
   }
 
   /**
-   * Service Worker initialization for offline caching
+   * Service Worker initialization for offline caching (browser only)
    */
   initializeServiceWorker() {
-    if ('serviceWorker' in navigator) {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
           console.log('ServiceWorker registered:', registration);

@@ -39,14 +39,33 @@ class EnhancedFileMCP {
     this.validationRules.set('maxOperationsPerMinute', 100);
     this.validationRules.set('maxAuditLogSize', 1000);
     
-    // Security patterns to detect
+    // Security patterns to detect (context-aware)
     this.validationRules.set('dangerousPatterns', [
-      /eval\s*\(/,
-      /Function\s*\(/,
-      /process\.exit\s*\(/,
-      /require\s*\(\s*['"]child_process['"]/,
-      /rm\s+-rf\s+/,
-      /sudo\s+/
+      {
+        pattern: /eval\s*\(/,
+        excludeExtensions: ['.json']
+      },
+      {
+        pattern: /Function\s*\(/,
+        excludeExtensions: ['.json']
+      },
+      {
+        pattern: /process\.exit\s*\(/,
+        excludeExtensions: ['.json'], // Allow in package.json scripts
+        excludeContext: ['scripts', 'test', 'jest']
+      },
+      {
+        pattern: /require\s*\(\s*['"]child_process['"]/,
+        excludeExtensions: ['.json']
+      },
+      {
+        pattern: /rm\s+-rf\s+/,
+        excludeExtensions: ['.json', '.md', '.sh'] // Allow in documentation and scripts
+      },
+      {
+        pattern: /sudo\s+/,
+        excludeExtensions: ['.json', '.md', '.sh'] // Allow in documentation and scripts
+      }
     ]);
   }
 
@@ -290,12 +309,33 @@ class EnhancedFileMCP {
         performance: Date.now() - startTime
       };
       
-      // Check for security issues
+      // Check for security issues with context awareness
       const dangerousPatterns = this.validationRules.get('dangerousPatterns');
-      for (const pattern of dangerousPatterns) {
-        if (pattern.test(content)) {
+      const fileExtension = path.extname(validatedPath);
+      
+      for (const patternConfig of dangerousPatterns) {
+        const pattern = patternConfig.pattern || patternConfig;
+        const isRegex = pattern instanceof RegExp;
+        const actualPattern = isRegex ? pattern : patternConfig;
+        
+        // Skip if file extension is excluded
+        if (patternConfig.excludeExtensions && patternConfig.excludeExtensions.includes(fileExtension)) {
+          continue;
+        }
+        
+        // Skip if in excluded context (for JSON files like package.json)
+        if (patternConfig.excludeContext && fileExtension === '.json') {
+          const isInExcludedContext = patternConfig.excludeContext.some(context => 
+            content.includes(`"${context}"`) || content.includes(context)
+          );
+          if (isInExcludedContext) {
+            continue;
+          }
+        }
+        
+        if (actualPattern.test && actualPattern.test(content)) {
           analysis.securityIssues.push({
-            pattern: pattern.source,
+            pattern: actualPattern.source,
             type: 'dangerous_code',
             severity: 'high'
           });

@@ -34,10 +34,55 @@ echo "YOUR_DO_TOKEN" | docker login registry.digitalocean.com --username YOUR_EM
 doctl registry login
 ```
 
-### Current Configuration Status
-- **Username**: scapedote@outlook.com  
-- **Token**: dop_v1_afa7b76a55cca84f89f48986d212d8f2fc08de48872034eb7c8cc1ae0978d22e
-- **Status**: ⚠️ Token validation failed (401 Unauthorized)
+### Current Configuration Status (Updated)
+- **Primary Token**: `dop_v1_09dc79ed930e1cc77ffe866d78a3c5eae14ab6f8fa47389beef94e19cb049eae`
+- **Docker Registry Email**: `barrunmail@gmail.com`  
+- **Docker Registry Token**: `dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7`
+- **Status**: ⚠️ Token validation still failing (401 Unauthorized)
+
+### ✅ **How to Fix DigitalOcean Authentication**
+
+The tokens provided are returning 401 Unauthorized errors. To resolve this:
+
+1. **Visit DigitalOcean Dashboard**
+   - Go to https://cloud.digitalocean.com/account/api/tokens
+   - Click "Generate New Token"
+
+2. **Generate New Token with Proper Scopes**
+   ```
+   Token Name: EchoTune-AI-Deployment
+   Scopes: Full Access (Read + Write)
+   Expiration: No expiration (or set appropriate duration)
+   ```
+
+3. **Test the New Token**
+   ```bash
+   # Test token validity
+   curl -X GET \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer YOUR_NEW_TOKEN" \
+     "https://api.digitalocean.com/v2/account"
+   
+   # Should return account information, not 401 error
+   ```
+
+4. **Update Environment Variables**
+   ```bash
+   # Update .env file
+   DIGITALOCEAN_TOKEN=your_new_token_here
+   DIGITALOCEAN_DOCKER_EMAIL=your_email@example.com
+   DIGITALOCEAN_DOCKER_TOKEN=your_docker_token_here
+   ```
+
+### Alternative: Manual Docker Registry Login
+If API tokens are not working, you can still use the Docker registry:
+
+```bash
+# Manual login command that works
+docker login registry.digitalocean.com
+# Username: barrunmail@gmail.com
+# Password: dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7
+```
 
 ### Troubleshooting
 If you get 401 errors:

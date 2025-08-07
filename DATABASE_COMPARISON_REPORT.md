@@ -1,6 +1,6 @@
 # Database Comparison and Audio Features Analysis Report
 
-**Generated:** 2025-08-07T06:41:24.676Z
+**Generated:** 2025-08-07T08:41:48.531Z
 **Connection Status:** success
 **Optimal Database:** echotune.spotify_analytics
 
@@ -18,30 +18,45 @@
 
 
 ### Database: echotune
-**Size:** 397MB
+**Size:** 474MB
 
 
 #### Collection: echotune_chat_sessions
-- **Documents:** 0
-- **Average Document Size:** 0 bytes
+- **Documents:** 51
+- **Average Document Size:** 611 bytes
 - **Storage Size:** 0MB
-- **Indexes:** 3
+- **Indexes:** 6
+
+- **Has Audio Features:** ❌
+- **Has Listening Data:** ❌
+- **Has Track Info:** ❌
+- **Spotify URI Present:** ❌
 
 
 
 #### Collection: echotune_user_preferences
-- **Documents:** 0
-- **Average Document Size:** 0 bytes
+- **Documents:** 1
+- **Average Document Size:** 211 bytes
 - **Storage Size:** 0MB
-- **Indexes:** 3
+- **Indexes:** 5
+
+- **Has Audio Features:** ❌
+- **Has Listening Data:** ❌
+- **Has Track Info:** ❌
+- **Spotify URI Present:** ❌
 
 
 
 #### Collection: echotune_listening_history
-- **Documents:** 0
-- **Average Document Size:** 0 bytes
-- **Storage Size:** 0MB
-- **Indexes:** 6
+- **Documents:** 203,090
+- **Average Document Size:** 815 bytes
+- **Storage Size:** 31MB
+- **Indexes:** 10
+
+- **Has Audio Features:** ❌
+- **Has Listening Data:** ✅
+- **Has Track Info:** ✅
+- **Spotify URI Present:** ✅
 
 
 
@@ -79,9 +94,9 @@
 
 #### Collection: spotify_analytics
 - **Documents:** 43,303
-- **Average Document Size:** 2184 bytes
+- **Average Document Size:** 2695 bytes
 - **Storage Size:** 172MB
-- **Indexes:** 17
+- **Indexes:** 35
 
 - **Has Audio Features:** ✅
 - **Has Listening Data:** ✅
@@ -204,6 +219,30 @@
 ## Audio Features Analysis
 
 
+### echotune.echotune_chat_sessions
+- **Total Tracks:** 51
+- **Complete Audio Features:** 0 (0.0%)
+- **Partial Audio Features:** 0
+- **With Track URIs:** 0
+- **Missing Audio Features:** 51
+
+
+### echotune.echotune_user_preferences
+- **Total Tracks:** 1
+- **Complete Audio Features:** 0 (0.0%)
+- **Partial Audio Features:** 0
+- **With Track URIs:** 0
+- **Missing Audio Features:** 1
+
+
+### echotune.echotune_listening_history
+- **Total Tracks:** 203,090
+- **Complete Audio Features:** 18 (0.0%)
+- **Partial Audio Features:** 18
+- **With Track URIs:** 203,090
+- **Missing Audio Features:** 203,072
+
+
 ### echotune.spotify_analytics
 - **Total Tracks:** 43,303
 - **Complete Audio Features:** 37,358 (86.3%)
@@ -253,7 +292,7 @@
 
 
 2. **MEDIUM - data_completeness**
-   - **Issue:** Another collection (spotify_analytics.listening_history) has more documents (203090 vs 43303)
+   - **Issue:** Another collection (echotune.echotune_listening_history) has more documents (203090 vs 43303)
    - **Action:** Consider merging data from multiple collections for maximum completeness
 
 
@@ -264,7 +303,7 @@ The analysis recommends using **echotune.spotify_analytics** as the primary data
 
 - **Data Volume:** 43,303 tracks
 - **Audio Features:** 86.3% coverage
-- **Performance:** 17 indexes for query optimization
+- **Performance:** 35 indexes for query optimization
 - **Data Quality:** Comprehensive track, artist, and listening information
 
 

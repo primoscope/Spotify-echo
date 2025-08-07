@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-08-07T08:42:45.493Z",
+  "database": "echotune",
+  "collections": {
+    "echotune_listening_history": {
+      "document_count": 203090,
+      "has_data": true,
+      "sample_structure": 14
+    },
+    "echotune_chat_sessions": {
+      "document_count": 51,
+      "has_data": true,
+      "sample_structure": 10
+    },
+    "echotune_user_preferences": {
+      "document_count": 1,
+      "has_data": true,
+      "sample_structure": 8
+    },
+    "spotify_analytics": {
+      "document_count": 43303,
+      "has_data": true,
+      "sample_structure": 28
+    }
+  },
+  "total_documents": 246445,
+  "comprehensive_dataset_ready": true
+}

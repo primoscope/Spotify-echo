@@ -83,7 +83,7 @@ function MobileResponsiveManager() {
       window.removeEventListener('resize', updateResponsiveInfo);
       window.removeEventListener('orientationchange', updateResponsiveInfo);
     };
-  }, []);
+  }, [updateResponsiveInfo]);
 
   const updateResponsiveInfo = () => {
     const info = {

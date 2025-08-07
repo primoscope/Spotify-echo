@@ -28,9 +28,10 @@
 - 🔍 **Smart Recommendations** - ML-powered personalized suggestions using collaborative filtering
 - 🔧 **MCP Server Ecosystem** - Advanced automation with 12 fully integrated Model Context Protocol servers
 - 🤖 **AI Agent Integration** - GitHub automation, database operations, and web intelligence with 100% task success rate
+- ⚙️ **Advanced Configuration** - Real-time settings management with system health monitoring
+- 📱 **Mobile Responsive** - Comprehensive mobile optimization with device detection and performance modes
 - 🎯 **Demo Mode** - Full functionality without API keys for instant testing
 - 🔊 **Voice Interface** - Voice commands for hands-free music discovery
-- 📱 **Mobile Responsive** - Optimized experience across all devices
 - ✅ **Production Ready** - Clean codebase, comprehensive health checks, deployment validated
 
 ## 🚀 Quick Start
@@ -393,10 +394,40 @@ npm run deploy:one-click    # One-click deployment wizard
 - **🔒 SSL/TLS** - Automatic HTTPS with Let's Encrypt
 - **📊 Health Monitoring** - Real-time system health checks and metrics
 
+## ⚙️ Configuration Management
+
+EchoTune AI features a comprehensive configuration system accessible through the web interface or API:
+
+### 🖥️ Web Configuration Interface
+1. Navigate to `http://localhost:3000` (or your deployed URL)
+2. Click the "⚙️ Settings" tab
+3. Configure:
+   - **General Settings**: Music discovery, performance, MCP servers, privacy
+   - **Mobile & Responsive**: Device optimization, touch controls, performance modes
+
+### 📱 Mobile Optimization Features
+- **Device Detection**: Automatic mobile/tablet/desktop identification  
+- **Touch Optimization**: Gesture navigation and touch-friendly interfaces
+- **Performance Modes**: Data saver, offline mode, battery optimization
+- **Responsive Controls**: Auto-rotation, high contrast, compact UI
+
+### 🔧 MCP Server Management
+Configure 12 Model Context Protocol servers individually:
+- ✅ **Always Available**: mermaid, filesystem, sqlite, memory, screenshot-website, browser, sequential-thinking
+- ⚙️ **Configurable**: spotify (with credentials), github (PAT required), browserbase (API key), postgres (DB URL), brave-search (API key)
+
+### 📊 Real-time System Monitoring
+- Live health checks for main application and MCP server
+- Performance metrics and optimization recommendations
+- System resource usage and response time monitoring
+
+For detailed configuration options, see: [**Configuration Guide**](CONFIGURATION_GUIDE.md)
+
 ## 📚 Documentation
 
 | Guide | Description |
 |-------|-------------|
+| [**Configuration Guide**](CONFIGURATION_GUIDE.md) | Complete settings and optimization guide |
 | [**DigitalOcean Deployment**](DEPLOYMENT.md) | Complete automated deployment guide with GitHub Actions |
 | [**Quick Start Guide**](docs/QUICK_START.md) | Get running in under 5 minutes |
 | [**Enhanced Docker Guide**](DOCKER_ENHANCED_GUIDE.md) | Comprehensive Docker deployment guide |
@@ -404,6 +435,7 @@ npm run deploy:one-click    # One-click deployment wizard
 | [**API Documentation**](docs/api/README.md) | Backend API reference |
 | [**Development Guide**](CODING_AGENT_GUIDE.md) | Setup for contributors |
 | [**Database Architecture**](DATABASE_ARCHITECTURE_GUIDE.md) | Data structure and schema |
+| [**MCP Servers Guide**](docs/mcp-servers.md) | Model Context Protocol server documentation |
 
 ### 🔧 Workflow Configuration
 

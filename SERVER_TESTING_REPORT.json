@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-07T01:44:34.592Z",
+  "timestamp": "2025-08-07T01:58:24.351Z",
   "tests": {
     "Docker Installation": {
       "status": "passed",
@@ -8,7 +8,7 @@
         "serverVersion": "28.0.4",
         "status": "Docker is running"
       },
-      "timestamp": "2025-08-07T01:44:34.686Z"
+      "timestamp": "2025-08-07T01:58:26.081Z"
     },
     "Docker Hub Connection": {
       "status": "passed",
@@ -18,41 +18,41 @@
         "authenticated": false,
         "note": "Public access working, authentication not tested without credentials"
       },
-      "timestamp": "2025-08-07T01:44:35.042Z"
+      "timestamp": "2025-08-07T01:58:26.385Z"
     },
     "DigitalOcean doctl Installation": {
       "status": "passed",
       "result": {
-        "status": "doctl already installed",
+        "status": "doctl installed successfully via snap",
         "version": "doctl version 1.135.0-release\nGit commit hash: dc1e1a02",
-        "action": "skipped installation"
+        "action": "installed"
       },
-      "timestamp": "2025-08-07T01:44:35.364Z"
+      "timestamp": "2025-08-07T01:58:43.824Z"
     },
     "DigitalOcean doctl Authentication": {
       "status": "failed",
-      "error": "DigitalOcean doctl failed: Command failed: doctl auth init --access-token dop_v1_09dc79ed930e1cc77ffe866d78a3c5eae14ab6f8fa47389beef94e19cb049eae\nError: Unable to use supplied token to access API: GET https://cloud.digitalocean.com/v1/oauth/token/info: 401 (request \"09b69461-b576-4928-bdeb-4dc6f5dc3e0b\") Unable to authenticate you\n",
-      "timestamp": "2025-08-07T01:44:35.849Z"
+      "error": "DigitalOcean doctl failed: Command failed: doctl auth init --access-token dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238\nError: Unable to use supplied token to access API: GET https://cloud.digitalocean.com/v1/oauth/token/info: 401 (request \"9fcbb765-3d83-482c-aedc-a83e98ab6835\") Unable to authenticate you\n",
+      "timestamp": "2025-08-07T01:58:44.375Z"
     },
     "DigitalOcean Container Registry": {
       "status": "failed",
-      "error": "DO Container Registry failed: Both authentication methods failed. doctl: Failed to get registry token: Command failed: doctl registry docker-config --expiry-seconds 3600\nError: GET https://api.digitalocean.com/v2/registry/docker-credentials?expiry_seconds=3600&read_write=false: 401 (request \"a7bf53b8-3bf0-40b2-a46c-8ce8bbce4482\") Unable to authenticate you\n, credentials: Command failed: echo \"dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7\" | docker login registry.digitalocean.com --username \"barrunmail@gmail.com\" --password-stdin\nError response from daemon: Get \"https://registry.digitalocean.com/v2/\": unauthorized: authentication required\n",
-      "timestamp": "2025-08-07T01:44:36.904Z"
+      "error": "DO Container Registry failed: Both authentication methods failed. doctl: Failed to get registry token: Command failed: doctl registry docker-config --expiry-seconds 3600\nError: GET https://api.digitalocean.com/v2/registry/docker-credentials?expiry_seconds=3600&read_write=false: 401 (request \"32aa55ee-1cd4-431a-aba1-75206ca9caaf\") Unable to authenticate you\n, credentials: Command failed: echo \"dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7\" | docker login registry.digitalocean.com --username \"barrunmail@gmail.com\" --password-stdin\nError response from daemon: Get \"https://registry.digitalocean.com/v2/\": unauthorized: authentication required\n",
+      "timestamp": "2025-08-07T01:58:45.154Z"
     },
     "DigitalOcean App Platform": {
       "status": "failed",
-      "error": "DO App Platform failed: Command failed: doctl apps list\nError: GET https://api.digitalocean.com/v2/apps?page=1&per_page=200: 401 (request \"564fde3c-532a-4d0e-8790-19cbaa7b0364\") Unable to authenticate you\n",
-      "timestamp": "2025-08-07T01:44:37.139Z"
+      "error": "DO App Platform failed: Command failed: doctl apps list\nError: GET https://api.digitalocean.com/v2/apps?page=1&per_page=200: 401 (request \"fc35c53c-cd8e-4c9c-a9dd-7f5ffa02058b\") Unable to authenticate you\n",
+      "timestamp": "2025-08-07T01:58:45.496Z"
     },
     "DigitalOcean Droplets": {
       "status": "failed",
-      "error": "DO Droplets failed: Command failed: doctl compute droplet list\nError: GET https://api.digitalocean.com/v2/droplets?page=1&per_page=200: 401 (request \"ce6e9fa0-fbc6-42e3-97ff-b10e14a5350a\") Unable to authenticate you\n",
-      "timestamp": "2025-08-07T01:44:37.413Z"
+      "error": "DO Droplets failed: Command failed: doctl compute droplet list\nError: GET https://api.digitalocean.com/v2/droplets?page=1&per_page=200: 401 (request \"5e1977a5-009b-42a1-b843-2798f2c07aac\") Unable to authenticate you\n",
+      "timestamp": "2025-08-07T01:58:45.791Z"
     },
     "DigitalOcean Kubernetes": {
       "status": "failed",
-      "error": "DO Kubernetes failed: Command failed: doctl kubernetes cluster list\nError: GET https://api.digitalocean.com/v2/kubernetes/clusters?page=1&per_page=200: 401 (request \"689f984f-1c30-4137-a6fd-f6c407313400\") Unable to authenticate you\n",
-      "timestamp": "2025-08-07T01:44:37.678Z"
+      "error": "DO Kubernetes failed: Command failed: doctl kubernetes cluster list\nError: GET https://api.digitalocean.com/v2/kubernetes/clusters?page=1&per_page=200: 401 (request \"6d8e90a7-bb30-4fa5-8afa-d198141b728d\") Unable to authenticate you\n",
+      "timestamp": "2025-08-07T01:58:46.090Z"
     },
     "DigitalOcean Spaces": {
       "status": "passed",
@@ -61,7 +61,7 @@
         "status": "DigitalOcean Spaces accessible",
         "note": "Can manage object storage"
       },
-      "timestamp": "2025-08-07T01:44:37.740Z"
+      "timestamp": "2025-08-07T01:58:46.149Z"
     },
     "GitHub Container Registry": {
       "status": "passed",
@@ -71,7 +71,7 @@
         "authenticated": false,
         "note": "Public access working, requires GITHUB_TOKEN for authentication"
       },
-      "timestamp": "2025-08-07T01:44:38.080Z"
+      "timestamp": "2025-08-07T01:58:46.393Z"
     },
     "AWS ECR": {
       "status": "passed",
@@ -80,7 +80,7 @@
         "registry": "ECR ready for configuration",
         "note": "Requires AWS credentials configuration"
       },
-      "timestamp": "2025-08-07T01:44:38.628Z"
+      "timestamp": "2025-08-07T01:58:46.989Z"
     },
     "Azure ACR": {
       "status": "passed",
@@ -89,7 +89,7 @@
         "registry": "ACR ready for configuration",
         "note": "Requires Azure credentials configuration"
       },
-      "timestamp": "2025-08-07T01:44:39.134Z"
+      "timestamp": "2025-08-07T01:58:49.794Z"
     },
     "Google GCR": {
       "status": "passed",
@@ -98,7 +98,7 @@
         "registry": "GCR ready for configuration",
         "note": "Requires Google Cloud credentials configuration"
       },
-      "timestamp": "2025-08-07T01:44:39.705Z"
+      "timestamp": "2025-08-07T01:58:52.749Z"
     }
   },
   "summary": {

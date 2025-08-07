@@ -17,12 +17,15 @@ const https = require('https');
 
 class EnhancedDigitalOceanManager {
     constructor() {
-        this.apiToken = 'dop_v1_09dc79ed930e1cc77ffe866d78a3c5eae14ab6f8fa47389beef94e19cb049eae';
+        // Updated tokens with full scope/access from user
+        this.apiToken = 'dop_v1_2a14cbf62df8a24bfd0ed6094e0bdf775999188d1f11324be47c39a308282238';
+        this.apiTokenFallback = 'dop_v1_9359807c1cd4103b5c92b21971a51d5364dc300d195ae5046639f3b0cd3dbe16';
         this.dockerCredentials = {
             email: 'barrunmail@gmail.com',
             token: 'dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7'
         };
-        this.callbackUrl = 'http://localhost:3000/';
+        this.callbackUrl = 'http://localhost:3000/callback';
+        this.productionCallbackUrl = 'http://159.223.207.187:3000/';
     }
 
     log(message, type = 'info') {
@@ -143,6 +146,86 @@ class EnhancedDigitalOceanManager {
         } catch (error) {
             throw new Error(`Failed to get registry token: ${error.message}`);
         }
+    }
+
+    async testBothTokens() {
+        this.log('🔄 Testing both DigitalOcean API tokens...', 'info');
+        
+        const tokens = [
+            { name: 'Primary (Full scope)', token: this.apiToken },
+            { name: 'Fallback (Full access)', token: this.apiTokenFallback }
+        ];
+        
+        for (const tokenInfo of tokens) {
+            this.log(`Testing ${tokenInfo.name}: ${tokenInfo.token.substring(0, 20)}...`, 'info');
+            
+            try {
+                const testResult = await this.testTokenWithApi(tokenInfo.token);
+                if (testResult.success) {
+                    this.log(`✅ ${tokenInfo.name} token is VALID`, 'success');
+                    this.log(`   Account: ${testResult.account.email}`, 'info');
+                    this.log(`   Status: ${testResult.account.status}`, 'info');
+                    
+                    // Use this working token
+                    this.apiToken = tokenInfo.token;
+                    return { success: true, token: tokenInfo.name, data: testResult };
+                }
+            } catch (error) {
+                this.log(`❌ ${tokenInfo.name} token failed: ${error.message}`, 'error');
+            }
+        }
+        
+        return { success: false, error: 'Both tokens failed validation' };
+    }
+
+    async testTokenWithApi(token) {
+        return new Promise((resolve, reject) => {
+            const options = {
+                hostname: 'api.digitalocean.com',
+                path: '/v2/account',
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            const req = https.request(options, (res) => {
+                let responseData = '';
+                
+                res.on('data', (chunk) => {
+                    responseData += chunk;
+                });
+                
+                res.on('end', () => {
+                    try {
+                        const parsed = JSON.parse(responseData);
+                        if (res.statusCode === 200) {
+                            resolve({ 
+                                success: true, 
+                                account: parsed.account,
+                                statusCode: res.statusCode 
+                            });
+                        } else {
+                            reject(new Error(`HTTP ${res.statusCode}: ${parsed.message || responseData}`));
+                        }
+                    } catch (parseError) {
+                        reject(new Error(`Parse error: ${parseError.message}. Response: ${responseData}`));
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                reject(new Error(`Request failed: ${error.message}`));
+            });
+            
+            req.setTimeout(10000, () => {
+                req.destroy();
+                reject(new Error('Request timeout'));
+            });
+            
+            req.end();
+        });
     }
 
     async makeApiRequest(endpoint, method = 'GET', data = null) {
@@ -323,16 +406,50 @@ class EnhancedDigitalOceanManager {
     }
 
     async runComprehensiveTest() {
-        this.log('🚀 Starting comprehensive DigitalOcean test with localhost:3000 callback...', 'info');
+        this.log('🚀 Starting comprehensive DigitalOcean test with new tokens...', 'info');
+        this.log(`   Localhost callback: ${this.callbackUrl}`, 'info');
+        this.log(`   Production callback: ${this.productionCallbackUrl}`, 'info');
         
         const results = {
             timestamp: new Date().toISOString(),
             callbackUrl: this.callbackUrl,
+            productionCallbackUrl: this.productionCallbackUrl,
             tests: {},
             summary: { passed: 0, failed: 0 }
         };
 
+        // Test both API tokens first
+        this.log('🔍 Step 1: Testing API tokens...', 'info');
+        try {
+            const tokenTest = await this.testBothTokens();
+            if (tokenTest.success) {
+                results.tests.tokenValidation = { 
+                    status: 'passed', 
+                    data: { 
+                        workingToken: tokenTest.token,
+                        account: tokenTest.data.account
+                    }
+                };
+                results.summary.passed++;
+                this.log(`✅ Using ${tokenTest.token} token`, 'success');
+            } else {
+                results.tests.tokenValidation = { 
+                    status: 'failed', 
+                    error: tokenTest.error 
+                };
+                results.summary.failed++;
+                this.log('❌ Both API tokens failed - stopping test', 'error');
+                return this.saveResults(results);
+            }
+        } catch (error) {
+            results.tests.tokenValidation = { status: 'failed', error: error.message };
+            results.summary.failed++;
+            this.log(`❌ Token validation error: ${error.message}`, 'error');
+            return this.saveResults(results);
+        }
+
         // Install and authenticate doctl
+        this.log('🔧 Step 2: Setting up doctl...', 'info');
         const doctlInstalled = await this.ensureDoctlInstalled();
         if (doctlInstalled) {
             results.tests.doctlInstallation = { status: 'passed' };
@@ -352,6 +469,7 @@ class EnhancedDigitalOceanManager {
         }
 
         // Test account access
+        this.log('🔍 Step 3: Testing account access...', 'info');
         try {
             const account = await this.getAccountInfo();
             results.tests.accountAccess = { status: 'passed', data: account };
@@ -364,6 +482,7 @@ class EnhancedDigitalOceanManager {
         }
 
         // Test registry access
+        this.log('🔍 Step 4: Testing registry access...', 'info');
         try {
             const registries = await this.listRegistries();
             results.tests.registryAccess = { status: 'passed', data: registries };
@@ -376,6 +495,7 @@ class EnhancedDigitalOceanManager {
         }
 
         // Test registry authentication
+        this.log('🔍 Step 5: Testing registry authentication...', 'info');
         try {
             const registryAuth = await this.testRegistryAuthentication();
             results.tests.registryAuthentication = { status: 'passed', data: registryAuth };
@@ -388,6 +508,7 @@ class EnhancedDigitalOceanManager {
         }
 
         // Test App Platform access
+        this.log('🔍 Step 6: Testing App Platform access...', 'info');
         try {
             const apps = await this.listApps();
             results.tests.appPlatform = { status: 'passed', data: apps };
@@ -400,10 +521,15 @@ class EnhancedDigitalOceanManager {
         }
 
         // Update environment configuration
+        this.log('🔧 Step 7: Updating environment configuration...', 'info');
         await this.updateEnvironmentConfig();
         results.tests.environmentUpdate = { status: 'passed', callbackUrl: this.callbackUrl };
         results.summary.passed++;
 
+        return this.saveResults(results);
+    }
+
+    saveResults(results) {
         // Generate report
         const reportPath = path.join(__dirname, '..', 'ENHANCED_DO_TESTING_REPORT.json');
         const markdownPath = path.join(__dirname, '..', 'ENHANCED_DO_TESTING_REPORT.md');
@@ -413,8 +539,16 @@ class EnhancedDigitalOceanManager {
         // Generate markdown report
         let markdown = `# 🌊 Enhanced DigitalOcean Testing Report\n\n`;
         markdown += `**Generated:** ${results.timestamp}\n`;
-        markdown += `**Callback URL:** ${results.callbackUrl}\n`;
-        markdown += `**API Token:** dop_v1_09dc79ed930e...\n`;
+        markdown += `**Localhost Callback:** ${results.callbackUrl}\n`;
+        markdown += `**Production Callback:** ${results.productionCallbackUrl}\n`;
+        
+        // Show which token worked
+        const tokenTest = results.tests.tokenValidation;
+        if (tokenTest && tokenTest.status === 'passed') {
+            markdown += `**Working Token:** ${tokenTest.data.workingToken}\n`;
+            markdown += `**Account:** ${tokenTest.data.account?.email || 'Unknown'}\n`;
+        }
+        
         markdown += `**Passed:** ${results.summary.passed} ✅\n`;
         markdown += `**Failed:** ${results.summary.failed} ❌\n\n`;
 
@@ -430,7 +564,8 @@ class EnhancedDigitalOceanManager {
 
         fs.writeFileSync(markdownPath, markdown);
 
-        this.log(`📊 Enhanced testing complete: ${results.summary.passed}/${results.summary.passed + results.summary.failed} passed`, 'success');
+        this.log(`📊 Enhanced testing complete: ${results.summary.passed}/${results.summary.passed + results.summary.failed} passed`, 
+                  results.summary.failed === 0 ? 'success' : 'warning');
         this.log(`📄 Reports: ${reportPath}, ${markdownPath}`, 'info');
 
         return results;

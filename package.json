@@ -31,10 +31,10 @@
     "test:mcp": "jest --config tests/jest.config.js tests/integration/enhanced-mcp-tools.test.js",
     "test:mcp-performance": "jest --config tests/jest.config.js tests/performance/mcp-performance.test.js",
     "test:mcp-integration": "./tests/mcp-integration.test.sh",
-    "lint": "eslint src/ --ext .js,.ts,.jsx,.tsx",
-    "lint:fix": "eslint src/ --ext .js,.ts,.jsx,.tsx --fix",
-    "format": "prettier --write src/",
-    "format:check": "prettier --check src/",
+    "lint": "npx eslint src/ --ext .js,.ts,.jsx,.tsx",
+    "lint:fix": "npx eslint src/ --ext .js,.ts,.jsx,.tsx --fix",
+    "format": "npx prettier --write src/",
+    "format:check": "npx prettier --check src/",
     "health-check": "curl -f http://localhost:3000/health || exit 1",
     "deploy": "./scripts/deploy.sh",
     "deploy:simple": "./scripts/simple-deploy.sh deploy",
@@ -189,7 +189,12 @@
     "redis:stats": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.getCacheStats()).then(s => console.log(JSON.stringify(s, null, 2))).finally(() => r.close())\"",
     "redis:clear": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache()).then(() => console.log('✅ Cache cleared')).finally(() => r.close())\"",
     "redis:clear-audio": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('audio_features:*')).then(count => console.log('✅ Cleared', count, 'audio features')).finally(() => r.close())\"",
-    "redis:clear-recommendations": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('recommendations:*')).then(count => console.log('✅ Cleared', count, 'recommendations')).finally(() => r.close())\""
+    "redis:clear-recommendations": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('recommendations:*')).then(count => console.log('✅ Cleared', count, 'recommendations')).finally(() => r.close())\"",
+    
+    "security:audit": "./scripts/security-audit.sh",
+    "security:check": "npm audit && ./scripts/security-audit.sh",
+    "production:validate": "./scripts/security-audit.sh && npm audit --audit-level=high",
+    "production:ready": "npm run lint && npm run test && npm run security:audit && npm run build"
   },
   "keywords": [
     "music",
@@ -287,6 +292,8 @@
     "postcss": "^8.5.6",
     "prettier": "^3.0.0",
     "puppeteer": "^24.15.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "terser": "^5.43.1",
     "ts-jest": "^29.0.0",
     "typescript": "^5.0.0",

@@ -108,6 +108,16 @@
         "SPOTIFY_REDIRECT_URI": "${SPOTIFY_REDIRECT_URI}"
       },
       "description": "Spotify API integration and music intelligence"
+    },
+    "sentry": {
+      "command": "node",
+      "args": ["../mcp-servers/sentry-mcp/sentry-mcp-server.js"],
+      "env": {
+        "SENTRY_MCP_PORT": "3012",
+        "NODE_ENV": "${NODE_ENV:-development}",
+        "SENTRY_DSN": "${SENTRY_DSN}"
+      },
+      "description": "Sentry monitoring and error tracking for comprehensive observability"
     }
   },
   "tools": {

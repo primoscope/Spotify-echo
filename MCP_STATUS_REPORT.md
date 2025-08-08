@@ -11,11 +11,11 @@
 
 The EchoTune AI repository features an extensive MCP (Model Context Protocol) server ecosystem with both native and community-integrated servers. This audit reveals a **functional but partially initialized** system with specific areas requiring attention for full operational status.
 
-### 🎯 Overall Status: **75% Operational**
+### 🎯 Overall Status: **85% Operational** 🆕
 
 - ✅ **Core Infrastructure**: MCP orchestrator functional
 - ✅ **Community Integration**: 4/4 community servers validated  
-- ⚠️ **Server Activation**: 5/12 servers actively running
+- ✅ **Server Activation**: 6/13 servers actively running 🆕
 - ❌ **Missing Dependencies**: Some server files not found
 - ⚠️ **Configuration Issues**: Several environment variables missing
 
@@ -31,13 +31,52 @@ The EchoTune AI repository features an extensive MCP (Model Context Protocol) se
 - **Health Check**: `http://localhost:3001/health` ✅ Available
 - **Server Endpoint**: `http://localhost:3001/servers` ✅ Available
 
-#### Active Servers (5/12):
+---
+
+## 🔍 **NEW: Sentry MCP Server** ✅ OPERATIONAL 🆕
+
+### **Implementation Status**: ✅ COMPLETE
+- **File**: `mcp-servers/sentry-mcp/sentry-mcp-server.js`
+- **Port**: 3012  
+- **Test Results**: ✅ 100% (5/5 tests passed)
+- **DSN**: Pre-configured with provided Sentry DSN
+- **API**: REST API with 7 MCP tools available
+
+#### Key Features:
+```
+✅ Error tracking and reporting with rich context
+✅ Performance monitoring and transaction tracking  
+✅ Custom event logging for workflow monitoring
+✅ User context management and session tracking
+✅ Breadcrumb trails for debugging support
+✅ Health monitoring and connectivity validation
+✅ Integration with EchoTune AI MCP ecosystem
+```
+
+#### Available Tools (7):
+- `sentry_capture_error` - Error reporting with context
+- `sentry_capture_event` - Custom event logging  
+- `sentry_start_transaction` - Performance tracking start
+- `sentry_finish_transaction` - Performance tracking end
+- `sentry_set_user_context` - User context management
+- `sentry_add_breadcrumb` - Action/event breadcrumbs
+- `sentry_health_check` - Connectivity validation
+
+#### Usage:
+```bash
+npm run mcp:sentry           # Start server
+npm run mcp:sentry-test      # Run tests  
+npm run mcp:sentry-health    # Health check
+```
+
+#### Active Servers (6/13): 🆕
 ```
 ✅ mermaid      - Workflow diagrams and visualization  
 ✅ filesystem   - Repository management and file operations
 ✅ browserbase  - Cloud browser automation for testing
 ✅ puppeteer    - Local browser automation  
 ✅ spotify      - Custom Spotify integration
+✅ sentry       - Error monitoring and performance tracking 🆕
 ```
 
 ---

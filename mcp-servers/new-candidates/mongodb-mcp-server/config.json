@@ -1,0 +1,29 @@
+{
+  "name": "mongodb-mcp-server",
+  "package": "mongodb-mcp-server",
+  "priority": "medium",
+  "relevanceScore": 9,
+  "description": "MongoDB Model Context Protocol Server",
+  "useCase": "Database operations and data management",
+  "configuration": {
+    "enabled": true,
+    "port": 3019,
+    "environment": "development",
+    "logLevel": "info"
+  },
+  "integration": {
+    "spotify": false,
+    "database": true,
+    "workflow": false,
+    "code": false
+  },
+  "capabilities": [
+    "database-operations",
+    "data-storage"
+  ],
+  "installation": {
+    "command": "npm install mongodb-mcp-server",
+    "dependencies": [],
+    "postInstall": []
+  }
+}

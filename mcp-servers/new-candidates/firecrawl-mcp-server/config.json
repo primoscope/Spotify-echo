@@ -1,0 +1,29 @@
+{
+  "name": "firecrawl-mcp-server",
+  "package": "@mendableai/firecrawl-mcp-server",
+  "priority": "low",
+  "relevanceScore": 8,
+  "description": "Web scraping MCP server using Firecrawl",
+  "useCase": "Web scraping for music data collection",
+  "configuration": {
+    "enabled": true,
+    "port": 3025,
+    "environment": "development",
+    "logLevel": "info"
+  },
+  "integration": {
+    "spotify": false,
+    "database": false,
+    "workflow": false,
+    "code": false
+  },
+  "capabilities": [
+    "web-scraping",
+    "data-extraction"
+  ],
+  "installation": {
+    "command": "npm install @mendableai/firecrawl-mcp-server",
+    "dependencies": [],
+    "postInstall": []
+  }
+}

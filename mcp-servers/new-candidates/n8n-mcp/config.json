@@ -1,0 +1,29 @@
+{
+  "name": "n8n-mcp",
+  "package": "n8n-mcp",
+  "priority": "high",
+  "relevanceScore": 15,
+  "description": "Integration between n8n workflow automation and Model Context Protocol (MCP)",
+  "useCase": "CI/CD and testing workflows automation",
+  "configuration": {
+    "enabled": true,
+    "port": 3019,
+    "environment": "development",
+    "logLevel": "info"
+  },
+  "integration": {
+    "spotify": false,
+    "database": false,
+    "workflow": true,
+    "code": false
+  },
+  "capabilities": [
+    "workflow-automation",
+    "ci-cd"
+  ],
+  "installation": {
+    "command": "npm install n8n-mcp",
+    "dependencies": [],
+    "postInstall": []
+  }
+}

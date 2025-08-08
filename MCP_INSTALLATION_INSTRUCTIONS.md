@@ -1,68 +1,10 @@
 # 🔧 MCP Installation Instructions
 
-**Generated:** 2025-08-08T21:59:04.102Z
+**Generated:** 2025-08-08T22:17:43.833Z
 
 ## 📦 New MCP Servers to Install
 
-### 1. n8n-mcp
-
-**Installation:**
-```bash
-# Install the MCP server
-npm install n8n-mcp
-
-# Add to MCP orchestrator configuration
-# Update mcp-server/orchestration-engine.js
-```
-
-**Configuration:**
-```javascript
-// Add to mcp-server/orchestration-engine.js
-const n8nMcp = {
-  name: 'n8n-mcp',
-  package: 'n8n-mcp',
-  description: 'Integration between n8n workflow automation and Model Context Protocol (MCP)',
-  enabled: true,
-  priority: high
-};
-```
-
-**Validation:**
-```bash
-# Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=n8n-mcp
-```
-
-### 2. mcp-server-code-runner
-
-**Installation:**
-```bash
-# Install the MCP server
-npm install mcp-server-code-runner
-
-# Add to MCP orchestrator configuration
-# Update mcp-server/orchestration-engine.js
-```
-
-**Configuration:**
-```javascript
-// Add to mcp-server/orchestration-engine.js
-const mcpServerCodeRunner = {
-  name: 'mcp-server-code-runner',
-  package: 'mcp-server-code-runner',
-  description: 'Code Runner MCP Server',
-  enabled: true,
-  priority: high
-};
-```
-
-**Validation:**
-```bash
-# Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=mcp-server-code-runner
-```
-
-### 3. xcodebuildmcp
+### 1. xcodebuildmcp
 
 **Installation:**
 ```bash
@@ -91,99 +33,12 @@ const xcodebuildmcp = {
 node scripts/test-community-mcp-servers.js --server=xcodebuildmcp
 ```
 
-### 4. puppeteer-mcp-server
+### 2. punkpeye/awesome-mcp-servers
 
 **Installation:**
 ```bash
 # Install the MCP server
-npm install puppeteer-mcp-server
-
-# Add to MCP orchestrator configuration
-# Update mcp-server/orchestration-engine.js
-```
-
-**Configuration:**
-```javascript
-// Add to mcp-server/orchestration-engine.js
-const puppeteerMcpServer = {
-  name: 'puppeteer-mcp-server',
-  package: 'puppeteer-mcp-server',
-  description: 'Experimental MCP server for browser automation using Puppeteer (inspired by @modelcontextprotocol/server-puppeteer)',
-  enabled: true,
-  priority: high
-};
-```
-
-**Validation:**
-```bash
-# Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=puppeteer-mcp-server
-```
-
-### 5. @hisma/server-puppeteer
-
-**Installation:**
-```bash
-# Install the MCP server
-npm install @hisma/server-puppeteer
-
-# Add to MCP orchestrator configuration
-# Update mcp-server/orchestration-engine.js
-```
-
-**Configuration:**
-```javascript
-// Add to mcp-server/orchestration-engine.js
-const HismaServerPuppeteer = {
-  name: '@hisma/server-puppeteer',
-  package: '@hisma/server-puppeteer',
-  description: 'Fork and update (v0.6.5) of the original @modelcontextprotocol/server-puppeteer MCP server for browser automation using Puppeteer.',
-  enabled: true,
-  priority: high
-};
-```
-
-**Validation:**
-```bash
-# Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=@hisma/server-puppeteer
-```
-
-### 6. mongodb-mcp-server
-
-**Installation:**
-```bash
-# Install the MCP server
-npm install mongodb-mcp-server
-
-# Add to MCP orchestrator configuration
-# Update mcp-server/orchestration-engine.js
-```
-
-**Configuration:**
-```javascript
-// Add to mcp-server/orchestration-engine.js
-const mongodbMcpServer = {
-  name: 'mongodb-mcp-server',
-  package: 'mongodb-mcp-server',
-  description: 'MongoDB Model Context Protocol Server',
-  enabled: true,
-  priority: high
-};
-```
-
-**Validation:**
-```bash
-# Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=mongodb-mcp-server
-```
-
-### 7. jlowin/fastmcp
-
-**Installation:**
-```bash
-# Install the MCP server
-npm install @jlowin/fastmcp
+npm install @punkpeye/awesome-mcp-servers
 # Or clone from source:
 git clone undefined
 
@@ -194,10 +49,10 @@ git clone undefined
 **Configuration:**
 ```javascript
 // Add to mcp-server/orchestration-engine.js
-const jlowinFastmcp = {
-  name: 'jlowin/fastmcp',
-  package: '@jlowin/fastmcp',
-  description: '🚀 The fast, Pythonic way to build MCP servers and clients',
+const punkpeyeAwesomeMcpServers = {
+  name: 'punkpeye/awesome-mcp-servers',
+  package: '@punkpeye/awesome-mcp-servers',
+  description: 'A collection of MCP servers.',
   enabled: true,
   priority: high
 };
@@ -206,15 +61,15 @@ const jlowinFastmcp = {
 **Validation:**
 ```bash
 # Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=jlowin/fastmcp
+node scripts/test-community-mcp-servers.js --server=punkpeye/awesome-mcp-servers
 ```
 
-### 8. mcp-use/mcp-use
+### 3. GLips/Figma-Context-MCP
 
 **Installation:**
 ```bash
 # Install the MCP server
-npm install @mcp-use/mcp-use
+npm install @GLips/Figma-Context-MCP
 # Or clone from source:
 git clone undefined
 
@@ -225,10 +80,10 @@ git clone undefined
 **Configuration:**
 ```javascript
 // Add to mcp-server/orchestration-engine.js
-const mcpUseMcpUse = {
-  name: 'mcp-use/mcp-use',
-  package: '@mcp-use/mcp-use',
-  description: 'mcp-use is the easiest way to interact with mcp servers with custom agents',
+const gLipsFigmaContextMCP = {
+  name: 'GLips/Figma-Context-MCP',
+  package: '@GLips/Figma-Context-MCP',
+  description: 'MCP server to provide Figma layout information to AI coding agents like Cursor',
   enabled: true,
   priority: high
 };
@@ -237,15 +92,15 @@ const mcpUseMcpUse = {
 **Validation:**
 ```bash
 # Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=mcp-use/mcp-use
+node scripts/test-community-mcp-servers.js --server=GLips/Figma-Context-MCP
 ```
 
-### 9. nanbingxyz/5ire
+### 4. lharries/whatsapp-mcp
 
 **Installation:**
 ```bash
 # Install the MCP server
-npm install @nanbingxyz/5ire
+npm install @lharries/whatsapp-mcp
 # Or clone from source:
 git clone undefined
 
@@ -256,10 +111,10 @@ git clone undefined
 **Configuration:**
 ```javascript
 // Add to mcp-server/orchestration-engine.js
-const nanbingxyz5ire = {
-  name: 'nanbingxyz/5ire',
-  package: '@nanbingxyz/5ire',
-  description: '5ire is a cross-platform desktop AI assistant, MCP client. It compatible with major service providers,  supports local knowledge base and  tools via model context protocol servers .',
+const lharriesWhatsappMcp = {
+  name: 'lharries/whatsapp-mcp',
+  package: '@lharries/whatsapp-mcp',
+  description: 'WhatsApp MCP server',
   enabled: true,
   priority: high
 };
@@ -268,15 +123,15 @@ const nanbingxyz5ire = {
 **Validation:**
 ```bash
 # Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=nanbingxyz/5ire
+node scripts/test-community-mcp-servers.js --server=lharries/whatsapp-mcp
 ```
 
-### 10. mendableai/firecrawl-mcp-server
+### 5. aipotheosis-labs/aci
 
 **Installation:**
 ```bash
 # Install the MCP server
-npm install @mendableai/firecrawl-mcp-server
+npm install @aipotheosis-labs/aci
 # Or clone from source:
 git clone undefined
 
@@ -287,10 +142,10 @@ git clone undefined
 **Configuration:**
 ```javascript
 // Add to mcp-server/orchestration-engine.js
-const mendableaiFirecrawlMcpServer = {
-  name: 'mendableai/firecrawl-mcp-server',
-  package: '@mendableai/firecrawl-mcp-server',
-  description: '🔥 Official Firecrawl MCP Server - Adds powerful web scraping to Cursor, Claude and any other LLM clients.',
+const aipotheosisLabsAci = {
+  name: 'aipotheosis-labs/aci',
+  package: '@aipotheosis-labs/aci',
+  description: 'ACI.dev is the open source tool-calling platform that hooks up 600+ tools into any agentic IDE or custom AI agent through direct function calling or a unified MCP server. The birthplace of VibeOps.',
   enabled: true,
   priority: high
 };
@@ -299,6 +154,151 @@ const mendableaiFirecrawlMcpServer = {
 **Validation:**
 ```bash
 # Test the new MCP server
-node scripts/test-community-mcp-servers.js --server=mendableai/firecrawl-mcp-server
+node scripts/test-community-mcp-servers.js --server=aipotheosis-labs/aci
+```
+
+### 6. graphlit-mcp-server
+
+**Installation:**
+```bash
+# Install the MCP server
+npm install graphlit-mcp-server
+
+# Add to MCP orchestrator configuration
+# Update mcp-server/orchestration-engine.js
+```
+
+**Configuration:**
+```javascript
+// Add to mcp-server/orchestration-engine.js
+const graphlitMcpServer = {
+  name: 'graphlit-mcp-server',
+  package: 'graphlit-mcp-server',
+  description: 'Graphlit MCP Server',
+  enabled: true,
+  priority: high
+};
+```
+
+**Validation:**
+```bash
+# Test the new MCP server
+node scripts/test-community-mcp-servers.js --server=graphlit-mcp-server
+```
+
+### 7. @openbnb/mcp-server-airbnb
+
+**Installation:**
+```bash
+# Install the MCP server
+npm install @openbnb/mcp-server-airbnb
+
+# Add to MCP orchestrator configuration
+# Update mcp-server/orchestration-engine.js
+```
+
+**Configuration:**
+```javascript
+// Add to mcp-server/orchestration-engine.js
+const OpenbnbMcpServerAirbnb = {
+  name: '@openbnb/mcp-server-airbnb',
+  package: '@openbnb/mcp-server-airbnb',
+  description: 'MCP server for Airbnb search and listing details',
+  enabled: true,
+  priority: high
+};
+```
+
+**Validation:**
+```bash
+# Test the new MCP server
+node scripts/test-community-mcp-servers.js --server=@openbnb/mcp-server-airbnb
+```
+
+### 8. scrapeless-mcp-server
+
+**Installation:**
+```bash
+# Install the MCP server
+npm install scrapeless-mcp-server
+
+# Add to MCP orchestrator configuration
+# Update mcp-server/orchestration-engine.js
+```
+
+**Configuration:**
+```javascript
+// Add to mcp-server/orchestration-engine.js
+const scrapelessMcpServer = {
+  name: 'scrapeless-mcp-server',
+  package: 'scrapeless-mcp-server',
+  description: 'Scrapeless Mcp Server',
+  enabled: true,
+  priority: high
+};
+```
+
+**Validation:**
+```bash
+# Test the new MCP server
+node scripts/test-community-mcp-servers.js --server=scrapeless-mcp-server
+```
+
+### 9. @langchain/mcp-adapters
+
+**Installation:**
+```bash
+# Install the MCP server
+npm install @langchain/mcp-adapters
+
+# Add to MCP orchestrator configuration
+# Update mcp-server/orchestration-engine.js
+```
+
+**Configuration:**
+```javascript
+// Add to mcp-server/orchestration-engine.js
+const LangchainMcpAdapters = {
+  name: '@langchain/mcp-adapters',
+  package: '@langchain/mcp-adapters',
+  description: 'LangChain.js adapters for Model Context Protocol (MCP)',
+  enabled: true,
+  priority: high
+};
+```
+
+**Validation:**
+```bash
+# Test the new MCP server
+node scripts/test-community-mcp-servers.js --server=@langchain/mcp-adapters
+```
+
+### 10. mcp-framework
+
+**Installation:**
+```bash
+# Install the MCP server
+npm install mcp-framework
+
+# Add to MCP orchestrator configuration
+# Update mcp-server/orchestration-engine.js
+```
+
+**Configuration:**
+```javascript
+// Add to mcp-server/orchestration-engine.js
+const mcpFramework = {
+  name: 'mcp-framework',
+  package: 'mcp-framework',
+  description: 'Framework for building Model Context Protocol (MCP) servers in Typescript',
+  enabled: true,
+  priority: high
+};
+```
+
+**Validation:**
+```bash
+# Test the new MCP server
+node scripts/test-community-mcp-servers.js --server=mcp-framework
 ```
 

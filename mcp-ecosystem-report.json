@@ -22,6 +22,14 @@
       ]
     },
     {
+      "name": "new-candidates",
+      "files": 7,
+      "has_readme": false,
+      "has_package_json": false,
+      "has_config": false,
+      "main_files": []
+    },
+    {
       "name": "package-management",
       "files": 1,
       "has_readme": false,
@@ -154,6 +162,26 @@
     {
       "name": "@browserbasehq/mcp-server-browserbase",
       "version": "github:browserbase/mcp-server-browserbase",
+      "type": "automation"
+    },
+    {
+      "name": "mcp-server-code-runner",
+      "version": "^0.1.7",
+      "type": "utility"
+    },
+    {
+      "name": "mongodb-mcp-server",
+      "version": "^0.2.0",
+      "type": "utility"
+    },
+    {
+      "name": "n8n-mcp",
+      "version": "^2.10.3",
+      "type": "utility"
+    },
+    {
+      "name": "puppeteer-mcp-server",
+      "version": "^0.7.2",
       "type": "automation"
     }
   ],

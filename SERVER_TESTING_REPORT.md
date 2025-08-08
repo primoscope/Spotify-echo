@@ -1,9 +1,9 @@
 # 🚀 Server Testing Report
 
-**Generated:** 2025-08-07T02:54:29.152Z
+**Generated:** 2025-08-08T19:28:45.014Z
 **Total Tests:** 13
-**Passed:** 8 ✅
-**Failed:** 5 ❌
+**Passed:** 11 ✅
+**Failed:** 2 ❌
 
 ## Test Results
 
@@ -23,41 +23,52 @@
 ### ✅ DigitalOcean doctl Installation
 
 - **status**: doctl installed successfully via snap
-- **version**: doctl version 1.135.0-release
-Git commit hash: dc1e1a02
+- **version**: doctl version 1.138.0-release
+Git commit hash: e1858c20
 - **action**: installed
 
 ### ❌ DigitalOcean doctl Authentication
 
 - **Error**: DigitalOcean doctl failed: Command failed: doctl auth init --access-token dop_v1_4bc3902fb43fec277797625f6fa97bb7baaf6c7a6c1a450d8e45e99b4601d215
-Error: Unable to use supplied token to access API: GET https://cloud.digitalocean.com/v1/oauth/token/info: 401 (request "a0c65c99-869a-4edb-aff9-a0b107e88be7") Unable to authenticate you
+Error: Unable to use supplied token to access API: GET https://cloud.digitalocean.com/v1/oauth/token/info: 401 (request "049ae8d3-5fe1-4968-9538-f8ae6bdef995") Unable to authenticate you
 
 
 ### ❌ DigitalOcean Container Registry
 
-- **Error**: DO Container Registry failed: Both authentication methods failed. doctl: Failed to get registry token: Command failed: doctl registry docker-config --expiry-seconds 3600
-Error: GET https://api.digitalocean.com/v2/registry/docker-credentials?expiry_seconds=3600&read_write=false: 401 (request "a832d95f-539b-41a5-b7b1-bc221b20ab5c") Unable to authenticate you
+- **Error**: DO Container Registry failed: Both authentication methods failed. doctl: Command failed: echo "YmFycnVubWFpbEBnbWFpbC5jb206ZG9wX3YxXzFiZTcxNWI2NzM4MzdiMjdiYTk2NmIyOWI2MDZkY2VlOWRlZTc3YWQzMjIzNDU0YjNiMGZhN2RlNjVmYzVlOWQ=" | docker login registry.digitalocean.com --username "" --password-stdin
+Must provide --username with --password-stdin
 , credentials: Command failed: echo "dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7" | docker login registry.digitalocean.com --username "barrunmail@gmail.com" --password-stdin
 Error response from daemon: Get "https://registry.digitalocean.com/v2/": unauthorized: authentication required
 
 
-### ❌ DigitalOcean App Platform
+### ✅ DigitalOcean App Platform
 
-- **Error**: DO App Platform failed: Command failed: doctl apps list
-Error: GET https://api.digitalocean.com/v2/apps?page=1&per_page=200: 401 (request "61b8092b-a010-4ee8-bf3f-9134dcd9d6e2") Unable to authenticate you
+- **apps**: ID                                      Spec Name        Default Ingress                                   Active Deployment ID                    In Progress Deployment ID               Created At                       Updated At
+5c0ee89f-d509-448b-9f49-4bb0c5afb30f    echotune-ai-6                                                                                              fad5e870-d56f-44bf-abbd-f3f0ae821007    2025-08-08 00:58:42 +0000 UTC    2025-08-08 19:29:05 +0000 UTC
+1e22ac01-7fde-467a-993b-e8ea467f62c4    echotune-ai-5                                                                                              9bfde2c0-03e5-4cf9-901b-0e673c389d81    2025-08-08 00:33:19 +0000 UTC    2025-08-08 19:29:01 +0000 UTC
+9c06b6ee-3106-4c4c-b8ee-c3850b3b5600    echotune-ai-4                                                                                              83e80280-249e-445e-a21e-7123157fd97f    2025-08-08 00:30:41 +0000 UTC    2025-08-08 19:29:01 +0000 UTC
+fdda95c3-c02a-45e9-9370-e26c0b86fd61    echotune-ai-3                                                                                              6e5a3e78-61f0-4656-a46d-b633313c8ee0    2025-08-07 20:50:48 +0000 UTC    2025-08-08 19:29:04 +0000 UTC
+290ea836-87be-470f-82cf-759cbc985209    echotune-ai-2    https://echotune-ai-2-6fqwz.ondigitalocean.app    c3562504-a46b-4fb8-91de-7ddd15bd5b91    6c394a91-7677-484f-9ad0-6fc62b094916    2025-08-06 00:22:31 +0000 UTC    2025-08-08 19:29:01 +0000 UTC
+af71af85-af8b-4b07-818e-c96cc0982cda    echotune-ai      https://echotune-ai-grm8j.ondigitalocean.app      6a905f16-2c88-4513-8e26-dade3e010b18    3ebbb227-7753-476b-b489-3b9bc4954878    2025-08-05 19:24:50 +0000 UTC    2025-08-08 19:29:01 +0000 UTC
+7e0ccfcf-99be-421f-8736-aba1d7d8aca0    coral-app                                                          2298515a-9325-40de-a405-c7d61fddb11e    4a15c4ce-3a32-4b95-b349-1b28bc6c2f33    2025-08-03 00:23:23 +0000 UTC    2025-08-08 19:29:07 +0000 UTC
+9441867a-881e-4fd8-9fad-5e795cf8ba38    sample-gin-3     https://sample-gin-3-rpwbl.ondigitalocean.app     27d5a0ea-c550-4153-9210-6303914d6f2e                                            2025-08-02 20:15:48 +0000 UTC    2025-08-02 23:32:20 +0000 UTC
+- **status**: DigitalOcean App Platform accessible
+- **note**: Can deploy apps directly
 
+### ✅ DigitalOcean Droplets
 
-### ❌ DigitalOcean Droplets
+- **droplets**: ID           Name                                        Public IPv4        Private IPv4    Public IPv6    Memory    VCPUs    Disk    Region    Image                            VPC UUID                                Status    Tags    Features                                               Volumes
+511182155    ubuntu-s-4vcpu-8gb-amd-fra1-01              46.101.106.220     10.114.0.2                     8192      4        160     fra1      Ubuntu 22.04 (LTS) x64           c3aa14c0-5152-4c4b-b8c2-b46d34c9ba9d    active            monitoring,droplet_agent,private_networking            
+511461492    droplet-er-vho                              159.223.207.187    10.124.0.3                     8192      4        50      sfo3      Ubuntu Docker on Ubuntu 22.04    dddbb700-dbb2-40d5-9084-202d4f539afa    active            backups,monitoring,droplet_agent,private_networking    fbb5cad2-7153-11f0-a7d4-0a58ac120cfe,9d164abd-722f-11f0-a419-0a58ac1202fb
+512166552    lemponubuntu2404-s-2vcpu-4gb-amd-lon1-01    159.65.27.195      10.106.0.2                     4096      2        80      lon1      Ubuntu LEMP on Ubuntu 24.04      d43aaee0-ebc3-4c56-ac45-58b7d3bd2c71    active            monitoring,droplet_agent,private_networking
+- **status**: DigitalOcean Droplets accessible
+- **note**: Can manage virtual machines
 
-- **Error**: DO Droplets failed: Command failed: doctl compute droplet list
-Error: GET https://api.digitalocean.com/v2/droplets?page=1&per_page=200: 401 (request "4f29d80a-be06-4a37-84b5-90f93d09165f") Unable to authenticate you
+### ✅ DigitalOcean Kubernetes
 
-
-### ❌ DigitalOcean Kubernetes
-
-- **Error**: DO Kubernetes failed: Command failed: doctl kubernetes cluster list
-Error: GET https://api.digitalocean.com/v2/kubernetes/clusters?page=1&per_page=200: 401 (request "7bd2c53b-05fb-4794-8d68-d159f7a8c544") Unable to authenticate you
-
+- **clusters**: ID    Name    Region    Version    Auto Upgrade    Status    Node Pools
+- **status**: DigitalOcean Kubernetes accessible
+- **note**: Can manage Kubernetes clusters
 
 ### ✅ DigitalOcean Spaces
 

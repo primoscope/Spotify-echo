@@ -1,0 +1,291 @@
+{
+  "timestamp": "2025-08-08T19:26:15.117Z",
+  "summary": {
+    "total": 12,
+    "operational": 12,
+    "failed": 0,
+    "notFound": 0
+  },
+  "servers": {
+    "Community: package-management": {
+      "name": "Community: package-management",
+      "type": "community",
+      "path": "mcp-servers/package-management/package-version-mcp.js",
+      "capabilities": [
+        "dependency-analysis",
+        "security-scanning",
+        "version-management"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 49
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Server loaded\n..."
+    },
+    "Community: code-sandbox": {
+      "name": "Community: code-sandbox",
+      "type": "community",
+      "path": "mcp-servers/code-sandbox/code-sandbox-mcp.js",
+      "capabilities": [
+        "code-execution",
+        "validation",
+        "testing"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 48
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Server loaded\n..."
+    },
+    "Community: analytics-server": {
+      "name": "Community: analytics-server",
+      "type": "community",
+      "path": "mcp-servers/analytics-server/analytics-mcp.js",
+      "capabilities": [
+        "metrics-collection",
+        "performance-monitoring",
+        "telemetry"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 48
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Server loaded\n..."
+    },
+    "Built-in: enhanced-mcp-orchestrator": {
+      "name": "Built-in: enhanced-mcp-orchestrator",
+      "type": "built-in",
+      "path": "mcp-server/enhanced-mcp-orchestrator.js",
+      "capabilities": [
+        "server-coordination",
+        "workflow-management"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 48
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Server loaded\n...",
+      "dependencies": {
+        "total": 7,
+        "production": 5,
+        "development": 2
+      }
+    },
+    "Built-in: coordination-server": {
+      "name": "Built-in: coordination-server",
+      "type": "built-in",
+      "path": "mcp-server/coordination-server.js",
+      "capabilities": [
+        "multi-server-management",
+        "resource-allocation"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 46
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Server loaded\n...",
+      "dependencies": {
+        "total": 7,
+        "production": 5,
+        "development": 2
+      }
+    },
+    "Built-in: enhanced-server": {
+      "name": "Built-in: enhanced-server",
+      "type": "built-in",
+      "path": "mcp-server/enhanced-server.js",
+      "capabilities": [],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 48
+      },
+      "recommendations": [
+        "Document server capabilities"
+      ],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Server loaded\n...",
+      "dependencies": {
+        "total": 7,
+        "production": 5,
+        "development": 2
+      }
+    },
+    "Built-in: workflow-manager": {
+      "name": "Built-in: workflow-manager",
+      "type": "built-in",
+      "path": "mcp-server/workflow-manager.js",
+      "capabilities": [
+        "task-automation",
+        "pipeline-management"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 47
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Server loaded\n...",
+      "dependencies": {
+        "total": 7,
+        "production": 5,
+        "development": 2
+      }
+    },
+    "Built-in: spotify_server": {
+      "name": "Built-in: spotify_server",
+      "type": "built-in",
+      "path": "mcp-server/spotify_server.py",
+      "capabilities": [
+        "music-api",
+        "authentication",
+        "playlist-management"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 264
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "initializationTest": "passed",
+      "testOutput": "Python server loaded\n...",
+      "dependencies": {
+        "total": 7,
+        "production": 5,
+        "development": 2
+      }
+    },
+    "Utility: comprehensive-validator": {
+      "name": "Utility: comprehensive-validator",
+      "type": "utility",
+      "path": "mcp-servers/comprehensive-validator.js",
+      "capabilities": [
+        "system-validation",
+        "health-checks"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 50
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Available commands: validate, health, system\n...",
+      "dependencies": {
+        "total": 5,
+        "production": 3,
+        "development": 2
+      }
+    },
+    "Utility: enhanced-browser-tools": {
+      "name": "Utility: enhanced-browser-tools",
+      "type": "utility",
+      "path": "mcp-servers/enhanced-browser-tools.js",
+      "capabilities": [
+        "web-automation",
+        "ui-testing"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 48
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Utility server loaded\n...",
+      "dependencies": {
+        "total": 5,
+        "production": 3,
+        "development": 2
+      }
+    },
+    "Utility: enhanced-file-utilities": {
+      "name": "Utility: enhanced-file-utilities",
+      "type": "utility",
+      "path": "mcp-servers/enhanced-file-utilities.js",
+      "capabilities": [
+        "filesystem-operations",
+        "file-management"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 49
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Available commands: health, read, list, validate, audit, performance\n...",
+      "dependencies": {
+        "total": 5,
+        "production": 3,
+        "development": 2
+      }
+    },
+    "Utility: browserbase-orchestrator": {
+      "name": "Utility: browserbase-orchestrator",
+      "type": "utility",
+      "path": "mcp-servers/browserbase-orchestrator.js",
+      "capabilities": [
+        "server-coordination",
+        "workflow-management"
+      ],
+      "status": "operational",
+      "errors": [],
+      "performance": {
+        "auditTime": 49
+      },
+      "recommendations": [],
+      "fileExists": true,
+      "syntaxValid": true,
+      "initializationTest": "passed",
+      "testOutput": "Utility server loaded\n...",
+      "dependencies": {
+        "total": 5,
+        "production": 3,
+        "development": 2
+      }
+    }
+  },
+  "recommendations": [
+    "Set up automated health monitoring for all MCP servers",
+    "Implement integration tests for server communication",
+    "Create unified configuration management for all servers"
+  ]
+}

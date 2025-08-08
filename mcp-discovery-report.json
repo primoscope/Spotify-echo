@@ -1,0 +1,141 @@
+{
+  "timestamp": "2025-08-08T21:57:25.929Z",
+  "total_discoveries": 10,
+  "current_mcps": [
+    "@browserbasehq/mcp-server-browserbase",
+    "README.md",
+    "analytics-server",
+    "browserbase-client.js",
+    "browserbase-cross-browser.js",
+    "browserbase-orchestrator.js",
+    "browserbase-test-config.json",
+    "browserbase-workflows.js",
+    "code-sandbox",
+    "comprehensive-validator.js",
+    "enhanced-browser-tools.js",
+    "enhanced-file-utilities.js",
+    "enhanced-mcp-performance-manager.js",
+    "filescope-config.json",
+    "filescope-handlers.js",
+    "filescope-security.js",
+    "mcp-integration-tester.js",
+    "package-management",
+    "package.json",
+    "sentry-mcp",
+    "sequential-thinking",
+    "testing-automation",
+    "@modelcontextprotocol/server-puppeteer",
+    "@modelcontextprotocol/server-sequential-thinking",
+    "@oraios/serena",
+    "@BeehiveInnovations/zen-mcp-server",
+    "@haris-musa/excel-mcp-server",
+    "@executeautomation/playwright-mcp-server",
+    "@bolide-ai/mcp",
+    "@designcomputer/mysql_mcp_server",
+    "@GongRzhe/REDIS-MCP-Server",
+    "@mindsdb/mindsdb",
+    "@1Panel-dev/1Panel",
+    "@hangwin/mcp-chrome",
+    "@activepieces/activepieces",
+    "@microsoft/mcp-for-beginners",
+    "@cameroncooke/XcodeBuildMCP",
+    "@ravitemer/mcphub",
+    "@IBM/mcp-context-forge",
+    "@stacklok/toolhive",
+    "@jamubc/gemini-mcp-tool",
+    "@Szowesgad/mcp-server-semgrep",
+    "@upstash/context7"
+  ],
+  "top_candidates": [
+    {
+      "name": "n8n-mcp",
+      "package_name": "n8n-mcp",
+      "description": "Integration between n8n workflow automation and Model Context Protocol (MCP)",
+      "relevance_score": 15,
+      "source": "npm",
+      "url": "https://github.com/czlonkowski/n8n-mcp#readme",
+      "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
+    },
+    {
+      "name": "googleapis/genai-toolbox",
+      "package_name": "@googleapis/genai-toolbox",
+      "description": "MCP Toolbox for Databases is an open source MCP server for databases.",
+      "relevance_score": 14,
+      "source": "github",
+      "url": "https://github.com/googleapis/genai-toolbox",
+      "integration_suggestion": "Low priority: Infrastructure and monitoring enhancements"
+    },
+    {
+      "name": "makalin/SecureMCP",
+      "package_name": "@makalin/SecureMCP",
+      "description": "SecureMCP is a security auditing tool designed to detect vulnerabilities and misconfigurations in applications using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). It proactively identifies threats like OAuth token leakage, prompt injection vulnerabilities, rogue MCP servers, and tool poisoning attacks.",
+      "relevance_score": 11,
+      "source": "github",
+      "url": "https://github.com/makalin/SecureMCP",
+      "integration_suggestion": "Medium priority: Code quality and security improvements"
+    },
+    {
+      "name": "modelcontextprotocol/example-remote-server",
+      "package_name": "@modelcontextprotocol/example-remote-server",
+      "description": "A hosted version of the Everything server - for demonstration and testing purposes, hosted at https://example-server.modelcontextprotocol.io/sse",
+      "relevance_score": 11,
+      "source": "github",
+      "url": "https://github.com/modelcontextprotocol/example-remote-server",
+      "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
+    },
+    {
+      "name": "modelcontextprotocol/inspector",
+      "package_name": "@modelcontextprotocol/inspector",
+      "description": "Visual testing tool for MCP servers",
+      "relevance_score": 11,
+      "source": "github",
+      "url": "https://github.com/modelcontextprotocol/inspector",
+      "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
+    },
+    {
+      "name": "mcp-server-code-runner",
+      "package_name": "mcp-server-code-runner",
+      "description": "Code Runner MCP Server",
+      "relevance_score": 11,
+      "source": "npm",
+      "url": "https://github.com/formulahendry/mcp-server-code-runner#readme",
+      "integration_suggestion": "Evaluate: Review documentation for specific use cases"
+    },
+    {
+      "name": "xcodebuildmcp",
+      "package_name": "xcodebuildmcp",
+      "description": "XcodeBuildMCP is a ModelContextProtocol server that provides tools for Xcode project management, simulator management, and app utilities.",
+      "relevance_score": 11,
+      "source": "npm",
+      "url": "https://www.async-let.com/blog/xcodebuild-mcp/",
+      "integration_suggestion": "Evaluate: Review documentation for specific use cases"
+    },
+    {
+      "name": "executeautomation/mcp-playwright",
+      "package_name": "@executeautomation/mcp-playwright",
+      "description": "Playwright Model Context Protocol Server - Tool to automate Browsers and APIs in Claude Desktop, Cline, Cursor IDE and More 🔌",
+      "relevance_score": 10,
+      "source": "github",
+      "url": "https://github.com/executeautomation/mcp-playwright",
+      "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
+    },
+    {
+      "name": "mobile-next/mobile-mcp",
+      "package_name": "@mobile-next/mobile-mcp",
+      "description": "Model Context Protocol Server for Mobile Automation and Scraping (iOS, Android, Emulators, Simulators and Real Devices)",
+      "relevance_score": 10,
+      "source": "github",
+      "url": "https://github.com/mobile-next/mobile-mcp",
+      "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
+    },
+    {
+      "name": "microsoft/playwright-mcp",
+      "package_name": "@microsoft/playwright-mcp",
+      "description": "Playwright MCP server",
+      "relevance_score": 10,
+      "source": "github",
+      "url": "https://github.com/microsoft/playwright-mcp",
+      "integration_suggestion": "Evaluate: Review documentation for specific use cases"
+    }
+  ]
+}

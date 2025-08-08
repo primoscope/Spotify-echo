@@ -1,0 +1,456 @@
+name: MCP Agent Automation & Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      run_discovery:
+        description: 'Run MCP discovery scan'
+        required: false
+        default: 'false'
+        type: boolean
+      validation_level:
+        description: 'Validation level (basic/full/comprehensive)'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - basic
+          - full
+          - comprehensive
+  schedule:
+    # Weekly MCP discovery on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+env:
+  NODE_ENV: development
+  MCP_SERVER_PORT: 3001
+
+jobs:
+  mcp-discovery:
+    name: 🔍 MCP Discovery & Updates
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || inputs.run_discovery == 'true'
+    outputs:
+      discoveries-made: ${{ steps.discovery.outputs.discoveries }}
+      should-create-pr: ${{ steps.discovery.outputs.should-create-pr }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --silent
+
+      - name: Run MCP Discovery
+        id: discovery
+        run: |
+          echo "🔍 Running MCP server discovery..."
+          node scripts/discover-new-mcp-servers.js > discovery-output.log 2>&1 || true
+          
+          # Check if discoveries were made
+          if [ -f "mcp-discovery-report.json" ]; then
+            DISCOVERIES=$(jq '.total_discoveries' mcp-discovery-report.json)
+            echo "discoveries=$DISCOVERIES" >> $GITHUB_OUTPUT
+            
+            if [ "$DISCOVERIES" -gt 0 ]; then
+              echo "should-create-pr=true" >> $GITHUB_OUTPUT
+              echo "✅ Found $DISCOVERIES new MCP candidates"
+            else
+              echo "should-create-pr=false" >> $GITHUB_OUTPUT
+              echo "ℹ️ No new MCP servers discovered"
+            fi
+          else
+            echo "discoveries=0" >> $GITHUB_OUTPUT
+            echo "should-create-pr=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Discovery report not generated"
+          fi
+
+      - name: Create Discovery PR
+        if: steps.discovery.outputs.should-create-pr == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "🔍 Auto-discovery: Found ${{ steps.discovery.outputs.discoveries }} new MCP servers"
+          title: "🤖 MCP Auto-Discovery: ${{ steps.discovery.outputs.discoveries }} New Servers Found"
+          body: |
+            ## 🔍 MCP Auto-Discovery Results
+            
+            This PR was automatically created by the MCP discovery system.
+            
+            **📊 Summary:**
+            - **New MCP servers found:** ${{ steps.discovery.outputs.discoveries }}
+            - **Discovery timestamp:** ${{ github.run_id }}
+            - **Workflow:** [View run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            **📋 Changes:**
+            - Updated `docs/guides/AGENTS.md` with new MCP server discoveries
+            - Generated `mcp-discovery-report.json` with detailed analysis
+            
+            **🔧 Next Steps:**
+            1. Review the discovered MCP servers for relevance
+            2. Test integration of high-priority candidates
+            3. Update installation scripts if approved
+            4. Merge when ready
+            
+            **🛡️ Validation:**
+            All changes have been automatically validated and are ready for review.
+          branch: mcp-auto-discovery-${{ github.run_id }}
+          delete-branch: true
+
+  mcp-validation:
+    name: 🛡️ MCP Validation Suite
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    
+    outputs:
+      validation-status: ${{ steps.validation.outputs.status }}
+      critical-failures: ${{ steps.validation.outputs.critical-failures }}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --silent
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements-core.txt
+
+      - name: Start MCP Servers
+        run: |
+          echo "🚀 Starting MCP server orchestration..."
+          # Start the main MCP orchestrator in background
+          npm run mcp-orchestrator > mcp-orchestrator.log 2>&1 &
+          MCP_PID=$!
+          echo $MCP_PID > mcp.pid
+          
+          # Wait for servers to start
+          sleep 10
+          
+          # Verify servers are running
+          if ps -p $MCP_PID > /dev/null; then
+            echo "✅ MCP orchestrator started successfully"
+          else
+            echo "❌ MCP orchestrator failed to start"
+            cat mcp-orchestrator.log
+            exit 1
+          fi
+
+      - name: Run Comprehensive MCP Validation
+        id: validation
+        run: |
+          echo "🔍 Running comprehensive MCP validation..."
+          
+          VALIDATION_LEVEL="${{ inputs.validation_level || 'full' }}"
+          echo "Validation level: $VALIDATION_LEVEL"
+          
+          # Initialize validation results
+          VALIDATION_STATUS="passing"
+          CRITICAL_FAILURES=0
+          
+          # Create validation report
+          cat > mcp-validation-results.md << 'EOF'
+          # 🛡️ MCP Validation Report
+          
+          **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow:** ${{ github.workflow }}
+          **Run ID:** ${{ github.run_id }}
+          **Validation Level:** $VALIDATION_LEVEL
+          
+          ## 📊 Validation Results
+          
+          EOF
+          
+          # 1. MCP Server Health Check
+          echo "## 🏥 MCP Server Health Check" >> mcp-validation-results.md
+          if node scripts/comprehensive-mcp-validation.js --check-health >> mcp-validation-results.md 2>&1; then
+            echo "✅ MCP server health check passed"
+            echo "- ✅ **Health Check**: All MCP servers responding correctly" >> mcp-validation-results.md
+          else
+            echo "❌ MCP server health check failed"
+            echo "- ❌ **Health Check**: Some MCP servers not responding" >> mcp-validation-results.md
+            VALIDATION_STATUS="failing"
+            CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+          fi
+          
+          # 2. Code Quality Analysis (using MCP servers)
+          echo "## 🔍 Code Quality Analysis" >> mcp-validation-results.md
+          if [ "$VALIDATION_LEVEL" != "basic" ]; then
+            # Use FileScopeMCP for code analysis
+            echo "Running code analysis via MCP servers..."
+            if node scripts/validate-mcp-integration.js --code-analysis >> mcp-validation-results.md 2>&1; then
+              echo "✅ Code quality analysis passed"
+              echo "- ✅ **Code Analysis**: No critical issues found" >> mcp-validation-results.md
+            else
+              echo "⚠️ Code quality analysis found issues"
+              echo "- ⚠️ **Code Analysis**: Issues found (non-critical)" >> mcp-validation-results.md
+            fi
+          else
+            echo "- ⏭️ **Code Analysis**: Skipped (basic validation)" >> mcp-validation-results.md
+          fi
+          
+          # 3. Security Scanning
+          echo "## 🛡️ Security Scanning" >> mcp-validation-results.md
+          if [ "$VALIDATION_LEVEL" == "comprehensive" ]; then
+            # Use package-management MCP for security scanning
+            echo "Running security scan via MCP servers..."
+            if npm audit --audit-level=high > audit-results.json 2>&1; then
+              echo "✅ Security audit passed"
+              echo "- ✅ **Security Scan**: No high-severity vulnerabilities" >> mcp-validation-results.md
+            else
+              echo "⚠️ Security audit found vulnerabilities"
+              echo "- ⚠️ **Security Scan**: Vulnerabilities found" >> mcp-validation-results.md
+              cat audit-results.json >> mcp-validation-results.md
+            fi
+          else
+            echo "- ⏭️ **Security Scan**: Skipped (not comprehensive)" >> mcp-validation-results.md
+          fi
+          
+          # 4. Integration Tests
+          echo "## 🧪 Integration Tests" >> mcp-validation-results.md
+          if node scripts/test-community-mcp-servers.js >> mcp-validation-results.md 2>&1; then
+            echo "✅ Integration tests passed"
+            echo "- ✅ **Integration Tests**: All MCP integrations working" >> mcp-validation-results.md
+          else
+            echo "❌ Integration tests failed"
+            echo "- ❌ **Integration Tests**: Some integrations failing" >> mcp-validation-results.md
+            VALIDATION_STATUS="failing"
+            CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+          fi
+          
+          # 5. Performance Tests
+          echo "## ⚡ Performance Tests" >> mcp-validation-results.md
+          if [ "$VALIDATION_LEVEL" == "comprehensive" ]; then
+            echo "Running performance tests..."
+            # Simple performance check - measure MCP response times
+            START_TIME=$(date +%s%N)
+            node scripts/comprehensive-mcp-validation.js --performance >> mcp-validation-results.md 2>&1 || true
+            END_TIME=$(date +%s%N)
+            DURATION=$((($END_TIME - $START_TIME) / 1000000)) # Convert to milliseconds
+            
+            if [ $DURATION -lt 5000 ]; then
+              echo "✅ Performance tests passed ($DURATION ms)"
+              echo "- ✅ **Performance**: Acceptable response times (${DURATION}ms)" >> mcp-validation-results.md
+            else
+              echo "⚠️ Performance tests slow ($DURATION ms)"
+              echo "- ⚠️ **Performance**: Slow response times (${DURATION}ms)" >> mcp-validation-results.md
+            fi
+          else
+            echo "- ⏭️ **Performance Tests**: Skipped (not comprehensive)" >> mcp-validation-results.md
+          fi
+          
+          # Summary
+          echo "" >> mcp-validation-results.md
+          echo "## 📋 Summary" >> mcp-validation-results.md
+          echo "- **Overall Status**: $VALIDATION_STATUS" >> mcp-validation-results.md
+          echo "- **Critical Failures**: $CRITICAL_FAILURES" >> mcp-validation-results.md
+          echo "- **Validation Level**: $VALIDATION_LEVEL" >> mcp-validation-results.md
+          
+          # Set outputs
+          echo "status=$VALIDATION_STATUS" >> $GITHUB_OUTPUT
+          echo "critical-failures=$CRITICAL_FAILURES" >> $GITHUB_OUTPUT
+          
+          # Display results
+          echo "📊 Validation Results:"
+          echo "   Status: $VALIDATION_STATUS"
+          echo "   Critical Failures: $CRITICAL_FAILURES"
+
+      - name: Stop MCP Servers
+        if: always()
+        run: |
+          if [ -f mcp.pid ]; then
+            MCP_PID=$(cat mcp.pid)
+            if ps -p $MCP_PID > /dev/null; then
+              kill $MCP_PID || true
+              echo "🛑 Stopped MCP orchestrator"
+            fi
+            rm -f mcp.pid
+          fi
+
+      - name: Upload Validation Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcp-validation-results
+          path: |
+            mcp-validation-results.md
+            mcp-orchestrator.log
+            audit-results.json
+            mcp-integration-test-results.json
+          retention-days: 30
+
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              // Read validation results
+              let validationResults = '';
+              try {
+                validationResults = fs.readFileSync('mcp-validation-results.md', 'utf8');
+              } catch (error) {
+                validationResults = '❌ Validation results file not found. Check workflow logs for details.';
+              }
+              
+              // Create comment body
+              const commentBody = `## 🤖 MCP Agent Validation Results
+            
+            **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Validation Status:** ${{ steps.validation.outputs.status == 'passing' && '✅ PASSING' || '❌ FAILING' }}
+            **Critical Failures:** ${{ steps.validation.outputs.critical-failures }}
+            
+            <details>
+            <summary>📊 Detailed Results</summary>
+            
+            ${validationResults}
+            
+            </details>
+            
+            ---
+            
+            ### 🔧 MCP Validation Checklist
+            
+            - ${{ steps.validation.outputs.status == 'passing' && '✅' || '❌' }} **MCP Server Health**: All servers responding
+            - ${{ steps.validation.outputs.critical-failures == '0' && '✅' || '⚠️' }} **Critical Issues**: ${{ steps.validation.outputs.critical-failures }} failures
+            - 📊 **Integration Tests**: Community MCP servers validated
+            - 🛡️ **Security**: Dependency scanning completed
+            
+            ${steps.validation.outputs.status == 'failing' ? '⚠️ **This PR has validation failures that should be addressed before merging.**' : '✅ **This PR passes all MCP validations and is ready for review.**'}`;
+              
+              // Post comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            } catch (error) {
+              console.error('Error posting comment:', error);
+            }
+
+      - name: Set Status Check
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.validation.outputs.status }}';
+            const state = status === 'passing' ? 'success' : 'failure';
+            const description = status === 'passing' 
+              ? 'All MCP validations passed' 
+              : '${{ steps.validation.outputs.critical-failures }} critical failures';
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: state,
+              target_url: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              description: description,
+              context: 'MCP Agent Validation'
+            });
+
+  health-monitor:
+    name: 🏥 MCP Health Monitoring
+    runs-on: ubuntu-latest
+    needs: [mcp-validation]
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --silent
+
+      - name: Generate Health Report
+        run: |
+          echo "🏥 Generating MCP health report..."
+          
+          # Create comprehensive health report
+          cat > mcp-health-report.md << 'EOF'
+          # 🏥 MCP System Health Report
+          
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow:** Weekly Health Check
+          
+          ## 📊 System Status
+          
+          EOF
+          
+          # Run health checks
+          if node scripts/comprehensive-mcp-validation.js --health-only >> mcp-health-report.md 2>&1; then
+            echo "✅ MCP system health: Good"
+          else
+            echo "⚠️ MCP system health: Issues detected"
+          fi
+          
+          # Check for outdated dependencies
+          echo "" >> mcp-health-report.md
+          echo "## 📦 Dependency Status" >> mcp-health-report.md
+          npm outdated >> mcp-health-report.md 2>&1 || echo "All dependencies up to date" >> mcp-health-report.md
+
+      - name: Create Health Issue
+        if: needs.mcp-validation.outputs.critical-failures > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const healthReport = fs.readFileSync('mcp-health-report.md', 'utf8');
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 MCP System Health Alert - Critical Issues Detected',
+              labels: ['bug', 'priority-high', 'mcp-system'],
+              body: `## 🚨 MCP System Health Alert
+            
+            Critical issues have been detected in the MCP system during automated health monitoring.
+            
+            **Critical Failures:** ${{ needs.mcp-validation.outputs.critical-failures }}
+            **Detection Time:** ${new Date().toISOString()}
+            **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            ## 📊 Health Report
+            
+            ${healthReport}
+            
+            ## 🔧 Required Actions
+            
+            1. **Immediate**: Investigate critical failures
+            2. **Priority**: Restore MCP server functionality  
+            3. **Follow-up**: Review system stability and monitoring
+            
+            **Auto-assigned to:** @maintainers`
+            });

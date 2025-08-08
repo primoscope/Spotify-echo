@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-08T21:57:25.929Z",
+  "timestamp": "2025-08-08T21:59:03.921Z",
   "total_discoveries": 10,
   "current_mcps": [
     "@browserbasehq/mcp-server-browserbase",
@@ -26,6 +26,13 @@
     "testing-automation",
     "@modelcontextprotocol/server-puppeteer",
     "@modelcontextprotocol/server-sequential-thinking",
+    "@googleapis/genai-toolbox",
+    "@makalin/SecureMCP",
+    "@modelcontextprotocol/example-remote-server",
+    "@modelcontextprotocol/inspector",
+    "@executeautomation/mcp-playwright",
+    "@mobile-next/mobile-mcp",
+    "@microsoft/playwright-mcp",
     "@oraios/serena",
     "@BeehiveInnovations/zen-mcp-server",
     "@haris-musa/excel-mcp-server",
@@ -57,42 +64,6 @@
       "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
     },
     {
-      "name": "googleapis/genai-toolbox",
-      "package_name": "@googleapis/genai-toolbox",
-      "description": "MCP Toolbox for Databases is an open source MCP server for databases.",
-      "relevance_score": 14,
-      "source": "github",
-      "url": "https://github.com/googleapis/genai-toolbox",
-      "integration_suggestion": "Low priority: Infrastructure and monitoring enhancements"
-    },
-    {
-      "name": "makalin/SecureMCP",
-      "package_name": "@makalin/SecureMCP",
-      "description": "SecureMCP is a security auditing tool designed to detect vulnerabilities and misconfigurations in applications using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). It proactively identifies threats like OAuth token leakage, prompt injection vulnerabilities, rogue MCP servers, and tool poisoning attacks.",
-      "relevance_score": 11,
-      "source": "github",
-      "url": "https://github.com/makalin/SecureMCP",
-      "integration_suggestion": "Medium priority: Code quality and security improvements"
-    },
-    {
-      "name": "modelcontextprotocol/example-remote-server",
-      "package_name": "@modelcontextprotocol/example-remote-server",
-      "description": "A hosted version of the Everything server - for demonstration and testing purposes, hosted at https://example-server.modelcontextprotocol.io/sse",
-      "relevance_score": 11,
-      "source": "github",
-      "url": "https://github.com/modelcontextprotocol/example-remote-server",
-      "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
-    },
-    {
-      "name": "modelcontextprotocol/inspector",
-      "package_name": "@modelcontextprotocol/inspector",
-      "description": "Visual testing tool for MCP servers",
-      "relevance_score": 11,
-      "source": "github",
-      "url": "https://github.com/modelcontextprotocol/inspector",
-      "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
-    },
-    {
       "name": "mcp-server-code-runner",
       "package_name": "mcp-server-code-runner",
       "description": "Code Runner MCP Server",
@@ -111,30 +82,66 @@
       "integration_suggestion": "Evaluate: Review documentation for specific use cases"
     },
     {
-      "name": "executeautomation/mcp-playwright",
-      "package_name": "@executeautomation/mcp-playwright",
-      "description": "Playwright Model Context Protocol Server - Tool to automate Browsers and APIs in Claude Desktop, Cline, Cursor IDE and More 🔌",
+      "name": "puppeteer-mcp-server",
+      "package_name": "puppeteer-mcp-server",
+      "description": "Experimental MCP server for browser automation using Puppeteer (inspired by @modelcontextprotocol/server-puppeteer)",
       "relevance_score": 10,
-      "source": "github",
-      "url": "https://github.com/executeautomation/mcp-playwright",
+      "source": "npm",
+      "url": "https://github.com/merajmehrabi/puppeteer-mcp-server",
       "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
     },
     {
-      "name": "mobile-next/mobile-mcp",
-      "package_name": "@mobile-next/mobile-mcp",
-      "description": "Model Context Protocol Server for Mobile Automation and Scraping (iOS, Android, Emulators, Simulators and Real Devices)",
+      "name": "@hisma/server-puppeteer",
+      "package_name": "@hisma/server-puppeteer",
+      "description": "Fork and update (v0.6.5) of the original @modelcontextprotocol/server-puppeteer MCP server for browser automation using Puppeteer.",
       "relevance_score": 10,
-      "source": "github",
-      "url": "https://github.com/mobile-next/mobile-mcp",
+      "source": "npm",
+      "url": "https://github.com/Hisma/servers-archived/tree/main/src/puppeteer",
       "integration_suggestion": "Medium priority: Useful for CI/CD and testing workflows"
     },
     {
-      "name": "microsoft/playwright-mcp",
-      "package_name": "@microsoft/playwright-mcp",
-      "description": "Playwright MCP server",
-      "relevance_score": 10,
+      "name": "mongodb-mcp-server",
+      "package_name": "mongodb-mcp-server",
+      "description": "MongoDB Model Context Protocol Server",
+      "relevance_score": 9,
+      "source": "npm",
+      "url": "https://github.com/mongodb-js/mongodb-mcp-server",
+      "integration_suggestion": "Evaluate: Review documentation for specific use cases"
+    },
+    {
+      "name": "jlowin/fastmcp",
+      "package_name": "@jlowin/fastmcp",
+      "description": "🚀 The fast, Pythonic way to build MCP servers and clients",
+      "relevance_score": 8,
       "source": "github",
-      "url": "https://github.com/microsoft/playwright-mcp",
+      "url": "https://github.com/jlowin/fastmcp",
+      "integration_suggestion": "Evaluate: Review documentation for specific use cases"
+    },
+    {
+      "name": "mcp-use/mcp-use",
+      "package_name": "@mcp-use/mcp-use",
+      "description": "mcp-use is the easiest way to interact with mcp servers with custom agents",
+      "relevance_score": 8,
+      "source": "github",
+      "url": "https://github.com/mcp-use/mcp-use",
+      "integration_suggestion": "Evaluate: Review documentation for specific use cases"
+    },
+    {
+      "name": "nanbingxyz/5ire",
+      "package_name": "@nanbingxyz/5ire",
+      "description": "5ire is a cross-platform desktop AI assistant, MCP client. It compatible with major service providers,  supports local knowledge base and  tools via model context protocol servers .",
+      "relevance_score": 8,
+      "source": "github",
+      "url": "https://github.com/nanbingxyz/5ire",
+      "integration_suggestion": "Evaluate: Review documentation for specific use cases"
+    },
+    {
+      "name": "mendableai/firecrawl-mcp-server",
+      "package_name": "@mendableai/firecrawl-mcp-server",
+      "description": "🔥 Official Firecrawl MCP Server - Adds powerful web scraping to Cursor, Claude and any other LLM clients.",
+      "relevance_score": 8,
+      "source": "github",
+      "url": "https://github.com/mendableai/firecrawl-mcp-server",
       "integration_suggestion": "Evaluate: Review documentation for specific use cases"
     }
   ]

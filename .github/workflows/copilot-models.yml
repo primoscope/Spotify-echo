@@ -1,7 +1,11 @@
 ---
-name: GitHub Copilot Models Integration
+# Legacy Copilot Models Workflow (Deprecated)
+# This workflow has been replaced by gpt5-advanced-multimodel.yml
+# Keeping for backward compatibility - will redirect to new enhanced workflow
 
-'on':
+name: GitHub Copilot Models Integration (Legacy)
+
+on:
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -9,7 +13,7 @@ name: GitHub Copilot Models Integration
   workflow_dispatch:
     inputs:
       model:
-        description: 'Copilot model to use (gpt-5, gpt-5-chat, gpt-4-turbo)'
+        description: 'Copilot model to use (redirected to enhanced workflow)'
         required: true
         default: 'gpt-5'
         type: choice
@@ -19,7 +23,7 @@ name: GitHub Copilot Models Integration
           - gpt-4-turbo
           - gpt-4
       task:
-        description: 'Task to perform'
+        description: 'Task to perform (redirected to enhanced workflow)'
         required: true
         default: 'analyze'
         type: choice
@@ -30,82 +34,68 @@ name: GitHub Copilot Models Integration
           - roadmap
           - optimize
           - test
-      target:
-        description: 'Target files or scope (optional)'
-        required: false
-        type: string
 
 env:
   GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
-  GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || secrets.COPILOT_API_KEY }}
-  COPILOT_API_KEY: ${{ secrets.COPILOT_API_KEY || secrets.OPENAI_API_KEY }}
 
 jobs:
-  copilot-models:
-    name: Copilot Models Agent
+  redirect-to-enhanced:
+    name: "Redirect to Enhanced GPT-5 Workflow"
     runs-on: ubuntu-latest
-
-    # Process model commands from authorized users
-    if: |
-      (github.event_name == 'workflow_dispatch') ||
-      ((github.event.issue.number || github.event.pull_request.number) &&
-       (contains(github.event.comment.body, '/models') ||
-        contains(github.event.comment.body, '/model') ||
-        contains(github.event.comment.body, 'use model') ||
-        contains(github.event.comment.body, 'use gpt')) &&
-       (github.event.comment.author_association == 'OWNER' ||
-        github.event.comment.author_association == 'COLLABORATOR' ||
-        github.event.comment.author_association == 'MEMBER'))
-
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      actions: write
-      checks: read
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Trigger Enhanced Workflow
+        uses: actions/github-script@v7
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
-
-      - name: Configure Git
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: |
-          npm ci
-          # Install additional AI/ML dependencies for model integration
-          npm install --save-dev @azure/openai openai axios
-
-      - name: Parse Model Command
-        id: parse
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            # Manual workflow dispatch
-            echo "trigger_type=manual" >> $GITHUB_OUTPUT
-            echo "model=${{ github.event.inputs.model }}" >> $GITHUB_OUTPUT
-            echo "task=${{ github.event.inputs.task }}" >> $GITHUB_OUTPUT
-            echo "target=${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
-            echo "context_type=workflow" >> $GITHUB_OUTPUT
-            echo "context_number=N/A" >> $GITHUB_OUTPUT
-          else
-            # Comment-based trigger
-            echo "trigger_type=comment" >> $GITHUB_OUTPUT
+          script: |
+            // Post comment explaining the redirect
+            if (context.eventName === 'issue_comment') {
+              const comment = `## 🔄 Workflow Redirect Notice
+              
+              This legacy workflow has been enhanced and moved to **gpt5-advanced-multimodel.yml**.
+              
+              **Enhanced Features Available:**
+              - Advanced GPT-5 model support
+              - Unified MCP validation integration
+              - Pre-merge validation gating
+              - Comprehensive result summaries
+              - Multiple trigger types (slash commands, labels, PR events)
+              
+              **Use These Commands Instead:**
+              - \`/gpt5 analyze\` - Full code analysis
+              - \`/analyze-gpt5\` - Quick analysis  
+              - \`/review-gpt5\` - Code review
+              - \`/optimize-gpt5\` - Performance optimization
+              
+              The enhanced workflow will automatically handle your request with improved capabilities.`;
+              
+              const contextNumber = context.issue?.number || context.pull_request?.number;
+              if (contextNumber) {
+                await github.rest.issues.createComment({
+                  issue_number: contextNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            }
             
-            COMMENT_BODY="${{ github.event.comment.body }}"
-            echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+            // Trigger the enhanced workflow if possible
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'gpt5-advanced-multimodel.yml',
+                ref: 'main',
+                inputs: {
+                  gpt_model: '${{ github.event.inputs.model || "gpt-5" }}',
+                  tasks: '${{ github.event.inputs.task || "analyze" }}',
+                  target: ''
+                }
+              });
+              console.log('✅ Successfully triggered enhanced GPT-5 workflow');
+            } catch (error) {
+              console.log('ℹ️ Enhanced workflow trigger skipped:', error.message);
+            }
             
             # Extract model and task from various command patterns
             # Pattern 1: /models use gpt-5 to review and analyze

@@ -421,15 +421,10 @@ deployment-temp-*
 *.do.tmp
 
 # Archive and temporary files
-docs/archive/
+archive/
 *.tmp
 *.bak
 *.orig
-
-# Validation reports (generated)
-*_REPORT.md
-*_VALIDATION_*.md
-*_STATUS_*.md
 
 # Environment files (except examples)
 .env

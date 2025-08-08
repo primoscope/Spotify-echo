@@ -37,6 +37,7 @@ const feedbackRoutes = require('./api/routes/feedback'); // New feedback system
 const musicDiscoveryRoutes = require('./api/routes/music-discovery'); // New music discovery system
 const llmProvidersRoutes = require('./api/routes/llm-providers'); // Enhanced LLM provider management
 const advancedSettingsRoutes = require('./api/advanced-settings'); // Advanced Settings UI API
+const docsRoutes = require('./api/routes/docs'); // API documentation
 const {
   extractUser,
   ensureDatabase,
@@ -636,6 +637,8 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // API Routes
+// Register API routes
+app.use('/api/docs', docsRoutes); // API documentation - must come first
 app.use('/api/chat', chatRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/spotify', spotifyRoutes);

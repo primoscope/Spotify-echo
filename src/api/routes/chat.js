@@ -91,6 +91,69 @@ router.post('/start', requireAuth, chatRateLimit, async (req, res) => {
 });
 
 /**
+ * @swagger
+ * /api/chat/message:
+ *   post:
+ *     summary: Send a message to the chatbot
+ *     description: Send a message to the EchoTune AI chatbot within an existing conversation session
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - sessionId
+ *               - message
+ *             properties:
+ *               sessionId:
+ *                 type: string
+ *                 description: Conversation session ID
+ *               message:
+ *                 type: string
+ *                 description: User message
+ *               provider:
+ *                 type: string
+ *                 enum: [openai, gemini, azure, openrouter]
+ *                 description: AI provider to use
+ *               model:
+ *                 type: string
+ *                 description: Specific model to use
+ *               temperature:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 2
+ *                 description: Response creativity (0-2)
+ *               maxTokens:
+ *                 type: number
+ *                 description: Maximum response length
+ *     responses:
+ *       200:
+ *         description: Successful chatbot response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 response:
+ *                   type: string
+ *                 recommendations:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Track'
+ *                 intent:
+ *                   type: object
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ */
+/**
  * Send a message to the chatbot
  * POST /api/chat/message
  */

@@ -80,15 +80,40 @@ EchoTune AI now features a **comprehensive Model Context Protocol (MCP) server e
 
 **Get running in under 5 minutes** - Choose your preferred method:
 
-| Method | Time | Best For |
-|--------|------|----------|
-| [**DigitalOcean**](#-digitalocean-deployment) | 2-3 min | Production with auto-scaling |
-| [**Docker**](#-docker-deployment) | 3-5 min | Any server with containerization |
-| [**Local Dev**](#-local-development) | 2 min | Testing and development |
+| Method | Time | Best For | Ubuntu 22.04 Optimized |
+|--------|------|----------|------------------------|
+| [**Ubuntu 22.04 One-Click**](#-ubuntu-2204-one-click-deployment) | 2 min | Ubuntu 22.04 servers | ✅ **NEW & RECOMMENDED** |
+| [**DigitalOcean**](#-digitalocean-deployment) | 2-3 min | Production with auto-scaling | ✅ Enhanced for Ubuntu 22 |
+| [**Docker**](#-docker-deployment) | 3-5 min | Any server with containerization | ✅ Ubuntu 22 compatible |
+| [**Local Dev**](#-local-development) | 2 min | Testing and development | ✅ Works everywhere |
+
+### ⚡ Ubuntu 22.04 One-Click Deployment (NEW)
+
+**For Ubuntu 22.04 LTS servers - Complete automated setup:**
+
+```bash
+# Interactive setup with domain and SSL configuration
+curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-ubuntu22-oneclick.sh | sudo bash
+
+# Or with parameters
+curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-ubuntu22-oneclick.sh | sudo bash -s -- --domain=yourdomain.com --email=you@example.com
+```
+
+**What this installs:**
+- ✅ Docker Engine optimized for Ubuntu 22.04
+- ✅ Node.js 20.x LTS with production configuration
+- ✅ nginx with advanced security and SSL automation
+- ✅ Let's Encrypt SSL certificates (with self-signed fallback)
+- ✅ UFW firewall with secure defaults
+- ✅ Complete EchoTune AI application setup
+- ✅ Health monitoring and management commands
+
+📖 **[Complete Ubuntu 22.04 Guide →](docs/deployment/UBUNTU22_COMPLETE_GUIDE.md)**
 
 ### ⚡ DigitalOcean Deployment
 
-> **✅ Current Status**: Application fully operational with 12 MCP servers integrated, 100% automation success rate, and comprehensive health monitoring. All core functionality validated and deployment-ready. Optional: DigitalOcean deployment available - see [Token Troubleshooting Guide](DIGITALOCEAN_COMPREHENSIVE_TOKEN_ANALYSIS.md) for setup.
+> **🆕 Enhanced for Ubuntu 22.04!**  
+> Now includes automatic domain detection and improved SSL handling.
 
 **Automated GitHub Actions Deployment with Container Registry:**
 
@@ -98,6 +123,21 @@ EchoTune AI now features a **comprehensive Model Context Protocol (MCP) server e
    - **Delete all existing tokens first** 
    - Create new token with **Full Access** permissions
    - See [comprehensive troubleshooting guide](DIGITALOCEAN_COMPREHENSIVE_TOKEN_ANALYSIS.md)
+
+3. **Quick DigitalOcean deployment** (Ubuntu 22.04 optimized):
+   ```bash
+   # One-command deployment with automatic domain detection
+   curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-digitalocean-ubuntu22.sh | sudo bash
+   
+   # Or with custom domain
+   curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-digitalocean-ubuntu22.sh | sudo bash -s -- --domain=yourdomain.com
+   ```
+
+**New Ubuntu 22.04 Features:**
+- ✅ **Automatic IP detection** with nip.io fallback domains
+- ✅ **Smart SSL handling** (Let's Encrypt for real domains, self-signed for testing)
+- ✅ **Enhanced security** with UFW firewall and fail2ban
+- ✅ **Production monitoring** with health checks and logging
 3. **Set up DigitalOcean secrets** in your repository:
    ```bash
    # Required GitHub Secrets:
@@ -146,14 +186,30 @@ EchoTune AI now features a **comprehensive Model Context Protocol (MCP) server e
 
 ### 🐳 Docker Deployment
 
-**Test All Container Registries First:**
-```bash
-# Test Docker Hub, DigitalOcean, GitHub, AWS, Azure, Google registries
-npm run test:registries
+> **🆕 Enhanced Ubuntu 22.04 Support!**  
+> Now includes optimized configurations and automated setup.
 
-# Test specific registries
-npm run test:docker-hub
-npm run test:digitalocean
+**Ultra-Simple One-Command Deployment (Ubuntu 22.04):**
+```bash
+# Complete Ubuntu 22.04 setup including Docker installation
+curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/ubuntu22-docker-setup.sh | sudo bash
+```
+
+**Manual Docker Deployment:**
+```bash
+git clone https://github.com/dzp5103/Spotify-echo.git
+cd Spotify-echo
+
+# Use Ubuntu 22.04 optimized configuration
+docker-compose -f docker-compose-ubuntu22.yml up -d
+# Open http://localhost:3000
+```
+
+**Docker Hub Image Available:**
+```bash
+# Pull and run from Docker Hub
+docker pull dzp5103/echotune-ai:latest
+docker run -d -p 3000:3000 --name echotune-ai dzp5103/echotune-ai:latest
 ```
 
 **Container Registry Authentication:**

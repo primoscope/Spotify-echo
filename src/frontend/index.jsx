@@ -91,7 +91,7 @@ class ErrorBoundary extends React.Component {
         React.createElement(
           'p',
           { style: textStyle },
-          "We're sorry, but something unexpected happened. Please refresh the page to try again."
+          'We\'re sorry, but something unexpected happened. Please refresh the page to try again.'
         ),
         React.createElement(
           'button',

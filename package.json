@@ -189,7 +189,12 @@
     "redis:stats": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.getCacheStats()).then(s => console.log(JSON.stringify(s, null, 2))).finally(() => r.close())\"",
     "redis:clear": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache()).then(() => console.log('✅ Cache cleared')).finally(() => r.close())\"",
     "redis:clear-audio": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('audio_features:*')).then(count => console.log('✅ Cleared', count, 'audio features')).finally(() => r.close())\"",
-    "redis:clear-recommendations": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('recommendations:*')).then(count => console.log('✅ Cleared', count, 'recommendations')).finally(() => r.close())\""
+    "redis:clear-recommendations": "node -e \"const RedisManager = require('./scripts/configure-redis'); const r = new RedisManager(); r.initialize().then(() => r.clearCache('recommendations:*')).then(count => console.log('✅ Cleared', count, 'recommendations')).finally(() => r.close())\"",
+    
+    "security:audit": "./scripts/security-audit.sh",
+    "security:check": "npm audit && ./scripts/security-audit.sh",
+    "production:validate": "./scripts/security-audit.sh && npm audit --audit-level=high",
+    "production:ready": "npm run lint && npm run test && npm run security:audit && npm run build"
   },
   "keywords": [
     "music",

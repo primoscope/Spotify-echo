@@ -18,7 +18,7 @@ const PROVIDER_MODELS = {
         contextWindow: 128000,
         features: ['chat', 'streaming', 'function_calling', 'vision'],
         cost: 'high',
-        speed: 'fast'
+        speed: 'fast',
       },
       {
         id: 'gpt-4o-mini',
@@ -28,7 +28,7 @@ const PROVIDER_MODELS = {
         contextWindow: 128000,
         features: ['chat', 'streaming', 'function_calling', 'vision'],
         cost: 'medium',
-        speed: 'very_fast'
+        speed: 'very_fast',
       },
       {
         id: 'gpt-4-turbo',
@@ -38,7 +38,7 @@ const PROVIDER_MODELS = {
         contextWindow: 128000,
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
-        speed: 'fast'
+        speed: 'fast',
       },
       {
         id: 'gpt-4',
@@ -48,7 +48,7 @@ const PROVIDER_MODELS = {
         contextWindow: 8192,
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
-        speed: 'medium'
+        speed: 'medium',
       },
       {
         id: 'gpt-3.5-turbo',
@@ -58,9 +58,9 @@ const PROVIDER_MODELS = {
         contextWindow: 16384,
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'low',
-        speed: 'very_fast'
-      }
-    ]
+        speed: 'very_fast',
+      },
+    ],
   },
 
   gemini: {
@@ -77,7 +77,7 @@ const PROVIDER_MODELS = {
         contextWindow: 1048576,
         features: ['chat', 'streaming', 'vision', 'code_execution'],
         cost: 'high',
-        speed: 'medium'
+        speed: 'medium',
       },
       {
         id: 'gemini-1.5-flash',
@@ -87,7 +87,7 @@ const PROVIDER_MODELS = {
         contextWindow: 1048576,
         features: ['chat', 'streaming', 'vision'],
         cost: 'medium',
-        speed: 'fast'
+        speed: 'fast',
       },
       {
         id: 'gemini-pro',
@@ -97,7 +97,7 @@ const PROVIDER_MODELS = {
         contextWindow: 32768,
         features: ['chat', 'streaming'],
         cost: 'medium',
-        speed: 'medium'
+        speed: 'medium',
       },
       {
         id: 'gemini-pro-vision',
@@ -107,9 +107,9 @@ const PROVIDER_MODELS = {
         contextWindow: 16384,
         features: ['chat', 'vision'],
         cost: 'medium',
-        speed: 'medium'
-      }
-    ]
+        speed: 'medium',
+      },
+    ],
   },
 
   openrouter: {
@@ -128,7 +128,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
         speed: 'fast',
-        provider: 'OpenAI'
+        provider: 'OpenAI',
       },
       {
         id: 'openai/gpt-4o-mini',
@@ -139,7 +139,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'medium',
         speed: 'very_fast',
-        provider: 'OpenAI'
+        provider: 'OpenAI',
       },
       {
         id: 'openai/gpt-3.5-turbo',
@@ -150,7 +150,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'low',
         speed: 'very_fast',
-        provider: 'OpenAI'
+        provider: 'OpenAI',
       },
       // Anthropic Models
       {
@@ -162,7 +162,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
         speed: 'fast',
-        provider: 'Anthropic'
+        provider: 'Anthropic',
       },
       {
         id: 'anthropic/claude-3-haiku',
@@ -173,7 +173,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming'],
         cost: 'low',
         speed: 'very_fast',
-        provider: 'Anthropic'
+        provider: 'Anthropic',
       },
       // Meta Models
       {
@@ -185,7 +185,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
         speed: 'medium',
-        provider: 'Meta'
+        provider: 'Meta',
       },
       {
         id: 'meta-llama/llama-3.1-70b-instruct',
@@ -196,7 +196,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'medium',
         speed: 'fast',
-        provider: 'Meta'
+        provider: 'Meta',
       },
       {
         id: 'meta-llama/llama-3.1-8b-instruct:free',
@@ -207,7 +207,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming'],
         cost: 'free',
         speed: 'fast',
-        provider: 'Meta'
+        provider: 'Meta',
       },
       // DeepSeek Models
       {
@@ -219,7 +219,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'reasoning'],
         cost: 'medium',
         speed: 'fast',
-        provider: 'DeepSeek'
+        provider: 'DeepSeek',
       },
       {
         id: 'deepseek/deepseek-r1-0528:free',
@@ -230,7 +230,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'reasoning'],
         cost: 'free',
         speed: 'medium',
-        provider: 'DeepSeek'
+        provider: 'DeepSeek',
       },
       // Google Models via OpenRouter
       {
@@ -242,7 +242,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'vision'],
         cost: 'free',
         speed: 'fast',
-        provider: 'Google'
+        provider: 'Google',
       },
       // Mistral Models
       {
@@ -254,7 +254,7 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
         speed: 'fast',
-        provider: 'Mistral'
+        provider: 'Mistral',
       },
       {
         id: 'mistralai/mistral-medium',
@@ -265,9 +265,9 @@ const PROVIDER_MODELS = {
         features: ['chat', 'streaming'],
         cost: 'medium',
         speed: 'fast',
-        provider: 'Mistral'
-      }
-    ]
+        provider: 'Mistral',
+      },
+    ],
   },
 
   azure: {
@@ -285,7 +285,7 @@ const PROVIDER_MODELS = {
         contextWindow: 128000,
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
-        speed: 'fast'
+        speed: 'fast',
       },
       {
         id: 'gpt-4',
@@ -295,7 +295,7 @@ const PROVIDER_MODELS = {
         contextWindow: 8192,
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'high',
-        speed: 'medium'
+        speed: 'medium',
       },
       {
         id: 'gpt-35-turbo',
@@ -305,9 +305,9 @@ const PROVIDER_MODELS = {
         contextWindow: 16384,
         features: ['chat', 'streaming', 'function_calling'],
         cost: 'low',
-        speed: 'very_fast'
-      }
-    ]
+        speed: 'very_fast',
+      },
+    ],
   },
 
   mock: {
@@ -324,7 +324,7 @@ const PROVIDER_MODELS = {
         contextWindow: 4096,
         features: ['chat', 'music_recommendations', 'demo'],
         cost: 'free',
-        speed: 'very_fast'
+        speed: 'very_fast',
       },
       {
         id: 'mock-general-assistant',
@@ -334,10 +334,10 @@ const PROVIDER_MODELS = {
         contextWindow: 4096,
         features: ['chat', 'demo'],
         cost: 'free',
-        speed: 'very_fast'
-      }
-    ]
-  }
+        speed: 'very_fast',
+      },
+    ],
+  },
 };
 
 /**
@@ -346,12 +346,20 @@ const PROVIDER_MODELS = {
 const FEATURES = {
   chat: { name: 'Chat', icon: '💬', description: 'Text-based conversation' },
   streaming: { name: 'Streaming', icon: '⚡', description: 'Real-time response streaming' },
-  function_calling: { name: 'Function Calling', icon: '🔧', description: 'Can call external functions' },
+  function_calling: {
+    name: 'Function Calling',
+    icon: '🔧',
+    description: 'Can call external functions',
+  },
   vision: { name: 'Vision', icon: '👁️', description: 'Can analyze images' },
   code_execution: { name: 'Code Execution', icon: '💻', description: 'Can execute code' },
   reasoning: { name: 'Advanced Reasoning', icon: '🧠', description: 'Enhanced logical reasoning' },
-  music_recommendations: { name: 'Music Recommendations', icon: '🎵', description: 'Specialized music suggestions' },
-  demo: { name: 'Demo Mode', icon: '🎭', description: 'Demo/testing purposes' }
+  music_recommendations: {
+    name: 'Music Recommendations',
+    icon: '🎵',
+    description: 'Specialized music suggestions',
+  },
+  demo: { name: 'Demo Mode', icon: '🎭', description: 'Demo/testing purposes' },
 };
 
 /**
@@ -361,7 +369,7 @@ const COST_LEVELS = {
   free: { name: 'Free', color: '#1db954', icon: '🆓' },
   low: { name: 'Low Cost', color: '#f39c12', icon: '💰' },
   medium: { name: 'Medium Cost', color: '#e67e22', icon: '💰💰' },
-  high: { name: 'High Cost', color: '#e74c3c', icon: '💰💰💰' }
+  high: { name: 'High Cost', color: '#e74c3c', icon: '💰💰💰' },
 };
 
 /**
@@ -371,16 +379,16 @@ const SPEED_LEVELS = {
   very_fast: { name: 'Very Fast', color: '#1db954', icon: '🚀' },
   fast: { name: 'Fast', color: '#27ae60', icon: '⚡' },
   medium: { name: 'Medium', color: '#f39c12', icon: '🐕' },
-  slow: { name: 'Slow', color: '#e74c3c', icon: '🐌' }
+  slow: { name: 'Slow', color: '#e74c3c', icon: '🐌' },
 };
 
 /**
  * Get all providers
  */
 function getAllProviders() {
-  return Object.keys(PROVIDER_MODELS).map(id => ({
+  return Object.keys(PROVIDER_MODELS).map((id) => ({
     id,
-    ...PROVIDER_MODELS[id]
+    ...PROVIDER_MODELS[id],
   }));
 }
 
@@ -398,9 +406,9 @@ function searchModels(query, providerId = null) {
   const providers = providerId ? [providerId] : Object.keys(PROVIDER_MODELS);
   const results = [];
 
-  providers.forEach(pid => {
+  providers.forEach((pid) => {
     const models = getModelsForProvider(pid);
-    models.forEach(model => {
+    models.forEach((model) => {
       if (
         model.name.toLowerCase().includes(query.toLowerCase()) ||
         model.description.toLowerCase().includes(query.toLowerCase()) ||
@@ -409,7 +417,7 @@ function searchModels(query, providerId = null) {
         results.push({
           ...model,
           providerId: pid,
-          providerName: PROVIDER_MODELS[pid].name
+          providerName: PROVIDER_MODELS[pid].name,
         });
       }
     });
@@ -423,7 +431,7 @@ function searchModels(query, providerId = null) {
  */
 function getModel(providerId, modelId) {
   const models = getModelsForProvider(providerId);
-  return models.find(model => model.id === modelId);
+  return models.find((model) => model.id === modelId);
 }
 
 /**
@@ -439,18 +447,18 @@ function validateProviderConfig(providerId, config) {
   // Check API key format
   if (provider.apiKeyFormat && config.apiKey) {
     if (!config.apiKey.startsWith(provider.apiKeyFormat)) {
-      return { 
-        valid: false, 
-        error: `API key should start with "${provider.apiKeyFormat}"` 
+      return {
+        valid: false,
+        error: `API key should start with "${provider.apiKeyFormat}"`,
       };
     }
   }
 
   // Check required endpoint for Azure
   if (provider.requiresEndpoint && !config.endpoint) {
-    return { 
-      valid: false, 
-      error: 'Endpoint URL is required for Azure OpenAI' 
+    return {
+      valid: false,
+      error: 'Endpoint URL is required for Azure OpenAI',
     };
   }
 
@@ -466,5 +474,5 @@ module.exports = {
   getModelsForProvider,
   searchModels,
   getModel,
-  validateProviderConfig
+  validateProviderConfig,
 };

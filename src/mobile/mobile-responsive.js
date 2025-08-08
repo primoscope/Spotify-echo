@@ -9,13 +9,13 @@ class MobileResponsiveManager {
       mobile: 768,
       tablet: 1024,
       desktop: 1280,
-      largeDesktop: 1920
+      largeDesktop: 1920,
     };
-    
+
     this.currentDeviceType = this.detectDeviceType();
     this.orientation = this.detectOrientation();
     this.touchSupport = this.detectTouchSupport();
-    
+
     this.setupEventListeners();
   }
 
@@ -24,9 +24,9 @@ class MobileResponsiveManager {
    */
   detectDeviceType() {
     if (typeof window === 'undefined') return 'desktop';
-    
+
     const width = window.innerWidth;
-    
+
     if (width <= this.breakpoints.mobile) {
       return 'mobile';
     } else if (width <= this.breakpoints.tablet) {
@@ -43,9 +43,11 @@ class MobileResponsiveManager {
    */
   detectOrientation() {
     if (typeof window === 'undefined') return 'landscape';
-    
+
     if (window.screen && window.screen.orientation) {
-      return window.screen.orientation.angle === 0 || window.screen.orientation.angle === 180 ? 'portrait' : 'landscape';
+      return window.screen.orientation.angle === 0 || window.screen.orientation.angle === 180
+        ? 'portrait'
+        : 'landscape';
     }
     return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
   }
@@ -63,7 +65,7 @@ class MobileResponsiveManager {
    */
   setupEventListeners() {
     if (typeof window === 'undefined') return;
-    
+
     // Resize handler with debouncing
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -92,7 +94,7 @@ class MobileResponsiveManager {
   handleResize() {
     const newDeviceType = this.detectDeviceType();
     const newOrientation = this.detectOrientation();
-    
+
     if (newDeviceType !== this.currentDeviceType || newOrientation !== this.orientation) {
       this.currentDeviceType = newDeviceType;
       this.orientation = newOrientation;
@@ -115,19 +117,23 @@ class MobileResponsiveManager {
    */
   setupTouchOptimizations() {
     if (typeof document === 'undefined') return;
-    
+
     // Add touch-friendly classes
     document.body.classList.add('touch-device');
-    
+
     // Prevent zoom on double tap
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', (event) => {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, false);
+    document.addEventListener(
+      'touchend',
+      (event) => {
+        const now = new Date().getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      },
+      false
+    );
 
     // Optimize scroll performance
     document.addEventListener('touchstart', () => {}, { passive: true });
@@ -139,21 +145,26 @@ class MobileResponsiveManager {
    */
   updateLayoutForDevice() {
     if (typeof document === 'undefined') return;
-    
+
     const body = document.body;
-    
+
     // Remove existing device classes
-    body.classList.remove('mobile-layout', 'tablet-layout', 'desktop-layout', 'large-desktop-layout');
-    
+    body.classList.remove(
+      'mobile-layout',
+      'tablet-layout',
+      'desktop-layout',
+      'large-desktop-layout'
+    );
+
     // Add current device class
     body.classList.add(`${this.currentDeviceType}-layout`);
-    
+
     // Update chat interface
     this.updateChatInterfaceLayout();
-    
+
     // Update player controls
     this.updatePlayerControlsLayout();
-    
+
     // Update navigation
     this.updateNavigationLayout();
   }
@@ -163,12 +174,12 @@ class MobileResponsiveManager {
    */
   updateChatInterfaceLayout() {
     if (typeof document === 'undefined') return;
-    
+
     const chatContainer = document.querySelector('.chat-container');
     const chatInput = document.querySelector('.chat-input-container');
-    
+
     if (!chatContainer || !chatInput) return;
-    
+
     if (this.currentDeviceType === 'mobile') {
       chatContainer.style.height = 'calc(100vh - 120px)';
       chatInput.style.position = 'fixed';
@@ -176,7 +187,7 @@ class MobileResponsiveManager {
       chatInput.style.left = '0';
       chatInput.style.right = '0';
       chatInput.style.zIndex = '1000';
-      
+
       // Add mobile-specific padding
       chatContainer.style.paddingBottom = '80px';
     } else {
@@ -195,15 +206,15 @@ class MobileResponsiveManager {
    */
   updatePlayerControlsLayout() {
     if (typeof document === 'undefined') return;
-    
+
     const playerControls = document.querySelector('.player-controls');
     if (!playerControls) return;
-    
+
     if (this.currentDeviceType === 'mobile') {
       playerControls.classList.add('mobile-player');
       // Make controls larger for touch
       const buttons = playerControls.querySelectorAll('button');
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         button.style.minHeight = '44px';
         button.style.minWidth = '44px';
       });
@@ -217,10 +228,10 @@ class MobileResponsiveManager {
    */
   updateNavigationLayout() {
     if (typeof document === 'undefined') return;
-    
+
     const nav = document.querySelector('nav');
     if (!nav) return;
-    
+
     if (this.currentDeviceType === 'mobile') {
       nav.classList.add('mobile-nav');
       this.createMobileMenu();
@@ -236,17 +247,17 @@ class MobileResponsiveManager {
   createMobileMenu() {
     if (typeof document === 'undefined') return;
     if (document.querySelector('.mobile-menu-toggle')) return;
-    
+
     const nav = document.querySelector('nav');
     const menuToggle = document.createElement('button');
     menuToggle.className = 'mobile-menu-toggle';
     menuToggle.innerHTML = '☰';
     menuToggle.setAttribute('aria-label', 'Toggle mobile menu');
-    
+
     menuToggle.addEventListener('click', () => {
       nav.classList.toggle('menu-open');
     });
-    
+
     nav.insertBefore(menuToggle, nav.firstChild);
   }
 
@@ -255,12 +266,12 @@ class MobileResponsiveManager {
    */
   removeMobileMenu() {
     if (typeof document === 'undefined') return;
-    
+
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     if (menuToggle) {
       menuToggle.remove();
     }
-    
+
     const nav = document.querySelector('nav');
     if (nav) {
       nav.classList.remove('menu-open');
@@ -272,11 +283,11 @@ class MobileResponsiveManager {
    */
   optimizeForOrientation() {
     if (typeof document === 'undefined') return;
-    
+
     const body = document.body;
     body.classList.remove('portrait', 'landscape');
     body.classList.add(this.orientation);
-    
+
     if (this.currentDeviceType === 'mobile' && this.orientation === 'landscape') {
       // Optimize for mobile landscape
       const chatContainer = document.querySelector('.chat-container');
@@ -291,13 +302,13 @@ class MobileResponsiveManager {
    */
   dispatchResponsiveEvent() {
     if (typeof window === 'undefined' || typeof CustomEvent === 'undefined') return;
-    
+
     const event = new CustomEvent('responsiveChange', {
       detail: {
         deviceType: this.currentDeviceType,
         orientation: this.orientation,
-        touchSupport: this.touchSupport
-      }
+        touchSupport: this.touchSupport,
+      },
     });
     window.dispatchEvent(event);
   }
@@ -333,16 +344,16 @@ class MobileResponsiveManager {
         orientation: this.orientation,
         touchSupport: this.touchSupport,
         screenWidth: 1920,
-        screenHeight: 1080
+        screenHeight: 1080,
       };
     }
-    
+
     return {
       type: this.currentDeviceType,
       orientation: this.orientation,
       touchSupport: this.touchSupport,
       screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight
+      screenHeight: window.innerHeight,
     };
   }
 
@@ -352,7 +363,7 @@ class MobileResponsiveManager {
   applyMobileOptimizations() {
     if (typeof document === 'undefined') return;
     if (!this.isMobile()) return;
-    
+
     // Create mobile-specific styles
     const mobileStyles = `
       .mobile-layout {
@@ -438,7 +449,7 @@ class MobileResponsiveManager {
         }
       }
     `;
-    
+
     const styleSheet = document.createElement('style');
     styleSheet.textContent = mobileStyles;
     document.head.appendChild(styleSheet);
@@ -473,16 +484,16 @@ class ReactNativeFoundation {
   createView(props = {}) {
     const element = document.createElement('div');
     element.className = 'rn-view';
-    
+
     // Apply React Native-style props
     if (props.style) {
       Object.assign(element.style, props.style);
     }
-    
+
     if (props.className) {
       element.className += ` ${props.className}`;
     }
-    
+
     return element;
   }
 
@@ -493,11 +504,11 @@ class ReactNativeFoundation {
     const element = document.createElement('span');
     element.className = 'rn-text';
     element.textContent = content;
-    
+
     if (props.style) {
       Object.assign(element.style, props.style);
     }
-    
+
     return element;
   }
 
@@ -507,20 +518,20 @@ class ReactNativeFoundation {
   createTouchableOpacity(props = {}) {
     const button = document.createElement('button');
     button.className = 'rn-touchable';
-    
+
     // Touch feedback
     button.addEventListener('touchstart', () => {
       button.style.opacity = '0.7';
     });
-    
+
     button.addEventListener('touchend', () => {
       button.style.opacity = '1';
     });
-    
+
     if (props.onPress) {
       button.addEventListener('click', props.onPress);
     }
-    
+
     return button;
   }
 
@@ -532,7 +543,7 @@ class ReactNativeFoundation {
     this.registerComponent('View', this.createView);
     this.registerComponent('Text', this.createText);
     this.registerComponent('TouchableOpacity', this.createTouchableOpacity);
-    
+
     // Create native bridges
     this.createNativeBridge('Dimensions', {
       get: () => {
@@ -541,17 +552,17 @@ class ReactNativeFoundation {
         }
         return {
           width: window.innerWidth,
-          height: window.innerHeight
+          height: window.innerHeight,
         };
-      }
+      },
     });
-    
+
     this.createNativeBridge('Platform', {
       OS: this.detectPlatform(),
       select: (platforms) => {
         const os = this.detectPlatform();
         return platforms[os] || platforms.default;
-      }
+      },
     });
   }
 
@@ -560,9 +571,9 @@ class ReactNativeFoundation {
    */
   detectPlatform() {
     if (typeof navigator === 'undefined') return 'web';
-    
+
     const userAgent = navigator.userAgent.toLowerCase();
-    
+
     if (/android/.test(userAgent)) {
       return 'android';
     } else if (/iphone|ipad|ipod/.test(userAgent)) {
@@ -604,6 +615,6 @@ if (typeof window !== 'undefined') {
     MobileResponsiveManager,
     ReactNativeFoundation,
     mobileResponsive,
-    reactNative
+    reactNative,
   };
 }

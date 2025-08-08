@@ -1,132 +1,64 @@
-# 🌊 DigitalOcean Token Setup Guide
 
-## Current Testing Status
+# 🔐 DigitalOcean Token Generation Instructions
 
-**❌ Authentication Issue:** The provided API tokens are returning 401 Unauthorized errors.
+## Step 1: Access DigitalOcean Control Panel
+1. Go to https://cloud.digitalocean.com/
+2. Log in to your DigitalOcean account
 
-**Provided Tokens:**
-- Primary API: `dop_v1_09dc79ed930e1cc77ffe866d78a3c5eae...` ❌ (Unauthorized)
-- Docker Registry: `dop_v1_be1d6c7989e8f51fefbae...` ❌ (Unauthorized)
+## Step 2: Navigate to API Tokens
+1. Click on "API" in the left sidebar
+2. Or go directly to: https://cloud.digitalocean.com/account/api/tokens
 
-## 🔧 How to Fix
+## Step 3: Create New Token
+1. Click "Generate New Token"
+2. **Name:** EchoTune AI Deployment Token
+3. **Scopes:** Select ALL permissions:
+   ✅ Read (required)
+   ✅ Write (required for deployments)
 
-### Step 1: Generate New DigitalOcean API Token
+## Step 4: Copy and Secure Token
+1. **IMMEDIATELY** copy the token (you won't see it again)
+2. Token format: `dop_v1_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+3. Store securely - treat like a password
 
-1. **Visit DigitalOcean Dashboard:**
-   - Go to https://cloud.digitalocean.com/account/api/tokens
-   - Click "Generate New Token"
-
-2. **Token Configuration:**
-   - **Name:** `EchoTune-AI-Full-Access`
-   - **Expiration:** 30 days (or No expiration)
-   - **Scopes:** Select **Full Access** (required for registry operations)
-
-3. **Copy the Token:** 
-   - ⚠️ **Important:** Copy immediately - you won't see it again!
-   - Format: `dop_v1_xxxxxxxxxxxxxxxxxx...`
-
-### Step 2: Update Configuration
-
-Replace tokens in the testing scripts:
-
-```javascript
-// In scripts/enhanced-digitalocean-manager.js
-this.apiToken = 'YOUR_NEW_TOKEN_HERE';
-
-// In scripts/test-all-servers.js  
-token: 'YOUR_NEW_TOKEN_HERE',
-dockerToken: 'YOUR_NEW_TOKEN_HERE'
+## Step 5: Update Environment Configuration
+Add to your .env file:
+```env
+DO_ACCESS_TOKEN=dop_v1_your_actual_token_here
+DO_REGISTRY_TOKEN=dop_v1_your_actual_token_here  # Same token works for registry
 ```
 
-### Step 3: Test Authentication
-
+## Step 6: Test Token
+Run this command to verify:
 ```bash
-# Test with new token
-npm run do:enhanced-test
-
-# Test specific components
-npm run do:enhanced-auth
-npm run do:enhanced-account
-npm run do:enhanced-registry-token
+npm run validate:digitalocean
+# OR
+node scripts/digitalocean-auth-fixer.js --test
 ```
 
-## 📋 What Works Currently
+## Troubleshooting Common Issues
 
-✅ **Infrastructure Ready (8/13 services):**
-- Docker Installation & Hub Connection
-- doctl Installation (automatic via snap)  
-- GitHub Container Registry
-- AWS ECR, Azure ACR, Google GCR (CLIs available)
-- DigitalOcean Spaces
+### 🚨 401 Unauthorized Error
+- **Cause:** Invalid, expired, or insufficient permissions
+- **Solution:** Generate new token with FULL permissions
 
-✅ **Configuration Complete:**
-- Localhost callback URL: `http://localhost:3000/`
-- Environment configuration updated
-- Enhanced testing tools created
+### 🚨 Token Format Issues
+- **Correct:** `dop_v1_1234567890abcdef...` (71 characters)
+- **Incorrect:** Missing `dop_v1_` prefix or wrong length
 
-## ⚠️ What Needs Valid Tokens (5/13 services)
+### 🚨 Registry Authentication
+- For container registry, same token works
+- Username: Your DigitalOcean email
+- Password: Your DO access token
 
-❌ **DigitalOcean Services Requiring Fresh Tokens:**
-- Primary API operations (Account, Apps, Droplets, Kubernetes)
-- Container Registry authentication
-- App Platform deployment
+## Security Best Practices
 
-## 🚀 Testing Commands Available
+1. **Never commit tokens** to Git repositories
+2. **Use environment variables** only
+3. **Rotate tokens regularly** (every 90 days)
+4. **Monitor token usage** in DO dashboard
+5. **Revoke unused tokens** immediately
 
-```bash
-# Full comprehensive test
-npm run test:servers
-
-# Enhanced DigitalOcean-specific testing
-npm run do:enhanced-test
-npm run do:enhanced-auth
-npm run do:enhanced-account
-npm run do:enhanced-registry-token
-
-# Original DigitalOcean commands
-npm run do:status
-npm run do:apps
-npm run do:registries
-npm run do:deploy
-```
-
-## 🛠️ Alternative: Use Personal Account Token
-
-If the current account doesn't have valid access:
-
-1. **Use your personal DigitalOcean account**
-2. **Generate token from your dashboard**
-3. **Update the email in scripts:**
-   ```javascript
-   dockerEmail: 'YOUR_EMAIL@example.com'
-   ```
-
-## 📊 Expected Results After Token Update
-
-Once valid tokens are provided:
-
-```bash
-✅ doctl Authentication: SUCCESS
-✅ Account Access: User info retrieved
-✅ Container Registry: Docker login successful
-✅ App Platform: Available applications listed
-✅ All Services: 13/13 operational
-```
-
-## 🔗 Useful Links
-
-- **API Tokens:** https://cloud.digitalocean.com/account/api/tokens
-- **Container Registry:** https://cloud.digitalocean.com/registry
-- **App Platform:** https://cloud.digitalocean.com/apps
-- **Documentation:** https://docs.digitalocean.com/reference/doctl/
-
-## 💡 Pro Tips
-
-1. **Token Expiration:** Use longer expiration for development
-2. **Permissions:** Ensure "Full Access" for complete functionality
-3. **Security:** Store tokens in environment variables, not code
-4. **Backup:** Keep tokens secure and backed up during development
-
----
-
-**Status:** Infrastructure 100% complete - ready for production deployment once valid DigitalOcean tokens are configured.
+## Additional Resources
+- [DigitalOcean API Documentation](https://docs.digitalocean.com/reference/api/)
+- [Container Registry Guide](https://docs.digitalocean.com/products/container-registry/)

@@ -5,7 +5,7 @@ import './Settings.css';
 
 /**
  * Comprehensive Settings Component
- * 
+ *
  * Features:
  * - Application configuration management
  * - LLM provider settings and switching
@@ -42,7 +42,7 @@ const Settings = () => {
     try {
       const response = await fetch('/api/settings');
       const data = await response.json();
-      
+
       if (data.success) {
         setSettings(data.settings);
       } else {
@@ -63,7 +63,7 @@ const Settings = () => {
     try {
       const response = await fetch('/api/database/status');
       const data = await response.json();
-      
+
       if (data.success) {
         setDatabaseStats(data);
       }
@@ -79,7 +79,7 @@ const Settings = () => {
     try {
       const response = await fetch('/api/database/analytics');
       const data = await response.json();
-      
+
       if (data.success) {
         setMongodbInsights(data.analytics);
       }
@@ -101,9 +101,9 @@ const Settings = () => {
         },
         body: JSON.stringify(updatedSettings),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setSettings(updatedSettings);
         setMessage({ type: 'success', text: 'Settings saved successfully' });
@@ -124,9 +124,9 @@ const Settings = () => {
   const handleSettingChange = (category, key, value) => {
     const updatedSettings = {
       ...settings,
-      [key]: value
+      [key]: value,
     };
-    
+
     // Save immediately for certain settings
     if (['LLM_PROVIDER', 'DATABASE_TYPE'].includes(key)) {
       saveSettings(updatedSettings);
@@ -155,7 +155,7 @@ const Settings = () => {
     try {
       const response = await fetch('/api/database/test', { method: 'POST' });
       const data = await response.json();
-      
+
       if (data.success) {
         setMessage({ type: 'success', text: 'Database connection successful' });
         await loadDatabaseStats();
@@ -219,7 +219,7 @@ const Settings = () => {
   const renderApplicationSettings = () => (
     <div className="settings-section">
       <h3>Application Configuration</h3>
-      
+
       <div className="setting-group">
         <label>Environment</label>
         <select
@@ -274,7 +274,7 @@ const Settings = () => {
   const renderLLMSettings = () => (
     <div className="settings-section">
       <h3>AI Provider Configuration</h3>
-      
+
       <div className="current-provider">
         <h4>Current Provider: {providers[currentProvider]?.name}</h4>
         <span className={`status ${providers[currentProvider]?.status}`}>
@@ -315,7 +315,7 @@ const Settings = () => {
   const renderDatabaseSettings = () => (
     <div className="settings-section">
       <h3>Database Configuration</h3>
-      
+
       {/* Database Status */}
       <div className="database-status">
         <h4>Database Status</h4>
@@ -399,13 +399,15 @@ const Settings = () => {
             <option value="sqlite">SQLite</option>
           </select>
         </div>
-        
+
         <div className="setting-group">
           <label>Enable Fallback</label>
           <input
             type="checkbox"
             checked={settings.ENABLE_SQLITE_FALLBACK || true}
-            onChange={(e) => handleSettingChange('database', 'ENABLE_SQLITE_FALLBACK', e.target.checked)}
+            onChange={(e) =>
+              handleSettingChange('database', 'ENABLE_SQLITE_FALLBACK', e.target.checked)
+            }
           />
         </div>
       </div>
@@ -418,7 +420,7 @@ const Settings = () => {
   const renderSecuritySettings = () => (
     <div className="settings-section">
       <h3>Security Configuration</h3>
-      
+
       <div className="setting-group">
         <label>Force HTTPS</label>
         <input
@@ -451,7 +453,9 @@ const Settings = () => {
         <input
           type="checkbox"
           checked={settings.ENABLE_SECURITY_HEADERS || true}
-          onChange={(e) => handleSettingChange('security', 'ENABLE_SECURITY_HEADERS', e.target.checked)}
+          onChange={(e) =>
+            handleSettingChange('security', 'ENABLE_SECURITY_HEADERS', e.target.checked)
+          }
         />
       </div>
     </div>
@@ -463,7 +467,7 @@ const Settings = () => {
   const renderPerformanceSettings = () => (
     <div className="settings-section">
       <h3>Performance Configuration</h3>
-      
+
       <div className="setting-group">
         <label>Enable Compression</label>
         <input
@@ -541,22 +545,18 @@ const Settings = () => {
       {message && (
         <div className={`settings-message ${message.type}`}>
           {message.text}
-          <button onClick={() => setMessage(null)} className="close-message">×</button>
+          <button onClick={() => setMessage(null)} className="close-message">
+            ×
+          </button>
         </div>
       )}
 
       {renderTabs()}
-      
-      <div className="settings-content">
-        {renderTabContent()}
-      </div>
+
+      <div className="settings-content">{renderTabContent()}</div>
 
       <div className="settings-actions">
-        <button
-          onClick={() => saveSettings(settings)}
-          disabled={saving}
-          className="save-settings"
-        >
+        <button onClick={() => saveSettings(settings)} disabled={saving} className="save-settings">
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
         <button onClick={loadSettings} className="reset-settings">

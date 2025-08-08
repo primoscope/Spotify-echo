@@ -9,7 +9,7 @@ const spotifyService = new SpotifyAudioFeaturesService();
 const spotifyRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // Higher limit for data processing
-  message: 'Too many Spotify API requests, please slow down'
+  message: 'Too many Spotify API requests, please slow down',
 });
 
 /**
@@ -24,7 +24,7 @@ router.get('/audio-features/:trackId', requireAuth, spotifyRateLimit, async (req
     if (!accessToken) {
       return res.status(400).json({
         error: 'Missing access token',
-        message: 'Spotify access token is required'
+        message: 'Spotify access token is required',
       });
     }
 
@@ -33,14 +33,13 @@ router.get('/audio-features/:trackId', requireAuth, spotifyRateLimit, async (req
     res.json({
       success: true,
       trackId,
-      audioFeatures
+      audioFeatures,
     });
-
   } catch (error) {
     console.error('Error getting audio features:', error);
     res.status(500).json({
       error: 'Failed to get audio features',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -56,14 +55,14 @@ router.post('/audio-features/batch', requireAuth, spotifyRateLimit, async (req, 
     if (!accessToken || !trackIds || !Array.isArray(trackIds)) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'accessToken and trackIds array are required'
+        message: 'accessToken and trackIds array are required',
       });
     }
 
     if (trackIds.length > 100) {
       return res.status(400).json({
         error: 'Too many tracks',
-        message: 'Maximum 100 tracks per batch request'
+        message: 'Maximum 100 tracks per batch request',
       });
     }
 
@@ -71,21 +70,20 @@ router.post('/audio-features/batch', requireAuth, spotifyRateLimit, async (req, 
       onProgress: (progress) => {
         // Could emit progress via WebSocket in real-time applications
         console.log(`Progress: ${progress.processed}/${progress.total}`);
-      }
+      },
     });
 
     res.json({
       success: true,
       result,
       processedCount: result.totalProcessed,
-      errorCount: result.errors.length
+      errorCount: result.errors.length,
     });
-
   } catch (error) {
     console.error('Error getting batch audio features:', error);
     res.status(500).json({
       error: 'Failed to get batch audio features',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -102,7 +100,7 @@ router.get('/track/:trackId', requireAuth, spotifyRateLimit, async (req, res) =>
     if (!accessToken) {
       return res.status(400).json({
         error: 'Missing access token',
-        message: 'Spotify access token is required'
+        message: 'Spotify access token is required',
       });
     }
 
@@ -111,14 +109,13 @@ router.get('/track/:trackId', requireAuth, spotifyRateLimit, async (req, res) =>
     res.json({
       success: true,
       trackId,
-      metadata
+      metadata,
     });
-
   } catch (error) {
     console.error('Error getting track metadata:', error);
     res.status(500).json({
       error: 'Failed to get track metadata',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -134,14 +131,14 @@ router.post('/tracks/batch', requireAuth, spotifyRateLimit, async (req, res) => 
     if (!accessToken || !trackIds || !Array.isArray(trackIds)) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'accessToken and trackIds array are required'
+        message: 'accessToken and trackIds array are required',
       });
     }
 
     if (trackIds.length > 50) {
       return res.status(400).json({
         error: 'Too many tracks',
-        message: 'Maximum 50 tracks per batch request'
+        message: 'Maximum 50 tracks per batch request',
       });
     }
 
@@ -150,14 +147,13 @@ router.post('/tracks/batch', requireAuth, spotifyRateLimit, async (req, res) => 
     res.json({
       success: true,
       tracks: metadata,
-      count: metadata.length
+      count: metadata.length,
     });
-
   } catch (error) {
     console.error('Error getting batch track metadata:', error);
     res.status(500).json({
       error: 'Failed to get batch track metadata',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -173,14 +169,15 @@ router.post('/process-history', requireAuth, spotifyRateLimit, async (req, res) 
     if (!accessToken || !listeningHistory || !Array.isArray(listeningHistory)) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'accessToken and listeningHistory array are required'
+        message: 'accessToken and listeningHistory array are required',
       });
     }
 
     if (listeningHistory.length > 1000) {
       return res.status(400).json({
         error: 'Too much data',
-        message: 'Maximum 1000 listening history items per request. Consider breaking into smaller batches.'
+        message:
+          'Maximum 1000 listening history items per request. Consider breaking into smaller batches.',
       });
     }
 
@@ -191,7 +188,7 @@ router.post('/process-history', requireAuth, spotifyRateLimit, async (req, res) 
         includeMetadata,
         onProgress: (progress) => {
           console.log(`Processing: ${progress.stage} - ${progress.processed}/${progress.total}`);
-        }
+        },
       }
     );
 
@@ -199,16 +196,16 @@ router.post('/process-history', requireAuth, spotifyRateLimit, async (req, res) 
     const db = require('../../database/mongodb').getDb();
     const listeningHistoryCollection = db.collection('listening_history');
 
-    const operations = enrichedHistory.map(item => ({
+    const operations = enrichedHistory.map((item) => ({
       updateOne: {
         filter: {
           user_id: req.userId,
           track_id: item.track_id,
-          played_at: item.played_at
+          played_at: item.played_at,
         },
         update: { $set: { ...item, user_id: req.userId } },
-        upsert: true
-      }
+        upsert: true,
+      },
     }));
 
     if (operations.length > 0) {
@@ -219,14 +216,13 @@ router.post('/process-history', requireAuth, spotifyRateLimit, async (req, res) 
       success: true,
       processedItems: enrichedHistory.length,
       enrichedHistory: enrichedHistory.slice(0, 10), // Return first 10 for preview
-      message: 'Listening history processed and stored successfully'
+      message: 'Listening history processed and stored successfully',
     });
-
   } catch (error) {
     console.error('Error processing listening history:', error);
     res.status(500).json({
       error: 'Failed to process listening history',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -242,7 +238,7 @@ router.post('/cached-features', requireAuth, async (req, res) => {
     if (!trackIds || !Array.isArray(trackIds)) {
       return res.status(400).json({
         error: 'Missing trackIds',
-        message: 'trackIds array is required'
+        message: 'trackIds array is required',
       });
     }
 
@@ -252,14 +248,13 @@ router.post('/cached-features', requireAuth, async (req, res) => {
       success: true,
       cachedFeatures,
       count: cachedFeatures.length,
-      cacheHitRate: cachedFeatures.length / trackIds.length
+      cacheHitRate: cachedFeatures.length / trackIds.length,
     });
-
   } catch (error) {
     console.error('Error getting cached features:', error);
     res.status(500).json({
       error: 'Failed to get cached features',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -275,7 +270,7 @@ router.post('/missing-features', requireAuth, async (req, res) => {
     if (!trackIds || !Array.isArray(trackIds)) {
       return res.status(400).json({
         error: 'Missing trackIds',
-        message: 'trackIds array is required'
+        message: 'trackIds array is required',
       });
     }
 
@@ -286,14 +281,13 @@ router.post('/missing-features', requireAuth, async (req, res) => {
       missingTrackIds,
       missingCount: missingTrackIds.length,
       totalRequested: trackIds.length,
-      cacheHitRate: (trackIds.length - missingTrackIds.length) / trackIds.length
+      cacheHitRate: (trackIds.length - missingTrackIds.length) / trackIds.length,
     });
-
   } catch (error) {
     console.error('Error getting missing track IDs:', error);
     res.status(500).json({
       error: 'Failed to get missing track IDs',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -305,13 +299,13 @@ router.post('/missing-features', requireAuth, async (req, res) => {
 router.get('/stats', requireAuth, async (req, res) => {
   try {
     const cacheStats = spotifyService.getCacheStats();
-    
+
     // Get database statistics
     const db = require('../../database/mongodb').getDb();
     const [audioFeaturesCount, trackMetadataCount, listeningHistoryCount] = await Promise.all([
       db.collection('audio_features').countDocuments(),
       db.collection('track_metadata').countDocuments(),
-      db.collection('listening_history').countDocuments({ user_id: req.userId })
+      db.collection('listening_history').countDocuments({ user_id: req.userId }),
     ]);
 
     res.json({
@@ -321,20 +315,19 @@ router.get('/stats', requireAuth, async (req, res) => {
         database: {
           audioFeatures: audioFeaturesCount,
           trackMetadata: trackMetadataCount,
-          userListeningHistory: listeningHistoryCount
+          userListeningHistory: listeningHistoryCount,
         },
         service: {
           name: 'SpotifyAudioFeaturesService',
-          status: 'active'
-        }
-      }
+          status: 'active',
+        },
+      },
     });
-
   } catch (error) {
     console.error('Error getting Spotify stats:', error);
     res.status(500).json({
       error: 'Failed to get Spotify statistics',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -349,14 +342,13 @@ router.post('/clear-cache', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Service cache cleared successfully'
+      message: 'Service cache cleared successfully',
     });
-
   } catch (error) {
     console.error('Error clearing cache:', error);
     res.status(500).json({
       error: 'Failed to clear cache',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -384,7 +376,7 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
       filename: (req, file, cb) => {
         const uniqueName = `${req.userId}_${Date.now()}_${file.originalname}`;
         cb(null, uniqueName);
-      }
+      },
     });
 
     const upload = multer({
@@ -397,8 +389,8 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
         }
       },
       limits: {
-        fileSize: 50 * 1024 * 1024 // 50MB limit
-      }
+        fileSize: 50 * 1024 * 1024, // 50MB limit
+      },
     }).single('csvFile');
 
     // Handle file upload
@@ -406,14 +398,14 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
       if (err) {
         return res.status(400).json({
           error: 'File upload failed',
-          message: err.message
+          message: err.message,
         });
       }
 
       if (!req.file) {
         return res.status(400).json({
           error: 'No file uploaded',
-          message: 'Please select a CSV file to upload'
+          message: 'Please select a CSV file to upload',
         });
       }
 
@@ -424,7 +416,7 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
         fs.unlinkSync(req.file.path);
         return res.status(400).json({
           error: 'Missing access token',
-          message: 'Spotify access token is required for processing'
+          message: 'Spotify access token is required for processing',
         });
       }
 
@@ -438,7 +430,7 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
           .pipe(csv())
           .on('data', (row) => {
             rowCount++;
-            
+
             // Validate required columns
             if (!row.track_id && !row.trackId && !row['Track ID']) {
               errors.push(`Row ${rowCount}: Missing track_id`);
@@ -450,9 +442,10 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
               track_id: row.track_id || row.trackId || row['Track ID'],
               track_name: row.track_name || row.trackName || row['Track Name'] || '',
               artist_name: row.artist_name || row.artistName || row['Artist Name'] || '',
-              played_at: row.played_at || row.playedAt || row['Played At'] || new Date().toISOString(),
+              played_at:
+                row.played_at || row.playedAt || row['Played At'] || new Date().toISOString(),
               duration_ms: parseInt(row.duration_ms || row.durationMs || row['Duration (ms)'] || 0),
-              user_id: req.userId
+              user_id: req.userId,
             };
 
             // Validate track_id format (Spotify track IDs are 22 characters)
@@ -477,7 +470,7 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
           return res.status(400).json({
             error: 'No valid data found',
             message: 'CSV file contained no valid listening history records',
-            errors: errors.slice(0, 10) // Return first 10 errors
+            errors: errors.slice(0, 10), // Return first 10 errors
           });
         }
 
@@ -486,32 +479,30 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
         if (processAudioFeatures) {
           // uniqueTrackIds removed - was unused
           // Process in smaller batches to avoid overwhelming the API
-          enrichedData = await spotifyService.enrichListeningHistory(
-            csvData,
-            accessToken,
-            {
-              includeMetadata: true,
-              onProgress: (progress) => {
-                console.log(`Processing CSV: ${progress.stage} - ${progress.processed}/${progress.total}`);
-              }
-            }
-          );
+          enrichedData = await spotifyService.enrichListeningHistory(csvData, accessToken, {
+            includeMetadata: true,
+            onProgress: (progress) => {
+              console.log(
+                `Processing CSV: ${progress.stage} - ${progress.processed}/${progress.total}`
+              );
+            },
+          });
         }
 
         // Store in database
         const db = require('../../database/mongodb').getDb();
         const listeningHistoryCollection = db.collection('listening_history');
 
-        const operations = enrichedData.map(item => ({
+        const operations = enrichedData.map((item) => ({
           updateOne: {
             filter: {
               user_id: req.userId,
               track_id: item.track_id,
-              played_at: item.played_at
+              played_at: item.played_at,
             },
             update: { $set: item },
-            upsert: true
-          }
+            upsert: true,
+          },
         }));
 
         const bulkResult = await listeningHistoryCollection.bulkWrite(operations);
@@ -523,32 +514,30 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
             valid_records: csvData.length,
             stored_records: bulkResult.upsertedCount + bulkResult.modifiedCount,
             audio_features_processed: processAudioFeatures,
-            errors_count: errors.length
+            errors_count: errors.length,
           },
           errors: errors.slice(0, 5), // Return first 5 errors for debugging
           sample_data: enrichedData.slice(0, 3), // Return first 3 records as sample
-          message: `Successfully processed ${csvData.length} listening history records from CSV file`
+          message: `Successfully processed ${csvData.length} listening history records from CSV file`,
         });
-
       } catch (parseError) {
         // Clean up uploaded file on error
         if (fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
         }
-        
+
         console.error('Error parsing CSV:', parseError);
         res.status(500).json({
           error: 'CSV processing failed',
-          message: parseError.message
+          message: parseError.message,
         });
       }
     });
-
   } catch (error) {
     console.error('Error in CSV upload endpoint:', error);
     res.status(500).json({
       error: 'Failed to process CSV upload',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -560,22 +549,21 @@ router.post('/upload-csv', requireAuth, async (req, res) => {
 router.get('/health', async (req, res) => {
   try {
     const cacheStats = spotifyService.getCacheStats();
-    
+
     res.json({
       status: 'healthy',
       service: 'SpotifyAudioFeaturesService',
       cache: cacheStats,
       rateLimiter: {
-        status: 'active'
+        status: 'active',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     res.status(500).json({
       status: 'unhealthy',
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });

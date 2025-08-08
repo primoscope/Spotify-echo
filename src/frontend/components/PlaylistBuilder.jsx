@@ -38,13 +38,13 @@ import {
 /**
  * Enhanced Playlist Builder with Drag & Drop, Explainable Recommendations
  */
-const PlaylistBuilder = ({ 
-  initialTracks = [], 
-  recommendations = [], 
-  onSave, 
+const PlaylistBuilder = ({
+  initialTracks = [],
+  recommendations = [],
+  onSave,
   onShare,
   onGetExplanation,
-  onProvideFeedback 
+  onProvideFeedback,
 }) => {
   const [tracks, setTracks] = useState(initialTracks);
   const [playlistName, setPlaylistName] = useState('My Playlist');
@@ -67,52 +67,64 @@ const PlaylistBuilder = ({
     setDragOverIndex(index);
   }, []);
 
-  const handleDrop = useCallback((e, dropIndex) => {
-    e.preventDefault();
-    
-    if (draggedItem === null) return;
-    
-    const newTracks = [...tracks];
-    const draggedTrack = newTracks[draggedItem];
-    
-    // Remove the dragged item
-    newTracks.splice(draggedItem, 1);
-    
-    // Insert at new position
-    const actualDropIndex = draggedItem < dropIndex ? dropIndex - 1 : dropIndex;
-    newTracks.splice(actualDropIndex, 0, draggedTrack);
-    
-    setTracks(newTracks);
-    setDraggedItem(null);
-    setDragOverIndex(null);
-  }, [tracks, draggedItem]);
+  const handleDrop = useCallback(
+    (e, dropIndex) => {
+      e.preventDefault();
+
+      if (draggedItem === null) return;
+
+      const newTracks = [...tracks];
+      const draggedTrack = newTracks[draggedItem];
+
+      // Remove the dragged item
+      newTracks.splice(draggedItem, 1);
+
+      // Insert at new position
+      const actualDropIndex = draggedItem < dropIndex ? dropIndex - 1 : dropIndex;
+      newTracks.splice(actualDropIndex, 0, draggedTrack);
+
+      setTracks(newTracks);
+      setDraggedItem(null);
+      setDragOverIndex(null);
+    },
+    [tracks, draggedItem]
+  );
 
   const handleDragEnd = useCallback(() => {
     setDraggedItem(null);
     setDragOverIndex(null);
   }, []);
 
-  const addTrackToPlaylist = useCallback((track) => {
-    if (!tracks.find(t => t.id === track.id)) {
-      setTracks(prev => [...prev, track]);
-    }
-  }, [tracks]);
+  const addTrackToPlaylist = useCallback(
+    (track) => {
+      if (!tracks.find((t) => t.id === track.id)) {
+        setTracks((prev) => [...prev, track]);
+      }
+    },
+    [tracks]
+  );
 
   const removeTrackFromPlaylist = useCallback((trackId) => {
-    setTracks(prev => prev.filter(t => t.id !== trackId));
+    setTracks((prev) => prev.filter((t) => t.id !== trackId));
   }, []);
 
-  const handleExplanation = useCallback(async (track) => {
-    if (onGetExplanation) {
-      onGetExplanation(track);
-    }
-  }, [onGetExplanation]);
+  const handleExplanation = useCallback(
+    async (track) => {
+      if (onGetExplanation) {
+        onGetExplanation(track);
+      }
+    },
+    [onGetExplanation]
+  );
 
-  const handleFeedback = useCallback((track, feedback) => {
-    if (onProvideFeedback) {
-      onProvideFeedback(track, feedback);
-    }
-  }, [onProvideFeedback]);
+  const handleFeedback = useCallback(
+    (track, feedback) => {
+      if (onProvideFeedback) {
+        onProvideFeedback(track, feedback);
+      }
+    },
+    [onProvideFeedback]
+  );
 
   const formatDuration = (ms) => {
     const minutes = Math.floor(ms / 60000);
@@ -142,19 +154,16 @@ const PlaylistBuilder = ({
       }}
     >
       {!isRecommendation && (
-        <DragIndicator 
-          sx={{ 
-            color: 'text.secondary', 
+        <DragIndicator
+          sx={{
+            color: 'text.secondary',
             mr: 1,
             cursor: 'grab',
-          }} 
+          }}
         />
       )}
-      
-      <Avatar 
-        src={track.album?.images?.[0]?.url} 
-        sx={{ width: 40, height: 40, mr: 2 }}
-      >
+
+      <Avatar src={track.album?.images?.[0]?.url} sx={{ width: 40, height: 40, mr: 2 }}>
         <LibraryMusic />
       </Avatar>
 
@@ -164,15 +173,13 @@ const PlaylistBuilder = ({
             <Typography variant="subtitle1" noWrap>
               {track.name}
             </Typography>
-            {track.explicit && (
-              <Chip label="E" size="small" variant="outlined" />
-            )}
+            {track.explicit && <Chip label="E" size="small" variant="outlined" />}
           </Box>
         }
         secondary={
           <Box>
             <Typography variant="body2" color="text.secondary" noWrap>
-              {track.artists?.map(a => a.name).join(', ') || track.artist}
+              {track.artists?.map((a) => a.name).join(', ') || track.artist}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
               <AccessTime sx={{ fontSize: 14 }} />
@@ -180,9 +187,9 @@ const PlaylistBuilder = ({
                 {formatDuration(track.duration_ms || 200000)}
               </Typography>
               {track.popularity && (
-                <Chip 
-                  label={`${track.popularity}% popular`} 
-                  size="small" 
+                <Chip
+                  label={`${track.popularity}% popular`}
+                  size="small"
                   variant="outlined"
                   sx={{ fontSize: '10px', height: '20px' }}
                 />
@@ -197,26 +204,17 @@ const PlaylistBuilder = ({
           {isRecommendation ? (
             <>
               <Tooltip title="Add to Playlist">
-                <IconButton 
-                  onClick={() => addTrackToPlaylist(track)}
-                  color="primary"
-                >
+                <IconButton onClick={() => addTrackToPlaylist(track)} color="primary">
                   <Add />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Why recommended?">
-                <IconButton 
-                  onClick={() => handleExplanation(track)}
-                  color="info"
-                >
+                <IconButton onClick={() => handleExplanation(track)} color="info">
                   <Info />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Like this recommendation">
-                <IconButton 
-                  onClick={() => handleFeedback(track, 'like')}
-                  color="success"
-                >
+                <IconButton onClick={() => handleFeedback(track, 'like')} color="success">
                   <FavoriteBorder />
                 </IconButton>
               </Tooltip>
@@ -224,18 +222,12 @@ const PlaylistBuilder = ({
           ) : (
             <>
               <Tooltip title="Like this track">
-                <IconButton 
-                  onClick={() => handleFeedback(track, 'like')}
-                  color="error"
-                >
+                <IconButton onClick={() => handleFeedback(track, 'like')} color="error">
                   <FavoriteBorder />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Remove from playlist">
-                <IconButton 
-                  onClick={() => removeTrackFromPlaylist(track.id)}
-                  color="error"
-                >
+                <IconButton onClick={() => removeTrackFromPlaylist(track.id)} color="error">
                   <Delete />
                 </IconButton>
               </Tooltip>
@@ -251,24 +243,22 @@ const PlaylistBuilder = ({
       {/* Current Playlist */}
       <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <CardContent sx={{ pb: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+          >
             <TextField
               value={playlistName}
               onChange={(e) => setPlaylistName(e.target.value)}
               variant="standard"
-              sx={{ 
-                '& .MuiInput-input': { 
-                  fontSize: '1.5rem', 
-                  fontWeight: 'bold' 
-                } 
+              sx={{
+                '& .MuiInput-input': {
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                },
               }}
             />
             <Stack direction="row" spacing={1}>
-              <Button
-                variant="contained"
-                startIcon={<PlayArrow />}
-                size="small"
-              >
+              <Button variant="contained" startIcon={<PlayArrow />} size="small">
                 Play
               </Button>
               <Button
@@ -281,26 +271,12 @@ const PlaylistBuilder = ({
               </Button>
             </Stack>
           </Box>
-          
+
           {/* Playlist Stats */}
           <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <Chip 
-              label={`${tracks.length} tracks`} 
-              variant="outlined" 
-              size="small"
-            />
-            <Chip 
-              label={`${totalMinutes} min`} 
-              variant="outlined" 
-              size="small"
-            />
-            {tracks.length > 0 && (
-              <Chip 
-                label="Custom Playlist" 
-                color="primary" 
-                size="small"
-              />
-            )}
+            <Chip label={`${tracks.length} tracks`} variant="outlined" size="small" />
+            <Chip label={`${totalMinutes} min`} variant="outlined" size="small" />
+            {tracks.length > 0 && <Chip label="Custom Playlist" color="primary" size="small" />}
           </Box>
         </CardContent>
 
@@ -308,10 +284,10 @@ const PlaylistBuilder = ({
 
         <CardContent sx={{ flex: 1, overflow: 'auto', pt: 2 }}>
           {tracks.length === 0 ? (
-            <Paper 
-              sx={{ 
-                p: 4, 
-                textAlign: 'center', 
+            <Paper
+              sx={{
+                p: 4,
+                textAlign: 'center',
                 bgcolor: alpha('#1976d2', 0.05),
                 border: '2px dashed',
                 borderColor: 'primary.main',
@@ -340,7 +316,7 @@ const PlaylistBuilder = ({
         </CardContent>
 
         <Divider />
-        
+
         <CardContent sx={{ pt: 2 }}>
           <Button
             fullWidth
@@ -390,8 +366,8 @@ const PlaylistBuilder = ({
       </Card>
 
       {/* Share Dialog */}
-      <Dialog 
-        open={shareDialogOpen} 
+      <Dialog
+        open={shareDialogOpen}
         onClose={() => setShareDialogOpen(false)}
         maxWidth="sm"
         fullWidth
@@ -401,7 +377,7 @@ const PlaylistBuilder = ({
           <Typography variant="body2" color="text.secondary" paragraph>
             Share &quot;{playlistName}&quot; with {tracks.length} tracks
           </Typography>
-          
+
           <Stack spacing={2}>
             <Button
               variant="outlined"
@@ -413,7 +389,7 @@ const PlaylistBuilder = ({
             >
               Copy Link
             </Button>
-            
+
             <Button
               variant="outlined"
               fullWidth
@@ -424,9 +400,7 @@ const PlaylistBuilder = ({
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShareDialogOpen(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setShareDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -48,7 +48,7 @@ function PlaylistManager() {
 
   const handleCreatePlaylist = async (playlistData) => {
     setCreating(true);
-    
+
     try {
       const response = await fetch('/api/playlists/create', {
         method: 'POST',
@@ -58,14 +58,14 @@ function PlaylistManager() {
         body: JSON.stringify({
           ...playlistData,
           userId: user.id,
-          spotifyAccessToken: accessToken
-        })
+          spotifyAccessToken: accessToken,
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setPlaylists(prev => [data.playlist, ...prev]);
+        setPlaylists((prev) => [data.playlist, ...prev]);
         setShowCreateModal(false);
         // Show success message
         alert(`Playlist "${data.playlist.name}" created successfully!`);
@@ -94,15 +94,15 @@ function PlaylistManager() {
           userId: user.id,
           spotifyAccessToken: accessToken,
           trackCount: options.trackCount || 20,
-          autoCreate: options.autoCreate || false
-        })
+          autoCreate: options.autoCreate || false,
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
         if (data.autoCreated) {
-          setPlaylists(prev => [data.playlist, ...prev]);
+          setPlaylists((prev) => [data.playlist, ...prev]);
           alert(`Playlist created with ${data.tracks.length} tracks!`);
         } else {
           // Show generated tracks for user to review
@@ -137,17 +137,17 @@ function PlaylistManager() {
       <div className="playlist-header">
         <h1>🎵 My Playlists</h1>
         <p>AI-generated playlists and manual creations</p>
-        
+
         <div className="playlist-actions">
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => setShowGenerateModal(true)}
             disabled={generating}
           >
             {generating ? '🤖 Generating...' : '🤖 Generate with AI'}
           </button>
-          
-          <button 
+
+          <button
             className="btn btn-secondary"
             onClick={() => setShowCreateModal(true)}
             disabled={creating}
@@ -171,8 +171,8 @@ function PlaylistManager() {
           </button>
         </div>
       ) : (
-        <PlaylistGrid 
-          playlists={playlists} 
+        <PlaylistGrid
+          playlists={playlists}
           onRefresh={loadPlaylists}
           userAccessToken={accessToken}
         />
@@ -213,9 +213,9 @@ function PlaylistGrid({ playlists, onRefresh, userAccessToken }) {
 
   return (
     <div className="playlist-grid">
-      {playlists.map(playlist => (
-        <PlaylistCard 
-          key={playlist.id} 
+      {playlists.map((playlist) => (
+        <PlaylistCard
+          key={playlist.id}
           playlist={playlist}
           onRefresh={onRefresh}
           userAccessToken={userAccessToken}
@@ -247,8 +247,8 @@ function PlaylistCard({ playlist, onRefresh, userAccessToken }) {
         },
         body: JSON.stringify({
           spotifyAccessToken: userAccessToken,
-          deleteFromSpotify: confirm('Also delete from Spotify?')
-        })
+          deleteFromSpotify: confirm('Also delete from Spotify?'),
+        }),
       });
 
       const data = await response.json();
@@ -279,16 +279,14 @@ function PlaylistCard({ playlist, onRefresh, userAccessToken }) {
           <p className="playlist-meta">
             {playlist.trackCount} tracks • Created {formatDate(playlist.createdAt)}
           </p>
-          {playlist.description && (
-            <p className="playlist-description">{playlist.description}</p>
-          )}
+          {playlist.description && <p className="playlist-description">{playlist.description}</p>}
         </div>
-        
+
         <div className="playlist-actions">
           {playlist.spotifyUrl && (
-            <a 
-              href={playlist.spotifyUrl} 
-              target="_blank" 
+            <a
+              href={playlist.spotifyUrl}
+              target="_blank"
               rel="noopener noreferrer"
               className="spotify-link"
               title="Open in Spotify"
@@ -296,16 +294,16 @@ function PlaylistCard({ playlist, onRefresh, userAccessToken }) {
               🎵
             </a>
           )}
-          
-          <button 
+
+          <button
             className="expand-btn"
             onClick={() => setExpanded(!expanded)}
             title={expanded ? 'Collapse' : 'Expand'}
           >
             {expanded ? '▲' : '▼'}
           </button>
-          
-          <button 
+
+          <button
             className="delete-btn"
             onClick={handleDelete}
             disabled={deleting}
@@ -316,9 +314,7 @@ function PlaylistCard({ playlist, onRefresh, userAccessToken }) {
         </div>
       </div>
 
-      {expanded && (
-        <PlaylistDetails playlist={playlist} />
-      )}
+      {expanded && <PlaylistDetails playlist={playlist} />}
     </div>
   );
 }
@@ -367,9 +363,7 @@ function PlaylistDetails({ playlist }) {
           </div>
         ))}
         {tracks.length > 10 && (
-          <div className="tracks-overflow">
-            +{tracks.length - 10} more tracks
-          </div>
+          <div className="tracks-overflow">+{tracks.length - 10} more tracks</div>
         )}
       </div>
     </div>
@@ -385,7 +379,7 @@ function CreatePlaylistModal({ onClose, onCreate, isCreating }) {
     description: '',
     public: false,
     collaborative: false,
-    tracks: []
+    tracks: [],
   });
 
   const handleSubmit = (e) => {
@@ -397,9 +391,9 @@ function CreatePlaylistModal({ onClose, onCreate, isCreating }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -408,9 +402,11 @@ function CreatePlaylistModal({ onClose, onCreate, isCreating }) {
       <div className="modal">
         <div className="modal-header">
           <h2>Create New Playlist</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" onClick={onClose}>
+            ✕
+          </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="modal-body">
           <div className="form-group">
             <label htmlFor="name">Playlist Name *</label>
@@ -465,8 +461,8 @@ function CreatePlaylistModal({ onClose, onCreate, isCreating }) {
             <button type="button" onClick={onClose} className="btn btn-secondary">
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary"
               disabled={isCreating || !formData.name.trim()}
             >
@@ -499,7 +495,7 @@ function GeneratePlaylistModal({ onClose, onGenerate, isGenerating }) {
     'Make a chill study music playlist',
     'Generate romantic dinner music',
     'Create energetic party songs',
-    'Make a relaxing bedtime playlist'
+    'Make a relaxing bedtime playlist',
   ];
 
   return (
@@ -507,9 +503,11 @@ function GeneratePlaylistModal({ onClose, onGenerate, isGenerating }) {
       <div className="modal generate-modal">
         <div className="modal-header">
           <h2>🤖 Generate AI Playlist</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" onClick={onClose}>
+            ✕
+          </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="modal-body">
           <div className="form-group">
             <label htmlFor="prompt">Describe your playlist *</label>
@@ -571,8 +569,8 @@ function GeneratePlaylistModal({ onClose, onGenerate, isGenerating }) {
             <button type="button" onClick={onClose} className="btn btn-secondary">
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary"
               disabled={isGenerating || !prompt.trim()}
             >

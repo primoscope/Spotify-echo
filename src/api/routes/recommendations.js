@@ -10,7 +10,7 @@ const router = express.Router();
 const recommendationRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 30, // 30 requests per window per IP
-  message: 'Too many recommendation requests, please slow down'
+  message: 'Too many recommendation requests, please slow down',
 });
 
 /**
@@ -19,7 +19,7 @@ const recommendationRateLimit = createRateLimit({
  */
 router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) => {
   const startTime = performance.now();
-  
+
   try {
     const {
       limit = 20,
@@ -28,7 +28,7 @@ router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) 
       activity,
       timeOfDay,
       includeNewMusic = true,
-      excludeRecentlyPlayed = true
+      excludeRecentlyPlayed = true,
     } = req.body;
 
     // Generate cache key for recommendations
@@ -40,7 +40,7 @@ router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) 
       activity,
       timeOfDay,
       includeNewMusic,
-      excludeRecentlyPlayed
+      excludeRecentlyPlayed,
     });
 
     // Try to get cached recommendations first
@@ -52,7 +52,7 @@ router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) 
         ...cachedRecommendations.data,
         cached: true,
         userId: req.userId,
-        generatedAt: cachedRecommendations.timestamp
+        generatedAt: cachedRecommendations.timestamp,
       });
     }
 
@@ -64,7 +64,7 @@ router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) 
       activity,
       timeOfDay,
       includeNewMusic,
-      excludeRecentlyPlayed
+      excludeRecentlyPlayed,
     });
 
     // Cache the recommendations
@@ -80,15 +80,14 @@ router.post('/generate', requireAuth, recommendationRateLimit, async (req, res) 
       ...recommendations,
       cached: false,
       userId: req.userId,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Error generating recommendations:', error);
     performanceMonitor.recordCustomMetric('recommendations_error', 1);
     res.status(500).json({
       error: 'Failed to generate recommendations',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -102,30 +101,38 @@ router.get('/mood/:mood', requireAuth, recommendationRateLimit, async (req, res)
     const { mood } = req.params;
     const { limit = 20 } = req.query;
 
-    const validMoods = ['happy', 'sad', 'energetic', 'calm', 'upbeat', 'melancholy', 'focused', 'party'];
+    const validMoods = [
+      'happy',
+      'sad',
+      'energetic',
+      'calm',
+      'upbeat',
+      'melancholy',
+      'focused',
+      'party',
+    ];
     if (!validMoods.includes(mood.toLowerCase())) {
       return res.status(400).json({
         error: 'Invalid mood',
-        message: `Mood must be one of: ${validMoods.join(', ')}`
+        message: `Mood must be one of: ${validMoods.join(', ')}`,
       });
     }
 
     const recommendations = await recommendationEngine.generateRecommendations(req.userId, {
       limit: parseInt(limit),
-      mood: mood.toLowerCase()
+      mood: mood.toLowerCase(),
     });
 
     res.json({
       success: true,
       mood: mood.toLowerCase(),
-      ...recommendations
+      ...recommendations,
     });
-
   } catch (error) {
     console.error('Error getting mood recommendations:', error);
     res.status(500).json({
       error: 'Failed to get mood recommendations',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -143,26 +150,25 @@ router.get('/activity/:activity', requireAuth, recommendationRateLimit, async (r
     if (!validActivities.includes(activity.toLowerCase())) {
       return res.status(400).json({
         error: 'Invalid activity',
-        message: `Activity must be one of: ${validActivities.join(', ')}`
+        message: `Activity must be one of: ${validActivities.join(', ')}`,
       });
     }
 
     const recommendations = await recommendationEngine.generateRecommendations(req.userId, {
       limit: parseInt(limit),
-      activity: activity.toLowerCase()
+      activity: activity.toLowerCase(),
     });
 
     res.json({
       success: true,
       activity: activity.toLowerCase(),
-      ...recommendations
+      ...recommendations,
     });
-
   } catch (error) {
     console.error('Error getting activity recommendations:', error);
     res.status(500).json({
       error: 'Failed to get activity recommendations',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -178,26 +184,25 @@ router.post('/similar', requireAuth, recommendationRateLimit, async (req, res) =
     if (!trackId) {
       return res.status(400).json({
         error: 'Missing track ID',
-        message: 'trackId is required'
+        message: 'trackId is required',
       });
     }
 
     const similarTracks = await recommendationEngine.contentFilter.findSimilarTracks(trackId, {
-      limit: parseInt(limit)
+      limit: parseInt(limit),
     });
 
     res.json({
       success: true,
       seedTrack: trackId,
       similarTracks,
-      count: similarTracks.length
+      count: similarTracks.length,
     });
-
   } catch (error) {
     console.error('Error finding similar tracks:', error);
     res.status(500).json({
       error: 'Failed to find similar tracks',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -221,7 +226,7 @@ router.get('/history', requireAuth, async (req, res) => {
         .skip(skip)
         .limit(parseInt(limit))
         .toArray(),
-      recommendationsCollection.countDocuments({ user_id: req.userId })
+      recommendationsCollection.countDocuments({ user_id: req.userId }),
     ]);
 
     res.json({
@@ -231,15 +236,14 @@ router.get('/history', requireAuth, async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
-        pages: Math.ceil(total / parseInt(limit))
-      }
+        pages: Math.ceil(total / parseInt(limit)),
+      },
     });
-
   } catch (error) {
     console.error('Error getting recommendation history:', error);
     res.status(500).json({
       error: 'Failed to get recommendation history',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -255,7 +259,7 @@ router.post('/feedback', requireAuth, async (req, res) => {
     if (!recommendationId || !trackId || (!feedback && !rating)) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'recommendationId, trackId, and either feedback or rating are required'
+        message: 'recommendationId, trackId, and either feedback or rating are required',
       });
     }
 
@@ -263,7 +267,7 @@ router.post('/feedback', requireAuth, async (req, res) => {
     if (feedback && !validFeedback.includes(feedback)) {
       return res.status(400).json({
         error: 'Invalid feedback',
-        message: `Feedback must be one of: ${validFeedback.join(', ')}`
+        message: `Feedback must be one of: ${validFeedback.join(', ')}`,
       });
     }
 
@@ -275,9 +279,9 @@ router.post('/feedback', requireAuth, async (req, res) => {
       [`user_feedback.${trackId}`]: {
         feedback: feedback || null,
         rating: rating || null,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      updated_at: new Date()
+      updated_at: new Date(),
     };
 
     await recommendationsCollection.updateOne(
@@ -294,14 +298,13 @@ router.post('/feedback', requireAuth, async (req, res) => {
     res.json({
       success: true,
       message: 'Feedback recorded successfully',
-      feedbackData: updateData[`user_feedback.${trackId}`]
+      feedbackData: updateData[`user_feedback.${trackId}`],
     });
-
   } catch (error) {
     console.error('Error recording feedback:', error);
     res.status(500).json({
       error: 'Failed to record feedback',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -318,7 +321,7 @@ router.get('/trending', recommendationRateLimit, async (req, res) => {
       parseInt(limit),
       {
         genre,
-        timeframe
+        timeframe,
       }
     );
 
@@ -328,14 +331,13 @@ router.get('/trending', recommendationRateLimit, async (req, res) => {
       timeframe,
       genre: genre || 'all',
       recommendations,
-      count: recommendations.length
+      count: recommendations.length,
     });
-
   } catch (error) {
     console.error('Error getting trending recommendations:', error);
     res.status(500).json({
       error: 'Failed to get trending recommendations',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -346,19 +348,12 @@ router.get('/trending', recommendationRateLimit, async (req, res) => {
  */
 router.post('/playlist', requireAuth, recommendationRateLimit, async (req, res) => {
   try {
-    const {
-      playlistName,
-      trackCount = 30,
-      mood,
-      activity,
-      genres,
-      audioFeatures
-    } = req.body;
+    const { playlistName, trackCount = 30, mood, activity, genres, audioFeatures } = req.body;
 
     if (!playlistName) {
       return res.status(400).json({
         error: 'Missing playlist name',
-        message: 'playlistName is required'
+        message: 'playlistName is required',
       });
     }
 
@@ -367,7 +362,7 @@ router.post('/playlist', requireAuth, recommendationRateLimit, async (req, res) 
       mood,
       activity,
       genres,
-      audioFeatures
+      audioFeatures,
     });
 
     const playlistData = {
@@ -375,20 +370,19 @@ router.post('/playlist', requireAuth, recommendationRateLimit, async (req, res) 
       description: `Personalized playlist generated by EchoTune AI${mood ? ` for ${mood} mood` : ''}${activity ? ` for ${activity}` : ''}`,
       tracks: recommendations.recommendations,
       metadata: recommendations.metadata,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     res.json({
       success: true,
       playlist: playlistData,
-      trackCount: recommendations.recommendations.length
+      trackCount: recommendations.recommendations.length,
     });
-
   } catch (error) {
     console.error('Error generating playlist recommendations:', error);
     res.status(500).json({
       error: 'Failed to generate playlist recommendations',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -404,7 +398,7 @@ router.get('/:id/explain', requireAuth, async (req, res) => {
 
     if (!id) {
       return res.status(400).json({
-        error: 'Missing recommendation ID'
+        error: 'Missing recommendation ID',
       });
     }
 
@@ -414,31 +408,34 @@ router.get('/:id/explain', requireAuth, async (req, res) => {
     // Get the recommendation
     const recommendation = await recommendationsCollection.findOne({
       _id: require('mongodb').ObjectId.isValid(id) ? new require('mongodb').ObjectId(id) : id,
-      user_id: req.userId
+      user_id: req.userId,
     });
 
     if (!recommendation) {
       return res.status(404).json({
-        error: 'Recommendation not found'
+        error: 'Recommendation not found',
       });
     }
 
     // Generate explanation based on recommendation type and data
-    const explanation = await generateRecommendationExplanation(recommendation, trackId, req.userId);
+    const explanation = await generateRecommendationExplanation(
+      recommendation,
+      trackId,
+      req.userId
+    );
 
     res.json({
       success: true,
       recommendationId: id,
       trackId: trackId || null,
       explanation,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Error explaining recommendation:', error);
     res.status(500).json({
       error: 'Failed to explain recommendation',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -450,7 +447,7 @@ router.get('/:id/explain', requireAuth, async (req, res) => {
 router.get('/insights', requireAuth, async (req, res) => {
   try {
     const db = require('../../database/mongodb').getDb();
-    
+
     // Get user's recent recommendations for analysis
     const recommendationsCollection = db.collection('recommendations');
     const recentRecommendations = await recommendationsCollection
@@ -463,22 +460,27 @@ router.get('/insights', requireAuth, async (req, res) => {
     const insights = {
       totalRecommendations: recentRecommendations.length,
       algorithmBreakdown: {
-        contentBased: recentRecommendations.filter(r => r.recommendation_type === 'content_based').length,
-        collaborative: recentRecommendations.filter(r => r.recommendation_type === 'collaborative').length,
-        hybrid: recentRecommendations.filter(r => r.recommendation_type === 'hybrid').length
+        contentBased: recentRecommendations.filter((r) => r.recommendation_type === 'content_based')
+          .length,
+        collaborative: recentRecommendations.filter(
+          (r) => r.recommendation_type === 'collaborative'
+        ).length,
+        hybrid: recentRecommendations.filter((r) => r.recommendation_type === 'hybrid').length,
       },
-      averageConfidence: recentRecommendations.reduce((sum, r) => sum + (r.confidence_score || 0), 0) / recentRecommendations.length || 0,
+      averageConfidence:
+        recentRecommendations.reduce((sum, r) => sum + (r.confidence_score || 0), 0) /
+          recentRecommendations.length || 0,
       feedbackStats: {
         liked: 0,
         disliked: 0,
-        saved: 0
-      }
+        saved: 0,
+      },
     };
 
     // Count feedback
-    recentRecommendations.forEach(rec => {
+    recentRecommendations.forEach((rec) => {
       if (rec.user_feedback) {
-        Object.values(rec.user_feedback).forEach(feedback => {
+        Object.values(rec.user_feedback).forEach((feedback) => {
           if (feedback.feedback === 'like') insights.feedbackStats.liked++;
           if (feedback.feedback === 'dislike') insights.feedbackStats.disliked++;
           if (feedback.feedback === 'save') insights.feedbackStats.saved++;
@@ -489,20 +491,19 @@ router.get('/insights', requireAuth, async (req, res) => {
     res.json({
       success: true,
       insights,
-      recommendations: recentRecommendations.map(r => ({
+      recommendations: recentRecommendations.map((r) => ({
         id: r._id,
         type: r.recommendation_type,
         confidence: r.confidence_score,
         createdAt: r.created_at,
-        trackCount: r.tracks?.length || 0
-      }))
+        trackCount: r.tracks?.length || 0,
+      })),
     });
-
   } catch (error) {
     console.error('Error getting recommendation insights:', error);
     res.status(500).json({
       error: 'Failed to get recommendation insights',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -513,59 +514,62 @@ router.get('/insights', requireAuth, async (req, res) => {
 async function generateRecommendationExplanation(recommendation, trackId, userId) {
   try {
     const db = require('../../database/mongodb').getDb();
-    
+
     // Get user's listening history and preferences for context
     const userProfile = await getUserListeningProfile(userId, db);
-    
+
     const explanation = {
       summary: '',
       reasons: [],
       confidence: recommendation.confidence_score || 0.7,
       algorithm: recommendation.recommendation_type || 'hybrid',
-      factors: []
+      factors: [],
     };
 
     // Base explanation on algorithm type
     switch (recommendation.recommendation_type) {
       case 'content_based':
-        explanation.summary = 'This recommendation is based on the musical characteristics of songs you\'ve enjoyed.';
+        explanation.summary =
+          'This recommendation is based on the musical characteristics of songs you\'ve enjoyed.';
         explanation.reasons.push('Analyzes audio features like tempo, energy, and mood');
         explanation.factors.push({
           type: 'audio_features',
           description: 'Musical similarity to your liked tracks',
-          weight: 0.8
+          weight: 0.8,
         });
         break;
 
       case 'collaborative':
-        explanation.summary = 'This recommendation comes from users with similar music taste to yours.';
+        explanation.summary =
+          'This recommendation comes from users with similar music taste to yours.';
         explanation.reasons.push('Based on listening patterns of users with similar preferences');
         explanation.factors.push({
           type: 'user_similarity',
           description: 'Recommended by users with similar taste',
-          weight: 0.7
+          weight: 0.7,
         });
         break;
 
       case 'hybrid':
       default:
-        explanation.summary = 'This recommendation combines multiple AI algorithms for the best results.';
+        explanation.summary =
+          'This recommendation combines multiple AI algorithms for the best results.';
         explanation.reasons.push('Combines content analysis with user behavior patterns');
         explanation.factors.push(
           {
             type: 'content_similarity',
             description: 'Musical features match your preferences',
-            weight: 0.4
+            weight: 0.4,
           },
           {
             type: 'collaborative_filtering',
             description: 'Liked by similar users',
-            weight: 0.3
+            weight: 0.3,
           },
           {
             type: 'context_aware',
             description: 'Fits your current mood and activity',
-            weight: 0.2
+            weight: 0.2,
           }
         );
         break;
@@ -577,7 +581,7 @@ async function generateRecommendationExplanation(recommendation, trackId, userId
       explanation.factors.push({
         type: 'mood_context',
         description: `Selected for ${recommendation.context.mood} mood`,
-        weight: 0.3
+        weight: 0.3,
       });
     }
 
@@ -586,7 +590,7 @@ async function generateRecommendationExplanation(recommendation, trackId, userId
       explanation.factors.push({
         type: 'activity_context',
         description: `Optimized for ${recommendation.context.activity}`,
-        weight: 0.2
+        weight: 0.2,
       });
     }
 
@@ -597,7 +601,9 @@ async function generateRecommendationExplanation(recommendation, trackId, userId
 
     // Add user-specific reasons if we have profile data
     if (userProfile.topGenres && userProfile.topGenres.length > 0) {
-      explanation.reasons.push(`Includes genres you love: ${userProfile.topGenres.slice(0, 3).join(', ')}`);
+      explanation.reasons.push(
+        `Includes genres you love: ${userProfile.topGenres.slice(0, 3).join(', ')}`
+      );
     }
 
     if (userProfile.recentlyPlayedArtists && userProfile.recentlyPlayedArtists.length > 0) {
@@ -606,18 +612,17 @@ async function generateRecommendationExplanation(recommendation, trackId, userId
 
     // Add specific track explanation if trackId provided
     if (trackId && recommendation.tracks) {
-      const specificTrack = recommendation.tracks.find(t => t.id === trackId);
+      const specificTrack = recommendation.tracks.find((t) => t.id === trackId);
       if (specificTrack) {
         explanation.trackSpecific = {
           name: specificTrack.name,
           artist: specificTrack.artist,
-          reasons: generateTrackSpecificReasons(specificTrack, userProfile, recommendation)
+          reasons: generateTrackSpecificReasons(specificTrack, userProfile, recommendation),
         };
       }
     }
 
     return explanation;
-
   } catch (error) {
     console.error('Error generating recommendation explanation:', error);
     return {
@@ -625,7 +630,7 @@ async function generateRecommendationExplanation(recommendation, trackId, userId
       reasons: ['Based on your listening history and preferences'],
       confidence: 0.5,
       algorithm: 'unknown',
-      factors: []
+      factors: [],
     };
   }
 }
@@ -637,7 +642,7 @@ async function getUserListeningProfile(userId, db) {
   try {
     // This would typically come from your user profile collection
     // For now, we'll create a basic profile from recent activity
-    
+
     const listeningHistoryCollection = db.collection('listening_history');
     const recentTracks = await listeningHistoryCollection
       .find({ user_id: userId })
@@ -650,7 +655,7 @@ async function getUserListeningProfile(userId, db) {
       topArtists: [],
       recentlyPlayedArtists: [],
       averageAudioFeatures: {},
-      listeningPatterns: {}
+      listeningPatterns: {},
     };
 
     if (recentTracks.length > 0) {
@@ -658,9 +663,9 @@ async function getUserListeningProfile(userId, db) {
       const genreMap = {};
       const artistMap = {};
 
-      recentTracks.forEach(track => {
+      recentTracks.forEach((track) => {
         if (track.genres) {
-          track.genres.forEach(genre => {
+          track.genres.forEach((genre) => {
             genreMap[genre] = (genreMap[genre] || 0) + 1;
           });
         }
@@ -672,21 +677,20 @@ async function getUserListeningProfile(userId, db) {
       profile.topGenres = Object.entries(genreMap)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
-        .map(entry => entry[0]);
+        .map((entry) => entry[0]);
 
       profile.topArtists = Object.entries(artistMap)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10)
-        .map(entry => entry[0]);
+        .map((entry) => entry[0]);
 
       profile.recentlyPlayedArtists = recentTracks
         .slice(0, 20)
-        .map(track => track.artist)
+        .map((track) => track.artist)
         .filter((artist, index, arr) => arr.indexOf(artist) === index);
     }
 
     return profile;
-
   } catch (error) {
     console.error('Error getting user listening profile:', error);
     return {
@@ -694,7 +698,7 @@ async function getUserListeningProfile(userId, db) {
       topArtists: [],
       recentlyPlayedArtists: [],
       averageAudioFeatures: {},
-      listeningPatterns: {}
+      listeningPatterns: {},
     };
   }
 }
@@ -712,9 +716,7 @@ function generateTrackSpecificReasons(track, userProfile, recommendation) {
 
   // Check genre matching
   if (track.genres && userProfile.topGenres) {
-    const matchingGenres = track.genres.filter(genre => 
-      userProfile.topGenres.includes(genre)
-    );
+    const matchingGenres = track.genres.filter((genre) => userProfile.topGenres.includes(genre));
     if (matchingGenres.length > 0) {
       reasons.push(`Features ${matchingGenres[0]} genre that you enjoy`);
     }
@@ -750,7 +752,7 @@ function generateTrackSpecificReasons(track, userProfile, recommendation) {
  */
 function getTimeOfDayDescription(timeOfDay) {
   const hour = parseInt(timeOfDay);
-  
+
   if (hour >= 5 && hour < 12) return 'morning listening';
   if (hour >= 12 && hour < 17) return 'afternoon vibes';
   if (hour >= 17 && hour < 22) return 'evening relaxation';

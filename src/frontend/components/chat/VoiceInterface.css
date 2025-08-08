@@ -89,7 +89,9 @@
   width: 4px;
   background: var(--primary-color);
   border-radius: 2px;
-  transition: height 0.1s ease, opacity 0.1s ease;
+  transition:
+    height 0.1s ease,
+    opacity 0.1s ease;
   min-height: 4px;
 }
 
@@ -303,7 +305,8 @@
   gap: 10px;
 }
 
-.tts-toggle, .voice-toggle {
+.tts-toggle,
+.voice-toggle {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--text-primary);
@@ -314,12 +317,14 @@
   font-size: 1rem;
 }
 
-.tts-toggle.enabled, .voice-toggle.active {
+.tts-toggle.enabled,
+.voice-toggle.active {
   background: var(--primary-color);
   border-color: var(--primary-color);
 }
 
-.tts-toggle:hover, .voice-toggle:hover {
+.tts-toggle:hover,
+.voice-toggle:hover {
   background: var(--primary-color);
   border-color: var(--primary-color);
   transform: translateY(-1px);
@@ -343,7 +348,8 @@
     gap: 10px;
   }
 
-  .mic-button, .submit-button {
+  .mic-button,
+  .submit-button {
     width: 100%;
     padding: 12px 20px;
   }
@@ -394,19 +400,20 @@
 
 /* Animations */
 @keyframes pulse {
-  0%, 100% { 
-    opacity: 1; 
+  0%,
+  100% {
+    opacity: 1;
     transform: scale(1);
   }
-  50% { 
-    opacity: 0.7; 
+  50% {
+    opacity: 0.7;
     transform: scale(1.05);
   }
 }
 
 @keyframes spin {
-  to { 
-    transform: rotate(360deg); 
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -424,7 +431,7 @@
 }
 
 /* Accessibility Improvements */
-.voice-interface [role="button"]:focus,
+.voice-interface [role='button']:focus,
 .voice-interface button:focus,
 .voice-interface select:focus {
   outline: 2px solid var(--primary-color);
@@ -436,11 +443,12 @@
   .voice-interface {
     border: 2px solid #ffffff;
   }
-  
-  .mic-button, .submit-button {
+
+  .mic-button,
+  .submit-button {
     border: 2px solid currentColor;
   }
-  
+
   .transcript-display {
     border: 2px solid #ffffff;
   }
@@ -451,15 +459,15 @@
   .pulse-indicator {
     animation: none;
   }
-  
+
   .processing-indicator {
     animation: none;
   }
-  
+
   .mic-button.listening {
     animation: none;
   }
-  
+
   .visualizer-bar {
     transition: none;
   }

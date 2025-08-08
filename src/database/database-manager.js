@@ -20,7 +20,7 @@ class DatabaseManager {
    */
   async initialize() {
     console.log('🔄 Initializing database connections...');
-    
+
     // Try MongoDB first (preferred for analytics)
     if (process.env.MONGODB_URI) {
       try {
@@ -47,8 +47,7 @@ class DatabaseManager {
     }
 
     // Set fallback mode if no primary databases are available
-    if (this.activeDatabases.length === 0 || 
-        (!this.mongodb && !this.supabase && this.sqlite)) {
+    if (this.activeDatabases.length === 0 || (!this.mongodb && !this.supabase && this.sqlite)) {
       this.fallbackMode = true;
       console.log('📦 Database running in fallback mode (SQLite only)');
     }
@@ -56,7 +55,7 @@ class DatabaseManager {
     this.initialized = true;
     console.log('✅ Database manager initialized');
     console.log(`📊 Active databases: ${this.activeDatabases.join(', ')}`);
-    
+
     return this.activeDatabases.length > 0;
   }
 
@@ -72,10 +71,10 @@ class DatabaseManager {
       });
 
       await this.mongodb.connect();
-      
+
       // Test connection
       await this.mongodb.db().admin().ping();
-      
+
       this.activeDatabases.push('mongodb');
       console.log('✅ MongoDB connected successfully');
       return true;
@@ -93,19 +92,14 @@ class DatabaseManager {
     try {
       // Import Supabase client
       const { createClient } = require('@supabase/supabase-js');
-      
-      this.supabase = createClient(
-        process.env.SUPABASE_URL,
-        process.env.SUPABASE_ANON_KEY
-      );
+
+      this.supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
       // Test connection
-      const { data: _data, error } = await this.supabase
-        .from('test')
-        .select('*')
-        .limit(1);
+      const { data: _data, error } = await this.supabase.from('test').select('*').limit(1);
 
-      if (error && error.code !== 'PGRST116') { // Table not found is ok
+      if (error && error.code !== 'PGRST116') {
+        // Table not found is ok
         throw error;
       }
 
@@ -126,7 +120,7 @@ class DatabaseManager {
     try {
       this.sqlite = new SQLiteManager();
       const success = await this.sqlite.initialize();
-      
+
       if (success) {
         this.activeDatabases.push('sqlite');
         console.log('✅ SQLite fallback database ready');
@@ -152,13 +146,13 @@ class DatabaseManager {
       try {
         const db = this.mongodb.db(process.env.MONGODB_DATABASE || 'spotify_analytics');
         const collection = db.collection('users');
-        
+
         const _result = await collection.replaceOne(
           { id: userData.id },
           { ...userData, updated_at: new Date() },
           { upsert: true }
         );
-        
+
         results.push({ database: 'mongodb', success: true, id: userData.id });
       } catch (error) {
         console.error('MongoDB save user error:', error);
@@ -169,13 +163,10 @@ class DatabaseManager {
     // Try Supabase
     if (this.supabase) {
       try {
-        const { data, error } = await this.supabase
-          .from('users')
-          .upsert([userData])
-          .select();
+        const { data, error } = await this.supabase.from('users').upsert([userData]).select();
 
         if (error) throw error;
-        
+
         results.push({ database: 'supabase', success: true, data });
       } catch (error) {
         console.error('Supabase save user error:', error);
@@ -190,9 +181,9 @@ class DatabaseManager {
     }
 
     return {
-      success: results.some(r => r.success),
+      success: results.some((r) => r.success),
       results,
-      primary: results.find(r => r.success && r.database !== 'sqlite')?.database || 'sqlite'
+      primary: results.find((r) => r.success && r.database !== 'sqlite')?.database || 'sqlite',
     };
   }
 
@@ -207,8 +198,8 @@ class DatabaseManager {
       try {
         const db = this.mongodb.db(process.env.MONGODB_DATABASE || 'spotify_analytics');
         const collection = db.collection('listening_history');
-        
-        const documents = tracks.map(track => ({
+
+        const documents = tracks.map((track) => ({
           userId,
           trackId: track.id || track.track_id,
           trackName: track.name || track.track_name,
@@ -217,7 +208,7 @@ class DatabaseManager {
           playedAt: new Date(track.played_at),
           durationMs: track.duration_ms,
           audioFeatures: track.audio_features || {},
-          createdAt: new Date()
+          createdAt: new Date(),
         }));
 
         const result = await collection.insertMany(documents, { ordered: false });
@@ -235,8 +226,8 @@ class DatabaseManager {
     }
 
     return {
-      success: results.some(r => r.success),
-      results
+      success: results.some((r) => r.success),
+      results,
     };
   }
 
@@ -251,7 +242,7 @@ class DatabaseManager {
       try {
         const db = this.mongodb.db(process.env.MONGODB_DATABASE || 'spotify_analytics');
         const collection = db.collection('recommendations');
-        
+
         const recommendations = await collection
           .find({ userId })
           .sort({ score: -1, createdAt: -1 })
@@ -283,7 +274,7 @@ class DatabaseManager {
     if (this.mongodb) {
       try {
         const db = this.mongodb.db(process.env.MONGODB_DATABASE || 'spotify_analytics');
-        
+
         // Aggregate listening data
         const pipeline = [
           { $match: { userId } },
@@ -292,36 +283,39 @@ class DatabaseManager {
               _id: null,
               totalTracks: { $sum: 1 },
               uniqueArtists: { $addToSet: '$artistName' },
-              avgDuration: { $avg: '$durationMs' }
-            }
+              avgDuration: { $avg: '$durationMs' },
+            },
           },
           {
             $project: {
               totalTracks: 1,
               uniqueArtists: { $size: '$uniqueArtists' },
-              avgDuration: 1
-            }
-          }
+              avgDuration: 1,
+            },
+          },
         ];
 
         const analytics = await db.collection('listening_history').aggregate(pipeline).toArray();
-        
+
         // Get top artists
-        const topArtists = await db.collection('listening_history').aggregate([
-          { $match: { userId } },
-          { $group: { _id: '$artistName', playCount: { $sum: 1 } } },
-          { $sort: { playCount: -1 } },
-          { $limit: 10 },
-          { $project: { artist_name: '$_id', play_count: '$playCount' } }
-        ]).toArray();
+        const topArtists = await db
+          .collection('listening_history')
+          .aggregate([
+            { $match: { userId } },
+            { $group: { _id: '$artistName', playCount: { $sum: 1 } } },
+            { $sort: { playCount: -1 } },
+            { $limit: 10 },
+            { $project: { artist_name: '$_id', play_count: '$playCount' } },
+          ])
+          .toArray();
 
         return {
           success: true,
           analytics: {
             ...analytics[0],
-            top_artists: topArtists
+            top_artists: topArtists,
           },
-          source: 'mongodb'
+          source: 'mongodb',
         };
       } catch (error) {
         console.error('MongoDB get analytics error:', error);
@@ -346,7 +340,7 @@ class DatabaseManager {
     const status = {
       mongodb: { connected: false, status: 'disconnected' },
       supabase: { connected: false, status: 'disconnected' },
-      sqlite: { connected: false, status: 'disconnected' }
+      sqlite: { connected: false, status: 'disconnected' },
     };
 
     // Check MongoDB
@@ -362,7 +356,10 @@ class DatabaseManager {
     // Check Supabase
     if (this.supabase) {
       try {
-        const { data: _data, error: _error } = await this.supabase.from('test').select('*').limit(1);
+        const { data: _data, error: _error } = await this.supabase
+          .from('test')
+          .select('*')
+          .limit(1);
         status.supabase = { connected: true, status: 'healthy' };
       } catch (error) {
         status.supabase = { connected: false, status: 'error', error: error.message };
@@ -379,7 +376,7 @@ class DatabaseManager {
       connections: status,
       active: this.activeDatabases,
       fallbackMode: this.fallbackMode,
-      healthy: this.activeDatabases.length > 0
+      healthy: this.activeDatabases.length > 0,
     };
   }
 
@@ -408,7 +405,7 @@ class DatabaseManager {
     return {
       databases: this.activeDatabases,
       fallbackMode: this.fallbackMode,
-      primary: this.activeDatabases.find(db => db !== 'sqlite') || 'sqlite'
+      primary: this.activeDatabases.find((db) => db !== 'sqlite') || 'sqlite',
     };
   }
 
@@ -420,7 +417,7 @@ class DatabaseManager {
       console.warn('getMongoDatabase: MongoDB client not initialized');
       return null;
     }
-    
+
     try {
       const dbName = databaseName || process.env.MONGODB_DATABASE || 'echotune';
       const db = this.mongodb.db(dbName);
@@ -439,7 +436,7 @@ class DatabaseManager {
     if (!this.mongodb) {
       throw new Error('MongoDB not initialized');
     }
-    
+
     const db = this.getMongoDatabase();
     await db.admin().ping();
     return true;

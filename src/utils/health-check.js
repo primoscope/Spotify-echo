@@ -47,46 +47,48 @@ class HealthCheckSystem {
     let hasCriticalErrors = false;
 
     // Run all health checks in parallel
-    const checkPromises = Array.from(this.checks.entries()).map(async ([checkName, checkFunction]) => {
-      // Define which checks are optional and shouldn't fail the health check
-      const optionalChecks = ['docker', 'ssl', 'network', 'storage', 'redis', 'database'];
-      const isOptional = optionalChecks.includes(checkName);
-      
-      try {
-        const startTime = Date.now();
-        const result = await checkFunction();
-        const duration = Date.now() - startTime;
+    const checkPromises = Array.from(this.checks.entries()).map(
+      async ([checkName, checkFunction]) => {
+        // Define which checks are optional and shouldn't fail the health check
+        const optionalChecks = ['docker', 'ssl', 'network', 'storage', 'redis', 'database'];
+        const isOptional = optionalChecks.includes(checkName);
 
-        return {
-          name: checkName,
-          result: {
-            ...result,
-            duration: `${duration}ms`,
-            timestamp: new Date().toISOString(),
-            optional: isOptional
-          }
-        };
-      } catch (error) {
-        return {
-          name: checkName,
-          result: {
-            status: isOptional ? 'warning' : 'error',
-            error: error.message,
-            optional: isOptional,
-            duration: '0ms',
-            timestamp: new Date().toISOString(),
-          }
-        };
+        try {
+          const startTime = Date.now();
+          const result = await checkFunction();
+          const duration = Date.now() - startTime;
+
+          return {
+            name: checkName,
+            result: {
+              ...result,
+              duration: `${duration}ms`,
+              timestamp: new Date().toISOString(),
+              optional: isOptional,
+            },
+          };
+        } catch (error) {
+          return {
+            name: checkName,
+            result: {
+              status: isOptional ? 'warning' : 'error',
+              error: error.message,
+              optional: isOptional,
+              duration: '0ms',
+              timestamp: new Date().toISOString(),
+            },
+          };
+        }
       }
-    });
+    );
 
     // Wait for all checks to complete
     const checkResults = await Promise.all(checkPromises);
-    
+
     // Process results
     checkResults.forEach(({ name, result }) => {
       results.checks[name] = result;
-      
+
       // Only treat non-optional errors as critical
       if (result.status === 'error' && !result.optional) {
         hasCriticalErrors = true;
@@ -130,16 +132,18 @@ class HealthCheckSystem {
     // Check environment configuration - warn about missing variables but don't fail health check
     const optionalEnvVars = ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'];
     const criticalEnvVars = ['NODE_ENV'];
-    
-    const missingOptional = optionalEnvVars.filter(varName => !process.env[varName]);
-    const missingCritical = criticalEnvVars.filter(varName => !process.env[varName]);
-    
+
+    const missingOptional = optionalEnvVars.filter((varName) => !process.env[varName]);
+    const missingCritical = criticalEnvVars.filter((varName) => !process.env[varName]);
+
     if (missingOptional.length > 0) {
       health.details.missingOptionalVariables = missingOptional;
       health.details.warnings = health.details.warnings || [];
-      health.details.warnings.push('Some optional environment variables are not set - full functionality may be limited');
+      health.details.warnings.push(
+        'Some optional environment variables are not set - full functionality may be limited'
+      );
     }
-    
+
     if (missingCritical.length > 0) {
       health.status = 'warning'; // Changed from 'unhealthy' to 'warning'
       health.details.missingCriticalVariables = missingCritical;
@@ -181,7 +185,7 @@ class HealthCheckSystem {
           status: 'healthy',
           database: global.db.databaseName,
           connected: true,
-          source: 'global_reference'
+          source: 'global_reference',
         };
         return health;
       } catch (error) {
@@ -189,7 +193,7 @@ class HealthCheckSystem {
         health.details.mongodb = {
           status: 'unhealthy',
           error: error.message,
-          source: 'global_reference'
+          source: 'global_reference',
         };
         return health;
       }
@@ -202,9 +206,9 @@ class HealthCheckSystem {
         const mongoHealth = await mongoManager.healthCheck();
         health.details.mongodb = {
           ...mongoHealth,
-          source: 'mongodb_manager'
+          source: 'mongodb_manager',
         };
-        
+
         if (mongoHealth.status !== 'healthy') {
           health.status = 'unhealthy';
         }
@@ -213,7 +217,7 @@ class HealthCheckSystem {
         health.details.mongodb = {
           status: 'error',
           message: error.message,
-          source: 'mongodb_manager'
+          source: 'mongodb_manager',
         };
       }
     } else {
@@ -238,7 +242,9 @@ class HealthCheckSystem {
     if (process.env.REDIS_URL) {
       try {
         // Simple Redis ping test with timeout
-        const { stdout } = await execAsync(`timeout 2s redis-cli -u "${process.env.REDIS_URL}" ping`);
+        const { stdout } = await execAsync(
+          `timeout 2s redis-cli -u "${process.env.REDIS_URL}" ping`
+        );
         if (stdout.trim() === 'PONG') {
           health.details.redis = {
             status: 'healthy',
@@ -310,7 +316,7 @@ class HealthCheckSystem {
       const { stdout } = await execAsync('df -h / | tail -1');
       const diskInfo = stdout.trim().split(/\s+/);
       const diskUsagePercent = parseInt(diskInfo[4]);
-      
+
       health.details.disk = {
         filesystem: diskInfo[0],
         size: diskInfo[1],
@@ -344,7 +350,7 @@ class HealthCheckSystem {
     if (process.env.NODE_ENV === 'development') {
       health.details.connectivity = {
         status: 'skipped',
-        message: 'Network checks disabled in development for performance'
+        message: 'Network checks disabled in development for performance',
       };
       return health;
     }
@@ -364,13 +370,13 @@ class HealthCheckSystem {
         // Reduced timeout from 10s to 1s for much faster health checks
         await execAsync(`timeout 1s curl -f -s --max-time 1 ${endpoint.url} > /dev/null`);
         const responseTime = Date.now() - startTime;
-        
+
         return {
           name: endpoint.name,
           result: {
             status: 'healthy',
             responseTime: `${responseTime}ms`,
-          }
+          },
         };
       } catch (error) {
         return {
@@ -378,14 +384,14 @@ class HealthCheckSystem {
           result: {
             status: 'unhealthy',
             error: 'Connection failed',
-          }
+          },
         };
       }
     });
 
     // Wait for all checks to complete in parallel
     const checkResults = await Promise.all(checkPromises);
-    
+
     // Process results
     checkResults.forEach(({ name, result }) => {
       results[name] = result;
@@ -412,9 +418,11 @@ class HealthCheckSystem {
 
     try {
       await fs.access(certPath);
-      
+
       // Check certificate expiry with timeout
-      const { stdout } = await execAsync(`timeout 2s openssl x509 -enddate -noout -in "${certPath}"`);
+      const { stdout } = await execAsync(
+        `timeout 2s openssl x509 -enddate -noout -in "${certPath}"`
+      );
       const expiryLine = stdout.trim();
       const expiryDate = new Date(expiryLine.split('=')[1]);
       const now = new Date();
@@ -458,16 +466,20 @@ class HealthCheckSystem {
     try {
       // Check if Docker is running with timeout
       await execAsync('timeout 2s docker --version');
-      
+
       // Check Docker Compose services
       const { stdout } = await execAsync('timeout 3s docker-compose ps --format json');
-      const containers = stdout.trim().split('\n').map(line => {
-        try {
-          return JSON.parse(line);
-        } catch {
-          return null;
-        }
-      }).filter(Boolean);
+      const containers = stdout
+        .trim()
+        .split('\n')
+        .map((line) => {
+          try {
+            return JSON.parse(line);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
 
       const containerStatuses = {};
       let allHealthy = true;
@@ -490,7 +502,8 @@ class HealthCheckSystem {
       }
     } catch (error) {
       health.status = 'warning'; // Changed from 'error' to 'warning' for non-Docker deployments
-      health.details.error = 'Docker not available or not running - normal for non-containerized deployments';
+      health.details.error =
+        'Docker not available or not running - normal for non-containerized deployments';
     }
 
     return health;
@@ -505,11 +518,7 @@ class HealthCheckSystem {
       details: {},
     };
 
-    const paths = [
-      '/opt/echotune/logs',
-      '/opt/echotune/backups',
-      '/opt/echotune/ssl',
-    ];
+    const paths = ['/opt/echotune/logs', '/opt/echotune/backups', '/opt/echotune/ssl'];
 
     for (const dirPath of paths) {
       try {

@@ -4,7 +4,7 @@ const SpotifyPlayerContext = createContext();
 
 /**
  * Spotify Web Player SDK Context Provider
- * 
+ *
  * Provides Spotify Web Player functionality:
  * - Music playback control
  * - Current track information
@@ -26,7 +26,7 @@ export const SpotifyPlayerProvider = ({ children }) => {
     // Get access token from local storage or auth context
     const _storedUser = localStorage.getItem('echotune_user');
     const storedToken = localStorage.getItem('spotify_access_token');
-    
+
     if (storedToken) {
       setAccessToken(storedToken);
       initializePlayer(storedToken);
@@ -36,85 +36,91 @@ export const SpotifyPlayerProvider = ({ children }) => {
   /**
    * Initialize Spotify Web Player SDK
    */
-  const initializePlayer = useCallback((token) => {
-    // Load Spotify Web Player SDK
-    if (!window.Spotify) {
-      const script = document.createElement('script');
-      script.src = 'https://sdk.scdn.co/spotify-player.js';
-      script.async = true;
-      document.body.appendChild(script);
+  const initializePlayer = useCallback(
+    (token) => {
+      // Load Spotify Web Player SDK
+      if (!window.Spotify) {
+        const script = document.createElement('script');
+        script.src = 'https://sdk.scdn.co/spotify-player.js';
+        script.async = true;
+        document.body.appendChild(script);
 
-      window.onSpotifyWebPlaybackSDKReady = () => {
+        window.onSpotifyWebPlaybackSDKReady = () => {
+          createPlayer(token);
+        };
+      } else {
         createPlayer(token);
-      };
-    } else {
-      createPlayer(token);
-    }
-  }, [createPlayer]);
+      }
+    },
+    [createPlayer]
+  );
 
   /**
    * Create Spotify Player instance
    */
-  const createPlayer = useCallback((token) => {
-    const spotifyPlayer = new window.Spotify.Player({
-      name: 'EchoTune AI Player',
-      getOAuthToken: (cb) => {
-        cb(token);
-      },
-      volume: volume
-    });
+  const createPlayer = useCallback(
+    (token) => {
+      const spotifyPlayer = new window.Spotify.Player({
+        name: 'EchoTune AI Player',
+        getOAuthToken: (cb) => {
+          cb(token);
+        },
+        volume: volume,
+      });
 
-    // Player event handlers
-    spotifyPlayer.addListener('ready', ({ device_id }) => {
-      console.log('🎵 Spotify Player ready with Device ID:', device_id);
-      setDeviceId(device_id);
-      setIsReady(true);
-    });
+      // Player event handlers
+      spotifyPlayer.addListener('ready', ({ device_id }) => {
+        console.log('🎵 Spotify Player ready with Device ID:', device_id);
+        setDeviceId(device_id);
+        setIsReady(true);
+      });
 
-    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
-      console.log('❌ Spotify Player not ready with Device ID:', device_id);
-      setIsReady(false);
-    });
+      spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+        console.log('❌ Spotify Player not ready with Device ID:', device_id);
+        setIsReady(false);
+      });
 
-    spotifyPlayer.addListener('player_state_changed', (state) => {
-      if (state) {
-        setPlayerState(state);
-        setCurrentTrack(state.track_window.current_track);
-        setIsPlaying(!state.paused);
-        console.log('🎵 Player state changed:', {
-          track: state.track_window.current_track?.name,
-          artist: state.track_window.current_track?.artists[0]?.name,
-          playing: !state.paused
-        });
-      }
-    });
+      spotifyPlayer.addListener('player_state_changed', (state) => {
+        if (state) {
+          setPlayerState(state);
+          setCurrentTrack(state.track_window.current_track);
+          setIsPlaying(!state.paused);
+          console.log('🎵 Player state changed:', {
+            track: state.track_window.current_track?.name,
+            artist: state.track_window.current_track?.artists[0]?.name,
+            playing: !state.paused,
+          });
+        }
+      });
 
-    spotifyPlayer.addListener('initialization_error', ({ message }) => {
-      console.error('Spotify initialization error:', message);
-    });
+      spotifyPlayer.addListener('initialization_error', ({ message }) => {
+        console.error('Spotify initialization error:', message);
+      });
 
-    spotifyPlayer.addListener('authentication_error', ({ message }) => {
-      console.error('Spotify authentication error:', message);
-    });
+      spotifyPlayer.addListener('authentication_error', ({ message }) => {
+        console.error('Spotify authentication error:', message);
+      });
 
-    spotifyPlayer.addListener('account_error', ({ message }) => {
-      console.error('Spotify account error:', message);
-    });
+      spotifyPlayer.addListener('account_error', ({ message }) => {
+        console.error('Spotify account error:', message);
+      });
 
-    spotifyPlayer.addListener('playback_error', ({ message }) => {
-      console.error('Spotify playback error:', message);
-    });
+      spotifyPlayer.addListener('playback_error', ({ message }) => {
+        console.error('Spotify playback error:', message);
+      });
 
-    // Connect to the player
-    spotifyPlayer.connect().then(success => {
-      if (success) {
-        console.log('✅ Spotify Player connected successfully');
-        setPlayer(spotifyPlayer);
-      } else {
-        console.error('❌ Failed to connect Spotify Player');
-      }
-    });
-  }, [volume]);
+      // Connect to the player
+      spotifyPlayer.connect().then((success) => {
+        if (success) {
+          console.log('✅ Spotify Player connected successfully');
+          setPlayer(spotifyPlayer);
+        } else {
+          console.error('❌ Failed to connect Spotify Player');
+        }
+      });
+    },
+    [volume]
+  );
 
   /**
    * Play a track or playlist
@@ -129,16 +135,16 @@ export const SpotifyPlayerProvider = ({ children }) => {
       const playOptions = {
         device_id: deviceId,
         uris: trackUri ? [trackUri] : undefined,
-        context_uri: contextUri
+        context_uri: contextUri,
       };
 
       const response = await fetch('https://api.spotify.com/v1/me/player/play', {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(playOptions)
+        body: JSON.stringify(playOptions),
       });
 
       if (response.status === 202 || response.status === 204) {
@@ -251,8 +257,8 @@ export const SpotifyPlayerProvider = ({ children }) => {
         `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}`,
         {
           headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
@@ -282,14 +288,10 @@ export const SpotifyPlayerProvider = ({ children }) => {
     previousTrack,
     setPlayerVolume,
     getCurrentState,
-    searchTracks
+    searchTracks,
   };
 
-  return (
-    <SpotifyPlayerContext.Provider value={value}>
-      {children}
-    </SpotifyPlayerContext.Provider>
-  );
+  return <SpotifyPlayerContext.Provider value={value}>{children}</SpotifyPlayerContext.Provider>;
 };
 
 export const useSpotifyPlayer = () => {

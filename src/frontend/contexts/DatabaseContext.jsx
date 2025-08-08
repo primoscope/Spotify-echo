@@ -15,7 +15,7 @@ export function DatabaseProvider({ children }) {
   const [connectionStatus, setConnectionStatus] = useState({
     mongodb: { connected: false, status: 'unknown' },
     supabase: { connected: false, status: 'unknown' },
-    sqlite: { connected: false, status: 'unknown' }
+    sqlite: { connected: false, status: 'unknown' },
   });
   const [activeDatabases, setActiveDatabases] = useState([]);
   const [fallbackMode, setFallbackMode] = useState(false);
@@ -28,7 +28,7 @@ export function DatabaseProvider({ children }) {
     try {
       const response = await fetch('/api/database/status');
       const data = await response.json();
-      
+
       if (data.success) {
         setConnectionStatus(data.connections);
         setActiveDatabases(data.active);
@@ -38,9 +38,9 @@ export function DatabaseProvider({ children }) {
       console.error('Database status check failed:', error);
       // Assume fallback mode if check fails
       setFallbackMode(true);
-      setConnectionStatus(prev => ({
+      setConnectionStatus((prev) => ({
         ...prev,
-        sqlite: { connected: true, status: 'fallback' }
+        sqlite: { connected: true, status: 'fallback' },
       }));
       setActiveDatabases(['sqlite']);
     }
@@ -49,21 +49,21 @@ export function DatabaseProvider({ children }) {
   const initializeFallbackDatabase = async () => {
     try {
       const response = await fetch('/api/database/init-fallback', {
-        method: 'POST'
+        method: 'POST',
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setFallbackMode(true);
-        setConnectionStatus(prev => ({
+        setConnectionStatus((prev) => ({
           ...prev,
-          sqlite: { connected: true, status: 'active' }
+          sqlite: { connected: true, status: 'active' },
         }));
         setActiveDatabases(['sqlite']);
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.error('Fallback database initialization failed:', error);
@@ -78,9 +78,9 @@ export function DatabaseProvider({ children }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(userData),
       });
-      
+
       return await response.json();
     } catch (error) {
       console.error('Save user data failed:', error);
@@ -95,9 +95,9 @@ export function DatabaseProvider({ children }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(historyData)
+        body: JSON.stringify(historyData),
       });
-      
+
       return await response.json();
     } catch (error) {
       console.error('Save listening history failed:', error);
@@ -109,9 +109,9 @@ export function DatabaseProvider({ children }) {
     try {
       const queryParams = new URLSearchParams({
         userId,
-        ...options
+        ...options,
       });
-      
+
       const response = await fetch(`/api/database/recommendations?${queryParams}`);
       return await response.json();
     } catch (error) {
@@ -124,9 +124,9 @@ export function DatabaseProvider({ children }) {
     try {
       const queryParams = new URLSearchParams({
         userId,
-        ...options
+        ...options,
       });
-      
+
       const response = await fetch(`/api/database/analytics?${queryParams}`);
       return await response.json();
     } catch (error) {
@@ -159,12 +159,8 @@ export function DatabaseProvider({ children }) {
     getAnalytics,
     isConnected,
     hasActiveDatabase,
-    getActiveDatabase
+    getActiveDatabase,
   };
 
-  return (
-    <DatabaseContext.Provider value={value}>
-      {children}
-    </DatabaseContext.Provider>
-  );
+  return <DatabaseContext.Provider value={value}>{children}</DatabaseContext.Provider>;
 }

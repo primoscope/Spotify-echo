@@ -18,7 +18,7 @@ const timeoutMiddleware = (timeoutMs = 30000) => {
           message: 'The request took too long to process. Please try again.',
           timeout: timeoutMs,
           timestamp: new Date().toISOString(),
-          requestId: req.id || Math.random().toString(36).substr(2, 9)
+          requestId: req.id || Math.random().toString(36).substr(2, 9),
         });
       }
     }, timeoutMs);
@@ -36,26 +36,26 @@ const timeoutMiddleware = (timeoutMs = 30000) => {
  */
 const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
   let lastError;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const result = await fn();
       return result;
     } catch (error) {
       lastError = error;
-      
+
       if (attempt === maxRetries) {
         throw error;
       }
-      
+
       // Exponential backoff
       const delay = baseDelay * Math.pow(2, attempt - 1);
       console.log(`Retry attempt ${attempt} failed, waiting ${delay}ms before retry...`);
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  
+
   throw lastError;
 };
 
@@ -85,7 +85,7 @@ const errorHandler = (err, req, res, next) => {
     method: req.method,
     timestamp: new Date().toISOString(),
     userAgent: req.get('User-Agent'),
-    ip: req.ip
+    ip: req.ip,
   });
 
   // Don't send response if headers already sent
@@ -159,7 +159,7 @@ const errorHandler = (err, req, res, next) => {
     details,
     timestamp: new Date().toISOString(),
     requestId: req.id || Math.random().toString(36).substr(2, 9),
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 
@@ -172,7 +172,7 @@ const notFoundHandler = (req, res) => {
     error: 'NOT_FOUND',
     message: `Route ${req.method} ${req.url} not found`,
     timestamp: new Date().toISOString(),
-    requestId: req.id || Math.random().toString(36).substr(2, 9)
+    requestId: req.id || Math.random().toString(36).substr(2, 9),
   });
 };
 
@@ -192,17 +192,17 @@ const validateRequest = (schema) => {
   return (req, res, next) => {
     try {
       const { error, value } = schema.validate(req.body, { abortEarly: false });
-      
+
       if (error) {
-        const details = error.details.map(detail => ({
+        const details = error.details.map((detail) => ({
           field: detail.path.join('.'),
           message: detail.message,
-          value: detail.context?.value
+          value: detail.context?.value,
         }));
-        
+
         throw new APIError('Validation failed', 400, 'VALIDATION_ERROR', details);
       }
-      
+
       req.validatedData = value;
       next();
     } catch (err) {
@@ -221,7 +221,7 @@ const rateLimiter = (options = {}) => {
     message = 'Too many requests, please try again later.',
     keyGenerator = (req) => req.ip,
     _skipSuccessfulRequests = false,
-    _skipFailedRequests = false
+    _skipFailedRequests = false,
   } = options;
 
   const requests = new Map();
@@ -233,7 +233,7 @@ const rateLimiter = (options = {}) => {
 
     // Clean old requests
     if (requests.has(key)) {
-      const userRequests = requests.get(key).filter(time => time > windowStart);
+      const userRequests = requests.get(key).filter((time) => time > windowStart);
       requests.set(key, userRequests);
     } else {
       requests.set(key, []);
@@ -249,7 +249,7 @@ const rateLimiter = (options = {}) => {
         retryAfter: Math.ceil(windowMs / 1000),
         limit: max,
         windowMs,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -260,7 +260,7 @@ const rateLimiter = (options = {}) => {
     res.set({
       'X-RateLimit-Limit': max,
       'X-RateLimit-Remaining': Math.max(0, max - userRequests.length),
-      'X-RateLimit-Reset': new Date(now + windowMs).toISOString()
+      'X-RateLimit-Reset': new Date(now + windowMs).toISOString(),
     });
 
     next();
@@ -277,7 +277,7 @@ const healthCheck = (dependencies = {}) => {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      dependencies: {}
+      dependencies: {},
     };
 
     // Check dependencies
@@ -286,12 +286,12 @@ const healthCheck = (dependencies = {}) => {
         const result = await checkFn();
         health.dependencies[name] = {
           status: 'healthy',
-          details: result
+          details: result,
         };
       } catch (error) {
         health.dependencies[name] = {
           status: 'unhealthy',
-          error: error.message
+          error: error.message,
         };
         health.status = 'degraded';
       }
@@ -307,34 +307,29 @@ const healthCheck = (dependencies = {}) => {
  */
 const gracefulDegrade = (primaryFn, fallbackFn, options = {}) => {
   const { timeout = 5000, retries = 1 } = options;
-  
+
   return async (...args) => {
     try {
       // Try primary function with timeout
       const result = await Promise.race([
         retryWithBackoff(primaryFn.bind(null, ...args), retries),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Primary function timeout')), timeout)
-        )
+        ),
       ]);
-      
+
       return result;
     } catch (error) {
       console.warn('Primary function failed, using fallback:', error.message);
-      
+
       try {
         return await fallbackFn(...args);
       } catch (fallbackError) {
         console.error('Fallback function also failed:', fallbackError.message);
-        throw new APIError(
-          'Service temporarily unavailable',
-          503,
-          'SERVICE_DEGRADED',
-          {
-            primaryError: error.message,
-            fallbackError: fallbackError.message
-          }
-        );
+        throw new APIError('Service temporarily unavailable', 503, 'SERVICE_DEGRADED', {
+          primaryError: error.message,
+          fallbackError: fallbackError.message,
+        });
       }
     }
   };
@@ -345,20 +340,22 @@ const gracefulDegrade = (primaryFn, fallbackFn, options = {}) => {
  */
 const requestLogger = (req, res, next) => {
   const start = Date.now();
-  
+
   // Generate request ID
   req.id = Math.random().toString(36).substr(2, 9);
-  
+
   // Log request
   console.log(`📝 ${req.method} ${req.url} [${req.id}] - ${req.ip}`);
-  
+
   // Log response when finished
   res.on('finish', () => {
     const duration = Date.now() - start;
     const level = res.statusCode >= 400 ? '🚨' : '✅';
-    console.log(`${level} ${req.method} ${req.url} [${req.id}] - ${res.statusCode} (${duration}ms)`);
+    console.log(
+      `${level} ${req.method} ${req.url} [${req.id}] - ${res.statusCode} (${duration}ms)`
+    );
   });
-  
+
   next();
 };
 
@@ -370,7 +367,7 @@ const corsHandler = (options = {}) => {
     origin = process.env.FRONTEND_URL || 'http://localhost:3000',
     methods = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders = ['Content-Type', 'Authorization', 'X-Requested-With'],
-    credentials = true
+    credentials = true,
   } = options;
 
   return (req, res, next) => {
@@ -399,5 +396,5 @@ module.exports = {
   healthCheck,
   gracefulDegrade,
   requestLogger,
-  corsHandler
+  corsHandler,
 };

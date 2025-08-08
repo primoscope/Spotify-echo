@@ -23,7 +23,9 @@ class MongoDBManager {
       }
 
       if (!this.connectionString) {
-        throw new Error('MongoDB connection string not provided. Set MONGODB_URI environment variable.');
+        throw new Error(
+          'MongoDB connection string not provided. Set MONGODB_URI environment variable.'
+        );
       }
 
       this.client = new MongoClient(this.connectionString, {
@@ -34,7 +36,7 @@ class MongoDBManager {
 
       await this.client.connect();
       await this.client.db('admin').command({ ping: 1 });
-      
+
       this.db = this.client.db(this.databaseName);
       this.isConnected = true;
 
@@ -88,7 +90,7 @@ class MongoDBManager {
       await userProfilesCollection.createIndexes([
         { key: { spotify_id: 1 }, unique: true },
         { key: { email: 1 }, unique: true, sparse: true },
-        { key: { created_at: 1 } }
+        { key: { created_at: 1 } },
       ]);
 
       // Listening history collection indexes
@@ -97,7 +99,7 @@ class MongoDBManager {
         { key: { user_id: 1, played_at: -1 } },
         { key: { track_id: 1 } },
         { key: { played_at: -1 } },
-        { key: { user_id: 1, track_id: 1 } }
+        { key: { user_id: 1, track_id: 1 } },
       ]);
 
       // Track metadata collection indexes
@@ -107,7 +109,7 @@ class MongoDBManager {
         { key: { artist_id: 1 } },
         { key: { album_id: 1 } },
         { key: { genres: 1 } },
-        { key: { popularity: -1 } }
+        { key: { popularity: -1 } },
       ]);
 
       // Audio features collection indexes
@@ -117,7 +119,7 @@ class MongoDBManager {
         { key: { energy: 1 } },
         { key: { valence: 1 } },
         { key: { danceability: 1 } },
-        { key: { acousticness: 1 } }
+        { key: { acousticness: 1 } },
       ]);
 
       // Recommendations collection indexes
@@ -125,7 +127,7 @@ class MongoDBManager {
       await recommendationsCollection.createIndexes([
         { key: { user_id: 1, created_at: -1 } },
         { key: { recommendation_type: 1 } },
-        { key: { created_at: 1 }, expireAfterSeconds: 2592000 } // 30 days TTL
+        { key: { created_at: 1 }, expireAfterSeconds: 2592000 }, // 30 days TTL
       ]);
 
       // Chat history collection indexes
@@ -133,7 +135,7 @@ class MongoDBManager {
       await chatHistoryCollection.createIndexes([
         { key: { user_id: 1, timestamp: -1 } },
         { key: { session_id: 1 } },
-        { key: { timestamp: 1 }, expireAfterSeconds: 7776000 } // 90 days TTL
+        { key: { timestamp: 1 }, expireAfterSeconds: 7776000 }, // 90 days TTL
       ]);
 
       // Playlists collection indexes
@@ -141,7 +143,7 @@ class MongoDBManager {
       await playlistsCollection.createIndexes([
         { key: { user_id: 1, created_at: -1 } },
         { key: { spotify_playlist_id: 1 }, unique: true, sparse: true },
-        { key: { playlist_type: 1 } }
+        { key: { playlist_type: 1 } },
       ]);
 
       console.log('✅ Database indexes created successfully');
@@ -158,24 +160,24 @@ class MongoDBManager {
     try {
       // Check if client is connected
       if (!this.client || !this.isConnected) {
-        return { 
-          status: 'unhealthy', 
+        return {
+          status: 'unhealthy',
           error: 'MongoDB client not connected',
-          details: { connected: this.isConnected, hasClient: !!this.client }
+          details: { connected: this.isConnected, hasClient: !!this.client },
         };
       }
-      
+
       await this.client.db('admin').command({ ping: 1 });
-      return { 
-        status: 'healthy', 
+      return {
+        status: 'healthy',
         database: this.databaseName,
-        connected: this.isConnected
+        connected: this.isConnected,
       };
     } catch (error) {
-      return { 
-        status: 'unhealthy', 
+      return {
+        status: 'unhealthy',
         error: error.message,
-        details: { connected: this.isConnected, hasClient: !!this.client }
+        details: { connected: this.isConnected, hasClient: !!this.client },
       };
     }
   }

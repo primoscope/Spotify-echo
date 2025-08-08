@@ -5,7 +5,7 @@ const SocketContext = createContext();
 
 /**
  * Socket.IO Context Provider for Real-time Communication
- * 
+ *
  * Provides WebSocket connection management and real-time features:
  * - Chat messaging with streaming responses
  * - Live provider switching
@@ -27,7 +27,7 @@ export const SocketProvider = ({ children }) => {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000
+      reconnectionDelayMax: 5000,
     });
 
     // Connection event handlers
@@ -67,11 +67,11 @@ export const SocketProvider = ({ children }) => {
 
     // Typing indicators
     newSocket.on('typing_start', (data) => {
-      setTypingUsers(prev => new Set([...prev, data.userId]));
+      setTypingUsers((prev) => new Set([...prev, data.userId]));
     });
 
     newSocket.on('typing_stop', (data) => {
-      setTypingUsers(prev => {
+      setTypingUsers((prev) => {
         const newSet = new Set(prev);
         newSet.delete(data.userId);
         return newSet;
@@ -100,7 +100,7 @@ export const SocketProvider = ({ children }) => {
       sessionId: currentSessionId,
       provider,
       userId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   };
 
@@ -123,7 +123,7 @@ export const SocketProvider = ({ children }) => {
 
     socket.emit(isTyping ? 'typing_start' : 'typing_stop', {
       userId,
-      sessionId: currentSessionId
+      sessionId: currentSessionId,
     });
   };
 
@@ -145,14 +145,10 @@ export const SocketProvider = ({ children }) => {
     sendMessage,
     switchProvider,
     sendTyping,
-    joinRoom
+    joinRoom,
   };
 
-  return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
-  );
+  return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 };
 
 export const useSocket = () => {

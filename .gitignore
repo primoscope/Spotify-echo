@@ -419,3 +419,29 @@ doctl_auth*
 /tmp/digitalocean-deploy-*
 deployment-temp-*
 *.do.tmp
+
+# Archive and temporary files
+docs/archive/
+*.tmp
+*.bak
+*.orig
+
+# Validation reports (generated)
+*_REPORT.md
+*_VALIDATION_*.md
+*_STATUS_*.md
+
+# Environment files (except examples)
+.env
+.env.local
+.env.production
+api_keys.env
+
+# MCP server logs
+mcp-server/*.log
+mcp-servers/*/logs/
+
+# Testing artifacts
+testing_screenshots/
+coverage/
+.nyc_output/

@@ -11,7 +11,7 @@ class EnhancedHealthCheck {
       system: this.checkSystemHealth.bind(this),
       database: this.checkDatabaseHealth.bind(this),
       mcp: this.checkMCPServerHealth.bind(this),
-      dependencies: this.checkDependencies.bind(this)
+      dependencies: this.checkDependencies.bind(this),
     };
   }
 
@@ -21,32 +21,32 @@ class EnhancedHealthCheck {
       status: 'healthy',
       checks: {},
       metrics: await this.getSystemMetrics(),
-      alerts: []
+      alerts: [],
     };
 
     for (const [checkName, checkFunction] of Object.entries(this.checks)) {
       try {
         const checkResult = await checkFunction();
         results.checks[checkName] = checkResult;
-        
+
         if (!checkResult.healthy) {
           results.status = 'degraded';
           results.alerts.push({
             type: 'warning',
             check: checkName,
-            message: checkResult.message
+            message: checkResult.message,
           });
         }
       } catch (error) {
         results.checks[checkName] = {
           healthy: false,
-          error: error.message
+          error: error.message,
         };
         results.status = 'unhealthy';
         results.alerts.push({
           type: 'error',
           check: checkName,
-          message: error.message
+          message: error.message,
         });
       }
     }
@@ -58,18 +58,18 @@ class EnhancedHealthCheck {
     const memUsage = process.memoryUsage();
     const cpuUsage = os.loadavg()[0];
     const uptime = process.uptime();
-    
+
     return {
       healthy: memUsage.heapUsed < memUsage.heapTotal * 0.9 && cpuUsage < 0.8,
       memory: {
         used: Math.round(memUsage.heapUsed / 1024 / 1024),
         total: Math.round(memUsage.heapTotal / 1024 / 1024),
-        percentage: Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100)
+        percentage: Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100),
       },
       cpu: { load: cpuUsage, cores: os.cpus().length },
       uptime: Math.round(uptime),
       platform: os.platform(),
-      nodeVersion: process.version
+      nodeVersion: process.version,
     };
   }
 
@@ -77,7 +77,7 @@ class EnhancedHealthCheck {
     return {
       healthy: true,
       mongodb: { status: 'simulated-connected' },
-      redis: { status: 'simulated-available' }
+      redis: { status: 'simulated-available' },
     };
   }
 
@@ -90,7 +90,7 @@ class EnhancedHealthCheck {
           healthy: true,
           status: 'operational',
           servers: health.servers,
-          capabilities: Object.keys(health.servers || {}).length
+          capabilities: Object.keys(health.servers || {}).length,
         };
       }
       return { healthy: false, status: 'unavailable' };
@@ -109,7 +109,7 @@ class EnhancedHealthCheck {
       uptime: process.uptime(),
       pid: process.pid,
       version: process.version,
-      platform: os.platform()
+      platform: os.platform(),
     };
   }
 }

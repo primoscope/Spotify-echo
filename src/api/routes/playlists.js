@@ -13,27 +13,27 @@ const databaseManager = require('../../database/database-manager');
  */
 router.post('/create', async (req, res) => {
   try {
-    const { 
-      name, 
-      description, 
-      tracks, 
+    const {
+      name,
+      description,
+      tracks,
       public: isPublic = false,
       collaborative = false,
       userId,
-      spotifyAccessToken 
+      spotifyAccessToken,
     } = req.body;
 
     if (!name || !tracks || !Array.isArray(tracks) || tracks.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Playlist name and tracks are required'
+        error: 'Playlist name and tracks are required',
       });
     }
 
     if (!userId) {
       return res.status(400).json({
         success: false,
-        error: 'User ID is required'
+        error: 'User ID is required',
       });
     }
 
@@ -45,26 +45,26 @@ router.post('/create', async (req, res) => {
       id: playlistId,
       name,
       description: description || 'AI-generated playlist created by EchoTune AI',
-      tracks: tracks.map(track => ({
+      tracks: tracks.map((track) => ({
         id: track.id || track.trackId,
         name: track.name || track.trackName,
         artist: track.artist || track.artistName,
         album: track.album || track.albumName,
         uri: track.uri || track.spotifyUri,
-        addedAt: new Date().toISOString()
+        addedAt: new Date().toISOString(),
       })),
       user_id: userId,
       public: isPublic,
       collaborative,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      source: 'ai_recommendation'
+      source: 'ai_recommendation',
     };
 
     // Save playlist to database
-    const _saveResult = await databaseManager.savePlaylist ? 
-      await databaseManager.savePlaylist(playlist) :
-      { success: true, id: playlistId };
+    const _saveResult = (await databaseManager.savePlaylist)
+      ? await databaseManager.savePlaylist(playlist)
+      : { success: true, id: playlistId };
 
     let spotifyPlaylist = null;
 
@@ -78,7 +78,7 @@ router.post('/create', async (req, res) => {
             name,
             description: playlist.description,
             public: isPublic,
-            collaborative
+            collaborative,
           },
           tracks
         );
@@ -87,7 +87,7 @@ router.post('/create', async (req, res) => {
         if (spotifyPlaylist && spotifyPlaylist.id) {
           playlist.spotify_id = spotifyPlaylist.id;
           playlist.spotifyUrl = spotifyPlaylist.external_urls?.spotify;
-          
+
           // Update in database
           if (databaseManager.savePlaylist) {
             await databaseManager.savePlaylist(playlist);
@@ -108,24 +108,25 @@ router.post('/create', async (req, res) => {
         trackCount: playlist.tracks.length,
         spotifyId: playlist.spotify_id,
         spotifyUrl: playlist.spotifyUrl,
-        createdAt: playlist.createdAt
+        createdAt: playlist.createdAt,
       },
-      spotifyPlaylist: spotifyPlaylist ? {
-        id: spotifyPlaylist.id,
-        url: spotifyPlaylist.external_urls?.spotify,
-        snapshot_id: spotifyPlaylist.snapshot_id
-      } : null,
-      message: spotifyPlaylist ? 
-        'Playlist created successfully on Spotify and saved locally' :
-        'Playlist saved locally (connect Spotify for automatic sync)'
+      spotifyPlaylist: spotifyPlaylist
+        ? {
+            id: spotifyPlaylist.id,
+            url: spotifyPlaylist.external_urls?.spotify,
+            snapshot_id: spotifyPlaylist.snapshot_id,
+          }
+        : null,
+      message: spotifyPlaylist
+        ? 'Playlist created successfully on Spotify and saved locally'
+        : 'Playlist saved locally (connect Spotify for automatic sync)',
     });
-
   } catch (error) {
     console.error('Create playlist error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to create playlist',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -141,7 +142,7 @@ router.post('/:playlistId/tracks', async (req, res) => {
     if (!tracks || !Array.isArray(tracks) || tracks.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Tracks array is required'
+        error: 'Tracks array is required',
       });
     }
 
@@ -149,22 +150,22 @@ router.post('/:playlistId/tracks', async (req, res) => {
     const playlist = {
       id: playlistId,
       spotify_id: 'mock_spotify_id',
-      tracks: []
+      tracks: [],
     };
 
     if (!playlist) {
       return res.status(404).json({
         success: false,
-        error: 'Playlist not found'
+        error: 'Playlist not found',
       });
     }
 
-    const newTracks = tracks.map(track => ({
+    const newTracks = tracks.map((track) => ({
       id: track.id || track.trackId,
       name: track.name || track.trackName,
       artist: track.artist || track.artistName,
       uri: track.uri || track.spotifyUri,
-      addedAt: new Date().toISOString()
+      addedAt: new Date().toISOString(),
     }));
 
     // Add tracks to Spotify playlist if connected
@@ -192,18 +193,19 @@ router.post('/:playlistId/tracks', async (req, res) => {
       success: true,
       addedTracks: newTracks.length,
       totalTracks: playlist.tracks.length,
-      spotifyResult: spotifyResult ? {
-        snapshot_id: spotifyResult.snapshot_id
-      } : null,
-      message: `Added ${newTracks.length} tracks to playlist`
+      spotifyResult: spotifyResult
+        ? {
+            snapshot_id: spotifyResult.snapshot_id,
+          }
+        : null,
+      message: `Added ${newTracks.length} tracks to playlist`,
     });
-
   } catch (error) {
     console.error('Add tracks error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to add tracks to playlist',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -226,7 +228,7 @@ router.get('/user/:userId', async (req, res) => {
         spotifyId: 'spotify_playlist_1',
         spotifyUrl: 'https://open.spotify.com/playlist/spotify_playlist_1',
         createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        source: 'ai_recommendation'
+        source: 'ai_recommendation',
       },
       {
         id: 'playlist2',
@@ -236,23 +238,22 @@ router.get('/user/:userId', async (req, res) => {
         spotifyId: 'spotify_playlist_2',
         spotifyUrl: 'https://open.spotify.com/playlist/spotify_playlist_2',
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        source: 'ai_recommendation'
-      }
+        source: 'ai_recommendation',
+      },
     ];
 
     res.json({
       success: true,
       playlists: mockPlaylists.slice(offset, offset + limit),
       total: mockPlaylists.length,
-      hasMore: offset + limit < mockPlaylists.length
+      hasMore: offset + limit < mockPlaylists.length,
     });
-
   } catch (error) {
     console.error('Get user playlists error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get user playlists',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -276,7 +277,7 @@ router.get('/:playlistId', async (req, res) => {
           artist: 'Artist A',
           album: 'Album A',
           uri: 'spotify:track:track1',
-          addedAt: new Date().toISOString()
+          addedAt: new Date().toISOString(),
         },
         {
           id: 'track2',
@@ -284,35 +285,34 @@ router.get('/:playlistId', async (req, res) => {
           artist: 'Artist B',
           album: 'Album B',
           uri: 'spotify:track:track2',
-          addedAt: new Date().toISOString()
-        }
+          addedAt: new Date().toISOString(),
+        },
       ],
       public: false,
       collaborative: false,
       spotifyId: 'spotify_playlist_id',
       spotifyUrl: 'https://open.spotify.com/playlist/spotify_playlist_id',
       createdAt: new Date().toISOString(),
-      source: 'ai_recommendation'
+      source: 'ai_recommendation',
     };
 
     if (!playlist) {
       return res.status(404).json({
         success: false,
-        error: 'Playlist not found'
+        error: 'Playlist not found',
       });
     }
 
     res.json({
       success: true,
-      playlist
+      playlist,
     });
-
   } catch (error) {
     console.error('Get playlist error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get playlist',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -328,13 +328,13 @@ router.delete('/:playlistId', async (req, res) => {
     // Get playlist info (mock implementation)
     const playlist = {
       id: playlistId,
-      spotify_id: 'spotify_playlist_id'
+      spotify_id: 'spotify_playlist_id',
     };
 
     if (!playlist) {
       return res.status(404).json({
         success: false,
-        error: 'Playlist not found'
+        error: 'Playlist not found',
       });
     }
 
@@ -355,15 +355,14 @@ router.delete('/:playlistId', async (req, res) => {
     res.json({
       success: true,
       message: 'Playlist deleted successfully',
-      spotifyDeleted
+      spotifyDeleted,
     });
-
   } catch (error) {
     console.error('Delete playlist error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to delete playlist',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -373,39 +372,33 @@ router.delete('/:playlistId', async (req, res) => {
  */
 router.post('/generate', async (req, res) => {
   try {
-    const { 
-      prompt, 
-      userId, 
-      trackCount = 20,
-      spotifyAccessToken,
-      autoCreate = false 
-    } = req.body;
+    const { prompt, userId, trackCount = 20, spotifyAccessToken, autoCreate = false } = req.body;
 
     if (!prompt || !userId) {
       return res.status(400).json({
         success: false,
-        error: 'Prompt and user ID are required'
+        error: 'Prompt and user ID are required',
       });
     }
 
     // Use recommendation engine to generate tracks based on prompt
     const recommendationEngine = require('../../ml/recommendation-engine-enhanced');
-    
+
     // Parse prompt for context
     const context = parsePlaylistPrompt(prompt);
-    
+
     // Generate recommendations
     const recommendations = await recommendationEngine.generateRecommendations(userId, {
       limit: trackCount,
       context: context.context,
       mood: context.mood,
-      activity: context.activity
+      activity: context.activity,
     });
 
     if (!recommendations.success || recommendations.recommendations.length === 0) {
       return res.status(500).json({
         success: false,
-        error: 'Failed to generate playlist recommendations'
+        error: 'Failed to generate playlist recommendations',
       });
     }
 
@@ -414,23 +407,19 @@ router.post('/generate', async (req, res) => {
       description: `Generated from: "${prompt}"`,
       tracks: recommendations.recommendations,
       context: context.context,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
 
     // Auto-create playlist if requested
     if (autoCreate) {
-      const createResult = await createPlaylistFromData(
-        userId,
-        playlistData,
-        spotifyAccessToken
-      );
-      
+      const createResult = await createPlaylistFromData(userId, playlistData, spotifyAccessToken);
+
       return res.json({
         success: true,
         playlist: createResult.playlist,
         tracks: recommendations.recommendations,
         context: context.context,
-        autoCreated: true
+        autoCreated: true,
       });
     }
 
@@ -439,15 +428,14 @@ router.post('/generate', async (req, res) => {
       tracks: recommendations.recommendations,
       playlistData,
       context: context.context,
-      message: 'Playlist generated successfully'
+      message: 'Playlist generated successfully',
     });
-
   } catch (error) {
     console.error('Generate playlist error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate playlist',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -461,15 +449,15 @@ async function createSpotifyPlaylist(userId, accessToken, playlistData, tracks) 
     const createResponse = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name: playlistData.name,
         description: playlistData.description,
         public: playlistData.public,
-        collaborative: playlistData.collaborative
-      })
+        collaborative: playlistData.collaborative,
+      }),
     });
 
     if (!createResponse.ok) {
@@ -481,8 +469,8 @@ async function createSpotifyPlaylist(userId, accessToken, playlistData, tracks) 
     // Add tracks if provided
     if (tracks && tracks.length > 0) {
       const trackUris = tracks
-        .map(track => track.uri || track.spotifyUri)
-        .filter(uri => uri && uri.startsWith('spotify:track:'))
+        .map((track) => track.uri || track.spotifyUri)
+        .filter((uri) => uri && uri.startsWith('spotify:track:'))
         .slice(0, 100); // Spotify limit
 
       if (trackUris.length > 0) {
@@ -491,12 +479,12 @@ async function createSpotifyPlaylist(userId, accessToken, playlistData, tracks) 
           {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              uris: trackUris
-            })
+              uris: trackUris,
+            }),
           }
         );
 
@@ -519,19 +507,19 @@ async function createSpotifyPlaylist(userId, accessToken, playlistData, tracks) 
  */
 async function addTracksToSpotifyPlaylist(playlistId, accessToken, tracks) {
   const trackUris = tracks
-    .map(track => track.uri)
-    .filter(uri => uri && uri.startsWith('spotify:track:'))
+    .map((track) => track.uri)
+    .filter((uri) => uri && uri.startsWith('spotify:track:'))
     .slice(0, 100);
 
   const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      uris: trackUris
-    })
+      uris: trackUris,
+    }),
   });
 
   if (!response.ok) {
@@ -548,8 +536,8 @@ async function deleteSpotifyPlaylist(playlistId, accessToken) {
   const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/followers`, {
     method: 'DELETE',
     headers: {
-      'Authorization': `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (!response.ok) {
@@ -572,7 +560,7 @@ function parsePlaylistPrompt(prompt) {
     sad: /sad|melancholy|depressing|emotional|heartbreak/i,
     calm: /calm|relaxing|peaceful|chill|zen/i,
     energetic: /energetic|pumped|high energy|intense|powerful/i,
-    romantic: /romantic|love|intimate|passionate/i
+    romantic: /romantic|love|intimate|passionate/i,
   };
 
   for (const [moodType, pattern] of Object.entries(moodPatterns)) {
@@ -588,7 +576,7 @@ function parsePlaylistPrompt(prompt) {
     study: /study|studying|focus|concentration|work/i,
     party: /party|celebration|dance|dancing|club/i,
     sleep: /sleep|bedtime|lullaby|nighttime/i,
-    driving: /driving|road trip|travel|commute/i
+    driving: /driving|road trip|travel|commute/i,
   };
 
   for (const [activityType, pattern] of Object.entries(activityPatterns)) {
@@ -599,9 +587,10 @@ function parsePlaylistPrompt(prompt) {
   }
 
   // Extract playlist name from "create/make a playlist called/named X"
-  const nameMatch = prompt.match(/(?:create|make).*?playlist.*?(?:called|named|titled)\s+"([^"]+)"/i) ||
-                   prompt.match(/(?:create|make).*?playlist.*?(?:called|named|titled)\s+([^,.\n]+)/i);
-  
+  const nameMatch =
+    prompt.match(/(?:create|make).*?playlist.*?(?:called|named|titled)\s+"([^"]+)"/i) ||
+    prompt.match(/(?:create|make).*?playlist.*?(?:called|named|titled)\s+([^,.\n]+)/i);
+
   if (nameMatch) {
     playlistName = nameMatch[1].trim();
   }
@@ -610,7 +599,7 @@ function parsePlaylistPrompt(prompt) {
     context,
     mood,
     activity,
-    playlistName
+    playlistName,
   };
 }
 
@@ -626,8 +615,8 @@ async function createPlaylistFromData(userId, playlistData, _spotifyAccessToken)
       name: playlistData.name,
       description: playlistData.description,
       trackCount: playlistData.tracks.length,
-      createdAt: new Date().toISOString()
-    }
+      createdAt: new Date().toISOString(),
+    },
   };
 }
 

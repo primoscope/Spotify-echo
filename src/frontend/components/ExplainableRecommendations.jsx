@@ -44,49 +44,59 @@ import {
  * ExplainableRecommendations Component
  * Shows AI-powered music recommendations with human-readable explanations
  */
-const ExplainableRecommendations = ({ 
-  recommendations = [], 
+const ExplainableRecommendations = ({
+  recommendations = [],
   onGetExplanation,
   onProvideFeedback,
-  loading = false 
+  loading = false,
 }) => {
-  const [explanationDialog, setExplanationDialog] = useState({ open: false, track: null, explanation: null });
+  const [explanationDialog, setExplanationDialog] = useState({
+    open: false,
+    track: null,
+    explanation: null,
+  });
   const [feedbackStates, setFeedbackStates] = useState({});
   const [loadingExplanation, setLoadingExplanation] = useState(false);
 
-  const handleGetExplanation = useCallback(async (track) => {
-    setLoadingExplanation(true);
-    setExplanationDialog({ open: true, track, explanation: null });
+  const handleGetExplanation = useCallback(
+    async (track) => {
+      setLoadingExplanation(true);
+      setExplanationDialog({ open: true, track, explanation: null });
 
-    try {
-      if (onGetExplanation) {
-        const explanation = await onGetExplanation(track.recommendationId, track.id);
-        setExplanationDialog(prev => ({ ...prev, explanation }));
-      }
-    } catch (error) {
-      console.error('Error getting explanation:', error);
-      setExplanationDialog(prev => ({ 
-        ...prev, 
-        explanation: { 
-          error: 'Failed to load explanation',
-          summary: 'Unable to generate explanation at this time.'
+      try {
+        if (onGetExplanation) {
+          const explanation = await onGetExplanation(track.recommendationId, track.id);
+          setExplanationDialog((prev) => ({ ...prev, explanation }));
         }
+      } catch (error) {
+        console.error('Error getting explanation:', error);
+        setExplanationDialog((prev) => ({
+          ...prev,
+          explanation: {
+            error: 'Failed to load explanation',
+            summary: 'Unable to generate explanation at this time.',
+          },
+        }));
+      } finally {
+        setLoadingExplanation(false);
+      }
+    },
+    [onGetExplanation]
+  );
+
+  const handleFeedback = useCallback(
+    (track, feedback, rating = null) => {
+      setFeedbackStates((prev) => ({
+        ...prev,
+        [track.id]: { feedback, rating, timestamp: Date.now() },
       }));
-    } finally {
-      setLoadingExplanation(false);
-    }
-  }, [onGetExplanation]);
 
-  const handleFeedback = useCallback((track, feedback, rating = null) => {
-    setFeedbackStates(prev => ({
-      ...prev,
-      [track.id]: { feedback, rating, timestamp: Date.now() }
-    }));
-
-    if (onProvideFeedback) {
-      onProvideFeedback(track, feedback, rating);
-    }
-  }, [onProvideFeedback]);
+      if (onProvideFeedback) {
+        onProvideFeedback(track, feedback, rating);
+      }
+    },
+    [onProvideFeedback]
+  );
 
   const getAlgorithmIcon = (algorithm) => {
     switch (algorithm) {
@@ -158,7 +168,7 @@ const ExplainableRecommendations = ({
         <SmartToy color="primary" />
         Explainable Recommendations
       </Typography>
-      
+
       <Typography variant="body2" color="text.secondary" paragraph>
         AI-curated music with transparent reasoning behind each recommendation
       </Typography>
@@ -166,37 +176,33 @@ const ExplainableRecommendations = ({
       <List sx={{ p: 0 }}>
         {recommendations.map((track, _index) => {
           const trackFeedback = feedbackStates[track.id];
-          
+
           return (
             <Card key={track.id} sx={{ mb: 2 }}>
               <CardContent>
                 <ListItem sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar 
-                      src={track.album?.images?.[0]?.url}
-                      sx={{ width: 56, height: 56 }}
-                    >
+                    <Avatar src={track.album?.images?.[0]?.url} sx={{ width: 56, height: 56 }}>
                       <MusicNote />
                     </Avatar>
                   </ListItemAvatar>
-                  
+
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <Typography variant="h6" component="span">
                           {track.name}
                         </Typography>
-                        {track.explicit && (
-                          <Chip label="E" size="small" variant="outlined" />
-                        )}
+                        {track.explicit && <Chip label="E" size="small" variant="outlined" />}
                       </Box>
                     }
                     secondary={
                       <Box>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {track.artists?.map(a => a.name).join(', ') || track.artist} • {track.album?.name || 'Unknown Album'}
+                          {track.artists?.map((a) => a.name).join(', ') || track.artist} •{' '}
+                          {track.album?.name || 'Unknown Album'}
                         </Typography>
-                        
+
                         <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
                           <Chip
                             icon={getAlgorithmIcon(track.algorithm)}
@@ -204,7 +210,7 @@ const ExplainableRecommendations = ({
                             size="small"
                             variant="outlined"
                           />
-                          
+
                           {track.confidence && (
                             <Chip
                               icon={<TrendingUp />}
@@ -214,14 +220,14 @@ const ExplainableRecommendations = ({
                               variant="outlined"
                             />
                           )}
-                          
+
                           <Chip
                             icon={<Schedule />}
                             label={formatDuration(track.duration_ms || 200000)}
                             size="small"
                             variant="outlined"
                           />
-                          
+
                           {track.popularity && (
                             <Chip
                               label={`${track.popularity}% popular`}
@@ -257,29 +263,26 @@ const ExplainableRecommendations = ({
 
                 {/* Quick Explanation Preview */}
                 {track.quickReason && (
-                  <Alert 
-                    icon={<Psychology />} 
-                    severity="info" 
+                  <Alert
+                    icon={<Psychology />}
+                    severity="info"
                     sx={{ mb: 2, bgcolor: 'rgba(25, 118, 210, 0.04)' }}
                   >
-                    <Typography variant="body2">
-                      {track.quickReason}
-                    </Typography>
+                    <Typography variant="body2">{track.quickReason}</Typography>
                   </Alert>
                 )}
 
                 {/* Action Buttons */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
                   <Stack direction="row" spacing={1}>
                     <Tooltip title="Why was this recommended?">
-                      <IconButton
-                        color="info"
-                        onClick={() => handleGetExplanation(track)}
-                      >
+                      <IconButton color="info" onClick={() => handleGetExplanation(track)}>
                         <Info />
                       </IconButton>
                     </Tooltip>
-                    
+
                     <Tooltip title="Like this recommendation">
                       <IconButton
                         color={trackFeedback?.feedback === 'like' ? 'success' : 'default'}
@@ -288,7 +291,7 @@ const ExplainableRecommendations = ({
                         <ThumbUp />
                       </IconButton>
                     </Tooltip>
-                    
+
                     <Tooltip title="Not interested">
                       <IconButton
                         color={trackFeedback?.feedback === 'dislike' ? 'error' : 'default'}
@@ -325,7 +328,7 @@ const ExplainableRecommendations = ({
           <Psychology color="primary" />
           Why &quot;{explanationDialog.track?.name}&quot; was recommended
         </DialogTitle>
-        
+
         <DialogContent>
           {loadingExplanation ? (
             <Box sx={{ display: 'flex', alignItems: 'center', p: 4 }}>
@@ -345,7 +348,7 @@ const ExplainableRecommendations = ({
                     <Typography variant="body1" paragraph>
                       <strong>Summary:</strong> {explanationDialog.explanation.summary}
                     </Typography>
-                    
+
                     <Stack direction="row" spacing={1} flexWrap="wrap">
                       <Chip
                         icon={getAlgorithmIcon(explanationDialog.explanation.algorithm)}
@@ -420,17 +423,20 @@ const ExplainableRecommendations = ({
                       </AccordionSummary>
                       <AccordionDetails>
                         <Typography variant="body2" color="text.secondary" paragraph>
-                          Specific reasons for &quot;{explanationDialog.explanation.trackSpecific.name}&quot;:
+                          Specific reasons for &quot;
+                          {explanationDialog.explanation.trackSpecific.name}&quot;:
                         </Typography>
                         <List>
-                          {explanationDialog.explanation.trackSpecific.reasons.map((reason, idx) => (
-                            <ListItem key={idx} sx={{ pl: 0 }}>
-                              <ListItemText
-                                primary={reason}
-                                sx={{ '& .MuiListItemText-primary': { fontSize: '0.9rem' } }}
-                              />
-                            </ListItem>
-                          ))}
+                          {explanationDialog.explanation.trackSpecific.reasons.map(
+                            (reason, idx) => (
+                              <ListItem key={idx} sx={{ pl: 0 }}>
+                                <ListItemText
+                                  primary={reason}
+                                  sx={{ '& .MuiListItemText-primary': { fontSize: '0.9rem' } }}
+                                />
+                              </ListItem>
+                            )
+                          )}
                         </List>
                       </AccordionDetails>
                     </Accordion>
@@ -442,7 +448,7 @@ const ExplainableRecommendations = ({
             <Typography>No explanation available</Typography>
           )}
         </DialogContent>
-        
+
         <DialogActions>
           <Rating
             value={explanationDialog.explanation?.userRating || 0}
@@ -453,7 +459,9 @@ const ExplainableRecommendations = ({
             }}
             sx={{ mr: 'auto' }}
           />
-          <Button onClick={() => setExplanationDialog({ open: false, track: null, explanation: null })}>
+          <Button
+            onClick={() => setExplanationDialog({ open: false, track: null, explanation: null })}
+          >
             Close
           </Button>
         </DialogActions>

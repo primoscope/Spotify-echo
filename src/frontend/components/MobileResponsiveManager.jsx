@@ -19,7 +19,7 @@ import {
   AppBar,
   Toolbar,
   Collapse,
-  Grid
+  Grid,
 } from '@mui/material';
 import {
   PhoneIphone,
@@ -31,7 +31,7 @@ import {
   Settings,
   ExpandMore,
   ExpandLess,
-  Menu as MenuIcon
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 
 /**
@@ -43,7 +43,7 @@ function MobileResponsiveManager() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
-  
+
   const [mobileSettings, setMobileSettings] = useState({
     touchOptimization: true,
     gestureNavigation: true,
@@ -54,7 +54,7 @@ function MobileResponsiveManager() {
     reduceAnimations: false,
     highContrastMode: false,
     offlineMode: false,
-    dataSaver: false
+    dataSaver: false,
   });
 
   const [responsiveInfo, setResponsiveInfo] = useState({
@@ -63,32 +63,47 @@ function MobileResponsiveManager() {
     orientation: 'unknown',
     touchCapability: false,
     pixelRatio: 1,
-    connectionType: 'unknown'
+    connectionType: 'unknown',
   });
 
   const [expandedSections, setExpandedSections] = useState({
     optimization: true,
     responsive: false,
-    performance: false
+    performance: false,
   });
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Helper functions wrapped in useCallback to avoid dependency warnings
+  const getCurrentBreakpoint = useCallback(() => {
+    if (isMobile) return 'mobile';
+    if (isTablet) return 'tablet';
+    if (isDesktop) return 'desktop';
+    return 'unknown';
+  }, [isMobile, isTablet, isDesktop]);
+
+  const getConnectionType = useCallback(() => {
+    if (navigator.connection) {
+      return navigator.connection.effectiveType || navigator.connection.type || 'unknown';
+    }
+    return 'unknown';
+  }, []);
 
   const updateResponsiveInfo = useCallback(() => {
     const info = {
       currentBreakpoint: getCurrentBreakpoint(),
       screenSize: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       },
       orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait',
       touchCapability: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
       pixelRatio: window.devicePixelRatio || 1,
-      connectionType: getConnectionType()
+      connectionType: getConnectionType(),
     };
-    
+
     setResponsiveInfo(info);
-    
+
     // Update CSS classes for responsive optimization
     document.body.className = document.body.className
       .replace(/\b(mobile|tablet|desktop)\b/g, '')
@@ -101,37 +116,25 @@ function MobileResponsiveManager() {
     updateResponsiveInfo();
     window.addEventListener('resize', updateResponsiveInfo);
     window.addEventListener('orientationchange', updateResponsiveInfo);
-    
+
     return () => {
       window.removeEventListener('resize', updateResponsiveInfo);
       window.removeEventListener('orientationchange', updateResponsiveInfo);
     };
   }, [updateResponsiveInfo]);
 
-  const getCurrentBreakpoint = () => {
-    if (isMobile) return 'Mobile (< 600px)';
-    if (isTablet) return 'Tablet (600px - 960px)';
-    if (isDesktop) return 'Desktop (> 960px)';
-    return 'Unknown';
-  };
-
-  const getConnectionType = () => {
-    if (navigator.connection) {
-      return navigator.connection.effectiveType || navigator.connection.type || 'Unknown';
-    }
-    return 'Unknown';
-  };
+  // Functions moved above to useCallback definitions
 
   const handleSettingChange = (setting, value) => {
-    setMobileSettings(prev => ({ ...prev, [setting]: value }));
-    
+    setMobileSettings((prev) => ({ ...prev, [setting]: value }));
+
     // Apply settings immediately
     applyMobileSetting(setting, value);
   };
 
   const applyMobileSetting = (setting, value) => {
     const body = document.body;
-    
+
     switch (setting) {
       case 'compactUI':
         body.classList.toggle('compact-ui', value);
@@ -158,9 +161,9 @@ function MobileResponsiveManager() {
       const response = await fetch('/api/settings/mobile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings: mobileSettings })
+        body: JSON.stringify({ settings: mobileSettings }),
       });
-      
+
       if (response.ok) {
         console.log('Mobile settings saved successfully');
       }
@@ -170,7 +173,7 @@ function MobileResponsiveManager() {
   };
 
   const toggleSection = (section) => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   const getDeviceIcon = () => {
@@ -221,7 +224,12 @@ function MobileResponsiveManager() {
 
       <Box sx={{ p: isMobile ? 2 : 3 }}>
         {/* Device Status Header */}
-        <Card sx={{ mb: 3, background: theme.palette.mode === 'dark' ? 'rgba(0,100,0,0.1)' : 'rgba(0,100,0,0.05)' }}>
+        <Card
+          sx={{
+            mb: 3,
+            background: theme.palette.mode === 'dark' ? 'rgba(0,100,0,0.1)' : 'rgba(0,100,0,0.05)',
+          }}
+        >
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
               {getDeviceIcon()}
@@ -230,39 +238,32 @@ function MobileResponsiveManager() {
                   Current Device: {responsiveInfo.currentBreakpoint}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {responsiveInfo.screenSize.width} × {responsiveInfo.screenSize.height} • {responsiveInfo.orientation}
+                  {responsiveInfo.screenSize.width} × {responsiveInfo.screenSize.height} •{' '}
+                  {responsiveInfo.orientation}
                 </Typography>
               </Box>
             </Box>
-            
+
             <Grid container spacing={1}>
               <Grid item xs={6} sm={3}>
-                <Chip 
+                <Chip
                   label={`Touch: ${responsiveInfo.touchCapability ? 'Yes' : 'No'}`}
                   color={responsiveInfo.touchCapability ? 'success' : 'default'}
                   size="small"
                 />
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Chip 
-                  label={`DPR: ${responsiveInfo.pixelRatio}x`}
-                  color="info"
-                  size="small"
-                />
+                <Chip label={`DPR: ${responsiveInfo.pixelRatio}x`} color="info" size="small" />
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Chip 
+                <Chip
                   label={`Network: ${responsiveInfo.connectionType}`}
                   color="secondary"
                   size="small"
                 />
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Chip 
-                  label={responsiveInfo.orientation}
-                  color="primary"
-                  size="small"
-                />
+                <Chip label={responsiveInfo.orientation} color="primary" size="small" />
               </Grid>
             </Grid>
           </CardContent>
@@ -271,8 +272,13 @@ function MobileResponsiveManager() {
         {/* Touch & Mobile Optimization */}
         <Card sx={{ mb: 3 }}>
           <CardContent>
-            <Box 
-              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+              }}
               onClick={() => toggleSection('optimization')}
             >
               <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -280,12 +286,19 @@ function MobileResponsiveManager() {
               </Typography>
               {expandedSections.optimization ? <ExpandLess /> : <ExpandMore />}
             </Box>
-            
+
             <Collapse in={expandedSections.optimization}>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Touch Optimization</Typography>
                       <Switch
                         checked={mobileSettings.touchOptimization}
@@ -293,9 +306,16 @@ function MobileResponsiveManager() {
                       />
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Gesture Navigation</Typography>
                       <Switch
                         checked={mobileSettings.gestureNavigation}
@@ -303,9 +323,16 @@ function MobileResponsiveManager() {
                       />
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Compact UI</Typography>
                       <Switch
                         checked={mobileSettings.compactUI}
@@ -313,13 +340,22 @@ function MobileResponsiveManager() {
                       />
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Mobile-Friendly Fonts</Typography>
                       <Switch
                         checked={mobileSettings.mobileFriendlyFonts}
-                        onChange={(e) => handleSettingChange('mobileFriendlyFonts', e.target.checked)}
+                        onChange={(e) =>
+                          handleSettingChange('mobileFriendlyFonts', e.target.checked)
+                        }
                       />
                     </Box>
                   </Grid>
@@ -332,8 +368,13 @@ function MobileResponsiveManager() {
         {/* Responsive Design */}
         <Card sx={{ mb: 3 }}>
           <CardContent>
-            <Box 
-              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+              }}
               onClick={() => toggleSection('responsive')}
             >
               <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -341,12 +382,19 @@ function MobileResponsiveManager() {
               </Typography>
               {expandedSections.responsive ? <ExpandLess /> : <ExpandMore />}
             </Box>
-            
+
             <Collapse in={expandedSections.responsive}>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Auto Rotation</Typography>
                       <Switch
                         checked={mobileSettings.autoRotation}
@@ -354,9 +402,16 @@ function MobileResponsiveManager() {
                       />
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>High Contrast Mode</Typography>
                       <Switch
                         checked={mobileSettings.highContrastMode}
@@ -365,7 +420,7 @@ function MobileResponsiveManager() {
                     </Box>
                   </Grid>
                 </Grid>
-                
+
                 {isMobile && (
                   <Alert severity="info" sx={{ mt: 2 }}>
                     Mobile device detected! Touch optimizations are automatically enabled.
@@ -379,8 +434,13 @@ function MobileResponsiveManager() {
         {/* Performance Settings */}
         <Card sx={{ mb: 3 }}>
           <CardContent>
-            <Box 
-              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+              }}
               onClick={() => toggleSection('performance')}
             >
               <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -388,12 +448,19 @@ function MobileResponsiveManager() {
               </Typography>
               {expandedSections.performance ? <ExpandLess /> : <ExpandMore />}
             </Box>
-            
+
             <Collapse in={expandedSections.performance}>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Reduce Animations</Typography>
                       <Switch
                         checked={mobileSettings.reduceAnimations}
@@ -401,9 +468,16 @@ function MobileResponsiveManager() {
                       />
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Fast Scrolling</Typography>
                       <Switch
                         checked={mobileSettings.fastScrolling}
@@ -411,9 +485,16 @@ function MobileResponsiveManager() {
                       />
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Data Saver Mode</Typography>
                       <Switch
                         checked={mobileSettings.dataSaver}
@@ -421,9 +502,16 @@ function MobileResponsiveManager() {
                       />
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 1,
+                      }}
+                    >
                       <Typography>Offline Mode</Typography>
                       <Switch
                         checked={mobileSettings.offlineMode}
@@ -432,10 +520,11 @@ function MobileResponsiveManager() {
                     </Box>
                   </Grid>
                 </Grid>
-                
+
                 {(mobileSettings.dataSaver || mobileSettings.offlineMode) && (
                   <Alert severity="warning" sx={{ mt: 2 }}>
-                    Performance mode is active. Some features may be limited to save bandwidth and battery.
+                    Performance mode is active. Some features may be limited to save bandwidth and
+                    battery.
                   </Alert>
                 )}
               </Box>
@@ -445,8 +534,8 @@ function MobileResponsiveManager() {
 
         {/* Save Button */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={saveMobileSettings}
             startIcon={<Settings />}
             fullWidth={isMobile}

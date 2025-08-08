@@ -26,7 +26,8 @@ class EnhancedMCPServer {
       fileOperations: ['filesystem'],
       browserAutomation: ['browserbase', 'puppeteer'],
       spotifyIntegration: ['spotify'],
-      testing: ['browserbase', 'puppeteer']
+      testing: ['browserbase', 'puppeteer'],
+      monitoring: ['sentry']
     };
 
     this.setupMiddleware();

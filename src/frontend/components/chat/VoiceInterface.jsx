@@ -3,7 +3,7 @@ import './VoiceInterface.css';
 
 /**
  * Enhanced Voice Interface Component
- * 
+ *
  * Features:
  * - Speech recognition (STT) for voice input
  * - Visual feedback for recording state
@@ -20,7 +20,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   const [supportedLanguages, setSupportedLanguages] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState('en-US');
   const [voiceVisualizer, setVoiceVisualizer] = useState([]);
-  
+
   const recognitionRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
@@ -29,7 +29,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   useEffect(() => {
     initializeSpeechRecognition();
     initializeAudioVisualizer();
-    
+
     return () => {
       cleanup();
     };
@@ -46,13 +46,13 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
+
     // Enhanced configuration
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 3;
     recognition.lang = selectedLanguage;
-    
+
     // Event handlers
     recognition.onstart = () => {
       console.log('🎤 Voice recognition started');
@@ -65,12 +65,12 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
     recognition.onresult = (event) => {
       let interimTranscript = '';
       let finalTranscript = '';
-      
+
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const transcript = result[0].transcript;
         const confidence = result[0].confidence;
-        
+
         if (result.isFinal) {
           finalTranscript += transcript;
           setConfidence(confidence);
@@ -79,9 +79,9 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
           interimTranscript += transcript;
         }
       }
-      
+
       setTranscript(finalTranscript || interimTranscript);
-      
+
       // Auto-process if final result has high confidence
       if (finalTranscript && confidence > 0.7) {
         processVoiceCommand(finalTranscript);
@@ -93,7 +93,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       setErrorMessage(`Voice recognition error: ${event.error}`);
       setIsListening(false);
       stopVisualization();
-      
+
       // Specific error handling
       switch (event.error) {
         case 'no-speech':
@@ -132,7 +132,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       { code: 'pt-BR', name: 'Portuguese (Brazil)' },
       { code: 'ja-JP', name: 'Japanese' },
       { code: 'ko-KR', name: 'Korean' },
-      { code: 'zh-CN', name: 'Chinese (Simplified)' }
+      { code: 'zh-CN', name: 'Chinese (Simplified)' },
     ];
     setSupportedLanguages(languages);
   }, [selectedLanguage, startVisualization, processVoiceCommand, confidence]);
@@ -146,12 +146,12 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const analyser = audioContext.createAnalyser();
       const microphone = audioContext.createMediaStreamSource(stream);
-      
+
       analyser.smoothingTimeConstant = 0.8;
       analyser.fftSize = 512;
-      
+
       microphone.connect(analyser);
-      
+
       audioContextRef.current = audioContext;
       analyserRef.current = analyser;
     } catch (error) {
@@ -164,39 +164,39 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
    */
   const startVisualization = useCallback(() => {
     if (!analyserRef.current) return;
-    
+
     const analyser = analyserRef.current;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
-    
+
     const updateVisualizer = () => {
       analyser.getByteFrequencyData(dataArray);
-      
+
       // Create visual representation of audio levels
       const visualizerData = [];
       const barCount = 20;
       const barWidth = bufferLength / barCount;
-      
+
       for (let i = 0; i < barCount; i++) {
         const start = Math.floor(i * barWidth);
         const end = Math.floor((i + 1) * barWidth);
         let sum = 0;
-        
+
         for (let j = start; j < end; j++) {
           sum += dataArray[j];
         }
-        
+
         const average = sum / (end - start);
         visualizerData.push(Math.min(average / 255, 1));
       }
-      
+
       setVoiceVisualizer(visualizerData);
-      
+
       if (isListening) {
         animationFrameRef.current = requestAnimationFrame(updateVisualizer);
       }
     };
-    
+
     updateVisualizer();
   }, [isListening]);
 
@@ -213,21 +213,24 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   /**
    * Process voice command
    */
-  const processVoiceCommand = useCallback((command) => {
-    setIsProcessing(true);
-    
-    // Enhanced command processing
-    const processedCommand = preprocessVoiceCommand(command);
-    
-    setTimeout(() => {
-      onVoiceInput(processedCommand);
-      setIsProcessing(false);
-      setTranscript('');
-      
-      // Auto-close after successful processing
-      setTimeout(onClose, 1000);
-    }, 500);
-  }, [onVoiceInput, onClose, preprocessVoiceCommand]);
+  const processVoiceCommand = useCallback(
+    (command) => {
+      setIsProcessing(true);
+
+      // Enhanced command processing
+      const processedCommand = preprocessVoiceCommand(command);
+
+      setTimeout(() => {
+        onVoiceInput(processedCommand);
+        setIsProcessing(false);
+        setTranscript('');
+
+        // Auto-close after successful processing
+        setTimeout(onClose, 1000);
+      }, 500);
+    },
+    [onVoiceInput, onClose, preprocessVoiceCommand]
+  );
 
   /**
    * Preprocess voice command for better AI understanding
@@ -235,7 +238,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
   const preprocessVoiceCommand = useCallback((command) => {
     // Convert common voice patterns to better text
     let processed = command.toLowerCase();
-    
+
     // Music-specific voice command patterns
     const patterns = [
       { pattern: /play some (.+)/i, replacement: 'Play $1' },
@@ -244,16 +247,16 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       { pattern: /create a (.+) playlist/i, replacement: 'Create a $1 playlist' },
       { pattern: /what's (.+) music/i, replacement: 'What is $1 music?' },
       { pattern: /suggest (.+)/i, replacement: 'Suggest $1' },
-      { pattern: /recommend (.+)/i, replacement: 'Recommend $1' }
+      { pattern: /recommend (.+)/i, replacement: 'Recommend $1' },
     ];
-    
+
     for (const { pattern, replacement } of patterns) {
       if (pattern.test(command)) {
         processed = command.replace(pattern, replacement);
         break;
       }
     }
-    
+
     return processed;
   }, []);
 
@@ -265,7 +268,7 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
       setErrorMessage('Speech recognition not available');
       return;
     }
-    
+
     try {
       recognitionRef.current.lang = selectedLanguage;
       recognitionRef.current.start();
@@ -291,11 +294,11 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
-    
+
     if (audioContextRef.current) {
       audioContextRef.current.close();
     }
-    
+
     stopVisualization();
   }, []);
 
@@ -331,12 +334,12 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
         {/* Language selector */}
         <div className="language-selector">
           <label>Language:</label>
-          <select 
-            value={selectedLanguage} 
+          <select
+            value={selectedLanguage}
             onChange={(e) => handleLanguageChange(e.target.value)}
             disabled={isListening}
           >
-            {supportedLanguages.map(lang => (
+            {supportedLanguages.map((lang) => (
               <option key={lang.code} value={lang.code}>
                 {lang.name}
               </option>
@@ -347,12 +350,12 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
         {/* Audio visualizer */}
         <div className="audio-visualizer">
           {voiceVisualizer.map((level, index) => (
-            <div 
+            <div
               key={index}
               className="visualizer-bar"
-              style={{ 
+              style={{
                 height: `${Math.max(level * 100, 2)}%`,
-                opacity: level > 0.1 ? 1 : 0.3
+                opacity: level > 0.1 ? 1 : 0.3,
               }}
             />
           ))}
@@ -384,32 +387,26 @@ const VoiceInterface = ({ onVoiceInput, onClose }) => {
             placeholder="Your voice input will appear here..."
             disabled={isListening}
           />
-          
+
           {confidence > 0 && (
-            <div className="confidence-meter">
-              Confidence: {Math.round(confidence * 100)}%
-            </div>
+            <div className="confidence-meter">Confidence: {Math.round(confidence * 100)}%</div>
           )}
         </div>
 
         {/* Error message */}
-        {errorMessage && (
-          <div className="error-message">
-            ⚠️ {errorMessage}
-          </div>
-        )}
+        {errorMessage && <div className="error-message">⚠️ {errorMessage}</div>}
 
         {/* Controls */}
         <div className="voice-controls">
-          <button 
+          <button
             className={`mic-button ${isListening ? 'listening' : ''}`}
             onClick={isListening ? stopListening : startListening}
             disabled={isProcessing}
           >
             {isListening ? '🔴 Stop' : '🎤 Start'}
           </button>
-          
-          <button 
+
+          <button
             className="submit-button"
             onClick={handleManualSubmit}
             disabled={!transcript.trim() || isListening || isProcessing}

@@ -4,7 +4,7 @@ const AuthContext = createContext();
 
 /**
  * Authentication Context Provider
- * 
+ *
  * Manages Spotify OAuth authentication and user session:
  * - User profile information
  * - Access token management
@@ -34,40 +34,43 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback((userData, token = null) => {
     setUser(userData);
     setIsAuthenticated(true);
-    
+
     if (token) {
       setAccessToken(token);
       localStorage.setItem('spotify_access_token', token);
     }
-    
+
     localStorage.setItem('echotune_user', JSON.stringify(userData));
-    
+
     console.log('User logged in:', userData.display_name || userData.id);
   }, []);
 
   /**
    * Validate access token
    */
-  const validateToken = useCallback(async (token) => {
-    try {
-      const response = await fetch('https://api.spotify.com/v1/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
+  const validateToken = useCallback(
+    async (token) => {
+      try {
+        const response = await fetch('https://api.spotify.com/v1/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Token invalid');
         }
-      });
 
-      if (!response.ok) {
-        throw new Error('Token invalid');
+        // Token is valid, could refresh user data here
+        return true;
+      } catch (error) {
+        console.error('Token validation failed:', error);
+        clearAuth();
+        return false;
       }
-
-      // Token is valid, could refresh user data here
-      return true;
-    } catch (error) {
-      console.error('Token validation failed:', error);
-      clearAuth();
-      return false;
-    }
-  }, [clearAuth]);
+    },
+    [clearAuth]
+  );
 
   /**
    * Check authentication status from localStorage
@@ -76,13 +79,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const storedUser = localStorage.getItem('echotune_user');
       const storedToken = localStorage.getItem('spotify_access_token');
-      
+
       if (storedUser && storedToken) {
         const userData = JSON.parse(storedUser);
         setUser(userData);
         setAccessToken(storedToken);
         setIsAuthenticated(true);
-        
+
         // Verify token is still valid
         validateToken(storedToken);
       }
@@ -113,7 +116,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const userData = JSON.parse(decodeURIComponent(userParam));
         login(userData);
-        
+
         // Clear URL parameters
         window.history.replaceState({}, document.title, window.location.pathname);
       } catch (error) {
@@ -125,7 +128,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check for stored authentication
     checkAuthStatus();
-    
+
     // Handle OAuth callback
     handleOAuthCallback();
   }, [checkAuthStatus, handleOAuthCallback]);
@@ -149,7 +152,7 @@ export const AuthProvider = ({ children }) => {
    * Update user data
    */
   const updateUser = (userData) => {
-    setUser(prev => ({ ...prev, ...userData }));
+    setUser((prev) => ({ ...prev, ...userData }));
     localStorage.setItem('echotune_user', JSON.stringify({ ...user, ...userData }));
   };
 
@@ -172,14 +175,10 @@ export const AuthProvider = ({ children }) => {
     initiateSpotifyAuth,
     updateUser,
     updateAccessToken,
-    validateToken
+    validateToken,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

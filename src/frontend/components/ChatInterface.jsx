@@ -19,7 +19,7 @@ function ChatInterface() {
   const { user } = useAuth();
   const { currentProvider, providers, sendMessage } = useLLM();
   const { hasActiveDatabase, fallbackMode } = useDatabase();
-  
+
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [conversationHistory, setConversationHistory] = useState([]);
@@ -38,7 +38,7 @@ function ChatInterface() {
 • "I'm feeling nostalgic, what should I listen to?"
 • "Analyze my music taste and suggest similar artists"`;
     }
-    
+
     return `Hello! I'm your AI music assistant powered by advanced language models. I can help you discover new music, create playlists, and find the perfect songs for any mood or activity.
 
 ${!hasActiveDatabase() ? '**Demo Mode Active** - Connect your Spotify account for personalized recommendations!' : ''}
@@ -50,30 +50,38 @@ ${!hasActiveDatabase() ? '**Demo Mode Active** - Connect your Spotify account fo
 • "Find songs similar to my recent favorites"
 
 **Available Models:**
-${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
+${Object.values(providers)
+  .map((p) => `• ${p.name} (${p.status})`)
+  .join('\n')}`;
   }, [user, hasActiveDatabase, providers]);
 
-  const addMessage = useCallback((sender, content, timestamp = null) => {
-    const newMessage = {
-      id: Date.now() + Math.random(),
-      sender,
-      content,
-      timestamp: timestamp || new Date().toISOString(),
-      provider: sender === 'assistant' ? currentProvider : null
-    };
-    
-    setMessages(prev => [...prev, newMessage]);
-    return newMessage;
-  }, [currentProvider]);
+  const addMessage = useCallback(
+    (sender, content, timestamp = null) => {
+      const newMessage = {
+        id: Date.now() + Math.random(),
+        sender,
+        content,
+        timestamp: timestamp || new Date().toISOString(),
+        provider: sender === 'assistant' ? currentProvider : null,
+      };
 
-  const addMessageCallback = useCallback((role, message, timestamp) => {
-    addMessage(role, message, timestamp);
-  }, [addMessage]);
+      setMessages((prev) => [...prev, newMessage]);
+      return newMessage;
+    },
+    [currentProvider]
+  );
+
+  const addMessageCallback = useCallback(
+    (role, message, timestamp) => {
+      addMessage(role, message, timestamp);
+    },
+    [addMessage]
+  );
 
   useEffect(() => {
     // Initialize WebSocket connection for real-time features
     const newSocket = io('/', {
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
     });
 
     newSocket.on('connect', () => {
@@ -90,7 +98,7 @@ ${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
 
     setSocket(newSocket);
 
-    // Add initial welcome message  
+    // Add initial welcome message
     addMessageCallback('assistant', getWelcomeMessage(), new Date().toISOString());
 
     return () => newSocket.close();
@@ -109,13 +117,13 @@ ${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
 
     // Add user message
     const _userMessage = addMessage('user', message);
-    
+
     // Update conversation history
     const newHistory = [...conversationHistory, { role: 'user', content: message }];
     setConversationHistory(newHistory);
 
     setIsTyping(true);
-    
+
     // Emit typing to server
     if (socket) {
       socket.emit('typing', { isTyping: true });
@@ -127,18 +135,18 @@ ${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
         user_context: user,
         conversation_history: newHistory.slice(-10), // Keep last 10 messages
         hasDatabase: hasActiveDatabase(),
-        fallbackMode
+        fallbackMode,
       };
 
       const result = await sendMessage(message, context);
-      
+
       if (result.success) {
         const assistantMessage = addMessage('assistant', result.response);
-        
+
         // Update conversation history
-        setConversationHistory(prev => [
+        setConversationHistory((prev) => [
           ...prev,
-          { role: 'assistant', content: result.response }
+          { role: 'assistant', content: result.response },
         ]);
 
         // Handle special actions
@@ -156,17 +164,19 @@ ${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
           socket.emit('message', {
             message: result.response,
             sender: 'assistant',
-            timestamp: assistantMessage.timestamp
+            timestamp: assistantMessage.timestamp,
           });
         }
       } else {
-        addMessage('assistant', 
+        addMessage(
+          'assistant',
           `I apologize, but I encountered an error: ${result.error || 'Please try again.'}`
         );
       }
     } catch (error) {
       console.error('Chat error:', error);
-      addMessage('assistant', 
+      addMessage(
+        'assistant',
         'I seem to be having connection issues. Please check your internet connection and try again.'
       );
     } finally {
@@ -180,11 +190,15 @@ ${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
   const handleSpecialAction = (action, data) => {
     switch (action) {
       case 'create_playlist':
-        addSystemMessage(`Creating playlist "${data.name}" with ${data.tracks?.length || 0} tracks...`);
+        addSystemMessage(
+          `Creating playlist "${data.name}" with ${data.tracks?.length || 0} tracks...`
+        );
         break;
       case 'recommend':
         if (data.tracks) {
-          addSystemMessage(`Found ${data.tracks.length} recommendations based on your preferences.`);
+          addSystemMessage(
+            `Found ${data.tracks.length} recommendations based on your preferences.`
+          );
         }
         break;
       case 'analysis_complete':
@@ -229,29 +243,22 @@ ${Object.values(providers).map(p => `• ${p.name} (${p.status})`).join('\n')}`;
 
         <ProviderPanel />
 
-        <MessageList 
-          messages={messages}
-          isTyping={isTyping}
-          currentProvider={currentProvider}
-        />
+        <MessageList messages={messages} isTyping={isTyping} currentProvider={currentProvider} />
 
         <div className="chat-input-container">
           <QuickSuggestions onSuggestionClick={handleSuggestionClick} />
-          
+
           <div className="input-row">
-            <ChatInput 
+            <ChatInput
               onSendMessage={handleSendMessage}
               disabled={isTyping}
               placeholder="Ask me about music recommendations, playlists, or anything music-related..."
             />
-            
-            <VoiceRecording 
-              onVoiceInput={handleVoiceInput}
-              disabled={isTyping}
-            />
+
+            <VoiceRecording onVoiceInput={handleVoiceInput} disabled={isTyping} />
           </div>
         </div>
-        
+
         <div ref={messagesEndRef} />
       </div>
     </div>

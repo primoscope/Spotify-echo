@@ -3,13 +3,7 @@
 import { useLLM } from '../contexts/LLMContext';
 
 function ProviderPanel() {
-  const { 
-    currentProvider, 
-    providers, 
-    loading, 
-    switchProvider, 
-    refreshProviders 
-  } = useLLM();
+  const { currentProvider, providers, loading, switchProvider, refreshProviders } = useLLM();
 
   const handleProviderChange = async (e) => {
     const newProvider = e.target.value;
@@ -24,17 +18,21 @@ function ProviderPanel() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'connected': return 'var(--success-color)';
-      case 'error': return 'var(--error-color)';
-      case 'unknown': return 'var(--warning-color)';
-      default: return 'var(--text-secondary)';
+      case 'connected':
+        return 'var(--success-color)';
+      case 'error':
+        return 'var(--error-color)';
+      case 'unknown':
+        return 'var(--warning-color)';
+      default:
+        return 'var(--text-secondary)';
     }
   };
 
   const getStatusText = (providerId) => {
     const provider = providers[providerId];
     if (!provider) return 'Unknown';
-    
+
     if (loading) return 'Loading...';
     if (!provider.available) return 'Unavailable';
     if (provider.status === 'connected') return 'Ready';
@@ -48,9 +46,9 @@ function ProviderPanel() {
         <label htmlFor="provider-select" className="provider-label">
           🤖 AI Provider:
         </label>
-        
-        <select 
-          id="provider-select" 
+
+        <select
+          id="provider-select"
           className="provider-select"
           value={currentProvider}
           onChange={handleProviderChange}
@@ -63,17 +61,13 @@ function ProviderPanel() {
               return order.indexOf(a) - order.indexOf(b);
             })
             .map(([key, provider]) => (
-            <option 
-              key={key} 
-              value={key}
-              disabled={!provider.available}
-            >
-              {provider.name} {!provider.available ? '(Unavailable)' : ''}
-            </option>
-          ))}
+              <option key={key} value={key} disabled={!provider.available}>
+                {provider.name} {!provider.available ? '(Unavailable)' : ''}
+              </option>
+            ))}
         </select>
-        
-        <button 
+
+        <button
           className="provider-settings-btn"
           onClick={() => alert('Provider settings will be implemented in settings page')}
           title="Provider Settings"
@@ -81,8 +75,8 @@ function ProviderPanel() {
         >
           ⚙️
         </button>
-        
-        <button 
+
+        <button
           className="refresh-providers-btn"
           onClick={refreshProviders}
           title="Refresh Providers"
@@ -91,18 +85,16 @@ function ProviderPanel() {
           {loading ? '⟳' : '🔄'}
         </button>
       </div>
-      
+
       <div className="provider-status">
-        <span 
+        <span
           className="status-text"
           style={{ color: getStatusColor(providers[currentProvider]?.status) }}
         >
           {getStatusText(currentProvider)}
         </span>
         {providers[currentProvider]?.model && (
-          <span className="model-info">
-            ({providers[currentProvider].model})
-          </span>
+          <span className="model-info">({providers[currentProvider].model})</span>
         )}
       </div>
     </div>

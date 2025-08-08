@@ -26,7 +26,7 @@ class SpotifyAudioFeaturesService {
       // Check database cache
       const db = mongoManager.getDb();
       const audioFeaturesCollection = db.collection('audio_features');
-      
+
       const cachedFeatures = await audioFeaturesCollection.findOne({ track_id: trackId });
       if (cachedFeatures) {
         this.cache.set(trackId, cachedFeatures);
@@ -39,12 +39,12 @@ class SpotifyAudioFeaturesService {
       // Fetch from Spotify API
       const response = await axios.get(`${this.baseURL}/audio-features/${trackId}`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       const audioFeatures = this.normalizeAudioFeatures(response.data);
-      
+
       // Cache in memory and database
       this.cache.set(trackId, audioFeatures);
       await this.cacheInDatabase(audioFeatures);
@@ -52,14 +52,14 @@ class SpotifyAudioFeaturesService {
       return audioFeatures;
     } catch (error) {
       console.error(`Error fetching audio features for track ${trackId}:`, error.message);
-      
+
       if (error.response?.status === 429) {
         // Rate limited - add delay and retry
         const retryAfter = error.response.headers['retry-after'] || 1;
         await this.rateLimiter.addDelay(retryAfter * 1000);
         return this.getAudioFeatures(trackId, accessToken);
       }
-      
+
       throw error;
     }
   }
@@ -75,22 +75,22 @@ class SpotifyAudioFeaturesService {
     // Process in batches to respect API limits
     for (let i = 0; i < trackIds.length; i += batchSize) {
       const batch = trackIds.slice(i, i + batchSize);
-      
+
       try {
         await this.rateLimiter.checkLimit();
 
         const response = await axios.get(`${this.baseURL}/audio-features`, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`
+            Authorization: `Bearer ${accessToken}`,
           },
           params: {
-            ids: batch.join(',')
-          }
+            ids: batch.join(','),
+          },
         });
 
         const batchFeatures = response.data.audio_features
-          .filter(features => features !== null)
-          .map(features => this.normalizeAudioFeatures(features));
+          .filter((features) => features !== null)
+          .map((features) => this.normalizeAudioFeatures(features));
 
         // Cache all results
         for (const features of batchFeatures) {
@@ -104,26 +104,25 @@ class SpotifyAudioFeaturesService {
           onProgress({
             processed: Math.min(i + batchSize, trackIds.length),
             total: trackIds.length,
-            currentBatch: batchFeatures.length
+            currentBatch: batchFeatures.length,
           });
         }
 
         // Small delay between batches
-        await new Promise(resolve => setTimeout(resolve, 100));
-
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
         console.error(`Error processing batch ${i}-${i + batchSize}:`, error.message);
-        
+
         if (error.response?.status === 429) {
           const retryAfter = error.response.headers['retry-after'] || 1;
           await this.rateLimiter.addDelay(retryAfter * 1000);
           i -= batchSize; // Retry this batch
           continue;
         }
-        
+
         errors.push({
           batch: batch,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -132,7 +131,7 @@ class SpotifyAudioFeaturesService {
       results,
       errors,
       totalProcessed: results.length,
-      totalRequested: trackIds.length
+      totalRequested: trackIds.length,
     };
   }
 
@@ -143,7 +142,7 @@ class SpotifyAudioFeaturesService {
     try {
       const db = mongoManager.getDb();
       const audioFeaturesCollection = db.collection('audio_features');
-      
+
       const cachedFeatures = await audioFeaturesCollection
         .find({ track_id: { $in: trackIds } })
         .toArray();
@@ -160,8 +159,8 @@ class SpotifyAudioFeaturesService {
    */
   async getMissingTrackIds(trackIds) {
     const cachedFeatures = await this.getCachedAudioFeatures(trackIds);
-    const cachedTrackIds = cachedFeatures.map(f => f.track_id);
-    return trackIds.filter(id => !cachedTrackIds.includes(id));
+    const cachedTrackIds = cachedFeatures.map((f) => f.track_id);
+    return trackIds.filter((id) => !cachedTrackIds.includes(id));
   }
 
   /**
@@ -182,7 +181,7 @@ class SpotifyAudioFeaturesService {
       key: rawFeatures.key,
       mode: rawFeatures.mode,
       time_signature: rawFeatures.time_signature,
-      created_at: new Date()
+      created_at: new Date(),
     };
   }
 
@@ -193,7 +192,7 @@ class SpotifyAudioFeaturesService {
     try {
       const db = mongoManager.getDb();
       const audioFeaturesCollection = db.collection('audio_features');
-      
+
       await audioFeaturesCollection.updateOne(
         { track_id: audioFeatures.track_id },
         { $set: audioFeatures },
@@ -213,8 +212,8 @@ class SpotifyAudioFeaturesService {
 
       const response = await axios.get(`${this.baseURL}/tracks/${trackId}`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       return this.normalizeTrackMetadata(response.data);
@@ -233,32 +232,32 @@ class SpotifyAudioFeaturesService {
 
     for (let i = 0; i < trackIds.length; i += batchSize) {
       const batch = trackIds.slice(i, i + batchSize);
-      
+
       try {
         await this.rateLimiter.checkLimit();
 
         const response = await axios.get(`${this.baseURL}/tracks`, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`
+            Authorization: `Bearer ${accessToken}`,
           },
           params: {
-            ids: batch.join(',')
-          }
+            ids: batch.join(','),
+          },
         });
 
         const batchMetadata = response.data.tracks
-          .filter(track => track !== null)
-          .map(track => this.normalizeTrackMetadata(track));
+          .filter((track) => track !== null)
+          .map((track) => this.normalizeTrackMetadata(track));
 
         results.push(...batchMetadata);
 
         // Cache in database
         await this.cacheTrackMetadata(batchMetadata);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
         console.error(`Error processing metadata batch ${i}-${i + batchSize}:`, error.message);
-        
+
         if (error.response?.status === 429) {
           const retryAfter = error.response.headers['retry-after'] || 1;
           await this.rateLimiter.addDelay(retryAfter * 1000);
@@ -278,24 +277,26 @@ class SpotifyAudioFeaturesService {
     return {
       track_id: rawTrack.id,
       name: rawTrack.name,
-      artists: rawTrack.artists.map(artist => ({
+      artists: rawTrack.artists.map((artist) => ({
         id: artist.id,
-        name: artist.name
+        name: artist.name,
       })),
       album: {
         id: rawTrack.album.id,
         name: rawTrack.album.name,
         release_date: rawTrack.album.release_date,
-        total_tracks: rawTrack.album.total_tracks
+        total_tracks: rawTrack.album.total_tracks,
       },
       duration_ms: rawTrack.duration_ms,
       explicit: rawTrack.explicit,
       popularity: rawTrack.popularity,
       preview_url: rawTrack.preview_url,
       spotify_url: rawTrack.external_urls.spotify,
-      release_year: rawTrack.album.release_date ? parseInt(rawTrack.album.release_date.substring(0, 4)) : null,
+      release_year: rawTrack.album.release_date
+        ? parseInt(rawTrack.album.release_date.substring(0, 4))
+        : null,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
     };
   }
 
@@ -306,13 +307,13 @@ class SpotifyAudioFeaturesService {
     try {
       const db = mongoManager.getDb();
       const trackMetadataCollection = db.collection('track_metadata');
-      
-      const operations = metadataArray.map(metadata => ({
+
+      const operations = metadataArray.map((metadata) => ({
         updateOne: {
           filter: { track_id: metadata.track_id },
           update: { $set: metadata },
-          upsert: true
-        }
+          upsert: true,
+        },
       }));
 
       if (operations.length > 0) {
@@ -328,14 +329,16 @@ class SpotifyAudioFeaturesService {
    */
   async enrichListeningHistory(listeningHistory, accessToken, options = {}) {
     const { includeMetadata = true, onProgress = null } = options;
-    
+
     // Extract unique track IDs
-    const uniqueTrackIds = [...new Set(listeningHistory.map(item => item.track_id))];
-    
+    const uniqueTrackIds = [...new Set(listeningHistory.map((item) => item.track_id))];
+
     // Get missing audio features
     const missingTrackIds = await this.getMissingTrackIds(uniqueTrackIds);
-    
-    console.log(`Processing ${missingTrackIds.length} missing audio features out of ${uniqueTrackIds.length} total tracks`);
+
+    console.log(
+      `Processing ${missingTrackIds.length} missing audio features out of ${uniqueTrackIds.length} total tracks`
+    );
 
     // Fetch missing audio features
     if (missingTrackIds.length > 0) {
@@ -344,10 +347,10 @@ class SpotifyAudioFeaturesService {
           if (onProgress) {
             onProgress({
               stage: 'audio_features',
-              ...progress
+              ...progress,
             });
           }
-        }
+        },
       });
     }
 
@@ -358,12 +361,12 @@ class SpotifyAudioFeaturesService {
 
     // Get all audio features
     const allAudioFeatures = await this.getCachedAudioFeatures(uniqueTrackIds);
-    const audioFeaturesMap = new Map(allAudioFeatures.map(af => [af.track_id, af]));
+    const audioFeaturesMap = new Map(allAudioFeatures.map((af) => [af.track_id, af]));
 
     // Enrich listening history
-    const enrichedHistory = listeningHistory.map(item => ({
+    const enrichedHistory = listeningHistory.map((item) => ({
       ...item,
-      audio_features: audioFeaturesMap.get(item.track_id) || null
+      audio_features: audioFeaturesMap.get(item.track_id) || null,
     }));
 
     return enrichedHistory;
@@ -382,7 +385,7 @@ class SpotifyAudioFeaturesService {
   getCacheStats() {
     return {
       memoryCache: this.cache.size,
-      rateLimiter: this.rateLimiter.getStats()
+      rateLimiter: this.rateLimiter.getStats(),
     };
   }
 }

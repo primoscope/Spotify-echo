@@ -20,7 +20,7 @@ async function extractUser(req, res, next) {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      
+
       // For now, treat token as user ID (in production, validate JWT)
       userId = token;
     }
@@ -51,17 +51,17 @@ async function extractUser(req, res, next) {
           last_seen: new Date(),
           ip_address: getClientIP(req),
         };
-        
+
         await userProfilesCollection.insertOne(userProfile);
       } else if (userProfile) {
         // Update last seen
         await userProfilesCollection.updateOne(
           { spotify_id: userId },
-          { 
-            $set: { 
+          {
+            $set: {
               last_seen: new Date(),
               ip_address: getClientIP(req),
-            }
+            },
           }
         );
       }
@@ -80,11 +80,13 @@ async function extractUser(req, res, next) {
  * Get client IP address with proxy support
  */
 function getClientIP(req) {
-  return req.ip || 
-         req.connection.remoteAddress || 
-         req.socket.remoteAddress ||
-         (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
-         'unknown';
+  return (
+    req.ip ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+    'unknown'
+  );
 }
 
 /**
@@ -94,7 +96,7 @@ function requireAuth(req, res, next) {
   if (!req.userId) {
     return res.status(401).json({
       error: 'Authentication required',
-      message: 'Please provide a valid user token or ID'
+      message: 'Please provide a valid user token or ID',
     });
   }
   next();
@@ -122,7 +124,7 @@ function createRateLimit(options = {}) {
 
     const key = keyGenerator(req);
     const now = Date.now();
-    
+
     // Clean old entries
     for (const [k, data] of requests.entries()) {
       if (now - data.firstRequest > windowMs) {
@@ -140,7 +142,7 @@ function createRateLimit(options = {}) {
     } else {
       // Log rate limit violation
       console.warn(`Rate limit exceeded for ${key} on ${req.method} ${req.path}`);
-      
+
       if (onLimitReached) {
         onLimitReached(req, res);
       }
@@ -148,7 +150,7 @@ function createRateLimit(options = {}) {
       res.status(429).json({
         error: 'Rate limit exceeded',
         message,
-        retryAfter: Math.ceil((userRequests.firstRequest + windowMs - now) / 1000)
+        retryAfter: Math.ceil((userRequests.firstRequest + windowMs - now) / 1000),
       });
     }
   };
@@ -177,7 +179,7 @@ function errorHandler(err, req, res, _next) {
   // Future enhancement: implement structured error logging
   // eslint-disable-next-line no-unused-vars
   const nextFn = _next;
-  
+
   // Log error with context
   const errorContext = {
     error: err.message,
@@ -188,7 +190,7 @@ function errorHandler(err, req, res, _next) {
     userAgent: req.get('User-Agent'),
     timestamp: new Date().toISOString(),
   };
-  
+
   console.error('API Error:', errorContext);
 
   // Security: Don't expose internal errors in production
@@ -198,30 +200,28 @@ function errorHandler(err, req, res, _next) {
     return res.status(400).json({
       error: 'Validation Error',
       message: err.message,
-      details: isProduction ? undefined : err.errors
+      details: isProduction ? undefined : err.errors,
     });
   }
 
   if (err.name === 'MongoError' || err.name === 'MongoServerError') {
     return res.status(500).json({
       error: 'Database Error',
-      message: isProduction ? 'A database error occurred' : err.message
+      message: isProduction ? 'A database error occurred' : err.message,
     });
   }
 
   if (err.status) {
     return res.status(err.status).json({
       error: err.message || 'An error occurred',
-      ...(isProduction ? {} : { stack: err.stack })
+      ...(isProduction ? {} : { stack: err.stack }),
     });
   }
 
   res.status(500).json({
     error: 'Internal Server Error',
-    message: isProduction 
-      ? 'An unexpected error occurred' 
-      : err.message,
-    ...(isProduction ? {} : { stack: err.stack })
+    message: isProduction ? 'An unexpected error occurred' : err.message,
+    ...(isProduction ? {} : { stack: err.stack }),
   });
 }
 
@@ -230,7 +230,7 @@ function errorHandler(err, req, res, _next) {
  */
 function requestLogger(req, res, next) {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
     const logData = {
@@ -242,17 +242,17 @@ function requestLogger(req, res, next) {
       userAgent: req.get('User-Agent'),
       timestamp: new Date().toISOString(),
     };
-    
+
     // Color code status for console output
-    const statusColor = res.statusCode >= 400 ? '\x1b[31m' : 
-                       res.statusCode >= 300 ? '\x1b[33m' : '\x1b[32m';
+    const statusColor =
+      res.statusCode >= 400 ? '\x1b[31m' : res.statusCode >= 300 ? '\x1b[33m' : '\x1b[32m';
     const resetColor = '\x1b[0m';
-    
+
     console.log(
       `${logData.method} ${logData.url} ${statusColor}${logData.status}${resetColor} ${logData.duration} - ${logData.ip}`
     );
   });
-  
+
   next();
 }
 
@@ -272,7 +272,7 @@ function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Max-Age', '86400');
-  
+
   // Additional security headers
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -297,7 +297,7 @@ function validateInput(schema) {
       return res.status(400).json({
         error: 'Validation Error',
         message: error.details[0].message,
-        details: process.env.NODE_ENV === 'production' ? undefined : error.details
+        details: process.env.NODE_ENV === 'production' ? undefined : error.details,
       });
     }
     next();
@@ -356,25 +356,26 @@ async function ensureDatabase(req, res, next) {
     if (!mongoManager.isConnected) {
       await mongoManager.connect();
     }
-    
+
     // Periodic health check
     const now = Date.now();
     const lastCheck = ensureDatabase.lastHealthCheck || 0;
-    
-    if (now - lastCheck > 30000) { // Check every 30 seconds
+
+    if (now - lastCheck > 30000) {
+      // Check every 30 seconds
       const health = await mongoManager.healthCheck();
       if (health.status !== 'healthy') {
         console.warn('Database health check failed:', health);
       }
       ensureDatabase.lastHealthCheck = now;
     }
-    
+
     next();
   } catch (error) {
     console.error('Database connection error:', error);
     res.status(503).json({
       error: 'Service Unavailable',
-      message: 'Database connection failed'
+      message: 'Database connection failed',
     });
   }
 }
@@ -409,14 +410,14 @@ function securityHeaders(req, res, next) {
  */
 function requestSizeLimit(req, res, next) {
   const maxSize = parseInt(config.server.maxRequestSize) || 10485760; // 10MB default
-  
+
   if (req.headers['content-length'] && parseInt(req.headers['content-length']) > maxSize) {
     return res.status(413).json({
       error: 'Payload Too Large',
-      message: `Request size exceeds ${maxSize} bytes`
+      message: `Request size exceeds ${maxSize} bytes`,
     });
   }
-  
+
   next();
 }
 

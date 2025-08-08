@@ -17,7 +17,7 @@ class RedisManager {
       keyPrefix: process.env.REDIS_KEY_PREFIX || 'echotune:',
       defaultTTL: parseInt(process.env.REDIS_DEFAULT_TTL) || 3600,
       maxRetries: parseInt(process.env.REDIS_MAX_RETRIES) || 3,
-      connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT) || 10000
+      connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT) || 10000,
     };
   }
 
@@ -32,7 +32,7 @@ class RedisManager {
         socket: {
           connectTimeout: this.config.connectTimeout,
         },
-        legacyMode: false
+        legacyMode: false,
       });
 
       this.client.on('error', (err) => {
@@ -56,7 +56,7 @@ class RedisManager {
     await this.connect();
     const fullKey = this.config.keyPrefix + key;
     const serializedValue = JSON.stringify(value);
-    
+
     if (ttl) {
       return await this.client.setEx(fullKey, ttl, serializedValue);
     } else {

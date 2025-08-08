@@ -15,7 +15,7 @@ import {
   LinearProgress,
   Alert,
   Snackbar,
-  Fab
+  Fab,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -27,7 +27,7 @@ import {
   Favorite as FavoriteIcon,
   Share as ShareIcon,
   Add as AddIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 
 /**
@@ -41,7 +41,7 @@ function EnhancedMusicDiscovery() {
     energy: 50,
     valence: 50,
     danceability: 50,
-    acousticness: 50
+    acousticness: 50,
   });
   const [discoveries, setDiscoveries] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -54,28 +54,28 @@ function EnhancedMusicDiscovery() {
     smart: {
       name: 'Smart Discovery',
       icon: <SearchIcon />,
-      description: 'AI-powered recommendations based on your listening history'
+      description: 'AI-powered recommendations based on your listening history',
     },
     mood: {
       name: 'Mood-Based',
       icon: <MoodIcon />,
-      description: 'Discover music that matches your current mood and energy'
+      description: 'Discover music that matches your current mood and energy',
     },
     trending: {
       name: 'Trending Now',
       icon: <TrendingIcon />,
-      description: 'Popular tracks and emerging artists in your genres'
+      description: 'Popular tracks and emerging artists in your genres',
     },
     social: {
       name: 'Social Discovery',
       icon: <SocialIcon />,
-      description: 'Music your friends and similar users are enjoying'
+      description: 'Music your friends and similar users are enjoying',
     },
     radio: {
       name: 'AI Radio',
       icon: <RadioIcon />,
-      description: 'Personalized radio stations with infinite discovery'
-    }
+      description: 'Personalized radio stations with infinite discovery',
+    },
   };
 
   // Load initial data
@@ -119,7 +119,7 @@ function EnhancedMusicDiscovery() {
       let endpoint = '/api/music/discover';
       let payload = {
         mode: discoveryMode,
-        limit: 20
+        limit: 20,
       };
 
       // Add mode-specific parameters
@@ -165,9 +165,9 @@ function EnhancedMusicDiscovery() {
 
   // Handle mood slider changes
   const handleMoodChange = (attribute, value) => {
-    setMoodSettings(prev => ({
+    setMoodSettings((prev) => ({
       ...prev,
-      [attribute]: value
+      [attribute]: value,
     }));
   };
 
@@ -235,12 +235,17 @@ function EnhancedMusicDiscovery() {
                     cursor: 'pointer',
                     border: discoveryMode === key ? 2 : 0,
                     borderColor: 'primary.main',
-                    '&:hover': { elevation: 4 }
+                    '&:hover': { elevation: 4 },
                   }}
                   onClick={() => setDiscoveryMode(key)}
                 >
                   <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                    <Box sx={{ mb: 1, color: discoveryMode === key ? 'primary.main' : 'text.secondary' }}>
+                    <Box
+                      sx={{
+                        mb: 1,
+                        color: discoveryMode === key ? 'primary.main' : 'text.secondary',
+                      }}
+                    >
                       {mode.icon}
                     </Box>
                     <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
@@ -262,7 +267,9 @@ function EnhancedMusicDiscovery() {
         <CardContent>
           {discoveryMode === 'smart' && (
             <Box>
-              <Typography variant="h6" sx={{ mb: 2 }}>Smart Search</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Smart Search
+              </Typography>
               <TextField
                 fullWidth
                 placeholder="Describe the music you want to discover..."
@@ -274,7 +281,7 @@ function EnhancedMusicDiscovery() {
                     <IconButton onClick={discoverMusic}>
                       <SearchIcon />
                     </IconButton>
-                  )
+                  ),
                 }}
               />
             </Box>
@@ -282,7 +289,9 @@ function EnhancedMusicDiscovery() {
 
           {discoveryMode === 'mood' && (
             <Box>
-              <Typography variant="h6" sx={{ mb: 2 }}>Mood Settings</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Mood Settings
+              </Typography>
               <Grid container spacing={3}>
                 {Object.entries(moodSettings).map(([key, value]) => (
                   <Grid item xs={12} sm={6} key={key}>
@@ -304,7 +313,9 @@ function EnhancedMusicDiscovery() {
 
           {discoveryMode === 'trending' && (
             <Box>
-              <Typography variant="h6" sx={{ mb: 2 }}>Trending Music</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Trending Music
+              </Typography>
               <Grid container spacing={2}>
                 {trends.slice(0, 5).map((trend, index) => (
                   <Grid item xs={12} sm={6} md={4} key={index}>
@@ -322,7 +333,9 @@ function EnhancedMusicDiscovery() {
 
           {discoveryMode === 'social' && (
             <Box>
-              <Typography variant="h6" sx={{ mb: 2 }}>Social Activity</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Social Activity
+              </Typography>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 {socialActivity.slice(0, 4).map((activity, index) => (
                   <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -396,7 +409,7 @@ function EnhancedMusicDiscovery() {
                           </Typography>
                         </Box>
                       </Box>
-                      
+
                       {track.confidence && (
                         <Box sx={{ mb: 2 }}>
                           <Typography variant="caption" color="text.secondary">
@@ -451,11 +464,7 @@ function EnhancedMusicDiscovery() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Select a discovery mode and start exploring personalized recommendations
             </Typography>
-            <Button
-              variant="contained"
-              onClick={discoverMusic}
-              startIcon={<SearchIcon />}
-            >
+            <Button variant="contained" onClick={discoverMusic} startIcon={<SearchIcon />}>
               Start Discovering
             </Button>
           </CardContent>
@@ -473,11 +482,7 @@ function EnhancedMusicDiscovery() {
       </Fab>
 
       {/* Error Snackbar */}
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-      >
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
         <Alert severity="error" onClose={() => setError(null)}>
           {error}
         </Alert>

@@ -138,14 +138,10 @@ const createEchoTuneTheme = (mode) => {
       MuiCard: {
         styleOverrides: {
           root: {
-            boxShadow: isDark 
-              ? '0 4px 12px rgba(0,0,0,0.3)' 
-              : '0 2px 8px rgba(0,0,0,0.1)',
+            boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
             borderRadius: 12,
             '&:hover': {
-              boxShadow: isDark 
-                ? '0 6px 16px rgba(0,0,0,0.4)' 
-                : '0 4px 16px rgba(0,0,0,0.15)',
+              boxShadow: isDark ? '0 6px 16px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.15)',
             },
             transition: 'box-shadow 0.2s ease',
           },
@@ -157,9 +153,7 @@ const createEchoTuneTheme = (mode) => {
             backgroundImage: 'none',
           },
           elevation1: {
-            boxShadow: isDark 
-              ? '0 2px 4px rgba(0,0,0,0.3)' 
-              : '0 1px 4px rgba(0,0,0,0.1)',
+            boxShadow: isDark ? '0 2px 4px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
           },
         },
       },
@@ -185,9 +179,7 @@ const createEchoTuneTheme = (mode) => {
           root: {
             backgroundColor: isDark ? '#1e1e1e' : '#ffffff',
             color: isDark ? '#ffffff' : '#333333',
-            boxShadow: isDark 
-              ? '0 2px 8px rgba(0,0,0,0.3)' 
-              : '0 1px 4px rgba(0,0,0,0.1)',
+            boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
           },
         },
       },
@@ -205,18 +197,12 @@ const createEchoTuneTheme = (mode) => {
             borderRadius: 8,
             margin: '2px 8px',
             '&:hover': {
-              backgroundColor: isDark 
-                ? 'rgba(255,255,255,0.05)' 
-                : 'rgba(0,0,0,0.05)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
             },
             '&.Mui-selected': {
-              backgroundColor: isDark 
-                ? 'rgba(29,185,84,0.2)' 
-                : 'rgba(29,185,84,0.1)',
+              backgroundColor: isDark ? 'rgba(29,185,84,0.2)' : 'rgba(29,185,84,0.1)',
               '&:hover': {
-                backgroundColor: isDark 
-                  ? 'rgba(29,185,84,0.3)' 
-                  : 'rgba(29,185,84,0.15)',
+                backgroundColor: isDark ? 'rgba(29,185,84,0.3)' : 'rgba(29,185,84,0.15)',
               },
             },
           },
@@ -227,9 +213,7 @@ const createEchoTuneTheme = (mode) => {
           root: {
             borderRadius: 8,
             '&:hover': {
-              backgroundColor: isDark 
-                ? 'rgba(255,255,255,0.1)' 
-                : 'rgba(0,0,0,0.05)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
             },
           },
         },
@@ -245,8 +229,8 @@ const createEchoTuneTheme = (mode) => {
     // Custom EchoTune specific values
     custom: {
       musicPlayer: {
-        background: isDark 
-          ? 'linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%)' 
+        background: isDark
+          ? 'linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%)'
           : 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
         controls: isDark ? '#1db954' : '#1ed760',
       },
@@ -275,12 +259,14 @@ const ThemeProvider = ({ children }) => {
 
   const [customizations, setCustomizations] = useState(() => {
     const saved = localStorage.getItem('echotune-theme-customizations');
-    return saved ? JSON.parse(saved) : {
-      primaryColor: '#1db954',
-      accentColor: '#9c27b0',
-      borderRadius: 12,
-      fontScale: 1,
-    };
+    return saved
+      ? JSON.parse(saved)
+      : {
+          primaryColor: '#1db954',
+          accentColor: '#9c27b0',
+          borderRadius: 12,
+          fontScale: 1,
+        };
   });
 
   const theme = createEchoTuneTheme(mode);
@@ -294,7 +280,7 @@ const ThemeProvider = ({ children }) => {
   }, [customizations]);
 
   const toggleMode = () => {
-    setMode(prev => prev === 'light' ? 'dark' : 'light');
+    setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
   const setThemeMode = (newMode) => {
@@ -302,7 +288,7 @@ const ThemeProvider = ({ children }) => {
   };
 
   const updateCustomization = (key, value) => {
-    setCustomizations(prev => ({
+    setCustomizations((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -367,10 +353,7 @@ export const ThemeToggle = ({ showCustomization = false }) => {
   return (
     <>
       <Tooltip title="Theme settings">
-        <IconButton 
-          onClick={(e) => setMenuAnchor(e.currentTarget)} 
-          color="inherit"
-        >
+        <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} color="inherit">
           <Palette />
         </IconButton>
       </Tooltip>
@@ -382,21 +365,36 @@ export const ThemeToggle = ({ showCustomization = false }) => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={() => { setThemeMode('light'); handleMenuClose(); }}>
+        <MenuItem
+          onClick={() => {
+            setThemeMode('light');
+            handleMenuClose();
+          }}
+        >
           <ListItemIcon>
             <Brightness7 />
           </ListItemIcon>
           <ListItemText>Light Mode</ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={() => { setThemeMode('dark'); handleMenuClose(); }}>
+        <MenuItem
+          onClick={() => {
+            setThemeMode('dark');
+            handleMenuClose();
+          }}
+        >
           <ListItemIcon>
             <Brightness4 />
           </ListItemIcon>
           <ListItemText>Dark Mode</ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={() => { setThemeMode('auto'); handleMenuClose(); }}>
+        <MenuItem
+          onClick={() => {
+            setThemeMode('auto');
+            handleMenuClose();
+          }}
+        >
           <ListItemIcon>
             <AutoMode />
           </ListItemIcon>

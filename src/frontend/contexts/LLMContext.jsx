@@ -18,7 +18,7 @@ export function LLMProvider({ children }) {
     mock: { name: 'Demo Mode (Mock)', status: 'connected', available: true },
     openai: { name: 'OpenAI GPT', status: 'unknown', available: false },
     azure: { name: 'Azure OpenAI', status: 'unknown', available: false },
-    openrouter: { name: 'OpenRouter', status: 'unknown', available: false }
+    openrouter: { name: 'OpenRouter', status: 'unknown', available: false },
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,35 +31,34 @@ export function LLMProvider({ children }) {
     try {
       const response = await fetch('/api/chat/providers');
       const data = await response.json();
-      
+
       if (data.success) {
         const updatedProviders = { ...providers };
-        
+
         // Update provider status based on response
-        Object.keys(updatedProviders).forEach(key => {
-          const providerData = data.providers.find(p => p.id === key);
+        Object.keys(updatedProviders).forEach((key) => {
+          const providerData = data.providers.find((p) => p.id === key);
           if (providerData) {
             updatedProviders[key] = {
               ...updatedProviders[key],
               status: providerData.status,
               available: providerData.available,
-              model: providerData.model
+              model: providerData.model,
             };
           }
         });
-        
+
         setProviders(updatedProviders);
-        
+
         // Auto-select best available provider - prioritize Gemini first
         const providerPriority = ['gemini', 'openai', 'openrouter', 'mock'];
         let selectedProvider = currentProvider;
-        
+
         if (!updatedProviders[currentProvider]?.available) {
-          selectedProvider = providerPriority.find(
-            key => updatedProviders[key]?.available
-          ) || 'mock';
+          selectedProvider =
+            providerPriority.find((key) => updatedProviders[key]?.available) || 'mock';
         }
-        
+
         setCurrentProvider(selectedProvider);
       }
     } catch (error) {
@@ -85,8 +84,8 @@ export function LLMProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: 'Hello',
-          provider: providerId
-        })
+          provider: providerId,
+        }),
       });
 
       if (response.ok) {
@@ -108,11 +107,11 @@ export function LLMProvider({ children }) {
 
     try {
       const endpoint = context.isDemo ? '/api/chat/test' : '/api/chat';
-      
+
       const requestBody = {
         message: message.trim(),
         provider: currentProvider,
-        ...context
+        ...context,
       };
 
       const response = await fetch(endpoint, {
@@ -120,18 +119,18 @@ export function LLMProvider({ children }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         return {
           success: true,
           response: data.response || data.message,
           action: data.action,
           data: data.data,
-          provider: currentProvider
+          provider: currentProvider,
         };
       } else {
         // If provider fails, try fallback to mock
@@ -142,10 +141,10 @@ export function LLMProvider({ children }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               message: message.trim(),
-              provider: 'mock'
-            })
+              provider: 'mock',
+            }),
           });
-          
+
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json();
             setCurrentProvider('mock');
@@ -153,21 +152,21 @@ export function LLMProvider({ children }) {
               success: true,
               response: fallbackData.response,
               provider: 'mock',
-              fallback: true
+              fallback: true,
             };
           }
         }
-        
+
         return {
           success: false,
-          error: data.message || 'Unknown error occurred'
+          error: data.message || 'Unknown error occurred',
         };
       }
     } catch (error) {
       console.error('Message send error:', error);
       return {
         success: false,
-        error: 'Connection error. Please check your internet connection.'
+        error: 'Connection error. Please check your internet connection.',
       };
     }
   };
@@ -188,12 +187,8 @@ export function LLMProvider({ children }) {
     switchProvider,
     sendMessage,
     getProviderStatus,
-    isProviderAvailable
+    isProviderAvailable,
   };
 
-  return (
-    <LLMContext.Provider value={value}>
-      {children}
-    </LLMContext.Provider>
-  );
+  return <LLMContext.Provider value={value}>{children}</LLMContext.Provider>;
 }

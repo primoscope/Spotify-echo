@@ -18,11 +18,11 @@ class ScalingManager {
     if (cluster.isMaster) {
       console.log('🚀 Master process starting...');
       console.log('⚖️ Available CPU cores:', this.cpuCores);
-      
+
       for (let i = 0; i < this.minWorkers; i++) {
         this.createWorker();
       }
-      
+
       this.startMonitoring();
     } else {
       console.log('👷 Worker started:', process.pid);
@@ -33,7 +33,10 @@ class ScalingManager {
   createWorker() {
     const worker = cluster.fork();
     this.workers.set(worker.id, {
-      worker, startTime: Date.now(), requests: 0, errors: 0
+      worker,
+      startTime: Date.now(),
+      requests: 0,
+      errors: 0,
     });
     return worker;
   }
@@ -50,7 +53,7 @@ class ScalingManager {
     const memory = process.memoryUsage();
     this.metrics.cpu.push(usage);
     this.metrics.memory.push(memory);
-    
+
     if (this.metrics.cpu.length > 20) {
       this.metrics.cpu.shift();
       this.metrics.memory.shift();

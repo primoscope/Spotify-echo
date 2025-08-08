@@ -22,18 +22,18 @@ const UserProfileSchema = {
       energy: { type: 'number', min: 0, max: 1 },
       valence: { type: 'number', min: 0, max: 1 },
       danceability: { type: 'number', min: 0, max: 1 },
-      acousticness: { type: 'number', min: 0, max: 1 }
-    }
+      acousticness: { type: 'number', min: 0, max: 1 },
+    },
   },
   listening_stats: {
     total_listening_time: { type: 'number', default: 0 },
     most_played_artist: { type: 'string' },
     most_played_genre: { type: 'string' },
-    average_session_length: { type: 'number', default: 0 }
+    average_session_length: { type: 'number', default: 0 },
   },
   created_at: { type: 'date', default: () => new Date() },
   updated_at: { type: 'date', default: () => new Date() },
-  last_active: { type: 'date', default: () => new Date() }
+  last_active: { type: 'date', default: () => new Date() },
 };
 
 /**
@@ -51,11 +51,11 @@ const ListeningHistorySchema = {
   context: {
     context_type: { type: 'string' }, // playlist, album, artist, search, etc.
     context_uri: { type: 'string' },
-    device_type: { type: 'string' }
+    device_type: { type: 'string' },
   },
   skip_count: { type: 'number', default: 0 },
   repeat_count: { type: 'number', default: 0 },
-  created_at: { type: 'date', default: () => new Date() }
+  created_at: { type: 'date', default: () => new Date() },
 };
 
 /**
@@ -69,7 +69,7 @@ const TrackMetadataSchema = {
     id: { type: 'string' },
     name: { type: 'string' },
     release_date: { type: 'string' },
-    total_tracks: { type: 'number' }
+    total_tracks: { type: 'number' },
   },
   duration_ms: { type: 'number', required: true },
   explicit: { type: 'boolean', default: false },
@@ -79,7 +79,7 @@ const TrackMetadataSchema = {
   genres: { type: 'array', default: [] },
   release_year: { type: 'number' },
   created_at: { type: 'date', default: () => new Date() },
-  updated_at: { type: 'date', default: () => new Date() }
+  updated_at: { type: 'date', default: () => new Date() },
 };
 
 /**
@@ -99,7 +99,7 @@ const AudioFeaturesSchema = {
   key: { type: 'number', min: -1, max: 11, required: true },
   mode: { type: 'number', min: 0, max: 1, required: true },
   time_signature: { type: 'number', min: 3, max: 7, required: true },
-  created_at: { type: 'date', default: () => new Date() }
+  created_at: { type: 'date', default: () => new Date() },
 };
 
 /**
@@ -114,16 +114,16 @@ const RecommendationsSchema = {
     seed_artists: { type: 'array' },
     seed_genres: { type: 'array' },
     target_features: { type: 'object' },
-    context: { type: 'string' }
+    context: { type: 'string' },
   },
   confidence_score: { type: 'number', min: 0, max: 1 },
   user_feedback: {
     liked_tracks: { type: 'array', default: [] },
     disliked_tracks: { type: 'array', default: [] },
-    saved_tracks: { type: 'array', default: [] }
+    saved_tracks: { type: 'array', default: [] },
   },
   created_at: { type: 'date', default: () => new Date() },
-  expires_at: { type: 'date', default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) } // 30 days
+  expires_at: { type: 'date', default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }, // 30 days
 };
 
 /**
@@ -140,14 +140,14 @@ const ChatHistorySchema = {
     tokens_used: { type: 'number' },
     response_time: { type: 'number' },
     intent: { type: 'string' },
-    entities: { type: 'object' }
+    entities: { type: 'object' },
   },
   context: {
     spotify_data: { type: 'object' },
     recommendations: { type: 'array' },
-    user_preferences: { type: 'object' }
+    user_preferences: { type: 'object' },
   },
-  timestamp: { type: 'date', default: () => new Date() }
+  timestamp: { type: 'date', default: () => new Date() },
 };
 
 /**
@@ -164,12 +164,12 @@ const PlaylistsSchema = {
     mood: { type: 'string' },
     activity: { type: 'string' },
     genres: { type: 'array' },
-    audio_features: { type: 'object' }
+    audio_features: { type: 'object' },
   },
   public: { type: 'boolean', default: false },
   collaborative: { type: 'boolean', default: false },
   created_at: { type: 'date', default: () => new Date() },
-  updated_at: { type: 'date', default: () => new Date() }
+  updated_at: { type: 'date', default: () => new Date() },
 };
 
 /**
@@ -206,24 +206,24 @@ class SchemaValidator {
 
   static validate(data, schema) {
     const errors = [];
-    
+
     for (const [field, rules] of Object.entries(schema)) {
       const value = data[field];
-      
+
       // Check required fields
       if (rules.required && (value === undefined || value === null)) {
         errors.push(`Field '${field}' is required`);
         continue;
       }
-      
+
       // Skip validation if field is not provided and not required
       if (value === undefined || value === null) continue;
-      
+
       // Type validation
       if (rules.type && !this.validateType(value, rules.type)) {
         errors.push(`Field '${field}' must be of type ${rules.type}`);
       }
-      
+
       // Min/max validation for numbers
       if (rules.type === 'number') {
         if (rules.min !== undefined && value < rules.min) {
@@ -234,10 +234,10 @@ class SchemaValidator {
         }
       }
     }
-    
+
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -271,5 +271,5 @@ module.exports = {
   RecommendationsSchema,
   ChatHistorySchema,
   PlaylistsSchema,
-  SchemaValidator
+  SchemaValidator,
 };

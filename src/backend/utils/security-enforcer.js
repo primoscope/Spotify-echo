@@ -17,18 +17,18 @@ class SecurityEnforcer {
       general: rateLimit({
         windowMs: 15 * 60 * 1000,
         max: 1000,
-        message: { error: 'Too many requests, try again later.' }
+        message: { error: 'Too many requests, try again later.' },
       }),
       auth: rateLimit({
         windowMs: 15 * 60 * 1000,
         max: 5,
-        message: { error: 'Too many auth attempts, try again later.' }
+        message: { error: 'Too many auth attempts, try again later.' },
       }),
       chat: rateLimit({
         windowMs: 60 * 1000,
         max: 30,
-        message: { error: 'Chat rate limit exceeded.' }
-      })
+        message: { error: 'Chat rate limit exceeded.' },
+      }),
     };
   }
 
@@ -38,9 +38,9 @@ class SecurityEnforcer {
         directives: {
           defaultSrc: ['\'self\''],
           styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
-          scriptSrc: ['\'self\'']
-        }
-      }
+          scriptSrc: ['\'self\''],
+        },
+      },
     });
   }
 
@@ -57,9 +57,9 @@ class SecurityEnforcer {
       security: {
         headers: 'enabled',
         rateLimit: 'enabled',
-        monitoring: 'active'
+        monitoring: 'active',
       },
-      features: ['HTTPS enforcement', 'HSTS headers', 'CSP', 'Rate limiting']
+      features: ['HTTPS enforcement', 'HSTS headers', 'CSP', 'Rate limiting'],
     };
   }
 }

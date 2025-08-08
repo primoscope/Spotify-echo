@@ -37,23 +37,23 @@ import {
  * Universal Feedback System Component
  * Handles feedback for recommendations, chat responses, and other content
  */
-const FeedbackSystem = ({ 
+const FeedbackSystem = ({
   type = 'recommendation', // 'recommendation' | 'chat' | 'track'
   targetId,
   trackId,
   onSubmitFeedback,
   showInline = true,
   showDetailed = false,
-  disabled = false
+  disabled = false,
 }) => {
   const [feedbackState, setFeedbackState] = useState({
     feedback: null,
     rating: 0,
     comment: '',
     submitted: false,
-    loading: false
+    loading: false,
   });
-  
+
   const [detailedFeedbackDialog, setDetailedFeedbackDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -61,89 +61,98 @@ const FeedbackSystem = ({
     setSnackbar({ open: true, message, severity });
   }, []);
 
-  const submitFeedback = useCallback(async (feedbackData) => {
-    if (!onSubmitFeedback) {
-      throw new Error('No feedback handler provided');
-    }
-
-    const payload = {
-      type,
-      targetId,
-      trackId,
-      ...feedbackData,
-      context: {
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        source: 'feedback_system'
+  const submitFeedback = useCallback(
+    async (feedbackData) => {
+      if (!onSubmitFeedback) {
+        throw new Error('No feedback handler provided');
       }
-    };
 
-    return await onSubmitFeedback(payload);
-  }, [onSubmitFeedback, type, targetId, trackId]);
+      const payload = {
+        type,
+        targetId,
+        trackId,
+        ...feedbackData,
+        context: {
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          source: 'feedback_system',
+        },
+      };
 
-  const handleQuickFeedback = useCallback(async (feedback) => {
-    if (disabled || feedbackState.submitted) return;
+      return await onSubmitFeedback(payload);
+    },
+    [onSubmitFeedback, type, targetId, trackId]
+  );
 
-    setFeedbackState(prev => ({ ...prev, loading: true }));
+  const handleQuickFeedback = useCallback(
+    async (feedback) => {
+      if (disabled || feedbackState.submitted) return;
 
-    try {
-      await submitFeedback({ feedback });
-      setFeedbackState(prev => ({ 
-        ...prev, 
-        feedback, 
-        submitted: true, 
-        loading: false 
-      }));
-      showSnackbar('Feedback submitted!', 'success');
-    } catch (error) {
-      setFeedbackState(prev => ({ ...prev, loading: false }));
-      showSnackbar('Failed to submit feedback', 'error');
-    }
-  }, [disabled, feedbackState.submitted, submitFeedback, showSnackbar]);
+      setFeedbackState((prev) => ({ ...prev, loading: true }));
 
-  const handleRating = useCallback(async (rating) => {
-    if (disabled || feedbackState.submitted) return;
+      try {
+        await submitFeedback({ feedback });
+        setFeedbackState((prev) => ({
+          ...prev,
+          feedback,
+          submitted: true,
+          loading: false,
+        }));
+        showSnackbar('Feedback submitted!', 'success');
+      } catch (error) {
+        setFeedbackState((prev) => ({ ...prev, loading: false }));
+        showSnackbar('Failed to submit feedback', 'error');
+      }
+    },
+    [disabled, feedbackState.submitted, submitFeedback, showSnackbar]
+  );
 
-    setFeedbackState(prev => ({ ...prev, loading: true }));
+  const handleRating = useCallback(
+    async (rating) => {
+      if (disabled || feedbackState.submitted) return;
 
-    try {
-      await submitFeedback({ rating });
-      setFeedbackState(prev => ({ 
-        ...prev, 
-        rating, 
-        submitted: true, 
-        loading: false 
-      }));
-      
-      showSnackbar('Rating submitted!', 'success');
-    } catch (error) {
-      setFeedbackState(prev => ({ ...prev, loading: false }));
-      showSnackbar('Failed to submit rating', 'error');
-    }
-  }, [disabled, feedbackState.submitted, submitFeedback, showSnackbar]);
+      setFeedbackState((prev) => ({ ...prev, loading: true }));
+
+      try {
+        await submitFeedback({ rating });
+        setFeedbackState((prev) => ({
+          ...prev,
+          rating,
+          submitted: true,
+          loading: false,
+        }));
+
+        showSnackbar('Rating submitted!', 'success');
+      } catch (error) {
+        setFeedbackState((prev) => ({ ...prev, loading: false }));
+        showSnackbar('Failed to submit rating', 'error');
+      }
+    },
+    [disabled, feedbackState.submitted, submitFeedback, showSnackbar]
+  );
 
   const handleDetailedFeedback = useCallback(async () => {
     if (!feedbackState.comment.trim()) return;
 
-    setFeedbackState(prev => ({ ...prev, loading: true }));
+    setFeedbackState((prev) => ({ ...prev, loading: true }));
 
     try {
       await submitFeedback({
         feedback: feedbackState.feedback,
         rating: feedbackState.rating,
-        comment: feedbackState.comment
+        comment: feedbackState.comment,
       });
-      
-      setFeedbackState(prev => ({ 
-        ...prev, 
-        submitted: true, 
-        loading: false 
+
+      setFeedbackState((prev) => ({
+        ...prev,
+        submitted: true,
+        loading: false,
       }));
-      
+
       setDetailedFeedbackDialog(false);
       showSnackbar('Detailed feedback submitted!', 'success');
     } catch (error) {
-      setFeedbackState(prev => ({ ...prev, loading: false }));
+      setFeedbackState((prev) => ({ ...prev, loading: false }));
       showSnackbar('Failed to submit feedback', 'error');
     }
   }, [feedbackState, submitFeedback, showSnackbar]);
@@ -190,8 +199,18 @@ const FeedbackSystem = ({
         ];
       case 'chat':
         return [
-          { id: 'helpful', label: 'Helpful', icon: <ThumbUp />, tooltip: 'This response was helpful' },
-          { id: 'not_helpful', label: 'Not Helpful', icon: <ThumbDown />, tooltip: 'This response was not helpful' },
+          {
+            id: 'helpful',
+            label: 'Helpful',
+            icon: <ThumbUp />,
+            tooltip: 'This response was helpful',
+          },
+          {
+            id: 'not_helpful',
+            label: 'Not Helpful',
+            icon: <ThumbDown />,
+            tooltip: 'This response was not helpful',
+          },
         ];
       case 'track':
         return [
@@ -218,11 +237,14 @@ const FeedbackSystem = ({
               <Tooltip key={option.id} title={option.tooltip}>
                 <IconButton
                   size="small"
-                  color={feedbackState.feedback === option.id ? getFeedbackColor(option.id) : 'default'}
+                  color={
+                    feedbackState.feedback === option.id ? getFeedbackColor(option.id) : 'default'
+                  }
                   onClick={() => handleQuickFeedback(option.id)}
                   disabled={disabled || feedbackState.submitted || feedbackState.loading}
                   sx={{
-                    opacity: feedbackState.submitted && feedbackState.feedback !== option.id ? 0.5 : 1,
+                    opacity:
+                      feedbackState.submitted && feedbackState.feedback !== option.id ? 0.5 : 1,
                     transform: feedbackState.feedback === option.id ? 'scale(1.1)' : 'scale(1)',
                     transition: 'all 0.2s ease',
                   }}
@@ -243,8 +265,8 @@ const FeedbackSystem = ({
             value={feedbackState.rating}
             onChange={(_, value) => handleRating(value)}
             disabled={disabled || feedbackState.submitted}
-            sx={{ 
-              opacity: feedbackState.submitted && feedbackState.rating === 0 ? 0.5 : 1 
+            sx={{
+              opacity: feedbackState.submitted && feedbackState.rating === 0 ? 0.5 : 1,
             }}
           />
 
@@ -287,19 +309,21 @@ const FeedbackSystem = ({
           {type === 'chat' ? <Chat /> : <MusicNote />}
           Share Your Thoughts
         </DialogTitle>
-        
+
         <DialogContent>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Your feedback helps us improve our {type === 'chat' ? 'AI responses' : 'recommendations'}.
+            Your feedback helps us improve our{' '}
+            {type === 'chat' ? 'AI responses' : 'recommendations'}.
           </Typography>
 
           {/* Current Feedback Summary */}
           {(feedbackState.feedback || feedbackState.rating > 0) && (
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
-                Current feedback: {feedbackState.feedback && (
-                  <Chip 
-                    size="small" 
+                Current feedback:{' '}
+                {feedbackState.feedback && (
+                  <Chip
+                    size="small"
                     label={feedbackState.feedback}
                     color={getFeedbackColor(feedbackState.feedback)}
                     sx={{ mx: 1 }}
@@ -322,7 +346,7 @@ const FeedbackSystem = ({
                   variant={feedbackState.feedback === option.id ? 'contained' : 'outlined'}
                   size="small"
                   startIcon={option.icon}
-                  onClick={() => setFeedbackState(prev => ({ ...prev, feedback: option.id }))}
+                  onClick={() => setFeedbackState((prev) => ({ ...prev, feedback: option.id }))}
                   color={getFeedbackColor(option.id)}
                 >
                   {option.label}
@@ -338,7 +362,7 @@ const FeedbackSystem = ({
             </Typography>
             <Rating
               value={feedbackState.rating}
-              onChange={(_, value) => setFeedbackState(prev => ({ ...prev, rating: value || 0 }))}
+              onChange={(_, value) => setFeedbackState((prev) => ({ ...prev, rating: value || 0 }))}
               size="large"
             />
           </Box>
@@ -350,24 +374,24 @@ const FeedbackSystem = ({
             rows={3}
             label="Additional Comments (Optional)"
             value={feedbackState.comment}
-            onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
+            onChange={(e) => setFeedbackState((prev) => ({ ...prev, comment: e.target.value }))}
             placeholder={`Tell us more about this ${type}...`}
             variant="outlined"
           />
         </DialogContent>
 
         <DialogActions>
-          <Button 
-            onClick={() => setDetailedFeedbackDialog(false)}
-            disabled={feedbackState.loading}
-          >
+          <Button onClick={() => setDetailedFeedbackDialog(false)} disabled={feedbackState.loading}>
             Cancel
           </Button>
           <Button
             variant="contained"
             startIcon={feedbackState.loading ? <CircularProgress size={16} /> : <Send />}
             onClick={handleDetailedFeedback}
-            disabled={feedbackState.loading || (!feedbackState.feedback && !feedbackState.rating && !feedbackState.comment.trim())}
+            disabled={
+              feedbackState.loading ||
+              (!feedbackState.feedback && !feedbackState.rating && !feedbackState.comment.trim())
+            }
           >
             Submit Feedback
           </Button>
@@ -378,11 +402,11 @@ const FeedbackSystem = ({
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
           severity={snackbar.severity}
           variant="filled"
         >
@@ -429,15 +453,15 @@ const FeedbackAnalytics = ({ analytics, loading = false }) => {
         <Typography variant="h6" gutterBottom>
           Feedback Summary
         </Typography>
-        
+
         <Box sx={{ mb: 3 }}>
           <Stack direction="row" spacing={2}>
-            <Chip 
+            <Chip
               label={`${analytics.summary?.totalFeedback || 0} Total`}
               color="primary"
               variant="outlined"
             />
-            <Chip 
+            <Chip
               label={`${(analytics.summary?.averageRating || 0).toFixed(1)} ⭐ Avg`}
               color="success"
               variant="outlined"

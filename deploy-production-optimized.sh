@@ -18,9 +18,9 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-# Configuration
-DOMAIN="${DOMAIN:-primosphere.studio}"
-PRIMARY_IP="${PRIMARY_IP:-159.223.207.187}"
+# Configuration - Use environment variables with fallbacks
+DOMAIN="${DOMAIN:-$(hostname -f || echo 'localhost')}"
+PRIMARY_IP="${PRIMARY_IP:-$(curl -s http://checkip.amazonaws.com/ || echo '127.0.0.1')}"
 APP_NAME="echotune-ai"
 DEPLOY_USER="echotune"
 BUILD_VERSION="${BUILD_VERSION:-$(date +%Y%m%d-%H%M%S)}"
@@ -539,8 +539,8 @@ http {
         listen 443 ssl;
         server_name _;
 
-        ssl_certificate /etc/nginx/ssl/primosphere.studio.crt;
-        ssl_certificate_key /etc/nginx/ssl/primosphere.studio.key;
+        ssl_certificate /etc/nginx/ssl/\${DOMAIN}.crt;
+        ssl_certificate_key /etc/nginx/ssl/\${DOMAIN}.key;
         ssl_protocols TLSv1.2 TLSv1.3;
 
         location / {

@@ -3,7 +3,7 @@ const router = express.Router();
 
 /**
  * Enhanced Real-time Recommendations API
- * 
+ *
  * Provides intelligent music recommendations with:
  * - Real-time preference learning
  * - Context-aware suggestions
@@ -17,7 +17,7 @@ const router = express.Router();
  */
 router.get('/realtime', async (req, res) => {
   try {
-    const { 
+    const {
       userId = 'demo_user',
       mood,
       activity,
@@ -25,12 +25,12 @@ router.get('/realtime', async (req, res) => {
       weather,
       limit = 20,
       genres,
-      audioFeatures 
+      audioFeatures,
     } = req.query;
 
     // Get user context and preferences
     const userContext = await getUserContext(userId);
-    
+
     // Build recommendation parameters
     const params = {
       userId,
@@ -40,7 +40,7 @@ router.get('/realtime', async (req, res) => {
       weather,
       limit: parseInt(limit),
       genres: genres ? genres.split(',') : null,
-      audioFeatures: audioFeatures ? JSON.parse(audioFeatures) : null
+      audioFeatures: audioFeatures ? JSON.parse(audioFeatures) : null,
     };
 
     // Generate recommendations using multiple algorithms
@@ -53,21 +53,20 @@ router.get('/realtime', async (req, res) => {
         mood,
         activity,
         timeOfDay: params.timeOfDay,
-        algorithmsUsed: recommendations.algorithmsUsed || ['collaborative', 'content', 'context']
+        algorithmsUsed: recommendations.algorithmsUsed || ['collaborative', 'content', 'context'],
       },
       metadata: {
         generatedAt: new Date().toISOString(),
         userId,
-        totalTracks: recommendations.length
-      }
+        totalTracks: recommendations.length,
+      },
     });
-
   } catch (error) {
     console.error('Real-time recommendations error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate recommendations',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -82,13 +81,13 @@ router.post('/feedback', async (req, res) => {
       userId = 'demo_user',
       trackId,
       feedback, // 'like', 'dislike', 'skip', 'save', 'play_complete'
-      context = {}
+      context = {},
     } = req.body;
 
     if (!trackId || !feedback) {
       return res.status(400).json({
         success: false,
-        error: 'Track ID and feedback are required'
+        error: 'Track ID and feedback are required',
       });
     }
 
@@ -98,7 +97,7 @@ router.post('/feedback', async (req, res) => {
       trackId,
       feedback,
       context,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Update user preferences in real-time
@@ -109,16 +108,15 @@ router.post('/feedback', async (req, res) => {
       message: 'Feedback processed successfully',
       learningImpact: {
         preferenceUpdate: true,
-        algorithmAdjustment: true
-      }
+        algorithmAdjustment: true,
+      },
     });
-
   } catch (error) {
     console.error('Feedback processing error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to process feedback',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -136,7 +134,7 @@ router.get('/context-aware', async (req, res) => {
       deviceType,
       currentlyPlaying,
       recentTracks,
-      limit = 15
+      limit = 15,
     } = req.query;
 
     // Analyze current context
@@ -146,14 +144,14 @@ router.get('/context-aware', async (req, res) => {
       deviceType,
       currentlyPlaying,
       recentTracks: recentTracks ? JSON.parse(recentTracks) : null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Generate context-specific recommendations
     const recommendations = await generateContextAwareRecommendations({
       userId,
       context,
-      limit: parseInt(limit)
+      limit: parseInt(limit),
     });
 
     res.json({
@@ -165,18 +163,17 @@ router.get('/context-aware', async (req, res) => {
           temporal: context.timeOfDay,
           environmental: context.weather || 'unknown',
           behavioral: context.activity || 'general',
-          social: context.social || 'personal'
-        }
+          social: context.social || 'personal',
+        },
       },
-      confidence: recommendations.confidence || 0.85
+      confidence: recommendations.confidence || 0.85,
     });
-
   } catch (error) {
     console.error('Context-aware recommendations error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate context-aware recommendations',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -187,12 +184,7 @@ router.get('/context-aware', async (req, res) => {
  */
 router.post('/learn', async (req, res) => {
   try {
-    const {
-      userId = 'demo_user',
-      behaviorData,
-      sessionData,
-      preferences
-    } = req.body;
+    const { userId = 'demo_user', behaviorData, sessionData, preferences } = req.body;
 
     // Process learning data
     const learningResults = await processLearningData({
@@ -200,7 +192,7 @@ router.post('/learn', async (req, res) => {
       behaviorData,
       sessionData,
       preferences,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Update recommendation models
@@ -212,16 +204,15 @@ router.post('/learn', async (req, res) => {
       learningResults: {
         preferencesUpdated: learningResults.preferencesUpdated,
         modelAccuracy: learningResults.modelAccuracy || 0.82,
-        newPatterns: learningResults.newPatterns || []
-      }
+        newPatterns: learningResults.newPatterns || [],
+      },
     });
-
   } catch (error) {
     console.error('Learning processing error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to process learning data',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -242,14 +233,14 @@ async function getUserContext(userId) {
         genres: ['pop', 'rock', 'electronic'],
         energy: 0.7,
         valence: 0.6,
-        danceability: 0.8
+        danceability: 0.8,
       },
       listeningHistory: [],
       behaviorPatterns: {
         mostActiveTime: 'evening',
         preferredGenres: ['pop', 'rock'],
-        skipRate: 0.15
-      }
+        skipRate: 0.15,
+      },
     };
   } catch (error) {
     console.error('Get user context error:', error);
@@ -273,10 +264,10 @@ async function generateRealtimeRecommendations(params, _userContext) {
           energy: 0.9,
           valence: 0.8,
           danceability: 0.85,
-          tempo: 128
+          tempo: 128,
         },
         score: 0.95,
-        reason: 'Perfect for workout sessions'
+        reason: 'Perfect for workout sessions',
       },
       {
         id: 'track_2',
@@ -287,26 +278,25 @@ async function generateRealtimeRecommendations(params, _userContext) {
           energy: 0.4,
           valence: 0.6,
           danceability: 0.3,
-          tempo: 85
+          tempo: 85,
         },
         score: 0.88,
-        reason: 'Great for concentration'
-      }
+        reason: 'Great for concentration',
+      },
     ];
 
     // Apply context filtering
     let recommendations = baseRecommendations;
-    
+
     if (params.mood === 'energetic') {
-      recommendations = recommendations.filter(r => r.audioFeatures.energy > 0.7);
+      recommendations = recommendations.filter((r) => r.audioFeatures.energy > 0.7);
     }
-    
+
     if (params.activity === 'workout') {
-      recommendations = recommendations.filter(r => r.audioFeatures.danceability > 0.6);
+      recommendations = recommendations.filter((r) => r.audioFeatures.danceability > 0.6);
     }
 
     return recommendations.slice(0, params.limit);
-
   } catch (error) {
     console.error('Generate recommendations error:', error);
     return [];
@@ -320,14 +310,14 @@ async function processFeedback(feedbackData) {
   try {
     // In production, store in database and update ML models
     console.log('Processing feedback:', feedbackData);
-    
+
     // Update user preferences based on feedback
     if (feedbackData.feedback === 'like') {
       console.log('Positive feedback - reinforcing preferences');
     } else if (feedbackData.feedback === 'dislike') {
       console.log('Negative feedback - adjusting preferences');
     }
-    
+
     return true;
   } catch (error) {
     console.error('Process feedback error:', error);
@@ -356,7 +346,7 @@ async function analyzeUserContext(data) {
   try {
     const now = new Date();
     const hour = now.getHours();
-    
+
     let timeOfDay;
     if (hour >= 6 && hour < 12) timeOfDay = 'morning';
     else if (hour >= 12 && hour < 17) timeOfDay = 'afternoon';
@@ -369,7 +359,7 @@ async function analyzeUserContext(data) {
       device: data.deviceType || 'web',
       location: data.location,
       activity: inferActivity(timeOfDay, data),
-      social: 'personal' // Could be enhanced with social context
+      social: 'personal', // Could be enhanced with social context
     };
   } catch (error) {
     console.error('Analyze context error:', error);
@@ -398,16 +388,16 @@ async function generateContextAwareRecommendations(params) {
     const contextRecommendations = {
       morning: [
         { name: 'Morning Motivation', energy: 0.8, reason: 'Perfect for starting your day' },
-        { name: 'Coffee Shop Vibes', energy: 0.6, reason: 'Great with your morning coffee' }
+        { name: 'Coffee Shop Vibes', energy: 0.6, reason: 'Great with your morning coffee' },
       ],
       work: [
         { name: 'Focus Flow', energy: 0.5, reason: 'Helps maintain concentration' },
-        { name: 'Productive Beats', energy: 0.7, reason: 'Keeps you motivated' }
+        { name: 'Productive Beats', energy: 0.7, reason: 'Keeps you motivated' },
       ],
       evening: [
         { name: 'Unwind Tracks', energy: 0.4, reason: 'Perfect for relaxing' },
-        { name: 'Dinner Party Mix', energy: 0.6, reason: 'Great for socializing' }
-      ]
+        { name: 'Dinner Party Mix', energy: 0.6, reason: 'Great for socializing' },
+      ],
     };
 
     const context = params.context.timeOfDay || 'general';
@@ -416,10 +406,9 @@ async function generateContextAwareRecommendations(params) {
     return recommendations.map((track, index) => ({
       id: `context_${index}`,
       ...track,
-      score: 0.9 - (index * 0.05),
-      uri: `spotify:track:context_${index}`
+      score: 0.9 - index * 0.05,
+      uri: `spotify:track:context_${index}`,
     }));
-
   } catch (error) {
     console.error('Generate context recommendations error:', error);
     return [];
@@ -446,12 +435,12 @@ async function processLearningData(_data) {
     if (_data && typeof _data !== 'object') {
       throw new Error('Invalid data format');
     }
-    
+
     // Mock learning processing
     return {
       preferencesUpdated: true,
       modelAccuracy: 0.85,
-      newPatterns: ['prefers_upbeat_in_morning', 'skips_slow_during_work']
+      newPatterns: ['prefers_upbeat_in_morning', 'skips_slow_during_work'],
     };
   } catch (error) {
     console.error('Process learning data error:', error);

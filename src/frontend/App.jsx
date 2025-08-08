@@ -26,7 +26,10 @@ function App() {
         <Routes>
           <Route path="/" element={<MainApplication />} />
           <Route path="/chat" element={<MainApplication initialTab="chat" />} />
-          <Route path="/recommendations" element={<MainApplication initialTab="recommendations" />} />
+          <Route
+            path="/recommendations"
+            element={<MainApplication initialTab="recommendations" />}
+          />
           <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
           <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
           <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
@@ -77,7 +80,7 @@ function MainApplication({ initialTab = 'chat' }) {
       id: 'track3',
       name: 'As It Was',
       artist: 'Harry Styles',
-      album: { name: 'Harry\'s House' },
+      album: { name: "Harry's House" },
       duration_ms: 167000,
       confidence: 0.76,
       algorithm: 'content_based',
@@ -89,7 +92,7 @@ function MainApplication({ initialTab = 'chat' }) {
 
   const handleSendChatMessage = async (message, context) => {
     console.log('Sending message:', message, 'with context:', context);
-    
+
     // Mock API call to enhanced chat endpoint
     try {
       const response = await fetch('/api/chat/test', {
@@ -103,7 +106,7 @@ function MainApplication({ initialTab = 'chat' }) {
           sessionId,
         }),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         return {
@@ -127,10 +130,10 @@ function MainApplication({ initialTab = 'chat' }) {
     } catch (error) {
       console.error('Chat API error:', error);
     }
-    
+
     // Fallback response
     return {
-      response: 'I\'d love to help you discover great music! What kind of mood are you in today?',
+      response: "I'd love to help you discover great music! What kind of mood are you in today?",
       recommendations: [],
       provider: 'mock',
     };
@@ -138,9 +141,9 @@ function MainApplication({ initialTab = 'chat' }) {
 
   const handleGetExplanation = async (recommendationId, trackId) => {
     console.log('Getting explanation for:', recommendationId, trackId);
-    
+
     // Mock explanation based on track
-    const track = mockRecommendations.find(t => t.id === trackId);
+    const track = mockRecommendations.find((t) => t.id === trackId);
     if (track) {
       return {
         summary: `"${track.name}" was recommended because it matches your musical taste profile and current listening context.`,
@@ -153,7 +156,11 @@ function MainApplication({ initialTab = 'chat' }) {
         confidence: track.confidence,
         algorithm: track.algorithm,
         factors: [
-          { type: 'audio_similarity', description: 'Musical features match your taste', weight: 0.4 },
+          {
+            type: 'audio_similarity',
+            description: 'Musical features match your taste',
+            weight: 0.4,
+          },
           { type: 'user_behavior', description: 'Similar users also enjoy this', weight: 0.3 },
           { type: 'popularity', description: 'Trending and well-received', weight: 0.2 },
           { type: 'context', description: 'Fits current mood/activity', weight: 0.1 },
@@ -165,12 +172,12 @@ function MainApplication({ initialTab = 'chat' }) {
             'Matches the energy level you typically prefer',
             `${track.artist} is in your top listened artists this month`,
             'Upbeat tempo perfect for your current activity',
-            'Similar to other tracks you\'ve liked recently',
+            "Similar to other tracks you've liked recently",
           ],
         },
       };
     }
-    
+
     return {
       summary: 'This recommendation was generated using our AI algorithms.',
       reasons: ['Based on your listening history and preferences'],
@@ -182,7 +189,7 @@ function MainApplication({ initialTab = 'chat' }) {
 
   const handleProvideFeedback = async (feedbackData) => {
     console.log('Submitting feedback:', feedbackData);
-    
+
     // Mock API call to feedback endpoint
     try {
       const response = await fetch('/api/feedback', {
@@ -192,7 +199,7 @@ function MainApplication({ initialTab = 'chat' }) {
         },
         body: JSON.stringify(feedbackData),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('Feedback submitted successfully:', data);
@@ -201,7 +208,7 @@ function MainApplication({ initialTab = 'chat' }) {
     } catch (error) {
       console.error('Feedback API error:', error);
     }
-    
+
     // Mock successful response
     return {
       success: true,
@@ -235,7 +242,11 @@ function MainApplication({ initialTab = 'chat' }) {
       {/* App Bar */}
       <AppBar position="static" elevation={1}>
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+          >
             🎵 EchoTune AI
             <Typography variant="caption" sx={{ ml: 1, opacity: 0.7 }}>
               Enhanced Experience
@@ -248,8 +259,8 @@ function MainApplication({ initialTab = 'chat' }) {
       {/* Navigation Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
         <Container maxWidth="xl">
-          <Tabs 
-            value={currentTab} 
+          <Tabs
+            value={currentTab}
             onChange={(_, newValue) => setCurrentTab(newValue)}
             aria-label="EchoTune AI navigation"
           >
@@ -331,8 +342,8 @@ function SettingsTabManager() {
 
   return (
     <Box>
-      <Tabs 
-        value={settingsTab} 
+      <Tabs
+        value={settingsTab}
         onChange={(event, newValue) => setSettingsTab(newValue)}
         sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}
       >

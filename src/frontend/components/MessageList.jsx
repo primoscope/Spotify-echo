@@ -1,12 +1,14 @@
 // React is needed for JSX
 
-
 function MessageList({ messages, isTyping, currentProvider }) {
   const formatMessage = (content) => {
     return content
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px;">$1</code>')
+      .replace(
+        /`(.*?)`/g,
+        '<code style="background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px;">$1</code>'
+      )
       .replace(/\n/g, '<br>');
   };
 
@@ -18,7 +20,7 @@ function MessageList({ messages, isTyping, currentProvider }) {
     <div className="chat-messages">
       {messages.map((message) => (
         <div key={message.id} className={`message ${message.sender} fade-in`}>
-          <div 
+          <div
             className="message-content"
             dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
           />
@@ -32,7 +34,7 @@ function MessageList({ messages, isTyping, currentProvider }) {
           )}
         </div>
       ))}
-      
+
       {isTyping && <TypingIndicator provider={currentProvider} />}
     </div>
   );
@@ -47,9 +49,7 @@ function TypingIndicator({ provider }) {
         <span></span>
         <span></span>
       </div>
-      {provider && (
-        <span className="typing-provider">via {provider}</span>
-      )}
+      {provider && <span className="typing-provider">via {provider}</span>}
     </div>
   );
 }

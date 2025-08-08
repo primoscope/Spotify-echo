@@ -14,7 +14,7 @@ class GeminiProvider extends BaseLLMProvider {
       'gemini-1.5-flash',
       'gemini-1.5-pro',
       'gemini-pro',
-      'gemini-pro-vision'
+      'gemini-pro-vision',
     ];
   }
 
@@ -34,7 +34,7 @@ class GeminiProvider extends BaseLLMProvider {
   }
 
   validateConfig() {
-    return !!(this.config.apiKey);
+    return !!this.config.apiKey;
   }
 
   getCapabilities() {
@@ -43,7 +43,7 @@ class GeminiProvider extends BaseLLMProvider {
       functionCalling: false, // Limited function calling support
       maxTokens: this.getMaxTokensForModel(this.defaultModel),
       supportedModels: this.supportedModels,
-      features: ['chat', 'completion', 'streaming', 'vision']
+      features: ['chat', 'completion', 'streaming', 'vision'],
     };
   }
 
@@ -52,7 +52,7 @@ class GeminiProvider extends BaseLLMProvider {
       'gemini-pro': 32768,
       'gemini-pro-vision': 16384,
       'gemini-1.5-pro': 1048576,
-      'gemini-1.5-flash': 1048576
+      'gemini-1.5-flash': 1048576,
     };
     return tokenLimits[model] || 32768;
   }
@@ -64,21 +64,22 @@ class GeminiProvider extends BaseLLMProvider {
       }
 
       // Always use Gemini's default model, don't inherit from other providers
-      const modelName = (options.model && options.model.includes('gemini')) ? options.model : this.defaultModel;
-      
-      const model = this.client.getGenerativeModel({ 
+      const modelName =
+        options.model && options.model.includes('gemini') ? options.model : this.defaultModel;
+
+      const model = this.client.getGenerativeModel({
         model: modelName,
         generationConfig: {
           maxOutputTokens: options.maxTokens || 2000,
           temperature: options.temperature ?? 0.7,
           topP: options.topP ?? 0.8,
-          topK: options.topK ?? 10
-        }
+          topK: options.topK ?? 10,
+        },
       });
 
       // Convert messages to Gemini format
       const geminiMessages = this.formatMessagesForGemini(messages);
-      
+
       let response;
       if (geminiMessages.length === 1) {
         // Single message - use generateContent
@@ -86,14 +87,14 @@ class GeminiProvider extends BaseLLMProvider {
       } else {
         // Multiple messages - use chat
         const chat = model.startChat({
-          history: geminiMessages.slice(0, -1)
+          history: geminiMessages.slice(0, -1),
         });
         const lastMessage = geminiMessages[geminiMessages.length - 1];
         response = await chat.sendMessage(lastMessage.parts);
       }
 
       const content = response.response.text();
-      
+
       return this.parseResponse({
         content,
         role: 'assistant',
@@ -101,40 +102,39 @@ class GeminiProvider extends BaseLLMProvider {
         usage: {
           promptTokens: response.response.usageMetadata?.promptTokenCount || 0,
           completionTokens: response.response.usageMetadata?.candidatesTokenCount || 0,
-          totalTokens: response.response.usageMetadata?.totalTokenCount || 0
+          totalTokens: response.response.usageMetadata?.totalTokenCount || 0,
         },
-        finishReason: response.response.candidates?.[0]?.finishReason
+        finishReason: response.response.candidates?.[0]?.finishReason,
       });
-
     } catch (error) {
       return this.handleError(error);
     }
   }
 
-  async* generateStreamingCompletion(messages, options = {}) {
+  async *generateStreamingCompletion(messages, options = {}) {
     try {
       if (!this.isAvailable()) {
         throw new Error('Gemini provider not initialized or configured');
       }
 
-      const model = this.client.getGenerativeModel({ 
+      const model = this.client.getGenerativeModel({
         model: options.model || this.defaultModel,
         generationConfig: {
           maxOutputTokens: options.maxTokens || 2000,
           temperature: options.temperature ?? 0.7,
           topP: options.topP ?? 0.8,
-          topK: options.topK ?? 10
-        }
+          topK: options.topK ?? 10,
+        },
       });
 
       const geminiMessages = this.formatMessagesForGemini(messages);
-      
+
       let stream;
       if (geminiMessages.length === 1) {
         stream = await model.generateContentStream(geminiMessages[0].parts);
       } else {
         const chat = model.startChat({
-          history: geminiMessages.slice(0, -1)
+          history: geminiMessages.slice(0, -1),
         });
         const lastMessage = geminiMessages[geminiMessages.length - 1];
         stream = await chat.sendMessageStream(lastMessage.parts);
@@ -147,11 +147,10 @@ class GeminiProvider extends BaseLLMProvider {
             content: chunkText,
             role: 'assistant',
             model: options.model || this.defaultModel,
-            isPartial: true
+            isPartial: true,
           };
         }
       }
-
     } catch (error) {
       yield this.handleError(error);
     }
@@ -159,7 +158,7 @@ class GeminiProvider extends BaseLLMProvider {
 
   formatMessagesForGemini(messages) {
     const geminiMessages = [];
-    
+
     for (const message of messages) {
       if (message.role === 'system') {
         // Gemini doesn't have system role, prepend to first user message
@@ -167,15 +166,15 @@ class GeminiProvider extends BaseLLMProvider {
       }
 
       const geminiRole = message.role === 'assistant' ? 'model' : 'user';
-      
+
       geminiMessages.push({
         role: geminiRole,
-        parts: [{ text: message.content }]
+        parts: [{ text: message.content }],
       });
     }
 
     // Prepend system message to first user message if exists
-    const systemMessage = messages.find(m => m.role === 'system');
+    const systemMessage = messages.find((m) => m.role === 'system');
     if (systemMessage && geminiMessages.length > 0 && geminiMessages[0].role === 'user') {
       geminiMessages[0].parts[0].text = `${systemMessage.content}\n\nUser: ${geminiMessages[0].parts[0].text}`;
     }
@@ -206,7 +205,7 @@ Key audio features you can work with:
 - Acousticness (0-1): How acoustic vs electronic the track is
 - Tempo (BPM): The speed of the track
 
-Be conversational, enthusiastic about music, and ask clarifying questions to provide better recommendations. Consider the user's mood and context when making suggestions. Respond naturally and avoid being overly technical unless requested.`
+Be conversational, enthusiastic about music, and ask clarifying questions to provide better recommendations. Consider the user's mood and context when making suggestions. Respond naturally and avoid being overly technical unless requested.`,
     };
   }
 
@@ -215,27 +214,30 @@ Be conversational, enthusiastic about music, and ask clarifying questions to pro
    */
   async handleMusicQuery(query, context = {}) {
     const systemPrompt = this.createMusicSystemPrompt();
-    
+
     let conversationContext = '';
     if (context.userProfile) {
       conversationContext += `User's favorite genres: ${context.userProfile.favorite_genres?.join(', ') || 'Not specified'}\n`;
     }
-    
+
     if (context.recentTracks) {
-      conversationContext += `Recent tracks: ${context.recentTracks.slice(0, 5).map(t => `${t.track_name} by ${t.artist_name}`).join(', ')}\n`;
+      conversationContext += `Recent tracks: ${context.recentTracks
+        .slice(0, 5)
+        .map((t) => `${t.track_name} by ${t.artist_name}`)
+        .join(', ')}\n`;
     }
 
     const messages = [
       systemPrompt,
       {
         role: 'user',
-        content: `${conversationContext}\n\nUser query: ${query}`
-      }
+        content: `${conversationContext}\n\nUser query: ${query}`,
+      },
     ];
 
     return await this.generateCompletion(messages, {
       temperature: 0.7,
-      maxTokens: 1000
+      maxTokens: 1000,
     });
   }
 
@@ -243,9 +245,10 @@ Be conversational, enthusiastic about music, and ask clarifying questions to pro
    * Generate playlist description based on tracks
    */
   async generatePlaylistDescription(tracks, theme = '') {
-    const trackList = tracks.slice(0, 10).map(t => 
-      `${t.track_name} by ${t.artist_name}`
-    ).join(', ');
+    const trackList = tracks
+      .slice(0, 10)
+      .map((t) => `${t.track_name} by ${t.artist_name}`)
+      .join(', ');
 
     const prompt = `Create a creative and engaging description for a music playlist. 
     
@@ -254,11 +257,9 @@ Tracks included: ${trackList}
 
 Write a short, catchy description (2-3 sentences) that captures the mood and vibe of this playlist. Make it sound appealing to potential listeners.`;
 
-    const response = await this.generateCompletion([
-      { role: 'user', content: prompt }
-    ], {
+    const response = await this.generateCompletion([{ role: 'user', content: prompt }], {
       temperature: 0.8,
-      maxTokens: 200
+      maxTokens: 200,
     });
 
     return response.content || `A carefully curated playlist featuring ${tracks.length} tracks`;
@@ -270,8 +271,8 @@ Write a short, catchy description (2-3 sentences) that captures the mood and vib
   async generateListeningInsights(analytics) {
     const prompt = `Analyze the following music listening data and provide interesting insights:
 
-Top Genres: ${analytics.topGenres?.map(g => `${g.genre} (${g.count} plays)`).join(', ') || 'Not available'}
-Top Artists: ${analytics.topArtists?.map(a => `${a.artist} (${a.plays} plays)`).join(', ') || 'Not available'}
+Top Genres: ${analytics.topGenres?.map((g) => `${g.genre} (${g.count} plays)`).join(', ') || 'Not available'}
+Top Artists: ${analytics.topArtists?.map((a) => `${a.artist} (${a.plays} plays)`).join(', ') || 'Not available'}
 Average Audio Features: ${JSON.stringify(analytics.averageFeatures || {})}
 Listening Patterns: ${analytics.patterns || 'Not available'}
 
@@ -283,11 +284,9 @@ Provide insights about:
 
 Keep it conversational and engaging, highlighting the most interesting aspects.`;
 
-    const response = await this.generateCompletion([
-      { role: 'user', content: prompt }
-    ], {
+    const response = await this.generateCompletion([{ role: 'user', content: prompt }], {
       temperature: 0.7,
-      maxTokens: 500
+      maxTokens: 500,
     });
 
     return response.content;

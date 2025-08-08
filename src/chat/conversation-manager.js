@@ -38,14 +38,14 @@ class ConversationManager {
           currentMood: null,
           preferredGenres: [],
           recentlyDiscussed: [],
-          playlistsInProgress: []
+          playlistsInProgress: [],
         },
         sessionMemory: {
           importantFacts: [],
           userFeedback: [],
-          preferences: {}
+          preferences: {},
         },
-        ...options.context
+        ...options.context,
       },
       metadata: {
         llmProvider: options.llmProvider || 'mock',
@@ -53,8 +53,8 @@ class ConversationManager {
         language: options.language || 'en',
         sessionType: options.sessionType || 'general',
         contextVersion: 1,
-        lastSummaryIndex: 0
-      }
+        lastSummaryIndex: 0,
+      },
     };
 
     // Load user context and previous conversation insights
@@ -62,7 +62,7 @@ class ConversationManager {
     await this.loadConversationInsights(session);
 
     this.activeSessions.set(sessionId, session);
-    
+
     // Save to database
     await this.saveSessionToDatabase(session);
 
@@ -116,8 +116,8 @@ class ConversationManager {
         intent: options.intent || null,
         confidence: options.confidence || 0,
         entities: options.entities || [],
-        ...options.metadata
-      }
+        ...options.metadata,
+      },
     };
 
     session.messages.push(messageObj);
@@ -127,8 +127,10 @@ class ConversationManager {
     await this.updateConversationContext(session, messageObj);
 
     // Check if we need to summarize old messages
-    if (session.messages.length > this.summaryThreshold && 
-        session.messages.length - session.metadata.lastSummaryIndex > this.summaryThreshold) {
+    if (
+      session.messages.length > this.summaryThreshold &&
+      session.messages.length - session.metadata.lastSummaryIndex > this.summaryThreshold
+    ) {
       await this.createConversationSummary(session);
     }
 
@@ -161,13 +163,19 @@ class ConversationManager {
         // Track music-related mentions
         if (musicEntities.genres?.length > 0) {
           session.context.musicContext.recentlyDiscussed = [
-            ...new Set([...session.context.musicContext.recentlyDiscussed, ...musicEntities.genres])
+            ...new Set([
+              ...session.context.musicContext.recentlyDiscussed,
+              ...musicEntities.genres,
+            ]),
           ].slice(-10);
         }
 
         if (musicEntities.artists?.length > 0) {
           session.context.musicContext.recentlyDiscussed = [
-            ...new Set([...session.context.musicContext.recentlyDiscussed, ...musicEntities.artists])
+            ...new Set([
+              ...session.context.musicContext.recentlyDiscussed,
+              ...musicEntities.artists,
+            ]),
           ].slice(-10);
         }
 
@@ -183,14 +191,13 @@ class ConversationManager {
         session.context.sessionMemory.importantFacts.push({
           timestamp: message.timestamp,
           content: message.content,
-          entities: message.metadata.entities
+          entities: message.metadata.entities,
         });
-        
+
         // Keep only recent important facts
-        session.context.sessionMemory.importantFacts = 
+        session.context.sessionMemory.importantFacts =
           session.context.sessionMemory.importantFacts.slice(-20);
       }
-
     } catch (error) {
       console.error('Error updating conversation context:', error);
     }
@@ -205,34 +212,36 @@ class ConversationManager {
       artists: [],
       songs: [],
       moods: [],
-      activities: []
+      activities: [],
     };
 
     // Simple pattern matching for genres
     const genrePatterns = [
       /\b(rock|pop|jazz|classical|electronic|hip[- ]?hop|country|folk|blues|reggae|metal|punk|indie|alternative)\b/gi,
-      /\b(r&b|rnb|soul|funk|disco|house|techno|dubstep|trap|lo[- ]?fi)\b/gi
+      /\b(r&b|rnb|soul|funk|disco|house|techno|dubstep|trap|lo[- ]?fi)\b/gi,
     ];
 
-    genrePatterns.forEach(pattern => {
+    genrePatterns.forEach((pattern) => {
       const matches = text.match(pattern);
       if (matches) {
-        entities.genres.push(...matches.map(m => m.toLowerCase()));
+        entities.genres.push(...matches.map((m) => m.toLowerCase()));
       }
     });
 
     // Mood indicators
-    const moodPatterns = /\b(happy|sad|energetic|calm|chill|upbeat|melancholy|angry|peaceful|excited|relaxed|nostalgic)\b/gi;
+    const moodPatterns =
+      /\b(happy|sad|energetic|calm|chill|upbeat|melancholy|angry|peaceful|excited|relaxed|nostalgic)\b/gi;
     const moodMatches = text.match(moodPatterns);
     if (moodMatches) {
-      entities.moods.push(...moodMatches.map(m => m.toLowerCase()));
+      entities.moods.push(...moodMatches.map((m) => m.toLowerCase()));
     }
 
     // Activity indicators
-    const activityPatterns = /\b(workout|working out|exercise|study|studying|work|working|sleep|sleeping|party|driving|cooking|cleaning)\b/gi;
+    const activityPatterns =
+      /\b(workout|working out|exercise|study|studying|work|working|sleep|sleeping|party|driving|cooking|cleaning)\b/gi;
     const activityMatches = text.match(activityPatterns);
     if (activityMatches) {
-      entities.activities.push(...activityMatches.map(m => m.toLowerCase()));
+      entities.activities.push(...activityMatches.map((m) => m.toLowerCase()));
     }
 
     return entities;
@@ -245,12 +254,12 @@ class ConversationManager {
     if (role !== 'user') return null;
 
     const intentPatterns = {
-      'recommend': /\b(recommend|suggest|find|discover|what should i listen to|any suggestions)\b/i,
-      'create_playlist': /\b(create|make|build|playlist|mix)\b/i,
-      'analyze': /\b(analyze|analysis|insights|stats|statistics|habits|taste)\b/i,
-      'search': /\b(search|look for|find|who is|what is)\b/i,
-      'mood_based': /\b(i'm feeling|mood|vibe|atmosphere)\b/i,
-      'activity_based': /\b(for (working out|studying|work|sleep|party|driving))\b/i
+      recommend: /\b(recommend|suggest|find|discover|what should i listen to|any suggestions)\b/i,
+      create_playlist: /\b(create|make|build|playlist|mix)\b/i,
+      analyze: /\b(analyze|analysis|insights|stats|statistics|habits|taste)\b/i,
+      search: /\b(search|look for|find|who is|what is)\b/i,
+      mood_based: /\b(i'm feeling|mood|vibe|atmosphere)\b/i,
+      activity_based: /\b(for (working out|studying|work|sleep|party|driving))\b/i,
     };
 
     for (const [intent, pattern] of Object.entries(intentPatterns)) {
@@ -267,19 +276,19 @@ class ConversationManager {
    */
   detectMood(text) {
     const moodMap = {
-      'happy': ['happy', 'joyful', 'cheerful', 'upbeat', 'positive'],
-      'sad': ['sad', 'melancholy', 'down', 'depressed', 'blue'],
-      'energetic': ['energetic', 'pumped', 'excited', 'hyped', 'motivated'],
-      'calm': ['calm', 'peaceful', 'relaxed', 'chill', 'zen'],
-      'nostalgic': ['nostalgic', 'reminiscent', 'throwback', 'memories'],
-      'romantic': ['romantic', 'love', 'intimate', 'romantic'],
-      'angry': ['angry', 'frustrated', 'mad', 'aggressive']
+      happy: ['happy', 'joyful', 'cheerful', 'upbeat', 'positive'],
+      sad: ['sad', 'melancholy', 'down', 'depressed', 'blue'],
+      energetic: ['energetic', 'pumped', 'excited', 'hyped', 'motivated'],
+      calm: ['calm', 'peaceful', 'relaxed', 'chill', 'zen'],
+      nostalgic: ['nostalgic', 'reminiscent', 'throwback', 'memories'],
+      romantic: ['romantic', 'love', 'intimate', 'romantic'],
+      angry: ['angry', 'frustrated', 'mad', 'aggressive'],
     };
 
     const textLower = text.toLowerCase();
-    
+
     for (const [mood, keywords] of Object.entries(moodMap)) {
-      if (keywords.some(keyword => textLower.includes(keyword))) {
+      if (keywords.some((keyword) => textLower.includes(keyword))) {
         return mood;
       }
     }
@@ -292,21 +301,23 @@ class ConversationManager {
    */
   async createConversationSummary(session) {
     try {
-      const messagesToSummarize = session.messages.slice(session.metadata.lastSummaryIndex, -this.contextMemoryLimit);
-      
+      const messagesToSummarize = session.messages.slice(
+        session.metadata.lastSummaryIndex,
+        -this.contextMemoryLimit
+      );
+
       if (messagesToSummarize.length < 5) return; // Not enough to summarize
 
       const summary = this.generateConversationSummary(messagesToSummarize, session.context);
-      
+
       // Store summary in context
       session.context.conversationSummary = summary;
       session.metadata.lastSummaryIndex = session.messages.length - this.contextMemoryLimit;
-      
+
       console.log(`📝 Created conversation summary for session ${session.sessionId}`);
-      
+
       // Save summary to database
       await this.saveConversationSummary(session.sessionId, summary);
-      
     } catch (error) {
       console.error('Error creating conversation summary:', error);
     }
@@ -321,15 +332,19 @@ class ConversationManager {
     const userPreferences = [];
     const playlists = [];
 
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       if (msg.role === 'user') {
         // Extract topics and preferences from user messages
         const entities = this.extractMusicEntities(msg.content);
-        entities.genres.forEach(g => topics.add(g));
-        entities.moods.forEach(m => topics.add(m));
-        entities.activities.forEach(a => topics.add(a));
-        
-        if (msg.content.includes('like') || msg.content.includes('love') || msg.content.includes('prefer')) {
+        entities.genres.forEach((g) => topics.add(g));
+        entities.moods.forEach((m) => topics.add(m));
+        entities.activities.forEach((a) => topics.add(a));
+
+        if (
+          msg.content.includes('like') ||
+          msg.content.includes('love') ||
+          msg.content.includes('prefer')
+        ) {
           userPreferences.push(msg.content.substring(0, 100));
         }
       } else if (msg.role === 'assistant') {
@@ -351,7 +366,7 @@ class ConversationManager {
       userPreferences: userPreferences.slice(0, 3),
       playlists: playlists.slice(0, 3),
       mainIntent: context.userIntent || 'general',
-      currentMood: context.musicContext?.currentMood
+      currentMood: context.musicContext?.currentMood,
     };
   }
 
@@ -359,13 +374,13 @@ class ConversationManager {
    * Trim session history while preserving important context
    */
   async trimSessionHistory(session) {
-    const systemMessages = session.messages.filter(m => m.role === 'system');
-    const otherMessages = session.messages.filter(m => m.role !== 'system');
-    
+    const systemMessages = session.messages.filter((m) => m.role === 'system');
+    const otherMessages = session.messages.filter((m) => m.role !== 'system');
+
     // Keep recent messages and ensure we maintain conversational flow
     const keepCount = this.maxSessionHistory - systemMessages.length - 5; // Reserve space for system messages
     const recentMessages = otherMessages.slice(-keepCount);
-    
+
     // Ensure we don't break mid-conversation
     let startIndex = 0;
     for (let i = 0; i < recentMessages.length; i++) {
@@ -374,13 +389,12 @@ class ConversationManager {
         break;
       }
     }
-    
-    session.messages = [
-      ...systemMessages,
-      ...recentMessages.slice(startIndex)
-    ];
-    
-    console.log(`✂️ Trimmed session history for ${session.sessionId}, kept ${session.messages.length} messages`);
+
+    session.messages = [...systemMessages, ...recentMessages.slice(startIndex)];
+
+    console.log(
+      `✂️ Trimmed session history for ${session.sessionId}, kept ${session.messages.length} messages`
+    );
   }
 
   /**
@@ -390,7 +404,7 @@ class ConversationManager {
     try {
       const db = mongoManager.getDb();
       const summariesCollection = db.collection('conversation_summaries');
-      
+
       // Load recent conversation summaries for this user
       const recentSummaries = await summariesCollection
         .find({ user_id: session.userId })
@@ -402,10 +416,10 @@ class ConversationManager {
         // Extract insights from previous conversations
         const combinedTopics = new Set();
         const combinedPreferences = [];
-        
-        recentSummaries.forEach(summary => {
+
+        recentSummaries.forEach((summary) => {
           if (summary.data.topics) {
-            summary.data.topics.forEach(topic => combinedTopics.add(topic));
+            summary.data.topics.forEach((topic) => combinedTopics.add(topic));
           }
           if (summary.data.userPreferences) {
             combinedPreferences.push(...summary.data.userPreferences);
@@ -415,7 +429,6 @@ class ConversationManager {
         session.context.sessionMemory.historicalTopics = Array.from(combinedTopics);
         session.context.sessionMemory.historicalPreferences = combinedPreferences.slice(0, 10);
       }
-
     } catch (error) {
       console.error('Error loading conversation insights:', error);
     }
@@ -434,7 +447,7 @@ class ConversationManager {
     let messages = session.messages;
 
     if (excludeSystem) {
-      messages = messages.filter(m => m.role !== 'system');
+      messages = messages.filter((m) => m.role !== 'system');
     }
 
     return messages.slice(-limit);
@@ -451,7 +464,7 @@ class ConversationManager {
 
     session.context = {
       ...session.context,
-      ...contextUpdate
+      ...contextUpdate,
     };
 
     session.lastActivity = new Date();
@@ -468,11 +481,11 @@ class ConversationManager {
   async loadUserContext(session) {
     try {
       const db = mongoManager.getDb();
-      
+
       // Load user profile
       const userProfileCollection = db.collection('user_profiles');
       const userProfile = await userProfileCollection.findOne({ _id: session.userId });
-      
+
       if (userProfile) {
         session.context.userProfile = userProfile;
         session.context.musicPreferences = userProfile.preferences || {};
@@ -490,16 +503,14 @@ class ConversationManager {
 
       // Load recent recommendations
       const recommendationsCollection = db.collection('recommendations');
-      const recentRecommendations = await recommendationsCollection
-        .findOne(
-          { user_id: session.userId },
-          { sort: { created_at: -1 } }
-        );
+      const recentRecommendations = await recommendationsCollection.findOne(
+        { user_id: session.userId },
+        { sort: { created_at: -1 } }
+      );
 
       if (recentRecommendations) {
         session.context.lastRecommendations = recentRecommendations;
       }
-
     } catch (error) {
       console.error('Error loading user context:', error);
     }
@@ -515,7 +526,7 @@ class ConversationManager {
     }
 
     const { includeContext = true, maxMessages = 10 } = options;
-    
+
     let messages = [];
 
     // Add system message with context
@@ -525,15 +536,17 @@ class ConversationManager {
     }
 
     // Add conversation history
-    const history = this.getConversationHistory(sessionId, { 
+    const history = this.getConversationHistory(sessionId, {
       limit: maxMessages,
-      excludeSystem: true 
+      excludeSystem: true,
     });
 
-    messages.push(...history.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    })));
+    messages.push(
+      ...history.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }))
+    );
 
     return messages;
   }
@@ -557,7 +570,7 @@ Current user context:`;
     // Add recent listening context
     if (context.recentListeningHistory?.length > 0) {
       const recentTracks = context.recentListeningHistory.slice(0, 3);
-      systemContent += `\n- Recent tracks: ${recentTracks.map(t => `${t.track_name} by ${t.artist_name}`).join(', ')}`;
+      systemContent += `\n- Recent tracks: ${recentTracks.map((t) => `${t.track_name} by ${t.artist_name}`).join(', ')}`;
     }
 
     // Add conversation-specific context
@@ -602,7 +615,7 @@ Guidelines:
 
     return {
       role: 'system',
-      content: systemContent
+      content: systemContent,
     };
   }
 
@@ -614,15 +627,14 @@ Guidelines:
       const db = mongoManager.getDb();
       const summariesCollection = db.collection('conversation_summaries');
       const session = this.activeSessions.get(sessionId);
-      
+
       await summariesCollection.insertOne({
         _id: uuidv4(),
         user_id: session.userId,
         session_id: sessionId,
         timestamp: summary.timestamp,
-        data: summary
+        data: summary,
       });
-
     } catch (error) {
       console.error('Error saving conversation summary:', error);
     }
@@ -658,7 +670,11 @@ Guidelines:
 
     // Default suggestions
     if (hints.length === 0) {
-      hints.push('Ask for music recommendations', 'Create a new playlist', 'Analyze your music taste');
+      hints.push(
+        'Ask for music recommendations',
+        'Create a new playlist',
+        'Analyze your music taste'
+      );
     }
 
     return hints.slice(0, 4);
@@ -676,13 +692,13 @@ Guidelines:
       type: feedback.type, // 'like', 'dislike', 'rating', etc.
       target: feedback.target, // 'recommendation', 'playlist', 'song', etc.
       value: feedback.value,
-      context: feedback.context || {}
+      context: feedback.context || {},
     };
 
     session.context.sessionMemory.userFeedback.push(feedbackObj);
-    
+
     // Keep only recent feedback
-    session.context.sessionMemory.userFeedback = 
+    session.context.sessionMemory.userFeedback =
       session.context.sessionMemory.userFeedback.slice(-20);
 
     // Update preferences based on feedback
@@ -691,7 +707,7 @@ Guidelines:
       if (!session.context.sessionMemory.preferences.genres) {
         session.context.sessionMemory.preferences.genres = {};
       }
-      session.context.sessionMemory.preferences.genres[genre] = 
+      session.context.sessionMemory.preferences.genres[genre] =
         (session.context.sessionMemory.preferences.genres[genre] || 0) + 1;
     }
 
@@ -712,7 +728,7 @@ Guidelines:
       }
     }
 
-    expiredSessions.forEach(sessionId => {
+    expiredSessions.forEach((sessionId) => {
       console.log(`🧹 Cleaning up expired session ${sessionId}`);
       this.activeSessions.delete(sessionId);
     });
@@ -727,7 +743,7 @@ Guidelines:
     try {
       const db = mongoManager.getDb();
       const chatSessionsCollection = db.collection('chat_sessions');
-      
+
       await chatSessionsCollection.insertOne({
         _id: session.sessionId,
         user_id: session.userId,
@@ -735,9 +751,8 @@ Guidelines:
         last_activity: session.lastActivity,
         context: session.context,
         metadata: session.metadata,
-        message_count: session.messages.length
+        message_count: session.messages.length,
       });
-
     } catch (error) {
       console.error('Error saving session to database:', error);
     }
@@ -751,10 +766,10 @@ Guidelines:
       const db = mongoManager.getDb();
       const chatSessionsCollection = db.collection('chat_sessions');
       const chatHistoryCollection = db.collection('chat_history');
-      
+
       const sessionData = await chatSessionsCollection.findOne({
         _id: sessionId,
-        user_id: userId
+        user_id: userId,
       });
 
       if (!sessionData) {
@@ -772,22 +787,21 @@ Guidelines:
         userId: sessionData.user_id,
         startTime: sessionData.start_time,
         lastActivity: new Date(),
-        messages: messages.map(msg => ({
+        messages: messages.map((msg) => ({
           id: msg._id,
           role: msg.message_type,
           content: msg.content,
           timestamp: msg.timestamp,
-          metadata: msg.metadata || {}
+          metadata: msg.metadata || {},
         })),
         context: sessionData.context || {},
-        metadata: sessionData.metadata || {}
+        metadata: sessionData.metadata || {},
       };
 
       // Reload user context
       await this.loadUserContext(session);
 
       return session;
-
     } catch (error) {
       console.error('Error loading session from database:', error);
       return null;
@@ -799,13 +813,13 @@ Guidelines:
    */
   getDefaultModelForProvider(provider) {
     const defaultModels = {
-      'openai': 'gpt-4o-mini',
-      'gemini': 'gemini-1.5-flash', 
-      'openrouter': 'deepseek/deepseek-r1-0528:free',
-      'azure': 'gpt-35-turbo',
-      'mock': 'mock-music-assistant'
+      openai: 'gpt-4o-mini',
+      gemini: 'gemini-1.5-flash',
+      openrouter: 'deepseek/deepseek-r1-0528:free',
+      azure: 'gpt-35-turbo',
+      mock: 'mock-music-assistant',
     };
-    
+
     return defaultModels[provider] || 'mock-music-assistant';
   }
 
@@ -817,7 +831,7 @@ Guidelines:
       const db = mongoManager.getDb();
       const chatHistoryCollection = db.collection('chat_history');
       const session = this.activeSessions.get(sessionId);
-      
+
       await chatHistoryCollection.insertOne({
         _id: message.id,
         user_id: session.userId,
@@ -825,9 +839,8 @@ Guidelines:
         message_type: message.role,
         content: message.content,
         timestamp: message.timestamp,
-        metadata: message.metadata
+        metadata: message.metadata,
       });
-
     } catch (error) {
       console.error('Error saving message to database:', error);
     }
@@ -840,17 +853,16 @@ Guidelines:
     try {
       const db = mongoManager.getDb();
       const chatSessionsCollection = db.collection('chat_sessions');
-      
+
       await chatSessionsCollection.updateOne(
         { _id: sessionId },
-        { 
+        {
           $set: {
             ...updates,
-            last_activity: new Date()
-          }
+            last_activity: new Date(),
+          },
         }
       );
-
     } catch (error) {
       console.error('Error updating session in database:', error);
     }
@@ -865,8 +877,8 @@ Guidelines:
       return null;
     }
 
-    const userMessages = session.messages.filter(m => m.role === 'user');
-    const assistantMessages = session.messages.filter(m => m.role === 'assistant');
+    const userMessages = session.messages.filter((m) => m.role === 'user');
+    const assistantMessages = session.messages.filter((m) => m.role === 'assistant');
     const totalTokens = session.messages.reduce((sum, m) => sum + (m.metadata.tokens || 0), 0);
 
     return {
@@ -878,7 +890,9 @@ Guidelines:
       userMessages: userMessages.length,
       assistantMessages: assistantMessages.length,
       totalTokens,
-      averageResponseTime: assistantMessages.reduce((sum, m) => sum + (m.metadata.responseTime || 0), 0) / assistantMessages.length || 0
+      averageResponseTime:
+        assistantMessages.reduce((sum, m) => sum + (m.metadata.responseTime || 0), 0) /
+          assistantMessages.length || 0,
     };
   }
 
@@ -895,25 +909,25 @@ Guidelines:
       sessionId: session.sessionId,
       userId: session.userId,
       startTime: session.startTime,
-      messages: session.messages.map(msg => ({
+      messages: session.messages.map((msg) => ({
         role: msg.role,
         content: msg.content,
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
       })),
-      stats: this.getSessionStats(sessionId)
+      stats: this.getSessionStats(sessionId),
     };
 
     if (format === 'json') {
       return JSON.stringify(exportData, null, 2);
     } else if (format === 'text') {
       let text = `EchoTune AI Conversation\nSession: ${sessionId}\nDate: ${session.startTime.toISOString()}\n\n`;
-      
+
       for (const msg of session.messages) {
         if (msg.role !== 'system') {
           text += `${msg.role.toUpperCase()}: ${msg.content}\n\n`;
         }
       }
-      
+
       return text;
     }
 
@@ -924,9 +938,12 @@ Guidelines:
    * Start periodic cleanup
    */
   startPeriodicCleanup(intervalMinutes = 15) {
-    setInterval(() => {
-      this.cleanupExpiredSessions();
-    }, intervalMinutes * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanupExpiredSessions();
+      },
+      intervalMinutes * 60 * 1000
+    );
 
     console.log(`🔄 Started periodic session cleanup (every ${intervalMinutes} minutes)`);
   }

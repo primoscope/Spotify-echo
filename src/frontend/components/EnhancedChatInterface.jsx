@@ -58,10 +58,14 @@ const EnhancedChatInterface = ({
   const [selectedContext, setSelectedContext] = useState({});
   const [expandedContexts, setExpandedContexts] = useState({ moods: true });
   const [feedbackDialog, setFeedbackDialog] = useState({ open: false, message: null });
-  const [explanationDialog, setExplanationDialog] = useState({ open: false, message: null, explanation: null });
+  const [explanationDialog, setExplanationDialog] = useState({
+    open: false,
+    message: null,
+    explanation: null,
+  });
   const [providerMenu, setProviderMenu] = useState(null);
   const [currentProvider, setCurrentProvider] = useState('mock');
-  
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -83,10 +87,10 @@ const EnhancedChatInterface = ({
     try {
       const response = await fetch('/api/chat/context-chips', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setContextChips(data.contextChips || {});
@@ -98,34 +102,54 @@ const EnhancedChatInterface = ({
         moods: [
           { id: 'happy', label: 'Happy', emoji: '😊', description: 'Upbeat and positive music' },
           { id: 'sad', label: 'Sad', emoji: '😢', description: 'Melancholic and emotional tracks' },
-          { id: 'energetic', label: 'Energetic', emoji: '⚡', description: 'High-energy and motivating' },
+          {
+            id: 'energetic',
+            label: 'Energetic',
+            emoji: '⚡',
+            description: 'High-energy and motivating',
+          },
           { id: 'calm', label: 'Calm', emoji: '😌', description: 'Peaceful and relaxing vibes' },
         ],
         genres: [
           { id: 'pop', label: 'Pop', emoji: '🎵', description: 'Popular and mainstream hits' },
           { id: 'rock', label: 'Rock', emoji: '🎸', description: 'Guitar-driven rock music' },
           { id: 'hip-hop', label: 'Hip-Hop', emoji: '🎤', description: 'Rap and urban beats' },
-          { id: 'electronic', label: 'Electronic', emoji: '🎛️', description: 'EDM and electronic dance music' },
+          {
+            id: 'electronic',
+            label: 'Electronic',
+            emoji: '🎛️',
+            description: 'EDM and electronic dance music',
+          },
         ],
         activities: [
           { id: 'workout', label: 'Workout', emoji: '🏋️', description: 'High-energy gym music' },
-          { id: 'study', label: 'Study', emoji: '📚', description: 'Focus and concentration music' },
+          {
+            id: 'study',
+            label: 'Study',
+            emoji: '📚',
+            description: 'Focus and concentration music',
+          },
           { id: 'party', label: 'Party', emoji: '🎉', description: 'Dance and party anthems' },
-          { id: 'relaxation', label: 'Relaxation', emoji: '🧘', description: 'Meditation and chill music' },
+          {
+            id: 'relaxation',
+            label: 'Relaxation',
+            emoji: '🧘',
+            description: 'Meditation and chill music',
+          },
         ],
       });
     }
   };
 
   const handleContextChipClick = (category, chip) => {
-    setSelectedContext(prev => ({
+    setSelectedContext((prev) => ({
       ...prev,
       [category]: prev[category] === chip.id ? null : chip.id,
     }));
   };
 
   const toggleContextExpansion = (category) => {
-    setExpandedContexts(prev => ({
+    setExpandedContexts((prev) => ({
       ...prev,
       [category]: !prev[category],
     }));
@@ -142,13 +166,13 @@ const EnhancedChatInterface = ({
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setInputMessage('');
 
     try {
       if (onSendMessage) {
         const response = await onSendMessage(inputMessage, selectedContext);
-        
+
         const assistantMessage = {
           id: Date.now() + 1,
           role: 'assistant',
@@ -160,7 +184,7 @@ const EnhancedChatInterface = ({
           timestamp: new Date(),
         };
 
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages((prev) => [...prev, assistantMessage]);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -171,7 +195,7 @@ const EnhancedChatInterface = ({
         error: true,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     }
   };
 
@@ -194,10 +218,10 @@ const EnhancedChatInterface = ({
   };
 
   const showExplanation = (message) => {
-    setExplanationDialog({ 
-      open: true, 
-      message, 
-      explanation: message.explanation 
+    setExplanationDialog({
+      open: true,
+      message,
+      explanation: message.explanation,
     });
   };
 
@@ -212,7 +236,7 @@ const EnhancedChatInterface = ({
       >
         {category}
       </Button>
-      
+
       <Collapse in={expandedContexts[category]}>
         <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
           {chips.map((chip) => (
@@ -258,12 +282,8 @@ const EnhancedChatInterface = ({
             >
               {isUser ? <Person /> : <SmartToy />}
             </Avatar>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ order: isUser ? 1 : 2 }}
-            >
-              {isUser ? 'You' : (message.provider ? `AI (${message.provider})` : 'AI')}
+            <Typography variant="caption" color="text.secondary" sx={{ order: isUser ? 1 : 2 }}>
+              {isUser ? 'You' : message.provider ? `AI (${message.provider})` : 'AI'}
             </Typography>
           </Box>
 
@@ -287,16 +307,17 @@ const EnhancedChatInterface = ({
             {message.context && Object.keys(message.context).length > 0 && (
               <Box sx={{ mt: 1 }}>
                 <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                  {Object.entries(message.context).map(([key, value]) => 
-                    value && (
-                      <Chip
-                        key={key}
-                        label={`${key}: ${value}`}
-                        size="small"
-                        variant="outlined"
-                        sx={{ fontSize: '0.7rem', height: '20px' }}
-                      />
-                    )
+                  {Object.entries(message.context).map(
+                    ([key, value]) =>
+                      value && (
+                        <Chip
+                          key={key}
+                          label={`${key}: ${value}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontSize: '0.7rem', height: '20px' }}
+                        />
+                      )
                   )}
                 </Stack>
               </Box>
@@ -307,7 +328,11 @@ const EnhancedChatInterface = ({
           {hasRecommendations && (
             <Card sx={{ mt: 1, maxWidth: 400 }}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
                   <VolumeUp fontSize="small" />
                   Recommended Tracks
                 </Typography>
@@ -333,21 +358,14 @@ const EnhancedChatInterface = ({
           {!isUser && !message.error && (
             <Box sx={{ mt: 1, display: 'flex', gap: 0.5 }}>
               <Tooltip title="Rate this response">
-                <IconButton
-                  size="small"
-                  onClick={() => setFeedbackDialog({ open: true, message })}
-                >
+                <IconButton size="small" onClick={() => setFeedbackDialog({ open: true, message })}>
                   <ThumbUp fontSize="small" />
                 </IconButton>
               </Tooltip>
-              
+
               {hasExplanation && (
                 <Tooltip title="View explanation">
-                  <IconButton
-                    size="small"
-                    color="info"
-                    onClick={() => showExplanation(message)}
-                  >
+                  <IconButton size="small" color="info" onClick={() => showExplanation(message)}>
                     <Info fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -358,9 +376,7 @@ const EnhancedChatInterface = ({
           {/* Error indicator */}
           {message.error && (
             <Alert severity="error" sx={{ mt: 1 }}>
-              <Typography variant="body2">
-                There was an error processing this message.
-              </Typography>
+              <Typography variant="body2">There was an error processing this message.</Typography>
             </Alert>
           )}
         </Box>
@@ -377,16 +393,12 @@ const EnhancedChatInterface = ({
             <SmartToy color="primary" />
             AI Music Assistant
           </Typography>
-          
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={(e) => setProviderMenu(e.currentTarget)}
-          >
+
+          <Button variant="outlined" size="small" onClick={(e) => setProviderMenu(e.currentTarget)}>
             {currentProvider}
           </Button>
         </Box>
-        
+
         <Typography variant="body2" color="text.secondary">
           Get personalized music recommendations with AI explanations
         </Typography>
@@ -397,16 +409,12 @@ const EnhancedChatInterface = ({
         <Typography variant="subtitle2" gutterBottom>
           Set Context for Better Recommendations:
         </Typography>
-        
+
         <Stack spacing={1}>
           {contextChips.moods && (
-            <ContextChipsSection
-              category="moods"
-              chips={contextChips.moods}
-              icon={Mood}
-            />
+            <ContextChipsSection category="moods" chips={contextChips.moods} icon={Mood} />
           )}
-          
+
           {contextChips.genres && (
             <ContextChipsSection
               category="genres"
@@ -414,7 +422,7 @@ const EnhancedChatInterface = ({
               icon={LibraryMusic}
             />
           )}
-          
+
           {contextChips.activities && (
             <ContextChipsSection
               category="activities"
@@ -475,7 +483,7 @@ const EnhancedChatInterface = ({
             variant="outlined"
             size="small"
           />
-          
+
           <IconButton
             color="primary"
             onClick={handleSendMessage}
@@ -490,20 +498,21 @@ const EnhancedChatInterface = ({
         {Object.keys(selectedContext).length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              Current context: 
+              Current context:
             </Typography>
             <Stack direction="row" spacing={0.5} sx={{ mt: 0.5 }}>
-              {Object.entries(selectedContext).map(([key, value]) => 
-                value && (
-                  <Chip
-                    key={key}
-                    label={`${value}`}
-                    size="small"
-                    variant="filled"
-                    color="primary"
-                    onDelete={() => handleContextChipClick(key, { id: value })}
-                  />
-                )
+              {Object.entries(selectedContext).map(
+                ([key, value]) =>
+                  value && (
+                    <Chip
+                      key={key}
+                      label={`${value}`}
+                      size="small"
+                      variant="filled"
+                      color="primary"
+                      onDelete={() => handleContextChipClick(key, { id: value })}
+                    />
+                  )
               )}
             </Stack>
           </Box>
@@ -520,7 +529,7 @@ const EnhancedChatInterface = ({
           <Typography variant="body2" color="text.secondary" paragraph>
             Help improve the AI by rating this response:
           </Typography>
-          
+
           <Rating
             size="large"
             onChange={(_, value) => {
@@ -531,12 +540,8 @@ const EnhancedChatInterface = ({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFeedbackDialog({ open: false, message: null })}>
-            Cancel
-          </Button>
-          <Button onClick={() => handleFeedback(feedbackDialog.message, 'helpful')}>
-            Helpful
-          </Button>
+          <Button onClick={() => setFeedbackDialog({ open: false, message: null })}>Cancel</Button>
+          <Button onClick={() => handleFeedback(feedbackDialog.message, 'helpful')}>Helpful</Button>
           <Button onClick={() => handleFeedback(feedbackDialog.message, 'not_helpful')}>
             Not Helpful
           </Button>
@@ -560,7 +565,7 @@ const EnhancedChatInterface = ({
               <Typography variant="body1" paragraph>
                 {explanationDialog.explanation.summary}
               </Typography>
-              
+
               {explanationDialog.explanation.reasoning && (
                 <Box>
                   <Typography variant="subtitle2" gutterBottom>
@@ -581,7 +586,9 @@ const EnhancedChatInterface = ({
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setExplanationDialog({ open: false, message: null, explanation: null })}>
+          <Button
+            onClick={() => setExplanationDialog({ open: false, message: null, explanation: null })}
+          >
             Close
           </Button>
         </DialogActions>
@@ -593,13 +600,28 @@ const EnhancedChatInterface = ({
         open={Boolean(providerMenu)}
         onClose={() => setProviderMenu(null)}
       >
-        <MenuItem onClick={() => { setCurrentProvider('mock'); setProviderMenu(null); }}>
+        <MenuItem
+          onClick={() => {
+            setCurrentProvider('mock');
+            setProviderMenu(null);
+          }}
+        >
           Mock AI (Demo)
         </MenuItem>
-        <MenuItem onClick={() => { setCurrentProvider('gemini'); setProviderMenu(null); }}>
+        <MenuItem
+          onClick={() => {
+            setCurrentProvider('gemini');
+            setProviderMenu(null);
+          }}
+        >
           Google Gemini
         </MenuItem>
-        <MenuItem onClick={() => { setCurrentProvider('openai'); setProviderMenu(null); }}>
+        <MenuItem
+          onClick={() => {
+            setCurrentProvider('openai');
+            setProviderMenu(null);
+          }}
+        >
           OpenAI GPT
         </MenuItem>
       </Menu>

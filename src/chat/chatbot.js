@@ -20,10 +20,10 @@ class EchoTuneChatbot {
     this.recommendationEngine = recommendationEngine; // Use the singleton instance
     this.spotifyService = new SpotifyAudioFeaturesService();
     this.spotifyAPI = new SpotifyAPIService();
-    
+
     // Initialize providers based on config
     this.initializeProviders();
-    
+
     // Start session cleanup
     this.conversationManager.startPeriodicCleanup();
   }
@@ -79,13 +79,15 @@ class EchoTuneChatbot {
     if (!hasConfiguredProvider || this.config.enableMockProvider) {
       const mockProvider = new MockLLMProvider({ enabledByDefault: !hasConfiguredProvider });
       this.providers.set('mock', mockProvider);
-      console.log(`🎭 Mock provider added ${!hasConfiguredProvider ? '(no API keys configured)' : '(demo mode enabled)'}`);
+      console.log(
+        `🎭 Mock provider added ${!hasConfiguredProvider ? '(no API keys configured)' : '(demo mode enabled)'}`
+      );
     }
 
     // Set default provider
-    this.currentProvider = this.config.defaultProvider || 
-                          (hasConfiguredProvider ? 'openai' : 'mock');
-    
+    this.currentProvider =
+      this.config.defaultProvider || (hasConfiguredProvider ? 'openai' : 'mock');
+
     console.log(`🤖 Initialized ${this.providers.size} LLM providers`);
   }
 
@@ -103,13 +105,13 @@ class EchoTuneChatbot {
     });
 
     await Promise.allSettled(initPromises);
-    
+
     const availableProviders = Array.from(this.providers.entries())
       .filter(([, provider]) => provider.isAvailable())
       .map(([name]) => name);
 
     console.log(`🎯 Available providers: ${availableProviders.join(', ')}`);
-    
+
     if (availableProviders.length === 0) {
       console.warn('⚠️ No LLM providers are available. The system may not function properly.');
       // Don't throw error, let mock provider handle it
@@ -131,7 +133,7 @@ class EchoTuneChatbot {
    */
   async startConversation(userId, options = {}) {
     const { sessionId, provider, model } = options;
-    
+
     // Switch provider if requested
     if (provider && this.providers.has(provider)) {
       this.currentProvider = provider;
@@ -140,12 +142,12 @@ class EchoTuneChatbot {
     const sessionOptions = {
       llmProvider: this.currentProvider,
       model: model || this.config.defaultModel,
-      ...options
+      ...options,
     };
 
     const session = await this.conversationManager.getOrCreateSession(
-      userId, 
-      sessionId, 
+      userId,
+      sessionId,
       sessionOptions
     );
 
@@ -153,7 +155,7 @@ class EchoTuneChatbot {
       sessionId: session.sessionId,
       provider: this.currentProvider,
       capabilities: this.getProviderCapabilities(),
-      context: session.context
+      context: session.context,
     };
   }
 
@@ -162,23 +164,32 @@ class EchoTuneChatbot {
    */
   async sendMessage(sessionId, message, options = {}) {
     const startTime = Date.now();
-    
+
     try {
       const session = await this._validateSession(sessionId);
       const provider = await this._setupProvider(options);
-      
+
       await this._addUserMessage(sessionId, message);
-      
-      const commandResponse = await this._handleSpecialCommands(message, session, options, startTime);
+
+      const commandResponse = await this._handleSpecialCommands(
+        message,
+        session,
+        options,
+        startTime
+      );
       if (commandResponse) {
         return commandResponse;
       }
-      
+
       const llmResponse = await this._generateLLMResponse(sessionId, session, provider, options);
-      const finalResponse = await this._processFunctionCalls(llmResponse, session, provider, options);
-      
+      const finalResponse = await this._processFunctionCalls(
+        llmResponse,
+        session,
+        provider,
+        options
+      );
+
       return await this._finalizeResponse(sessionId, finalResponse, llmResponse, startTime);
-      
     } catch (error) {
       return await this._handleSendMessageError(error, sessionId, startTime);
     }
@@ -216,7 +227,7 @@ class EchoTuneChatbot {
   async _addUserMessage(sessionId, message) {
     await this.conversationManager.addMessage(sessionId, {
       role: 'user',
-      content: message
+      content: message,
     });
   }
 
@@ -226,20 +237,24 @@ class EchoTuneChatbot {
   async _handleSpecialCommands(message, session, options, startTime) {
     const commandResponse = await this.handleSpecialCommands(message, session, options);
     if (commandResponse) {
-      await this.conversationManager.addMessage(session.sessionId, {
-        role: 'assistant',
-        content: commandResponse.content
-      }, {
-        responseTime: Date.now() - startTime,
-        ...commandResponse.metadata
-      });
+      await this.conversationManager.addMessage(
+        session.sessionId,
+        {
+          role: 'assistant',
+          content: commandResponse.content,
+        },
+        {
+          responseTime: Date.now() - startTime,
+          ...commandResponse.metadata,
+        }
+      );
 
       return {
         response: commandResponse.content,
         sessionId: session.sessionId,
         provider: this.currentProvider,
         metadata: commandResponse.metadata,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       };
     }
     return null;
@@ -250,7 +265,7 @@ class EchoTuneChatbot {
    */
   async _generateLLMResponse(sessionId, session, provider, options) {
     const messages = this.conversationManager.getMessagesForLLM(sessionId, {
-      maxMessages: options.maxHistory || 10
+      maxMessages: options.maxHistory || 10,
     });
 
     const llmResponse = await provider.generateCompletion(messages, {
@@ -258,7 +273,7 @@ class EchoTuneChatbot {
       temperature: options.temperature || 0.7,
       maxTokens: options.maxTokens || 1500,
       functions: this.getMusicFunctions(),
-      ...options.llmOptions
+      ...options.llmOptions,
     });
 
     if (llmResponse.error) {
@@ -273,21 +288,25 @@ class EchoTuneChatbot {
    */
   async _processFunctionCalls(llmResponse, session, provider, options) {
     let finalResponse = llmResponse.content;
-    
+
     if (llmResponse.functionCall || llmResponse.toolCalls) {
       const functionResults = await this.handleFunctionCalls(
         llmResponse.functionCall || llmResponse.toolCalls,
         session,
         options
       );
-      
+
       if (functionResults) {
         finalResponse = await this._generateFollowUpResponse(
-          llmResponse, functionResults, session, provider, options
+          llmResponse,
+          functionResults,
+          session,
+          provider,
+          options
         );
       }
     }
-    
+
     return finalResponse;
   }
 
@@ -297,24 +316,24 @@ class EchoTuneChatbot {
   async _generateFollowUpResponse(llmResponse, functionResults, session, provider, options) {
     const followUpMessages = [
       ...this.conversationManager.getMessagesForLLM(session.sessionId, {
-        maxMessages: options.maxHistory || 10
+        maxMessages: options.maxHistory || 10,
       }),
       {
         role: 'assistant',
         content: llmResponse.content,
-        function_call: llmResponse.functionCall
+        function_call: llmResponse.functionCall,
       },
       {
         role: 'function',
         content: JSON.stringify(functionResults),
-        name: llmResponse.functionCall?.name
-      }
+        name: llmResponse.functionCall?.name,
+      },
     ];
 
     const followUpResponse = await provider.generateCompletion(followUpMessages, {
       model: options.model || session.metadata.model,
       temperature: 0.7,
-      maxTokens: 1000
+      maxTokens: 1000,
     });
 
     return followUpResponse.content || llmResponse.content;
@@ -329,20 +348,24 @@ class EchoTuneChatbot {
       provider: this.currentProvider,
       model: llmResponse.model,
       tokens: llmResponse.usage?.totalTokens || 0,
-      functionCalls: llmResponse.functionCall || llmResponse.toolCalls ? 1 : 0
+      functionCalls: llmResponse.functionCall || llmResponse.toolCalls ? 1 : 0,
     };
 
-    await this.conversationManager.addMessage(sessionId, {
-      role: 'assistant',
-      content: finalResponse
-    }, responseMetadata);
+    await this.conversationManager.addMessage(
+      sessionId,
+      {
+        role: 'assistant',
+        content: finalResponse,
+      },
+      responseMetadata
+    );
 
     return {
       response: finalResponse,
       sessionId,
       provider: this.currentProvider,
       functionResults: llmResponse.functionCall || llmResponse.toolCalls ? true : null,
-      metadata: responseMetadata
+      metadata: responseMetadata,
     };
   }
 
@@ -351,17 +374,22 @@ class EchoTuneChatbot {
    */
   async _handleSendMessageError(error, sessionId, startTime) {
     console.error('Error in sendMessage:', error);
-    
-    const errorResponse = 'I apologize, but I encountered an error while processing your message. Please try again or rephrase your request.';
-    
+
+    const errorResponse =
+      'I apologize, but I encountered an error while processing your message. Please try again or rephrase your request.';
+
     try {
-      await this.conversationManager.addMessage(sessionId, {
-        role: 'assistant',
-        content: errorResponse
-      }, {
-        responseTime: Date.now() - startTime,
-        error: error.message
-      });
+      await this.conversationManager.addMessage(
+        sessionId,
+        {
+          role: 'assistant',
+          content: errorResponse,
+        },
+        {
+          responseTime: Date.now() - startTime,
+          error: error.message,
+        }
+      );
     } catch (dbError) {
       console.error('Error saving error message:', dbError);
     }
@@ -372,17 +400,17 @@ class EchoTuneChatbot {
       error: error.message,
       metadata: {
         responseTime: Date.now() - startTime,
-        error: true
-      }
+        error: true,
+      },
     };
   }
 
   /**
    * Stream a response (for real-time chat)
    */
-  async* streamMessage(sessionId, message, options = {}) {
+  async *streamMessage(sessionId, message, options = {}) {
     const startTime = Date.now();
-    
+
     try {
       const session = this.conversationManager.activeSessions.get(sessionId);
       if (!session) {
@@ -397,14 +425,14 @@ class EchoTuneChatbot {
       // Add user message
       await this.conversationManager.addMessage(sessionId, {
         role: 'user',
-        content: message
+        content: message,
       });
 
       // Get conversation history
       const messages = this.conversationManager.getMessagesForLLM(sessionId);
 
       let fullResponse = '';
-      
+
       // Stream response
       for await (const chunk of provider.generateStreamingCompletion(messages, options)) {
         if (chunk.error) {
@@ -417,30 +445,33 @@ class EchoTuneChatbot {
           yield {
             content: chunk.content,
             type: 'chunk',
-            isPartial: chunk.isPartial
+            isPartial: chunk.isPartial,
           };
         }
       }
 
       // Save complete response
-      await this.conversationManager.addMessage(sessionId, {
-        role: 'assistant',
-        content: fullResponse
-      }, {
-        responseTime: Date.now() - startTime,
-        provider: this.currentProvider,
-        streaming: true
-      });
+      await this.conversationManager.addMessage(
+        sessionId,
+        {
+          role: 'assistant',
+          content: fullResponse,
+        },
+        {
+          responseTime: Date.now() - startTime,
+          provider: this.currentProvider,
+          streaming: true,
+        }
+      );
 
       yield {
         type: 'complete',
-        totalTime: Date.now() - startTime
+        totalTime: Date.now() - startTime,
       };
-
     } catch (error) {
-      yield { 
-        error: error.message, 
-        type: 'error' 
+      yield {
+        error: error.message,
+        type: 'error',
       };
     }
   }
@@ -470,7 +501,7 @@ class EchoTuneChatbot {
     if (lowerMessage === '/help' || lowerMessage === 'help') {
       return {
         content: this.getHelpMessage(),
-        metadata: { command: 'help' }
+        metadata: { command: 'help' },
       };
     }
 
@@ -494,16 +525,16 @@ class EchoTuneChatbot {
       switch (functionName) {
         case 'search_tracks':
           return await this.searchTracks(args, session);
-        
+
         case 'create_playlist':
           return await this.createPlaylist(args, session, options);
-        
+
         case 'get_recommendations':
           return await this.getRecommendations(args, session);
-        
+
         case 'analyze_listening_habits':
           return await this.analyzeListeningHabits(args, session);
-        
+
         default:
           return { error: `Unknown function: ${functionName}` };
       }
@@ -519,10 +550,10 @@ class EchoTuneChatbot {
   async searchTracks(args, session = null) {
     try {
       const { query, limit = 10, mood, energy, danceability } = args;
-      
+
       // Get access token from session context (if available)
       const accessToken = session?.context?.spotifyAccessToken;
-      
+
       if (!accessToken) {
         // For testing or when not connected, return mock data
         return {
@@ -532,12 +563,12 @@ class EchoTuneChatbot {
               name: query,
               artists: [{ name: 'Test Artist' }],
               album: { name: 'Test Album' },
-              preview_url: 'https://example.com/preview.mp3'
-            }
+              preview_url: 'https://example.com/preview.mp3',
+            },
           ],
           total: 1,
           query: query,
-          message: 'Found tracks (demo mode - connect Spotify for real results)'
+          message: 'Found tracks (demo mode - connect Spotify for real results)',
         };
       }
 
@@ -547,31 +578,30 @@ class EchoTuneChatbot {
         mood,
         energy,
         danceability,
-        accessToken
+        accessToken,
       });
 
       // Enrich with audio features if needed
-      const trackIds = searchResults.tracks.map(track => track.id);
+      const trackIds = searchResults.tracks.map((track) => track.id);
       const audioFeatures = await this.spotifyService.getCachedAudioFeatures(trackIds);
-      const audioFeaturesMap = new Map(audioFeatures.map(af => [af.track_id, af]));
+      const audioFeaturesMap = new Map(audioFeatures.map((af) => [af.track_id, af]));
 
-      const enrichedTracks = searchResults.tracks.map(track => ({
+      const enrichedTracks = searchResults.tracks.map((track) => ({
         ...track,
-        audio_features: audioFeaturesMap.get(track.id)
+        audio_features: audioFeaturesMap.get(track.id),
       }));
 
       return {
         tracks: enrichedTracks,
         total: searchResults.total,
         query: searchResults.query,
-        message: `Found ${enrichedTracks.length} tracks matching "${query}"`
+        message: `Found ${enrichedTracks.length} tracks matching "${query}"`,
       };
-
     } catch (error) {
       console.error('Error searching tracks:', error);
       return {
         error: error.message,
-        message: 'Sorry, I encountered an error while searching for tracks. Please try again.'
+        message: 'Sorry, I encountered an error while searching for tracks. Please try again.',
       };
     }
   }
@@ -582,10 +612,10 @@ class EchoTuneChatbot {
   async createPlaylist(args, session = null, _options) {
     try {
       const { name, description, tracks = [], public: isPublic = false } = args;
-      
+
       // Get access token and user ID from session context
       const accessToken = session?.context?.spotifyAccessToken;
-      
+
       if (!accessToken) {
         // Return mock playlist for testing or demo mode
         return {
@@ -595,32 +625,34 @@ class EchoTuneChatbot {
             description: description || 'Created by EchoTune AI',
             public: isPublic,
             tracks_count: tracks.length,
-            url: 'https://open.spotify.com/playlist/test_playlist_id'
+            url: 'https://open.spotify.com/playlist/test_playlist_id',
           },
-          message: 'Playlist created (demo mode - connect Spotify for real playlists)'
+          message: 'Playlist created (demo mode - connect Spotify for real playlists)',
         };
       }
 
       // Create playlist using real Spotify API
-      const playlist = await this.spotifyAPI.createPlaylist(session.userId || 'default_user', {
-        name: name || 'EchoTune AI Playlist',
-        description: description || 'Created by EchoTune AI',
-        public: isPublic
-      }, { accessToken });
+      const playlist = await this.spotifyAPI.createPlaylist(
+        session.userId || 'default_user',
+        {
+          name: name || 'EchoTune AI Playlist',
+          description: description || 'Created by EchoTune AI',
+          public: isPublic,
+        },
+        { accessToken }
+      );
 
       // Add tracks if provided
       let addedTracks = 0;
       if (tracks && tracks.length > 0) {
         // Convert track IDs to URIs
-        const trackUris = tracks.map(track => 
+        const trackUris = tracks.map((track) =>
           typeof track === 'string' ? `spotify:track:${track}` : `spotify:track:${track.id}`
         );
-        
-        const addResult = await this.spotifyAPI.addTracksToPlaylist(
-          playlist.id, 
-          trackUris, 
-          { accessToken }
-        );
+
+        const addResult = await this.spotifyAPI.addTracksToPlaylist(playlist.id, trackUris, {
+          accessToken,
+        });
         addedTracks = addResult.added_tracks;
       }
 
@@ -629,23 +661,22 @@ class EchoTuneChatbot {
         action: 'playlist_created',
         playlist_id: playlist.id,
         playlist_name: playlist.name,
-        tracks_added: addedTracks
+        tracks_added: addedTracks,
       });
 
       return {
         playlist: {
           ...playlist,
-          tracks_added: addedTracks
+          tracks_added: addedTracks,
         },
         success: true,
-        message: `Successfully created playlist "${playlist.name}"${addedTracks > 0 ? ` with ${addedTracks} tracks` : ''}`
+        message: `Successfully created playlist "${playlist.name}"${addedTracks > 0 ? ` with ${addedTracks} tracks` : ''}`,
       };
-
     } catch (error) {
       console.error('Error creating playlist:', error);
       return {
         error: error.message,
-        message: 'Sorry, I encountered an error while creating the playlist. Please try again.'
+        message: 'Sorry, I encountered an error while creating the playlist. Please try again.',
       };
     }
   }
@@ -660,14 +691,14 @@ class EchoTuneChatbot {
         {
           limit: args.limit || 10,
           mood: args.target_features?.mood,
-          activity: args.target_features?.activity
+          activity: args.target_features?.activity,
         }
       );
 
       return {
         recommendations: recommendations.recommendations,
         total: recommendations.recommendations.length,
-        algorithm: 'hybrid'
+        algorithm: 'hybrid',
       };
     } catch (error) {
       return { error: error.message };
@@ -680,10 +711,10 @@ class EchoTuneChatbot {
   async analyzeListeningHabits(args = {}, session = null) {
     try {
       const { time_period = 'medium_term', include_audio_features = true } = args;
-      
+
       // Get access token from session context
       const accessToken = session?.context?.spotifyAccessToken;
-      
+
       if (!accessToken) {
         // Return mock analysis for testing or demo mode
         return {
@@ -694,21 +725,23 @@ class EchoTuneChatbot {
             top_tracks: [
               { name: 'Test Song 1', artist: 'Test Artist 1', play_count: 25 },
               { name: 'Test Song 2', artist: 'Test Artist 2', play_count: 20 },
-              { name: 'Test Song 3', artist: 'Test Artist 3', play_count: 18 }
+              { name: 'Test Song 3', artist: 'Test Artist 3', play_count: 18 },
             ],
-            audio_features: include_audio_features ? {
-              avg_danceability: 0.65,
-              avg_energy: 0.72,
-              avg_valence: 0.58,
-              avg_acousticness: 0.25
-            } : null
+            audio_features: include_audio_features
+              ? {
+                  avg_danceability: 0.65,
+                  avg_energy: 0.72,
+                  avg_valence: 0.58,
+                  avg_acousticness: 0.25,
+                }
+              : null,
           },
           insights: [
             'You have diverse music taste across multiple genres',
             'Your listening shows preference for energetic music',
-            'You enjoy both mainstream and alternative artists'
+            'You enjoy both mainstream and alternative artists',
           ],
-          message: 'Analysis complete (demo mode - connect Spotify for real data)'
+          message: 'Analysis complete (demo mode - connect Spotify for real data)',
         };
       }
 
@@ -717,39 +750,39 @@ class EchoTuneChatbot {
         this.spotifyAPI.getUserTopTracks({
           time_range: time_period,
           limit: 50,
-          accessToken
+          accessToken,
         }),
         this.spotifyAPI.getUserTopArtists({
           time_range: time_period,
           limit: 20,
-          accessToken
-        })
+          accessToken,
+        }),
       ]);
 
       // Get listening history from database
       const listeningHistory = await this.recommendationEngine.getUserListeningHistory(
-        session.userId, 
+        session.userId,
         { limit: 1000 }
       );
 
       // Analyze audio features if requested
       let audioAnalysis = null;
       if (include_audio_features && topTracks.tracks.length > 0) {
-        const trackIds = topTracks.tracks.map(track => track.id);
+        const trackIds = topTracks.tracks.map((track) => track.id);
         const audioFeatures = await this.spotifyService.getCachedAudioFeatures(trackIds);
-        
+
         if (audioFeatures.length > 0) {
           audioAnalysis = this.calculateAudioFeatureStats(audioFeatures);
         }
       }
 
       // Extract genres from top artists
-      const allGenres = topArtists.artists.flatMap(artist => artist.genres);
+      const allGenres = topArtists.artists.flatMap((artist) => artist.genres);
       const genreCounts = {};
-      allGenres.forEach(genre => {
+      allGenres.forEach((genre) => {
         genreCounts[genre] = (genreCounts[genre] || 0) + 1;
       });
-      
+
       const topGenres = Object.entries(genreCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10)
@@ -766,7 +799,7 @@ class EchoTuneChatbot {
         listening_patterns: listeningPatterns,
         audio_features_profile: audioAnalysis,
         total_tracks_analyzed: topTracks.tracks.length,
-        database_history_count: listeningHistory.length
+        database_history_count: listeningHistory.length,
       };
 
       // Generate insights
@@ -775,14 +808,14 @@ class EchoTuneChatbot {
       return {
         analysis,
         insights,
-        message: `Analysis complete! Found ${topTracks.tracks.length} top tracks and ${topArtists.artists.length} top artists.`
+        message: `Analysis complete! Found ${topTracks.tracks.length} top tracks and ${topArtists.artists.length} top artists.`,
       };
-
     } catch (error) {
       console.error('Error analyzing listening habits:', error);
       return {
         error: error.message,
-        message: 'Sorry, I encountered an error while analyzing your listening habits. Please try again.'
+        message:
+          'Sorry, I encountered an error while analyzing your listening habits. Please try again.',
       };
     }
   }
@@ -796,7 +829,7 @@ class EchoTuneChatbot {
       .map(([name, provider]) => ({
         name,
         capabilities: provider.getCapabilities(),
-        isActive: name === this.currentProvider
+        isActive: name === this.currentProvider,
       }));
   }
 
@@ -815,10 +848,10 @@ class EchoTuneChatbot {
 
     this.currentProvider = providerName;
     console.log(`🔄 Switched to ${providerName} provider`);
-    
+
     return {
       provider: providerName,
-      capabilities: provider.getCapabilities()
+      capabilities: provider.getCapabilities(),
     };
   }
 
@@ -871,7 +904,9 @@ I'm your personal music assistant! Here's what I can help you with:
 - /provider [name] - Switch AI provider
 
 **Available Providers:**
-${this.getAvailableProviders().map(p => `- ${p.name} ${p.isActive ? '(active)' : ''}`).join('\n')}
+${this.getAvailableProviders()
+  .map((p) => `- ${p.name} ${p.isActive ? '(active)' : ''}`)
+  .join('\n')}
 
 Just ask me anything about music and I'll help you discover your next favorite song! 🎶`;
   }
@@ -882,12 +917,12 @@ Just ask me anything about music and I'll help you discover your next favorite s
   getStats() {
     const activeSessionsCount = this.conversationManager.activeSessions.size;
     const providersStatus = this.getAvailableProviders();
-    
+
     return {
       activeSessions: activeSessionsCount,
       currentProvider: this.currentProvider,
       availableProviders: providersStatus.length,
-      providers: providersStatus
+      providers: providersStatus,
     };
   }
 
@@ -898,11 +933,11 @@ Just ask me anything about music and I'll help you discover your next favorite s
     try {
       const db = require('../database/mongodb').getDb();
       const userActivityCollection = db.collection('user_activity');
-      
+
       await userActivityCollection.insertOne({
         user_id: userId,
         ...activity,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (error) {
       console.error('Error logging user activity:', error);
@@ -916,27 +951,35 @@ Just ask me anything about music and I'll help you discover your next favorite s
   calculateAudioFeatureStats(audioFeatures) {
     if (audioFeatures.length === 0) return null;
 
-    const features = ['energy', 'danceability', 'valence', 'acousticness', 'instrumentalness', 'speechiness', 'liveness'];
+    const features = [
+      'energy',
+      'danceability',
+      'valence',
+      'acousticness',
+      'instrumentalness',
+      'speechiness',
+      'liveness',
+    ];
     const stats = {};
 
-    features.forEach(feature => {
-      const values = audioFeatures.map(af => af[feature]).filter(v => v !== undefined);
+    features.forEach((feature) => {
+      const values = audioFeatures.map((af) => af[feature]).filter((v) => v !== undefined);
       if (values.length > 0) {
         stats[feature] = {
           average: values.reduce((sum, val) => sum + val, 0) / values.length,
           min: Math.min(...values),
-          max: Math.max(...values)
+          max: Math.max(...values),
         };
       }
     });
 
     // Calculate tempo stats separately
-    const tempoValues = audioFeatures.map(af => af.tempo).filter(v => v !== undefined);
+    const tempoValues = audioFeatures.map((af) => af.tempo).filter((v) => v !== undefined);
     if (tempoValues.length > 0) {
       stats.tempo = {
         average: tempoValues.reduce((sum, val) => sum + val, 0) / tempoValues.length,
         min: Math.min(...tempoValues),
-        max: Math.max(...tempoValues)
+        max: Math.max(...tempoValues),
       };
     }
 
@@ -952,7 +995,7 @@ Just ask me anything about music and I'll help you discover your next favorite s
         most_active_hours: [],
         most_active_days: [],
         listening_streaks: [],
-        total_listening_time: 0
+        total_listening_time: 0,
       };
     }
 
@@ -961,11 +1004,11 @@ Just ask me anything about music and I'll help you discover your next favorite s
     const dayCounts = new Array(7).fill(0);
     let totalDuration = 0;
 
-    listeningHistory.forEach(item => {
+    listeningHistory.forEach((item) => {
       const playedAt = new Date(item.played_at);
       hourCounts[playedAt.getHours()]++;
       dayCounts[playedAt.getDay()]++;
-      
+
       if (item.duration_ms) {
         totalDuration += item.duration_ms;
       }
@@ -988,7 +1031,7 @@ Just ask me anything about music and I'll help you discover your next favorite s
       most_active_hours: mostActiveHours,
       most_active_days: mostActiveDays,
       total_listening_time: Math.round(totalDuration / 1000 / 60), // minutes
-      total_tracks: listeningHistory.length
+      total_tracks: listeningHistory.length,
     };
   }
 
@@ -1002,17 +1045,19 @@ Just ask me anything about music and I'll help you discover your next favorite s
     if (analysis.top_genres.length > 5) {
       insights.push('You have very diverse musical taste across multiple genres!');
     } else if (analysis.top_genres.length > 0) {
-      insights.push(`Your music taste is focused primarily on ${analysis.top_genres[0].genre} music.`);
+      insights.push(
+        `Your music taste is focused primarily on ${analysis.top_genres[0].genre} music.`
+      );
     }
 
     // Audio features insights
     if (analysis.audio_features_profile) {
       const features = analysis.audio_features_profile;
-      
+
       if (features.energy?.average > 0.7) {
         insights.push('You prefer high-energy, upbeat music that gets you moving!');
       } else if (features.energy?.average < 0.3) {
-        insights.push('You enjoy calm, low-energy music that\'s perfect for relaxation.');
+        insights.push("You enjoy calm, low-energy music that's perfect for relaxation.");
       }
 
       if (features.danceability?.average > 0.7) {
@@ -1022,7 +1067,7 @@ Just ask me anything about music and I'll help you discover your next favorite s
       if (features.valence?.average > 0.7) {
         insights.push('Your music tends to be very positive and uplifting!');
       } else if (features.valence?.average < 0.3) {
-        insights.push('You\'re drawn to more melancholic or introspective music.');
+        insights.push("You're drawn to more melancholic or introspective music.");
       }
 
       if (features.acousticness?.average > 0.7) {
@@ -1034,13 +1079,13 @@ Just ask me anything about music and I'll help you discover your next favorite s
     if (analysis.listening_patterns.most_active_hours.length > 0) {
       const topHour = analysis.listening_patterns.most_active_hours[0];
       if (topHour.hour >= 6 && topHour.hour < 12) {
-        insights.push('You\'re most active listening to music in the morning!');
+        insights.push("You're most active listening to music in the morning!");
       } else if (topHour.hour >= 12 && topHour.hour < 18) {
         insights.push('Afternoon is your prime music listening time!');
       } else if (topHour.hour >= 18 && topHour.hour < 22) {
-        insights.push('You\'re an evening music lover!');
+        insights.push("You're an evening music lover!");
       } else {
-        insights.push('You\'re a night owl when it comes to music!');
+        insights.push("You're a night owl when it comes to music!");
       }
     }
 
@@ -1049,16 +1094,16 @@ Just ask me anything about music and I'll help you discover your next favorite s
 
   /**
    * Legacy chat method for compatibility
-   * @param {string} message - User message  
+   * @param {string} message - User message
    * @param {string} sessionId - Session identifier
    * @returns {Promise<Object>} Chat response
    */
   async chat(message, sessionId) {
     const response = await this.sendMessage(sessionId, message);
     return {
-      text: response.content || response.text || 'I\'m having trouble processing that request.',
+      text: response.content || response.text || "I'm having trouble processing that request.",
       provider: this.currentProvider,
-      sessionId: sessionId
+      sessionId: sessionId,
     };
   }
 }

@@ -13,18 +13,18 @@ const databaseManager = require('../../database/database-manager');
 router.get('/status', async (req, res) => {
   try {
     const healthStatus = await databaseManager.healthCheck();
-    
+
     res.json({
       success: true,
       ...healthStatus,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Database status check error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to check database status',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -40,15 +40,15 @@ router.post('/init-fallback', async (req, res) => {
     }
 
     const success = await databaseManager.sqlite.initialize();
-    
+
     if (success) {
       databaseManager.activeDatabases = ['sqlite'];
       databaseManager.fallbackMode = true;
-      
+
       res.json({
         success: true,
         message: 'Fallback database initialized successfully',
-        database: 'sqlite'
+        database: 'sqlite',
       });
     } else {
       throw new Error('SQLite initialization failed');
@@ -58,7 +58,7 @@ router.post('/init-fallback', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to initialize fallback database',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -69,28 +69,28 @@ router.post('/init-fallback', async (req, res) => {
 router.post('/user', async (req, res) => {
   try {
     const userData = req.body;
-    
+
     if (!userData.id) {
       return res.status(400).json({
         success: false,
-        error: 'User ID is required'
+        error: 'User ID is required',
       });
     }
 
     const result = await databaseManager.saveUser(userData);
-    
+
     if (result.success) {
       res.json({
         success: true,
         message: 'User data saved successfully',
         primary: result.primary,
-        results: result.results
+        results: result.results,
       });
     } else {
       res.status(500).json({
         success: false,
         error: 'Failed to save user data',
-        results: result.results
+        results: result.results,
       });
     }
   } catch (error) {
@@ -98,7 +98,7 @@ router.post('/user', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to save user data',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -109,27 +109,27 @@ router.post('/user', async (req, res) => {
 router.post('/listening-history', async (req, res) => {
   try {
     const { userId, tracks } = req.body;
-    
+
     if (!userId || !tracks || !Array.isArray(tracks)) {
       return res.status(400).json({
         success: false,
-        error: 'User ID and tracks array are required'
+        error: 'User ID and tracks array are required',
       });
     }
 
     const result = await databaseManager.saveListeningHistory(userId, tracks);
-    
+
     if (result.success) {
       res.json({
         success: true,
         message: 'Listening history saved successfully',
-        results: result.results
+        results: result.results,
       });
     } else {
       res.status(500).json({
         success: false,
         error: 'Failed to save listening history',
-        results: result.results
+        results: result.results,
       });
     }
   } catch (error) {
@@ -137,7 +137,7 @@ router.post('/listening-history', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to save listening history',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -148,32 +148,32 @@ router.post('/listening-history', async (req, res) => {
 router.get('/recommendations', async (req, res) => {
   try {
     const { userId, limit } = req.query;
-    
+
     if (!userId) {
       return res.status(400).json({
         success: false,
-        error: 'User ID is required'
+        error: 'User ID is required',
       });
     }
 
     const options = {
-      limit: parseInt(limit) || 20
+      limit: parseInt(limit) || 20,
     };
 
     const result = await databaseManager.getRecommendations(userId, options);
-    
+
     if (result.success) {
       res.json({
         success: true,
         recommendations: result.recommendations,
         source: result.source,
-        count: result.recommendations.length
+        count: result.recommendations.length,
       });
     } else {
       res.status(404).json({
         success: false,
         error: 'No recommendations found',
-        details: result.error
+        details: result.error,
       });
     }
   } catch (error) {
@@ -181,7 +181,7 @@ router.get('/recommendations', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get recommendations',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -192,7 +192,7 @@ router.get('/recommendations', async (req, res) => {
 router.get('/analytics', async (req, res) => {
   try {
     const { userId, dateFrom, dateTo } = req.query;
-    
+
     // If no userId provided, return MongoDB insights
     if (!userId) {
       try {
@@ -200,7 +200,7 @@ router.get('/analytics', async (req, res) => {
         return res.json({
           success: true,
           analytics: mongodbInsights,
-          source: 'mongodb_insights'
+          source: 'mongodb_insights',
         });
       } catch (error) {
         console.error('MongoDB insights error:', error);
@@ -212,10 +212,10 @@ router.get('/analytics', async (req, res) => {
             users: 0,
             listeningHistory: 0,
             recommendations: 0,
-            size: 'Unknown'
+            size: 'Unknown',
           },
           source: 'fallback',
-          error: 'Could not retrieve MongoDB insights'
+          error: 'Could not retrieve MongoDB insights',
         });
       }
     }
@@ -225,18 +225,18 @@ router.get('/analytics', async (req, res) => {
     if (dateTo) options.dateTo = dateTo;
 
     const result = await databaseManager.getAnalytics(userId, options);
-    
+
     if (result.success) {
       res.json({
         success: true,
         analytics: result.analytics,
-        source: result.source
+        source: result.source,
       });
     } else {
       res.status(404).json({
         success: false,
         error: 'No analytics data found',
-        details: result.error
+        details: result.error,
       });
     }
   } catch (error) {
@@ -244,7 +244,7 @@ router.get('/analytics', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get analytics',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -259,18 +259,18 @@ async function getMongoDBInsights() {
 
   try {
     const db = databaseManager.mongodb.db;
-    
+
     // Get collections info
     const collections = await db.listCollections().toArray();
-    const collectionNames = collections.map(c => c.name);
-    
+    const collectionNames = collections.map((c) => c.name);
+
     const insights = {
       collections: collections.length,
       totalDocuments: 0,
       users: 0,
       listeningHistory: 0,
       recommendations: 0,
-      size: 'Unknown'
+      size: 'Unknown',
     };
 
     // Count documents in each collection
@@ -279,7 +279,7 @@ async function getMongoDBInsights() {
         const collection = db.collection(collectionName);
         const count = await collection.countDocuments();
         insights.totalDocuments += count;
-        
+
         // Specific collection counts
         if (collectionName.includes('user')) {
           insights.users = count;
@@ -327,18 +327,18 @@ function formatBytes(bytes) {
 router.get('/info', async (req, res) => {
   try {
     const info = databaseManager.getActiveDatabase();
-    
+
     res.json({
       success: true,
       ...info,
-      initialized: databaseManager.initialized
+      initialized: databaseManager.initialized,
     });
   } catch (error) {
     console.error('Get database info error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get database info',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -349,27 +349,27 @@ router.get('/info', async (req, res) => {
 router.post('/test', async (req, res) => {
   try {
     const { database } = req.body;
-    
+
     if (database && !['mongodb', 'supabase', 'sqlite'].includes(database)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid database type'
+        error: 'Invalid database type',
       });
     }
 
     const healthStatus = await databaseManager.healthCheck();
-    
+
     if (database) {
       const dbStatus = healthStatus.connections[database];
       res.json({
         success: dbStatus.connected,
         database,
-        status: dbStatus
+        status: dbStatus,
       });
     } else {
       res.json({
         success: healthStatus.healthy,
-        ...healthStatus
+        ...healthStatus,
       });
     }
   } catch (error) {
@@ -377,7 +377,7 @@ router.post('/test', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Database test failed',
-      details: error.message
+      details: error.message,
     });
   }
 });

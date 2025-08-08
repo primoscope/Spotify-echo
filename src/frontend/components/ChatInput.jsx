@@ -47,15 +47,9 @@ function ChatInput({ onSendMessage, disabled, placeholder }) {
         rows="1"
         disabled={disabled}
       />
-      <button 
-        type="submit" 
-        className="send-button"
-        disabled={disabled || !message.trim()}
-      >
+      <button type="submit" className="send-button" disabled={disabled || !message.trim()}>
         <span className={`loading ${disabled ? '' : 'hidden'}`}></span>
-        <span className="send-text">
-          {disabled ? 'Thinking...' : 'Send'}
-        </span>
+        <span className="send-text">{disabled ? 'Thinking...' : 'Send'}</span>
       </button>
     </form>
   );

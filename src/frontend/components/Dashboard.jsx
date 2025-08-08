@@ -10,7 +10,7 @@ import { useDatabase } from '../contexts/DatabaseContext';
 function Dashboard() {
   const { user } = useAuth();
   const { getAnalytics } = useDatabase();
-  
+
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,13 +18,13 @@ function Dashboard() {
 
   const loadAnalytics = useCallback(async () => {
     if (!user) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const options = {};
-      
+
       // Set date range based on selection
       if (timeRange !== 'all') {
         const now = new Date();
@@ -32,17 +32,17 @@ function Dashboard() {
           '7d': 7,
           '30d': 30,
           '6m': 180,
-          '1y': 365
+          '1y': 365,
         }[timeRange];
-        
+
         if (daysAgo) {
-          const fromDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
+          const fromDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
           options.dateFrom = fromDate.toISOString();
         }
       }
 
       const result = await getAnalytics(user.id, options);
-      
+
       if (result.success) {
         setAnalytics(result.analytics);
       } else {
@@ -103,11 +103,11 @@ function Dashboard() {
       <div className="dashboard-header">
         <h1>📊 Music Analytics Dashboard</h1>
         <p>Insights into your musical preferences and listening habits</p>
-        
+
         <div className="time-range-selector">
           <label>Time Range:</label>
-          <select 
-            value={timeRange} 
+          <select
+            value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
             className="time-range-select"
           >
@@ -156,26 +156,26 @@ function StatsOverview({ analytics }) {
       icon: '🎵',
       label: 'Total Tracks',
       value: analytics.total_tracks || analytics.totalTracks || 0,
-      color: 'var(--primary-color)'
+      color: 'var(--primary-color)',
     },
     {
       icon: '👨‍🎤',
       label: 'Unique Artists',
       value: analytics.unique_artists || analytics.uniqueArtists || 0,
-      color: 'var(--success-color)'
+      color: 'var(--success-color)',
     },
     {
       icon: '⏱️',
       label: 'Avg Duration',
       value: formatDuration(analytics.avg_duration || analytics.avgDuration),
-      color: 'var(--warning-color)'
+      color: 'var(--warning-color)',
     },
     {
       icon: '🎯',
       label: 'Music Score',
       value: Math.round((analytics.total_tracks || 0) / 10) || 0,
-      color: 'var(--error-color)'
-    }
+      color: 'var(--error-color)',
+    },
   ];
 
   return (
@@ -211,7 +211,7 @@ function TopArtists({ artists }) {
     );
   }
 
-  const maxPlays = Math.max(...artists.map(a => a.play_count || a.playCount || 0));
+  const maxPlays = Math.max(...artists.map((a) => a.play_count || a.playCount || 0));
 
   return (
     <div className="top-artists">
@@ -220,17 +220,14 @@ function TopArtists({ artists }) {
         {artists.slice(0, 10).map((artist, index) => {
           const playCount = artist.play_count || artist.playCount || 0;
           const percentage = maxPlays > 0 ? (playCount / maxPlays) * 100 : 0;
-          
+
           return (
             <div key={index} className="artist-item">
               <div className="artist-rank">#{index + 1}</div>
               <div className="artist-info">
                 <div className="artist-name">{artist.artist_name || artist.name}</div>
                 <div className="artist-stats">
-                  <div 
-                    className="play-bar"
-                    style={{ width: `${percentage}%` }}
-                  ></div>
+                  <div className="play-bar" style={{ width: `${percentage}%` }}></div>
                   <span className="play-count">{playCount} plays</span>
                 </div>
               </div>
@@ -249,24 +246,25 @@ function MusicTrends({ analytics }) {
   const trends = [
     {
       title: 'Listening Diversity',
-      value: analytics.unique_artists && analytics.total_tracks 
-        ? Math.round((analytics.unique_artists / analytics.total_tracks) * 100)
-        : 0,
+      value:
+        analytics.unique_artists && analytics.total_tracks
+          ? Math.round((analytics.unique_artists / analytics.total_tracks) * 100)
+          : 0,
       unit: '%',
-      description: 'Percentage of unique artists in your library'
+      description: 'Percentage of unique artists in your library',
     },
     {
       title: 'Discovery Rate',
       value: Math.round(Math.random() * 30 + 10), // Mock data for now
       unit: '%',
-      description: 'New artists discovered this period'
+      description: 'New artists discovered this period',
     },
     {
       title: 'Repeat Factor',
       value: Math.round(Math.random() * 20 + 15), // Mock data for now
       unit: '%',
-      description: 'How often you replay the same songs'
-    }
+      description: 'How often you replay the same songs',
+    },
   ];
 
   return (
@@ -276,7 +274,8 @@ function MusicTrends({ analytics }) {
         {trends.map((trend, index) => (
           <div key={index} className="trend-card">
             <div className="trend-value">
-              {trend.value}{trend.unit}
+              {trend.value}
+              {trend.unit}
             </div>
             <div className="trend-title">{trend.title}</div>
             <div className="trend-description">{trend.description}</div>
@@ -332,9 +331,7 @@ function RecommendationInsights({ userId }) {
                 <div className="rec-track">{rec.track_name || rec.trackName}</div>
                 <div className="rec-artist">{rec.artist_name || rec.artistName}</div>
               </div>
-              <div className="rec-score">
-                {Math.round((rec.score || 0) * 100)}% match
-              </div>
+              <div className="rec-score">{Math.round((rec.score || 0) * 100)}% match</div>
             </div>
           ))}
         </div>

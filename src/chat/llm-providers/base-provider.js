@@ -32,7 +32,7 @@ class BaseLLMProvider {
    * @param {Object} options - Generation options
    * @returns {AsyncGenerator} Stream of response chunks
    */
-  async* generateStreamingCompletion() {
+  async *generateStreamingCompletion() {
     throw new Error('generateStreamingCompletion must be implemented by subclass');
     // eslint-disable-next-line no-unreachable
     yield; // This will never execute but satisfies the generator requirement
@@ -60,7 +60,7 @@ class BaseLLMProvider {
       streaming: false,
       functionCalling: false,
       maxTokens: 4096,
-      supportedModels: []
+      supportedModels: [],
     };
   }
 
@@ -68,9 +68,9 @@ class BaseLLMProvider {
    * Format messages for provider
    */
   formatMessages(messages) {
-    return messages.map(msg => ({
+    return messages.map((msg) => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
     }));
   }
 
@@ -83,7 +83,7 @@ class BaseLLMProvider {
       role: 'assistant',
       model: response.model || 'unknown',
       usage: response.usage || {},
-      metadata: response.metadata || {}
+      metadata: response.metadata || {},
     };
   }
 
@@ -95,7 +95,7 @@ class BaseLLMProvider {
     return {
       error: true,
       message: error.message || 'Unknown error occurred',
-      provider: this.name
+      provider: this.name,
     };
   }
 

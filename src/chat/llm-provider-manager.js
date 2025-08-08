@@ -22,16 +22,16 @@ class LLMProviderManager {
     try {
       // Load provider configurations
       await this.loadProviderConfigs();
-      
+
       // Initialize providers
       await this.initializeProviders();
-      
+
       // Setup key refresh monitoring
       this.setupKeyRefreshMonitoring();
-      
+
       this.initialized = true;
       console.log('✅ LLM Provider Manager initialized');
-      
+
       return true;
     } catch (error) {
       console.error('LLM Provider Manager initialization failed:', error);
@@ -50,7 +50,7 @@ class LLMProviderManager {
         apiKey: 'mock-key',
         status: 'connected',
         available: true,
-        refreshable: false
+        refreshable: false,
       },
       gemini: {
         name: 'Google Gemini',
@@ -58,14 +58,14 @@ class LLMProviderManager {
         model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
         endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
         refreshable: true,
-        refreshEndpoint: 'https://oauth2.googleapis.com/token'
+        refreshEndpoint: 'https://oauth2.googleapis.com/token',
       },
       openai: {
         name: 'OpenAI GPT',
         apiKey: process.env.OPENAI_API_KEY,
         model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
         endpoint: 'https://api.openai.com/v1/chat/completions',
-        refreshable: false // OpenAI keys don't expire
+        refreshable: false, // OpenAI keys don't expire
       },
       azure: {
         name: 'Azure OpenAI',
@@ -73,7 +73,7 @@ class LLMProviderManager {
         endpoint: process.env.AZURE_OPENAI_ENDPOINT,
         deployment: process.env.AZURE_OPENAI_DEPLOYMENT,
         refreshable: true,
-        refreshEndpoint: `${process.env.AZURE_OPENAI_ENDPOINT}/oauth2/token`
+        refreshEndpoint: `${process.env.AZURE_OPENAI_ENDPOINT}/oauth2/token`,
       },
       openrouter: {
         name: 'OpenRouter',
@@ -81,17 +81,17 @@ class LLMProviderManager {
         model: process.env.OPENROUTER_MODEL || 'anthropic/claude-3-haiku',
         endpoint: 'https://openrouter.ai/api/v1/chat/completions',
         refreshable: true,
-        refreshEndpoint: 'https://openrouter.ai/api/v1/auth/refresh'
-      }
+        refreshEndpoint: 'https://openrouter.ai/api/v1/auth/refresh',
+      },
     };
 
     // Load additional config from file if exists
     try {
       const configPath = path.join(process.cwd(), 'config', 'llm-providers.json');
       const fileConfig = JSON.parse(await fs.readFile(configPath, 'utf8'));
-      
+
       // Merge configurations
-      Object.keys(fileConfig).forEach(key => {
+      Object.keys(fileConfig).forEach((key) => {
         if (configs[key]) {
           configs[key] = { ...configs[key], ...fileConfig[key] };
         } else {
@@ -104,7 +104,7 @@ class LLMProviderManager {
     }
 
     // Determine availability
-    Object.keys(configs).forEach(key => {
+    Object.keys(configs).forEach((key) => {
       const config = configs[key];
       if (key === 'mock') {
         config.available = true;
@@ -125,11 +125,11 @@ class LLMProviderManager {
     const MockProvider = require('./llm-providers/mock-provider');
     const GeminiProvider = require('./llm-providers/gemini-provider');
     const OpenAIProvider = require('./llm-providers/openai-provider');
-    
+
     for (const [key, config] of this.providerConfigs) {
       try {
         let provider;
-        
+
         switch (key) {
           case 'mock':
             provider = new MockProvider();
@@ -148,7 +148,7 @@ class LLMProviderManager {
             if (config.available && config.endpoint && config.deployment) {
               provider = new OpenAIProvider(config.apiKey, {
                 baseURL: config.endpoint,
-                defaultQuery: { 'api-version': '2023-12-01-preview' }
+                defaultQuery: { 'api-version': '2023-12-01-preview' },
               });
             }
             break;
@@ -156,7 +156,7 @@ class LLMProviderManager {
             if (config.available) {
               provider = new OpenAIProvider(config.apiKey, {
                 baseURL: 'https://openrouter.ai/api/v1',
-                model: config.model
+                model: config.model,
               });
             }
             break;
@@ -164,7 +164,7 @@ class LLMProviderManager {
 
         if (provider) {
           this.providers.set(key, provider);
-          
+
           // Test provider connection
           await this.testProvider(key);
         }
@@ -183,7 +183,7 @@ class LLMProviderManager {
     try {
       const provider = this.providers.get(providerId);
       const config = this.providerConfigs.get(providerId);
-      
+
       if (!provider || !config) {
         throw new Error('Provider not found');
       }
@@ -195,7 +195,7 @@ class LLMProviderManager {
 
       // Test with simple message
       const response = await provider.generateResponse('Hello');
-      
+
       if (response && typeof response === 'string') {
         config.status = 'connected';
         config.lastTested = new Date().toISOString();
@@ -209,7 +209,7 @@ class LLMProviderManager {
       if (config) {
         config.status = 'error';
         config.error = error.message;
-        
+
         // If it's an auth error, try to refresh key
         if (this.isAuthError(error) && config.refreshable) {
           console.log(`Attempting to refresh API key for ${providerId}...`);
@@ -225,9 +225,12 @@ class LLMProviderManager {
    */
   setupKeyRefreshMonitoring() {
     // Check provider health every 5 minutes
-    setInterval(async () => {
-      await this.monitorProviderHealth();
-    }, 5 * 60 * 1000);
+    setInterval(
+      async () => {
+        await this.monitorProviderHealth();
+      },
+      5 * 60 * 1000
+    );
 
     // Setup specific refresh handlers
     this.setupRefreshHandlers();
@@ -242,7 +245,7 @@ class LLMProviderManager {
 
       try {
         const isHealthy = await this.testProvider(providerId);
-        
+
         if (!isHealthy && config.refreshable) {
           console.log(`Provider ${providerId} unhealthy, attempting key refresh...`);
           await this.refreshProviderKey(providerId);
@@ -261,13 +264,16 @@ class LLMProviderManager {
     this.keyRefreshHandlers.set('gemini', async (providedConfig) => {
       // Google API keys don't typically expire, but we can validate them
       try {
-        const response = await fetch(`${providedConfig.endpoint}/${providedConfig.model}:generateContent?key=${providedConfig.apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: 'test' }] }]
-          })
-        });
+        const response = await fetch(
+          `${providedConfig.endpoint}/${providedConfig.model}:generateContent?key=${providedConfig.apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: 'test' }] }],
+            }),
+          }
+        );
 
         if (response.status === 401 || response.status === 403) {
           throw new Error('API key invalid or expired');
@@ -303,12 +309,12 @@ class LLMProviderManager {
               grant_type: 'client_credentials',
               client_id: process.env.AZURE_CLIENT_ID,
               client_secret: process.env.AZURE_CLIENT_SECRET,
-              scope: 'https://cognitiveservices.azure.com/.default'
-            })
+              scope: 'https://cognitiveservices.azure.com/.default',
+            }),
           });
 
           const tokenData = await tokenResponse.json();
-          
+
           if (tokenData.access_token) {
             return { success: true, newKey: tokenData.access_token };
           } else {
@@ -330,22 +336,22 @@ class LLMProviderManager {
     try {
       const config = this.providerConfigs.get(providerId);
       const refreshHandler = this.keyRefreshHandlers.get(providerId);
-      
+
       if (!config || !refreshHandler) {
         throw new Error('Provider or refresh handler not found');
       }
 
       const result = await refreshHandler(config);
-      
+
       if (result.success && result.newKey) {
         // Update configuration
         config.apiKey = result.newKey;
         config.status = 'connected';
         config.lastRefreshed = new Date().toISOString();
-        
+
         // Reinitialize provider with new key
         await this.reinitializeProvider(providerId);
-        
+
         console.log(`✅ Successfully refreshed API key for ${providerId}`);
         return true;
       } else {
@@ -353,7 +359,7 @@ class LLMProviderManager {
       }
     } catch (error) {
       console.error(`Failed to refresh key for ${providerId}:`, error.message);
-      
+
       // Mark provider as unavailable
       const config = this.providerConfigs.get(providerId);
       if (config) {
@@ -361,7 +367,7 @@ class LLMProviderManager {
         config.available = false;
         config.error = error.message;
       }
-      
+
       return false;
     }
   }
@@ -371,7 +377,7 @@ class LLMProviderManager {
    */
   async reinitializeProvider(providerId) {
     const config = this.providerConfigs.get(providerId);
-    
+
     switch (providerId) {
       case 'gemini': {
         const GeminiProvider = require('./llm-providers/gemini-provider');
@@ -385,18 +391,24 @@ class LLMProviderManager {
       }
       case 'azure': {
         const AzureProvider = require('./llm-providers/openai-provider');
-        this.providers.set(providerId, new AzureProvider(config.apiKey, {
-          baseURL: config.endpoint,
-          defaultQuery: { 'api-version': '2023-12-01-preview' }
-        }));
+        this.providers.set(
+          providerId,
+          new AzureProvider(config.apiKey, {
+            baseURL: config.endpoint,
+            defaultQuery: { 'api-version': '2023-12-01-preview' },
+          })
+        );
         break;
       }
       case 'openrouter': {
         const OpenRouterProvider = require('./llm-providers/openai-provider');
-        this.providers.set(providerId, new OpenRouterProvider(config.apiKey, {
-          baseURL: 'https://openrouter.ai/api/v1',
-          model: config.model
-        }));
+        this.providers.set(
+          providerId,
+          new OpenRouterProvider(config.apiKey, {
+            baseURL: 'https://openrouter.ai/api/v1',
+            model: config.model,
+          })
+        );
         break;
       }
     }
@@ -411,19 +423,19 @@ class LLMProviderManager {
   isAuthError(error) {
     const authErrors = [
       'unauthorized',
-      'forbidden', 
+      'forbidden',
       'invalid_api_key',
       'api_key_expired',
       'authentication_failed',
       '401',
-      '403'
+      '403',
     ];
 
     const errorMessage = error.message?.toLowerCase() || '';
     const errorCode = error.code?.toLowerCase() || '';
-    
-    return authErrors.some(authError => 
-      errorMessage.includes(authError) || errorCode.includes(authError)
+
+    return authErrors.some(
+      (authError) => errorMessage.includes(authError) || errorCode.includes(authError)
     );
   }
 
@@ -457,7 +469,7 @@ class LLMProviderManager {
    * Send message with automatic provider management
    */
   async sendMessage(message, options = {}) {
-    const providerId = options.provider || await this.getBestProvider();
+    const providerId = options.provider || (await this.getBestProvider());
     const provider = this.providers.get(providerId);
     const config = this.providerConfigs.get(providerId);
 
@@ -467,20 +479,20 @@ class LLMProviderManager {
 
     try {
       const response = await provider.generateResponse(message, options);
-      
+
       // Update last used timestamp
       if (config) {
         config.lastUsed = new Date().toISOString();
       }
-      
+
       return {
         response,
         provider: providerId,
-        model: config?.model
+        model: config?.model,
       };
     } catch (error) {
       console.error(`Provider ${providerId} failed:`, error.message);
-      
+
       // If auth error and refreshable, try to refresh
       if (this.isAuthError(error) && config?.refreshable) {
         const refreshed = await this.refreshProviderKey(providerId);
@@ -492,7 +504,7 @@ class LLMProviderManager {
             response,
             provider: providerId,
             model: config?.model,
-            refreshed: true
+            refreshed: true,
           };
         }
       }
@@ -506,7 +518,7 @@ class LLMProviderManager {
           response,
           provider: 'mock',
           fallback: true,
-          originalError: error.message
+          originalError: error.message,
         };
       }
 
@@ -519,7 +531,7 @@ class LLMProviderManager {
    */
   getProviderStatus() {
     const status = {};
-    
+
     for (const [providerId, config] of this.providerConfigs) {
       status[providerId] = {
         name: config.name,
@@ -530,14 +542,14 @@ class LLMProviderManager {
         lastUsed: config.lastUsed,
         lastRefreshed: config.lastRefreshed,
         refreshable: config.refreshable,
-        error: config.error
+        error: config.error,
       };
     }
 
     return {
       providers: status,
       current: this.currentProvider,
-      fallbackOrder: this.fallbackOrder
+      fallbackOrder: this.fallbackOrder,
     };
   }
 }

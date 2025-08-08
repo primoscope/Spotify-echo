@@ -18,7 +18,7 @@ class DatabaseManager {
       queries: 0,
       successes: 0,
       failures: 0,
-      fallbacks: 0
+      fallbacks: 0,
     };
   }
 
@@ -28,35 +28,35 @@ class DatabaseManager {
   async initialize() {
     try {
       console.log('🗄️ Initializing Phase 3 Database Manager...');
-      
+
       // Try MongoDB first (production)
       await this.initializeMongoDB();
-      
+
       // Initialize SQLite fallback (development)
       await this.initializeSQLite();
-      
+
       // Set current connection
       await this.selectBestConnection();
-      
+
       // Start monitoring
       await this.startMonitoring();
-      
+
       this.initialized = true;
       console.log(`✅ Database Manager initialized using ${this.connectionType}`);
-      
+
       return true;
     } catch (error) {
       console.error('❌ Database Manager initialization failed:', error);
-      
+
       // Emergency fallback to SQLite
       if (!this.fallbackConnection) {
         await this.initializeSQLite();
       }
-      
+
       this.currentConnection = this.fallbackConnection;
       this.connectionType = 'sqlite';
       this.initialized = true;
-      
+
       console.log('⚠️ Using SQLite emergency fallback');
       return false;
     }
@@ -68,14 +68,14 @@ class DatabaseManager {
   async initializeMongoDB() {
     try {
       const mongoUri = process.env.MONGODB_URI;
-      
+
       if (!mongoUri || mongoUri.includes('username:password')) {
         console.log('⚠️ MongoDB credentials not configured, skipping...');
         return false;
       }
 
       const { MongoClient } = require('mongodb');
-      
+
       const client = new MongoClient(mongoUri, {
         useUnifiedTopology: true,
         maxPoolSize: 10,
@@ -84,16 +84,16 @@ class DatabaseManager {
       });
 
       await client.connect();
-      
+
       // Test connection
       await client.db().admin().ping();
-      
+
       this.primaryConnection = {
         client,
         db: client.db(process.env.MONGODB_DATABASE || 'echotune'),
-        type: 'mongodb'
+        type: 'mongodb',
       };
-      
+
       console.log('✅ MongoDB connection established');
       return true;
     } catch (error) {
@@ -108,13 +108,13 @@ class DatabaseManager {
   async initializeSQLite() {
     try {
       const { Database } = require('sqlite3');
-      
+
       // Ensure data directory exists
       const dataDir = path.join(process.cwd(), 'data');
       await fs.mkdir(dataDir, { recursive: true });
-      
+
       const dbPath = path.join(dataDir, 'echotune_dev.db');
-      
+
       return new Promise((resolve, reject) => {
         const db = new Database(dbPath, (err) => {
           if (err) {
@@ -122,16 +122,16 @@ class DatabaseManager {
             reject(err);
             return;
           }
-          
+
           // Initialize schema
           this.initializeSQLiteSchema(db)
             .then(() => {
               this.fallbackConnection = {
                 db,
                 type: 'sqlite',
-                path: dbPath
+                path: dbPath,
               };
-              
+
               console.log('✅ SQLite fallback connection established');
               resolve(true);
             })
@@ -159,7 +159,7 @@ class DatabaseManager {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`,
-      
+
       // Chat sessions table
       `CREATE TABLE IF NOT EXISTS chat_sessions (
         id TEXT PRIMARY KEY,
@@ -169,7 +169,7 @@ class DatabaseManager {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id)
       )`,
-      
+
       // Chat messages table
       `CREATE TABLE IF NOT EXISTS chat_messages (
         id TEXT PRIMARY KEY,
@@ -183,7 +183,7 @@ class DatabaseManager {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (session_id) REFERENCES chat_sessions (id)
       )`,
-      
+
       // Music recommendations table
       `CREATE TABLE IF NOT EXISTS music_recommendations (
         id TEXT PRIMARY KEY,
@@ -199,7 +199,7 @@ class DatabaseManager {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (session_id) REFERENCES chat_sessions (id)
       )`,
-      
+
       // User listening history table
       `CREATE TABLE IF NOT EXISTS listening_history (
         id TEXT PRIMARY KEY,
@@ -214,7 +214,7 @@ class DatabaseManager {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id)
       )`,
-      
+
       // System health logs table
       `CREATE TABLE IF NOT EXISTS system_health (
         id TEXT PRIMARY KEY,
@@ -222,7 +222,7 @@ class DatabaseManager {
         status TEXT,
         details TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`
+      )`,
     ];
 
     // Create indexes
@@ -234,7 +234,7 @@ class DatabaseManager {
       'CREATE INDEX IF NOT EXISTS idx_listening_history_user_id ON listening_history (user_id)',
       'CREATE INDEX IF NOT EXISTS idx_listening_history_played_at ON listening_history (played_at)',
       'CREATE INDEX IF NOT EXISTS idx_system_health_component ON system_health (component)',
-      'CREATE INDEX IF NOT EXISTS idx_system_health_timestamp ON system_health (timestamp)'
+      'CREATE INDEX IF NOT EXISTS idx_system_health_timestamp ON system_health (timestamp)',
     ];
 
     return new Promise((resolve, reject) => {
@@ -247,7 +247,7 @@ class DatabaseManager {
                 rejectQuery(err);
                 return;
               }
-              
+
               resolveQuery();
             });
           });
@@ -292,7 +292,7 @@ class DatabaseManager {
    */
   async saveChatSession(sessionData) {
     this.stats.queries++;
-    
+
     try {
       if (this.connectionType === 'mongodb') {
         const collection = this.currentConnection.db.collection('chat_sessions');
@@ -300,9 +300,9 @@ class DatabaseManager {
           _id: sessionData.id,
           ...sessionData,
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
-        
+
         this.stats.successes++;
         return result.insertedId;
       } else {
@@ -312,37 +312,33 @@ class DatabaseManager {
             INSERT INTO chat_sessions (id, user_id, title, created_at, updated_at)
             VALUES (?, ?, ?, datetime('now'), datetime('now'))
           `);
-          
-          stmt.run([
-            sessionData.id,
-            sessionData.userId,
-            sessionData.title
-          ], function(err) {
+
+          stmt.run([sessionData.id, sessionData.userId, sessionData.title], function (err) {
             if (err) {
               reject(err);
               return;
             }
             resolve(sessionData.id);
           });
-          
+
           stmt.finalize();
         });
       }
     } catch (error) {
       this.stats.failures++;
       console.error('Save chat session error:', error);
-      
+
       // Try fallback if using MongoDB
       if (this.connectionType === 'mongodb' && this.fallbackConnection) {
         this.stats.fallbacks++;
         console.log('Falling back to SQLite for chat session save');
-        
+
         const originalConnection = this.currentConnection;
         const originalType = this.connectionType;
-        
+
         this.currentConnection = this.fallbackConnection;
         this.connectionType = 'sqlite';
-        
+
         try {
           const result = await this.saveChatSession(sessionData);
           return result;
@@ -351,7 +347,7 @@ class DatabaseManager {
           this.connectionType = originalType;
         }
       }
-      
+
       throw error;
     }
   }
@@ -361,16 +357,16 @@ class DatabaseManager {
    */
   async saveChatMessage(messageData) {
     this.stats.queries++;
-    
+
     try {
       if (this.connectionType === 'mongodb') {
         const collection = this.currentConnection.db.collection('chat_messages');
         const result = await collection.insertOne({
           _id: messageData.id,
           ...messageData,
-          createdAt: new Date()
+          createdAt: new Date(),
         });
-        
+
         this.stats.successes++;
         return result.insertedId;
       } else {
@@ -380,24 +376,27 @@ class DatabaseManager {
             INSERT INTO chat_messages (id, session_id, role, content, provider, model, tokens, response_time, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
           `);
-          
-          stmt.run([
-            messageData.id,
-            messageData.sessionId,
-            messageData.role,
-            messageData.content,
-            messageData.provider,
-            messageData.model,
-            messageData.tokens,
-            messageData.responseTime
-          ], function(err) {
-            if (err) {
-              reject(err);
-              return;
+
+          stmt.run(
+            [
+              messageData.id,
+              messageData.sessionId,
+              messageData.role,
+              messageData.content,
+              messageData.provider,
+              messageData.model,
+              messageData.tokens,
+              messageData.responseTime,
+            ],
+            function (err) {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(messageData.id);
             }
-            resolve(messageData.id);
-          });
-          
+          );
+
           stmt.finalize();
         });
       }
@@ -413,7 +412,7 @@ class DatabaseManager {
    */
   async getChatSessions(userId, limit = 50) {
     this.stats.queries++;
-    
+
     try {
       if (this.connectionType === 'mongodb') {
         const collection = this.currentConnection.db.collection('chat_sessions');
@@ -422,24 +421,28 @@ class DatabaseManager {
           .sort({ updatedAt: -1 })
           .limit(limit)
           .toArray();
-        
+
         this.stats.successes++;
         return sessions;
       } else {
         // SQLite
         return new Promise((resolve, reject) => {
-          this.currentConnection.db.all(`
+          this.currentConnection.db.all(
+            `
             SELECT * FROM chat_sessions 
             WHERE user_id = ? 
             ORDER BY updated_at DESC 
             LIMIT ?
-          `, [userId, limit], (err, rows) => {
-            if (err) {
-              reject(err);
-              return;
+          `,
+            [userId, limit],
+            (err, rows) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(rows);
             }
-            resolve(rows);
-          });
+          );
         });
       }
     } catch (error) {
@@ -454,16 +457,16 @@ class DatabaseManager {
    */
   async saveMusicRecommendation(recommendationData) {
     this.stats.queries++;
-    
+
     try {
       if (this.connectionType === 'mongodb') {
         const collection = this.currentConnection.db.collection('music_recommendations');
         const result = await collection.insertOne({
           _id: recommendationData.id,
           ...recommendationData,
-          createdAt: new Date()
+          createdAt: new Date(),
         });
-        
+
         this.stats.successes++;
         return result.insertedId;
       } else {
@@ -474,26 +477,29 @@ class DatabaseManager {
             (id, session_id, track_id, track_name, artist_name, album_name, preview_url, spotify_url, confidence_score, reason, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
           `);
-          
-          stmt.run([
-            recommendationData.id,
-            recommendationData.sessionId,
-            recommendationData.trackId,
-            recommendationData.trackName,
-            recommendationData.artistName,
-            recommendationData.albumName,
-            recommendationData.previewUrl,
-            recommendationData.spotifyUrl,
-            recommendationData.confidenceScore,
-            recommendationData.reason
-          ], function(err) {
-            if (err) {
-              reject(err);
-              return;
+
+          stmt.run(
+            [
+              recommendationData.id,
+              recommendationData.sessionId,
+              recommendationData.trackId,
+              recommendationData.trackName,
+              recommendationData.artistName,
+              recommendationData.albumName,
+              recommendationData.previewUrl,
+              recommendationData.spotifyUrl,
+              recommendationData.confidenceScore,
+              recommendationData.reason,
+            ],
+            function (err) {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(recommendationData.id);
             }
-            resolve(recommendationData.id);
-          });
-          
+          );
+
           stmt.finalize();
         });
       }
@@ -514,7 +520,7 @@ class DatabaseManager {
         component,
         status,
         details: JSON.stringify(details),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       if (this.connectionType === 'mongodb') {
@@ -527,20 +533,18 @@ class DatabaseManager {
             INSERT INTO system_health (id, component, status, details, timestamp)
             VALUES (?, ?, ?, ?, datetime('now'))
           `);
-          
-          stmt.run([
-            healthData.id,
-            healthData.component,
-            healthData.status,
-            healthData.details
-          ], function(err) {
-            if (err) {
-              reject(err);
-              return;
+
+          stmt.run(
+            [healthData.id, healthData.component, healthData.status, healthData.details],
+            function (err) {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(healthData.id);
             }
-            resolve(healthData.id);
-          });
-          
+          );
+
           stmt.finalize();
         });
       }
@@ -554,19 +558,25 @@ class DatabaseManager {
    */
   async startMonitoring() {
     if (this.monitoring) return;
-    
+
     this.monitoring = true;
     console.log('📊 Starting database monitoring...');
-    
+
     // Health check every 2 minutes
-    setInterval(async () => {
-      await this.performHealthCheck();
-    }, 2 * 60 * 1000);
-    
+    setInterval(
+      async () => {
+        await this.performHealthCheck();
+      },
+      2 * 60 * 1000
+    );
+
     // Statistics logging every 5 minutes
-    setInterval(() => {
-      this.logStatistics();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.logStatistics();
+      },
+      5 * 60 * 1000
+    );
   }
 
   /**
@@ -579,7 +589,7 @@ class DatabaseManager {
           await this.primaryConnection.client.db().admin().ping();
           await this.logSystemHealth('database', 'healthy', {
             type: 'mongodb',
-            stats: this.stats
+            stats: this.stats,
           });
         } catch (error) {
           console.log('⚠️ MongoDB health check failed, switching to SQLite');
@@ -587,11 +597,11 @@ class DatabaseManager {
           await this.logSystemHealth('database', 'failover', {
             from: 'mongodb',
             to: 'sqlite',
-            error: error.message
+            error: error.message,
           });
         }
       }
-      
+
       if (this.connectionType === 'sqlite') {
         // Simple SQLite health check
         return new Promise((resolve) => {
@@ -612,9 +622,9 @@ class DatabaseManager {
    * Log database statistics
    */
   logStatistics() {
-    const successRate = this.stats.queries > 0 ? 
-      ((this.stats.successes / this.stats.queries) * 100).toFixed(1) : 0;
-    
+    const successRate =
+      this.stats.queries > 0 ? ((this.stats.successes / this.stats.queries) * 100).toFixed(1) : 0;
+
     console.log('📊 Database Statistics:');
     console.log(`   Connection: ${this.connectionType}`);
     console.log(`   Queries: ${this.stats.queries}`);
@@ -635,8 +645,8 @@ class DatabaseManager {
       statistics: this.stats,
       health: {
         mongodb: this.primaryConnection ? 'available' : 'unavailable',
-        sqlite: this.fallbackConnection ? 'available' : 'unavailable'
-      }
+        sqlite: this.fallbackConnection ? 'available' : 'unavailable',
+      },
     };
   }
 
@@ -648,11 +658,11 @@ class DatabaseManager {
       if (this.primaryConnection) {
         await this.primaryConnection.client.close();
       }
-      
+
       if (this.fallbackConnection) {
         this.fallbackConnection.db.close();
       }
-      
+
       console.log('✅ Database connections closed');
     } catch (error) {
       console.error('Error closing database connections:', error);

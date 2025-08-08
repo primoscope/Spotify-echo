@@ -10,10 +10,10 @@ if (process.env.NODE_ENV === 'production') {
     window.addEventListener('load', () => {
       const perfData = performance.getEntriesByType('navigation')[0];
       const loadTime = perfData.loadEventEnd - perfData.fetchStart;
-      
+
       // Log performance metrics (could send to analytics service)
       console.log(`App loaded in ${loadTime}ms`);
-      
+
       // Report Core Web Vitals
       import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
         getCLS(console.log);
@@ -39,7 +39,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('EchoTune AI Error:', error, errorInfo);
-    
+
     // In production, send error to monitoring service
     if (process.env.NODE_ENV === 'production') {
       // Could integrate with Sentry or other error tracking
@@ -59,18 +59,18 @@ class ErrorBoundary extends React.Component {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       };
 
       const headingStyle = {
         fontSize: '2rem',
         marginBottom: '1rem',
-        color: '#1db954'
+        color: '#1db954',
       };
 
       const textStyle = {
         color: '#b3b3b3',
-        marginBottom: '2rem'
+        marginBottom: '2rem',
       };
 
       const buttonStyle = {
@@ -81,18 +81,26 @@ class ErrorBoundary extends React.Component {
         borderRadius: '25px',
         fontSize: '1rem',
         cursor: 'pointer',
-        fontWeight: '600'
+        fontWeight: '600',
       };
 
-      return React.createElement('div', { style: errorPageStyle },
+      return React.createElement(
+        'div',
+        { style: errorPageStyle },
         React.createElement('h1', { style: headingStyle }, '🎵 Oops! Something went wrong'),
-        React.createElement('p', { style: textStyle }, 
-          'We\'re sorry, but something unexpected happened. Please refresh the page to try again.'
+        React.createElement(
+          'p',
+          { style: textStyle },
+          "We're sorry, but something unexpected happened. Please refresh the page to try again."
         ),
-        React.createElement('button', { 
-          onClick: () => window.location.reload(),
-          style: buttonStyle 
-        }, 'Refresh Page')
+        React.createElement(
+          'button',
+          {
+            onClick: () => window.location.reload(),
+            style: buttonStyle,
+          },
+          'Refresh Page'
+        )
       );
     }
 
@@ -104,10 +112,10 @@ class ErrorBoundary extends React.Component {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  React.createElement(React.StrictMode, null,
-    React.createElement(ErrorBoundary, null,
-      React.createElement(App)
-    )
+  React.createElement(
+    React.StrictMode,
+    null,
+    React.createElement(ErrorBoundary, null, React.createElement(App))
   )
 );
 

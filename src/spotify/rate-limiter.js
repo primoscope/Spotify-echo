@@ -7,16 +7,16 @@ class RateLimiter {
     this.requestsPerSecond = options.requestsPerSecond || 10; // Conservative rate
     this.requestsPerMinute = options.requestsPerMinute || 300; // Spotify limit
     this.burstLimit = options.burstLimit || 20; // Burst allowance
-    
+
     this.requests = []; // Timestamp array for tracking requests
     this.isBlocked = false;
     this.blockUntil = null;
-    
+
     // Statistics
     this.stats = {
       totalRequests: 0,
       blockedRequests: 0,
-      averageDelay: 0
+      averageDelay: 0,
     };
   }
 
@@ -25,7 +25,7 @@ class RateLimiter {
    */
   async checkLimit() {
     const now = Date.now();
-    
+
     // Check if we're in a blocked state
     if (this.isBlocked && this.blockUntil && now < this.blockUntil) {
       const waitTime = this.blockUntil - now;
@@ -37,13 +37,13 @@ class RateLimiter {
 
     // Clean old requests (older than 1 minute)
     const oneMinuteAgo = now - 60 * 1000;
-    this.requests = this.requests.filter(timestamp => timestamp > oneMinuteAgo);
+    this.requests = this.requests.filter((timestamp) => timestamp > oneMinuteAgo);
 
     // Check minute limit
     if (this.requests.length >= this.requestsPerMinute) {
       const oldestRequest = Math.min(...this.requests);
       const waitTime = oldestRequest + 60 * 1000 - now + 100; // Add small buffer
-      
+
       if (waitTime > 0) {
         console.log(`Minute rate limit reached, waiting ${waitTime}ms`);
         this.stats.blockedRequests++;
@@ -54,8 +54,8 @@ class RateLimiter {
 
     // Check second limit
     const oneSecondAgo = now - 1000;
-    const recentRequests = this.requests.filter(timestamp => timestamp > oneSecondAgo);
-    
+    const recentRequests = this.requests.filter((timestamp) => timestamp > oneSecondAgo);
+
     if (recentRequests.length >= this.requestsPerSecond) {
       const waitTime = Math.max(1000 / this.requestsPerSecond, 100);
       console.log(`Second rate limit reached, waiting ${waitTime}ms`);
@@ -84,7 +84,7 @@ class RateLimiter {
    * Simple delay utility
    */
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -93,13 +93,13 @@ class RateLimiter {
   getStats() {
     const now = Date.now();
     const oneMinuteAgo = now - 60 * 1000;
-    const activeRequests = this.requests.filter(timestamp => timestamp > oneMinuteAgo);
-    
+    const activeRequests = this.requests.filter((timestamp) => timestamp > oneMinuteAgo);
+
     return {
       ...this.stats,
       currentRequestsPerMinute: activeRequests.length,
       isBlocked: this.isBlocked,
-      blockUntil: this.blockUntil
+      blockUntil: this.blockUntil,
     };
   }
 
@@ -113,7 +113,7 @@ class RateLimiter {
     this.stats = {
       totalRequests: 0,
       blockedRequests: 0,
-      averageDelay: 0
+      averageDelay: 0,
     };
   }
 
@@ -124,7 +124,7 @@ class RateLimiter {
     const availableRequestsPerMinute = Math.max(this.requestsPerMinute - this.requests.length, 10);
     const timeRemaining = timeLimit;
     // Note: requestsPerItem calculation available for future enhancement
-    
+
     return Math.min(
       availableRequestsPerMinute,
       Math.floor(totalItems / (timeRemaining / 60000)),

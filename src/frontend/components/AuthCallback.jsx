@@ -23,7 +23,7 @@ function AuthCallback() {
     if (authStatus === 'success') {
       // Refresh auth status to get user data
       await checkAuthStatus();
-      
+
       // Redirect to home page
       window.location.href = '/?auth=success';
     } else {

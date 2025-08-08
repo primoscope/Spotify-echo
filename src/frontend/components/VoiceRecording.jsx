@@ -9,7 +9,7 @@ function VoiceRecording({ onVoiceInput, disabled }) {
   const initializeSpeechRecognition = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognitionInstance = new SpeechRecognition();
-    
+
     recognitionInstance.continuous = false;
     recognitionInstance.interimResults = false;
     recognitionInstance.lang = 'en-US';

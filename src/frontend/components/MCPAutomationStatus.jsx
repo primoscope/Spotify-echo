@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  Typography, 
-  Box, 
-  Chip, 
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Chip,
   CircularProgress,
   Alert,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider
+  Divider,
 } from '@mui/material';
-import { 
+import {
   AutoFixHigh as AutoIcon,
-  Speed as PerformanceIcon, 
+  Speed as PerformanceIcon,
   Security as SecurityIcon,
   CheckCircle as CheckIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 
 /**
@@ -32,16 +32,16 @@ const MCPAutomationStatus = () => {
     capabilities: [],
     lastRun: null,
     performance: {},
-    error: null
+    error: null,
   });
 
   useEffect(() => {
     // Fetch automation status from the backend
     fetchAutomationStatus();
-    
+
     // Set up periodic status updates
     const interval = setInterval(fetchAutomationStatus, 30000); // Update every 30 seconds
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -50,7 +50,7 @@ const MCPAutomationStatus = () => {
       // Check if MCP server is running
       const mcpResponse = await fetch('/api/health');
       const healthData = await mcpResponse.json();
-      
+
       // Mock automation status based on health data
       // In production, this would call the actual MCP automation status endpoint
       setAutomationStatus({
@@ -60,40 +60,48 @@ const MCPAutomationStatus = () => {
           { name: 'Code Validation', status: 'active', lastRun: '2 minutes ago' },
           { name: 'Performance Testing', status: 'active', lastRun: '5 minutes ago' },
           { name: 'Health Monitoring', status: 'active', lastRun: '30 seconds ago' },
-          { name: 'Workflow Optimization', status: 'active', lastRun: '10 minutes ago' }
+          { name: 'Workflow Optimization', status: 'active', lastRun: '10 minutes ago' },
         ],
         lastRun: new Date().toLocaleString(),
         performance: {
           tasksCompleted: 1247,
           successRate: 100,
-          averageTaskTime: 523
+          averageTaskTime: 523,
         },
-        error: null
+        error: null,
       });
     } catch (error) {
-      setAutomationStatus(prev => ({
+      setAutomationStatus((prev) => ({
         ...prev,
         loading: false,
-        error: error.message
+        error: error.message,
       }));
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'warning': return 'warning';
-      case 'error': return 'error';
-      default: return 'default';
+      case 'active':
+        return 'success';
+      case 'warning':
+        return 'warning';
+      case 'error':
+        return 'error';
+      default:
+        return 'default';
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'active': return <CheckIcon color="success" />;
-      case 'warning': return <ErrorIcon color="warning" />;
-      case 'error': return <ErrorIcon color="error" />;
-      default: return <CircularProgress size={20} />;
+      case 'active':
+        return <CheckIcon color="success" />;
+      case 'warning':
+        return <ErrorIcon color="warning" />;
+      case 'error':
+        return <ErrorIcon color="error" />;
+      default:
+        return <CircularProgress size={20} />;
     }
   };
 
@@ -111,11 +119,7 @@ const MCPAutomationStatus = () => {
   }
 
   if (automationStatus.error) {
-    return (
-      <Alert severity="error">
-        MCP Automation Status Error: {automationStatus.error}
-      </Alert>
-    );
+    return <Alert severity="error">MCP Automation Status Error: {automationStatus.error}</Alert>;
   }
 
   return (
@@ -124,8 +128,8 @@ const MCPAutomationStatus = () => {
         <Box display="flex" alignItems="center" gap={2} mb={2}>
           <AutoIcon color="primary" />
           <Typography variant="h6">MCP Server Automation</Typography>
-          <Chip 
-            label={automationStatus.enabled ? 'Active' : 'Inactive'} 
+          <Chip
+            label={automationStatus.enabled ? 'Active' : 'Inactive'}
             color={automationStatus.enabled ? 'success' : 'error'}
             size="small"
           />
@@ -134,7 +138,8 @@ const MCPAutomationStatus = () => {
         {automationStatus.enabled && (
           <>
             <Alert severity="success" sx={{ mb: 2 }}>
-              🎉 MCP Server automation is fully operational! All workflows are automated and monitored.
+              🎉 MCP Server automation is fully operational! All workflows are automated and
+              monitored.
             </Alert>
 
             {/* Performance Metrics */}
@@ -169,22 +174,20 @@ const MCPAutomationStatus = () => {
 
             {/* Automation Capabilities */}
             <Typography variant="subtitle1" gutterBottom display="flex" alignItems="center" gap={1}>
-              <PerformanceIcon /> 
+              <PerformanceIcon />
               Active Automation Tasks
             </Typography>
-            
+
             <List dense>
               {automationStatus.capabilities.map((capability, index) => (
                 <ListItem key={index}>
-                  <ListItemIcon>
-                    {getStatusIcon(capability.status)}
-                  </ListItemIcon>
-                  <ListItemText 
+                  <ListItemIcon>{getStatusIcon(capability.status)}</ListItemIcon>
+                  <ListItemText
                     primary={capability.name}
                     secondary={`Last run: ${capability.lastRun}`}
                   />
-                  <Chip 
-                    label={capability.status} 
+                  <Chip
+                    label={capability.status}
                     color={getStatusColor(capability.status)}
                     size="small"
                   />

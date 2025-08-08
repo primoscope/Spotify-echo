@@ -16,7 +16,7 @@ class CustomAPIProvider extends BaseLLMProvider {
 
   buildHeaders(config) {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
 
     // Handle different authentication methods
@@ -47,7 +47,7 @@ class CustomAPIProvider extends BaseLLMProvider {
 
       // Test connection with a simple request
       await this.testConnection();
-      
+
       this.isInitialized = true;
       console.log(`✅ Custom API provider initialized: ${this.config.provider || 'Custom'}`);
     } catch (error) {
@@ -81,7 +81,7 @@ class CustomAPIProvider extends BaseLLMProvider {
       functionCalling: this.config.supportsFunctionCalling ?? false,
       maxTokens: this.config.maxTokens || 4096,
       supportedModels: this.supportedModels,
-      features: this.config.features || ['chat', 'completion']
+      features: this.config.features || ['chat', 'completion'],
     };
   }
 
@@ -93,24 +93,19 @@ class CustomAPIProvider extends BaseLLMProvider {
 
       const model = options.model || this.defaultModel;
       const requestData = this.buildRequestData(messages, options, model);
-      
-      const response = await axios.post(
-        this.getCompletionsEndpoint(),
-        requestData,
-        { 
-          headers: this.headers,
-          timeout: options.timeout || 30000
-        }
-      );
+
+      const response = await axios.post(this.getCompletionsEndpoint(), requestData, {
+        headers: this.headers,
+        timeout: options.timeout || 30000,
+      });
 
       return this.parseAPIResponse(response.data, model);
-
     } catch (error) {
       return this.handleError(error);
     }
   }
 
-  async* generateStreamingCompletion(messages, options = {}) {
+  async *generateStreamingCompletion(messages, options = {}) {
     try {
       if (!this.isAvailable()) {
         throw new Error('Custom API provider not initialized or configured');
@@ -127,15 +122,11 @@ class CustomAPIProvider extends BaseLLMProvider {
       const requestData = this.buildRequestData(messages, options, model);
       requestData.stream = true;
 
-      const response = await axios.post(
-        this.getCompletionsEndpoint(),
-        requestData,
-        {
-          headers: this.headers,
-          responseType: 'stream',
-          timeout: options.timeout || 60000
-        }
-      );
+      const response = await axios.post(this.getCompletionsEndpoint(), requestData, {
+        headers: this.headers,
+        responseType: 'stream',
+        timeout: options.timeout || 60000,
+      });
 
       let buffer = '';
       for await (const chunk of response.data) {
@@ -157,7 +148,7 @@ class CustomAPIProvider extends BaseLLMProvider {
                   content,
                   role: 'assistant',
                   model,
-                  isPartial: true
+                  isPartial: true,
                 };
               }
             } catch (parseError) {
@@ -167,7 +158,6 @@ class CustomAPIProvider extends BaseLLMProvider {
           }
         }
       }
-
     } catch (error) {
       yield this.handleError(error);
     }
@@ -178,7 +168,7 @@ class CustomAPIProvider extends BaseLLMProvider {
       model,
       messages: this.formatMessages(messages),
       max_tokens: options.maxTokens || 2000,
-      temperature: options.temperature ?? 0.7
+      temperature: options.temperature ?? 0.7,
     };
 
     // Add provider-specific parameters
@@ -207,7 +197,7 @@ class CustomAPIProvider extends BaseLLMProvider {
     if (this.config.provider === 'azure') {
       return `${this.baseURL}/openai/deployments/${this.defaultModel}/chat/completions?api-version=2023-12-01-preview`;
     }
-    
+
     // For OpenRouter and other providers, the base URL already includes /v1 if needed
     return `${this.baseURL}/chat/completions`;
   }
@@ -233,7 +223,7 @@ class CustomAPIProvider extends BaseLLMProvider {
       role: 'assistant',
       model: responseData.model || model,
       usage,
-      finishReason
+      finishReason,
     });
   }
 
@@ -256,7 +246,7 @@ class CustomAPIProvider extends BaseLLMProvider {
       model: config.deployment || 'gpt-35-turbo',
       supportsStreaming: true,
       supportsFunctionCalling: true,
-      maxTokens: 16384
+      maxTokens: 16384,
     };
   }
 
@@ -268,7 +258,7 @@ class CustomAPIProvider extends BaseLLMProvider {
       model: config.model || 'deepseek/deepseek-r1-0528:free',
       customHeaders: {
         'HTTP-Referer': config.referer || 'https://echotune.ai',
-        'X-Title': 'EchoTune AI'
+        'X-Title': 'EchoTune AI',
       },
       supportsStreaming: true,
       supportsFunctionCalling: true,
@@ -280,8 +270,8 @@ class CustomAPIProvider extends BaseLLMProvider {
         'openai/gpt-4',
         'anthropic/claude-2',
         'google/palm-2-chat-bison',
-        'meta-llama/llama-2-70b-chat'
-      ]
+        'meta-llama/llama-2-70b-chat',
+      ],
     };
   }
 
@@ -296,7 +286,7 @@ class CustomAPIProvider extends BaseLLMProvider {
       supportsStreaming: config.streaming ?? false,
       supportsFunctionCalling: config.functionCalling ?? false,
       maxTokens: config.maxTokens || 4096,
-      supportedModels: config.models || ['default']
+      supportedModels: config.models || ['default'],
     };
   }
 
@@ -306,20 +296,21 @@ class CustomAPIProvider extends BaseLLMProvider {
   async handleMusicQuery(query) {
     const systemPrompt = {
       role: 'system',
-      content: 'You are EchoTune AI, a music recommendation assistant. Help users discover music, create playlists, and understand their listening habits. Be conversational and enthusiastic about music.'
+      content:
+        'You are EchoTune AI, a music recommendation assistant. Help users discover music, create playlists, and understand their listening habits. Be conversational and enthusiastic about music.',
     };
 
     const messages = [
       systemPrompt,
       {
         role: 'user',
-        content: query
-      }
+        content: query,
+      },
     ];
 
     return await this.generateCompletion(messages, {
       temperature: 0.7,
-      maxTokens: 1000
+      maxTokens: 1000,
     });
   }
 
@@ -327,7 +318,7 @@ class CustomAPIProvider extends BaseLLMProvider {
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
-      
+
       let message = 'API request failed';
       if (status === 401) {
         message = 'Authentication failed - check API key';
@@ -346,7 +337,7 @@ class CustomAPIProvider extends BaseLLMProvider {
         message,
         status,
         provider: this.name,
-        details: data
+        details: data,
       };
     }
 

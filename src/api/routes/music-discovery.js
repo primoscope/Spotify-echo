@@ -15,7 +15,7 @@ router.post('/discover', async (req, res) => {
     const { mode, query, moodSettings, limit = 20, userId } = req.body;
 
     let discoveryResult;
-    
+
     switch (mode) {
       case 'smart':
         discoveryResult = await performSmartDiscovery(query, userId, limit);
@@ -40,9 +40,8 @@ router.post('/discover', async (req, res) => {
       mode,
       tracks: discoveryResult.tracks || [],
       metadata: discoveryResult.metadata || {},
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Discovery error:', error);
     res.status(500).json({ error: 'Music discovery failed' });
@@ -56,7 +55,7 @@ router.post('/discover', async (req, res) => {
 router.get('/trending', async (req, res) => {
   try {
     const { timeframe = '24h', limit = 50 } = req.query;
-    
+
     // Mock trending data - in production, this would come from analytics
     const trendingData = {
       trends: [
@@ -64,11 +63,11 @@ router.get('/trending', async (req, res) => {
         { genre: 'Electronic', growth: 12.8, tracks: 198 },
         { genre: 'Hip-Hop', growth: 8.9, tracks: 167 },
         { genre: 'Rock', growth: 6.4, tracks: 134 },
-        { genre: 'R&B', growth: 5.1, tracks: 89 }
+        { genre: 'R&B', growth: 5.1, tracks: 89 },
       ],
       topTracks: await getMockTrendingTracks(limit),
       timeframe,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     res.json(trendingData);
@@ -85,7 +84,7 @@ router.get('/trending', async (req, res) => {
 router.get('/social/activity', async (req, res) => {
   try {
     const { limit: _limit = 20 } = req.query;
-    
+
     // Mock social activity - in production, this would come from user database
     const socialActivity = {
       activity: [
@@ -94,7 +93,7 @@ router.get('/social/activity', async (req, res) => {
           username: 'MusicLover123',
           action: 'liked',
           track: 'Blinding Lights - The Weeknd',
-          timestamp: new Date(Date.now() - 300000).toISOString()
+          timestamp: new Date(Date.now() - 300000).toISOString(),
         },
         {
           id: 2,
@@ -102,18 +101,18 @@ router.get('/social/activity', async (req, res) => {
           action: 'added to playlist',
           track: 'Anti-Hero - Taylor Swift',
           playlist: 'Favorites 2024',
-          timestamp: new Date(Date.now() - 600000).toISOString()
+          timestamp: new Date(Date.now() - 600000).toISOString(),
         },
         {
           id: 3,
           username: 'IndieExplorer',
           action: 'discovered',
           track: 'As It Was - Harry Styles',
-          timestamp: new Date(Date.now() - 900000).toISOString()
-        }
+          timestamp: new Date(Date.now() - 900000).toISOString(),
+        },
       ],
       totalCount: 156,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     res.json(socialActivity);
@@ -129,12 +128,12 @@ async function performSmartDiscovery(query, userId, limit) {
   try {
     // Enhanced natural language processing for music queries
     const processedQuery = await processNaturalLanguageQuery(query);
-    
+
     // Mock implementation - in production, this would use ML algorithms
     const tracks = await getMockDiscoveredTracks(limit, {
       type: 'smart',
       query: processedQuery,
-      userId
+      userId,
     });
 
     return {
@@ -142,8 +141,8 @@ async function performSmartDiscovery(query, userId, limit) {
       metadata: {
         processedQuery,
         algorithm: 'natural_language_processing',
-        confidence: 0.87
-      }
+        confidence: 0.87,
+      },
     };
   } catch (error) {
     throw new Error(`Smart discovery failed: ${error.message}`);
@@ -157,13 +156,13 @@ async function performMoodBasedDiscovery(moodSettings, userId, limit) {
       energy: moodSettings.energy / 100,
       valence: moodSettings.valence / 100,
       danceability: moodSettings.danceability / 100,
-      acousticness: moodSettings.acousticness / 100
+      acousticness: moodSettings.acousticness / 100,
     };
 
     const tracks = await getMockDiscoveredTracks(limit, {
       type: 'mood',
       audioFeatures,
-      userId
+      userId,
     });
 
     return {
@@ -171,8 +170,8 @@ async function performMoodBasedDiscovery(moodSettings, userId, limit) {
       metadata: {
         moodProfile: moodSettings,
         audioFeatures,
-        algorithm: 'mood_based_filtering'
-      }
+        algorithm: 'mood_based_filtering',
+      },
     };
   } catch (error) {
     throw new Error(`Mood discovery failed: ${error.message}`);
@@ -182,14 +181,14 @@ async function performMoodBasedDiscovery(moodSettings, userId, limit) {
 async function getTrendingMusic(limit) {
   try {
     const tracks = await getMockTrendingTracks(limit);
-    
+
     return {
       tracks,
       metadata: {
         algorithm: 'trending_analysis',
         timeframe: '24h',
-        source: 'global_trends'
-      }
+        source: 'global_trends',
+      },
     };
   } catch (error) {
     throw new Error(`Trending music failed: ${error.message}`);
@@ -200,7 +199,7 @@ async function getSocialRecommendations(userId, limit) {
   try {
     const tracks = await getMockDiscoveredTracks(limit, {
       type: 'social',
-      userId
+      userId,
     });
 
     return {
@@ -208,8 +207,8 @@ async function getSocialRecommendations(userId, limit) {
       metadata: {
         algorithm: 'social_collaborative_filtering',
         socialScore: 0.82,
-        friendsInfluence: 0.65
-      }
+        friendsInfluence: 0.65,
+      },
     };
   } catch (error) {
     throw new Error(`Social recommendations failed: ${error.message}`);
@@ -221,7 +220,7 @@ async function generatePersonalizedRadio(userId, limit) {
     const tracks = await getMockDiscoveredTracks(limit, {
       type: 'radio',
       userId,
-      variety: 0.7 // Mix of familiar and new
+      variety: 0.7, // Mix of familiar and new
     });
 
     return {
@@ -229,8 +228,8 @@ async function generatePersonalizedRadio(userId, limit) {
       metadata: {
         algorithm: 'personalized_radio_generation',
         stationType: 'discovery',
-        variety: 0.7
-      }
+        variety: 0.7,
+      },
     };
   } catch (error) {
     throw new Error(`Radio generation failed: ${error.message}`);
@@ -246,7 +245,7 @@ async function processNaturalLanguageQuery(query) {
     intent: detectIntent(query),
     entities: extractEntities(query),
     sentiment: 'positive', // Mock sentiment analysis
-    confidence: 0.89
+    confidence: 0.89,
   };
 
   return processedQuery;
@@ -257,7 +256,7 @@ function detectIntent(query) {
     genre: /(?:play|find|suggest).*?(rock|pop|jazz|classical|electronic|hip.?hop)/i,
     mood: /(?:happy|sad|energetic|calm|chill|upbeat|melancholic)/i,
     activity: /(?:workout|study|sleep|party|work|relax|driving)/i,
-    artist: /(?:by|from|artist).*?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i
+    artist: /(?:by|from|artist).*?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i,
   };
 
   for (const [intentType, pattern] of Object.entries(intents)) {
@@ -265,7 +264,7 @@ function detectIntent(query) {
       return intentType;
     }
   }
-  
+
   return 'general';
 }
 
@@ -275,18 +274,18 @@ function extractEntities(query) {
     genres: [],
     artists: [],
     moods: [],
-    activities: []
+    activities: [],
   };
 
   // Simple keyword matching - in production, use proper NER
   const _words = query.toLowerCase().split(' ');
-  
+
   const genreKeywords = ['rock', 'pop', 'jazz', 'classical', 'electronic', 'hip-hop'];
   const moodKeywords = ['happy', 'sad', 'energetic', 'calm', 'chill', 'upbeat'];
-  
-  entities.genres = genreKeywords.filter(genre => query.toLowerCase().includes(genre));
-  entities.moods = moodKeywords.filter(mood => query.toLowerCase().includes(mood));
-  
+
+  entities.genres = genreKeywords.filter((genre) => query.toLowerCase().includes(genre));
+  entities.moods = moodKeywords.filter((mood) => query.toLowerCase().includes(mood));
+
   return entities;
 }
 
@@ -301,7 +300,7 @@ async function getMockDiscoveredTracks(limit, options = {}) {
       duration_ms: 200040,
       confidence: 0.92,
       algorithm: options.type || 'general',
-      preview_url: 'https://example.com/preview1.mp3'
+      preview_url: 'https://example.com/preview1.mp3',
     },
     {
       id: 'track2',
@@ -311,17 +310,17 @@ async function getMockDiscoveredTracks(limit, options = {}) {
       duration_ms: 203064,
       confidence: 0.88,
       algorithm: options.type || 'general',
-      preview_url: 'https://example.com/preview2.mp3'
+      preview_url: 'https://example.com/preview2.mp3',
     },
     {
       id: 'track3',
       name: 'As It Was',
       artist: 'Harry Styles',
-      album: { name: 'Harry\'s House', images: [{ url: '/api/placeholder-album.jpg' }] },
+      album: { name: "Harry's House", images: [{ url: '/api/placeholder-album.jpg' }] },
       duration_ms: 167000,
       confidence: 0.85,
       algorithm: options.type || 'general',
-      preview_url: 'https://example.com/preview3.mp3'
+      preview_url: 'https://example.com/preview3.mp3',
     },
     {
       id: 'track4',
@@ -329,9 +328,9 @@ async function getMockDiscoveredTracks(limit, options = {}) {
       artist: 'Taylor Swift',
       album: { name: 'Midnights', images: [{ url: '/api/placeholder-album.jpg' }] },
       duration_ms: 200560,
-      confidence: 0.90,
+      confidence: 0.9,
       algorithm: options.type || 'general',
-      preview_url: 'https://example.com/preview4.mp3'
+      preview_url: 'https://example.com/preview4.mp3',
     },
     {
       id: 'track5',
@@ -341,8 +340,8 @@ async function getMockDiscoveredTracks(limit, options = {}) {
       duration_ms: 141806,
       confidence: 0.83,
       algorithm: options.type || 'general',
-      preview_url: 'https://example.com/preview5.mp3'
-    }
+      preview_url: 'https://example.com/preview5.mp3',
+    },
   ];
 
   // Shuffle and limit results
@@ -352,13 +351,13 @@ async function getMockDiscoveredTracks(limit, options = {}) {
 
 async function getMockTrendingTracks(limit) {
   const trendingTracks = await getMockDiscoveredTracks(limit, { type: 'trending' });
-  
+
   // Add trending-specific metadata
   return trendingTracks.map((track, index) => ({
     ...track,
     trendingRank: index + 1,
     trendingScore: Math.floor(Math.random() * 100) + 50,
-    growthRate: Math.floor(Math.random() * 30) + 5
+    growthRate: Math.floor(Math.random() * 30) + 5,
   }));
 }
 

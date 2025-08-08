@@ -18,14 +18,26 @@ function Header() {
         </div>
 
         <nav className="main-nav">
-          <a href="/" className="nav-link">Home</a>
-          <a href="/chat" className="nav-link">Chat</a>
+          <a href="/" className="nav-link">
+            Home
+          </a>
+          <a href="/chat" className="nav-link">
+            Chat
+          </a>
           {user && (
             <>
-              <a href="/dashboard" className="nav-link">Dashboard</a>
-              <a href="/playlists" className="nav-link">Playlists</a>
-              <a href="/profile" className="nav-link">Profile</a>
-              <a href="/settings" className="nav-link">Settings</a>
+              <a href="/dashboard" className="nav-link">
+                Dashboard
+              </a>
+              <a href="/playlists" className="nav-link">
+                Playlists
+              </a>
+              <a href="/profile" className="nav-link">
+                Profile
+              </a>
+              <a href="/settings" className="nav-link">
+                Settings
+              </a>
             </>
           )}
         </nav>
@@ -33,9 +45,7 @@ function Header() {
         <div className="user-section">
           {user ? (
             <div className="user-info">
-              <span className="user-name">
-                Hello, {user.display_name || user.id}
-              </span>
+              <span className="user-name">Hello, {user.display_name || user.id}</span>
               <button onClick={logout} className="logout-btn">
                 Logout
               </button>

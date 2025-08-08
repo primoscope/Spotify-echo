@@ -26,20 +26,20 @@ export function AuthProvider({ children }) {
       // Check for stored user data
       const storedUser = localStorage.getItem('echotune_user');
       const storedToken = localStorage.getItem('echotune_token');
-      
+
       if (storedUser && storedToken) {
         const userData = JSON.parse(storedUser);
         setUser(userData);
         setAccessToken(storedToken);
       }
-      
+
       // Verify token validity with backend
       const response = await fetch('/api/auth/status', {
         headers: {
-          Authorization: `Bearer ${storedToken}`
-        }
+          Authorization: `Bearer ${storedToken}`,
+        },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.user) {
@@ -93,10 +93,10 @@ export function AuthProvider({ children }) {
       const response = await fetch('/api/auth/refresh', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setAccessToken(data.accessToken);
@@ -121,12 +121,8 @@ export function AuthProvider({ children }) {
     login,
     logout,
     refreshToken,
-    checkAuthStatus
+    checkAuthStatus,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

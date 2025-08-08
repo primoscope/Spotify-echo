@@ -26,14 +26,18 @@ class SQLiteManager {
       }
 
       // Create database connection
-      this.db = new sqlite3.Database(this.dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
-        if (err) {
-          console.error('SQLite connection error:', err.message);
-          throw err;
+      this.db = new sqlite3.Database(
+        this.dbPath,
+        sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+        (err) => {
+          if (err) {
+            console.error('SQLite connection error:', err.message);
+            throw err;
+          }
+          console.log('✅ SQLite database connected successfully');
+          this.connected = true;
         }
-        console.log('✅ SQLite database connected successfully');
-        this.connected = true;
-      });
+      );
 
       // Create tables
       await this.createTables();
@@ -128,7 +132,7 @@ class SQLiteManager {
         sender TEXT NOT NULL,
         provider TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`
+      )`,
     ];
 
     for (const table of tables) {
@@ -143,7 +147,7 @@ class SQLiteManager {
       'CREATE INDEX IF NOT EXISTS idx_recommendations_score ON recommendations(score)',
       'CREATE INDEX IF NOT EXISTS idx_playlists_user_id ON playlists(user_id)',
       'CREATE INDEX IF NOT EXISTS idx_analytics_user_id ON analytics(user_id)',
-      'CREATE INDEX IF NOT EXISTS idx_chat_history_session_id ON chat_history(session_id)'
+      'CREATE INDEX IF NOT EXISTS idx_chat_history_session_id ON chat_history(session_id)',
     ];
 
     for (const index of indexes) {
@@ -163,7 +167,7 @@ class SQLiteManager {
         return;
       }
 
-      this.db.run(query, params, function(err) {
+      this.db.run(query, params, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -223,7 +227,7 @@ class SQLiteManager {
         (id, display_name, email, country, premium, followers, spotify_data, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `;
-      
+
       const params = [
         userData.id,
         userData.display_name,
@@ -231,7 +235,7 @@ class SQLiteManager {
         userData.country,
         userData.premium || false,
         userData.followers?.total || 0,
-        JSON.stringify(userData)
+        JSON.stringify(userData),
       ];
 
       const _result = await this.runQuery(query, params);
@@ -262,7 +266,7 @@ class SQLiteManager {
           track.album?.name || track.album_name,
           track.played_at,
           track.duration_ms,
-          JSON.stringify(track.audio_features || {})
+          JSON.stringify(track.audio_features || {}),
         ];
 
         await this.runQuery(query, params);
@@ -286,7 +290,7 @@ class SQLiteManager {
         ORDER BY score DESC, created_at DESC 
         LIMIT ?
       `;
-      
+
       const rows = await this.getAllQuery(query, [userId, limit]);
       return { success: true, recommendations: rows };
     } catch (error) {
@@ -305,14 +309,14 @@ class SQLiteManager {
         (id, user_id, name, description, tracks, spotify_id, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `;
-      
+
       const params = [
         playlistData.id,
         playlistData.user_id,
         playlistData.name,
         playlistData.description,
         JSON.stringify(playlistData.tracks || []),
-        playlistData.spotify_id
+        playlistData.spotify_id,
       ];
 
       await this.runQuery(query, params);
@@ -336,21 +340,21 @@ class SQLiteManager {
         FROM listening_history 
         WHERE user_id = ?
       `;
-      
+
       const params = [userId];
-      
+
       if (options.dateFrom) {
         query += ' AND played_at >= ?';
         params.push(options.dateFrom);
       }
-      
+
       if (options.dateTo) {
         query += ' AND played_at <= ?';
         params.push(options.dateTo);
       }
 
       const result = await this.getQuery(query, params);
-      
+
       // Get top artists
       const topArtistsQuery = `
         SELECT artist_name, COUNT(*) as play_count
@@ -360,15 +364,15 @@ class SQLiteManager {
         ORDER BY play_count DESC
         LIMIT 10
       `;
-      
+
       const topArtists = await this.getAllQuery(topArtistsQuery, [userId]);
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         analytics: {
           ...result,
-          top_artists: topArtists
-        }
+          top_artists: topArtists,
+        },
       };
     } catch (error) {
       console.error('Get analytics error:', error);
@@ -386,7 +390,7 @@ class SQLiteManager {
         (user_id, session_id, message, sender, provider)
         VALUES (?, ?, ?, ?, ?)
       `;
-      
+
       await this.runQuery(query, [userId, sessionId, message, sender, provider]);
       return { success: true };
     } catch (error) {
@@ -406,17 +410,17 @@ class SQLiteManager {
 
       // Simple query to test connection
       await this.getQuery('SELECT 1');
-      
-      return { 
+
+      return {
         status: 'healthy',
         type: 'sqlite',
         path: this.dbPath,
-        initialized: this.initialized
+        initialized: this.initialized,
       };
     } catch (error) {
-      return { 
-        status: 'error', 
-        error: error.message 
+      return {
+        status: 'error',
+        error: error.message,
       };
     }
   }

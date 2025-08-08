@@ -10,21 +10,21 @@ import { useDatabase } from '../contexts/DatabaseContext';
 function UserProfile() {
   const { user } = useAuth();
   const { saveUserData } = useDatabase();
-  
+
   const [profile, setProfile] = useState(null);
   const [preferences, setPreferences] = useState({
     favoriteGenres: [],
     favoriteArtists: [],
     musicDiscovery: 'balanced',
     explicitContent: true,
-    playlistPrivacy: 'private'
+    playlistPrivacy: 'private',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const loadUserProfile = useCallback(async () => {
     setLoading(true);
-    
+
     try {
       // In a real app, this would load from database
       setProfile({
@@ -34,7 +34,7 @@ function UserProfile() {
         totalAlbums: 156,
         totalPlaylists: 23,
         memberSince: '2023-01-15',
-        lastActive: new Date().toISOString()
+        lastActive: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Load profile error:', error);
@@ -51,16 +51,16 @@ function UserProfile() {
 
   const handleSavePreferences = async () => {
     setSaving(true);
-    
+
     try {
       const updatedUser = {
         ...user,
         preferences,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const result = await saveUserData(updatedUser);
-      
+
       if (result.success) {
         alert('Preferences saved successfully!');
       } else {
@@ -75,9 +75,9 @@ function UserProfile() {
   };
 
   const handlePreferenceChange = (key, value) => {
-    setPreferences(prev => ({
+    setPreferences((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -113,7 +113,7 @@ function UserProfile() {
       <div className="profile-content">
         <ProfileStats profile={profile} />
         <ProfileInfo profile={profile} />
-        <MusicPreferences 
+        <MusicPreferences
           preferences={preferences}
           onChange={handlePreferenceChange}
           onSave={handleSavePreferences}
@@ -132,7 +132,7 @@ function ProfileStats({ profile }) {
     { label: 'Total Tracks', value: profile.totalTracks, icon: '🎵' },
     { label: 'Artists', value: profile.totalArtists, icon: '🎤' },
     { label: 'Albums', value: profile.totalAlbums, icon: '💿' },
-    { label: 'Playlists', value: profile.totalPlaylists, icon: '📋' }
+    { label: 'Playlists', value: profile.totalPlaylists, icon: '📋' },
   ];
 
   return (
@@ -167,27 +167,27 @@ function ProfileInfo({ profile }) {
           <label>Display Name</label>
           <span>{profile.display_name || 'Not set'}</span>
         </div>
-        
+
         <div className="info-item">
           <label>Email</label>
           <span>{profile.email || 'Not provided'}</span>
         </div>
-        
+
         <div className="info-item">
           <label>Country</label>
           <span>{profile.country || 'Unknown'}</span>
         </div>
-        
+
         <div className="info-item">
           <label>Spotify Premium</label>
           <span>{profile.premium ? '✅ Yes' : '❌ No'}</span>
         </div>
-        
+
         <div className="info-item">
           <label>Followers</label>
           <span>{profile.followers?.total || 0}</span>
         </div>
-        
+
         <div className="info-item">
           <label>Member Since</label>
           <span>{formatDate(profile.memberSince)}</span>
@@ -202,20 +202,30 @@ function ProfileInfo({ profile }) {
  */
 function MusicPreferences({ preferences, onChange, onSave, saving }) {
   const genres = [
-    'Pop', 'Rock', 'Hip Hop', 'Electronic', 'Jazz', 'Classical',
-    'R&B', 'Country', 'Folk', 'Metal', 'Indie', 'Alternative'
+    'Pop',
+    'Rock',
+    'Hip Hop',
+    'Electronic',
+    'Jazz',
+    'Classical',
+    'R&B',
+    'Country',
+    'Folk',
+    'Metal',
+    'Indie',
+    'Alternative',
   ];
 
   const discoveryOptions = [
     { value: 'conservative', label: 'Conservative (similar to current taste)' },
     { value: 'balanced', label: 'Balanced (mix of familiar and new)' },
-    { value: 'adventurous', label: 'Adventurous (explore new genres)' }
+    { value: 'adventurous', label: 'Adventurous (explore new genres)' },
   ];
 
   const handleGenreToggle = (genre) => {
     const current = preferences.favoriteGenres || [];
     const updated = current.includes(genre)
-      ? current.filter(g => g !== genre)
+      ? current.filter((g) => g !== genre)
       : [...current, genre];
     onChange('favoriteGenres', updated);
   };
@@ -223,11 +233,11 @@ function MusicPreferences({ preferences, onChange, onSave, saving }) {
   return (
     <div className="music-preferences">
       <h2>🎵 Music Preferences</h2>
-      
+
       <div className="preference-section">
         <h3>Favorite Genres</h3>
         <div className="genre-grid">
-          {genres.map(genre => (
+          {genres.map((genre) => (
             <button
               key={genre}
               className={`genre-chip ${(preferences.favoriteGenres || []).includes(genre) ? 'selected' : ''}`}
@@ -242,7 +252,7 @@ function MusicPreferences({ preferences, onChange, onSave, saving }) {
       <div className="preference-section">
         <h3>Music Discovery</h3>
         <div className="discovery-options">
-          {discoveryOptions.map(option => (
+          {discoveryOptions.map((option) => (
             <label key={option.value} className="radio-option">
               <input
                 type="radio"
@@ -298,11 +308,7 @@ function MusicPreferences({ preferences, onChange, onSave, saving }) {
       </div>
 
       <div className="preference-actions">
-        <button 
-          className="save-preferences-btn"
-          onClick={onSave}
-          disabled={saving}
-        >
+        <button className="save-preferences-btn" onClick={onSave} disabled={saving}>
           {saving ? 'Saving...' : 'Save Preferences'}
         </button>
       </div>

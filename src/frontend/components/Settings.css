@@ -165,7 +165,7 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.setting-group input[type="checkbox"] {
+.setting-group input[type='checkbox'] {
   width: auto;
   margin-right: 0.5rem;
   transform: scale(1.2);

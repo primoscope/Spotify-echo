@@ -20,9 +20,9 @@ const productionConfig = {
   security: {
     // CORS configuration
     cors: {
-      origins: process.env.CORS_ORIGINS ? 
-        process.env.CORS_ORIGINS.split(',').map(origin => origin.trim()) : 
-        ['https://primosphere.studio', 'https://www.primosphere.studio'],
+      origins: process.env.CORS_ORIGINS
+        ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+        : ['https://primosphere.studio', 'https://www.primosphere.studio'],
       credentials: true,
       optionsSuccessStatus: 200,
     },
@@ -48,16 +48,16 @@ const productionConfig = {
     helmet: {
       contentSecurityPolicy: {
         directives: {
-          defaultSrc: ['\'self\''],
-          styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
-          fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
-          scriptSrc: ['\'self\'', '\'unsafe-inline\'', 'https://apis.google.com'],
-          connectSrc: ['\'self\'', 'https://api.spotify.com', 'wss://api.spotify.com'],
-          imgSrc: ['\'self\'', 'data:', 'https:', 'http:'],
-          objectSrc: ['\'none\''],
-          baseUri: ['\'self\''],
-          formAction: ['\'self\''],
-          frameAncestors: ['\'none\''],
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+          scriptSrc: ["'self'", "'unsafe-inline'", 'https://apis.google.com'],
+          connectSrc: ["'self'", 'https://api.spotify.com', 'wss://api.spotify.com'],
+          imgSrc: ["'self'", 'data:', 'https:', 'http:'],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          frameAncestors: ["'none'"],
         },
       },
       hsts: {
@@ -166,7 +166,9 @@ const productionConfig = {
 function generateSecureSecret() {
   // For DigitalOcean and other deployments, generate a secure secret automatically
   if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
-    console.warn('⚠️  SESSION_SECRET not provided in production. Generating secure secret automatically.');
+    console.warn(
+      '⚠️  SESSION_SECRET not provided in production. Generating secure secret automatically.'
+    );
     console.warn('   For better security, set SESSION_SECRET environment variable.');
   }
   const crypto = require('crypto');
@@ -185,11 +187,7 @@ function validateProductionConfig() {
     const critical = [];
 
     // Optional environment variables (will show warnings but allow startup)
-    const optional = [
-      'SPOTIFY_CLIENT_ID',
-      'SPOTIFY_CLIENT_SECRET',
-      'FRONTEND_URL',
-    ];
+    const optional = ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET', 'FRONTEND_URL'];
 
     // Check critical variables
     for (const variable of critical) {
@@ -201,7 +199,9 @@ function validateProductionConfig() {
     // Check optional variables
     for (const variable of optional) {
       if (!process.env[variable]) {
-        warnings.push(`Missing optional environment variable: ${variable} - some features may be limited`);
+        warnings.push(
+          `Missing optional environment variable: ${variable} - some features may be limited`
+        );
       }
     }
 
@@ -216,14 +216,18 @@ function validateProductionConfig() {
     }
 
     // Validate URLs but don't fail on HTTP in deployment scenarios
-    if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.startsWith('https://') && !process.env.FRONTEND_URL.startsWith('http://')) {
+    if (
+      process.env.FRONTEND_URL &&
+      !process.env.FRONTEND_URL.startsWith('https://') &&
+      !process.env.FRONTEND_URL.startsWith('http://')
+    ) {
       warnings.push('FRONTEND_URL should use HTTPS for production for better security');
     }
 
     // Log warnings
     if (warnings.length > 0) {
       console.warn('⚠️  Production configuration warnings:');
-      warnings.forEach(warning => console.warn(`   ${warning}`));
+      warnings.forEach((warning) => console.warn(`   ${warning}`));
       console.warn('   The application will start with limited functionality.');
     }
   }
@@ -240,7 +244,7 @@ function validateProductionConfig() {
  */
 function getEnvironmentConfig() {
   const env = process.env.NODE_ENV || 'development';
-  
+
   const envConfigs = {
     development: {
       ...productionConfig,

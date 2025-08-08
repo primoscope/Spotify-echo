@@ -3,7 +3,7 @@ import './EnhancedAdvancedSettings.css';
 
 /**
  * Enhanced Advanced Settings Component
- * 
+ *
  * Comprehensive configuration interface with:
  * - Multi-provider LLM configuration (OpenAI, Gemini, OpenRouter)
  * - Model selection and parameter tuning
@@ -21,7 +21,7 @@ const EnhancedAdvancedSettings = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-  
+
   // LLM Provider configurations
   const [llmProviders, setLlmProviders] = useState({
     openai: {
@@ -56,25 +56,18 @@ const EnhancedAdvancedSettings = () => {
     mock: {
       enabled: true,
       fallback: true,
-    }
+    },
   });
 
   // Available models for each provider
   const availableModels = {
-    openai: [
-      'gpt-4o',
-      'gpt-4o-mini', 
-      'gpt-4-turbo',
-      'gpt-4',
-      'gpt-3.5-turbo',
-      'gpt-3.5-turbo-16k'
-    ],
+    openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'],
     gemini: [
       'gemini-2.0-flash-exp',
       'gemini-2.0-flash',
       'gemini-1.5-pro',
       'gemini-1.5-flash',
-      'gemini-1.0-pro'
+      'gemini-1.0-pro',
     ],
     openrouter: [
       'anthropic/claude-3.5-sonnet',
@@ -84,8 +77,8 @@ const EnhancedAdvancedSettings = () => {
       'openai/gpt-4-turbo',
       'google/gemini-pro-1.5',
       'meta-llama/llama-3.1-405b-instruct',
-      'mistralai/mixtral-8x7b-instruct'
-    ]
+      'mistralai/mixtral-8x7b-instruct',
+    ],
   };
 
   // Component lifecycle
@@ -103,18 +96,18 @@ const EnhancedAdvancedSettings = () => {
     try {
       const [settingsResponse, configResponse] = await Promise.all([
         fetch('/api/settings/config'),
-        fetch('/api/settings/llm-providers')
+        fetch('/api/settings/llm-providers'),
       ]);
-      
+
       const settingsData = await settingsResponse.json();
       const configData = await configResponse.json();
-      
+
       if (settingsData.success) {
         // setSettings(settingsData.config); // Commented out since settings is unused
       }
-      
+
       if (configData.success) {
-        setLlmProviders(prev => ({ ...prev, ...configData.providers }));
+        setLlmProviders((prev) => ({ ...prev, ...configData.providers }));
       }
     } catch (error) {
       showMessage('error', 'Failed to load settings');
@@ -165,7 +158,7 @@ const EnhancedAdvancedSettings = () => {
         },
         body: JSON.stringify({ providers: llmProviders }),
       });
-      
+
       const data = await response.json();
       if (data.success) {
         showMessage('success', 'LLM provider settings saved successfully');
@@ -191,12 +184,12 @@ const EnhancedAdvancedSettings = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           provider: providerName,
-          config: llmProviders[providerName]
+          config: llmProviders[providerName],
         }),
       });
-      
+
       const data = await response.json();
       if (data.success) {
         showMessage('success', `${providerName} connection test successful`);
@@ -214,12 +207,12 @@ const EnhancedAdvancedSettings = () => {
    * Update LLM provider setting
    */
   const updateLLMProvider = (provider, field, value) => {
-    setLlmProviders(prev => ({
+    setLlmProviders((prev) => ({
       ...prev,
       [provider]: {
         ...prev[provider],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
@@ -240,12 +233,12 @@ const EnhancedAdvancedSettings = () => {
       { id: 'database', label: '🗄️ Database Insights', icon: '📊' },
       { id: 'api-config', label: '🔧 API Configuration', icon: '⚙️' },
       { id: 'system-monitor', label: '📈 System Monitor', icon: '💻' },
-      { id: 'environment', label: '🌍 Environment', icon: '🔐' }
+      { id: 'environment', label: '🌍 Environment', icon: '🔐' },
     ];
 
     return (
       <div className="enhanced-settings-tabs">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
@@ -272,7 +265,7 @@ const EnhancedAdvancedSettings = () => {
       <div className="providers-grid">
         {Object.entries(llmProviders).map(([providerName, config]) => {
           if (providerName === 'mock') return null;
-          
+
           return (
             <div key={providerName} className="provider-card">
               <div className="provider-header">
@@ -283,14 +276,16 @@ const EnhancedAdvancedSettings = () => {
                       <input
                         type="checkbox"
                         checked={config.enabled}
-                        onChange={(e) => updateLLMProvider(providerName, 'enabled', e.target.checked)}
+                        onChange={(e) =>
+                          updateLLMProvider(providerName, 'enabled', e.target.checked)
+                        }
                       />
                       <span className="toggle-slider"></span>
                     </label>
                     <span>{config.enabled ? 'Enabled' : 'Disabled'}</span>
                   </div>
                 </div>
-                <button 
+                <button
                   className="test-provider-btn"
                   onClick={() => testProvider(providerName)}
                   disabled={!config.enabled || loading}
@@ -324,8 +319,10 @@ const EnhancedAdvancedSettings = () => {
                       onChange={(e) => updateLLMProvider(providerName, 'model', e.target.value)}
                       className="model-select"
                     >
-                      {availableModels[providerName]?.map(model => (
-                        <option key={model} value={model}>{model}</option>
+                      {availableModels[providerName]?.map((model) => (
+                        <option key={model} value={model}>
+                          {model}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -342,7 +339,13 @@ const EnhancedAdvancedSettings = () => {
                           max="2"
                           step="0.1"
                           value={config.temperature}
-                          onChange={(e) => updateLLMProvider(providerName, 'temperature', parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            updateLLMProvider(
+                              providerName,
+                              'temperature',
+                              parseFloat(e.target.value)
+                            )
+                          }
                           className="param-slider"
                         />
                         <span className="param-value">{config.temperature}</span>
@@ -355,7 +358,9 @@ const EnhancedAdvancedSettings = () => {
                           min="1"
                           max="32768"
                           value={config.maxTokens}
-                          onChange={(e) => updateLLMProvider(providerName, 'maxTokens', parseInt(e.target.value))}
+                          onChange={(e) =>
+                            updateLLMProvider(providerName, 'maxTokens', parseInt(e.target.value))
+                          }
                           className="param-input"
                         />
                       </div>
@@ -370,7 +375,9 @@ const EnhancedAdvancedSettings = () => {
                               max="1"
                               step="0.1"
                               value={config.topP}
-                              onChange={(e) => updateLLMProvider(providerName, 'topP', parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                updateLLMProvider(providerName, 'topP', parseFloat(e.target.value))
+                              }
                               className="param-slider"
                             />
                             <span className="param-value">{config.topP}</span>
@@ -383,7 +390,13 @@ const EnhancedAdvancedSettings = () => {
                               max="2"
                               step="0.1"
                               value={config.frequencyPenalty}
-                              onChange={(e) => updateLLMProvider(providerName, 'frequencyPenalty', parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                updateLLMProvider(
+                                  providerName,
+                                  'frequencyPenalty',
+                                  parseFloat(e.target.value)
+                                )
+                              }
                               className="param-slider"
                             />
                             <span className="param-value">{config.frequencyPenalty}</span>
@@ -400,7 +413,9 @@ const EnhancedAdvancedSettings = () => {
                               min="1"
                               max="100"
                               value={config.topK}
-                              onChange={(e) => updateLLMProvider(providerName, 'topK', parseInt(e.target.value))}
+                              onChange={(e) =>
+                                updateLLMProvider(providerName, 'topK', parseInt(e.target.value))
+                              }
                               className="param-input"
                             />
                           </div>
@@ -412,7 +427,9 @@ const EnhancedAdvancedSettings = () => {
                               max="1"
                               step="0.05"
                               value={config.topP}
-                              onChange={(e) => updateLLMProvider(providerName, 'topP', parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                updateLLMProvider(providerName, 'topP', parseFloat(e.target.value))
+                              }
                               className="param-slider"
                             />
                             <span className="param-value">{config.topP}</span>
@@ -427,7 +444,9 @@ const EnhancedAdvancedSettings = () => {
                             <input
                               type="url"
                               value={config.site_url}
-                              onChange={(e) => updateLLMProvider(providerName, 'site_url', e.target.value)}
+                              onChange={(e) =>
+                                updateLLMProvider(providerName, 'site_url', e.target.value)
+                              }
                               placeholder="https://yoursite.com"
                               className="param-input"
                             />
@@ -437,7 +456,9 @@ const EnhancedAdvancedSettings = () => {
                             <input
                               type="text"
                               value={config.app_name}
-                              onChange={(e) => updateLLMProvider(providerName, 'app_name', e.target.value)}
+                              onChange={(e) =>
+                                updateLLMProvider(providerName, 'app_name', e.target.value)
+                              }
                               className="param-input"
                             />
                           </div>
@@ -453,17 +474,13 @@ const EnhancedAdvancedSettings = () => {
       </div>
 
       <div className="providers-actions">
-        <button 
-          className="save-providers-btn primary"
-          onClick={saveLLMProviders}
-          disabled={saving}
-        >
+        <button className="save-providers-btn primary" onClick={saveLLMProviders} disabled={saving}>
           {saving ? '💾 Saving...' : '💾 Save LLM Configuration'}
         </button>
-        <button 
+        <button
           className="test-all-btn secondary"
           onClick={() => {
-            Object.keys(llmProviders).forEach(provider => {
+            Object.keys(llmProviders).forEach((provider) => {
               if (provider !== 'mock' && llmProviders[provider].enabled) {
                 testProvider(provider);
               }
@@ -522,13 +539,14 @@ const EnhancedAdvancedSettings = () => {
         <div className="collection-details">
           <h4>Collection Details</h4>
           <div className="collections-table">
-            {databaseInsights.collectionDetails && Object.entries(databaseInsights.collectionDetails).map(([name, details]) => (
-              <div key={name} className="collection-row">
-                <span className="collection-name">{name}</span>
-                <span className="collection-count">{details.documents} docs</span>
-                <span className="collection-size">{details.size}</span>
-              </div>
-            ))}
+            {databaseInsights.collectionDetails &&
+              Object.entries(databaseInsights.collectionDetails).map(([name, details]) => (
+                <div key={name} className="collection-row">
+                  <span className="collection-name">{name}</span>
+                  <span className="collection-count">{details.documents} docs</span>
+                  <span className="collection-size">{details.size}</span>
+                </div>
+              ))}
           </div>
         </div>
 
@@ -536,12 +554,8 @@ const EnhancedAdvancedSettings = () => {
           <button onClick={loadDatabaseInsights} className="refresh-btn">
             🔄 Refresh Insights
           </button>
-          <button className="optimize-btn">
-            ⚡ Optimize Database
-          </button>
-          <button className="backup-btn">
-            💾 Create Backup
-          </button>
+          <button className="optimize-btn">⚡ Optimize Database</button>
+          <button className="backup-btn">💾 Create Backup</button>
         </div>
       </div>
     </div>
@@ -560,24 +574,27 @@ const EnhancedAdvancedSettings = () => {
       <div className="system-status">
         <div className="status-overview">
           <div className="status-indicator">
-            <div className={`status-light ${systemStatus.status === 'healthy' ? 'green' : 'red'}`}></div>
+            <div
+              className={`status-light ${systemStatus.status === 'healthy' ? 'green' : 'red'}`}
+            ></div>
             <span>System Status: {systemStatus.status || 'Unknown'}</span>
           </div>
           <div className="system-uptime">
-            <span>Uptime: {systemStatus.uptime ? Math.floor(systemStatus.uptime / 60) : 0} minutes</span>
+            <span>
+              Uptime: {systemStatus.uptime ? Math.floor(systemStatus.uptime / 60) : 0} minutes
+            </span>
           </div>
         </div>
 
         <div className="health-checks">
-          {systemStatus.checks && Object.entries(systemStatus.checks).map(([check, status]) => (
-            <div key={check} className="health-check-item">
-              <div className="check-name">{check}</div>
-              <div className={`check-status ${status.status}`}>
-                {status.status}
+          {systemStatus.checks &&
+            Object.entries(systemStatus.checks).map(([check, status]) => (
+              <div key={check} className="health-check-item">
+                <div className="check-name">{check}</div>
+                <div className={`check-status ${status.status}`}>{status.status}</div>
+                <div className="check-duration">{status.duration}</div>
               </div>
-              <div className="check-duration">{status.duration}</div>
-            </div>
-          ))}
+            ))}
         </div>
 
         <div className="system-actions">
@@ -624,15 +641,15 @@ const EnhancedAdvancedSettings = () => {
       {message && (
         <div className={`enhanced-message ${message.type}`}>
           <span className="message-text">{message.text}</span>
-          <button onClick={() => setMessage(null)} className="message-close">×</button>
+          <button onClick={() => setMessage(null)} className="message-close">
+            ×
+          </button>
         </div>
       )}
 
       {renderTabs()}
-      
-      <div className="enhanced-settings-content">
-        {renderTabContent()}
-      </div>
+
+      <div className="enhanced-settings-content">{renderTabContent()}</div>
     </div>
   );
 };

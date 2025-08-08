@@ -9,29 +9,37 @@ const chatbotConfig = {
   llmProviders: {
     openai: {
       apiKey: process.env.OPENAI_API_KEY,
-      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo'
+      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
     },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY,
-      model: process.env.GEMINI_MODEL || 'gemini-1.5-flash'
+      model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
     },
     azure: {
       apiKey: process.env.AZURE_OPENAI_API_KEY,
       endpoint: process.env.AZURE_OPENAI_ENDPOINT,
-      deployment: process.env.AZURE_OPENAI_DEPLOYMENT
+      deployment: process.env.AZURE_OPENAI_DEPLOYMENT,
     },
     openrouter: {
       apiKey: process.env.OPENROUTER_API_KEY,
-      model: process.env.OPENROUTER_MODEL || process.env.DEFAULT_LLM_MODEL || 'deepseek/deepseek-r1-0528:free'
-    }
+      model:
+        process.env.OPENROUTER_MODEL ||
+        process.env.DEFAULT_LLM_MODEL ||
+        'deepseek/deepseek-r1-0528:free',
+    },
   },
   // Determine the best available provider based on API keys
-  defaultProvider: process.env.DEFAULT_LLM_PROVIDER || 
-                  (process.env.GEMINI_API_KEY ? 'gemini' : 
-                   process.env.OPENAI_API_KEY ? 'openai' : 
-                   process.env.OPENROUTER_API_KEY ? 'openrouter' : 'mock'),
+  defaultProvider:
+    process.env.DEFAULT_LLM_PROVIDER ||
+    (process.env.GEMINI_API_KEY
+      ? 'gemini'
+      : process.env.OPENAI_API_KEY
+        ? 'openai'
+        : process.env.OPENROUTER_API_KEY
+          ? 'openrouter'
+          : 'mock'),
   defaultModel: process.env.DEFAULT_LLM_MODEL || 'gemini-1.5-flash',
-  enableMockProvider: true // Always enable mock provider for demo functionality
+  enableMockProvider: true, // Always enable mock provider for demo functionality
 };
 
 let chatbot = null;
@@ -50,7 +58,7 @@ async function initializeChatbot() {
 const chatRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 50, // 50 requests per window per IP
-  message: 'Too many chat requests, please slow down'
+  message: 'Too many chat requests, please slow down',
 });
 
 /**
@@ -65,20 +73,19 @@ router.post('/start', requireAuth, chatRateLimit, async (req, res) => {
     const session = await chatbotInstance.startConversation(req.userId, {
       sessionId,
       provider,
-      model
+      model,
     });
 
     res.json({
       success: true,
       session,
-      message: 'Conversation started successfully'
+      message: 'Conversation started successfully',
     });
-
   } catch (error) {
     console.error('Error starting conversation:', error);
     res.status(500).json({
       error: 'Failed to start conversation',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -95,7 +102,7 @@ router.post('/message', requireAuth, chatRateLimit, async (req, res) => {
     if (!sessionId || !message) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'sessionId and message are required'
+        message: 'sessionId and message are required',
       });
     }
 
@@ -103,19 +110,18 @@ router.post('/message', requireAuth, chatRateLimit, async (req, res) => {
       provider,
       model,
       temperature,
-      maxTokens
+      maxTokens,
     });
 
     res.json({
       success: true,
-      ...response
+      ...response,
     });
-
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({
       error: 'Failed to send message',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -132,7 +138,7 @@ router.post('/stream', requireAuth, chatRateLimit, async (req, res) => {
     if (!sessionId || !message) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'sessionId and message are required'
+        message: 'sessionId and message are required',
       });
     }
 
@@ -140,9 +146,9 @@ router.post('/stream', requireAuth, chatRateLimit, async (req, res) => {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
       'Access-Control-Allow-Origin': req.headers.origin || '*',
-      'Access-Control-Allow-Credentials': 'true'
+      'Access-Control-Allow-Credentials': 'true',
     });
 
     // Send initial connection event
@@ -150,14 +156,19 @@ router.post('/stream', requireAuth, chatRateLimit, async (req, res) => {
     res.write('data: {"message": "Connected to chat stream"}\n\n');
 
     try {
-      for await (const chunk of chatbotInstance.streamMessage(sessionId, message, { provider, model })) {
+      for await (const chunk of chatbotInstance.streamMessage(sessionId, message, {
+        provider,
+        model,
+      })) {
         if (chunk.error) {
           res.write('event: error\n');
           res.write(`data: ${JSON.stringify({ error: chunk.error })}\n\n`);
           break;
         } else if (chunk.type === 'chunk') {
           res.write('event: message\n');
-          res.write(`data: ${JSON.stringify({ content: chunk.content, isPartial: chunk.isPartial })}\n\n`);
+          res.write(
+            `data: ${JSON.stringify({ content: chunk.content, isPartial: chunk.isPartial })}\n\n`
+          );
         } else if (chunk.type === 'complete') {
           res.write('event: complete\n');
           res.write(`data: ${JSON.stringify({ totalTime: chunk.totalTime })}\n\n`);
@@ -170,12 +181,11 @@ router.post('/stream', requireAuth, chatRateLimit, async (req, res) => {
     }
 
     res.end();
-
   } catch (error) {
     console.error('Error in stream endpoint:', error);
     res.status(500).json({
       error: 'Failed to initialize stream',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -192,21 +202,20 @@ router.get('/history/:sessionId', requireAuth, async (req, res) => {
 
     const history = chatbotInstance.conversationManager.getConversationHistory(sessionId, {
       limit: parseInt(limit),
-      excludeSystem: excludeSystem === 'true'
+      excludeSystem: excludeSystem === 'true',
     });
 
     res.json({
       success: true,
       sessionId,
       messages: history,
-      count: history.length
+      count: history.length,
     });
-
   } catch (error) {
     console.error('Error getting conversation history:', error);
     res.status(500).json({
       error: 'Failed to get conversation history',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -223,14 +232,13 @@ router.get('/providers', async (req, res) => {
     res.json({
       success: true,
       providers,
-      currentProvider: chatbotInstance.currentProvider
+      currentProvider: chatbotInstance.currentProvider,
     });
-
   } catch (error) {
     console.error('Error getting providers:', error);
     res.status(500).json({
       error: 'Failed to get providers',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -246,7 +254,7 @@ router.post('/provider', requireAuth, async (req, res) => {
 
     if (!provider) {
       return res.status(400).json({
-        error: 'Missing provider name'
+        error: 'Missing provider name',
       });
     }
 
@@ -255,14 +263,13 @@ router.post('/provider', requireAuth, async (req, res) => {
     res.json({
       success: true,
       ...result,
-      message: `Switched to ${provider} provider`
+      message: `Switched to ${provider} provider`,
     });
-
   } catch (error) {
     console.error('Error switching provider:', error);
     res.status(400).json({
       error: 'Failed to switch provider',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -277,7 +284,10 @@ router.get('/export/:sessionId', requireAuth, async (req, res) => {
     const { sessionId } = req.params;
     const { format = 'json' } = req.query;
 
-    const exportData = await chatbotInstance.conversationManager.exportConversation(sessionId, format);
+    const exportData = await chatbotInstance.conversationManager.exportConversation(
+      sessionId,
+      format
+    );
 
     if (format === 'text') {
       res.setHeader('Content-Type', 'text/plain');
@@ -288,12 +298,11 @@ router.get('/export/:sessionId', requireAuth, async (req, res) => {
     }
 
     res.send(exportData);
-
   } catch (error) {
     console.error('Error exporting conversation:', error);
     res.status(500).json({
       error: 'Failed to export conversation',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -309,14 +318,13 @@ router.get('/stats', async (req, res) => {
 
     res.json({
       success: true,
-      stats
+      stats,
     });
-
   } catch (error) {
     console.error('Error getting chatbot stats:', error);
     res.status(500).json({
       error: 'Failed to get statistics',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -329,7 +337,7 @@ router.get('/health', async (req, res) => {
   try {
     const chatbotInstance = await initializeChatbot();
     const providers = chatbotInstance.getAvailableProviders();
-    const activeProviders = providers.filter(p => p.isActive).length;
+    const activeProviders = providers.filter((p) => p.isActive).length;
 
     res.json({
       status: 'healthy',
@@ -337,16 +345,15 @@ router.get('/health', async (req, res) => {
         initialized: !!chatbotInstance,
         activeProviders,
         totalProviders: providers.length,
-        currentProvider: chatbotInstance.currentProvider
+        currentProvider: chatbotInstance.currentProvider,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     res.status(500).json({
       status: 'unhealthy',
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -362,16 +369,23 @@ router.post('/feedback', requireAuth, chatRateLimit, async (req, res) => {
     if (!sessionId || (!feedback && !rating)) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'sessionId and either feedback or rating are required'
+        message: 'sessionId and either feedback or rating are required',
       });
     }
 
     // Validate feedback
-    const validFeedback = ['helpful', 'not_helpful', 'accurate', 'inaccurate', 'relevant', 'irrelevant'];
+    const validFeedback = [
+      'helpful',
+      'not_helpful',
+      'accurate',
+      'inaccurate',
+      'relevant',
+      'irrelevant',
+    ];
     if (feedback && !validFeedback.includes(feedback)) {
       return res.status(400).json({
         error: 'Invalid feedback',
-        message: `Feedback must be one of: ${validFeedback.join(', ')}`
+        message: `Feedback must be one of: ${validFeedback.join(', ')}`,
       });
     }
 
@@ -387,7 +401,7 @@ router.post('/feedback', requireAuth, chatRateLimit, async (req, res) => {
       rating: rating || null,
       comment: comment || null,
       context: context || {},
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const result = await chatFeedbackCollection.insertOne(feedbackDoc);
@@ -403,24 +417,23 @@ router.post('/feedback', requireAuth, chatRateLimit, async (req, res) => {
             messageId,
             feedback,
             rating,
-            timestamp: new Date()
-          }
+            timestamp: new Date(),
+          },
         },
-        $set: { updated_at: new Date() }
+        $set: { updated_at: new Date() },
       }
     );
 
     res.json({
       success: true,
       feedbackId: result.insertedId,
-      message: 'Chat feedback recorded successfully'
+      message: 'Chat feedback recorded successfully',
     });
-
   } catch (error) {
     console.error('Error recording chat feedback:', error);
     res.status(500).json({
       error: 'Failed to record chat feedback',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -432,28 +445,58 @@ router.post('/feedback', requireAuth, chatRateLimit, async (req, res) => {
 router.get('/context-chips', requireAuth, async (req, res) => {
   try {
     const { category } = req.query;
-    
+
     // Define available context chips
     const contextChips = {
       moods: [
         { id: 'happy', label: 'Happy', emoji: '😊', description: 'Upbeat and positive music' },
         { id: 'sad', label: 'Sad', emoji: '😢', description: 'Melancholic and emotional tracks' },
-        { id: 'energetic', label: 'Energetic', emoji: '⚡', description: 'High-energy and motivating' },
+        {
+          id: 'energetic',
+          label: 'Energetic',
+          emoji: '⚡',
+          description: 'High-energy and motivating',
+        },
         { id: 'calm', label: 'Calm', emoji: '😌', description: 'Peaceful and relaxing vibes' },
-        { id: 'romantic', label: 'Romantic', emoji: '💕', description: 'Love songs and romantic ballads' },
+        {
+          id: 'romantic',
+          label: 'Romantic',
+          emoji: '💕',
+          description: 'Love songs and romantic ballads',
+        },
         { id: 'angry', label: 'Angry', emoji: '😤', description: 'Aggressive and intense music' },
-        { id: 'nostalgic', label: 'Nostalgic', emoji: '🌅', description: 'Throwback and classic hits' },
-        { id: 'confident', label: 'Confident', emoji: '💪', description: 'Empowering and bold tracks' }
+        {
+          id: 'nostalgic',
+          label: 'Nostalgic',
+          emoji: '🌅',
+          description: 'Throwback and classic hits',
+        },
+        {
+          id: 'confident',
+          label: 'Confident',
+          emoji: '💪',
+          description: 'Empowering and bold tracks',
+        },
       ],
       genres: [
         { id: 'pop', label: 'Pop', emoji: '🎵', description: 'Popular and mainstream hits' },
         { id: 'rock', label: 'Rock', emoji: '🎸', description: 'Guitar-driven rock music' },
         { id: 'hip-hop', label: 'Hip-Hop', emoji: '🎤', description: 'Rap and urban beats' },
-        { id: 'electronic', label: 'Electronic', emoji: '🎛️', description: 'EDM and electronic dance music' },
+        {
+          id: 'electronic',
+          label: 'Electronic',
+          emoji: '🎛️',
+          description: 'EDM and electronic dance music',
+        },
         { id: 'jazz', label: 'Jazz', emoji: '🎷', description: 'Smooth jazz and improvisation' },
-        { id: 'classical', label: 'Classical', emoji: '🎼', description: 'Orchestral and classical compositions' },
+        {
+          id: 'classical',
+          label: 'Classical',
+          emoji: '🎼',
+          description: 'Orchestral and classical compositions',
+        },
         { id: 'country', label: 'Country', emoji: '🤠', description: 'Country and folk music' },
-        { id: 'r&b', label: 'R&B', emoji: '🎹', description: 'Rhythm and blues, soul music' }
+        { id: 'r&b', label: 'R&B', emoji: '🎹', description: 'Rhythm and blues, soul music' },
       ],
       activities: [
         { id: 'workout', label: 'Workout', emoji: '🏋️', description: 'High-energy gym music' },
@@ -461,27 +504,36 @@ router.get('/context-chips', requireAuth, async (req, res) => {
         { id: 'party', label: 'Party', emoji: '🎉', description: 'Dance and party anthems' },
         { id: 'sleep', label: 'Sleep', emoji: '😴', description: 'Soothing bedtime music' },
         { id: 'commute', label: 'Commute', emoji: '🚗', description: 'Travel and road trip music' },
-        { id: 'cooking', label: 'Cooking', emoji: '👨‍🍳', description: 'Kitchen vibes and cooking music' },
-        { id: 'relaxation', label: 'Relaxation', emoji: '🧘', description: 'Meditation and chill music' },
-        { id: 'work', label: 'Work', emoji: '💼', description: 'Productive work background music' }
+        {
+          id: 'cooking',
+          label: 'Cooking',
+          emoji: '👨‍🍳',
+          description: 'Kitchen vibes and cooking music',
+        },
+        {
+          id: 'relaxation',
+          label: 'Relaxation',
+          emoji: '🧘',
+          description: 'Meditation and chill music',
+        },
+        { id: 'work', label: 'Work', emoji: '💼', description: 'Productive work background music' },
       ],
       times: [
         { id: 'morning', label: 'Morning', emoji: '🌅', description: 'Fresh start morning music' },
         { id: 'afternoon', label: 'Afternoon', emoji: '☀️', description: 'Midday energy boost' },
         { id: 'evening', label: 'Evening', emoji: '🌆', description: 'Wind-down evening vibes' },
-        { id: 'night', label: 'Night', emoji: '🌙', description: 'Late night mood music' }
-      ]
+        { id: 'night', label: 'Night', emoji: '🌙', description: 'Late night mood music' },
+      ],
     };
 
     // Return specific category or all chips
-    const response = category && contextChips[category] 
-      ? { [category]: contextChips[category] }
-      : contextChips;
+    const response =
+      category && contextChips[category] ? { [category]: contextChips[category] } : contextChips;
 
     // Get user's frequently used chips
     const db = require('../../database/mongodb').getDb();
     const chatSessionsCollection = db.collection('chat_sessions');
-    
+
     const userSessions = await chatSessionsCollection
       .find({ user_id: req.userId })
       .sort({ updated_at: -1 })
@@ -490,9 +542,9 @@ router.get('/context-chips', requireAuth, async (req, res) => {
 
     // Analyze context usage
     const contextUsage = {};
-    userSessions.forEach(session => {
+    userSessions.forEach((session) => {
       if (session.context) {
-        Object.keys(session.context).forEach(key => {
+        Object.keys(session.context).forEach((key) => {
           contextUsage[key] = (contextUsage[key] || 0) + 1;
         });
       }
@@ -504,14 +556,13 @@ router.get('/context-chips', requireAuth, async (req, res) => {
       userFrequent: Object.entries(contextUsage)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 8)
-        .map(([key, count]) => ({ id: key, usageCount: count }))
+        .map(([key, count]) => ({ id: key, usageCount: count })),
     });
-
   } catch (error) {
     console.error('Error getting context chips:', error);
     res.status(500).json({
       error: 'Failed to get context chips',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -523,20 +574,20 @@ router.get('/context-chips', requireAuth, async (req, res) => {
 router.post('/message', requireAuth, chatRateLimit, async (req, res) => {
   try {
     const chatbotInstance = await initializeChatbot();
-    const { 
-      sessionId, 
-      message, 
-      provider, 
-      model, 
-      temperature, 
+    const {
+      sessionId,
+      message,
+      provider,
+      model,
+      temperature,
       maxTokens,
-      context = {} // mood, genre, activity, timeOfDay
+      context = {}, // mood, genre, activity, timeOfDay
     } = req.body;
 
     if (!sessionId || !message) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'sessionId and message are required'
+        message: 'sessionId and message are required',
       });
     }
 
@@ -544,10 +595,16 @@ router.post('/message', requireAuth, chatRateLimit, async (req, res) => {
     await persistConversationContext(sessionId, context, req.userId);
 
     // Get conversation history for context
-    const conversationHistory = chatbotInstance.conversationManager.getConversationHistory(sessionId);
-    
+    const conversationHistory =
+      chatbotInstance.conversationManager.getConversationHistory(sessionId);
+
     // Create enhanced prompt with context and history
-    const enhancedMessage = await createContextualMessage(message, context, conversationHistory, req.userId);
+    const enhancedMessage = await createContextualMessage(
+      message,
+      context,
+      conversationHistory,
+      req.userId
+    );
 
     const response = await chatbotInstance.sendMessage(sessionId, enhancedMessage, {
       provider,
@@ -556,7 +613,7 @@ router.post('/message', requireAuth, chatRateLimit, async (req, res) => {
       maxTokens,
       userId: req.userId,
       originalMessage: message,
-      context
+      context,
     });
 
     // Generate explanation for the response if it includes recommendations
@@ -573,14 +630,13 @@ router.post('/message', requireAuth, chatRateLimit, async (req, res) => {
       success: true,
       ...response,
       context: context,
-      conversationTurn: conversationHistory.length + 1
+      conversationTurn: conversationHistory.length + 1,
     });
-
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({
       error: 'Failed to send message',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -597,17 +653,17 @@ router.post('/test', chatRateLimit, async (req, res) => {
     if (!message) {
       return res.status(400).json({
         error: 'Missing message',
-        message: 'Please provide a message to test'
+        message: 'Please provide a message to test',
       });
     }
 
     // Create a session first
     const testUserId = 'test_user';
-    
+
     // Start a conversation session (this will generate a new sessionId)
     const session = await chatbotInstance.startConversation(testUserId, {
       provider: provider || chatbotInstance.config.defaultProvider,
-      model: model || chatbotInstance.config.defaultModel
+      model: model || chatbotInstance.config.defaultModel,
     });
 
     console.log('Test session created:', session.sessionId);
@@ -616,27 +672,26 @@ router.post('/test', chatRateLimit, async (req, res) => {
     const response = await chatbotInstance.sendMessage(session.sessionId, message, {
       provider: provider || chatbotInstance.config.defaultProvider,
       model: model || chatbotInstance.config.defaultModel,
-      userId: testUserId
+      userId: testUserId,
     });
 
     res.json({
       success: true,
       testMode: true,
       sessionCreated: { sessionId: session.sessionId, provider: session.llmProvider },
-      providersAvailable: chatbotInstance.getAvailableProviders().map(p => ({
+      providersAvailable: chatbotInstance.getAvailableProviders().map((p) => ({
         id: p.id,
         name: p.name,
-        isActive: p.isActive
+        isActive: p.isActive,
       })),
-      ...response
+      ...response,
     });
-
   } catch (error) {
     console.error('Error in test chat:', error);
     res.status(500).json({
       error: 'Failed to test chat',
       message: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 });
@@ -654,8 +709,8 @@ async function persistConversationContext(sessionId, context, userId) {
       {
         $set: {
           context: { ...context, lastUpdated: new Date() },
-          updated_at: new Date()
-        }
+          updated_at: new Date(),
+        },
       },
       { upsert: true }
     );
@@ -709,7 +764,7 @@ async function generateChatResponseExplanation(recommendations, context, origina
       summary: '',
       reasoning: [],
       contextFactors: [],
-      conversationFlow: ''
+      conversationFlow: '',
     };
 
     // Base explanation
@@ -721,7 +776,7 @@ async function generateChatResponseExplanation(recommendations, context, origina
       explanation.contextFactors.push({
         factor: 'mood',
         value: context.mood,
-        influence: 'high'
+        influence: 'high',
       });
     }
 
@@ -730,7 +785,7 @@ async function generateChatResponseExplanation(recommendations, context, origina
       explanation.contextFactors.push({
         factor: 'activity',
         value: context.activity,
-        influence: 'high'
+        influence: 'high',
       });
     }
 
@@ -739,13 +794,14 @@ async function generateChatResponseExplanation(recommendations, context, origina
       explanation.contextFactors.push({
         factor: 'genre',
         value: context.genre,
-        influence: 'high'
+        influence: 'high',
       });
     }
 
     // Analyze conversation flow
     if (history.length > 2) {
-      explanation.conversationFlow = 'Building on our previous conversation to refine recommendations';
+      explanation.conversationFlow =
+        'Building on our previous conversation to refine recommendations';
     } else if (history.length > 0) {
       explanation.conversationFlow = 'First recommendation based on your initial request';
     }
@@ -768,7 +824,7 @@ async function generateChatResponseExplanation(recommendations, context, origina
       summary: 'Recommendations generated based on your request',
       reasoning: ['Selected using AI music intelligence'],
       contextFactors: [],
-      conversationFlow: ''
+      conversationFlow: '',
     };
   }
 }
@@ -778,7 +834,7 @@ async function generateChatResponseExplanation(recommendations, context, origina
  */
 function getTimeDescription(timeOfDay) {
   const hour = parseInt(timeOfDay) || new Date().getHours();
-  
+
   if (hour >= 5 && hour < 12) return 'morning time';
   if (hour >= 12 && hour < 17) return 'afternoon';
   if (hour >= 17 && hour < 22) return 'evening';

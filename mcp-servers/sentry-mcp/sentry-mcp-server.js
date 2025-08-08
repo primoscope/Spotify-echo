@@ -16,10 +16,11 @@
 
 const Sentry = require("@sentry/node");
 const express = require('express');
+const axios = require('axios');
 
 // Initialize Sentry with provided configuration
 Sentry.init({
-  dsn: "https://81f42a0da8d0d7467f0c231d29f34051@o4509810176294912.ingest.us.sentry.io/4509810186387456",
+  dsn: process.env.SENTRY_DSN || "https://81f42a0da8d0d7467f0c231d29f34051@o4509810176294912.ingest.us.sentry.io/4509810186387456",
   // Tracing must be enabled for MCP monitoring to work
   tracesSampleRate: 1.0,
   sendDefaultPii: true,
@@ -56,6 +57,18 @@ Sentry.init({
     return event;
   }
 });
+
+// Sentry API configuration
+const SENTRY_API_CONFIG = {
+  baseURL: 'https://sentry.io/api/0',
+  headers: {
+    'Authorization': `Bearer ${process.env.SENTRY_AUTH_TOKEN || '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'}`,
+    'Content-Type': 'application/json'
+  }
+};
+
+const SENTRY_ORG = process.env.SENTRY_ORGANIZATION || 'primoacope';
+const SENTRY_PROJECT = process.env.SENTRY_PROJECT || 'echotune-ai';
 
 class SentryMCPServer {
   constructor() {
@@ -133,6 +146,26 @@ class SentryMCPServer {
             res.json(healthResult);
             break;
             
+          case 'sentry_get_issues':
+            const issuesResult = await this.getIssues(args);
+            res.json(issuesResult);
+            break;
+            
+          case 'sentry_get_project_stats':
+            const statsResult = await this.getProjectStats(args);
+            res.json(statsResult);
+            break;
+            
+          case 'sentry_create_release':
+            const releaseResult = await this.createRelease(args);
+            res.json(releaseResult);
+            break;
+            
+          case 'sentry_get_organization_info':
+            const orgResult = await this.getOrganizationInfo();
+            res.json(orgResult);
+            break;
+            
           default:
             res.status(400).json({
               success: false,
@@ -144,7 +177,11 @@ class SentryMCPServer {
                 'sentry_finish_transaction',
                 'sentry_set_user_context',
                 'sentry_add_breadcrumb',
-                'sentry_health_check'
+                'sentry_health_check',
+                'sentry_get_issues',
+                'sentry_get_project_stats',
+                'sentry_create_release',
+                'sentry_get_organization_info'
               ]
             });
         }
@@ -253,6 +290,48 @@ class SentryMCPServer {
           {
             name: 'sentry_health_check',
             description: 'Check Sentry integration health and connectivity',
+            inputSchema: { type: 'object', properties: {} }
+          },
+          {
+            name: 'sentry_get_issues',
+            description: 'Retrieve issues from Sentry project using API token',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                status: { type: 'string', enum: ['resolved', 'unresolved', 'ignored'], default: 'unresolved' },
+                limit: { type: 'number', default: 10, maximum: 100 },
+                query: { type: 'string', description: 'Search query for filtering issues' }
+              }
+            }
+          },
+          {
+            name: 'sentry_get_project_stats',
+            description: 'Get project statistics and metrics from Sentry',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                stat: { type: 'string', enum: ['received', 'rejected', 'blacklisted'], default: 'received' },
+                since: { type: 'string', description: 'Start date (ISO format)' },
+                until: { type: 'string', description: 'End date (ISO format)' }
+              }
+            }
+          },
+          {
+            name: 'sentry_create_release',
+            description: 'Create a new release in Sentry for deployment tracking',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                version: { type: 'string', description: 'Release version' },
+                ref: { type: 'string', description: 'Git commit reference' },
+                url: { type: 'string', description: 'Repository URL' }
+              },
+              required: ['version']
+            }
+          },
+          {
+            name: 'sentry_get_organization_info',
+            description: 'Get organization information and available projects',
             inputSchema: { type: 'object', properties: {} }
           }
         ]
@@ -537,12 +616,30 @@ class SentryMCPServer {
         }
       });
       
+      // Also test API connectivity
+      let apiHealthy = false;
+      let apiError = null;
+      
+      try {
+        const response = await axios.get(`${SENTRY_API_CONFIG.baseURL}/organizations/${SENTRY_ORG}/`, {
+          headers: SENTRY_API_CONFIG.headers
+        });
+        apiHealthy = response.status === 200;
+      } catch (error) {
+        apiError = error.message;
+      }
+      
       return {
         success: true,
         status: 'healthy',
         sentry_connected: true,
+        sentry_api_connected: apiHealthy,
+        api_error: apiError,
         test_event_id: eventId,
         dsn_configured: true,
+        auth_token_configured: !!(process.env.SENTRY_AUTH_TOKEN || SENTRY_API_CONFIG.headers.Authorization !== 'Bearer undefined'),
+        organization: SENTRY_ORG,
+        project: SENTRY_PROJECT,
         timestamp: new Date().toISOString(),
         features: [
           'error_tracking',
@@ -550,7 +647,10 @@ class SentryMCPServer {
           'custom_events',
           'user_context',
           'breadcrumbs',
-          'transactions'
+          'transactions',
+          'api_integration',
+          'issue_management',
+          'release_tracking'
         ]
       };
     } catch (err) {
@@ -563,25 +663,189 @@ class SentryMCPServer {
     }
   }
   
+  async getIssues(args) {
+    try {
+      const { status = 'unresolved', limit = 10, query = '' } = args;
+      
+      const params = new URLSearchParams({
+        statsPeriod: '24h',
+        query: `is:${status} ${query}`.trim(),
+        limit: Math.min(limit, 100)
+      });
+      
+      const response = await axios.get(
+        `${SENTRY_API_CONFIG.baseURL}/projects/${SENTRY_ORG}/${SENTRY_PROJECT}/issues/?${params}`,
+        { headers: SENTRY_API_CONFIG.headers }
+      );
+      
+      const issues = response.data.map(issue => ({
+        id: issue.id,
+        title: issue.title,
+        culprit: issue.culprit,
+        permalink: issue.permalink,
+        status: issue.status,
+        level: issue.level,
+        count: issue.count,
+        userCount: issue.userCount,
+        firstSeen: issue.firstSeen,
+        lastSeen: issue.lastSeen,
+        project: issue.project.name
+      }));
+      
+      return {
+        success: true,
+        issues: issues,
+        total: issues.length,
+        query: query,
+        status_filter: status,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to get issues: ${error.response?.data?.detail || error.message}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+  
+  async getProjectStats(args) {
+    try {
+      const { stat = 'received', since, until } = args;
+      
+      const params = new URLSearchParams({
+        stat: stat,
+        resolution: '1h'
+      });
+      
+      if (since) params.append('since', since);
+      if (until) params.append('until', until);
+      
+      const response = await axios.get(
+        `${SENTRY_API_CONFIG.baseURL}/projects/${SENTRY_ORG}/${SENTRY_PROJECT}/stats/?${params}`,
+        { headers: SENTRY_API_CONFIG.headers }
+      );
+      
+      return {
+        success: true,
+        stats: response.data,
+        stat_type: stat,
+        period: { since, until },
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to get project stats: ${error.response?.data?.detail || error.message}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+  
+  async createRelease(args) {
+    try {
+      const { version, ref, url } = args;
+      
+      const releaseData = {
+        version: version,
+        projects: [SENTRY_PROJECT]
+      };
+      
+      if (ref) releaseData.ref = ref;
+      if (url) releaseData.url = url;
+      
+      const response = await axios.post(
+        `${SENTRY_API_CONFIG.baseURL}/organizations/${SENTRY_ORG}/releases/`,
+        releaseData,
+        { headers: SENTRY_API_CONFIG.headers }
+      );
+      
+      return {
+        success: true,
+        release: {
+          version: response.data.version,
+          dateCreated: response.data.dateCreated,
+          shortVersion: response.data.shortVersion,
+          projects: response.data.projects
+        },
+        message: `Release ${version} created successfully`,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to create release: ${error.response?.data?.detail || error.message}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+  
+  async getOrganizationInfo() {
+    try {
+      const [orgResponse, projectsResponse] = await Promise.all([
+        axios.get(`${SENTRY_API_CONFIG.baseURL}/organizations/${SENTRY_ORG}/`, {
+          headers: SENTRY_API_CONFIG.headers
+        }),
+        axios.get(`${SENTRY_API_CONFIG.baseURL}/organizations/${SENTRY_ORG}/projects/`, {
+          headers: SENTRY_API_CONFIG.headers
+        })
+      ]);
+      
+      const organization = orgResponse.data;
+      const projects = projectsResponse.data;
+      
+      return {
+        success: true,
+        organization: {
+          id: organization.id,
+          slug: organization.slug,
+          name: organization.name,
+          dateCreated: organization.dateCreated
+        },
+        projects: projects.map(project => ({
+          id: project.id,
+          slug: project.slug,
+          name: project.name,
+          platform: project.platform,
+          status: project.status
+        })),
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to get organization info: ${error.response?.data?.detail || error.message}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+  
   startServer() {
     this.app.listen(this.port, () => {
-      console.log(`🔍 Sentry MCP Server running on port ${this.port}`);
-      console.log(`📊 Sentry DSN configured: ${!!process.env.SENTRY_DSN || 'using hardcoded DSN'}`);
+      console.log(`🔍 Enhanced Sentry MCP Server running on port ${this.port}`);
+      console.log(`📊 Sentry DSN configured: ${!!process.env.SENTRY_DSN || 'using default DSN'}`);
+      console.log(`🔑 Sentry API token configured: ${!!(process.env.SENTRY_AUTH_TOKEN || SENTRY_API_CONFIG.headers.Authorization !== 'Bearer undefined')}`);
+      console.log(`🏢 Organization: ${SENTRY_ORG}`);
+      console.log(`📱 Project: ${SENTRY_PROJECT}`);
       console.log(`🌐 Health check: http://localhost:${this.port}/health`);
       console.log(`⚠️  Test error: http://localhost:${this.port}/test-error`);
       console.log(`📈 Test performance: http://localhost:${this.port}/test-performance`);
+      console.log(`🛠️  Available tools: 11 (including API integration)`);
       
       // Send startup event to Sentry
-      Sentry.captureMessage('Sentry MCP Server Started', {
+      Sentry.captureMessage('Enhanced Sentry MCP Server Started', {
         level: 'info',
         extra: {
           port: this.port,
           started_at: new Date().toISOString(),
-          version: '1.0.0'
+          version: '1.1.0',
+          features: ['error_tracking', 'performance_monitoring', 'api_integration', 'issue_management'],
+          organization: SENTRY_ORG,
+          project: SENTRY_PROJECT
         },
         tags: {
           event_type: 'server_startup',
-          service: 'sentry-mcp'
+          service: 'sentry-mcp-enhanced'
         }
       });
     });

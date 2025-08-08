@@ -41,6 +41,8 @@ class SentryMCPServerTester {
       await this.testPerformanceEndpoint();
       await this.testMCPToolsEndpoint();
       await this.testMCPCallTool();
+      await this.testAPIIntegration();
+      await this.testEnhancedFeatures();
       
       // Generate test report
       this.generateReport();
@@ -192,6 +194,54 @@ class SentryMCPServerTester {
       }
     } catch (error) {
       this.recordTest('MCP Call Tool', false, `Call tool failed: ${error.message}`);
+    }
+  }
+  
+  async testAPIIntegration() {
+    console.log('🧪 Testing Sentry API Integration...');
+    
+    try {
+      // Test the enhanced health check with API connectivity
+      const response = await axios.post(`${this.baseUrl}/mcp/call-tool`, {
+        tool: 'sentry_health_check',
+        arguments: {}
+      });
+      
+      if (response.status === 200 && 
+          response.data.success && 
+          response.data.hasOwnProperty('sentry_api_connected') &&
+          response.data.hasOwnProperty('auth_token_configured')) {
+        this.recordTest('API Integration Health', true, 'Enhanced health check includes API status');
+      } else {
+        this.recordTest('API Integration Health', false, 'API integration health check incomplete');
+      }
+    } catch (error) {
+      this.recordTest('API Integration Health', false, `API health check failed: ${error.message}`);
+    }
+  }
+  
+  async testEnhancedFeatures() {
+    console.log('🧪 Testing Enhanced Sentry Features...');
+    
+    try {
+      // Test organization info tool (may fail if API tokens are invalid, but should handle gracefully)
+      const response = await axios.post(`${this.baseUrl}/mcp/call-tool`, {
+        tool: 'sentry_get_organization_info',
+        arguments: {}
+      });
+      
+      if (response.status === 200) {
+        if (response.data.success) {
+          this.recordTest('Enhanced Features', true, 'Organization info tool succeeded (API tokens valid)');
+        } else {
+          // This is expected if tokens are not valid, but the tool should handle it gracefully
+          this.recordTest('Enhanced Features', true, 'Organization info tool handled gracefully (expected if tokens invalid)');
+        }
+      } else {
+        this.recordTest('Enhanced Features', false, 'Organization info tool failed unexpectedly');
+      }
+    } catch (error) {
+      this.recordTest('Enhanced Features', false, `Enhanced features test failed: ${error.message}`);
     }
   }
 

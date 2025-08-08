@@ -2,6 +2,9 @@
 
 This guide provides step-by-step instructions for deploying EchoTune AI on Ubuntu with Docker, nginx, SSL, and production monitoring.
 
+> **🆕 NEW: Ubuntu 22.04 LTS Guide Available!**  
+> For the most comprehensive and up-to-date Ubuntu 22.04 deployment instructions, see our new complete guide: **[Ubuntu 22.04 Complete Deployment Guide](UBUNTU22_COMPLETE_GUIDE.md)**
+
 ## 📋 Table of Contents
 
 1. [Prerequisites](#prerequisites)
@@ -9,6 +12,25 @@ This guide provides step-by-step instructions for deploying EchoTune AI on Ubunt
 3. [Manual Deployment](#manual-deployment)
 4. [SSL Configuration](#ssl-configuration)
 5. [Troubleshooting](#troubleshooting)
+
+## 🚀 Ubuntu 22.04 LTS Quick Start
+
+For Ubuntu 22.04 LTS users, we recommend using our enhanced deployment script:
+
+```bash
+# One-command installation for Ubuntu 22.04
+curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/ubuntu22-docker-setup.sh | sudo bash
+```
+
+This script includes:
+- ✅ Docker Engine optimized for Ubuntu 22.04
+- ✅ Node.js 20.x LTS with production configuration
+- ✅ nginx with security hardening
+- ✅ SSL certificate automation
+- ✅ UFW firewall configuration
+- ✅ Application environment setup
+
+📖 **[View Complete Ubuntu 22.04 Guide →](UBUNTU22_COMPLETE_GUIDE.md)**
 
 ## 🔧 Prerequisites
 

@@ -294,92 +294,89 @@ install_nodejs() {
     log "npm version: $npm_version"
 }
 
-# Install/Update Python tools and packages
+# Install/Update Python tools and packages using virtual environment
 install_python() {
-    log "Installing/updating Python and pip packages..."
+    log "Installing/updating Python with virtual environment for Ubuntu 22.04..."
     
-    # Ensure latest pip
-    safe_execute "python3 -m pip install --upgrade pip" "Upgrading pip"
-    safe_execute "python3 -m pip install --upgrade setuptools wheel" "Upgrading setuptools and wheel"
+    # Install python3-venv to handle externally-managed-environment issue
+    safe_execute "apt-get install -y python3-venv python3-pip python3-dev" "Installing Python dependencies"
     
-    # Install essential Python packages
+    # Create virtual environment at deploy directory
+    local python_venv="${DEPLOY_DIR}/venv"
+    if [[ ! -d "$python_venv" ]]; then
+        safe_execute "python3 -m venv '$python_venv'" "Creating Python virtual environment"
+    fi
+    
+    # Activate virtual environment and install packages
+    safe_execute "source '$python_venv/bin/activate' && pip install --upgrade pip setuptools wheel" "Upgrading pip in virtual environment"
+    
+    # Install essential Python packages in virtual environment
     local python_packages=(
-        "virtualenv"
-        "pipenv"
-        "poetry"
-        "requests"
-        "aiohttp"
-        "fastapi"
-        "uvicorn"
-        "pandas"
-        "numpy"
-        "scipy"
-        "scikit-learn"
-        "matplotlib"
-        "seaborn"
-        "plotly"
-        "jupyter"
-        "pytest"
-        "black"
-        "flake8"
-        "mypy"
-        "spotipy"
-        "pymongo"
-        "psycopg2-binary"
-        "sqlalchemy"
-        "redis"
-        "celery"
-        "gunicorn"
-        "supervisor"
+        "requests>=2.31.0"
+        "spotipy>=2.22.0"
+        "python-dotenv>=1.0.0"
+        "fastapi>=0.100.0"
+        "uvicorn>=0.22.0"
+        "gunicorn>=21.0.0"
+        "pymongo>=4.6.0"
+        "supervisor>=4.2.0"
     )
     
     for package in "${python_packages[@]}"; do
-        safe_execute "python3 -m pip install '$package'" "Installing Python package: $package"
+        safe_execute "source '$python_venv/bin/activate' && pip install '$package'" "Installing Python package: $package"
     done
+    
+    # Create activation script for easy use
+    cat > "${DEPLOY_DIR}/activate-python" << 'EOF'
+#!/bin/bash
+# Activate Python virtual environment for EchoTune AI
+source /opt/echotune/venv/bin/activate
+exec "$@"
+EOF
+    chmod +x "${DEPLOY_DIR}/activate-python"
     
     # Verify Python installation
     python_version=$(python3 --version 2>/dev/null || echo "Not installed")
-    pip_version=$(python3 -m pip --version 2>/dev/null || echo "Not installed")
+    pip_version=$(source "$python_venv/bin/activate" && pip --version 2>/dev/null || echo "Not installed")
     
     log "Python version: $python_version"
-    log "pip version: $pip_version"
+    log "pip version (venv): $pip_version"
+    log "Python virtual environment: $python_venv"
 }
 
-# Enhanced Docker installation with proper updates and permissions
+# Enhanced Docker installation with Ubuntu 22.04 compatibility
 install_docker() {
-    log "Installing/updating Docker and Docker Compose..."
+    log "Installing Docker with Ubuntu 22.04 compatibility fixes..."
     
-    # Remove any existing Docker installations to start fresh
-    if [[ "$FORCE_RESET" == "true" ]] || ! command -v docker &> /dev/null; then
-        warning "Removing existing Docker installations..."
-        safe_execute "apt-get remove -y docker docker-engine docker.io containerd runc docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null || true" "Removing old Docker packages"
-        safe_execute "rm -rf /var/lib/docker /etc/docker" "Cleaning Docker directories"
-        safe_execute "groupdel docker 2>/dev/null || true" "Removing docker group"
-    fi
+    # Remove any existing Docker installations
+    safe_execute "apt-get remove -y docker docker-engine docker.io containerd runc docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null || true" "Removing old Docker packages"
+    safe_execute "rm -rf /var/lib/docker /etc/docker /usr/share/keyrings/docker-archive-keyring.gpg /etc/apt/sources.list.d/docker.list" "Cleaning Docker directories"
     
-    # Always update Docker to latest version
-    log "Installing/updating Docker to latest version..."
+    # Install prerequisites for Ubuntu 22.04
+    safe_execute "apt-get update" "Updating package lists"
+    safe_execute "apt-get install -y ca-certificates curl gnupg lsb-release" "Installing Docker prerequisites"
     
-    # Add Docker's official GPG key
-    safe_execute "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg" "Adding Docker GPG key"
+    # Add Docker's official GPG key for Ubuntu 22.04 (Jammy)
+    safe_execute "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker.gpg" "Adding Docker GPG key"
+    safe_execute "chmod a+r /usr/share/keyrings/docker.gpg" "Setting GPG key permissions"
     
-    # Add Docker repository
-    safe_execute "echo 'deb [arch=\$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable' | tee /etc/apt/sources.list.d/docker.list > /dev/null" "Adding Docker repository"
+    # Add Docker repository for Ubuntu 22.04 (Jammy Jellyfish)  
+    safe_execute "echo 'deb [arch=\$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable' | tee /etc/apt/sources.list.d/docker.list > /dev/null" "Adding Docker repository"
     
     # Update package index
     safe_execute "apt-get update" "Updating package index with Docker repository"
     
-    # Install latest Docker
+    # Install Docker Engine
     safe_execute "apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin" "Installing Docker packages"
     
-    # Start and enable Docker
+    # Configure systemd to properly manage Docker
+    safe_execute "systemctl daemon-reload" "Reloading systemd"
     safe_execute "systemctl start docker" "Starting Docker service"
     safe_execute "systemctl enable docker" "Enabling Docker service"
     
     # Create docker group and add users
     safe_execute "groupadd docker 2>/dev/null || true" "Creating docker group"
     safe_execute "usermod -aG docker '$DEPLOY_USER'" "Adding deploy user to docker group"
-    safe_execute "usermod -aG docker root" "Adding root to docker group"
     
     # Set up Docker daemon configuration for production
     safe_execute "mkdir -p /etc/docker" "Creating Docker config directory"
@@ -393,31 +390,27 @@ install_docker() {
     },
     "storage-driver": "overlay2",
     "live-restore": true,
-    "userland-proxy": false,
-    "experimental": false,
-    "metrics-addr": "127.0.0.1:9323",
-    "features": {
-        "buildkit": true
-    }
+    "userland-proxy": false
 }
 EOF
     
+    # Restart Docker with new configuration
+    safe_execute "systemctl daemon-reload" "Reloading systemd daemon"
     safe_execute "systemctl restart docker" "Restarting Docker with new configuration"
     
     # Test Docker installation
-    safe_execute "docker --version" "Verifying Docker installation"
-    safe_execute "docker compose version" "Verifying Docker Compose installation"
+    if safe_execute "docker run --rm hello-world" "Testing Docker functionality"; then
+        log "Docker installation and test successful"
+    else
+        warning "Docker test failed, but installation may still work"
+    fi
     
-    # Test Docker functionality
-    safe_execute "docker run --rm hello-world" "Testing Docker functionality"
+    # Verify versions
+    docker_version=$(docker --version 2>/dev/null || echo "Failed")
+    compose_version=$(docker compose version 2>/dev/null || echo "Failed")
     
-    # Ensure deploy user can use Docker immediately
-    safe_execute "newgrp docker" "Refreshing docker group membership"
-    
-    # Set permissive permissions on Docker socket for development
-    safe_execute "chmod 666 /var/run/docker.sock" "Setting permissive Docker socket permissions"
-    
-    log "Docker and Docker Compose installed and configured successfully"
+    log "Docker version: $docker_version"
+    log "Docker Compose version: $compose_version"
 }
 
 # Configure firewall to be fully permissive
@@ -639,33 +632,58 @@ deploy_application() {
         # Ensure proper permissions
         chmod -R 777 .
         
-        # Create production environment file
-        if [ -f \".env.production.example\" ]; then
-            cp .env.production.example .env.production
+        # Fix any existing environment file issues
+        if [ -f \".env\" ]; then
+            echo \"Fixing existing environment file issues...\"
+            # Fix malformed GEMINI_API_KEY line
+            sed -i 's/GEMINI_API_KEY[^=]/GEMINI_API_KEY=/g' .env
+            # Remove any binary characters
+            sed -i 's/[\x00-\x08\x0E-\x1F\x7F-\xFF]//g' .env
+            cp .env .env.backup.\$(date +%s)
         fi
         
-        if [ -f \".env.production\" ]; then
-            cp .env.production .env
+        # Create production environment file from template
+        if [ -f \".env.production.example\" ]; then
+            cp .env.production.example .env
         else
-            echo \"Warning: No .env.production file found, creating basic one\"
+            echo \"Creating basic production environment file\"
             cat > .env << EOF
 NODE_ENV=production
 DOMAIN=$DOMAIN
-DIGITALOCEAN_IP_PRIMARY=$PRIMARY_IP
-DIGITALOCEAN_IP_RESERVED=$RESERVED_IP
+FRONTEND_URL=https://$DOMAIN
+PORT=3000
+PRIMARY_IP=$PRIMARY_IP
 SSL_CERT_PATH=/etc/nginx/ssl/$DOMAIN.crt
 SSL_KEY_PATH=/etc/nginx/ssl/$DOMAIN.key
 BUILD_VERSION=$BUILD_VERSION
+SESSION_SECRET=\$(openssl rand -hex 32)
+JWT_SECRET=\$(openssl rand -hex 32)
+DATABASE_TYPE=mongodb
+MONGODB_URI=mongodb://localhost:27017/echotune
+DEMO_MODE=false
+DEFAULT_LLM_PROVIDER=mock
+SPOTIFY_CLIENT_ID=your_spotify_client_id_here
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
+SPOTIFY_REDIRECT_URI=https://$DOMAIN/auth/callback
+GEMINI_API_KEY=your_gemini_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 EOF
         fi
         
-        # Update environment variables for production
-        sed -i \"s/DOMAIN=.*/DOMAIN=$DOMAIN/\" .env
-        sed -i \"s/DIGITALOCEAN_IP_PRIMARY=.*/DIGITALOCEAN_IP_PRIMARY=$PRIMARY_IP/\" .env
-        sed -i \"s/DIGITALOCEAN_IP_RESERVED=.*/DIGITALOCEAN_IP_RESERVED=$RESERVED_IP/\" .env
-        sed -i \"s|SSL_CERT_PATH=.*|SSL_CERT_PATH=/etc/nginx/ssl/$DOMAIN.crt|\" .env
-        sed -i \"s|SSL_KEY_PATH=.*|SSL_KEY_PATH=/etc/nginx/ssl/$DOMAIN.key|\" .env
-        sed -i \"s/BUILD_VERSION=.*/BUILD_VERSION=$BUILD_VERSION/\" .env
+        # Update environment variables for production with proper escaping
+        sed -i \"s|^DOMAIN=.*|DOMAIN=$DOMAIN|\" .env
+        sed -i \"s|^FRONTEND_URL=.*|FRONTEND_URL=https://$DOMAIN|\" .env
+        sed -i \"s|^PRIMARY_IP=.*|PRIMARY_IP=$PRIMARY_IP|\" .env
+        sed -i \"s|^SSL_CERT_PATH=.*|SSL_CERT_PATH=/etc/nginx/ssl/$DOMAIN.crt|\" .env
+        sed -i \"s|^SSL_KEY_PATH=.*|SSL_KEY_PATH=/etc/nginx/ssl/$DOMAIN.key|\" .env
+        sed -i \"s|^BUILD_VERSION=.*|BUILD_VERSION=$BUILD_VERSION|\" .env
+        sed -i \"s|^SPOTIFY_REDIRECT_URI=.*|SPOTIFY_REDIRECT_URI=https://$DOMAIN/auth/callback|\" .env
+        
+        # Generate new session secrets
+        SESSION_SECRET=\$(openssl rand -hex 32 2>/dev/null || echo \"\$(date +%s)\$(shuf -i 1000-9999 -n 1)\")
+        JWT_SECRET=\$(openssl rand -hex 32 2>/dev/null || echo \"\$(date +%s)\$(shuf -i 1000-9999 -n 1)\")
+        sed -i \"s|^SESSION_SECRET=.*|SESSION_SECRET=\$SESSION_SECRET|\" .env
+        sed -i \"s|^JWT_SECRET=.*|JWT_SECRET=\$JWT_SECRET|\" .env
         
         # Install/update Node.js dependencies
         if [ -f \"package.json\" ]; then
@@ -674,10 +692,10 @@ EOF
             npm audit fix --force || true
         fi
         
-        # Install/update Python dependencies
-        if [ -f \"requirements.txt\" ]; then
-            echo \"Installing Python dependencies...\"
-            python3 -m pip install -r requirements.txt --upgrade
+        # Install/update Python dependencies in virtual environment
+        if [ -f \"requirements.txt\" ] && [ -d \"/opt/echotune/venv\" ]; then
+            echo \"Installing Python dependencies in virtual environment...\"
+            source /opt/echotune/venv/bin/activate && pip install -r requirements.txt --upgrade
         fi
         
         # Build application if needed

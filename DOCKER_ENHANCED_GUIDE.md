@@ -256,7 +256,109 @@ docker build --target production -t echotune-ai:latest .
 docker buildx build --platform linux/amd64,linux/arm64 -t echotune-ai:multi .
 ```
 
-## 🔍 Container Management
+## 🐧 Ubuntu 22.04 LTS Specific Setup
+
+### Quick Ubuntu 22.04 Installation
+
+For Ubuntu 22.04 LTS users, we provide an optimized setup script:
+
+```bash
+# Complete Ubuntu 22.04 setup including Docker
+curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/ubuntu22-docker-setup.sh | sudo bash
+```
+
+**What this script provides:**
+- ✅ Docker Engine optimized for Ubuntu 22.04 (Jammy Jellyfish)
+- ✅ Node.js 20.x LTS with production configuration
+- ✅ nginx with security hardening
+- ✅ UFW firewall with Docker-compatible rules
+- ✅ Application user and directory setup
+- ✅ Helpful management aliases
+
+### Ubuntu 22.04 Docker Issues and Solutions
+
+#### Issue: Docker Installation Fails
+
+**Problem**: Standard Docker installation scripts fail on Ubuntu 22.04
+
+**Solution**:
+```bash
+# Use Ubuntu 22.04 specific Docker installation
+sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg lsb-release
+
+# Add Docker's official GPG key
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Add repository for Jammy (22.04)
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+#### Issue: UFW Firewall Blocks Docker
+
+**Problem**: Ubuntu 22.04's UFW firewall interferes with Docker networking
+
+**Solution**:
+```bash
+# Configure UFW to work with Docker
+sudo ufw --force reset
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# Allow Docker daemon
+sudo ufw allow 2376/tcp
+
+# Enable firewall
+sudo ufw --force enable
+
+# Restart Docker after UFW changes
+sudo systemctl restart docker
+```
+
+#### Issue: Snap Docker Conflicts
+
+**Problem**: Ubuntu 22.04 may have snap Docker installed which conflicts
+
+**Solution**:
+```bash
+# Remove snap Docker if installed
+sudo snap remove docker --purge
+
+# Remove any conflicting packages
+sudo apt purge docker.io docker-doc docker-compose podman-docker containerd runc
+
+# Install official Docker (use script above)
+```
+
+#### Issue: systemd-resolved DNS Issues
+
+**Problem**: Docker containers can't resolve DNS on Ubuntu 22.04
+
+**Solution**:
+```bash
+# Configure Docker daemon for DNS
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json > /dev/null <<EOF
+{
+    "dns": ["8.8.8.8", "1.1.1.1"],
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "10m",
+        "max-file": "3"
+    }
+}
+EOF
+
+sudo systemctl restart docker
+```
 
 ### Service Management Commands
 

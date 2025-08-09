@@ -105,7 +105,7 @@ router.post('/workflow/execute', async (req, res) => {
         workflowPromise.then(result => {
             console.log(`Workflow ${result.workflowId} completed:`, result);
         }).catch(error => {
-            console.error(`Workflow failed:`, error);
+            console.error('Workflow failed:', error);
         });
         
     } catch (error) {

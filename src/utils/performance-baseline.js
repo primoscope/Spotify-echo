@@ -398,20 +398,20 @@ class PerformanceBaseline {
             critical: '🚨'
         };
         
-        let report = `# Performance Baseline Report\n\n`;
+        let report = '# Performance Baseline Report\n\n';
         report += `**Generated:** ${timestamp}\n`;
         report += `**Duration:** ${Math.round(duration / 1000)}s\n`;
         report += `**Status:** ${statusEmoji[summary.status] || '❓'} ${summary.status.toUpperCase()}\n\n`;
         
         // Environment info
-        report += `## Environment\n`;
+        report += '## Environment\n';
         report += `- Node.js: ${environment.nodeVersion}\n`;
         report += `- Platform: ${environment.platform}\n`;
         report += `- CPUs: ${environment.cpus}\n`;
         report += `- Memory: ${Math.round(environment.memory.heapUsed / 1024 / 1024)}MB used\n\n`;
         
         // Overall metrics
-        report += `## Overall Performance\n`;
+        report += '## Overall Performance\n';
         report += `- **Average Response Time:** ${Math.round(summary.overallAverageResponseTime)}ms\n`;
         report += `- **P95 Response Time:** ${Math.round(summary.overallP95ResponseTime)}ms\n`;
         report += `- **Requests per Second:** ${Math.round(summary.overallRequestsPerSecond)}\n`;
@@ -419,7 +419,7 @@ class PerformanceBaseline {
         report += `- **Healthy Endpoints:** ${summary.healthyEndpoints}/${summary.totalEndpoints}\n\n`;
         
         // Endpoint details
-        report += `## Endpoint Performance\n\n`;
+        report += '## Endpoint Performance\n\n';
         for (const [name, endpoint] of Object.entries(this.results.endpoints)) {
             const status = endpoint.summary.errorRate < 5 ? '✅' : '❌';
             const critical = endpoint.critical ? '🔴' : '🔵';
@@ -435,7 +435,7 @@ class PerformanceBaseline {
         
         // Errors
         if (this.results.errors.length > 0) {
-            report += `## Errors\n\n`;
+            report += '## Errors\n\n';
             for (const error of this.results.errors) {
                 report += `- **${error.endpoint}:** ${error.error}\n`;
             }

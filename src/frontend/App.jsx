@@ -1,4 +1,4 @@
-import { BrowserRouter as _Router, Routes as _Routes, Route as _Route, Navigate as _Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Box as _Box, AppBar as _AppBar, Toolbar as _Toolbar, Typography as _Typography, Container as _Container, Tabs as _Tabs, Tab as _Tab } from '@mui/material';
 import { useState } from 'react';
 import ThemeProvider, { ThemeToggle as _ThemeToggle } from './components/ThemeProvider';

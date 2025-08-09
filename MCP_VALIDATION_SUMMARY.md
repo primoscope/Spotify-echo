@@ -1,13 +1,13 @@
 # Enhanced MCP Validation Report
 
-## Overall Status: FAILED
-- **Score**: 0%
-- **Duration**: 0s
-- **Tests**: 64 total (47 passed, 0 failed)
+## Overall Status: WARNING
+- **Score**: 77%
+- **Duration**: 6s
+- **Tests**: 91 total (69 passed, 2 failed)
 
 ## Category Results
-- **installation**: 10 passed, 0 failed
-- **configuration**: 15 passed, 0 failed
+- **installation**: 20 passed, 0 failed
+- **configuration**: 27 passed, 2 failed
 - **health**: 1 passed, 0 failed
 - **performance**: 4 passed, 0 failed
 - **security**: 3 passed, 0 failed
@@ -18,8 +18,9 @@
 - Run validation pipeline regularly
 
 ## Next Steps
+- Address failed tests before deployment
 - Review warnings for potential issues
 - Set up continuous monitoring
 - Schedule regular validation runs
 
-Generated: 2025-08-09T06:01:22.984Z
+Generated: 2025-08-09T07:06:45.789Z

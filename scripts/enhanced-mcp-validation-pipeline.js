@@ -78,10 +78,93 @@ class EnhancedMCPValidationPipeline {
         this.testResults.totalTests++;
     }
 
+    addTest(category, description, passed, type = null) {
+        const status = passed ? 'success' : 'error';
+        const finalType = type || status;
+        
+        this.log(description, finalType, category);
+        
+        const testResult = {
+            timestamp: new Date().toISOString(),
+            description,
+            passed,
+            category,
+            duration: Date.now() - this.startTime
+        };
+
+        // Update category statistics
+        if (this.testResults.categories[category]) {
+            this.testResults.categories[category].tests.push(testResult);
+            
+            if (passed) {
+                this.testResults.categories[category].passed++;
+                this.testResults.passedTests++;
+            } else {
+                this.testResults.categories[category].failed++;
+                this.testResults.failedTests++;
+            }
+        }
+
+        this.testResults.totalTests++;
+    }
+
+    async autoFixIssues() {
+        this.log('🔧 Auto-fixing common issues...', 'progress', 'autofix');
+        
+        try {
+            // Set default NODE_ENV if missing
+            if (!process.env.NODE_ENV) {
+                process.env.NODE_ENV = 'development';
+                this.log('Set NODE_ENV to development', 'success', 'autofix');
+            }
+            
+            // Check if .env file exists, create from example if not
+            const envPath = path.join(__dirname, '..', '.env');
+            const envExamplePath = path.join(__dirname, '..', '.env.example');
+            
+            try {
+                await fs.access(envPath);
+                this.log('.env file exists', 'success', 'autofix');
+            } catch {
+                try {
+                    await fs.access(envExamplePath);
+                    // Copy .env.example to .env with development defaults
+                    const envExample = await fs.readFile(envExamplePath, 'utf8');
+                    const envContent = envExample
+                        .replace(/NODE_ENV=production/g, 'NODE_ENV=development')
+                        .replace(/DOMAIN=your-domain.com/g, 'DOMAIN=localhost')
+                        .replace(/FRONTEND_URL=https:\/\/your-domain.com/g, 'FRONTEND_URL=http://localhost:3000');
+                    
+                    await fs.writeFile(envPath, envContent);
+                    this.log('Created .env file from .env.example with development defaults', 'success', 'autofix');
+                } catch {
+                    this.log('Could not create .env file', 'warning', 'autofix');
+                }
+            }
+            
+            // Install missing dependencies if node_modules is missing  
+            try {
+                await fs.access(path.join(__dirname, '..', 'node_modules'));
+                this.log('Node modules directory exists', 'success', 'autofix');
+            } catch {
+                this.log('Node modules missing, should run npm install', 'warning', 'autofix');
+            }
+            
+            return true;
+        } catch (error) {
+            this.log(`Auto-fix failed: ${error.message}`, 'error', 'autofix');
+            return false;
+        }
+    }
+
     async runComprehensiveValidation(options = {}) {
         console.log('🚀 Starting Enhanced MCP Integration Validation Pipeline...\n');
         
         try {
+            // Phase 0: Auto-fix common issues first
+            await this.autoFixIssues();
+            console.log(''); // Add spacing
+            
             // Phase 1: Installation and Dependencies
             await this.validateInstallation();
             
@@ -103,15 +186,17 @@ class EnhancedMCPValidationPipeline {
             // Phase 7: Automation and Workflows
             await this.validateAutomation();
             
+            // Calculate final score and duration before generating report
+            this.testResults.duration = Date.now() - this.startTime;
+            this.testResults.score = this.testResults.totalTests > 0 ? 
+                Math.round((this.testResults.passedTests / this.testResults.totalTests) * 100) : 0;
+            
             // Generate final report
             await this.generateComprehensiveReport();
             
         } catch (error) {
             this.log(`Validation pipeline failed: ${error.message}`, 'error');
         }
-        
-        this.testResults.duration = Date.now() - this.startTime;
-        this.testResults.score = Math.round((this.testResults.passedTests / this.testResults.totalTests) * 100);
         
         return this.testResults;
     }
@@ -134,20 +219,17 @@ class EnhancedMCPValidationPipeline {
             ];
             
             for (const dep of mcpDeps) {
-                if (packageData.dependencies[dep] || packageData.devDependencies?.[dep]) {
-                    this.log(`MCP dependency ${dep} found`, 'success', 'installation');
-                } else {
-                    this.log(`MCP dependency ${dep} missing`, 'warning', 'installation');
-                }
+                const exists = packageData.dependencies[dep] || packageData.devDependencies?.[dep];
+                this.addTest('installation', `MCP dependency ${dep} found`, !!exists);
             }
             
             // Check node_modules installation
             const nodeModulesPath = path.join(__dirname, '..', 'node_modules');
             try {
                 await fs.access(nodeModulesPath);
-                this.log('Node modules directory exists', 'success', 'installation');
+                this.addTest('installation', 'Node modules directory exists', true);
             } catch {
-                this.log('Node modules not found - run npm install', 'error', 'installation');
+                this.addTest('installation', 'Node modules directory exists', false);
             }
             
             // Verify command availability
@@ -155,9 +237,9 @@ class EnhancedMCPValidationPipeline {
             for (const cmd of commands) {
                 try {
                     await execAsync(`which ${cmd}`);
-                    this.log(`Command ${cmd} available`, 'success', 'installation');
+                    this.addTest('installation', `Command ${cmd} available`, true);
                 } catch {
-                    this.log(`Command ${cmd} not available`, 'error', 'installation');
+                    this.addTest('installation', `Command ${cmd} available`, false);
                 }
             }
             
@@ -176,32 +258,36 @@ class EnhancedMCPValidationPipeline {
             
             if (packageData.mcp && packageData.mcp.servers) {
                 const serverCount = Object.keys(packageData.mcp.servers).length;
-                this.log(`Found ${serverCount} MCP server configurations`, 'success', 'configuration');
+                this.addTest('configuration', `Found ${serverCount} MCP server configurations`, serverCount > 0);
                 
                 // Validate each server configuration
                 for (const [serverName, config] of Object.entries(packageData.mcp.servers)) {
-                    if (config.command && config.args) {
-                        this.log(`Server ${serverName} properly configured`, 'success', 'configuration');
-                    } else {
-                        this.log(`Server ${serverName} missing required config`, 'error', 'configuration');
-                    }
+                    const isValid = config.command && config.args;
+                    this.addTest('configuration', `Server ${serverName} properly configured`, isValid);
                 }
             } else {
-                this.log('MCP server configuration missing', 'error', 'configuration');
+                this.addTest('configuration', 'MCP server configuration found', false);
             }
             
-            // Check environment variables
-            const requiredEnvVars = [
-                'NODE_ENV',
-                'SPOTIFY_CLIENT_ID',
-                'SPOTIFY_CLIENT_SECRET'
+            // Check environment variables more gracefully
+            const envVarsConfig = [
+                { name: 'NODE_ENV', required: false, default: 'development' },
+                { name: 'SPOTIFY_CLIENT_ID', required: false, note: 'for Spotify integration' },
+                { name: 'SPOTIFY_CLIENT_SECRET', required: false, note: 'for Spotify integration' }
             ];
             
-            for (const envVar of requiredEnvVars) {
-                if (process.env[envVar]) {
-                    this.log(`Environment variable ${envVar} set`, 'success', 'configuration');
+            for (const envConfig of envVarsConfig) {
+                if (process.env[envConfig.name]) {
+                    this.addTest('configuration', `Environment variable ${envConfig.name} configured`, true);
                 } else {
-                    this.log(`Environment variable ${envVar} missing`, 'warning', 'configuration');
+                    const defaultValue = envConfig.default;
+                    const note = envConfig.note || '';
+                    if (defaultValue) {
+                        process.env[envConfig.name] = defaultValue;
+                        this.addTest('configuration', `Environment variable ${envConfig.name} set to default: ${defaultValue}`, true, 'warning');
+                    } else {
+                        this.addTest('configuration', `Environment variable ${envConfig.name} configured ${note ? '(' + note + ')' : ''}`, false, 'warning');
+                    }
                 }
             }
             

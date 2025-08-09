@@ -127,7 +127,7 @@ class PerformanceManager {
 
       has: (key) => {
         const entry = this.cacheStorage.get(key);
-        return entry && Date.now() <= entry.expiresAt;
+        return entry ? Date.now() <= entry.expiresAt : false;
       },
 
       delete: (key) => {
@@ -290,22 +290,26 @@ class PerformanceManager {
 
     for (let i = 0; i < items.length; i += batchSize) {
       const batch = items.slice(i, i + batchSize);
-      const batchPromises = [];
+      
+      // Process batch with concurrency control
+      const processChunk = async (chunk) => {
+        const chunkPromises = chunk.map((item, j) => 
+          this.rateLimitedRequest(limiterName, () => processFn(item), options)
+            .then((result) => {
+              results.push({ item, result, index: i + j });
+            })
+            .catch((error) => {
+              errors.push({ item, error, index: i + j });
+            })
+        );
+        await Promise.all(chunkPromises);
+      };
 
-      for (let j = 0; j < batch.length && j < concurrency; j++) {
-        const item = batch[j];
-        const promise = this.rateLimitedRequest(limiterName, () => processFn(item), options)
-          .then((result) => {
-            results.push({ item, result, index: i + j });
-          })
-          .catch((error) => {
-            errors.push({ item, error, index: i + j });
-          });
-
-        batchPromises.push(promise);
+      // Split batch into chunks based on concurrency
+      for (let j = 0; j < batch.length; j += concurrency) {
+        const chunk = batch.slice(j, j + concurrency);
+        await processChunk(chunk);
       }
-
-      await Promise.all(batchPromises);
 
       // Add delay between batches
       if (i + batchSize < items.length) {

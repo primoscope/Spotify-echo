@@ -330,6 +330,7 @@ class EnhancedFileMCP {
         performance: Date.now() - startTime
       };
       
+
       // Check for security issues
       const dangerousPatterns = this.validationRules.get('dangerousPatterns');
       const fileExtension = path.extname(validatedPath).toLowerCase();
@@ -338,6 +339,7 @@ class EnhancedFileMCP {
         if (pattern.test(content)) {
           // Check if this is a valid configuration context
           if (!this.isValidConfigurationContext(content, pattern, fileExtension)) {
+
             analysis.securityIssues.push({
               pattern: pattern.source,
               type: 'dangerous_code',

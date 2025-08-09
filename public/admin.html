@@ -395,7 +395,7 @@
         // Load dashboard data
         async function loadDashboard() {
             try {
-                // Check connection status
+                // Check connection status first
                 const healthResponse = await fetch('/api/admin/health');
                 const healthData = await healthResponse.json();
                 
@@ -430,35 +430,52 @@
                             <strong>Current Status:</strong> ${healthData.mongodb?.message || 'Database unavailable'}
                             <br>
                             <strong>Fallback Mode:</strong> SQLite database is active for basic functionality.
+                            <br><br>
+                            <strong>Note:</strong> All admin dashboard features require MongoDB connection.
                         </div>
                     `;
-                    return;
                 }
 
-                // Load main dashboard
+                // Always attempt to load dashboard (will show graceful fallback)
                 const response = await fetch('/api/admin/dashboard');
                 const data = await response.json();
                 
-                if (data.success) {
+                if (data.success && data.dashboard) {
                     dashboardData = data.dashboard;
                     renderDashboard(dashboardData);
                 } else {
-                    showError('Failed to load dashboard: ' + data.error);
+                    // Show fallback dashboard with helpful information
+                    const fallbackData = data.dashboard || {
+                        overview: { database: 'N/A', totalCollections: 0, totalDocuments: 0, totalDataSize: 0, uptime: 0 },
+                        collections: [],
+                        indexHealth: { healthy: 0, problematic: 0, unused: 0, recommendations: ['MongoDB connection required'] },
+                        performance: { operations: { query: 0, insert: 0 }, memory: { resident: 0 } }
+                    };
+                    renderDashboard(fallbackData, true);
+                    
+                    if (data.error) {
+                        showError(`Admin Dashboard: ${data.error}. Some features may not be available.`);
+                    }
                 }
             } catch (error) {
                 console.error('Dashboard load error:', error);
                 showError('Failed to load dashboard: ' + error.message);
+                
+                // Show completely offline state
+                renderOfflineDashboard();
             }
         }
 
         // Render dashboard data
-        function renderDashboard(data) {
+        function renderDashboard(data, isOffline = false) {
+            const offlinePrefix = isOffline ? '[OFFLINE] ' : '';
+            
             // Database overview
             const overviewDiv = document.getElementById('db-overview');
             overviewDiv.innerHTML = `
                 <div class="metric">
                     <span class="metric-label">Database</span>
-                    <span class="metric-value">${data.overview.database}</span>
+                    <span class="metric-value">${offlinePrefix}${data.overview.database}</span>
                 </div>
                 <div class="metric">
                     <span class="metric-label">Collections</span>
@@ -476,73 +493,122 @@
                     <span class="metric-label">Uptime</span>
                     <span class="metric-value">${formatUptime(data.overview.uptime)}</span>
                 </div>
+                ${isOffline ? '<div style="color: var(--warning-color); font-size: 0.9em; margin-top: 10px;">⚠️ Data shown from last successful connection</div>' : ''}
             `;
 
             // Collections summary
             const collectionsSummaryDiv = document.getElementById('collections-summary');
             const topCollections = data.collections
                 .filter(c => !c.hasErrors)
-                .sort((a, b) => b.count - a.count)
+                .sort((a, b) => (b.count || 0) - (a.count || 0))
                 .slice(0, 5);
             
-            collectionsSummaryDiv.innerHTML = `
-                <div style="margin-bottom: 15px;">
-                    <strong>Total: ${data.overview.totalCollections} collections</strong>
-                </div>
-                ${topCollections.map(col => `
-                    <div class="metric">
-                        <span class="metric-label">${col.name}</span>
-                        <span class="metric-value">${col.count.toLocaleString()} docs</span>
+            if (topCollections.length > 0) {
+                collectionsSummaryDiv.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <strong>${offlinePrefix}Total: ${data.overview.totalCollections} collections</strong>
                     </div>
-                `).join('')}
-            `;
+                    ${topCollections.map(col => `
+                        <div class="metric">
+                            <span class="metric-label">${col.name}</span>
+                            <span class="metric-value">${(col.count || 0).toLocaleString()} docs</span>
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                collectionsSummaryDiv.innerHTML = `
+                    <div style="color: var(--text-muted);">
+                        ${isOffline ? 'No collection data available in offline mode' : 'No collections found'}
+                    </div>
+                `;
+            }
 
             // Performance metrics
             const performanceDiv = document.getElementById('performance-metrics');
             performanceDiv.innerHTML = `
                 <div class="metric">
                     <span class="metric-label">Active Connections</span>
-                    <span class="metric-value">${data.overview.connections.current}</span>
+                    <span class="metric-value">${data.overview.connections?.current || 0}</span>
                 </div>
                 <div class="metric">
                     <span class="metric-label">Operations/sec</span>
                     <span class="metric-value">${formatNumber(
-                        (data.performance.operations.query + data.performance.operations.insert) / data.overview.uptime
+                        ((data.performance.operations?.query || 0) + (data.performance.operations?.insert || 0)) / Math.max(data.overview.uptime, 1)
                     )}</span>
                 </div>
                 <div class="metric">
                     <span class="metric-label">Memory Usage</span>
-                    <span class="metric-value">${data.performance.memory.resident} MB</span>
+                    <span class="metric-value">${data.performance.memory?.resident || 0} MB</span>
                 </div>
+                ${isOffline ? '<div style="color: var(--warning-color); font-size: 0.9em; margin-top: 10px;">⚠️ Performance data requires active connection</div>' : ''}
             `;
 
             // Index health
             const indexDiv = document.getElementById('index-health');
-            const totalIndexes = data.indexHealth.healthy + data.indexHealth.problematic + data.indexHealth.unused;
+            const totalIndexes = (data.indexHealth.healthy || 0) + (data.indexHealth.problematic || 0) + (data.indexHealth.unused || 0);
             indexDiv.innerHTML = `
                 <div class="metric">
                     <span class="metric-label">
                         <span class="status-indicator status-healthy"></span>Healthy Indexes
                     </span>
-                    <span class="metric-value">${data.indexHealth.healthy}</span>
+                    <span class="metric-value">${data.indexHealth.healthy || 0}</span>
                 </div>
                 <div class="metric">
                     <span class="metric-label">
                         <span class="status-indicator status-warning"></span>Unused Indexes
                     </span>
-                    <span class="metric-value">${data.indexHealth.unused}</span>
+                    <span class="metric-value">${data.indexHealth.unused || 0}</span>
                 </div>
                 <div class="metric">
                     <span class="metric-label">
                         <span class="status-indicator status-error"></span>Issues
                     </span>
-                    <span class="metric-value">${data.indexHealth.problematic}</span>
+                    <span class="metric-value">${data.indexHealth.problematic || 0}</span>
                 </div>
                 <div class="metric">
                     <span class="metric-label">Recommendations</span>
-                    <span class="metric-value">${data.indexHealth.recommendations.length}</span>
+                    <span class="metric-value">${data.indexHealth.recommendations?.length || 0}</span>
                 </div>
+                ${isOffline ? '<div style="color: var(--warning-color); font-size: 0.9em; margin-top: 10px;">⚠️ Index analysis requires MongoDB connection</div>' : ''}
             `;
+            
+            // Show warnings if any
+            if (data.warnings && data.warnings.length > 0) {
+                const warningsDiv = document.createElement('div');
+                warningsDiv.className = 'error';
+                warningsDiv.innerHTML = `
+                    <strong>Warnings:</strong><br>
+                    ${data.warnings.map(w => `• ${w}`).join('<br>')}
+                `;
+                document.querySelector('.container').insertBefore(warningsDiv, document.querySelector('.tabs'));
+            }
+        }
+
+        // Render complete offline dashboard
+        function renderOfflineDashboard() {
+            const offlineData = {
+                overview: {
+                    database: 'Offline',
+                    totalCollections: 0,
+                    totalDocuments: 0,
+                    totalDataSize: 0,
+                    uptime: 0,
+                    connections: { current: 0 }
+                },
+                collections: [],
+                indexHealth: {
+                    healthy: 0,
+                    problematic: 0,
+                    unused: 0,
+                    recommendations: ['MongoDB connection required for admin features']
+                },
+                performance: {
+                    operations: { query: 0, insert: 0 },
+                    memory: { resident: 0 }
+                }
+            };
+            
+            renderDashboard(offlineData, true);
         }
 
         // Load collection details

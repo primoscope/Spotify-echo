@@ -8,6 +8,7 @@ describe('MongoDBManager Admin Tools', () => {
   let mongoDBManager;
   let mockClient;
   let mockDb;
+  let mockAdminDb;
   let mockCollection;
 
   beforeEach(() => {
@@ -16,27 +17,43 @@ describe('MongoDBManager Admin Tools', () => {
     
     mockCollection = {
       stats: jest.fn(),
-      indexes: jest.fn(),
-      find: jest.fn(),
-      findOne: jest.fn(),
-      countDocuments: jest.fn(),
-      aggregate: jest.fn()
+      indexes: jest.fn().mockResolvedValue([{ name: '_id_', key: { _id: 1 } }]),
+      find: jest.fn().mockReturnValue({
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        toArray: jest.fn().mockResolvedValue([])
+      }),
+      findOne: jest.fn().mockResolvedValue({}),
+      countDocuments: jest.fn().mockResolvedValue(0),
+      aggregate: jest.fn().mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([])
+      })
+    };
+
+    mockAdminDb = {
+      command: jest.fn().mockResolvedValue({ ok: 1 })
     };
     
     mockDb = {
-      listCollections: jest.fn(),
-      collection: jest.fn().mockReturnValue(mockCollection),
-      admin: jest.fn().mockReturnValue({
-        ping: jest.fn(),
-        command: jest.fn()
+      listCollections: jest.fn().mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([
+          { name: 'echotune_users' },
+          { name: 'echotune_listening_history' }
+        ])
       }),
+      collection: jest.fn().mockReturnValue(mockCollection),
+      admin: jest.fn().mockReturnValue(mockAdminDb),
       databaseName: 'echotune'
     };
     
     mockClient = {
-      connect: jest.fn(),
-      close: jest.fn(),
-      db: jest.fn().mockReturnValue(mockDb),
+      connect: jest.fn().mockResolvedValue(),
+      close: jest.fn().mockResolvedValue(),
+      db: jest.fn((name) => {
+        if (name === 'admin') return mockAdminDb;
+        return mockDb;
+      }),
       on: jest.fn()
     };
     
@@ -249,25 +266,25 @@ describe('MongoDBManager Admin Tools', () => {
             planSummary: 'COLLSCAN',
             docsExamined: 1000,
             docsReturned: 1,
-            efficiency: '0.10%'
+            keysExamined: 0
           }
         ],
         recommendations: expect.arrayContaining([
-          expect.objectContaining({
-            type: 'performance',
-            collection: 'echotune_users',
-            severity: 'high',
-            description: expect.stringContaining('collection scans')
-          })
+          'Found 1 slow queries in the last 24 hours',
+          'Consider adding indexes for frequently slow queries',
+          'Review query patterns and optimize where possible'
         ])
       });
     });
 
-    it('should handle profiling access errors', async () => {
+    it('should handle profiling access errors gracefully', async () => {
       mockDb.admin().command.mockRejectedValue(new Error('Profiling not available'));
 
-      await expect(mongoDBManager.analyzeSlowQueries())
-        .rejects.toThrow('Profiling not available');
+      const result = await mongoDBManager.analyzeSlowQueries();
+      
+      expect(result.error).toBe('Profiling not available');
+      expect(result.queries).toEqual([]);
+      expect(result.recommendations).toContain('MongoDB profiling is disabled or not accessible');
     });
   });
 
@@ -334,13 +351,17 @@ describe('MongoDBManager Admin Tools', () => {
       expect(result.data).toContain('2,Jane,25');
     });
 
-    it('should reject export for non-existent collection', async () => {
+    it('should handle export for non-existent collection gracefully', async () => {
       mockDb.listCollections.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([])
+        toArray: jest.fn().mockResolvedValue([]) // No collections found
       });
 
-      await expect(mongoDBManager.exportCollectionData('nonexistent'))
-        .rejects.toThrow("Collection 'nonexistent' not found");
+      const result = await mongoDBManager.exportCollectionData('nonexistent');
+      
+      expect(result.error).toBe("Collection 'nonexistent' not found");
+      expect(result.count).toBe(0);
+      expect(result.data).toEqual([]);
+      expect(result.recommendations).toContain('Verify collection name spelling');
     });
   });
 

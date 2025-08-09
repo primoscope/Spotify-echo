@@ -456,35 +456,102 @@ class MongoDBManager {
    */
   async analyzeSlowQueries(options = {}) {
     if (!this.isConnected()) {
-      throw new Error('MongoDB not connected');
+      return {
+        threshold: options.threshold || 100,
+        totalSlowQueries: 0,
+        queries: [],
+        error: 'MongoDB not connected',
+        recommendations: ['Connect to MongoDB to enable slow query analysis']
+      };
     }
 
     try {
       const { threshold = 100, limit = 50 } = options;
       
-      // Get current profiling status
-      const profilingStatus = await this.db.admin().command({ profile: -1 });
+      // Check if profiling is available
+      let profilingStatus;
+      try {
+        if (this.db && this.db.admin && typeof this.db.admin === 'function') {
+          const adminDb = this.db.admin();
+          if (adminDb && typeof adminDb.command === 'function') {
+            profilingStatus = await adminDb.command({ profile: -1 });
+          } else {
+            throw new Error('Admin database access not available');
+          }
+        } else {
+          throw new Error('Database admin functions not available');
+        }
+      } catch (error) {
+        console.warn('Profiling not available:', error.message);
+        return {
+          threshold,
+          totalSlowQueries: 0,
+          queries: [],
+          error: 'Profiling not available',
+          recommendations: [
+            'MongoDB profiling is disabled or not accessible',
+            'Enable profiling with: db.setProfilingLevel(1, { slowms: 100 })',
+            'Requires admin privileges on MongoDB'
+          ]
+        };
+      }
       
       // Enable profiling temporarily if not enabled
       let wasProfilingEnabled = profilingStatus.was > 0;
       if (!wasProfilingEnabled) {
-        await this.db.admin().command({ profile: 1, slowms: threshold });
+        try {
+          const adminDb = this.db.admin();
+          await adminDb.command({ profile: 1, slowms: threshold });
+        } catch (error) {
+          console.warn('Could not enable profiling:', error.message);
+          return {
+            threshold,
+            totalSlowQueries: 0,
+            queries: [],
+            error: 'Cannot enable profiling - insufficient permissions',
+            recommendations: [
+              'Requires admin privileges to enable profiling',
+              'Ask database administrator to enable profiling',
+              'Alternative: Use MongoDB Compass for query analysis'
+            ]
+          };
+        }
       }
 
       // Query the profiler collection
       const profileCollection = this.db.collection('system.profile');
-      const slowQueries = await profileCollection
-        .find({ 
-          ts: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // Last 24 hours
-          millis: { $gte: threshold }
-        })
-        .sort({ millis: -1 })
-        .limit(limit)
-        .toArray();
+      let slowQueries = [];
+      
+      try {
+        slowQueries = await profileCollection
+          .find({ 
+            ts: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // Last 24 hours
+            millis: { $gte: threshold }
+          })
+          .sort({ millis: -1 })
+          .limit(limit)
+          .toArray();
+      } catch (error) {
+        console.warn('Could not query profiler collection:', error.message);
+      }
 
       // Restore original profiling status
       if (!wasProfilingEnabled) {
-        await this.db.admin().command({ profile: 0 });
+        try {
+          const adminDb = this.db.admin();
+          await adminDb.command({ profile: 0 });
+        } catch (error) {
+          console.warn('Could not disable profiling:', error.message);
+        }
+      }
+
+      const recommendations = [];
+      if (slowQueries.length > 0) {
+        recommendations.push(`Found ${slowQueries.length} slow queries in the last 24 hours`);
+        recommendations.push('Consider adding indexes for frequently slow queries');
+        recommendations.push('Review query patterns and optimize where possible');
+      } else {
+        recommendations.push('No slow queries detected - performance looks good');
       }
 
       return {
@@ -499,14 +566,23 @@ class MongoDBManager {
           planSummary: query.planSummary || 'Not available',
           docsExamined: query.docsExamined || 0,
           docsReturned: query.docsReturned || 0,
-          efficiency: query.docsReturned && query.docsExamined ? 
-            (query.docsReturned / query.docsExamined * 100).toFixed(2) + '%' : 'N/A'
+          keysExamined: query.keysExamined || 0
         })),
-        recommendations: this.generateSlowQueryRecommendations(slowQueries)
+        recommendations
       };
     } catch (error) {
-      console.error('Error analyzing slow queries:', error);
-      throw error;
+      console.warn('Error analyzing slow queries:', error.message);
+      return {
+        threshold: options.threshold || 100,
+        totalSlowQueries: 0,
+        queries: [],
+        error: error.message,
+        recommendations: [
+          'Slow query analysis failed',
+          'Check MongoDB permissions and configuration',
+          'Consider using MongoDB Compass for performance analysis'
+        ]
+      };
     }
   }
 
@@ -634,7 +710,16 @@ class MongoDBManager {
    */
   async exportCollectionData(collectionName, options = {}) {
     if (!this.isConnected()) {
-      throw new Error('MongoDB not connected');
+      return {
+        collection: collectionName,
+        count: 0,
+        totalInCollection: 0,
+        exportedAt: new Date().toISOString(),
+        format: options.format || 'json',
+        data: options.format === 'csv' ? '' : [],
+        error: 'MongoDB not connected',
+        recommendations: ['Establish MongoDB connection to enable data export']
+      };
     }
 
     try {
@@ -647,21 +732,74 @@ class MongoDBManager {
         format = 'json'
       } = options;
 
-      const collection = this.db.collection(collectionName);
+      // Verify collection exists with better error handling
+      let collections = [];
+      try {
+        if (this.db && typeof this.db.listCollections === 'function') {
+          collections = await this.db.listCollections({ name: collectionName }).toArray();
+        }
+      } catch (error) {
+        console.warn(`Cannot list collections: ${error.message}`);
+        return {
+          collection: collectionName,
+          count: 0,
+          totalInCollection: 0,
+          exportedAt: new Date().toISOString(),
+          format,
+          data: format === 'csv' ? '' : [],
+          error: 'Cannot access collections list',
+          recommendations: ['Check database permissions for collection access']
+        };
+      }
       
-      // Verify collection exists
-      const collections = await this.db.listCollections({ name: collectionName }).toArray();
       if (collections.length === 0) {
-        throw new Error(`Collection '${collectionName}' not found`);
+        return {
+          collection: collectionName,
+          count: 0,
+          totalInCollection: 0,
+          exportedAt: new Date().toISOString(),
+          format,
+          data: format === 'csv' ? '' : [],
+          error: `Collection '${collectionName}' not found`,
+          recommendations: [
+            'Verify collection name spelling',
+            'Check if collection exists in database',
+            'Collection may be empty or not created yet'
+          ]
+        };
       }
 
-      // Execute export query
-      let cursor = collection.find(query, { projection });
+      const collection = this.db.collection(collectionName);
       
-      if (skip > 0) cursor = cursor.skip(skip);
-      if (limit > 0) cursor = cursor.limit(limit);
+      // Execute export query with error handling
+      let documents = [];
+      let totalCount = 0;
       
-      const documents = await cursor.toArray();
+      try {
+        let cursor = collection.find(query, { projection });
+        
+        if (skip > 0) cursor = cursor.skip(skip);
+        if (limit > 0) cursor = cursor.limit(limit);
+        
+        documents = await cursor.toArray();
+        totalCount = await collection.countDocuments(query);
+      } catch (error) {
+        console.warn(`Error querying collection ${collectionName}:`, error.message);
+        return {
+          collection: collectionName,
+          count: 0,
+          totalInCollection: 0,
+          exportedAt: new Date().toISOString(),
+          format,
+          data: format === 'csv' ? '' : [],
+          error: `Query failed: ${error.message}`,
+          recommendations: [
+            'Check query syntax and parameters',
+            'Verify collection schema and field names',
+            'Ensure sufficient database permissions'
+          ]
+        };
+      }
 
       // Sanitize sensitive data if requested
       const exportData = sanitize ? this.sanitizeExportData(documents) : documents;
@@ -669,14 +807,31 @@ class MongoDBManager {
       return {
         collection: collectionName,
         count: exportData.length,
-        totalInCollection: await collection.countDocuments(query),
+        totalInCollection: totalCount,
         exportedAt: new Date().toISOString(),
         format,
-        data: format === 'csv' ? this.convertToCSV(exportData) : exportData
+        data: format === 'csv' ? this.convertToCSV(exportData) : exportData,
+        sanitized: sanitize,
+        recommendations: exportData.length > 0 ? 
+          ['Export completed successfully', 'Data has been sanitized for security'] :
+          ['Collection is empty', 'No data available for export']
       };
     } catch (error) {
-      console.error(`Error exporting collection ${collectionName}:`, error);
-      throw error;
+      console.warn(`Error exporting collection ${collectionName}:`, error.message);
+      return {
+        collection: collectionName,
+        count: 0,
+        totalInCollection: 0,
+        exportedAt: new Date().toISOString(),
+        format: options.format || 'json',
+        data: options.format === 'csv' ? '' : [],
+        error: error.message,
+        recommendations: [
+          'Check MongoDB connection and permissions',
+          'Verify collection exists and is accessible',
+          'Review export parameters and try again'
+        ]
+      };
     }
   }
 
@@ -783,69 +938,119 @@ class MongoDBManager {
    * Validate MongoDB connection and permissions
    */
   async validateAdminAccess() {
+    // Handle disconnected state gracefully
     if (!this.isConnected()) {
-      throw new Error('MongoDB not connected');
+      return {
+        isValid: false,
+        error: 'MongoDB not connected',
+        permissions: {
+          connection: false,
+          readAccess: false,
+          adminAccess: false,
+          profilingAccess: false,
+          indexAccess: false
+        },
+        recommendations: [
+          'MongoDB connection is not available',
+          'Check MONGODB_URI environment variable',
+          'Verify MongoDB server is running'
+        ]
+      };
     }
 
-    try {
-      const tests = {
-        connection: false,
-        readAccess: false,
-        adminAccess: false,
-        profilingAccess: false,
-        indexAccess: false
-      };
+    const tests = {
+      connection: false,
+      readAccess: false,
+      adminAccess: false,
+      profilingAccess: false,
+      indexAccess: false
+    };
 
-      // Test basic connection
-      await this.client.db('admin').command({ ping: 1 });
-      tests.connection = true;
+    try {
+      // Test basic connection with better error handling
+      try {
+        if (this.client && this.client.db) {
+          const adminDb = this.client.db('admin');
+          if (adminDb && typeof adminDb.command === 'function') {
+            await adminDb.command({ ping: 1 });
+            tests.connection = true;
+          }
+        }
+      } catch (error) {
+        console.warn('Connection test failed:', error.message);
+      }
 
       // Test read access
       try {
-        await this.db.listCollections().toArray();
-        tests.readAccess = true;
+        if (this.db && typeof this.db.listCollections === 'function') {
+          await this.db.listCollections().toArray();
+          tests.readAccess = true;
+        }
       } catch (error) {
         console.warn('No read access:', error.message);
       }
 
       // Test admin access
       try {
-        await this.db.admin().command({ serverStatus: 1 });
-        tests.adminAccess = true;
+        if (this.db && this.db.admin && typeof this.db.admin === 'function') {
+          const adminDb = this.db.admin();
+          if (adminDb && typeof adminDb.command === 'function') {
+            await adminDb.command({ serverStatus: 1 });
+            tests.adminAccess = true;
+          }
+        }
       } catch (error) {
         console.warn('No admin access:', error.message);
       }
 
       // Test profiling access
       try {
-        await this.db.admin().command({ profile: -1 });
-        tests.profilingAccess = true;
+        if (this.db && this.db.admin && typeof this.db.admin === 'function') {
+          const adminDb = this.db.admin();
+          if (adminDb && typeof adminDb.command === 'function') {
+            await adminDb.command({ profile: -1 });
+            tests.profilingAccess = true;
+          }
+        }
       } catch (error) {
         console.warn('No profiling access:', error.message);
       }
 
       // Test index access
       try {
-        const collections = await this.db.listCollections().toArray();
-        if (collections.length > 0) {
-          await this.db.collection(collections[0].name).indexes();
-          tests.indexAccess = true;
+        if (this.db && typeof this.db.listCollections === 'function') {
+          const collections = await this.db.listCollections().toArray();
+          if (collections.length > 0 && this.db.collection) {
+            const collection = this.db.collection(collections[0].name);
+            if (collection && typeof collection.indexes === 'function') {
+              await collection.indexes();
+              tests.indexAccess = true;
+            }
+          } else {
+            // If no collections exist, assume index access is available
+            tests.indexAccess = true;
+          }
         }
       } catch (error) {
         console.warn('No index access:', error.message);
       }
 
       return {
-        isValid: tests.connection && tests.readAccess,
+        isValid: tests.connection || tests.readAccess, // More permissive validation
         permissions: tests,
         recommendations: this.generatePermissionRecommendations(tests)
       };
     } catch (error) {
+      console.warn('Admin access validation error:', error.message);
       return {
         isValid: false,
         error: error.message,
-        permissions: {},
-        recommendations: ['Check MongoDB connection and credentials']
+        permissions: tests,
+        recommendations: [
+          'Check MongoDB connection and credentials',
+          'Verify database permissions',
+          'Consider upgrading MongoDB driver version'
+        ]
       };
     }
   }

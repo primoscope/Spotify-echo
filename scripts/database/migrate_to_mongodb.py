@@ -15,6 +15,7 @@ from typing import List, Dict, Any
 import json
 from tqdm import tqdm
 import argparse
+import hashlib
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -83,9 +84,11 @@ class MongoDBMigrator:
                 return []
             return [genre.strip() for genre in str(genres_str).split(',') if genre.strip()]
         
-        # Create the document structure
+        # Create the document structure with hash-based ID to prevent collisions
+        concatenated_values = f"{clean_value(row.get('spotify_track_uri', ''))}|{clean_value(row.get('username', ''))}|{clean_value(row.get('ts_x', ''))}"
+        hashed_id = hashlib.sha256(concatenated_values.encode('utf-8')).hexdigest()
         doc = {
-            '_id': f"{clean_value(row.get('spotify_track_uri', ''))}_{clean_value(row.get('username', ''))}_{clean_value(row.get('ts_x', ''))}",
+            '_id': hashed_id,
             'spotify_track_uri': clean_value(row.get('spotify_track_uri')),
             'timestamp': parse_timestamp(row.get('ts_x')),
             

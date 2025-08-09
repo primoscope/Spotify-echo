@@ -1,0 +1,351 @@
+{
+  "timestamp": "2025-08-09T05:19:49.289Z",
+  "summary": {
+    "healthy": 1,
+    "unhealthy": 1,
+    "unknown": 0,
+    "available": 9,
+    "total": 11
+  },
+  "servers": [
+    {
+      "name": "browser",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.253Z",
+      "description": "",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "browser",
+          "timestamp": "2025-08-09T05:19:49.253Z",
+          "status": "available",
+          "responseTime": 31,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/npx",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browserbase",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.257Z",
+      "description": "",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "browserbase",
+          "timestamp": "2025-08-09T05:19:49.257Z",
+          "status": "available",
+          "responseTime": 27,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/npx",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "filesystem",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.258Z",
+      "description": "",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "filesystem",
+          "timestamp": "2025-08-09T05:19:49.258Z",
+          "status": "available",
+          "responseTime": 26,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/node",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "spotify",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.260Z",
+      "description": "",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "spotify",
+          "timestamp": "2025-08-09T05:19:49.260Z",
+          "status": "available",
+          "responseTime": 24,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/bin/python",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "sequential-thinking",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.261Z",
+      "description": "Structured thinking and reasoning capabilities for complex tasks",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "sequential-thinking",
+          "timestamp": "2025-08-09T05:19:49.261Z",
+          "status": "available",
+          "responseTime": 23,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/node",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "screenshot-website",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.263Z",
+      "description": "Fast website screenshot capabilities for automation",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "screenshot-website",
+          "timestamp": "2025-08-09T05:19:49.263Z",
+          "status": "available",
+          "responseTime": 21,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/node",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "enhanced-file-utilities",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.265Z",
+      "description": "Enhanced file handling with validation and security",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "enhanced-file-utilities",
+          "timestamp": "2025-08-09T05:19:49.265Z",
+          "status": "available",
+          "responseTime": 19,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/node",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "enhanced-browser-tools",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.267Z",
+      "description": "Improved browser automation with error checking",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "enhanced-browser-tools",
+          "timestamp": "2025-08-09T05:19:49.267Z",
+          "status": "available",
+          "responseTime": 17,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/node",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "comprehensive-validator",
+      "type": "mcp_config",
+      "status": "available",
+      "lastCheck": "2025-08-09T05:19:49.269Z",
+      "description": "System-wide validation and monitoring",
+      "port": null,
+      "recentHealth": [
+        {
+          "server": "comprehensive-validator",
+          "timestamp": "2025-08-09T05:19:49.269Z",
+          "status": "available",
+          "responseTime": 15,
+          "error": null,
+          "details": {
+            "commandAvailable": true,
+            "commandPath": "/usr/local/bin/node",
+            "type": "command_check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mcp-orchestrator",
+      "type": "orchestrator",
+      "status": "healthy",
+      "lastCheck": "2025-08-09T05:19:49.270Z",
+      "port": 3002,
+      "recentHealth": [
+        {
+          "server": "mcp-orchestrator",
+          "timestamp": "2025-08-09T05:19:49.270Z",
+          "status": "healthy",
+          "responseTime": 19,
+          "error": null,
+          "details": {
+            "statusCode": 200,
+            "response": {
+              "status": "healthy",
+              "service": "mcp-orchestrator",
+              "timestamp": "2025-08-09T05:19:49.285Z",
+              "port": 3002,
+              "servers": {
+                "mermaid": {
+                  "status": "available",
+                  "capabilities": [
+                    "diagrams",
+                    "flowcharts",
+                    "sequence",
+                    "class",
+                    "state"
+                  ],
+                  "lastCheck": "2025-08-09T05:19:27.999Z"
+                },
+                "filesystem": {
+                  "status": "available",
+                  "capabilities": [
+                    "file_operations",
+                    "repository_analysis",
+                    "code_analysis"
+                  ],
+                  "lastCheck": "2025-08-09T05:19:27.999Z"
+                },
+                "browserbase": {
+                  "status": "needs_credentials",
+                  "capabilities": [
+                    "cloud_automation",
+                    "cross_browser",
+                    "screenshots",
+                    "performance"
+                  ],
+                  "lastCheck": "2025-08-09T05:19:27.999Z"
+                },
+                "puppeteer": {
+                  "status": "available",
+                  "capabilities": [
+                    "local_automation",
+                    "screenshots",
+                    "scraping",
+                    "testing"
+                  ],
+                  "lastCheck": "2025-08-09T05:19:27.999Z"
+                },
+                "spotify": {
+                  "status": "needs_credentials",
+                  "capabilities": [
+                    "spotify_api",
+                    "music_data",
+                    "playlists",
+                    "recommendations"
+                  ],
+                  "lastCheck": "2025-08-09T05:19:27.999Z"
+                }
+              },
+              "totalServers": 5,
+              "uptime": 21.374362918,
+              "uptime_human": "0h 0m 21s",
+              "memory": {
+                "rss": 51,
+                "heapUsed": 6
+              },
+              "system": {
+                "platform": "linux",
+                "node_version": "v20.19.4"
+              },
+              "capabilities": {
+                "diagrams": [
+                  "mermaid"
+                ],
+                "fileOperations": [
+                  "filesystem"
+                ],
+                "browserAutomation": [
+                  "browserbase",
+                  "puppeteer"
+                ],
+                "spotifyIntegration": [
+                  "spotify"
+                ],
+                "testing": [
+                  "browserbase",
+                  "puppeteer"
+                ],
+                "monitoring": [
+                  "sentry"
+                ]
+              }
+            },
+            "healthy": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "enhanced-mcp-server",
+      "type": "enhanced",
+      "status": "unhealthy",
+      "lastCheck": "2025-08-09T05:19:49.278Z",
+      "port": 3001,
+      "recentHealth": [
+        {
+          "server": "enhanced-mcp-server",
+          "timestamp": "2025-08-09T05:19:49.278Z",
+          "status": "unhealthy",
+          "responseTime": 8,
+          "error": "",
+          "details": {}
+        }
+      ]
+    }
+  ],
+  "alerts": [],
+  "systemInfo": {
+    "uptime": 0.061002323,
+    "memory": {
+      "rss": 49213440,
+      "heapTotal": 7208960,
+      "heapUsed": 4736928,
+      "external": 1779431,
+      "arrayBuffers": 13282
+    },
+    "platform": "linux",
+    "nodeVersion": "v20.19.4"
+  }
+}

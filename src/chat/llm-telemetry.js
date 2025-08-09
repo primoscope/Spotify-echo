@@ -11,7 +11,7 @@ class LLMTelemetry {
       totalSuccesses: 0,
       totalFailures: 0,
       averageLatency: 0,
-      startTime: new Date().toISOString()
+      startTime: new Date().toISOString(),
     };
     this.metricsHistory = [];
     this.collectionInterval = null;
@@ -23,12 +23,12 @@ class LLMTelemetry {
   initialize(options = {}) {
     const {
       collectionIntervalMs = 60000, // 1 minute
-      historyRetentionHours = 24
+      historyRetentionHours = 24,
     } = options;
 
     this.startCollection(collectionIntervalMs);
     this.startHistoryCleanup(historyRetentionHours);
-    
+
     console.log('📊 LLM Telemetry system initialized');
   }
 
@@ -39,7 +39,7 @@ class LLMTelemetry {
     this.providers.set(providerId, {
       provider,
       lastSnapshot: null,
-      metrics: []
+      metrics: [],
     });
   }
 
@@ -58,7 +58,7 @@ class LLMTelemetry {
     const snapshot = {
       timestamp,
       providers: {},
-      aggregated: { ...this.aggregatedMetrics }
+      aggregated: { ...this.aggregatedMetrics },
     };
 
     let totalRequests = 0;
@@ -70,16 +70,16 @@ class LLMTelemetry {
     for (const [providerId, providerInfo] of this.providers) {
       try {
         const telemetry = providerInfo.provider.getTelemetry();
-        
+
         snapshot.providers[providerId] = {
           ...telemetry,
-          timestamp
+          timestamp,
         };
 
         // Update provider metrics history
         providerInfo.metrics.push({
           timestamp,
-          ...telemetry
+          ...telemetry,
         });
 
         // Keep only last 100 snapshots per provider
@@ -93,7 +93,7 @@ class LLMTelemetry {
         totalRequests += telemetry.requests;
         totalSuccesses += telemetry.successes;
         totalFailures += telemetry.failures;
-        
+
         if (telemetry.requests > 0) {
           totalLatency += telemetry.averageLatency * telemetry.requests;
           activeProviders++;
@@ -102,7 +102,7 @@ class LLMTelemetry {
         console.error(`Failed to collect metrics for provider ${providerId}:`, error);
         snapshot.providers[providerId] = {
           error: error.message,
-          timestamp
+          timestamp,
         };
       }
     }
@@ -113,10 +113,12 @@ class LLMTelemetry {
       totalSuccesses,
       totalFailures,
       averageLatency: totalRequests > 0 ? totalLatency / totalRequests : 0,
-      successRate: totalRequests > 0 ? (totalSuccesses / totalRequests * 100).toFixed(2) + '%' : '0%',
-      failureRate: totalRequests > 0 ? (totalFailures / totalRequests * 100).toFixed(2) + '%' : '0%',
+      successRate:
+        totalRequests > 0 ? ((totalSuccesses / totalRequests) * 100).toFixed(2) + '%' : '0%',
+      failureRate:
+        totalRequests > 0 ? ((totalFailures / totalRequests) * 100).toFixed(2) + '%' : '0%',
       activeProviders,
-      lastUpdated: timestamp
+      lastUpdated: timestamp,
     };
 
     snapshot.aggregated = this.aggregatedMetrics;
@@ -154,14 +156,17 @@ class LLMTelemetry {
    * Start automatic history cleanup
    */
   startHistoryCleanup(retentionHours = 24) {
-    setInterval(() => {
-      const cutoff = new Date();
-      cutoff.setHours(cutoff.getHours() - retentionHours);
-      
-      this.metricsHistory = this.metricsHistory.filter(
-        snapshot => new Date(snapshot.timestamp) > cutoff
-      );
-    }, 60 * 60 * 1000); // Check every hour
+    setInterval(
+      () => {
+        const cutoff = new Date();
+        cutoff.setHours(cutoff.getHours() - retentionHours);
+
+        this.metricsHistory = this.metricsHistory.filter(
+          (snapshot) => new Date(snapshot.timestamp) > cutoff
+        );
+      },
+      60 * 60 * 1000
+    ); // Check every hour
   }
 
   /**
@@ -177,7 +182,7 @@ class LLMTelemetry {
   getAggregatedMetrics() {
     return {
       ...this.aggregatedMetrics,
-      providersCount: this.providers.size
+      providersCount: this.providers.size,
     };
   }
 
@@ -186,10 +191,12 @@ class LLMTelemetry {
    */
   getProviderMetrics(providerId) {
     const providerInfo = this.providers.get(providerId);
-    return providerInfo ? {
-      current: providerInfo.lastSnapshot,
-      history: providerInfo.metrics
-    } : null;
+    return providerInfo
+      ? {
+          current: providerInfo.lastSnapshot,
+          history: providerInfo.metrics,
+        }
+      : null;
   }
 
   /**
@@ -199,7 +206,7 @@ class LLMTelemetry {
     const insights = {
       recommendations: [],
       alerts: [],
-      trends: {}
+      trends: {},
     };
 
     // Analyze each provider
@@ -213,7 +220,7 @@ class LLMTelemetry {
           type: 'performance',
           provider: providerId,
           message: `High latency detected (${metrics.averageLatency.toFixed(0)}ms). Consider switching to a faster model.`,
-          severity: 'medium'
+          severity: 'medium',
         });
       }
 
@@ -222,7 +229,7 @@ class LLMTelemetry {
           type: 'reliability',
           provider: providerId,
           message: `Low success rate (${metrics.successRate}). Check provider health.`,
-          severity: 'high'
+          severity: 'high',
         });
       }
 
@@ -231,7 +238,7 @@ class LLMTelemetry {
           type: 'critical',
           provider: providerId,
           message: `Critical success rate (${metrics.successRate}). Provider may be unhealthy.`,
-          severity: 'critical'
+          severity: 'critical',
         });
       }
 
@@ -240,8 +247,9 @@ class LLMTelemetry {
         insights.recommendations.push({
           type: 'reliability',
           provider: providerId,
-          message: 'High retry rate detected. Consider adjusting retry configuration or switching providers.',
-          severity: 'medium'
+          message:
+            'High retry rate detected. Consider adjusting retry configuration or switching providers.',
+          severity: 'medium',
         });
       }
     }
@@ -252,15 +260,17 @@ class LLMTelemetry {
       const older = this.metricsHistory.slice(-20, -10);
 
       if (older.length >= 10) {
-        const recentAvgLatency = recent.reduce((sum, s) => sum + s.aggregated.averageLatency, 0) / recent.length;
-        const olderAvgLatency = older.reduce((sum, s) => sum + s.aggregated.averageLatency, 0) / older.length;
+        const recentAvgLatency =
+          recent.reduce((sum, s) => sum + s.aggregated.averageLatency, 0) / recent.length;
+        const olderAvgLatency =
+          older.reduce((sum, s) => sum + s.aggregated.averageLatency, 0) / older.length;
 
-        const latencyTrend = ((recentAvgLatency - olderAvgLatency) / olderAvgLatency * 100);
+        const latencyTrend = ((recentAvgLatency - olderAvgLatency) / olderAvgLatency) * 100;
 
         insights.trends.latency = {
           direction: latencyTrend > 5 ? 'increasing' : latencyTrend < -5 ? 'decreasing' : 'stable',
           change: latencyTrend.toFixed(2) + '%',
-          current: recentAvgLatency.toFixed(0) + 'ms'
+          current: recentAvgLatency.toFixed(0) + 'ms',
         };
       }
     }
@@ -274,10 +284,8 @@ class LLMTelemetry {
   getMetricsHistory(hours = 24) {
     const cutoff = new Date();
     cutoff.setHours(cutoff.getHours() - hours);
-    
-    return this.metricsHistory.filter(
-      snapshot => new Date(snapshot.timestamp) > cutoff
-    );
+
+    return this.metricsHistory.filter((snapshot) => new Date(snapshot.timestamp) > cutoff);
   }
 
   /**
@@ -287,7 +295,7 @@ class LLMTelemetry {
     const data = {
       aggregated: this.aggregatedMetrics,
       providers: {},
-      exportTime: new Date().toISOString()
+      exportTime: new Date().toISOString(),
     };
 
     // Include current provider metrics
@@ -309,33 +317,45 @@ class LLMTelemetry {
    * Convert metrics to CSV format
    */
   convertToCSV(data) {
-    const headers = ['Provider', 'Requests', 'Successes', 'Failures', 'Success Rate', 'Average Latency', 'Retry Attempts'];
+    const headers = [
+      'Provider',
+      'Requests',
+      'Successes',
+      'Failures',
+      'Success Rate',
+      'Average Latency',
+      'Retry Attempts',
+    ];
     const rows = [headers.join(',')];
 
     // Add aggregated row
-    rows.push([
-      'TOTAL',
-      data.aggregated.totalRequests,
-      data.aggregated.totalSuccesses,
-      data.aggregated.totalFailures,
-      data.aggregated.successRate,
-      data.aggregated.averageLatency.toFixed(2),
-      'N/A'
-    ].join(','));
+    rows.push(
+      [
+        'TOTAL',
+        data.aggregated.totalRequests,
+        data.aggregated.totalSuccesses,
+        data.aggregated.totalFailures,
+        data.aggregated.successRate,
+        data.aggregated.averageLatency.toFixed(2),
+        'N/A',
+      ].join(',')
+    );
 
     // Add provider rows
     for (const [providerId, metrics] of Object.entries(data.providers)) {
       if (metrics.error) continue;
-      
-      rows.push([
-        providerId,
-        metrics.requests,
-        metrics.successes,
-        metrics.failures,
-        metrics.successRate,
-        metrics.averageLatency.toFixed(2),
-        metrics.retryAttempts
-      ].join(','));
+
+      rows.push(
+        [
+          providerId,
+          metrics.requests,
+          metrics.successes,
+          metrics.failures,
+          metrics.successRate,
+          metrics.averageLatency.toFixed(2),
+          metrics.retryAttempts,
+        ].join(',')
+      );
     }
 
     return rows.join('\n');
@@ -360,7 +380,7 @@ class LLMTelemetry {
       totalSuccesses: 0,
       totalFailures: 0,
       averageLatency: 0,
-      startTime: new Date().toISOString()
+      startTime: new Date().toISOString(),
     };
 
     // Clear history

@@ -121,6 +121,37 @@ class EnhancedMCPServer {
       }
     });
 
+    // Comprehensive validation endpoint
+    this.app.post('/validate/comprehensive', async (req, res) => {
+      try {
+        const { includeHealthCheck, includeRegistryUpdate } = req.body;
+        const results = await this.runComprehensiveValidation(includeHealthCheck, includeRegistryUpdate);
+        res.json({ success: true, results });
+      } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+      }
+    });
+
+    // Registry update endpoint
+    this.app.post('/registry/update', async (req, res) => {
+      try {
+        const results = await this.updateMCPRegistry();
+        res.json({ success: true, results });
+      } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+      }
+    });
+
+    // Health monitoring endpoint
+    this.app.get('/health/all', async (req, res) => {
+      try {
+        const results = await this.checkAllServersHealth();
+        res.json({ success: true, results });
+      } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+      }
+    });
+
     // Comprehensive testing endpoint
     this.app.post('/test/comprehensive', async (req, res) => {
       try {
@@ -569,6 +600,144 @@ class EnhancedMCPServer {
     }
 
     return testResult;
+  }
+
+  async runComprehensiveValidation(includeHealthCheck = true, includeRegistryUpdate = true) {
+    console.log('🔄 Running comprehensive MCP validation...');
+    
+    const validation = {
+      timestamp: new Date().toISOString(),
+      healthCheck: null,
+      registryUpdate: null,
+      serverTests: null,
+      summary: {
+        passed: 0,
+        failed: 0,
+        warnings: 0
+      }
+    };
+
+    try {
+      // Run health check
+      if (includeHealthCheck) {
+        validation.healthCheck = await this.checkAllServersHealth();
+      }
+
+      // Update registry
+      if (includeRegistryUpdate) {
+        validation.registryUpdate = await this.updateMCPRegistry();
+      }
+
+      // Run server tests
+      validation.serverTests = await this.runComprehensiveTests();
+
+      // Calculate summary
+      if (validation.healthCheck) {
+        validation.summary.passed += validation.healthCheck.healthyServers || 0;
+        validation.summary.failed += validation.healthCheck.unhealthyServers || 0;
+      }
+
+      if (validation.serverTests) {
+        validation.summary.passed += validation.serverTests.passedTests;
+        validation.summary.failed += validation.serverTests.failedTests;
+      }
+
+      console.log(`✅ Comprehensive validation completed - Passed: ${validation.summary.passed}, Failed: ${validation.summary.failed}`);
+      return validation;
+
+    } catch (error) {
+      console.error('❌ Comprehensive validation failed:', error.message);
+      validation.error = error.message;
+      return validation;
+    }
+  }
+
+  async updateMCPRegistry() {
+    console.log('📋 Updating MCP registry...');
+    
+    try {
+      const { spawn } = require('child_process');
+      
+      return new Promise((resolve, reject) => {
+        const child = spawn('node', ['scripts/mcp-registry-updater.js', 'update'], {
+          cwd: process.cwd(),
+          stdio: 'pipe'
+        });
+
+        let output = '';
+        child.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+
+        child.stderr.on('data', (data) => {
+          output += data.toString();
+        });
+
+        child.on('close', (code) => {
+          if (code === 0) {
+            resolve({
+              status: 'success',
+              output,
+              timestamp: new Date().toISOString()
+            });
+          } else {
+            reject(new Error(`Registry update failed with code ${code}: ${output}`));
+          }
+        });
+      });
+
+    } catch (error) {
+      throw new Error(`Registry update failed: ${error.message}`);
+    }
+  }
+
+  async checkAllServersHealth() {
+    console.log('🏥 Checking health of all MCP servers...');
+    
+    try {
+      const { spawn } = require('child_process');
+      
+      return new Promise((resolve, reject) => {
+        const child = spawn('node', ['scripts/mcp-health-monitor.js', 'check'], {
+          cwd: process.cwd(),
+          stdio: 'pipe'
+        });
+
+        let output = '';
+        child.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+
+        child.stderr.on('data', (data) => {
+          output += data.toString();
+        });
+
+        child.on('close', (code) => {
+          if (code === 0) {
+            // Parse the health check output
+            const healthyMatch = output.match(/Healthy: (\d+)/);
+            const unhealthyMatch = output.match(/Unhealthy: (\d+)/);
+            const unknownMatch = output.match(/Unknown: (\d+)/);
+            const availableMatch = output.match(/Available: (\d+)/);
+
+            resolve({
+              status: 'success',
+              healthyServers: healthyMatch ? parseInt(healthyMatch[1]) : 0,
+              unhealthyServers: unhealthyMatch ? parseInt(unhealthyMatch[1]) : 0,
+              unknownServers: unknownMatch ? parseInt(unknownMatch[1]) : 0,
+              availableServers: availableMatch ? parseInt(availableMatch[1]) : 0,
+              output,
+              timestamp: new Date().toISOString()
+            });
+          } else {
+            reject(new Error(`Health check failed with code ${code}: ${output}`));
+          }
+        });
+      });
+
+    } catch (error) {
+      throw new Error(`Health check failed: ${error.message}`);
+    }
   }
 
   start() {

@@ -59,8 +59,8 @@ const DEFAULT_LLM_CONFIG = {
     enabled: true,
     fallback: true,
     responses: [
-      'Here\'s a great music recommendation based on your taste!',
-      'I\'d suggest exploring this genre - it matches your listening patterns.',
+      "Here's a great music recommendation based on your taste!",
+      "I'd suggest exploring this genre - it matches your listening patterns.",
       'Based on your preferences, you might enjoy these tracks.',
       'Let me recommend some music that fits your current mood.',
     ],
@@ -149,7 +149,7 @@ function validateApiKey(provider, apiKey) {
 async function testLLMProvider(provider, config) {
   try {
     let response;
-    const testPrompt = 'Respond with exactly: \'Test successful\'';
+    const testPrompt = "Respond with exactly: 'Test successful'";
 
     switch (provider) {
       case 'openai':
@@ -528,12 +528,12 @@ router.get('/llm-providers/models/:provider', async (req, res) => {
         {
           id: 'google/gemini-pro-1.5',
           name: 'Gemini Pro 1.5 (via OpenRouter)',
-          description: 'Google\'s advanced model',
+          description: "Google's advanced model",
         },
         {
           id: 'meta-llama/llama-3.1-405b-instruct',
           name: 'Llama 3.1 405B',
-          description: 'Meta\'s largest open model',
+          description: "Meta's largest open model",
         },
         {
           id: 'mistralai/mixtral-8x7b-instruct',
@@ -618,7 +618,7 @@ router.get('/llm-providers/status', async (req, res) => {
 router.get('/llm-providers/models', async (req, res) => {
   try {
     const { provider, capability, maxCost, includeUnavailable } = req.query;
-    
+
     let models;
     if (provider) {
       models = modelRegistry.getProviderModels(provider, !includeUnavailable);
@@ -633,7 +633,7 @@ router.get('/llm-providers/models', async (req, res) => {
       if (includeUnavailable === 'true') {
         filters.includeUnavailable = true;
       }
-      
+
       models = modelRegistry.getAvailableModels(filters);
     }
 
@@ -641,13 +641,13 @@ router.get('/llm-providers/models', async (req, res) => {
       success: true,
       models,
       totalCount: models.length,
-      registryStats: modelRegistry.getRegistryStats()
+      registryStats: modelRegistry.getRegistryStats(),
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to load models from registry',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -659,13 +659,13 @@ router.get('/llm-providers/models', async (req, res) => {
 router.get('/llm-providers/models/:provider/:modelId', async (req, res) => {
   try {
     const { provider, modelId } = req.params;
-    
+
     const modelInfo = modelRegistry.getModelInfo(provider, modelId);
-    
+
     if (!modelInfo) {
       return res.status(404).json({
         success: false,
-        error: 'Model not found'
+        error: 'Model not found',
       });
     }
 
@@ -675,14 +675,14 @@ router.get('/llm-providers/models/:provider/:modelId', async (req, res) => {
         id: modelId,
         providerId: provider,
         fullId: `${provider}/${modelId}`,
-        ...modelInfo
-      }
+        ...modelInfo,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to get model information',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -694,26 +694,26 @@ router.get('/llm-providers/models/:provider/:modelId', async (req, res) => {
 router.post('/llm-providers/models/recommend', async (req, res) => {
   try {
     const taskRequirements = req.body;
-    
+
     const recommendedModel = modelRegistry.recommendModel(taskRequirements);
-    
+
     if (!recommendedModel) {
       return res.status(404).json({
         success: false,
-        error: 'No suitable model found for the given requirements'
+        error: 'No suitable model found for the given requirements',
       });
     }
 
     res.json({
       success: true,
       recommendation: recommendedModel,
-      requirements: taskRequirements
+      requirements: taskRequirements,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to generate model recommendation',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -725,20 +725,20 @@ router.post('/llm-providers/models/recommend', async (req, res) => {
 router.post('/llm-providers/models/refresh', async (req, res) => {
   try {
     await modelRegistry.discoverModels();
-    
+
     const stats = modelRegistry.getRegistryStats();
-    
+
     res.json({
       success: true,
       message: 'Model registry refreshed successfully',
       stats,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to refresh model registry',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -750,45 +750,45 @@ router.post('/llm-providers/models/refresh', async (req, res) => {
 router.get('/llm-providers/telemetry', async (req, res) => {
   try {
     const { provider, hours } = req.query;
-    
+
     if (provider) {
       const providerMetrics = llmTelemetry.getProviderMetrics(provider);
-      
+
       if (!providerMetrics) {
         return res.status(404).json({
           success: false,
-          error: 'Provider not found in telemetry system'
+          error: 'Provider not found in telemetry system',
         });
       }
-      
+
       res.json({
         success: true,
         provider,
-        metrics: providerMetrics
+        metrics: providerMetrics,
       });
     } else {
       const currentMetrics = llmTelemetry.getCurrentMetrics();
       const aggregated = llmTelemetry.getAggregatedMetrics();
       const insights = llmTelemetry.getPerformanceInsights();
-      
+
       let history = null;
       if (hours) {
         history = llmTelemetry.getMetricsHistory(parseInt(hours));
       }
-      
+
       res.json({
         success: true,
         current: currentMetrics,
         aggregated,
         insights,
-        history
+        history,
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to get telemetry data',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -800,17 +800,17 @@ router.get('/llm-providers/telemetry', async (req, res) => {
 router.post('/llm-providers/telemetry/reset', async (req, res) => {
   try {
     llmTelemetry.resetMetrics();
-    
+
     res.json({
       success: true,
       message: 'Telemetry data reset successfully',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to reset telemetry data',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -822,25 +822,25 @@ router.post('/llm-providers/telemetry/reset', async (req, res) => {
 router.get('/llm-providers/telemetry/export', async (req, res) => {
   try {
     const { format = 'json' } = req.query;
-    
+
     const exportedData = llmTelemetry.exportMetrics(format);
-    
+
     const filename = `llm-telemetry-${Date.now()}.${format}`;
-    
+
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    
+
     if (format === 'csv') {
       res.setHeader('Content-Type', 'text/csv');
     } else {
       res.setHeader('Content-Type', 'application/json');
     }
-    
+
     res.send(exportedData);
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to export telemetry data',
-      details: error.message
+      details: error.message,
     });
   }
 });

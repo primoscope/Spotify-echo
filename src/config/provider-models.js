@@ -65,7 +65,7 @@ const PROVIDER_MODELS = {
 
   gemini: {
     name: 'Google Gemini',
-    description: 'Google\'s advanced AI models with multimodal capabilities',
+    description: "Google's advanced AI models with multimodal capabilities",
     website: 'https://ai.google.dev/',
     apiKeyFormat: 'AIza',
     models: [
@@ -122,7 +122,7 @@ const PROVIDER_MODELS = {
       {
         id: 'openai/gpt-4o',
         name: 'GPT-4o (OpenRouter)',
-        description: 'OpenAI\'s most advanced model via OpenRouter',
+        description: "OpenAI's most advanced model via OpenRouter",
         maxTokens: 128000,
         contextWindow: 128000,
         features: ['chat', 'streaming', 'function_calling'],
@@ -156,7 +156,7 @@ const PROVIDER_MODELS = {
       {
         id: 'anthropic/claude-3.5-sonnet',
         name: 'Claude 3.5 Sonnet',
-        description: 'Anthropic\'s most intelligent model',
+        description: "Anthropic's most intelligent model",
         maxTokens: 200000,
         contextWindow: 200000,
         features: ['chat', 'streaming', 'function_calling'],
@@ -179,7 +179,7 @@ const PROVIDER_MODELS = {
       {
         id: 'meta-llama/llama-3.1-405b-instruct',
         name: 'Llama 3.1 405B Instruct',
-        description: 'Meta\'s largest and most capable open model',
+        description: "Meta's largest and most capable open model",
         maxTokens: 131072,
         contextWindow: 131072,
         features: ['chat', 'streaming', 'function_calling'],
@@ -248,7 +248,7 @@ const PROVIDER_MODELS = {
       {
         id: 'mistralai/mistral-large',
         name: 'Mistral Large',
-        description: 'Mistral\'s flagship model for complex tasks',
+        description: "Mistral's flagship model for complex tasks",
         maxTokens: 128000,
         contextWindow: 128000,
         features: ['chat', 'streaming', 'function_calling'],

@@ -25,7 +25,7 @@ class EnhancedDigitalOceanManager {
             token: 'dop_v1_be1d6c7989e8f51fefbae284c017fa7eaeea5d230e59d7c399b220d4677652c7'
         };
         this.callbackUrl = 'http://localhost:3000/callback';
-        this.productionCallbackUrl = 'http://159.223.207.187:3000/';
+        this.productionCallbackUrl = 'https://primosphere.studio/auth/callback';
     }
 
     log(message, type = 'info') {
@@ -379,10 +379,10 @@ class EnhancedDigitalOceanManager {
         try {
             let envContent = fs.readFileSync(envPath, 'utf8');
             
-            // Update Spotify redirect URI to localhost:3000
+            // Update Spotify redirect URI for production
             envContent = envContent.replace(
                 /SPOTIFY_REDIRECT_URI=.*/,
-                `SPOTIFY_REDIRECT_URI=${this.callbackUrl}auth/callback`
+                `SPOTIFY_REDIRECT_URI=https://primosphere.studio/auth/callback`
             );
             
             // Add DigitalOcean configuration section if not present

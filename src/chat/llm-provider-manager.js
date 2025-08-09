@@ -482,15 +482,15 @@ class LLMProviderManager {
   async sendMessage(message, options = {}) {
     const providerId = options.provider || (await this.getBestProvider());
     let modelId = options.model;
-    
+
     // Use model registry to get optimal model if not specified
     if (!modelId && providerId !== 'mock') {
       const recommendation = modelRegistry.recommendModel({
         capabilities: options.capabilities || ['text'],
         maxCost: options.maxCost || 0.02,
-        maxLatency: options.maxLatency || 10000
+        maxLatency: options.maxLatency || 10000,
       });
-      
+
       if (recommendation && recommendation.providerId === providerId) {
         modelId = recommendation.id;
       }
@@ -504,10 +504,10 @@ class LLMProviderManager {
     }
 
     try {
-      const response = await provider.generateCompletion(
-        [{ role: 'user', content: message }], 
-        { ...options, model: modelId }
-      );
+      const response = await provider.generateCompletion([{ role: 'user', content: message }], {
+        ...options,
+        model: modelId,
+      });
 
       // Update last used timestamp
       if (config) {
@@ -518,7 +518,7 @@ class LLMProviderManager {
         response: response.content,
         provider: providerId,
         model: modelId || config?.model,
-        metadata: response.metadata || {}
+        metadata: response.metadata || {},
       };
     } catch (error) {
       console.error(`Provider ${providerId} failed:`, error.message);
@@ -538,7 +538,7 @@ class LLMProviderManager {
             provider: providerId,
             model: modelId || config?.model,
             refreshed: true,
-            metadata: retryResponse.metadata || {}
+            metadata: retryResponse.metadata || {},
           };
         }
       }
@@ -547,14 +547,14 @@ class LLMProviderManager {
       if (providerId !== 'mock') {
         console.log(`Falling back to mock provider due to ${providerId} failure`);
         const mockProvider = this.providers.get('mock');
-        const fallbackResponse = await mockProvider.generateCompletion(
-          [{ role: 'user', content: message }]
-        );
+        const fallbackResponse = await mockProvider.generateCompletion([
+          { role: 'user', content: message },
+        ]);
         return {
           response: fallbackResponse.content,
           provider: 'mock',
           fallback: true,
-          originalError: error.message
+          originalError: error.message,
         };
       }
 
@@ -571,7 +571,7 @@ class LLMProviderManager {
     for (const [providerId, config] of this.providerConfigs) {
       // Get telemetry data if available
       const telemetryData = llmTelemetry.getProviderMetrics(providerId);
-      
+
       status[providerId] = {
         name: config.name,
         available: config.available,
@@ -586,8 +586,8 @@ class LLMProviderManager {
         performance: {
           averageLatency: telemetryData?.current?.averageLatency || null,
           successRate: telemetryData?.current?.successRate || null,
-          totalRequests: telemetryData?.current?.requests || 0
-        }
+          totalRequests: telemetryData?.current?.requests || 0,
+        },
       };
     }
 
@@ -596,7 +596,7 @@ class LLMProviderManager {
       current: this.currentProvider,
       fallbackOrder: this.fallbackOrder,
       modelRegistry: modelRegistry.getRegistryStats(),
-      telemetryOverview: llmTelemetry.getAggregatedMetrics()
+      telemetryOverview: llmTelemetry.getAggregatedMetrics(),
     };
   }
 
@@ -606,15 +606,15 @@ class LLMProviderManager {
   getProviderInsights() {
     const telemetryInsights = llmTelemetry.getPerformanceInsights();
     const registryStats = modelRegistry.getRegistryStats();
-    
+
     return {
       performance: telemetryInsights,
       models: {
         totalAvailable: registryStats.totalModels,
         currentlyOnline: registryStats.availableModels,
-        recommendations: this.getModelRecommendations()
+        recommendations: this.getModelRecommendations(),
       },
-      health: this.getSystemHealth()
+      health: this.getSystemHealth(),
     };
   }
 
@@ -626,23 +626,23 @@ class LLMProviderManager {
       textGeneration: modelRegistry.recommendModel({
         capabilities: ['text'],
         maxCost: 0.005,
-        latencyTier: 'fast'
+        latencyTier: 'fast',
       }),
       codeGeneration: modelRegistry.recommendModel({
         capabilities: ['text', 'function-calling'],
         minQuality: 'high',
-        maxLatency: 5000
+        maxLatency: 5000,
       }),
       imageAnalysis: modelRegistry.recommendModel({
         capabilities: ['text', 'vision'],
         maxCost: 0.01,
-        minQuality: 'high'
+        minQuality: 'high',
       }),
       longForm: modelRegistry.recommendModel({
         capabilities: ['text'],
         minContextWindow: 100000,
-        minQuality: 'highest'
-      })
+        minQuality: 'highest',
+      }),
     };
   }
 
@@ -652,14 +652,14 @@ class LLMProviderManager {
   getSystemHealth() {
     const aggregated = llmTelemetry.getAggregatedMetrics();
     const insights = llmTelemetry.getPerformanceInsights();
-    
+
     return {
       overall: this.calculateHealthScore(aggregated, insights),
       activeProviders: aggregated.activeProviders,
       totalRequests: aggregated.totalRequests,
       successRate: aggregated.successRate,
-      criticalAlerts: insights.alerts.filter(a => a.severity === 'critical').length,
-      recommendations: insights.recommendations.length
+      criticalAlerts: insights.alerts.filter((a) => a.severity === 'critical').length,
+      recommendations: insights.recommendations.length,
     };
   }
 
@@ -668,22 +668,22 @@ class LLMProviderManager {
    */
   calculateHealthScore(aggregated, insights) {
     let score = 100;
-    
+
     // Reduce score for low success rate
     const successRate = parseFloat(aggregated.successRate) || 0;
     if (successRate < 95) score -= (95 - successRate) * 2;
-    
+
     // Reduce score for critical alerts
-    const criticalAlerts = insights.alerts.filter(a => a.severity === 'critical').length;
+    const criticalAlerts = insights.alerts.filter((a) => a.severity === 'critical').length;
     score -= criticalAlerts * 20;
-    
+
     // Reduce score for high alerts
-    const highAlerts = insights.alerts.filter(a => a.severity === 'high').length;
+    const highAlerts = insights.alerts.filter((a) => a.severity === 'high').length;
     score -= highAlerts * 10;
-    
+
     // Reduce score if no providers are active
     if (aggregated.activeProviders === 0) score = 0;
-    
+
     return Math.max(0, Math.min(100, score));
   }
 }

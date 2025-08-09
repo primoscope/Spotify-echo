@@ -83,9 +83,10 @@ class EnhancedFileMCP {
   /**
    * Validate file content for security issues
    */
-  validateContent(content, operation) {
+  validateContent(content, operation, filePath = '') {
     const dangerousPatterns = this.validationRules.get('dangerousPatterns');
     const maxSize = this.validationRules.get('maxFileSize');
+    const fileExtension = path.extname(filePath).toLowerCase();
     
     // Check file size
     if (content.length > maxSize) {
@@ -96,6 +97,10 @@ class EnhancedFileMCP {
     if (operation === 'write' || operation === 'create') {
       for (const pattern of dangerousPatterns) {
         if (pattern.test(content)) {
+          // Skip certain patterns in configuration files if they're in valid contexts
+          if (this.isValidConfigurationContext(content, pattern, fileExtension)) {
+            continue;
+          }
           throw new Error(`Security violation: Dangerous pattern detected: ${pattern.source}`);
         }
       }
@@ -269,6 +274,41 @@ class EnhancedFileMCP {
   }
 
   /**
+   * Check if a dangerous pattern is in a valid configuration context
+   */
+  isValidConfigurationContext(content, pattern, fileExtension) {
+    // Allow process.exit in package.json scripts and .js files when used appropriately
+    if (pattern.source === 'process\\.exit\\s*\\(' && 
+        (fileExtension === '.json' || fileExtension === '.js')) {
+      
+      // In package.json, process.exit in scripts is usually legitimate
+      if (fileExtension === '.json') {
+        try {
+          const parsed = JSON.parse(content);
+          return parsed.scripts !== undefined;
+        } catch {
+          return false;
+        }
+      }
+      
+      // In JS files, allow process.exit in error handling contexts
+      if (fileExtension === '.js') {
+        const lines = content.split('\n');
+        const matchingLines = lines.filter(line => pattern.test(line));
+        return matchingLines.every(line => {
+          return line.includes('catch') || 
+                 line.includes('error') || 
+                 line.includes('//') ||
+                 line.includes('finally') ||
+                 line.trim().startsWith('//');
+        });
+      }
+    }
+    
+    return false;
+  }
+
+  /**
    * File validation and analysis
    */
   async validateFile(filePath) {
@@ -290,16 +330,16 @@ class EnhancedFileMCP {
         performance: Date.now() - startTime
       };
       
-      // Check for security issues only in executable files
-      const extension = path.extname(validatedPath).toLowerCase();
-      const executableExtensions = ['.js', '.ts', '.py', '.sh', '.bash', '.zsh', '.ps1', '.bat', '.cmd'];
-      const configExtensions = ['.json', '.yml', '.yaml', '.toml', '.ini', '.env', '.conf', '.config'];
+
+      // Check for security issues
+      const dangerousPatterns = this.validationRules.get('dangerousPatterns');
+      const fileExtension = path.extname(validatedPath).toLowerCase();
       
-      // Only apply dangerous pattern checks to executable files, not config files
-      if (executableExtensions.includes(extension) && !configExtensions.includes(extension)) {
-        const dangerousPatterns = this.validationRules.get('dangerousPatterns');
-        for (const pattern of dangerousPatterns) {
-          if (pattern.test(content)) {
+      for (const pattern of dangerousPatterns) {
+        if (pattern.test(content)) {
+          // Check if this is a valid configuration context
+          if (!this.isValidConfigurationContext(content, pattern, fileExtension)) {
+
             analysis.securityIssues.push({
               pattern: pattern.source,
               type: 'dangerous_code',

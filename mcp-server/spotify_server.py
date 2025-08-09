@@ -18,11 +18,14 @@ import aiohttp
 import time
 from pathlib import Path
 
-# Setup enhanced logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+def configure_logger():
+    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+    logging.basicConfig(level=getattr(logging, log_level, logging.INFO),
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    return logging.getLogger(__name__)
+
+# Setup enhanced logging  
+logger = configure_logger()
 logger = logging.getLogger(__name__)
 
 class SpotifyMCPServer:
@@ -31,7 +34,7 @@ class SpotifyMCPServer:
     def __init__(self):
         self.client_id = os.getenv('SPOTIFY_CLIENT_ID')
         self.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://localhost:3000/callback')
+        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'https://primosphere.studio/auth/callback')
         self.access_token = None
         self.refresh_token = None
         self.token_expires_at = None

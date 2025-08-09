@@ -18,18 +18,20 @@ function ProviderPanel() {
 
   const loadAvailableModels = useCallback(async () => {
     if (currentProvider === 'mock') return;
-    
+
     setRefreshingModels(true);
     try {
-      const response = await fetch(`/api/settings/llm-providers/models?provider=${currentProvider}`);
+      const response = await fetch(
+        `/api/settings/llm-providers/models?provider=${currentProvider}`
+      );
       const data = await response.json();
-      
+
       if (data.success) {
         setAvailableModels(data.models);
-        
+
         // Set default selected model
         if (data.models.length > 0 && !selectedModel) {
-          const currentModel = data.models.find(m => m.available) || data.models[0];
+          const currentModel = data.models.find((m) => m.available) || data.models[0];
           setSelectedModel(currentModel.id);
         }
       }
@@ -42,9 +44,11 @@ function ProviderPanel() {
 
   const loadTelemetryData = useCallback(async () => {
     try {
-      const response = await fetch(`/api/settings/llm-providers/telemetry?provider=${currentProvider}`);
+      const response = await fetch(
+        `/api/settings/llm-providers/telemetry?provider=${currentProvider}`
+      );
       const data = await response.json();
-      
+
       if (data.success) {
         setTelemetryData(data.metrics);
       }
@@ -67,7 +71,7 @@ function ProviderPanel() {
   const handleModelChange = async (e) => {
     const newModel = e.target.value;
     setSelectedModel(newModel);
-    
+
     // TODO: Implement model switching API call
     console.log(`Switching to model: ${newModel}`);
   };
@@ -109,7 +113,7 @@ function ProviderPanel() {
   };
 
   const getModelInfo = (modelId) => {
-    const model = availableModels.find(m => m.id === modelId);
+    const model = availableModels.find((m) => m.id === modelId);
     return model || null;
   };
 
@@ -184,7 +188,7 @@ function ProviderPanel() {
               disabled={loading || refreshingModels}
             >
               {availableModels
-                .filter(model => model.available)
+                .filter((model) => model.available)
                 .map((model) => (
                   <option key={model.id} value={model.id}>
                     {model.name} ({model.latencyTier}, {model.qualityTier})
@@ -216,7 +220,8 @@ function ProviderPanel() {
         )}
         {telemetryData?.current && (
           <span className="telemetry-info">
-            ({telemetryData.current.requests} requests, {formatLatency(telemetryData.current.averageLatency)} avg)
+            ({telemetryData.current.requests} requests,{' '}
+            {formatLatency(telemetryData.current.averageLatency)} avg)
           </span>
         )}
       </div>
@@ -282,11 +287,15 @@ function ProviderPanel() {
                 </div>
                 <div className="metric-item">
                   <span className="metric-label">Success Rate:</span>
-                  <span className="metric-value">{formatPercentage(telemetryData.current.successRate)}</span>
+                  <span className="metric-value">
+                    {formatPercentage(telemetryData.current.successRate)}
+                  </span>
                 </div>
                 <div className="metric-item">
                   <span className="metric-label">Avg Latency:</span>
-                  <span className="metric-value">{formatLatency(telemetryData.current.averageLatency)}</span>
+                  <span className="metric-value">
+                    {formatLatency(telemetryData.current.averageLatency)}
+                  </span>
                 </div>
                 <div className="metric-item">
                   <span className="metric-label">Retries:</span>

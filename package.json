@@ -284,7 +284,7 @@
     "mcp-server-code-runner": "^0.1.7",
     "mongodb-mcp-server": "^0.2.0",
     "multer": "^2.0.0",
-    "n8n-mcp": "^2.10.3",
+    "n8n-mcp": "^2.10.2",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "openai": "^4.24.0",

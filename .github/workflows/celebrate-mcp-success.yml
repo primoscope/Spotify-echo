@@ -1,0 +1,40 @@
+# 🎧 Epic: Spotify MVP with MCP-first
+
+Fun TL;DR
+- Secure Spotify OAuth ✅
+- MVP endpoints incoming 🎯
+- MCP-first enforced in CI 🛡️
+
+What changed
+- Added MCP-first workflow to gate edits on install → lint → test → build
+- Agent prompts/config to make future automation smoother
+- Integration track for issues #149, #150, #151, #154
+
+MCP status
+- Preflight: <!-- pass/fail -->
+- Artifacts: See CI → MCP Validation → “mcp-artifacts”
+- Notes: MCP-first is now the default before any edits or merges
+
+Changelog haiku
+Secure OAuth flows  
+MCP leads the marching band  
+Green checks, merge with joy
+
+Try it locally
+- npm ci
+- npm run lint
+- npm test -- --ci
+- npm run build
+
+Demo (optional)
+- GIF, short video, or screenshots of OAuth/login
+- Paste links or images here
+
+Checklist
+- [ ] MCP preflight passed locally
+- [ ] CI “MCP Validation” passed
+- [ ] Tests added/updated
+- [ ] Docs updated (if needed)
+
+Footnotes
+- Superseding: #149, #150, #151, #154 (merged into this epic)

@@ -1,0 +1,219 @@
+{
+  "timestamp": "2025-08-09T10:06:18.593Z",
+  "summary": {
+    "totalServers": 3,
+    "runningServers": 3,
+    "averagePerformanceScore": 100,
+    "overallStatus": "excellent"
+  },
+  "servers": {
+    "performance-analyzer": {
+      "status": "running",
+      "startupTime": 1029,
+      "performanceScore": 100,
+      "tests": {
+        "performance": {
+          "healthCheck": {
+            "averageResponseTime": 1,
+            "maxResponseTime": 2,
+            "minResponseTime": 0,
+            "score": 99.9
+          },
+          "endpointResponsiveness": {
+            "endpoints": {
+              "/api/metrics/realtime": {
+                "responseTime": 1,
+                "status": "success",
+                "hasData": true
+              },
+              "/api/recommendations": {
+                "responseTime": 2,
+                "status": "success",
+                "hasData": true
+              },
+              "/api/benchmarks": {
+                "responseTime": 0,
+                "status": "success",
+                "hasData": true
+              }
+            },
+            "successRate": 100,
+            "averageResponseTime": 1,
+            "score": 100
+          },
+          "loadTesting": {
+            "concurrentRequests": 10,
+            "successCount": 10,
+            "successRate": 100,
+            "totalTime": 10,
+            "requestsPerSecond": 1000,
+            "score": 100
+          },
+          "memoryUsage": {
+            "beforeMemory": 5267864,
+            "afterMemory": 5399904,
+            "memoryIncrease": 132040,
+            "score": 99.87407684326172
+          }
+        },
+        "functionality": {
+          "realtimeMetrics": {
+            "status": "success",
+            "hasMemoryData": true,
+            "hasCPUData": true,
+            "score": 100
+          },
+          "benchmarking": {
+            "status": "success",
+            "duration": 1002.9311289999998,
+            "score": 100
+          }
+        }
+      }
+    },
+    "code-intelligence": {
+      "status": "running",
+      "startupTime": 1034,
+      "performanceScore": 100,
+      "tests": {
+        "performance": {
+          "healthCheck": {
+            "averageResponseTime": 0.8,
+            "maxResponseTime": 1,
+            "minResponseTime": 0,
+            "score": 99.92
+          },
+          "endpointResponsiveness": {
+            "endpoints": {
+              "/api/analyze/comprehensive": {
+                "responseTime": 3,
+                "status": "success",
+                "hasData": true
+              },
+              "/api/quality/score": {
+                "responseTime": 2,
+                "status": "success",
+                "hasData": true
+              },
+              "/api/security/scan": {
+                "responseTime": 1,
+                "status": "success",
+                "hasData": true
+              }
+            },
+            "successRate": 100,
+            "averageResponseTime": 2,
+            "score": 100
+          },
+          "loadTesting": {
+            "concurrentRequests": 10,
+            "successCount": 10,
+            "successRate": 100,
+            "totalTime": 7,
+            "requestsPerSecond": 1428.5714285714287,
+            "score": 100
+          },
+          "memoryUsage": {
+            "beforeMemory": 5148712,
+            "afterMemory": 5261560,
+            "memoryIncrease": 112848,
+            "score": 99.89237976074219
+          }
+        },
+        "functionality": {
+          "codeAnalysis": {
+            "status": "success",
+            "hasMetrics": true,
+            "hasQuality": true,
+            "hasComplexity": true,
+            "score": 100
+          },
+          "qualityScoring": {
+            "status": "success",
+            "hasOverallScore": true,
+            "hasBreakdown": true,
+            "score": 100
+          }
+        }
+      }
+    },
+    "enhanced-orchestrator-v2": {
+      "status": "running",
+      "startupTime": 1037,
+      "performanceScore": 100,
+      "tests": {
+        "performance": {
+          "healthCheck": {
+            "averageResponseTime": 0.8,
+            "maxResponseTime": 1,
+            "minResponseTime": 0,
+            "score": 99.92
+          },
+          "endpointResponsiveness": {
+            "endpoints": {
+              "/api/orchestrator/status": {
+                "responseTime": 1,
+                "status": "success",
+                "hasData": true
+              },
+              "/api/performance/metrics": {
+                "responseTime": 1,
+                "status": "success",
+                "hasData": true
+              },
+              "/api/system/analyze": {
+                "responseTime": 2,
+                "status": "success",
+                "hasData": true
+              }
+            },
+            "successRate": 100,
+            "averageResponseTime": 1.3333333333333333,
+            "score": 100
+          },
+          "loadTesting": {
+            "concurrentRequests": 10,
+            "successCount": 10,
+            "successRate": 100,
+            "totalTime": 7,
+            "requestsPerSecond": 1428.5714285714287,
+            "score": 100
+          },
+          "memoryUsage": {
+            "beforeMemory": 5163232,
+            "afterMemory": 5282184,
+            "memoryIncrease": 118952,
+            "score": 99.88655853271484
+          }
+        },
+        "functionality": {
+          "orchestratorStatus": {
+            "status": "success",
+            "hasVersion": true,
+            "hasServers": true,
+            "hasRouting": true,
+            "score": 100
+          },
+          "performanceMetrics": {
+            "status": "success",
+            "hasMetrics": true,
+            "score": 100
+          }
+        }
+      }
+    }
+  },
+  "recommendations": [
+    {
+      "category": "optimization",
+      "severity": "info",
+      "title": "Excellent performance achieved",
+      "description": "All servers running with high performance scores",
+      "actions": [
+        "Monitor ongoing performance",
+        "Consider implementing advanced features",
+        "Document successful configuration"
+      ]
+    }
+  ]
+}

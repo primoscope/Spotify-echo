@@ -226,7 +226,25 @@
     "mcp:hismaserver_puppeteer": "node mcp-servers/new-candidates/@hisma/server-puppeteer/integration.js",
     "test:hismaserver_puppeteer": "jest mcp-servers/new-candidates/@hisma/server-puppeteer/test.js",
     "mcp:candidates": "node scripts/run-all-candidates.js",
-    "test:candidates": "jest mcp-servers/new-candidates/*/test.js"
+    "test:candidates": "jest mcp-servers/new-candidates/*/test.js",
+    "mcp:performance-analyzer": "node mcp-servers/performance-analyzer-server.js",
+    "mcp:code-intelligence": "node mcp-servers/code-intelligence-server.js",
+    "mcp:orchestrator-v2": "node mcp-servers/enhanced-mcp-orchestrator-v2.js",
+    "mcp:performance-test": "curl -s http://localhost:3010/health | jq '.' && curl -s http://localhost:3010/api/metrics/realtime | jq '.'",
+    "mcp:code-test": "curl -s http://localhost:3011/health | jq '.'",
+    "mcp:orchestrator-v2-test": "curl -s http://localhost:3012/health | jq '.'",
+    "mcp:enhanced-suite": "npm run mcp:performance-analyzer & npm run mcp:code-intelligence & npm run mcp:orchestrator-v2",
+    "mcp:performance-suite": "npm run mcp:performance-analyzer & npm run mcp:code-intelligence",
+    "mcp:full-performance-test": "npm run mcp:enhanced-suite && sleep 5 && npm run mcp:performance-test && npm run mcp:code-test && npm run mcp:orchestrator-v2-test",
+    "analyze:codebase": "curl -X POST http://localhost:3011/api/analyze/project -H 'Content-Type: application/json' -d '{\"projectPath\":\"./src\",\"extensions\":[\".js\",\".jsx\",\".ts\",\".tsx\"]}' | jq '.'",
+    "analyze:performance": "curl -X GET http://localhost:3010/api/recommendations | jq '.'",
+    "benchmark:start": "curl -X POST http://localhost:3010/api/benchmark/start -H 'Content-Type: application/json' -d '{\"name\":\"codebase-analysis\",\"description\":\"Full codebase analysis benchmark\"}' | jq '.'",
+    "benchmark:end": "curl -X POST http://localhost:3010/api/benchmark/end -H 'Content-Type: application/json' -d '{\"name\":\"codebase-analysis\"}' | jq '.'",
+    "system:analyze": "curl -X POST http://localhost:3012/api/system/analyze | jq '.summary'",
+    "system:performance": "curl -X GET http://localhost:3012/api/performance/metrics | jq '.'",
+    "system:scaling": "curl -X POST http://localhost:3012/api/scaling/auto -H 'Content-Type: application/json' -d '{\"enable\":true}' | jq '.'",
+    "validate:enhanced-mcp": "node scripts/validate-enhanced-mcp-performance.js",
+    "mcp:enhanced-validation-new": "npm run validate:enhanced-mcp"
   },
   "keywords": [
     "music",
@@ -416,6 +434,36 @@
           "mcp-servers/comprehensive-validator.js"
         ],
         "description": "System-wide validation and monitoring"
+      },
+      "performance-analyzer": {
+        "command": "node",
+        "args": [
+          "mcp-servers/performance-analyzer-server.js"
+        ],
+        "env": {
+          "PERFORMANCE_MCP_PORT": "3010"
+        },
+        "description": "Advanced performance monitoring and optimization"
+      },
+      "code-intelligence": {
+        "command": "node",
+        "args": [
+          "mcp-servers/code-intelligence-server.js"
+        ],
+        "env": {
+          "CODE_INTELLIGENCE_PORT": "3011"
+        },
+        "description": "AI-powered code analysis and intelligent assistance"
+      },
+      "enhanced-orchestrator-v2": {
+        "command": "node",
+        "args": [
+          "mcp-servers/enhanced-mcp-orchestrator-v2.js"
+        ],
+        "env": {
+          "ENHANCED_MCP_PORT": "3012"
+        },
+        "description": "Advanced MCP orchestration with load balancing and auto-scaling"
       }
     }
   },

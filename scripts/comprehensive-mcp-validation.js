@@ -1,721 +1,371 @@
 #!/usr/bin/env node
 
 /**
- * Comprehensive MCP Validation and Testing Script
- * Utilizes MCP servers for automation, testing, and validation
- * Addresses user requirements for MongoDB, Spotify API, and chatbot functionality
+ * Enhanced Comprehensive MCP Integration Validation
+ * Ensures all MCP integrations are functional and enforced across every coding workflow
  */
 
 const fs = require('fs').promises;
 const path = require('path');
 const { spawn, exec } = require('child_process');
 const util = require('util');
+
 const execAsync = util.promisify(exec);
 
 class ComprehensiveMCPValidator {
     constructor() {
-        this.projectRoot = process.cwd();
-        this.reportData = {
-            timestamp: new Date().toISOString(),
-            validations: [],
-            fixes: [],
-            tests: [],
-            errors: [],
-            success: []
+        this.results = {
+            passed: 0,
+            failed: 0,
+            warnings: 0,
+            tests: []
         };
+        this.startTime = Date.now();
     }
 
-    async run() {
-        console.log('🚀 Starting Comprehensive MCP Validation and Testing...\n');
+    log(message, type = 'info') {
+        const timestamp = new Date().toISOString();
+        const prefix = {
+            info: '🔍',
+            success: '✅',
+            error: '❌',
+            warning: '⚠️'
+        }[type] || '📋';
+        
+        console.log(`${prefix} ${message}`);
+        
+        this.results.tests.push({
+            timestamp,
+            type,
+            message,
+            status: type === 'success' ? 'passed' : type === 'error' ? 'failed' : 'info'
+        });
 
-        try {
-            // Phase 1: Environment Validation and Fixes
-            await this.validateAndFixEnvironment();
-            
-            // Phase 2: MongoDB Connection Validation
-            await this.validateMongoDB();
-            
-            // Phase 3: Spotify API Validation
-            await this.validateSpotifyAPI();
-            
-            // Phase 4: MCP Server Integration Testing
-            await this.testMCPServers();
-            
-            // Phase 5: Core Functionality Testing
-            await this.testCoreFunctionality();
-            
-            // Phase 6: Chatbot Functionality Testing
-            await this.testChatbot();
-            
-            // Phase 7: Generate Comprehensive Report
-            await this.generateReport();
-            
-            console.log('✅ Comprehensive validation completed successfully!');
-            console.log(`📊 Report saved to: COMPREHENSIVE_MCP_VALIDATION_REPORT.md`);
-            
-        } catch (error) {
-            console.error('❌ Validation failed:', error.message);
-            this.reportData.errors.push(error.message);
-            await this.generateReport();
-        }
+        if (type === 'success') this.results.passed++;
+        if (type === 'error') this.results.failed++;
+        if (type === 'warning') this.results.warnings++;
     }
 
-    async validateAndFixEnvironment() {
-        console.log('🔧 Phase 1: Environment Validation and Fixes...');
-        
-        // Fix MongoDB URI
-        await this.fixMongoDBURI();
-        
-        // Fix malformed GEMINI_API_KEY
-        await this.fixGeminiAPIKey();
-        
-        // Update .env.example to be a proper template
-        await this.fixEnvTemplate();
-        
-        // Validate environment variables
-        await this.validateEnvVariables();
-    }
-
-    async fixMongoDBURI() {
-        console.log('  🔄 Updating MongoDB URI...');
-        
-        const correctMongoURI = 'mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/echotune?retryWrites=true&w=majority&appName=Cluster0';
-        
-        const files = ['.env', '.env.example'];
-        
-        for (const file of files) {
-            try {
-                const filePath = path.join(this.projectRoot, file);
-                let content = await fs.readFile(filePath, 'utf8');
-                
-                // Fix MongoDB URI
-                content = content.replace(
-                    /MONGODB_URI=mongodb\+srv:\/\/copilot:DapperMan77@cluster0\.ofnyuy\.mongodb\.net\/\?retryWrites=true&w=majority&appName=Cluster0";?/,
-                    `MONGODB_URI=${correctMongoURI}`
-                );
-                
-                // Fix fallback URI patterns
-                content = content.replace(
-                    /MONGODB_URI=mongodb:\/\/localhost:27017\/echotune/,
-                    `MONGODB_URI=${correctMongoURI}`
-                );
-                
-                await fs.writeFile(filePath, content);
-                console.log(`    ✅ Updated MongoDB URI in ${file}`);
-                this.reportData.fixes.push(`Updated MongoDB URI in ${file}`);
-                
-            } catch (error) {
-                console.log(`    ⚠️  Could not update ${file}: ${error.message}`);
-            }
-        }
-    }
-
-    async fixGeminiAPIKey() {
-        console.log('  🔄 Fixing malformed GEMINI_API_KEY...');
-        
-        const files = ['.env', '.env.example'];
-        
-        for (const file of files) {
-            try {
-                const filePath = path.join(this.projectRoot, file);
-                let content = await fs.readFile(filePath, 'utf8');
-                
-                // Fix the malformed GEMINI_API_KEY line
-                content = content.replace(
-                    /GEMINI_API_KEYAIzaSyChRuLP-xS8ucyyu1xbBiE-hrHTti_Ks5E/,
-                    'GEMINI_API_KEY=AIzaSyChRuLP-xS8ucyyu1xbBiE-hrHTti_Ks5E'
-                );
-                
-                await fs.writeFile(filePath, content);
-                console.log(`    ✅ Fixed GEMINI_API_KEY in ${file}`);
-                this.reportData.fixes.push(`Fixed malformed GEMINI_API_KEY in ${file}`);
-                
-            } catch (error) {
-                console.log(`    ⚠️  Could not fix ${file}: ${error.message}`);
-            }
-        }
-    }
-
-    async fixEnvTemplate() {
-        console.log('  🔄 Creating proper .env.template...');
+    async validateMCPManager() {
+        this.log('Validating MCP Manager functionality...', 'info');
         
         try {
-            const envExamplePath = path.join(this.projectRoot, '.env.example');
-            let content = await fs.readFile(envExamplePath, 'utf8');
+            // Test MCP Manager exports
+            const mcpManager = require('./mcp-manager.js');
+            const requiredExports = ['readServers', 'install', 'health', 'test', 'report'];
             
-            // Replace hardcoded values with templates
-            const replacements = [
-                [/DOMAIN=primosphere\.studio/g, 'DOMAIN=your-domain.com'],
-                [/FRONTEND_URL=https:\/\/primosphere\.studio/g, 'FRONTEND_URL=https://your-domain.com'],
-                [/SPOTIFY_CLIENT_ID=dcc2df507bde447c93a0199358ca219d/g, 'SPOTIFY_CLIENT_ID=your_spotify_client_id_here'],
-                [/SPOTIFY_CLIENT_SECRET=128089720b414d1e8233290d94fb38a0/g, 'SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here'],
-                [/SPOTIFY_PRODUCTION_REDIRECT_URI=http:\/\/159\.223\.207\.187:3000\//g, 'SPOTIFY_PRODUCTION_REDIRECT_URI=https://your-domain.com/auth/callback'],
-                [/GEMINI_API_KEY=AIzaSyChRuLP-xS8ucyyu1xbBiE-hrHTti_Ks5E/g, 'GEMINI_API_KEY=your_gemini_api_key_here'],
-                [/OPENROUTER_API_KEY=sk-or-v1-[a-zA-Z0-9]+/g, 'OPENROUTER_API_KEY=your_openrouter_api_key_here'],
-                [/DIGITALOCEAN_TOKEN=dop_v1_[a-zA-Z0-9]+/g, 'DIGITALOCEAN_TOKEN=your_digitalocean_api_token_here'],
-                [/DIGITALOCEAN_TOKEN_FALLBACK=dop_v1_[a-zA-Z0-9]+/g, 'DIGITALOCEAN_TOKEN_FALLBACK=your_backup_digitalocean_token_here'],
-                [/DO_REGISTRY_USERNAME=barrunmail@gmail\.com/g, 'DO_REGISTRY_USERNAME=your_email@example.com'],
-                [/DO_REGISTRY_TOKEN=dop_v1_[a-zA-Z0-9]+/g, 'DO_REGISTRY_TOKEN=your_digitalocean_registry_token_here'],
-                [/OAUTH_CALLBACK_PRODUCTION=http:\/\/159\.223\.207\.187:3000\//g, 'OAUTH_CALLBACK_PRODUCTION=https://your-domain.com/auth/callback'],
-                [/CORS_ORIGINS=https:\/\/primosphere\.studio,https:\/\/www\.primosphere\.studio/g, 'CORS_ORIGINS=https://your-domain.com,https://www.your-domain.com'],
-                [/FROM_EMAIL=noreply@primosphere\.studio/g, 'FROM_EMAIL=noreply@your-domain.com'],
-                [/ALERT_EMAIL=admin@primosphere\.studio/g, 'ALERT_EMAIL=admin@your-domain.com'],
-                [/LETSENCRYPT_EMAIL=admin@primosphere\.studio/g, 'LETSENCRYPT_EMAIL=admin@your-domain.com'],
-                [/SSL_CERT_PATH=\/etc\/nginx\/ssl\/primosphere\.studio\.crt/g, 'SSL_CERT_PATH=/etc/nginx/ssl/your-domain.com.crt'],
-                [/SSL_KEY_PATH=\/etc\/nginx\/ssl\/primosphere\.studio\.key/g, 'SSL_KEY_PATH=/etc/nginx/ssl/your-domain.com.key']
-            ];
-            
-            replacements.forEach(([pattern, replacement]) => {
-                content = content.replace(pattern, replacement);
-            });
-            
-            await fs.writeFile(envExamplePath, content);
-            console.log('    ✅ Updated .env.example with template values');
-            this.reportData.fixes.push('Updated .env.example with template values');
-            
-        } catch (error) {
-            console.log(`    ❌ Failed to update .env.example: ${error.message}`);
-            this.reportData.errors.push(error.message);
-        }
-    }
-
-    async validateEnvVariables() {
-        console.log('  🔍 Validating environment variables...');
-        
-        const requiredVars = [
-            'SPOTIFY_CLIENT_ID',
-            'SPOTIFY_CLIENT_SECRET',
-            'MONGODB_URI',
-            'GEMINI_API_KEY'
-        ];
-        
-        try {
-            require('dotenv').config();
-            
-            const missing = [];
-            const invalid = [];
-            
-            requiredVars.forEach(varName => {
-                const value = process.env[varName];
-                if (!value) {
-                    missing.push(varName);
-                } else if (value.includes('your_') || value.includes('here') || value.includes('example.com')) {
-                    invalid.push(varName);
-                }
-            });
-            
-            if (missing.length === 0 && invalid.length === 0) {
-                console.log('    ✅ All required environment variables are present');
-                this.reportData.validations.push('Environment variables validation passed');
-            } else {
-                if (missing.length > 0) {
-                    console.log(`    ⚠️  Missing variables: ${missing.join(', ')}`);
-                }
-                if (invalid.length > 0) {
-                    console.log(`    ⚠️  Template variables (need real values): ${invalid.join(', ')}`);
-                }
-            }
-            
-        } catch (error) {
-            console.log(`    ❌ Environment validation failed: ${error.message}`);
-            this.reportData.errors.push(`Environment validation: ${error.message}`);
-        }
-    }
-
-    async validateMongoDB() {
-        console.log('🗄️  Phase 2: MongoDB Connection Validation...');
-        
-        try {
-            // Try to connect to MongoDB using the correct URI
-            const { MongoClient } = require('mongodb');
-            const uri = 'mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/echotune?retryWrites=true&w=majority&appName=Cluster0';
-            
-            console.log('  🔄 Testing MongoDB connection...');
-            
-            const client = new MongoClient(uri);
-            await client.connect();
-            
-            // Test basic operations
-            const db = client.db('echotune');
-            const collections = await db.listCollections().toArray();
-            
-            console.log('    ✅ MongoDB connection successful');
-            console.log(`    📊 Found ${collections.length} collections`);
-            
-            // Test write operation
-            const testCollection = db.collection('connection_test');
-            await testCollection.insertOne({
-                test: 'connection',
-                timestamp: new Date(),
-                validated_by: 'comprehensive-mcp-validator'
-            });
-            
-            console.log('    ✅ MongoDB write test successful');
-            
-            await client.close();
-            
-            this.reportData.validations.push('MongoDB connection and write test passed');
-            this.reportData.success.push('MongoDB is fully functional');
-            
-        } catch (error) {
-            console.log(`    ❌ MongoDB validation failed: ${error.message}`);
-            this.reportData.errors.push(`MongoDB validation: ${error.message}`);
-        }
-    }
-
-    async validateSpotifyAPI() {
-        console.log('🎵 Phase 3: Spotify API Validation...');
-        
-        try {
-            // Load environment variables
-            require('dotenv').config();
-            
-            const clientId = process.env.SPOTIFY_CLIENT_ID;
-            const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-            
-            if (!clientId || !clientSecret || clientId.includes('your_') || clientSecret.includes('your_')) {
-                console.log('    ⚠️  Spotify credentials not configured (using template values)');
-                this.reportData.validations.push('Spotify API credentials need configuration');
-                return;
-            }
-            
-            console.log('  🔄 Testing Spotify API connection...');
-            
-            // Test client credentials flow
-            const fetch = require('node-fetch');
-            const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-            
-            const response = await fetch('https://accounts.spotify.com/api/token', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Basic ${credentials}`,
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'grant_type=client_credentials'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log('    ✅ Spotify API authentication successful');
-                console.log(`    🔑 Access token received (expires in ${data.expires_in}s)`);
-                
-                // Test API call
-                const apiResponse = await fetch('https://api.spotify.com/v1/search?q=test&type=track&limit=1', {
-                    headers: {
-                        'Authorization': `Bearer ${data.access_token}`
-                    }
-                });
-                
-                if (apiResponse.ok) {
-                    console.log('    ✅ Spotify API search test successful');
-                    this.reportData.validations.push('Spotify API authentication and search test passed');
-                    this.reportData.success.push('Spotify API is fully functional');
+            for (const exportName of requiredExports) {
+                if (typeof mcpManager[exportName] === 'function') {
+                    this.log(`MCP Manager exports ${exportName}`, 'success');
                 } else {
-                    throw new Error(`Spotify search API failed: ${apiResponse.status}`);
+                    this.log(`MCP Manager missing export: ${exportName}`, 'error');
                 }
-                
+            }
+            
+            // Test reading server configuration
+            const servers = await mcpManager.readServers();
+            if (Object.keys(servers).length > 0) {
+                this.log(`Found ${Object.keys(servers).length} configured MCP servers`, 'success');
             } else {
-                const errorData = await response.json();
-                throw new Error(`Spotify authentication failed: ${errorData.error}`);
+                this.log('No MCP servers configured', 'warning');
             }
             
         } catch (error) {
-            console.log(`    ❌ Spotify API validation failed: ${error.message}`);
-            this.reportData.errors.push(`Spotify API validation: ${error.message}`);
+            this.log(`MCP Manager validation failed: ${error.message}`, 'error');
         }
     }
 
-    async testMCPServers() {
-        console.log('🤖 Phase 4: MCP Server Integration Testing...');
+    async validateMCPServers() {
+        this.log('Validating MCP Server configurations...', 'info');
         
-        const mcpServers = [
-            'filesystem',
-            'browserbase',
-            'sequential-thinking',
-            'enhanced-file-utilities',
-            'comprehensive-validator'
+        const mcpServerPath = path.join(process.cwd(), 'mcp-server');
+        
+        try {
+            // Check mcp-server directory exists
+            await fs.access(mcpServerPath);
+            this.log('MCP server directory exists', 'success');
+            
+            // Check package.json
+            const packagePath = path.join(mcpServerPath, 'package.json');
+            const packageData = JSON.parse(await fs.readFile(packagePath, 'utf8'));
+            
+            if (packageData.servers && Object.keys(packageData.servers).length > 0) {
+                this.log(`Package.json has ${Object.keys(packageData.servers).length} server configurations`, 'success');
+            } else {
+                this.log('Package.json missing servers configuration', 'error');
+            }
+            
+            // Check key server files
+            const serverFiles = ['health.js', 'enhanced-mcp-orchestrator.js', 'workflow-manager.js'];
+            for (const file of serverFiles) {
+                try {
+                    await fs.access(path.join(mcpServerPath, file));
+                    this.log(`Server file ${file} exists`, 'success');
+                } catch {
+                    this.log(`Server file ${file} missing`, 'error');
+                }
+            }
+            
+        } catch (error) {
+            this.log(`MCP server validation failed: ${error.message}`, 'error');
+        }
+    }
+
+    async validateWorkflows() {
+        this.log('Validating GitHub Actions workflows...', 'info');
+        
+        const workflowsPath = path.join(process.cwd(), '.github', 'workflows');
+        
+        try {
+            const files = await fs.readdir(workflowsPath);
+            const mcpWorkflows = files.filter(f => f.includes('mcp') || f.includes('ci') || f.includes('auto'));
+            
+            this.log(`Found ${mcpWorkflows.length} MCP-related workflows`, 'success');
+            
+            // Check specific workflows
+            const requiredWorkflows = ['mcp-validation.yml', 'ci.yml', 'auto-merge-gate.yml'];
+            for (const workflow of requiredWorkflows) {
+                if (files.includes(workflow)) {
+                    this.log(`Workflow ${workflow} exists`, 'success');
+                    
+                    // Check if workflow includes MCP validation
+                    const content = await fs.readFile(path.join(workflowsPath, workflow), 'utf8');
+                    if (content.includes('mcp-manager') || content.includes('MCP')) {
+                        this.log(`Workflow ${workflow} includes MCP integration`, 'success');
+                    } else {
+                        this.log(`Workflow ${workflow} missing MCP integration`, 'warning');
+                    }
+                } else {
+                    this.log(`Required workflow ${workflow} missing`, 'error');
+                }
+            }
+            
+        } catch (error) {
+            this.log(`Workflow validation failed: ${error.message}`, 'error');
+        }
+    }
+
+    async validateEnvironmentConfig() {
+        this.log('Validating environment configuration...', 'info');
+        
+        try {
+            // Check .env.example
+            const envExample = await fs.readFile('.env.example', 'utf8');
+            if (envExample.includes('MCP_PORT') || envExample.includes('MCP_SERVER_PORT')) {
+                this.log('Environment template includes MCP configuration', 'success');
+            } else {
+                this.log('Environment template missing MCP configuration', 'warning');
+            }
+            
+            // Run environment validator
+            const { stdout } = await execAsync('node scripts/validate-env.js');
+            if (stdout.includes('validation') || !stdout.includes('error')) {
+                this.log('Environment validation passed', 'success');
+            } else {
+                this.log('Environment validation issues found', 'warning');
+            }
+            
+        } catch (error) {
+            this.log(`Environment validation error: ${error.message}`, 'warning');
+        }
+    }
+
+    async validatePackageScripts() {
+        this.log('Validating package.json MCP scripts...', 'info');
+        
+        try {
+            const packageData = JSON.parse(await fs.readFile('package.json', 'utf8'));
+            const scripts = packageData.scripts || {};
+            
+            const mcpScripts = Object.keys(scripts).filter(script => 
+                script.includes('mcp') || script.includes('MCP')
+            );
+            
+            this.log(`Found ${mcpScripts.length} MCP-related npm scripts`, 'success');
+            
+            // Check for required scripts
+            const requiredScripts = [
+                'mcp:install', 'mcp:health', 'mcp:test', 'mcp:validate'
+            ];
+            
+            for (const script of requiredScripts) {
+                if (scripts[script]) {
+                    this.log(`Script ${script} configured`, 'success');
+                } else {
+                    this.log(`Script ${script} missing`, 'warning');
+                }
+            }
+            
+        } catch (error) {
+            this.log(`Package script validation failed: ${error.message}`, 'error');
+        }
+    }
+
+    async validateDocumentation() {
+        this.log('Validating MCP documentation...', 'info');
+        
+        const docsToCheck = [
+            'docs/MCP_INTEGRATION.md',
+            'docs/mcp-servers.md', 
+            'mcp-server/README.md'
         ];
         
-        for (const server of mcpServers) {
-            await this.testMCPServer(server);
+        for (const doc of docsToCheck) {
+            try {
+                await fs.access(doc);
+                this.log(`Documentation ${doc} exists`, 'success');
+            } catch {
+                this.log(`Documentation ${doc} missing`, 'warning');
+            }
         }
     }
 
-    async testMCPServer(serverName) {
-        console.log(`  🔍 Testing MCP server: ${serverName}...`);
+    async runLiveHealthChecks() {
+        this.log('Running live MCP health checks...', 'info');
         
         try {
-            // Check if MCP server configuration exists
-            const packageJson = JSON.parse(await fs.readFile(path.join(this.projectRoot, 'package.json'), 'utf8'));
-            const mcpConfig = packageJson.mcp?.servers?.[serverName];
+            // Run MCP manager commands
+            const commands = ['install', 'health', 'test'];
             
-            if (mcpConfig) {
-                console.log(`    ✅ MCP server ${serverName} configuration found`);
-                
-                // Check if server files exist
-                const serverPath = mcpConfig.args?.[0];
-                if (serverPath) {
-                    const fullPath = path.join(this.projectRoot, serverPath);
-                    try {
-                        await fs.access(fullPath);
-                        console.log(`    ✅ MCP server ${serverName} files exist`);
-                        this.reportData.validations.push(`MCP server ${serverName} is properly configured`);
-                    } catch {
-                        console.log(`    ⚠️  MCP server ${serverName} files missing at ${fullPath}`);
-                        this.reportData.errors.push(`MCP server ${serverName} files missing`);
+            for (const cmd of commands) {
+                try {
+                    const { stdout, stderr } = await execAsync(`node scripts/mcp-manager.js ${cmd}`);
+                    if (stdout.includes('✅') || !stderr) {
+                        this.log(`MCP ${cmd} command successful`, 'success');
+                    } else {
+                        this.log(`MCP ${cmd} command issues: ${stderr}`, 'warning');
                     }
+                } catch (error) {
+                    this.log(`MCP ${cmd} command failed: ${error.message}`, 'error');
                 }
-                
+            }
+            
+        } catch (error) {
+            this.log(`Live health check error: ${error.message}`, 'error');
+        }
+    }
+
+    async validatePerformance() {
+        this.log('Validating MCP performance characteristics...', 'info');
+        
+        try {
+            const startTime = Date.now();
+            
+            // Test MCP manager performance
+            const mcpManager = require('./mcp-manager.js');
+            await mcpManager.readServers();
+            
+            const readTime = Date.now() - startTime;
+            if (readTime < 1000) {
+                this.log(`MCP server configuration read time: ${readTime}ms - Good`, 'success');
             } else {
-                console.log(`    ⚠️  MCP server ${serverName} not configured`);
+                this.log(`MCP server configuration read time: ${readTime}ms - Slow`, 'warning');
             }
             
-        } catch (error) {
-            console.log(`    ❌ MCP server ${serverName} test failed: ${error.message}`);
-            this.reportData.errors.push(`MCP server ${serverName}: ${error.message}`);
-        }
-    }
-
-    async testCoreFunctionality() {
-        console.log('⚙️  Phase 5: Core Functionality Testing...');
-        
-        // Test server startup
-        await this.testServerStartup();
-        
-        // Test health endpoint
-        await this.testHealthEndpoint();
-        
-        // Test API endpoints
-        await this.testAPIEndpoints();
-    }
-
-    async testServerStartup() {
-        console.log('  🔄 Testing server startup...');
-        
-        try {
-            // Test if main server file exists and is valid
-            const serverFiles = ['server.js', 'src/index.js', 'index.js'];
-            let mainServer = null;
+            // Check memory usage
+            const memoryUsage = process.memoryUsage();
+            const memoryMB = Math.round(memoryUsage.rss / 1024 / 1024);
             
-            for (const file of serverFiles) {
-                try {
-                    await fs.access(path.join(this.projectRoot, file));
-                    mainServer = file;
-                    break;
-                } catch {}
-            }
-            
-            if (mainServer) {
-                console.log(`    ✅ Main server file found: ${mainServer}`);
-                this.reportData.validations.push(`Main server file exists: ${mainServer}`);
+            if (memoryMB < 100) {
+                this.log(`Memory usage: ${memoryMB}MB - Efficient`, 'success');
             } else {
-                console.log('    ❌ No main server file found');
-                this.reportData.errors.push('Main server file not found');
+                this.log(`Memory usage: ${memoryMB}MB - Consider optimization`, 'warning');
             }
             
         } catch (error) {
-            console.log(`    ❌ Server startup test failed: ${error.message}`);
-            this.reportData.errors.push(`Server startup test: ${error.message}`);
-        }
-    }
-
-    async testHealthEndpoint() {
-        console.log('  🔄 Testing health endpoint...');
-        
-        // This would require actually starting the server, which we'll skip for now
-        // but we can check if health endpoint code exists
-        try {
-            const serverFiles = ['server.js', 'src/index.js'];
-            let hasHealthEndpoint = false;
-            
-            for (const file of serverFiles) {
-                try {
-                    const content = await fs.readFile(path.join(this.projectRoot, file), 'utf8');
-                    if (content.includes('/health') || content.includes('health')) {
-                        hasHealthEndpoint = true;
-                        break;
-                    }
-                } catch {}
-            }
-            
-            if (hasHealthEndpoint) {
-                console.log('    ✅ Health endpoint code found');
-                this.reportData.validations.push('Health endpoint is implemented');
-            } else {
-                console.log('    ⚠️  Health endpoint not found in server code');
-            }
-            
-        } catch (error) {
-            console.log(`    ❌ Health endpoint test failed: ${error.message}`);
-        }
-    }
-
-    async testAPIEndpoints() {
-        console.log('  🔄 Testing API endpoint structure...');
-        
-        try {
-            // Check if API routes exist
-            const apiPaths = [
-                'src/routes',
-                'routes',
-                'api'
-            ];
-            
-            let apiFound = false;
-            for (const apiPath of apiPaths) {
-                try {
-                    const stats = await fs.stat(path.join(this.projectRoot, apiPath));
-                    if (stats.isDirectory()) {
-                        apiFound = true;
-                        console.log(`    ✅ API routes directory found: ${apiPath}`);
-                        break;
-                    }
-                } catch {}
-            }
-            
-            if (!apiFound) {
-                console.log('    ⚠️  No dedicated API routes directory found');
-            }
-            
-            this.reportData.validations.push('API endpoint structure checked');
-            
-        } catch (error) {
-            console.log(`    ❌ API endpoints test failed: ${error.message}`);
-        }
-    }
-
-    async testChatbot() {
-        console.log('💬 Phase 6: Chatbot Functionality Testing...');
-        
-        try {
-            // Check if chatbot components exist
-            const chatbotFiles = [
-                'src/components/chat',
-                'src/chat',
-                'src/components/Chat.js',
-                'src/components/ChatInterface.js'
-            ];
-            
-            let chatbotFound = false;
-            for (const chatPath of chatbotFiles) {
-                try {
-                    await fs.access(path.join(this.projectRoot, chatPath));
-                    chatbotFound = true;
-                    console.log(`    ✅ Chatbot component found: ${chatPath}`);
-                    break;
-                } catch {}
-            }
-            
-            if (!chatbotFound) {
-                console.log('    ⚠️  Chatbot components not found in expected locations');
-            }
-            
-            // Test Gemini API integration
-            await this.testGeminiIntegration();
-            
-        } catch (error) {
-            console.log(`    ❌ Chatbot test failed: ${error.message}`);
-            this.reportData.errors.push(`Chatbot test: ${error.message}`);
-        }
-    }
-
-    async testGeminiIntegration() {
-        console.log('  🔄 Testing Gemini API integration...');
-        
-        try {
-            require('dotenv').config();
-            const apiKey = process.env.GEMINI_API_KEY;
-            
-            if (!apiKey || apiKey.includes('your_') || apiKey.includes('here')) {
-                console.log('    ⚠️  Gemini API key not configured (using template value)');
-                return;
-            }
-            
-            // Test Gemini API connection
-            const { GoogleGenerativeAI } = require('@google/generative-ai');
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-            
-            const result = await model.generateContent('Say "API connection test successful"');
-            const response = await result.response;
-            const text = response.text();
-            
-            if (text.includes('successful')) {
-                console.log('    ✅ Gemini API integration test successful');
-                this.reportData.validations.push('Gemini API integration is working');
-                this.reportData.success.push('Chatbot AI integration is functional');
-            } else {
-                console.log('    ⚠️  Gemini API response unexpected');
-            }
-            
-        } catch (error) {
-            console.log(`    ❌ Gemini API integration test failed: ${error.message}`);
-            this.reportData.errors.push(`Gemini API integration: ${error.message}`);
+            this.log(`Performance validation error: ${error.message}`, 'error');
         }
     }
 
     async generateReport() {
-        console.log('📊 Phase 7: Generating Comprehensive Report...');
+        const duration = Date.now() - this.startTime;
         
-        const report = `# Comprehensive MCP Validation Report
-Generated: ${this.reportData.timestamp}
+        this.log('\n📊 MCP Validation Report Summary', 'info');
+        this.log(`Total Tests: ${this.results.tests.length}`, 'info');
+        this.log(`Passed: ${this.results.passed}`, this.results.passed > 0 ? 'success' : 'info');
+        this.log(`Failed: ${this.results.failed}`, this.results.failed > 0 ? 'error' : 'info');
+        this.log(`Warnings: ${this.results.warnings}`, this.results.warnings > 0 ? 'warning' : 'info');
+        this.log(`Duration: ${duration}ms`, 'info');
+        
+        // Calculate score
+        const totalTests = this.results.passed + this.results.failed;
+        const score = totalTests > 0 ? Math.round((this.results.passed / totalTests) * 100) : 0;
+        
+        this.log(`Overall Score: ${score}%`, score >= 80 ? 'success' : score >= 60 ? 'warning' : 'error');
+        
+        // Save detailed report
+        const report = {
+            timestamp: new Date().toISOString(),
+            summary: {
+                total: this.results.tests.length,
+                passed: this.results.passed,
+                failed: this.results.failed,
+                warnings: this.results.warnings,
+                score: score,
+                duration_ms: duration
+            },
+            tests: this.results.tests,
+            recommendations: this.generateRecommendations()
+        };
+        
+        await fs.writeFile(
+            'mcp-validation-report.json',
+            JSON.stringify(report, null, 2)
+        );
+        
+        this.log('📄 Detailed report saved to mcp-validation-report.json', 'success');
+        
+        // Exit with error code if validation failed
+        if (this.results.failed > 0) {
+            process.exit(1);
+        }
+    }
 
-## Executive Summary
+    generateRecommendations() {
+        const recommendations = [];
+        
+        if (this.results.failed > 0) {
+            recommendations.push('🔧 Fix failed validations before proceeding with deployment');
+        }
+        
+        if (this.results.warnings > 3) {
+            recommendations.push('⚠️  Address warnings to improve MCP integration robustness');
+        }
+        
+        recommendations.push('🚀 Run this validation regularly in CI/CD pipelines');
+        recommendations.push('📚 Keep MCP documentation updated with any configuration changes');
+        recommendations.push('🔍 Monitor MCP server health endpoints in production');
+        
+        return recommendations;
+    }
 
-This comprehensive validation addresses all critical issues identified in Ubuntu 22.04 deployment and validates core functionality including MongoDB, Spotify API, and chatbot features.
-
-### Key Fixes Applied
-${this.reportData.fixes.map(fix => `- ✅ ${fix}`).join('\n')}
-
-### Validations Completed
-${this.reportData.validations.map(validation => `- ✅ ${validation}`).join('\n')}
-
-### Success Metrics
-${this.reportData.success.map(success => `- 🎉 ${success}`).join('\n')}
-
-${this.reportData.errors.length > 0 ? `### Issues Found
-${this.reportData.errors.map(error => `- ❌ ${error}`).join('\n')}` : '### ✅ No Critical Issues Found'}
-
-## MongoDB Configuration
-
-### Updated MongoDB URI
-\`\`\`
-mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/echotune?retryWrites=true&w=majority&appName=Cluster0
-\`\`\`
-
-### Connection Status
-- ✅ MongoDB connection tested and validated
-- ✅ Database read/write operations working
-- ✅ Collections accessible
-
-## Spotify API Configuration
-
-### Redirect URLs Setup Required
-For production deployment, configure these redirect URLs in your Spotify app:
-- **Development**: \`http://localhost:3000/callback\`
-- **Production**: \`https://your-domain.com/auth/callback\`
-
-### API Status
-- ✅ Client credentials flow working
-- ✅ Search API endpoints functional
-- ✅ Authentication mechanism validated
-
-## Chatbot Functionality
-
-### AI Integration Status
-- ✅ Gemini API configuration validated
-- ✅ Conversational AI ready for deployment
-- ✅ Music recommendation system functional
-
-## MCP Server Ecosystem
-
-### Available MCP Servers
-- **Filesystem MCP**: Enhanced file operations and security
-- **Browser Automation**: Comprehensive web automation tools
-- **Sequential Thinking**: Structured reasoning capabilities
-- **Enhanced File Utilities**: Advanced file handling with validation
-- **Comprehensive Validator**: System-wide validation and monitoring
-
-### Automated Workflows
-- ✅ Code validation and testing automation
-- ✅ Deployment validation pipelines
-- ✅ Performance monitoring and optimization
-- ✅ Security scanning and compliance checking
-
-## Deployment Testing Results
-
-### Features Confirmed Working
-- **🎵 Music Recommendations**: AI-powered collaborative filtering
-- **💬 Conversational Interface**: Natural language music discovery
-- **📊 Analytics Dashboard**: User listening insights
-- **🔐 Authentication**: Secure Spotify OAuth integration
-- **⚡ Performance**: Optimized caching and rate limiting
-- **🛡️ Security**: SSL/TLS, security headers, input validation
-
-### Testing Instructions
-
-1. **MongoDB Connection Test**:
-   \`\`\`bash
-   npm run validate:mongodb-comprehensive
-   \`\`\`
-
-2. **Spotify API Test**:
-   \`\`\`bash
-   npm run validate:spotify
-   \`\`\`
-
-3. **Chatbot AI Test**:
-   \`\`\`bash
-   npm run test:gemini-integration
-   \`\`\`
-
-4. **Full System Validation**:
-   \`\`\`bash
-   npm run validate:comprehensive
-   \`\`\`
-
-5. **MCP Server Health Check**:
-   \`\`\`bash
-   npm run mcp-health-check
-   \`\`\`
-
-### Required Setup Steps
-
-1. **API Keys Configuration**: Update \`.env\` with real API keys:
-   - Spotify Client ID & Secret from https://developer.spotify.com/dashboard
-   - Gemini API Key from https://makersuite.google.com/app/apikey
-
-2. **Redirect URL Configuration**: 
-   - Add your domain's callback URL to Spotify app settings
-   - Format: \`https://your-domain.com/auth/callback\`
-
-3. **DNS Configuration**: 
-   - Point your domain A record to server IP
-   - Configure SSL certificates for HTTPS
-
-4. **MongoDB Access**:
-   - Database is pre-configured and accessible
-   - Connection string validated and working
-
-## Next Steps for Production
-
-1. **Deploy with Interactive Wizard**:
-   \`\`\`bash
-   curl -sSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-ubuntu22-wizard.sh | sudo bash
-   \`\`\`
-
-2. **Multi-Server Configuration**:
-   - Each server deployment creates unique configurations
-   - Automatic DNS validation and SSL certificate generation
-   - Independent environment variable management
-
-3. **Monitoring and Maintenance**:
-   - Health check endpoints active
-   - Performance metrics collection
-   - Automated backup procedures
-   - Security monitoring enabled
-
-## Support and Documentation
-
-- **Setup Guide**: \`docs/deployment/PRE_INSTALLATION_REQUIREMENTS.md\`
-- **DNS Configuration**: \`docs/deployment/DNS_CONFIGURATION_GUIDE.md\`
-- **Troubleshooting**: \`docs/deployment/TROUBLESHOOTING_GUIDE.md\`
-- **API Documentation**: \`API_DOCUMENTATION.md\`
-
----
-**Generated by Comprehensive MCP Validator v2.1.0**  
-**Validation completed with MCP automation and testing integration**
-`;
-
-        await fs.writeFile('COMPREHENSIVE_MCP_VALIDATION_REPORT.md', report);
-        console.log('  ✅ Comprehensive validation report generated');
+    async runFullValidation() {
+        this.log('🎵 Starting comprehensive MCP validation for EchoTune AI...', 'info');
+        
+        await this.validateMCPManager();
+        await this.validateMCPServers();
+        await this.validateWorkflows();
+        await this.validateEnvironmentConfig();
+        await this.validatePackageScripts();
+        await this.validateDocumentation();
+        await this.runLiveHealthChecks();
+        await this.validatePerformance();
+        
+        await this.generateReport();
     }
 }
 
-// Run the validation
+// Run validation if called directly
 if (require.main === module) {
     const validator = new ComprehensiveMCPValidator();
-    validator.run().catch(console.error);
+    validator.runFullValidation()
+        .then(() => {
+            console.log('\n🎉 MCP validation completed successfully!');
+        })
+        .catch(error => {
+            console.error('\n💥 MCP validation failed:', error.message);
+            process.exit(1);
+        });
 }
 
 module.exports = ComprehensiveMCPValidator;

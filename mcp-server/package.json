@@ -2,22 +2,66 @@
   "name": "echotune-mcp",
   "version": "1.0.0",
   "private": true,
+  "description": "EchoTune AI MCP Server Infrastructure",
   "scripts": {
+    "start": "node health.js",
     "start:health": "node health.js",
-    "health": "curl -fsS http://localhost:${MCP_PORT:-3001}/health || exit 1"
+    "start:orchestrator": "node enhanced-mcp-orchestrator.js", 
+    "start:workflow": "node workflow-manager.js",
+    "health": "curl -fsS http://localhost:${MCP_PORT:-3001}/health || exit 1",
+    "health:all": "npm run health && node ../scripts/mcp-manager.js health",
+    "test": "node ../scripts/mcp-manager.js test",
+    "validate": "node ../scripts/mcp-manager.js install && npm run health:all && npm run test"
   },
   "servers": {
     "mcpHealth": {
       "command": "node",
-      "args": [
-        "health.js"
-      ],
+      "args": ["health.js"],
       "port": 3001,
       "healthPath": "/health",
-      "env": {}
+      "env": {
+        "NODE_ENV": "production",
+        "MCP_SERVER_NAME": "mcpHealth"
+      },
+      "timeout": 30000,
+      "retries": 3
+    },
+    "mcpOrchestrator": {
+      "command": "node", 
+      "args": ["enhanced-mcp-orchestrator.js"],
+      "port": 3002,
+      "healthPath": "/health",
+      "env": {
+        "NODE_ENV": "production",
+        "MCP_SERVER_NAME": "mcpOrchestrator"
+      },
+      "timeout": 45000,
+      "retries": 3
+    },
+    "mcpWorkflow": {
+      "command": "node",
+      "args": ["workflow-manager.js"], 
+      "port": 3003,
+      "healthPath": "/status",
+      "env": {
+        "NODE_ENV": "production", 
+        "MCP_SERVER_NAME": "mcpWorkflow"
+      },
+      "timeout": 30000,
+      "retries": 3
     }
   },
   "dependencies": {
-    "express": "^5.1.0"
-  }
+    "express": "^5.1.0",
+    "ws": "^8.16.0",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": ["mcp", "model-context-protocol", "echotune", "ai", "automation"],
+  "author": "EchoTune AI Team",
+  "license": "MIT"
 }

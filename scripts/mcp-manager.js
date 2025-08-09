@@ -56,8 +56,13 @@ async function install() {
   try {
     if (fs.existsSync(MCP_DIR)) {
       if (fs.existsSync(MCP_PKG)) {
-        log('→ npm ci in mcp-server');
-        await execAsync('npm ci', { cwd: MCP_DIR });
+        log('→ Installing/updating npm packages in mcp-server');
+        try {
+          await execAsync('npm ci', { cwd: MCP_DIR });
+        } catch (ciError) {
+          log('→ npm ci failed, trying npm install...');
+          await execAsync('npm install', { cwd: MCP_DIR });
+        }
       }
       if (fs.existsSync(path.join(MCP_DIR, 'requirements.txt'))) {
         log('→ pip install -r requirements.txt in mcp-server');
@@ -205,4 +210,13 @@ if (require.main === module) {
   main().catch(err => { console.error('❌', err.message); process.exit(1); });
 }
 
-module.exports = { readServers };
+module.exports = { 
+  readServers,
+  install,
+  health,
+  test,
+  report,
+  probeHealth,
+  startServer,
+  stopServer
+};

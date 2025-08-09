@@ -31,6 +31,10 @@
     "mcp:validate-comprehensive": "node scripts/comprehensive-mcp-validation.js",
     "mcp:enhanced-validation": "node scripts/enhanced-mcp-validation-pipeline.js",
     "mcp:enhanced-validation-fix": "npm install && node scripts/enhanced-mcp-validation-pipeline.js",
+    "mcp:test:comprehensive": "node scripts/mcp/comprehensive-test-suite.js",
+    "mcp:test:live-servers": "node scripts/mcp/live-server-test.js",
+    "mcp:test:automation": "node scripts/mcp/automation-progress-test.js",
+    "mcp:test:all": "npm run mcp:test:comprehensive && npm run mcp:test:live-servers && npm run mcp:test:automation",
     "mcp:orchestrator-status": "node mcp-server/enhanced-registry-orchestrator.js status",
     "mcp:orchestrator-start": "node mcp-server/enhanced-registry-orchestrator.js start",
     "mcp:health-monitor": "node mcp-server/enhanced-health-monitor.js",
@@ -244,11 +248,7 @@
     "enhanced-mcp:capabilities": "curl -s http://localhost:3000/api/enhanced-mcp/capabilities | jq '.' || echo 'Enhanced MCP server not running'",
     "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'",
     "mcp:health:n8n": "node scripts/mcp/probes/probe-n8n.js",
-    "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js",
-    "mcp:test:comprehensive": "node scripts/mcp/comprehensive-test-suite.js",
-    "mcp:test:live-servers": "node scripts/mcp/live-server-test.js", 
-    "mcp:test:automation": "node scripts/mcp/automation-progress-test.js",
-    "mcp:test:all": "npm run mcp:test:comprehensive && npm run mcp:test:live-servers && npm run mcp:test:automation"
+    "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js"
   },
   "keywords": [
     "music",

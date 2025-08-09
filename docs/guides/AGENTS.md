@@ -539,7 +539,671 @@ function validateMCPEnvironment() {
 
 ## Integration Testing for AI Agents
 
-### Automated Validation Script
+### 🔍 Recently Discovered MCP Servers
+
+*Last updated: 8/8/2025*
+
+The following MCP servers were discovered and may be valuable additions to EchoTune AI:
+
+### 1. xcodebuildmcp
+- **Package**: `xcodebuildmcp`
+- **Description**: XcodeBuildMCP is a ModelContextProtocol server that provides tools for Xcode project management, simulator management, and app utilities.
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://www.async-let.com/blog/xcodebuild-mcp/](https://www.async-let.com/blog/xcodebuild-mcp/)
+- **Integration Suggestion**: undefined
+
+### 2. punkpeye/awesome-mcp-servers
+- **Package**: `@punkpeye/awesome-mcp-servers`
+- **Description**: A collection of MCP servers.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers)
+- **Integration Suggestion**: undefined
+
+### 3. GLips/Figma-Context-MCP
+- **Package**: `@GLips/Figma-Context-MCP`
+- **Description**: MCP server to provide Figma layout information to AI coding agents like Cursor
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/GLips/Figma-Context-MCP](https://github.com/GLips/Figma-Context-MCP)
+- **Integration Suggestion**: undefined
+
+### 4. lharries/whatsapp-mcp
+- **Package**: `@lharries/whatsapp-mcp`
+- **Description**: WhatsApp MCP server
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp)
+- **Integration Suggestion**: undefined
+
+### 5. aipotheosis-labs/aci
+- **Package**: `@aipotheosis-labs/aci`
+- **Description**: ACI.dev is the open source tool-calling platform that hooks up 600+ tools into any agentic IDE or custom AI agent through direct function calling or a unified MCP server. The birthplace of VibeOps.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/aipotheosis-labs/aci](https://github.com/aipotheosis-labs/aci)
+- **Integration Suggestion**: undefined
+
+### 6. graphlit-mcp-server
+- **Package**: `graphlit-mcp-server`
+- **Description**: Graphlit MCP Server
+- **Relevance Score**: 8/10
+- **Source**: npm
+- **URL**: [https://github.com/graphlit/graphlit-mcp-server#readme](https://github.com/graphlit/graphlit-mcp-server#readme)
+- **Integration Suggestion**: undefined
+
+### 7. @openbnb/mcp-server-airbnb
+- **Package**: `@openbnb/mcp-server-airbnb`
+- **Description**: MCP server for Airbnb search and listing details
+- **Relevance Score**: 8/10
+- **Source**: npm
+- **URL**: [undefined](undefined)
+- **Integration Suggestion**: undefined
+
+### 8. scrapeless-mcp-server
+- **Package**: `scrapeless-mcp-server`
+- **Description**: Scrapeless Mcp Server
+- **Relevance Score**: 8/10
+- **Source**: npm
+- **URL**: [https://scrapeless.com](https://scrapeless.com)
+- **Integration Suggestion**: undefined
+
+### 9. @langchain/mcp-adapters
+- **Package**: `@langchain/mcp-adapters`
+- **Description**: LangChain.js adapters for Model Context Protocol (MCP)
+- **Relevance Score**: 8/10
+- **Source**: npm
+- **URL**: [https://github.com/langchain-ai/langchainjs/tree/main/libs/langchain-mcp-adapters/](https://github.com/langchain-ai/langchainjs/tree/main/libs/langchain-mcp-adapters/)
+- **Integration Suggestion**: undefined
+
+### 10. mcp-framework
+- **Package**: `mcp-framework`
+- **Description**: Framework for building Model Context Protocol (MCP) servers in Typescript
+- **Relevance Score**: 8/10
+- **Source**: npm
+- **URL**: [undefined](undefined)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+### 1. xcodebuildmcp
+- **Package**: `xcodebuildmcp`
+- **Description**: XcodeBuildMCP is a ModelContextProtocol server that provides tools for Xcode project management, simulator management, and app utilities.
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://www.async-let.com/blog/xcodebuild-mcp/](https://www.async-let.com/blog/xcodebuild-mcp/)
+- **Integration Suggestion**: undefined
+
+### 2. perplexityai/modelcontextprotocol
+- **Package**: `@perplexityai/modelcontextprotocol`
+- **Description**: A Model Context Protocol Server connector for Perplexity API, to enable web search without leaving the MCP ecosystem.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/perplexityai/modelcontextprotocol](https://github.com/perplexityai/modelcontextprotocol)
+- **Integration Suggestion**: undefined
+
+### 3. dataforseo/mcp-server-typescript
+- **Package**: `@dataforseo/mcp-server-typescript`
+- **Description**: DataForSEO API modelcontextprotocol server 
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/dataforseo/mcp-server-typescript](https://github.com/dataforseo/mcp-server-typescript)
+- **Integration Suggestion**: undefined
+
+### 4. dweigend/joplin-mcp-server
+- **Package**: `@dweigend/joplin-mcp-server`
+- **Description**: A Model Context Protocol (MCP) Server for https://joplinapp.org/ that enables note access through the https://modelcontextprotocol.io. Perfect for integration with AI assistants like Claude.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/dweigend/joplin-mcp-server](https://github.com/dweigend/joplin-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 5. recraft-ai/mcp-recraft-server
+- **Package**: `@recraft-ai/mcp-recraft-server`
+- **Description**: MCP (modelcontextprotocol) server implementation for Recraft API
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/recraft-ai/mcp-recraft-server](https://github.com/recraft-ai/mcp-recraft-server)
+- **Integration Suggestion**: undefined
+
+### 6. TickHaiJun/mysql-mcp-server
+- **Package**: `@TickHaiJun/mysql-mcp-server`
+- **Description**: MCP MySQL Server 是一个基于 @modelcontextprotocol/sdk 的 MySQL 工具服务，支持 SQL 查询、表结构获取、连接检测等功能，适用于 AI 代理、自动化工具等场景。
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/TickHaiJun/mysql-mcp-server](https://github.com/TickHaiJun/mysql-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 7. covalenthq/goldrush-mcp-server
+- **Package**: `@covalenthq/goldrush-mcp-server`
+- **Description**: This project provides a MCP (Model Context Protocol) server that exposes Covalent's GoldRush APIs as MCP resources and tools. It is implemented in TypeScript using @modelcontextprotocol/sdk and @covalenthq/client-sdk.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/covalenthq/goldrush-mcp-server](https://github.com/covalenthq/goldrush-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 8. jaimaann/MCPRepository
+- **Package**: `@jaimaann/MCPRepository`
+- **Description**: Open Source Repository for ModelContextProtocol MCP server
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/jaimaann/MCPRepository](https://github.com/jaimaann/MCPRepository)
+- **Integration Suggestion**: undefined
+
+### 9. softgridinc-pte-ltd/mcp-excel-reader-server
+- **Package**: `@softgridinc-pte-ltd/mcp-excel-reader-server`
+- **Description**: A MS excel server based on modelcontextprotocol
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/softgridinc-pte-ltd/mcp-excel-reader-server](https://github.com/softgridinc-pte-ltd/mcp-excel-reader-server)
+- **Integration Suggestion**: undefined
+
+### 10. Anshumaan031/Crawl4AI-RAG-MCP-Server
+- **Package**: `@Anshumaan031/Crawl4AI-RAG-MCP-Server`
+- **Description**: A powerful implementation of the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) integrated with [Crawl4AI](https://crawl4ai.com) and [Supabase](https://supabase.com/) for providing AI agents and AI coding assistants with advanced web crawling and RAG capabilities.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/Anshumaan031/Crawl4AI-RAG-MCP-Server](https://github.com/Anshumaan031/Crawl4AI-RAG-MCP-Server)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+### 1. n8n-mcp
+- **Package**: `n8n-mcp`
+- **Description**: Integration between n8n workflow automation and Model Context Protocol (MCP)
+- **Relevance Score**: 15/10
+- **Source**: npm
+- **URL**: [https://github.com/czlonkowski/n8n-mcp#readme](https://github.com/czlonkowski/n8n-mcp#readme)
+- **Integration Suggestion**: undefined
+
+### 2. mcp-server-code-runner
+- **Package**: `mcp-server-code-runner`
+- **Description**: Code Runner MCP Server
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://github.com/formulahendry/mcp-server-code-runner#readme](https://github.com/formulahendry/mcp-server-code-runner#readme)
+- **Integration Suggestion**: undefined
+
+### 3. xcodebuildmcp
+- **Package**: `xcodebuildmcp`
+- **Description**: XcodeBuildMCP is a ModelContextProtocol server that provides tools for Xcode project management, simulator management, and app utilities.
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://www.async-let.com/blog/xcodebuild-mcp/](https://www.async-let.com/blog/xcodebuild-mcp/)
+- **Integration Suggestion**: undefined
+
+### 4. puppeteer-mcp-server
+- **Package**: `puppeteer-mcp-server`
+- **Description**: Experimental MCP server for browser automation using Puppeteer (inspired by @modelcontextprotocol/server-puppeteer)
+- **Relevance Score**: 10/10
+- **Source**: npm
+- **URL**: [https://github.com/merajmehrabi/puppeteer-mcp-server](https://github.com/merajmehrabi/puppeteer-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 5. mongodb-mcp-server
+- **Package**: `mongodb-mcp-server`
+- **Description**: MongoDB Model Context Protocol Server
+- **Relevance Score**: 9/10
+- **Source**: npm
+- **URL**: [https://github.com/mongodb-js/mongodb-mcp-server](https://github.com/mongodb-js/mongodb-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 6. TensorBlock/awesome-mcp-servers
+- **Package**: `@TensorBlock/awesome-mcp-servers`
+- **Description**: A comprehensive collection of Model Context Protocol (MCP) servers
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/TensorBlock/awesome-mcp-servers](https://github.com/TensorBlock/awesome-mcp-servers)
+- **Integration Suggestion**: undefined
+
+### 7. taylorwilsdon/google_workspace_mcp
+- **Package**: `@taylorwilsdon/google_workspace_mcp`
+- **Description**: Control Gmail, Google Calendar, Docs, Sheets, Slides, Chat, Forms, Tasks, Search & Drive with AI - Comprehensive Google Workspace / G Suite MCP Server
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)
+- **Integration Suggestion**: undefined
+
+### 8. opensumi/core
+- **Package**: `@opensumi/core`
+- **Description**: A framework helps you quickly build AI Native IDE products. MCP Client, supports Model Context Protocol (MCP) tools via MCP server.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/opensumi/core](https://github.com/opensumi/core)
+- **Integration Suggestion**: undefined
+
+### 9. zcaceres/markdownify-mcp
+- **Package**: `@zcaceres/markdownify-mcp`
+- **Description**: A Model Context Protocol server for converting almost anything to Markdown
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/zcaceres/markdownify-mcp](https://github.com/zcaceres/markdownify-mcp)
+- **Integration Suggestion**: undefined
+
+### 10. blazickjp/arxiv-mcp-server
+- **Package**: `@blazickjp/arxiv-mcp-server`
+- **Description**: A Model Context Protocol server for searching and analyzing arXiv papers
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/blazickjp/arxiv-mcp-server](https://github.com/blazickjp/arxiv-mcp-server)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+### 1. n8n-mcp
+- **Package**: `n8n-mcp`
+- **Description**: Integration between n8n workflow automation and Model Context Protocol (MCP)
+- **Relevance Score**: 15/10
+- **Source**: npm
+- **URL**: [https://github.com/czlonkowski/n8n-mcp#readme](https://github.com/czlonkowski/n8n-mcp#readme)
+- **Integration Suggestion**: undefined
+
+### 2. mcp-server-code-runner
+- **Package**: `mcp-server-code-runner`
+- **Description**: Code Runner MCP Server
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://github.com/formulahendry/mcp-server-code-runner#readme](https://github.com/formulahendry/mcp-server-code-runner#readme)
+- **Integration Suggestion**: undefined
+
+### 3. xcodebuildmcp
+- **Package**: `xcodebuildmcp`
+- **Description**: XcodeBuildMCP is a ModelContextProtocol server that provides tools for Xcode project management, simulator management, and app utilities.
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://www.async-let.com/blog/xcodebuild-mcp/](https://www.async-let.com/blog/xcodebuild-mcp/)
+- **Integration Suggestion**: undefined
+
+### 4. puppeteer-mcp-server
+- **Package**: `puppeteer-mcp-server`
+- **Description**: Experimental MCP server for browser automation using Puppeteer (inspired by @modelcontextprotocol/server-puppeteer)
+- **Relevance Score**: 10/10
+- **Source**: npm
+- **URL**: [https://github.com/merajmehrabi/puppeteer-mcp-server](https://github.com/merajmehrabi/puppeteer-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 5. mongodb-mcp-server
+- **Package**: `mongodb-mcp-server`
+- **Description**: MongoDB Model Context Protocol Server
+- **Relevance Score**: 9/10
+- **Source**: npm
+- **URL**: [https://github.com/mongodb-js/mongodb-mcp-server](https://github.com/mongodb-js/mongodb-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 6. appcypher/awesome-mcp-servers
+- **Package**: `@appcypher/awesome-mcp-servers`
+- **Description**: Awesome MCP Servers - A curated list of Model Context Protocol servers
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/appcypher/awesome-mcp-servers](https://github.com/appcypher/awesome-mcp-servers)
+- **Integration Suggestion**: undefined
+
+### 7. CoplayDev/unity-mcp
+- **Package**: `@CoplayDev/unity-mcp`
+- **Description**: A Unity MCP server that allows MCP clients like Claude Desktop or Cursor to perform Unity Editor actions.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp)
+- **Integration Suggestion**: undefined
+
+### 8. metatool-ai/metamcp
+- **Package**: `@metatool-ai/metamcp`
+- **Description**: MCP Aggregator, Orchestrator, Middleware, Gateway in one docker
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/metatool-ai/metamcp](https://github.com/metatool-ai/metamcp)
+- **Integration Suggestion**: undefined
+
+### 9. isaacphi/mcp-language-server
+- **Package**: `@isaacphi/mcp-language-server`
+- **Description**: mcp-language-server gives MCP enabled clients access semantic tools like get definition, references, rename, and diagnostics.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/isaacphi/mcp-language-server](https://github.com/isaacphi/mcp-language-server)
+- **Integration Suggestion**: undefined
+
+### 10. SecretiveShell/MCP-Bridge
+- **Package**: `@SecretiveShell/MCP-Bridge`
+- **Description**: A middleware to provide an openAI compatible endpoint that can call MCP tools
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/SecretiveShell/MCP-Bridge](https://github.com/SecretiveShell/MCP-Bridge)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+### 1. n8n-mcp
+- **Package**: `n8n-mcp`
+- **Description**: Integration between n8n workflow automation and Model Context Protocol (MCP)
+- **Relevance Score**: 15/10
+- **Source**: npm
+- **URL**: [https://github.com/czlonkowski/n8n-mcp#readme](https://github.com/czlonkowski/n8n-mcp#readme)
+- **Integration Suggestion**: undefined
+
+### 2. mcp-server-code-runner
+- **Package**: `mcp-server-code-runner`
+- **Description**: Code Runner MCP Server
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://github.com/formulahendry/mcp-server-code-runner#readme](https://github.com/formulahendry/mcp-server-code-runner#readme)
+- **Integration Suggestion**: undefined
+
+### 3. xcodebuildmcp
+- **Package**: `xcodebuildmcp`
+- **Description**: XcodeBuildMCP is a ModelContextProtocol server that provides tools for Xcode project management, simulator management, and app utilities.
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://www.async-let.com/blog/xcodebuild-mcp/](https://www.async-let.com/blog/xcodebuild-mcp/)
+- **Integration Suggestion**: undefined
+
+### 4. puppeteer-mcp-server
+- **Package**: `puppeteer-mcp-server`
+- **Description**: Experimental MCP server for browser automation using Puppeteer (inspired by @modelcontextprotocol/server-puppeteer)
+- **Relevance Score**: 10/10
+- **Source**: npm
+- **URL**: [https://github.com/merajmehrabi/puppeteer-mcp-server](https://github.com/merajmehrabi/puppeteer-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 5. @hisma/server-puppeteer
+- **Package**: `@hisma/server-puppeteer`
+- **Description**: Fork and update (v0.6.5) of the original @modelcontextprotocol/server-puppeteer MCP server for browser automation using Puppeteer.
+- **Relevance Score**: 10/10
+- **Source**: npm
+- **URL**: [https://github.com/Hisma/servers-archived/tree/main/src/puppeteer](https://github.com/Hisma/servers-archived/tree/main/src/puppeteer)
+- **Integration Suggestion**: undefined
+
+### 6. mongodb-mcp-server
+- **Package**: `mongodb-mcp-server`
+- **Description**: MongoDB Model Context Protocol Server
+- **Relevance Score**: 9/10
+- **Source**: npm
+- **URL**: [https://github.com/mongodb-js/mongodb-mcp-server](https://github.com/mongodb-js/mongodb-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 7. jlowin/fastmcp
+- **Package**: `@jlowin/fastmcp`
+- **Description**: 🚀 The fast, Pythonic way to build MCP servers and clients
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/jlowin/fastmcp](https://github.com/jlowin/fastmcp)
+- **Integration Suggestion**: undefined
+
+### 8. mcp-use/mcp-use
+- **Package**: `@mcp-use/mcp-use`
+- **Description**: mcp-use is the easiest way to interact with mcp servers with custom agents
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/mcp-use/mcp-use](https://github.com/mcp-use/mcp-use)
+- **Integration Suggestion**: undefined
+
+### 9. nanbingxyz/5ire
+- **Package**: `@nanbingxyz/5ire`
+- **Description**: 5ire is a cross-platform desktop AI assistant, MCP client. It compatible with major service providers,  supports local knowledge base and  tools via model context protocol servers .
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/nanbingxyz/5ire](https://github.com/nanbingxyz/5ire)
+- **Integration Suggestion**: undefined
+
+### 10. mendableai/firecrawl-mcp-server
+- **Package**: `@mendableai/firecrawl-mcp-server`
+- **Description**: 🔥 Official Firecrawl MCP Server - Adds powerful web scraping to Cursor, Claude and any other LLM clients.
+- **Relevance Score**: 8/10
+- **Source**: github
+- **URL**: [https://github.com/mendableai/firecrawl-mcp-server](https://github.com/mendableai/firecrawl-mcp-server)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+### 1. n8n-mcp
+- **Package**: `n8n-mcp`
+- **Description**: Integration between n8n workflow automation and Model Context Protocol (MCP)
+- **Relevance Score**: 15/10
+- **Source**: npm
+- **URL**: [https://github.com/czlonkowski/n8n-mcp#readme](https://github.com/czlonkowski/n8n-mcp#readme)
+- **Integration Suggestion**: undefined
+
+### 2. googleapis/genai-toolbox
+- **Package**: `@googleapis/genai-toolbox`
+- **Description**: MCP Toolbox for Databases is an open source MCP server for databases.
+- **Relevance Score**: 14/10
+- **Source**: github
+- **URL**: [https://github.com/googleapis/genai-toolbox](https://github.com/googleapis/genai-toolbox)
+- **Integration Suggestion**: undefined
+
+### 3. makalin/SecureMCP
+- **Package**: `@makalin/SecureMCP`
+- **Description**: SecureMCP is a security auditing tool designed to detect vulnerabilities and misconfigurations in applications using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). It proactively identifies threats like OAuth token leakage, prompt injection vulnerabilities, rogue MCP servers, and tool poisoning attacks.
+- **Relevance Score**: 11/10
+- **Source**: github
+- **URL**: [https://github.com/makalin/SecureMCP](https://github.com/makalin/SecureMCP)
+- **Integration Suggestion**: undefined
+
+### 4. modelcontextprotocol/example-remote-server
+- **Package**: `@modelcontextprotocol/example-remote-server`
+- **Description**: A hosted version of the Everything server - for demonstration and testing purposes, hosted at https://example-server.modelcontextprotocol.io/sse
+- **Relevance Score**: 11/10
+- **Source**: github
+- **URL**: [https://github.com/modelcontextprotocol/example-remote-server](https://github.com/modelcontextprotocol/example-remote-server)
+- **Integration Suggestion**: undefined
+
+### 5. modelcontextprotocol/inspector
+- **Package**: `@modelcontextprotocol/inspector`
+- **Description**: Visual testing tool for MCP servers
+- **Relevance Score**: 11/10
+- **Source**: github
+- **URL**: [https://github.com/modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector)
+- **Integration Suggestion**: undefined
+
+### 6. mcp-server-code-runner
+- **Package**: `mcp-server-code-runner`
+- **Description**: Code Runner MCP Server
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://github.com/formulahendry/mcp-server-code-runner#readme](https://github.com/formulahendry/mcp-server-code-runner#readme)
+- **Integration Suggestion**: undefined
+
+### 7. xcodebuildmcp
+- **Package**: `xcodebuildmcp`
+- **Description**: XcodeBuildMCP is a ModelContextProtocol server that provides tools for Xcode project management, simulator management, and app utilities.
+- **Relevance Score**: 11/10
+- **Source**: npm
+- **URL**: [https://www.async-let.com/blog/xcodebuild-mcp/](https://www.async-let.com/blog/xcodebuild-mcp/)
+- **Integration Suggestion**: undefined
+
+### 8. executeautomation/mcp-playwright
+- **Package**: `@executeautomation/mcp-playwright`
+- **Description**: Playwright Model Context Protocol Server - Tool to automate Browsers and APIs in Claude Desktop, Cline, Cursor IDE and More 🔌
+- **Relevance Score**: 10/10
+- **Source**: github
+- **URL**: [https://github.com/executeautomation/mcp-playwright](https://github.com/executeautomation/mcp-playwright)
+- **Integration Suggestion**: undefined
+
+### 9. mobile-next/mobile-mcp
+- **Package**: `@mobile-next/mobile-mcp`
+- **Description**: Model Context Protocol Server for Mobile Automation and Scraping (iOS, Android, Emulators, Simulators and Real Devices)
+- **Relevance Score**: 10/10
+- **Source**: github
+- **URL**: [https://github.com/mobile-next/mobile-mcp](https://github.com/mobile-next/mobile-mcp)
+- **Integration Suggestion**: undefined
+
+### 10. microsoft/playwright-mcp
+- **Package**: `@microsoft/playwright-mcp`
+- **Description**: Playwright MCP server
+- **Relevance Score**: 10/10
+- **Source**: github
+- **URL**: [https://github.com/microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+### 1. oraios/serena
+- **Package**: `@oraios/serena`
+- **Description**: A powerful coding agent toolkit providing semantic retrieval and editing capabilities (MCP server & Agno integration)
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/oraios/serena](https://github.com/oraios/serena)
+- **Integration Suggestion**: undefined
+
+### 2. BeehiveInnovations/zen-mcp-server
+- **Package**: `@BeehiveInnovations/zen-mcp-server`
+- **Description**: The power of Claude Code + [Gemini / OpenAI / Grok / OpenRouter / Ollama / Custom Model / All Of The Above] working as one.
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/BeehiveInnovations/zen-mcp-server](https://github.com/BeehiveInnovations/zen-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 3. haris-musa/excel-mcp-server
+- **Package**: `@haris-musa/excel-mcp-server`
+- **Description**: A Model Context Protocol server for Excel file manipulation
+- **Relevance Score**: 15/10
+- **Source**: github
+- **URL**: [https://github.com/haris-musa/excel-mcp-server](https://github.com/haris-musa/excel-mcp-server)
+- **Integration Suggestion**: undefined
+
+### 4. @executeautomation/playwright-mcp-server
+- **Package**: `@executeautomation/playwright-mcp-server`
+- **Description**: Model Context Protocol servers for Playwright
+- **Relevance Score**: 15/10
+- **Source**: npm
+- **URL**: [https://executeautomation.github.io/mcp-playwright/](https://executeautomation.github.io/mcp-playwright/)
+- **Integration Suggestion**: undefined
+
+### 5. n8n-mcp
+- **Package**: `n8n-mcp`
+- **Description**: Integration between n8n workflow automation and Model Context Protocol (MCP)
+- **Relevance Score**: 15/10
+- **Source**: npm
+- **URL**: [https://github.com/czlonkowski/n8n-mcp#readme](https://github.com/czlonkowski/n8n-mcp#readme)
+- **Integration Suggestion**: undefined
+
+### 6. @bolide-ai/mcp
+- **Package**: `@bolide-ai/mcp`
+- **Description**: Bolide AI MCP is a ModelContextProtocol server that provides tools for marketing automation.
+- **Relevance Score**: 15/10
+- **Source**: npm
+- **URL**: [https://bolide.ai](https://bolide.ai)
+- **Integration Suggestion**: undefined
+
+### 7. designcomputer/mysql_mcp_server
+- **Package**: `@designcomputer/mysql_mcp_server`
+- **Description**: A Model Context Protocol (MCP) server that enables secure interaction with MySQL databases
+- **Relevance Score**: 14/10
+- **Source**: github
+- **URL**: [https://github.com/designcomputer/mysql_mcp_server](https://github.com/designcomputer/mysql_mcp_server)
+- **Integration Suggestion**: undefined
+
+### 8. GongRzhe/REDIS-MCP-Server
+- **Package**: `@GongRzhe/REDIS-MCP-Server`
+- **Description**: A Redis MCP server (pushed to https://github.com/modelcontextprotocol/servers/tree/main/src/redis) implementation for interacting with Redis databases. This server enables LLMs to interact with Redis key-value stores through a set of standardized tools.
+- **Relevance Score**: 14/10
+- **Source**: github
+- **URL**: [https://github.com/GongRzhe/REDIS-MCP-Server](https://github.com/GongRzhe/REDIS-MCP-Server)
+- **Integration Suggestion**: undefined
+
+### 9. mindsdb/mindsdb
+- **Package**: `@mindsdb/mindsdb`
+- **Description**: AI's query engine - Platform for building AI that can answer questions over large scale federated data. - The only MCP Server you'll ever need
+- **Relevance Score**: 14/10
+- **Source**: github
+- **URL**: [https://github.com/mindsdb/mindsdb](https://github.com/mindsdb/mindsdb)
+- **Integration Suggestion**: undefined
+
+### 10. 1Panel-dev/1Panel
+- **Package**: `@1Panel-dev/1Panel`
+- **Description**: 🔥 1Panel provides an intuitive web interface and MCP Server to manage websites, files, containers, databases, and LLMs on a Linux server.
+- **Relevance Score**: 14/10
+- **Source**: github
+- **URL**: [https://github.com/1Panel-dev/1Panel](https://github.com/1Panel-dev/1Panel)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+### 1. hangwin/mcp-chrome
+- **Package**: `@hangwin/mcp-chrome`
+- **Description**: Chrome MCP Server is a Chrome extension-based Model Context Protocol (MCP) server that exposes your Chrome browser functionality to AI assistants like Claude, enabling complex browser automation, content analysis, and semantic search.
+- **Relevance Score**: 23/10
+- **Source**: github
+- **URL**: [https://github.com/hangwin/mcp-chrome](https://github.com/hangwin/mcp-chrome)
+- **Integration Suggestion**: undefined
+
+### 2. activepieces/activepieces
+- **Package**: `@activepieces/activepieces`
+- **Description**: AI Agents & MCPs & AI Workflow Automation • (280+ MCP servers for AI agents) • AI Automation / AI Agent with MCPs • AI Workflows & AI Agents • MCPs for AI Agents
+- **Relevance Score**: 23/10
+- **Source**: github
+- **URL**: [https://github.com/activepieces/activepieces](https://github.com/activepieces/activepieces)
+- **Integration Suggestion**: undefined
+
+### 3. microsoft/mcp-for-beginners
+- **Package**: `@microsoft/mcp-for-beginners`
+- **Description**: This open-source curriculum introduces the fundamentals of Model Context Protocol (MCP) through real-world, cross-language examples in .NET, Java, TypeScript, JavaScript, and Python. Designed for developers, it focuses on practical techniques for building modular, scalable, and secure AI workflows from session setup to service orchestration.
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/microsoft/mcp-for-beginners](https://github.com/microsoft/mcp-for-beginners)
+- **Integration Suggestion**: undefined
+
+### 4. cameroncooke/XcodeBuildMCP
+- **Package**: `@cameroncooke/XcodeBuildMCP`
+- **Description**: A Model Context Protocol (MCP) server that provides Xcode-related tools for integration with AI assistants and other MCP clients.
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/cameroncooke/XcodeBuildMCP](https://github.com/cameroncooke/XcodeBuildMCP)
+- **Integration Suggestion**: undefined
+
+### 5. ravitemer/mcphub.nvim
+- **Package**: `@ravitemer/mcphub.nvim`
+- **Description**: An MCP client for Neovim that seamlessly integrates MCP servers into your editing workflow with an intuitive interface for managing, testing, and using MCP servers with your favorite chat plugins.
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/ravitemer/mcphub.nvim](https://github.com/ravitemer/mcphub.nvim)
+- **Integration Suggestion**: undefined
+
+### 6. IBM/mcp-context-forge
+- **Package**: `@IBM/mcp-context-forge`
+- **Description**: A Model Context Protocol (MCP) Gateway & Registry. Serves as a central management point for tools, resources, and prompts that can be accessed by MCP-compatible LLM applications. Converts REST API endpoints to MCP, composes virtual MCP servers with added security and observability, and converts between protocols (stdio, SSE, Streamable HTTP).
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/IBM/mcp-context-forge](https://github.com/IBM/mcp-context-forge)
+- **Integration Suggestion**: undefined
+
+### 7. stacklok/toolhive
+- **Package**: `@stacklok/toolhive`
+- **Description**: ToolHive makes deploying MCP servers easy, secure and fun
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/stacklok/toolhive](https://github.com/stacklok/toolhive)
+- **Integration Suggestion**: undefined
+
+### 8. jamubc/gemini-mcp-tool
+- **Package**: `@jamubc/gemini-mcp-tool`
+- **Description**: MCP server that enables AI assistants to interact with Google Gemini CLI, leveraging Gemini's massive token window for large file analysis and codebase understanding
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/jamubc/gemini-mcp-tool](https://github.com/jamubc/gemini-mcp-tool)
+- **Integration Suggestion**: undefined
+
+### 9. Szowesgad/mcp-server-semgrep
+- **Package**: `@Szowesgad/mcp-server-semgrep`
+- **Description**: MCP Server Semgrep is a [Model Context Protocol](https://modelcontextprotocol.io) compliant server that integrates the powerful Semgrep static analysis tool with AI assistants like Anthropic Claude. It enables advanced code analysis, security vulnerability detection, and code quality improvements directly through a conversational interface.
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/Szowesgad/mcp-server-semgrep](https://github.com/Szowesgad/mcp-server-semgrep)
+- **Integration Suggestion**: undefined
+
+### 10. upstash/context7
+- **Package**: `@upstash/context7`
+- **Description**: Context7 MCP Server -- Up-to-date code documentation for LLMs and AI code editors
+- **Relevance Score**: 16/10
+- **Source**: github
+- **URL**: [https://github.com/upstash/context7](https://github.com/upstash/context7)
+- **Integration Suggestion**: undefined
+
+**Next Steps**: Review these candidates and consider integration based on project priorities.
+
+
+
+## Automated Validation Script
 
 ```javascript
 async function validateMCPIntegration() {
@@ -575,3 +1239,1106 @@ async function testServer(serverName) {
 ---
 
 **Note**: This guide is designed for AI coding agents working with EchoTune AI. It should be used in conjunction with the main MCP servers documentation and community server guides. Always validate server availability and permissions before performing operations.
+
+## 🤖 MCP Ecosystem Status Report
+
+**Generated:** 2025-08-08T22:17:43.831Z
+**Auto-generated by:** MCP Documentation Automation
+
+## 📊 Summary
+
+- **Package Dependencies:** 5
+- **Community Servers:** 7
+- **Custom Servers:** 6
+- **Workflow Integrations:** 6
+
+## 📦 Package Dependencies
+
+### @browserbasehq/mcp-server-browserbase
+- **Version:** github:browserbase/mcp-server-browserbase
+- **Type:** automation
+- **Category:** automation
+
+### mcp-server-code-runner
+- **Version:** ^0.1.7
+- **Type:** utility
+- **Category:** utility
+
+### mongodb-mcp-server
+- **Version:** ^0.2.0
+- **Type:** utility
+- **Category:** utility
+
+### n8n-mcp
+- **Version:** ^2.10.3
+- **Type:** utility
+- **Category:** utility
+
+### puppeteer-mcp-server
+- **Version:** ^0.7.2
+- **Type:** automation
+- **Category:** automation
+
+## 🌟 Community MCP Servers
+
+### analytics-server
+- **Files:** 1 files
+- **Main Files:** analytics-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### code-sandbox
+- **Files:** 1 files
+- **Main Files:** code-sandbox-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### new-candidates
+- **Files:** 7 files
+- **Main Files:** 
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### package-management
+- **Files:** 1 files
+- **Main Files:** package-version-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### sentry-mcp
+- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
+- **Version:** 1.0.0
+- **Files:** 5 files
+- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
+- **Documentation:** ✅
+- **Configuration:** ❌
+
+### sequential-thinking
+- **Description:** MCP server for sequential thinking and problem solving
+- **Version:** 0.6.2
+- **Files:** 6 files
+- **Main Files:** index.ts
+- **Documentation:** ✅
+- **Configuration:** ✅
+
+### testing-automation
+- **Files:** 1 files
+- **Main Files:** testing-automation-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+## 🔧 Custom MCP Servers
+
+### coordination-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 201
+- **Functions:** express, path, status, workflows, execution
+- **MCP Integration:** ✅
+
+### enhanced-mcp-orchestrator.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 592
+- **Functions:** express, WebSocket, cors, fs, path
+- **MCP Integration:** ✅
+
+### enhanced-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 347
+- **Functions:** express, puppeteer, cors, fs, path
+- **MCP Integration:** ✅
+
+### orchestration-engine.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 313
+- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
+- **MCP Integration:** ✅
+
+### spotify_server.py
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 1133
+- **Functions:** correctly
+- **MCP Integration:** ✅
+
+### workflow-manager.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 238
+- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
+- **MCP Integration:** ✅
+
+## 🔄 Workflow Integrations
+
+### #mcp-inntegration.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Servers Integration`
+  - Line 7: `- 'mcp-servers/**'`
+  - Line 8: `- 'scripts/mcp-manager.js'`
+  - Line 10: `- '.github/workflows/mcp-integration.yml'`
+  - Line 14: `- 'mcp-servers/**'`
+
+### agent-mcp-automation.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Agent Automation & Validation`
+  - Line 10: `description: 'Run MCP discovery scan'`
+  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
+  - Line 29: `MCP_SERVER_PORT: 3001`
+  - Line 32: `mcp-discovery:`
+
+### copilot-models.yml
+- **MCP References:** 2
+- **Key Lines:**
+  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
+  - Line 541: `- MCP server integration tests`
+
+### copilot-slash-commands.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 510: `MCP[MCP Automation Server]`
+  - Line 540: `LB --> MCP`
+  - Line 554: `MCP --> FILES`
+  - Line 1042: `# Start the MCP automation server (optional)`
+  - Line 1043: `npm run mcp-server`
+
+### digitalocean-deploy.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 42: `MCP_IMAGE: echotune-mcp`
+  - Line 186: `- name: mcp`
+  - Line 187: `dockerfile: mcp-server/Dockerfile`
+  - Line 188: `context: mcp-server`
+  - Line 189: `image: ${{ env.MCP_IMAGE }}`
+
+### gemini-enhanced.yml
+- **MCP References:** 4
+- **Key Lines:**
+  - Line 9: `- 'mcp-server/**'`
+  - Line 99: `src/*|mcp-server/*|scripts/*)`
+  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
+  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
+
+## 🔄 Auto-Update Information
+
+This documentation is automatically updated by the MCP Documentation Automator.
+- **Last Scan:** 2025-08-08T22:17:43.831Z
+- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
+- **Trigger:** On MCP changes, schedule, or manual execution
+
+## 📊 Summary
+
+- **Package Dependencies:** 1
+- **Community Servers:** 6
+- **Custom Servers:** 6
+- **Workflow Integrations:** 6
+
+## 📦 Package Dependencies
+
+### @browserbasehq/mcp-server-browserbase
+- **Version:** github:browserbase/mcp-server-browserbase
+- **Type:** automation
+- **Category:** automation
+
+## 🌟 Community MCP Servers
+
+### analytics-server
+- **Files:** 1 files
+- **Main Files:** analytics-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### code-sandbox
+- **Files:** 1 files
+- **Main Files:** code-sandbox-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### package-management
+- **Files:** 1 files
+- **Main Files:** package-version-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### sentry-mcp
+- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
+- **Version:** 1.0.0
+- **Files:** 5 files
+- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
+- **Documentation:** ✅
+- **Configuration:** ❌
+
+### sequential-thinking
+- **Description:** MCP server for sequential thinking and problem solving
+- **Version:** 0.6.2
+- **Files:** 6 files
+- **Main Files:** index.ts
+- **Documentation:** ✅
+- **Configuration:** ✅
+
+### testing-automation
+- **Files:** 1 files
+- **Main Files:** testing-automation-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+## 🔧 Custom MCP Servers
+
+### coordination-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 201
+- **Functions:** express, path, status, workflows, execution
+- **MCP Integration:** ✅
+
+### enhanced-mcp-orchestrator.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 592
+- **Functions:** express, WebSocket, cors, fs, path
+- **MCP Integration:** ✅
+
+### enhanced-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 347
+- **Functions:** express, puppeteer, cors, fs, path
+- **MCP Integration:** ✅
+
+### orchestration-engine.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 313
+- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
+- **MCP Integration:** ✅
+
+### spotify_server.py
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 1133
+- **Functions:** correctly
+- **MCP Integration:** ✅
+
+### workflow-manager.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 238
+- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
+- **MCP Integration:** ✅
+
+## 🔄 Workflow Integrations
+
+### #mcp-inntegration.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Servers Integration`
+  - Line 7: `- 'mcp-servers/**'`
+  - Line 8: `- 'scripts/mcp-manager.js'`
+  - Line 10: `- '.github/workflows/mcp-integration.yml'`
+  - Line 14: `- 'mcp-servers/**'`
+
+### agent-mcp-automation.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Agent Automation & Validation`
+  - Line 10: `description: 'Run MCP discovery scan'`
+  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
+  - Line 29: `MCP_SERVER_PORT: 3001`
+  - Line 32: `mcp-discovery:`
+
+### copilot-models.yml
+- **MCP References:** 2
+- **Key Lines:**
+  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
+  - Line 541: `- MCP server integration tests`
+
+### copilot-slash-commands.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 510: `MCP[MCP Automation Server]`
+  - Line 540: `LB --> MCP`
+  - Line 554: `MCP --> FILES`
+  - Line 1042: `# Start the MCP automation server (optional)`
+  - Line 1043: `npm run mcp-server`
+
+### digitalocean-deploy.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 42: `MCP_IMAGE: echotune-mcp`
+  - Line 186: `- name: mcp`
+  - Line 187: `dockerfile: mcp-server/Dockerfile`
+  - Line 188: `context: mcp-server`
+  - Line 189: `image: ${{ env.MCP_IMAGE }}`
+
+### gemini-enhanced.yml
+- **MCP References:** 4
+- **Key Lines:**
+  - Line 9: `- 'mcp-server/**'`
+  - Line 99: `src/*|mcp-server/*|scripts/*)`
+  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
+  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
+
+## 🔄 Auto-Update Information
+
+This documentation is automatically updated by the MCP Documentation Automator.
+- **Last Scan:** 2025-08-08T22:10:18.439Z
+- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
+- **Trigger:** On MCP changes, schedule, or manual execution
+
+## 📊 Summary
+
+- **Package Dependencies:** 1
+- **Community Servers:** 6
+- **Custom Servers:** 6
+- **Workflow Integrations:** 6
+
+## 📦 Package Dependencies
+
+### @browserbasehq/mcp-server-browserbase
+- **Version:** github:browserbase/mcp-server-browserbase
+- **Type:** automation
+- **Category:** automation
+
+## 🌟 Community MCP Servers
+
+### analytics-server
+- **Files:** 1 files
+- **Main Files:** analytics-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### code-sandbox
+- **Files:** 1 files
+- **Main Files:** code-sandbox-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### package-management
+- **Files:** 1 files
+- **Main Files:** package-version-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### sentry-mcp
+- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
+- **Version:** 1.0.0
+- **Files:** 5 files
+- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
+- **Documentation:** ✅
+- **Configuration:** ❌
+
+### sequential-thinking
+- **Description:** MCP server for sequential thinking and problem solving
+- **Version:** 0.6.2
+- **Files:** 6 files
+- **Main Files:** index.ts
+- **Documentation:** ✅
+- **Configuration:** ✅
+
+### testing-automation
+- **Files:** 1 files
+- **Main Files:** testing-automation-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+## 🔧 Custom MCP Servers
+
+### coordination-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 201
+- **Functions:** express, path, status, workflows, execution
+- **MCP Integration:** ✅
+
+### enhanced-mcp-orchestrator.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 592
+- **Functions:** express, WebSocket, cors, fs, path
+- **MCP Integration:** ✅
+
+### enhanced-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 347
+- **Functions:** express, puppeteer, cors, fs, path
+- **MCP Integration:** ✅
+
+### orchestration-engine.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 313
+- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
+- **MCP Integration:** ✅
+
+### spotify_server.py
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 1133
+- **Functions:** correctly
+- **MCP Integration:** ✅
+
+### workflow-manager.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 238
+- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
+- **MCP Integration:** ✅
+
+## 🔄 Workflow Integrations
+
+### #mcp-inntegration.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Servers Integration`
+  - Line 7: `- 'mcp-servers/**'`
+  - Line 8: `- 'scripts/mcp-manager.js'`
+  - Line 10: `- '.github/workflows/mcp-integration.yml'`
+  - Line 14: `- 'mcp-servers/**'`
+
+### agent-mcp-automation.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Agent Automation & Validation`
+  - Line 10: `description: 'Run MCP discovery scan'`
+  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
+  - Line 29: `MCP_SERVER_PORT: 3001`
+  - Line 32: `mcp-discovery:`
+
+### copilot-models.yml
+- **MCP References:** 2
+- **Key Lines:**
+  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
+  - Line 541: `- MCP server integration tests`
+
+### copilot-slash-commands.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 510: `MCP[MCP Automation Server]`
+  - Line 540: `LB --> MCP`
+  - Line 554: `MCP --> FILES`
+  - Line 1042: `# Start the MCP automation server (optional)`
+  - Line 1043: `npm run mcp-server`
+
+### digitalocean-deploy.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 42: `MCP_IMAGE: echotune-mcp`
+  - Line 186: `- name: mcp`
+  - Line 187: `dockerfile: mcp-server/Dockerfile`
+  - Line 188: `context: mcp-server`
+  - Line 189: `image: ${{ env.MCP_IMAGE }}`
+
+### gemini-enhanced.yml
+- **MCP References:** 4
+- **Key Lines:**
+  - Line 9: `- 'mcp-server/**'`
+  - Line 99: `src/*|mcp-server/*|scripts/*)`
+  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
+  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
+
+## 🔄 Auto-Update Information
+
+This documentation is automatically updated by the MCP Documentation Automator.
+- **Last Scan:** 2025-08-08T22:10:17.291Z
+- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
+- **Trigger:** On MCP changes, schedule, or manual execution
+
+## 📊 Summary
+
+- **Package Dependencies:** 1
+- **Community Servers:** 6
+- **Custom Servers:** 6
+- **Workflow Integrations:** 6
+
+## 📦 Package Dependencies
+
+### @browserbasehq/mcp-server-browserbase
+- **Version:** github:browserbase/mcp-server-browserbase
+- **Type:** automation
+- **Category:** automation
+
+## 🌟 Community MCP Servers
+
+### analytics-server
+- **Files:** 1 files
+- **Main Files:** analytics-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### code-sandbox
+- **Files:** 1 files
+- **Main Files:** code-sandbox-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### package-management
+- **Files:** 1 files
+- **Main Files:** package-version-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### sentry-mcp
+- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
+- **Version:** 1.0.0
+- **Files:** 5 files
+- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
+- **Documentation:** ✅
+- **Configuration:** ❌
+
+### sequential-thinking
+- **Description:** MCP server for sequential thinking and problem solving
+- **Version:** 0.6.2
+- **Files:** 6 files
+- **Main Files:** index.ts
+- **Documentation:** ✅
+- **Configuration:** ✅
+
+### testing-automation
+- **Files:** 1 files
+- **Main Files:** testing-automation-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+## 🔧 Custom MCP Servers
+
+### coordination-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 201
+- **Functions:** express, path, status, workflows, execution
+- **MCP Integration:** ✅
+
+### enhanced-mcp-orchestrator.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 592
+- **Functions:** express, WebSocket, cors, fs, path
+- **MCP Integration:** ✅
+
+### enhanced-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 347
+- **Functions:** express, puppeteer, cors, fs, path
+- **MCP Integration:** ✅
+
+### orchestration-engine.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 313
+- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
+- **MCP Integration:** ✅
+
+### spotify_server.py
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 1133
+- **Functions:** correctly
+- **MCP Integration:** ✅
+
+### workflow-manager.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 238
+- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
+- **MCP Integration:** ✅
+
+## 🔄 Workflow Integrations
+
+### #mcp-inntegration.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Servers Integration`
+  - Line 7: `- 'mcp-servers/**'`
+  - Line 8: `- 'scripts/mcp-manager.js'`
+  - Line 10: `- '.github/workflows/mcp-integration.yml'`
+  - Line 14: `- 'mcp-servers/**'`
+
+### agent-mcp-automation.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Agent Automation & Validation`
+  - Line 10: `description: 'Run MCP discovery scan'`
+  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
+  - Line 29: `MCP_SERVER_PORT: 3001`
+  - Line 32: `mcp-discovery:`
+
+### copilot-models.yml
+- **MCP References:** 2
+- **Key Lines:**
+  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
+  - Line 541: `- MCP server integration tests`
+
+### copilot-slash-commands.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 510: `MCP[MCP Automation Server]`
+  - Line 540: `LB --> MCP`
+  - Line 554: `MCP --> FILES`
+  - Line 1042: `# Start the MCP automation server (optional)`
+  - Line 1043: `npm run mcp-server`
+
+### digitalocean-deploy.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 42: `MCP_IMAGE: echotune-mcp`
+  - Line 186: `- name: mcp`
+  - Line 187: `dockerfile: mcp-server/Dockerfile`
+  - Line 188: `context: mcp-server`
+  - Line 189: `image: ${{ env.MCP_IMAGE }}`
+
+### gemini-enhanced.yml
+- **MCP References:** 4
+- **Key Lines:**
+  - Line 9: `- 'mcp-server/**'`
+  - Line 99: `src/*|mcp-server/*|scripts/*)`
+  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
+  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
+
+## 🔄 Auto-Update Information
+
+This documentation is automatically updated by the MCP Documentation Automator.
+- **Last Scan:** 2025-08-08T21:59:04.101Z
+- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
+- **Trigger:** On MCP changes, schedule, or manual execution
+
+## 📊 Summary
+
+- **Package Dependencies:** 1
+- **Community Servers:** 6
+- **Custom Servers:** 6
+- **Workflow Integrations:** 6
+
+## 📦 Package Dependencies
+
+### @browserbasehq/mcp-server-browserbase
+- **Version:** github:browserbase/mcp-server-browserbase
+- **Type:** automation
+- **Category:** automation
+
+## 🌟 Community MCP Servers
+
+### analytics-server
+- **Files:** 1 files
+- **Main Files:** analytics-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### code-sandbox
+- **Files:** 1 files
+- **Main Files:** code-sandbox-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### package-management
+- **Files:** 1 files
+- **Main Files:** package-version-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### sentry-mcp
+- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
+- **Version:** 1.0.0
+- **Files:** 5 files
+- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
+- **Documentation:** ✅
+- **Configuration:** ❌
+
+### sequential-thinking
+- **Description:** MCP server for sequential thinking and problem solving
+- **Version:** 0.6.2
+- **Files:** 6 files
+- **Main Files:** index.ts
+- **Documentation:** ✅
+- **Configuration:** ✅
+
+### testing-automation
+- **Files:** 1 files
+- **Main Files:** testing-automation-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+## 🔧 Custom MCP Servers
+
+### coordination-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 201
+- **Functions:** express, path, status, workflows, execution
+- **MCP Integration:** ✅
+
+### enhanced-mcp-orchestrator.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 592
+- **Functions:** express, WebSocket, cors, fs, path
+- **MCP Integration:** ✅
+
+### enhanced-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 347
+- **Functions:** express, puppeteer, cors, fs, path
+- **MCP Integration:** ✅
+
+### orchestration-engine.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 313
+- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
+- **MCP Integration:** ✅
+
+### spotify_server.py
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 1133
+- **Functions:** correctly
+- **MCP Integration:** ✅
+
+### workflow-manager.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 238
+- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
+- **MCP Integration:** ✅
+
+## 🔄 Workflow Integrations
+
+### #mcp-inntegration.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Servers Integration`
+  - Line 7: `- 'mcp-servers/**'`
+  - Line 8: `- 'scripts/mcp-manager.js'`
+  - Line 10: `- '.github/workflows/mcp-integration.yml'`
+  - Line 14: `- 'mcp-servers/**'`
+
+### agent-mcp-automation.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Agent Automation & Validation`
+  - Line 10: `description: 'Run MCP discovery scan'`
+  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
+  - Line 29: `MCP_SERVER_PORT: 3001`
+  - Line 32: `mcp-discovery:`
+
+### copilot-models.yml
+- **MCP References:** 2
+- **Key Lines:**
+  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
+  - Line 541: `- MCP server integration tests`
+
+### copilot-slash-commands.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 510: `MCP[MCP Automation Server]`
+  - Line 540: `LB --> MCP`
+  - Line 554: `MCP --> FILES`
+  - Line 1042: `# Start the MCP automation server (optional)`
+  - Line 1043: `npm run mcp-server`
+
+### digitalocean-deploy.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 42: `MCP_IMAGE: echotune-mcp`
+  - Line 186: `- name: mcp`
+  - Line 187: `dockerfile: mcp-server/Dockerfile`
+  - Line 188: `context: mcp-server`
+  - Line 189: `image: ${{ env.MCP_IMAGE }}`
+
+### gemini-enhanced.yml
+- **MCP References:** 4
+- **Key Lines:**
+  - Line 9: `- 'mcp-server/**'`
+  - Line 99: `src/*|mcp-server/*|scripts/*)`
+  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
+  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
+
+## 🔄 Auto-Update Information
+
+This documentation is automatically updated by the MCP Documentation Automator.
+- **Last Scan:** 2025-08-08T21:57:26.108Z
+- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
+- **Trigger:** On MCP changes, schedule, or manual execution
+
+## 📊 Summary
+
+- **Package Dependencies:** 1
+- **Community Servers:** 6
+- **Custom Servers:** 6
+- **Workflow Integrations:** 6
+
+## 📦 Package Dependencies
+
+### @browserbasehq/mcp-server-browserbase
+- **Version:** github:browserbase/mcp-server-browserbase
+- **Type:** automation
+- **Category:** automation
+
+## 🌟 Community MCP Servers
+
+### analytics-server
+- **Files:** 1 files
+- **Main Files:** analytics-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### code-sandbox
+- **Files:** 1 files
+- **Main Files:** code-sandbox-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### package-management
+- **Files:** 1 files
+- **Main Files:** package-version-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### sentry-mcp
+- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
+- **Version:** 1.0.0
+- **Files:** 5 files
+- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
+- **Documentation:** ✅
+- **Configuration:** ❌
+
+### sequential-thinking
+- **Description:** MCP server for sequential thinking and problem solving
+- **Version:** 0.6.2
+- **Files:** 6 files
+- **Main Files:** index.ts
+- **Documentation:** ✅
+- **Configuration:** ✅
+
+### testing-automation
+- **Files:** 1 files
+- **Main Files:** testing-automation-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+## 🔧 Custom MCP Servers
+
+### coordination-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 201
+- **Functions:** express, path, status, workflows, execution
+- **MCP Integration:** ✅
+
+### enhanced-mcp-orchestrator.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 592
+- **Functions:** express, WebSocket, cors, fs, path
+- **MCP Integration:** ✅
+
+### enhanced-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 347
+- **Functions:** express, puppeteer, cors, fs, path
+- **MCP Integration:** ✅
+
+### orchestration-engine.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 313
+- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
+- **MCP Integration:** ✅
+
+### spotify_server.py
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 1133
+- **Functions:** correctly
+- **MCP Integration:** ✅
+
+### workflow-manager.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 238
+- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
+- **MCP Integration:** ✅
+
+## 🔄 Workflow Integrations
+
+### #mcp-inntegration.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Servers Integration`
+  - Line 7: `- 'mcp-servers/**'`
+  - Line 8: `- 'scripts/mcp-manager.js'`
+  - Line 10: `- '.github/workflows/mcp-integration.yml'`
+  - Line 14: `- 'mcp-servers/**'`
+
+### agent-mcp-automation.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Agent Automation & Validation`
+  - Line 10: `description: 'Run MCP discovery scan'`
+  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
+  - Line 29: `MCP_SERVER_PORT: 3001`
+  - Line 32: `mcp-discovery:`
+
+### copilot-models.yml
+- **MCP References:** 2
+- **Key Lines:**
+  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
+  - Line 541: `- MCP server integration tests`
+
+### copilot-slash-commands.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 510: `MCP[MCP Automation Server]`
+  - Line 540: `LB --> MCP`
+  - Line 554: `MCP --> FILES`
+  - Line 1042: `# Start the MCP automation server (optional)`
+  - Line 1043: `npm run mcp-server`
+
+### digitalocean-deploy.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 42: `MCP_IMAGE: echotune-mcp`
+  - Line 186: `- name: mcp`
+  - Line 187: `dockerfile: mcp-server/Dockerfile`
+  - Line 188: `context: mcp-server`
+  - Line 189: `image: ${{ env.MCP_IMAGE }}`
+
+### gemini-enhanced.yml
+- **MCP References:** 4
+- **Key Lines:**
+  - Line 9: `- 'mcp-server/**'`
+  - Line 99: `src/*|mcp-server/*|scripts/*)`
+  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
+  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
+
+## 🔄 Auto-Update Information
+
+This documentation is automatically updated by the MCP Documentation Automator.
+- **Last Scan:** 2025-08-08T21:57:22.548Z
+- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
+- **Trigger:** On MCP changes, schedule, or manual execution
+
+## 📊 Summary
+
+- **Package Dependencies:** 1
+- **Community Servers:** 6
+- **Custom Servers:** 6
+- **Workflow Integrations:** 6
+
+## 📦 Package Dependencies
+
+### @browserbasehq/mcp-server-browserbase
+- **Version:** github:browserbase/mcp-server-browserbase
+- **Type:** automation
+- **Category:** automation
+
+## 🌟 Community MCP Servers
+
+### analytics-server
+- **Files:** 1 files
+- **Main Files:** analytics-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### code-sandbox
+- **Files:** 1 files
+- **Main Files:** code-sandbox-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### package-management
+- **Files:** 1 files
+- **Main Files:** package-version-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+### sentry-mcp
+- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
+- **Version:** 1.0.0
+- **Files:** 5 files
+- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
+- **Documentation:** ✅
+- **Configuration:** ❌
+
+### sequential-thinking
+- **Description:** MCP server for sequential thinking and problem solving
+- **Version:** 0.6.2
+- **Files:** 6 files
+- **Main Files:** index.ts
+- **Documentation:** ✅
+- **Configuration:** ✅
+
+### testing-automation
+- **Files:** 1 files
+- **Main Files:** testing-automation-mcp.js
+- **Documentation:** ❌
+- **Configuration:** ❌
+
+## 🔧 Custom MCP Servers
+
+### coordination-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 201
+- **Functions:** express, path, status, workflows, execution
+- **MCP Integration:** ✅
+
+### enhanced-mcp-orchestrator.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 592
+- **Functions:** express, WebSocket, cors, fs, path
+- **MCP Integration:** ✅
+
+### enhanced-server.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 347
+- **Functions:** express, puppeteer, cors, fs, path
+- **MCP Integration:** ✅
+
+### orchestration-engine.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 313
+- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
+- **MCP Integration:** ✅
+
+### spotify_server.py
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 1133
+- **Functions:** correctly
+- **MCP Integration:** ✅
+
+### workflow-manager.js
+- **Description:** Custom MCP server implementation
+- **Lines of Code:** 238
+- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
+- **MCP Integration:** ✅
+
+## 🔄 Workflow Integrations
+
+### #mcp-inntegration.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Servers Integration`
+  - Line 7: `- 'mcp-servers/**'`
+  - Line 8: `- 'scripts/mcp-manager.js'`
+  - Line 10: `- '.github/workflows/mcp-integration.yml'`
+  - Line 14: `- 'mcp-servers/**'`
+
+### agent-mcp-automation.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 1: `name: MCP Agent Automation & Validation`
+  - Line 10: `description: 'Run MCP discovery scan'`
+  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
+  - Line 29: `MCP_SERVER_PORT: 3001`
+  - Line 32: `mcp-discovery:`
+
+### copilot-models.yml
+- **MCP References:** 2
+- **Key Lines:**
+  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
+  - Line 541: `- MCP server integration tests`
+
+### copilot-slash-commands.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 510: `MCP[MCP Automation Server]`
+  - Line 540: `LB --> MCP`
+  - Line 554: `MCP --> FILES`
+  - Line 1042: `# Start the MCP automation server (optional)`
+  - Line 1043: `npm run mcp-server`
+
+### digitalocean-deploy.yml
+- **MCP References:** 5
+- **Key Lines:**
+  - Line 42: `MCP_IMAGE: echotune-mcp`
+  - Line 186: `- name: mcp`
+  - Line 187: `dockerfile: mcp-server/Dockerfile`
+  - Line 188: `context: mcp-server`
+  - Line 189: `image: ${{ env.MCP_IMAGE }}`
+
+### gemini-enhanced.yml
+- **MCP References:** 4
+- **Key Lines:**
+  - Line 9: `- 'mcp-server/**'`
+  - Line 99: `src/*|mcp-server/*|scripts/*)`
+  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
+  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
+
+## 🔄 Auto-Update Information
+
+This documentation is automatically updated by the MCP Documentation Automator.
+- **Last Scan:** 2025-08-08T21:55:33.127Z
+- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
+- **Trigger:** On MCP changes, schedule, or manual execution
+

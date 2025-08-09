@@ -87,6 +87,19 @@ EchoTune AI now features a **comprehensive Model Context Protocol (MCP) server e
 | [**Docker**](#-docker-deployment) | 3-5 min | Any server with containerization | ✅ Ubuntu 22 compatible |
 | [**Local Dev**](#-local-development) | 2 min | Testing and development | ✅ Works everywhere |
 
+### 🔐 **NEW: Repository Secrets Setup**
+
+**⚠️ Important**: For GitHub Actions workflows and enhanced GPT-5 features, you'll need to configure repository secrets.
+
+📖 **[Complete Secrets Setup Guide](docs/REPOSITORY_SECRETS_SETUP_GUIDE.md)** - Step-by-step guide for:
+- 🎵 Spotify API keys
+- 🤖 OpenAI, Gemini, Anthropic API keys  
+- 🗄️ Database connection strings
+- 🚀 Deployment tokens
+- 🛡️ Security secrets
+
+**Quick Setup**: Navigate to `Repository Settings → Secrets and variables → Actions` and add your API keys.
+
 ### ⚡ Ubuntu 22.04 One-Click Deployment (NEW)
 
 **For Ubuntu 22.04 LTS servers - Complete automated setup:**

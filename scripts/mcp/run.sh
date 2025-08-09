@@ -57,7 +57,22 @@ servers:
     capabilities: ["server-management", "workflow-coordination"]
     
   - name: workflow-manager
-    status: $([ -f "mcp-server/workflow-manager.js" ] && echo "available" || echo "missing")
+    status: $(file_status "mcp-servers/enhanced-file-utilities.js")
+    type: file-operations
+    capabilities: ["read", "validate", "security-scan"]
+    
+  - name: comprehensive-validator  
+    status: $(file_status "mcp-servers/comprehensive-validator.js")
+    type: system-validation
+    capabilities: ["health-check", "resource-validation"]
+    
+  - name: mcp-orchestrator
+    status: $(file_status "mcp-server/enhanced-mcp-orchestrator.js")
+    type: orchestration
+    capabilities: ["server-management", "workflow-coordination"]
+    
+  - name: workflow-manager
+    status: $(file_status "mcp-server/workflow-manager.js")
     type: automation
     capabilities: ["workflow-execution", "task-scheduling"]
 

@@ -10,7 +10,7 @@ module.exports = {
     ],
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov', 'html'],
-    setupFilesAfterEnv: ['<rootDir>/setup.js'],
+    setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
     testTimeout: 30000,
     maxWorkers: 1, // Prevent worker process issues
     forceExit: true, // Force exit to prevent hanging
@@ -23,6 +23,11 @@ module.exports = {
         '^.+\\.js$': 'babel-jest',
         '^.+\\.mjs$': 'babel-jest'
     },
+    // Set up global test environment
+    globals: {
+        'TextEncoder': TextEncoder,
+        'TextDecoder': TextDecoder
+    },
     projects: [
         {
             displayName: 'node',
@@ -32,12 +37,17 @@ module.exports = {
                 '**/tests/database/**/*.test.js',
                 '**/tests/ml/**/*.test.js',
                 '**/tests/security/**/*.test.js',
-                '**/tests/integration/**/*.test.js'
+                '**/tests/integration/**/*.test.js',
+                '**/tests/admin/**/*.test.js'  // Added admin tests
             ],
             transformIgnorePatterns: [
                 'node_modules/(?!(mongodb|bson|@opentelemetry)/)'
             ],
-            maxWorkers: 1
+            maxWorkers: 1,
+            globals: {
+                'TextEncoder': TextEncoder,
+                'TextDecoder': TextDecoder
+            }
         },
         {
             displayName: 'jsdom',
@@ -47,7 +57,7 @@ module.exports = {
                 '**/tests/mobile/**/*.test.js',
                 '**/tests/chat/**/*.test.js'
             ],
-            setupFilesAfterEnv: ['<rootDir>/setup.js'],
+            setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
             transformIgnorePatterns: [
                 'node_modules/(?!(mongodb|bson|@opentelemetry)/)'
             ],

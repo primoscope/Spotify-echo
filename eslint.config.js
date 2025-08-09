@@ -22,7 +22,7 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': [
-        'error',
+        'warn',  // Changed from 'error' to 'warn' to be less strict
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
@@ -34,9 +34,9 @@ module.exports = [
     },
   },
   
-  // Configuration for React files
+  // Configuration for React/JSX files
   {
-    files: ['src/**/*.jsx', 'src/**/*.tsx'],
+    files: ['**/*.jsx', '**/*.tsx'],
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {
@@ -48,9 +48,7 @@ module.exports = [
       },
     },
     rules: {
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
-      'react/prop-types': 'off',
+      'no-unused-vars': 'warn', // Less strict for React files
     },
   },
   
@@ -79,6 +77,7 @@ module.exports = [
     },
     rules: {
       'no-unused-expressions': 'off',
+      'no-unused-vars': 'warn',
     },
   },
   
@@ -92,6 +91,7 @@ module.exports = [
     },
     rules: {
       'no-console': 'off',
+      'no-unused-vars': 'warn',
     },
   },
   

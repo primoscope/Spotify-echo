@@ -3,6 +3,11 @@
  * Provides global mocks and test utilities
  */
 
+// Setup global text encoding for Node.js tests
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 // Mock MongoDB before any imports
 jest.mock('mongodb', () => ({
   MongoClient: jest.fn(() => ({

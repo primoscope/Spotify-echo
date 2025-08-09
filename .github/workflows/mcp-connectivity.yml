@@ -1,0 +1,38 @@
+name: MCP Connectivity Probes
+
+on:
+  pull_request:
+    paths:
+      - "mcp/**"
+      - "scripts/mcp/**"
+      - "mcp-servers/new-candidates/**"
+      - ".github/workflows/mcp-connectivity.yml"
+
+jobs:
+  probes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Probe n8n-mcp
+        env:
+          N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+          N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+        run: |
+          node scripts/mcp/probes/probe-n8n.js
+
+      - name: Probe mongodb-mcp-server
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DB: ${{ secrets.MONGODB_DB }}
+        run: |
+          node scripts/mcp/probes/probe-mongodb.js
+
+      - name: Check Brave/Search and Screenshots secrets presence (informational)
+        env:
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+        run: |
+          if [ -n "${BRAVE_API_KEY}" ]; then echo "Brave Search: secret present"; else echo "Brave Search: secret missing (tests skipped)"; fi

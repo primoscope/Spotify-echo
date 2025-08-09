@@ -40,6 +40,7 @@ services:
       # Database connections
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/echotune}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-secure_redis_password}
       # Security
       SESSION_SECRET: ${SESSION_SECRET:-change_this_in_production}
       JWT_SECRET: ${JWT_SECRET:-change_this_in_production}

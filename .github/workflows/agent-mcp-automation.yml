@@ -250,6 +250,15 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements-core.txt
 
+      - name: Install Security Tools
+        run: |
+          # Install gitleaks for secret scanning
+          wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz
+          tar -xzf gitleaks_8.18.0_linux_x64.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+          chmod +x /usr/local/bin/gitleaks
+          echo "✅ Gitleaks installed for secret scanning"
+
       - name: Start MCP Servers
         run: |
           echo "🚀 Starting MCP server orchestration..."
@@ -323,21 +332,52 @@ jobs:
             echo "- ⏭️ **Code Analysis**: Skipped (basic validation)" >> mcp-validation-results.md
           fi
           
-          # 3. Security Scanning
-          echo "## 🛡️ Security Scanning" >> mcp-validation-results.md
-          if [ "$VALIDATION_LEVEL" == "comprehensive" ]; then
+          # 3. Security Scanning & Secret Detection
+          echo "## 🛡️ Security Scanning & Secret Detection" >> mcp-validation-results.md
+          if [ "$VALIDATION_LEVEL" == "comprehensive" ] || [ "$VALIDATION_LEVEL" == "full" ]; then
             # Use package-management MCP for security scanning
             echo "Running security scan via MCP servers..."
+            
+            # 1. NPM Audit
             if npm audit --audit-level=high > audit-results.json 2>&1; then
-              echo "✅ Security audit passed"
-              echo "- ✅ **Security Scan**: No high-severity vulnerabilities" >> mcp-validation-results.md
+              echo "✅ NPM security audit passed"
+              echo "- ✅ **NPM Audit**: No high-severity vulnerabilities" >> mcp-validation-results.md
             else
-              echo "⚠️ Security audit found vulnerabilities"
-              echo "- ⚠️ **Security Scan**: Vulnerabilities found" >> mcp-validation-results.md
+              echo "❌ NPM security audit found vulnerabilities"
+              echo "- ❌ **NPM Audit**: High-severity vulnerabilities found" >> mcp-validation-results.md
+              VALIDATION_STATUS="failing"
+              CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
               cat audit-results.json >> mcp-validation-results.md
             fi
+            
+            # 2. Secret Scanning
+            echo "Running secret scanning..."
+            if command -v gitleaks >/dev/null 2>&1; then
+              if gitleaks detect --source . --no-git --verbose > gitleaks-results.json 2>&1; then
+                echo "✅ Secret scanning passed - No secrets detected"
+                echo "- ✅ **Secret Scan**: No secrets detected" >> mcp-validation-results.md
+              else
+                echo "❌ Secret scanning failed - Secrets detected"
+                echo "- ❌ **Secret Scan**: Secrets detected in code" >> mcp-validation-results.md
+                VALIDATION_STATUS="failing"
+                CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+                cat gitleaks-results.json >> mcp-validation-results.md
+              fi
+            else
+              # Fallback basic secret scanning
+              echo "Using basic secret scanning (gitleaks not available)..."
+              SECRET_PATTERNS="password|secret|key|token|api_key|private|credential"
+              if grep -r -i -E "$SECRET_PATTERNS.*=.*['\"][a-zA-Z0-9+/=]{8,}['\"]" . --exclude-dir=node_modules --exclude-dir=.git --exclude="*.test.js" --exclude="*.example" > secret-scan-results.txt 2>/dev/null; then
+                echo "⚠️ Potential secrets found (basic scan)"
+                echo "- ⚠️ **Secret Scan**: Potential secrets found (basic scan)" >> mcp-validation-results.md
+                cat secret-scan-results.txt >> mcp-validation-results.md
+              else
+                echo "✅ Basic secret scanning passed"
+                echo "- ✅ **Secret Scan**: Basic scan passed" >> mcp-validation-results.md
+              fi
+            fi
           else
-            echo "- ⏭️ **Security Scan**: Skipped (not comprehensive)" >> mcp-validation-results.md
+            echo "- ⏭️ **Security Scan**: Skipped (basic validation only)" >> mcp-validation-results.md
           fi
           
           # 4. Integration Tests
@@ -416,6 +456,8 @@ jobs:
             mcp-validation-results.md
             mcp-orchestrator.log
             audit-results.json
+            gitleaks-results.json
+            secret-scan-results.txt
             mcp-integration-test-results.json
           retention-days: 30
 
@@ -586,6 +628,21 @@ jobs:
                 });
               }
             }
+
+      - name: Block Merge on Critical Failures
+        if: steps.validation.outputs.critical-failures != '0' && needs.pre-merge-validation-gate.outputs.requires-mcp-validation == 'true'
+        run: |
+          echo "🚫 MERGE BLOCKED: Critical MCP validation failures detected"
+          echo "Critical failures: ${{ steps.validation.outputs.critical-failures }}"
+          echo "Status: ${{ steps.validation.outputs.status }}"
+          echo ""
+          echo "This PR cannot be merged until all critical validation issues are resolved."
+          echo "Please address the issues listed in the validation report and re-run validation."
+          echo ""
+          echo "Available commands:"
+          echo "- /run-mcp-validation    # Re-run validation"
+          echo "- /approve-merge         # Maintainer override (if necessary)"
+          exit 1
 
   health-monitor:
     name: 🏥 MCP Health Monitoring

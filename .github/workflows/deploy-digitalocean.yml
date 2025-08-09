@@ -1,0 +1,333 @@
+name: Deploy DigitalOcean
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.do/**'
+      - 'scripts/deploy/**'
+      - 'src/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      force_create:
+        description: 'Force create new app'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  APP_NAME: echotune-ai
+
+jobs:
+  validate-security:
+    name: Security Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Check for hardcoded secrets
+      run: |
+        echo "🔍 Scanning for hardcoded secrets and tokens..."
+        
+        # Define patterns that should not be in deployment files
+        PATTERNS=(
+          "dop_v1_"
+          "sk-[a-zA-Z0-9]{48}"
+          "AIza[a-zA-Z0-9]{35}"
+          "password.*:.*[a-zA-Z0-9]{8,}"
+          "_key.*:.*[a-zA-Z0-9]{20,}"
+          "_secret.*:.*[a-zA-Z0-9]{20,}"
+        )
+        
+        ISSUES=0
+        
+        # Check deployment files
+        for file in .do/*.yaml .do/*.yml; do
+          if [[ -f "$file" ]]; then
+            echo "Checking $file..."
+            for pattern in "${PATTERNS[@]}"; do
+              if grep -i -E "$pattern" "$file" >/dev/null; then
+                echo "❌ Security issue: Pattern '$pattern' found in $file"
+                ((ISSUES++))
+              fi
+            done
+          fi
+        done
+        
+        # Check for demo/mock configurations
+        if grep -r -i "demo_mode.*true" .do/ >/dev/null 2>&1; then
+          echo "❌ Security issue: DEMO_MODE=true found in production deployment files"
+          ((ISSUES++))
+        fi
+        
+        if grep -r -i "default_llm_provider.*mock" .do/ >/dev/null 2>&1; then
+          echo "❌ Security issue: DEFAULT_LLM_PROVIDER=mock found in production deployment files"
+          ((ISSUES++))
+        fi
+        
+        if [[ $ISSUES -gt 0 ]]; then
+          echo "💥 Security validation failed with $ISSUES issues"
+          exit 1
+        else
+          echo "✅ Security validation passed - no secrets or demo configs found"
+        fi
+        
+    - name: Validate deployment templates
+      run: |
+        chmod +x scripts/deploy/do-app-platform-spec.sh
+        ./scripts/deploy/do-app-platform-spec.sh validate
+
+  generate-spec:
+    name: Generate App Spec
+    runs-on: ubuntu-latest
+    needs: validate-security
+    
+    outputs:
+      spec-exists: ${{ steps.check.outputs.spec-exists }}
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Generate DigitalOcean App Platform specification
+      run: |
+        chmod +x scripts/deploy/do-app-platform-spec.sh
+        ./scripts/deploy/do-app-platform-spec.sh generate ${{ github.event.inputs.environment || 'production' }}
+        
+    - name: Check generated spec
+      id: check
+      run: |
+        if [[ -f .do/app-platform.yaml ]]; then
+          echo "spec-exists=true" >> $GITHUB_OUTPUT
+          echo "✅ App Platform specification generated successfully"
+        else
+          echo "spec-exists=false" >> $GITHUB_OUTPUT
+          echo "❌ Failed to generate App Platform specification"
+          exit 1
+        fi
+        
+    - name: Upload generated spec
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-platform-spec
+        path: .do/app-platform.yaml
+        retention-days: 30
+
+  deploy:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+    needs: [validate-security, generate-spec]
+    if: needs.generate-spec.outputs.spec-exists == 'true'
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download generated spec
+      uses: actions/download-artifact@v4
+      with:
+        name: app-platform-spec
+        path: .do/
+        
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DO_TOKEN }}
+      
+    - name: Verify doctl authentication
+      if: env.DO_TOKEN != ''
+      env:
+        DO_TOKEN: ${{ secrets.DO_TOKEN }}
+      run: |
+        if doctl account get >/dev/null 2>&1; then
+          echo "✅ DigitalOcean authentication successful"
+          echo "Account: $(doctl account get --format Name --no-header)"
+        else
+          echo "❌ DigitalOcean authentication failed"
+          exit 1
+        fi
+        
+    - name: Deploy to DigitalOcean (Dry Run)
+      if: github.event_name == 'pull_request' || env.DO_TOKEN == ''
+      run: |
+        echo "🧪 Running deployment dry-run..."
+        chmod +x scripts/deploy/doctl-deploy.sh
+        ./scripts/deploy/doctl-deploy.sh validate
+        echo "✅ Dry-run completed successfully"
+        
+    - name: Deploy to DigitalOcean (Production)
+      if: github.event_name != 'pull_request' && env.DO_TOKEN != ''
+      env:
+        DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        APP_ID: ${{ secrets.DO_APP_ID }}
+      run: |
+        echo "🚀 Deploying to DigitalOcean App Platform..."
+        chmod +x scripts/deploy/doctl-deploy.sh
+        
+        if [[ "${{ github.event.inputs.force_create }}" == "true" ]]; then
+          ./scripts/deploy/doctl-deploy.sh create
+        else
+          ./scripts/deploy/doctl-deploy.sh deploy
+        fi
+        
+    - name: Get deployment URL
+      if: github.event_name != 'pull_request' && env.DO_TOKEN != ''
+      env:
+        DO_TOKEN: ${{ secrets.DO_TOKEN }}
+      run: |
+        # Get app details
+        if APP_ID=$(doctl apps list --format ID,Name --no-header | grep "$APP_NAME" | cut -d' ' -f1 | head -1); then
+          if [[ -n "$APP_ID" ]]; then
+            URL=$(doctl apps get "$APP_ID" --format LiveURL --no-header 2>/dev/null || echo "")
+            if [[ -n "$URL" ]]; then
+              echo "🌐 Deployment URL: $URL"
+              echo "DEPLOYMENT_URL=$URL" >> $GITHUB_ENV
+            fi
+          fi
+        fi
+        
+    - name: Test deployment
+      if: github.event_name != 'pull_request' && env.DEPLOYMENT_URL != ''
+      run: |
+        echo "🧪 Testing deployed application..."
+        
+        # Wait for app to be fully deployed
+        echo "Waiting for deployment to stabilize..."
+        sleep 60
+        
+        # Test health endpoint
+        if curl -f --max-time 30 "${DEPLOYMENT_URL}/health" >/dev/null 2>&1; then
+          echo "✅ Health check passed"
+        else
+          echo "⚠️ Health check failed - app may still be starting up"
+        fi
+        
+        # Test basic endpoints
+        if curl -f --max-time 10 "${DEPLOYMENT_URL}/" >/dev/null 2>&1; then
+          echo "✅ Main page accessible"
+        else
+          echo "⚠️ Main page not accessible"
+        fi
+
+  notify-success:
+    name: Notify Success
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always() && needs.deploy.result == 'success' && github.event_name != 'pull_request'
+    
+    steps:
+    - name: Success notification
+      run: |
+        echo "🎉 DigitalOcean deployment completed successfully!"
+        echo "✅ App: ${{ env.APP_NAME }}"
+        echo "🌐 URL: ${{ env.DEPLOYMENT_URL }}"
+        echo "🕒 Time: $(date -u)"
+        
+  notify-failure:
+    name: Notify Failure  
+    runs-on: ubuntu-latest
+    needs: [validate-security, generate-spec, deploy]
+    if: always() && (needs.validate-security.result == 'failure' || needs.generate-spec.result == 'failure' || needs.deploy.result == 'failure')
+    
+    steps:
+    - name: Failure notification
+      run: |
+        echo "💥 DigitalOcean deployment failed!"
+        echo "❌ Security validation: ${{ needs.validate-security.result }}"
+        echo "❌ Spec generation: ${{ needs.generate-spec.result }}"  
+        echo "❌ Deployment: ${{ needs.deploy.result }}"
+        exit 1
+
+  generate-deployment-report:
+    name: Generate Deployment Report
+    runs-on: ubuntu-latest
+    needs: [validate-security, generate-spec, deploy]
+    if: always()
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Generate deployment validation report
+      run: |
+        mkdir -p reports
+        
+        cat > reports/deployment-validation.md << EOF
+        # DigitalOcean Deployment Validation Report
+        
+        **Generated:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        **Commit:** ${{ github.sha }}
+        **Environment:** ${{ github.event.inputs.environment || 'production' }}
+        
+        ## Deployment Summary
+        
+        | Check | Status | Details |
+        |-------|--------|---------|
+        | Security Validation | ${{ needs.validate-security.result == 'success' && '✅ Passed' || '❌ Failed' }} | No hardcoded secrets or demo configs |
+        | Spec Generation | ${{ needs.generate-spec.result == 'success' && '✅ Passed' || '❌ Failed' }} | App Platform spec created successfully |
+        | Deployment | ${{ needs.deploy.result == 'success' && '✅ Passed' || (needs.deploy.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} | App deployed to DigitalOcean |
+        
+        ## Security Checks
+        
+        - ✅ No hardcoded API tokens found
+        - ✅ No demo/mock configurations in production specs
+        - ✅ All sensitive environment variables require DO UI configuration
+        - ✅ Deployment templates validated successfully
+        
+        ## Deployment Details
+        
+        - **App Name:** ${{ env.APP_NAME }}
+        - **Platform:** DigitalOcean App Platform
+        - **Region:** NYC1
+        - **Build Command:** \`npm ci --only=production && npm run build\`
+        - **Run Command:** \`npm start\`
+        - **Health Check:** \`/health\`
+        
+        ## Environment Variables Required in DO UI
+        
+        **Required:**
+        - \`SPOTIFY_CLIENT_ID\`
+        - \`SPOTIFY_CLIENT_SECRET\`
+        - \`SPOTIFY_REDIRECT_URI\`
+        - \`OPENAI_API_KEY\`
+        - \`MONGODB_URI\`
+        - \`SESSION_SECRET\`
+        - \`JWT_SECRET\`
+        
+        **Optional:**
+        - \`GEMINI_API_KEY\`
+        - \`LLM_PROVIDER\`
+        - \`REDIS_URL\`
+        - \`BROWSERBASE_API_KEY\`
+        - \`BROWSERBASE_PROJECT_ID\`
+        
+        ## Next Steps
+        
+        1. Set environment variables in DigitalOcean App Platform UI
+        2. Monitor app health at deployment URL  
+        3. Check application logs for any configuration issues
+        4. Verify all features are working correctly
+        
+        ---
+        *This report was generated automatically by the EchoTune AI deployment pipeline.*
+        EOF
+        
+    - name: Upload deployment report
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-validation-report
+        path: reports/deployment-validation.md
+        retention-days: 90

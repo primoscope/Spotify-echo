@@ -462,3 +462,9 @@ gpt5_analysis.md
 mcp_results.txt
 target_files.txt
 automation_analysis.log
+
+# Validation and test artifacts
+.artifacts/
+VALIDATION_REPORT.md
+test-results/
+playwright-report/

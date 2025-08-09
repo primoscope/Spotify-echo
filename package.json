@@ -226,7 +226,16 @@
     "mcp:hismaserver_puppeteer": "node mcp-servers/new-candidates/@hisma/server-puppeteer/integration.js",
     "test:hismaserver_puppeteer": "jest mcp-servers/new-candidates/@hisma/server-puppeteer/test.js",
     "mcp:candidates": "node scripts/run-all-candidates.js",
-    "test:candidates": "jest mcp-servers/new-candidates/*/test.js"
+    "test:candidates": "jest mcp-servers/new-candidates/*/test.js",
+    "orchestrator:health": "node scripts/mcp-orchestration-health.js health",
+    "orchestrator:discover": "node scripts/mcp-orchestration-health.js discover",
+    "orchestrator:status": "node scripts/mcp-orchestration-health.js status",
+    "orchestrator:report": "node scripts/mcp-orchestration-health.js report",
+    "validation:report": "node scripts/generate-validation-report.js",
+    "validation:comprehensive": "node scripts/generate-validation-report.js --format=md && node scripts/generate-validation-report.js --format=json",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "keywords": [
     "music",
@@ -305,6 +314,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
     "@babel/preset-env": "^7.28.0",
     "@eslint/js": "^9.33.0",
+    "@playwright/test": "^1.40.0",
     "@types/cors": "^2.8.0",
     "@types/express": "^4.17.0",
     "@types/jest": "^29.0.0",

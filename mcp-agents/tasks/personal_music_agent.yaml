@@ -1,0 +1,19 @@
+name: personal_music_agent
+description: Automates personal music ingestion, enrichment, and reporting.
+steps:
+  - id: merge
+    run: python scripts/database/merge_csv_data.py --output data/spotify_listening_history_combined.csv --verbose
+  - id: migrate
+    run: python scripts/database/migrate_to_mongodb.py --input data/spotify_listening_history_combined.csv --batch-size 1000 --update
+  - id: enrich
+    run: node scripts/pipeline/enrich_audio_features.js --chunk-size 100 --max-tracks 50000 --include-metadata
+  - id: analyze
+    run: python scripts/pipeline/analyze_and_visualize.py --out-dir docs/reports --images-dir docs/reports/images --max-rows 50000
+  - id: commit
+    run: bash -lc 'git checkout -B data-pipeline-artifacts && git add docs/reports && git commit -m "chore(data): update artifacts" || true && git push -u origin data-pipeline-artifacts'
+metadata:
+  state_file: .pipeline/state.json
+  env:
+    - MONGODB_URI
+    - MONGODB_DATABASE
+    - SPOTIFY_ACCESS_TOKEN

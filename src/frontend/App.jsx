@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Box as _Box, AppBar as _AppBar, Toolbar as _Toolbar, Typography as _Typography, Container as _Container, Tabs as _Tabs, Tab as _Tab } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
 import { useState } from 'react';
-import ThemeProvider, { ThemeToggle as _ThemeToggle } from './components/ThemeProvider';
+import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
 import PlaylistBuilder from './components/PlaylistBuilder';
 import PlaylistsPage from './components/PlaylistsPage'; // Enhanced playlists page
 import ExplainableRecommendations from './components/ExplainableRecommendations';
@@ -27,11 +27,11 @@ function App() {
     <ThemeProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<_MainApplication />} />
-          <Route path="/chat" element={<_MainApplication initialTab="chat" />} />
+          <Route path="/" element={<MainApplication />} />
+          <Route path="/chat" element={<MainApplication initialTab="chat" />} />
           <Route
             path="/recommendations"
-            element={<_MainApplication initialTab="recommendations" />}
+            element={<MainApplication initialTab="recommendations" />}
           />
 
           <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
@@ -52,11 +52,11 @@ function App() {
 /**
  * Main Application Component with Tabbed Interface
  */
-function _MainApplication({ initialTab = 'chat' }) {
+function MainApplication({ initialTab = 'chat' }) {
   const [currentTab, setCurrentTab] = useState(initialTab);
   const [sessionId] = useState(`session_${Date.now()}`);
-  const [_recommendations, _setRecommendations] = useState([]);
-  const [_playlistTracks, _setPlaylistTracks] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [playlistTracks, setPlaylistTracks] = useState([]);
 
   // Mock data for demonstration
   const mockRecommendations = [
@@ -354,7 +354,7 @@ function _MainApplication({ initialTab = 'chat' }) {
 
         {currentTab === 'settings' && (
           <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <_SettingsTabManager />
+            <SettingsTabManager />
           </Container>
         )}
       </Box>
@@ -366,7 +366,7 @@ function _MainApplication({ initialTab = 'chat' }) {
  * Settings Tab Manager Component
  * Manages sub-tabs for different configuration areas
  */
-function _SettingsTabManager() {
+function SettingsTabManager() {
   const [settingsTab, setSettingsTab] = useState('general');
 
   return (

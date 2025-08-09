@@ -44,11 +44,11 @@ function generateNonce() {
 /**
  * Create JWT token with user data
  * @param {Object} payload - User payload data
- * @param {string} secret - JWT secret
+ * @param {string}  - JWT 
  * @param {Object} options - JWT options
  * @returns {string} JWT token
  */
-function createJWT(payload, secret, options = {}) {
+function createJWT(payload, , options = {}) {
   const defaultOptions = {
     expiresIn: '1h',
     issuer: 'echotune-ai',
@@ -56,18 +56,18 @@ function createJWT(payload, secret, options = {}) {
     ...options
   };
   
-  return jwt.sign(payload, secret, defaultOptions);
+  return jwt.sign(payload, , defaultOptions);
 }
 
 /**
  * Verify JWT token
  * @param {string} token - JWT token to verify
- * @param {string} secret - JWT secret
+ * @param {string}  - JWT 
  * @returns {Object} Decoded payload or null if invalid
  */
-function verifyJWT(token, secret) {
+function verifyJWT(token, ) {
   try {
-    return jwt.verify(token, secret, {
+    return jwt.verify(token, , {
       issuer: 'echotune-ai',
       audience: 'echotune-users'
     });
@@ -80,11 +80,11 @@ function verifyJWT(token, secret) {
 /**
  * Create refresh token
  * @param {Object} payload - User payload data
- * @param {string} secret - JWT secret
+ * @param {string}  - JWT 
  * @returns {string} Refresh token
  */
-function createRefreshToken(payload, secret) {
-  return jwt.sign(payload, secret, {
+function createRefreshToken(payload, ) {
+  return jwt.sign(payload, , {
     expiresIn: '7d',
     issuer: 'echotune-ai-refresh',
     audience: 'echotune-users'
@@ -94,12 +94,12 @@ function createRefreshToken(payload, secret) {
 /**
  * Verify refresh token
  * @param {string} token - Refresh token to verify
- * @param {string} secret - JWT secret
+ * @param {string}  - JWT 
  * @returns {Object} Decoded payload or null if invalid
  */
-function verifyRefreshToken(token, secret) {
+function verifyRefreshToken(token, ) {
   try {
-    return jwt.verify(token, secret, {
+    return jwt.verify(token, , {
       issuer: 'echotune-ai-refresh',
       audience: 'echotune-users'
     });

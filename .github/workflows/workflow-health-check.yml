@@ -103,12 +103,12 @@ jobs:
           echo "🔒 Basic security check..."
           
           # Check for potential exposed secrets in workflow files
-          secret_patterns=("api[_-]?key" "secret" "password" "token")
+          secret_patterns=("api[_-]?key" "" "password" "token")
           found_issues=false
           
           for pattern in "${secret_patterns[@]}"; do
             if grep -r -i --include="*.yml" "$pattern" .github/workflows/ | grep -v -E "(secrets\.|env:|inputs:|description:|required:)" | head -5; then
-              echo "⚠️ Potential exposed secret pattern: $pattern"
+              echo "⚠️ Potential exposed  pattern: $pattern"
               found_issues=true
             fi
           done

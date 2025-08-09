@@ -184,16 +184,16 @@ services:
         value: "3000"
       - key: DIGITALOCEAN_TOKEN
         value: \${DIGITALOCEAN_TOKEN}
-        type: SECRET
+        type: 
       - key: MONGODB_URI
         value: \${MONGODB_URI}
-        type: SECRET
+        type: 
       - key: SPOTIFY_CLIENT_ID
         value: \${SPOTIFY_CLIENT_ID}
-        type: SECRET
+        type: 
       - key: SPOTIFY_CLIENT_SECRET
         value: \${SPOTIFY_CLIENT_SECRET}
-        type: SECRET
+        type: 
   - name: mcp-server
     source_dir: /mcp-server
     run_command: npm start

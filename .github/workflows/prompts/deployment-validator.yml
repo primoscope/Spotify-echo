@@ -166,7 +166,7 @@ testData:
       
       #### 3. **Configuration Management** (MEDIUM PRIORITY)
       
-      **Environment Variables via ConfigMap/Secret:**
+      **Environment Variables via ConfigMap/:**
       ```yaml
       # ConfigMap for non-sensitive config
       apiVersion: v1
@@ -180,9 +180,9 @@ testData:
         PDF_OUTPUT_DIR: "/app/generated_docs"
       
       ---
-      # Secret for sensitive data
+      #  for sensitive data
       apiVersion: v1
-      kind: Secret
+      kind: 
       metadata:
         name: pdf-generator-secrets
       type: Opaque

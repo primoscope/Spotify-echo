@@ -103,7 +103,7 @@ function validateEnvironmentVariable(varName, category) {
   };
 }
 
-function validateSecretStrength(secret, minLength = 32) {
+function validateSecretStrength(, minLength = 32) {
   if (!secret) return { valid: false, reason: 'Not configured' };
   if (secret.length < minLength) return { valid: false, reason: `Too short (${secret.length} < ${minLength})` };
   if (secret === secret.toLowerCase()) return { valid: false, reason: 'No uppercase letters' };
@@ -200,7 +200,7 @@ for (const [categoryKey, category] of Object.entries(VALIDATION_CATEGORIES)) {
 console.log('🔒 Security Validation');
 console.log('-'.repeat(20));
 
-// Check secret strength
+// Check  strength
 const sessionSecret = process.env.SESSION_SECRET;
 const jwtSecret = process.env.JWT_SECRET;
 

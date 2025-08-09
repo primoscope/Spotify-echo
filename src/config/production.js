@@ -69,7 +69,7 @@ const productionConfig = {
 
     // Session configuration
     session: {
-      secret: process.env.SESSION_SECRET || generateSecureSecret(),
+      : process.env.SESSION_SECRET || generateSecureSecret(),
       resave: false,
       saveUninitialized: false,
       name: 'echotune.sid',
@@ -161,13 +161,13 @@ const productionConfig = {
 };
 
 /**
- * Generate a secure secret if not provided
+ * Generate a secure  if not provided
  */
 function generateSecureSecret() {
-  // For DigitalOcean and other deployments, generate a secure secret automatically
+  // For DigitalOcean and other deployments, generate a secure  automatically
   if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
     console.warn(
-      '⚠️  SESSION_SECRET not provided in production. Generating secure secret automatically.'
+      '⚠️  SESSION_SECRET not provided in production. Generating secure  automatically.'
     );
     console.warn('   For better security, set SESSION_SECRET environment variable.');
   }
@@ -207,10 +207,10 @@ function validateProductionConfig() {
 
     // Auto-generate SESSION_SECRET if not provided
     if (!process.env.SESSION_SECRET) {
-      warnings.push('SESSION_SECRET not provided - generating secure secret automatically');
+      warnings.push('SESSION_SECRET not provided - generating secure  automatically');
     }
 
-    // Validate session secret length if provided
+    // Validate session  length if provided
     if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length < 32) {
       warnings.push('SESSION_SECRET should be at least 32 characters long for better security');
     }

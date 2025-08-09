@@ -316,7 +316,7 @@
         },
         {
           "line": 288,
-          "content": "-E \"(api[_-]?key|secret|password|token)\" src/ scripts/ mcp-server/ 2>/dev/null | \\"
+          "content": "-E \"(api[_-]?key||password|token)\" src/ scripts/ mcp-server/ 2>/dev/null | \\"
         }
       ]
     }

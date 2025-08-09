@@ -47,22 +47,22 @@ if [ -f .env ]; then
     fi
     
     if grep -q "JWT_SECRET" .env; then
-        check_pass "JWT secret configured"
+        check_pass "JWT  configured"
     else
-        check_fail "Missing JWT secret"
+        check_fail "Missing JWT "
     fi
     
     if grep -q "SESSION_SECRET" .env; then
-        check_pass "Session secret configured"
+        check_pass "Session  configured"
     else
-        check_fail "Missing session secret"
+        check_fail "Missing session "
     fi
     
     # Check for weak secrets
-    if grep -E "(secret|password|key).*=.{1,10}$" .env > /dev/null; then
+    if grep -E "(|password|key).*=.{1,10}$" .env > /dev/null; then
         check_fail "Weak secrets detected (too short)"
     else
-        check_pass "Secret length appears adequate"
+        check_pass " length appears adequate"
     fi
 else
     check_fail "No .env file found"

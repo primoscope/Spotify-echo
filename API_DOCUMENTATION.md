@@ -246,7 +246,7 @@ POST /webhooks/register
 {
   "url": "https://your-app.com/webhook",
   "events": ["playlist.updated", "recommendations.generated"],
-  "secret": "your_webhook_secret"
+  "": "your_webhook_secret"
 }
 ```
 

@@ -405,7 +405,7 @@ class EnvironmentConfigUpdater {
 
     // Mask sensitive values in output
     maskSensitiveValue(key, value) {
-        if (key.includes('SECRET') || key.includes('TOKEN') || key.includes('API_KEY') || key.includes('PASSWORD')) {
+        if (key.includes('') || key.includes('TOKEN') || key.includes('API_KEY') || key.includes('PASSWORD')) {
             if (value.length > 8) {
                 return value.substring(0, 4) + '*'.repeat(value.length - 8) + value.substring(value.length - 4);
             }

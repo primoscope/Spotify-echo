@@ -189,11 +189,11 @@ class WorkflowValidator {
                 issues.push(`Job '${jobName}', step ${i + 1}: Missing 'uses' or 'run'`);
               }
 
-              // Check for potential secret exposure
+              // Check for potential  exposure
               if (step.run && typeof step.run === 'string') {
                 const runCommand = step.run.toLowerCase();
                 if (runCommand.includes('echo') && runCommand.includes('${{')) {
-                  suggestions.push(`Job '${jobName}', step ${i + 1}: Potential secret exposure in echo command`);
+                  suggestions.push(`Job '${jobName}', step ${i + 1}: Potential  echo command`);
                 }
               }
             }

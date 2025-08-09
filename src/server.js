@@ -155,7 +155,7 @@ if (config.server.compression) {
 
 // Session management with Redis store or memory fallback
 const sessionConfig = {
-  secret: process.env.SESSION_SECRET || 'fallback-dev-secret-change-in-production',
+  : process.env.SESSION_SECRET || 'fallback-dev--change-in-production',
   name: 'echotune.session',
   resave: false,
   saveUninitialized: false,

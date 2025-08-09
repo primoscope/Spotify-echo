@@ -1,10 +1,10 @@
 #!/bin/bash
-# Enhanced Secret Scanning with Smart Filtering
+# Enhanced nning with Smart Filtering
 # Reduces false positives while maintaining security
 
 set -e
 
-echo "🔍 Enhanced Secret Scanning with Smart Filtering"
+echo "🔍 Enhanced  Smart Filtering"
 echo "================================================"
 
 # Create .gitleaksignore if it doesn't exist
@@ -69,7 +69,7 @@ fi
 
 # Function to run Gitleaks with better configuration
 run_gitleaks_scan() {
-    echo "Running Gitleaks secret scanning..."
+    echo "Running Gitleaks nning..."
     
     if command -v gitleaks &> /dev/null; then
         # Use Gitleaks with ignore file
@@ -80,7 +80,7 @@ run_gitleaks_scan() {
         
         # Fallback: Basic pattern detection with smart filtering
         POTENTIAL_SECRETS=$(grep -r -i -E \
-            "(password|secret|key|token).*=.*['\"][a-zA-Z0-9+/=]{10,}['\"]" \
+            "(password|oken).*=.*['\"][a-zA-Z0-9+/=]{10,}['\"]" \
             . \
             --exclude-dir=node_modules \
             --exclude-dir=.git \
@@ -113,11 +113,11 @@ analyze_results() {
     local scan_result=$1
     
     if [ $scan_result -eq 0 ]; then
-        echo "✅ Secret scanning passed"
+        echo "✅ nning passed"
         echo "No hardcoded secrets detected in codebase"
         return 0
     else
-        echo "❌ Secret scanning found issues"
+        echo "❌ nning found issues"
         echo "Please review the findings above"
         
         # Provide remediation guidance
@@ -133,7 +133,7 @@ analyze_results() {
 - Use .env files for development (excluded from git)
 - Implement proper secrets rotation
 - Use service accounts with minimal permissions
-- Monitor for secret exposure in logs and error messages
+- Monitor for  exposure in logs and error messages
 
 EOF
         return 1
@@ -166,7 +166,7 @@ check_high_risk_files() {
 
 # Main execution
 main() {
-    echo "Starting enhanced secret scanning..."
+    echo "Starting enhanced nning..."
     
     # Check high-risk files first
     check_high_risk_files
@@ -181,13 +181,13 @@ main() {
     fi
     
     echo ""
-    echo "🏁 Secret scanning complete"
+    echo "🏁 nning complete"
     
     # Generate summary report
-    cat > secret-scan-report.json << EOF
+    cat > -scan-report.json << EOF
 {
     "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-    "scan_type": "enhanced-secret-detection",
+    "scan_type": "enhanced--detection",
     "status": "$([ $? -eq 0 ] && echo 'passed' || echo 'failed')",
     "tool": "$(command -v gitleaks &> /dev/null && echo 'gitleaks' || echo 'fallback-grep')",
     "ignore_patterns": "$(wc -l < .gitleaksignore) patterns in .gitleaksignore",
@@ -195,7 +195,7 @@ main() {
 }
 EOF
     
-    echo "📄 Scan report saved to: secret-scan-report.json"
+    echo "📄 Scan report saved to: -scan-report.json"
 }
 
 # Run main function

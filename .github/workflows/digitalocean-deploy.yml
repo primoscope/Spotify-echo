@@ -68,12 +68,12 @@ jobs:
           
           # Check required secrets
           if [[ -z "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" ]]; then
-            echo "❌ DIGITALOCEAN_ACCESS_TOKEN secret is required"
+            echo "❌ DIGITALOCEAN_ACCESS_TOKEN "
             exit 1
           fi
           
           if [[ -z "${{ secrets.DO_REGISTRY_TOKEN }}" ]]; then
-            echo "❌ DO_REGISTRY_TOKEN secret is required"
+            echo "❌ DO_REGISTRY_TOKEN quired"
             exit 1
           fi
           

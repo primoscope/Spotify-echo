@@ -30,9 +30,9 @@ Create a GitHub Personal Access Token with full permissions:
 
 4. Copy the token and add it to repository secrets as `GH_PAT`
 
-### 2. Repository Secret Configuration
+### 2. Repository guration
 
-Add the following secret to your repository:
+Add the following ository:
 
 - **Name**: `GH_PAT`
 - **Value**: Your GitHub Personal Access Token
@@ -163,7 +163,7 @@ ls agent-workflow/progress/
 ## Troubleshooting
 
 ### Common Issues
-1. **No GitHub token**: Set GH_PAT secret in repository
+1. **No GitHub token**: Set GH_PAT 
 2. **Workflow not triggering**: Ensure files are committed to agent-workflow/
 3. **Permission denied**: Verify token has all required scopes
 4. **Rate limiting**: GitHub API rate limits may delay operations

@@ -35,7 +35,7 @@ Phase 2 — Testing, Security, and CI Hardening
    - Unit/integration/e2e for backend and frontend
    - Contract tests for Spotify API with mocking strategy
 2) Security scanning:
-   - Secret scanning, dependency audits, CodeQL/Semgrep
+   -  scanning, dependency audits, CodeQL/Semgrep
    - Output: /reports/security-scan.md
 3) Performance baselines:
    - Backend profiling and frontend Lighthouse CI

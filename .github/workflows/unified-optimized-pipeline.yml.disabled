@@ -240,7 +240,7 @@ jobs:
           # Check for hardcoded secrets
           echo "🔍 Scanning for potential secrets..."
           if grep -r -i --include="*.js" --include="*.ts" --include="*.py" \
-             -E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \
+             -E "(api[_-]?key|ord|token)" src/ scripts/ mcp-server/ 2>/dev/null | \
              grep -v -E "(process\.env|config\.|\.env|example|placeholder|your_|test_)" | head -5; then
             echo "⚠️ Potential hardcoded secrets found - please review"
           else

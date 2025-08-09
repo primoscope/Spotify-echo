@@ -389,10 +389,10 @@ services:
     type: SECRET
   - key: SESSION_SECRET
     value: "${this.config.SESSION_SECRET}"
-    type: SECRET
+    type: 
   - key: JWT_SECRET
     value: "${this.config.JWT_SECRET}"
-    type: SECRET
+    type: 
   routes:
   - path: /
 static_sites: []

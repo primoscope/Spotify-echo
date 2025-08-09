@@ -590,8 +590,8 @@ SPOTIFY_CLIENT_ID           # Your Spotify app client ID
 SPOTIFY_CLIENT_SECRET       # Your Spotify app client secret
 
 # Security
-SESSION_SECRET              # Secure session secret
-JWT_SECRET                  # Secure JWT secret
+SESSION_SECRET              # Secure session 
+JWT_SECRET                  # Secure JWT 
 MONGODB_URI                 # Database connection string
 
 # AI/LLM (Optional)
@@ -1027,7 +1027,7 @@ echo "YOUR_GITHUB_TOKEN" | docker login ghcr.io --username YOUR_GITHUB_USERNAME 
 ```bash
 aws configure
 # Access Key ID: YOUR_ACCESS_KEY
-# Secret Access Key: YOUR_SECRET_KEY
+#  Access Key: YOUR_SECRET_KEY
 # Region: us-east-1
 ```
 
@@ -1265,7 +1265,7 @@ A: Follow these steps:
 #    - App description: Music recommendation app
 #    - Redirect URI: https://your-domain.com/auth/callback
 #    - API/SDK: Web API
-# 3. Copy Client ID and Client Secret to your .env file
+# 3. Copy Client ID and Client ur .env file
 ```
 
 **Q: How do I secure API keys in production?**

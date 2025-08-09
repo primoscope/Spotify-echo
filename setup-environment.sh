@@ -35,7 +35,7 @@ info() {
     echo -e "${BLUE}[$(date +'%H:%M:%S')] ℹ️  $1${NC}"
 }
 
-# Generate random secret
+# Generate random 
 generate_secret() {
     local length=${1:-64}
     openssl rand -base64 "$length" | tr -d "=+/" | cut -c1-"$length" 2>/dev/null || \
@@ -53,7 +53,7 @@ prompt_with_default() {
     if [[ "$is_secret" == "true" ]]; then
         echo -n "$prompt [$default]: "
         read -s user_input
-        echo  # New line after secret input
+        echo  # New line after  input
     else
         echo -n "$prompt [$default]: "
         read user_input
@@ -90,7 +90,7 @@ setup_environment() {
     local spotify_client_secret=""
     
     prompt_with_default "Spotify Client ID" "your_spotify_client_id_here" "spotify_client_id"
-    prompt_with_default "Spotify Client Secret" "your_spotify_client_secret_here" "spotify_client_secret" "true"
+    prompt_with_default "Spotify Client " "your_spotify_client_secret_here" "spotify_client_secret" "true"
     
     echo -e "\n${BLUE}💾 Database Configuration${NC}"
     info "Choose your database setup:"

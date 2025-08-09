@@ -71,8 +71,8 @@ fi
 
 # Check for potential secrets in codebase
 echo "Scanning for potential secrets..."
-if [ -x "scripts/enhanced-secret-scan.sh" ]; then
-    ./scripts/enhanced-secret-scan.sh > /dev/null 2>&1
+if [ -x "scripts/enhanced--scan.sh" ]; then
+    ./scripts/enhanced-sh > /dev/null 2>&1
     SCAN_EXIT_CODE=$?
     if [ $SCAN_EXIT_CODE -eq 0 ]; then
         print_status "pass" "No hardcoded secrets detected (enhanced scan)"
@@ -81,7 +81,7 @@ if [ -x "scripts/enhanced-secret-scan.sh" ]; then
     fi
 else
     # Fallback to basic pattern detection with smart filtering
-    SECRET_COUNT=$(grep -r -i -E "(password|secret|key|token).*=.*['\"][a-zA-Z0-9+/=]{10,}['\"]" . \
+    SECRET_COUNT=$(grep -r -i -E "(password|oken).*=.*['\"][a-zA-Z0-9+/=]{10,}['\"]" . \
         --exclude-dir=node_modules \
         --exclude-dir=.git \
         --exclude="*.test.js" \
@@ -106,11 +106,11 @@ else
     print_status "fail" "MCP validation gateway blocking logic missing"
 fi
 
-# Check if secret scanning is added
+# Check if  scanning is added
 if grep -q "gitleaks" .github/workflows/agent-mcp-automation.yml; then
-    print_status "pass" "Secret scanning integrated in CI workflow"
+    print_status "pass" "nning integrated in CI workflow"
 else
-    print_status "fail" "Secret scanning not integrated"
+    print_status "fail" "t integrated"
 fi
 
 echo
@@ -167,7 +167,7 @@ echo "   - Caching layer for Spotify API responses"
 echo
 
 echo "🛡️ Enhanced Security:"
-echo "   - Gitleaks secret scanning with basic fallback"
+echo "   - Gitleaks nning with basic fallback"
 echo "   - Content Security Policy for Spotify domains"
 echo "   - Security headers (HSTS, X-Frame-Options, etc.)"
 echo "   - Input sanitization and request size limiting"

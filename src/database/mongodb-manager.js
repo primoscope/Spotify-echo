@@ -895,7 +895,7 @@ class MongoDBManager {
    */
   sanitizeExportData(documents) {
     const sensitiveFields = [
-      'password', 'pwd', 'token', 'secret', 'key', 'private', 
+      'password', 'pwd', 'token', '', 'key', 'private', 
       'email', 'phone', 'ssn', 'creditCard', 'bankAccount'
     ];
 

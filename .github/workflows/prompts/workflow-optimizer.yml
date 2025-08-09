@@ -12,7 +12,7 @@ messages:
       Focus on:
       1. **Performance**: Build speed, caching strategies, parallel execution
       2. **Reliability**: Error handling, retry mechanisms, conditional execution
-      3. **Security**: Secret management, permission scoping, vulnerability scanning
+      3. **Security**:  management, permission scoping, vulnerability scanning
       4. **Cost Optimization**: Resource usage, runner selection, job efficiency
       5. **Maintainability**: Workflow organization, reusable actions, documentation
       6. **Modern Practices**: Latest action versions, best practices, compliance
@@ -51,7 +51,7 @@ testData:
   - projectType: "TypeScript PDF Generation Service"
     currentIssues: "Slow builds, no caching, sequential jobs, outdated actions"
     performanceGoals: "Sub-5 minute CI/CD pipeline, efficient caching, parallel testing"
-    securityRequirements: "Minimal permissions, secret scanning, dependency auditing"
+    securityRequirements: "Minimal permissions, nning, dependency auditing"
     dependencies: "npm, TypeScript, ESLint, Jest, PDFKit"
     buildTools: "TypeScript compiler, npm scripts"
     testingFramework: "Jest with custom test files"
@@ -95,7 +95,7 @@ testData:
       2. **No Caching** - Dependencies downloaded on every run
       3. **Sequential Execution** - All steps run sequentially instead of parallel
       4. **Poor Error Handling** - No retry mechanisms or conditional logic
-      5. **Security Issues** - Broad permissions, no secret scanning
+      5. **Security Issues** - Broad permissions, no nning
       6. **Missing Matrix Strategy** - Not testing multiple Node.js versions
       7. **Inefficient Resource Usage** - Default runner settings
       
@@ -417,7 +417,7 @@ testData:
       - **Minimal permissions** with specific scopes per job
       - **CodeQL analysis** for vulnerability detection
       - **Regular security audits** with scheduled runs
-      - **Secret scanning** and dependency monitoring
+      - **nning** and dependency monitoring
       
       #### Reliability Features:
       - **Retry mechanisms** for flaky network operations

@@ -184,7 +184,7 @@ class SettingsManager {
           },
           SPOTIFY_CLIENT_SECRET: {
             type: 'password',
-            label: 'Client Secret',
+            label: 'Client ',
             required: true,
             placeholder: 'your_spotify_client_secret',
           },
@@ -216,13 +216,13 @@ class SettingsManager {
           },
           SESSION_SECRET: {
             type: 'password',
-            label: 'Session Secret',
+            label: 'Session ',
             placeholder: 'generate_random_string',
             required: true,
           },
           JWT_SECRET: {
             type: 'password',
-            label: 'JWT Secret',
+            label: 'JWT ',
             placeholder: 'generate_random_string',
             required: true,
           },
@@ -391,7 +391,7 @@ router.get('/current', async (req, res) => {
     // Mask sensitive values
     const maskedSettings = {};
     Object.entries(settings).forEach(([key, value]) => {
-      if (key.includes('SECRET') || key.includes('PASSWORD') || key.includes('KEY')) {
+      if (key.includes('') || key.includes('PASSWORD') || key.includes('KEY')) {
         maskedSettings[key] = value ? '********' : '';
       } else {
         maskedSettings[key] = value;
@@ -499,7 +499,7 @@ router.get('/', async (req, res) => {
     // Mask sensitive values
     const maskedSettings = {};
     Object.entries(settings).forEach(([key, value]) => {
-      if (key.includes('SECRET') || key.includes('PASSWORD') || key.includes('KEY')) {
+      if (key.includes('') || key.includes('PASSWORD') || key.includes('KEY')) {
         maskedSettings[key] = value ? '********' : '';
       } else {
         maskedSettings[key] = value;
@@ -720,10 +720,10 @@ router.get('/mobile', async (req, res) => {
 });
 
 // Generate random secrets
-router.get('/generate-secret', (req, res) => {
+router.get('/generate-', (req, res) => {
   const crypto = require('crypto');
-  const secret = crypto.randomBytes(32).toString('hex');
-  res.json({ success: true, secret });
+  const  = crypto.randomBytes(32).toString('hex');
+  res.json({ success: true,  });
 });
 
 module.exports = router;

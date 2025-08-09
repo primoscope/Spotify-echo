@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Simple env validator that does not print secret values. */
+/** Simple env validator that does not print s. */
 const REQUIRED = [
   // Only warn for now to avoid blocking contributors without full setup
   'SPOTIFY_CLIENT_ID',

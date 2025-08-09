@@ -47,6 +47,6 @@ jobs:
           args: "detect --no-banner --redact --exit-code 0 --report-format json --report-path reports/gitleaks.json"
       - uses: actions/upload-artifact@v4
         with:
-          name: secret-scan
+          name: -scan
           path: reports/gitleaks.json
           if-no-files-found: ignore

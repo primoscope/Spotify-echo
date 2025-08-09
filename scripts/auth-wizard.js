@@ -117,7 +117,7 @@ class AuthWizard {
         this.log('Create app at: https://developer.spotify.com/dashboard/', 'info');
         
         const clientId = await this.question('Spotify Client ID: ');
-        const clientSecret = await this.question('Spotify Client Secret: ');
+        const clientSecret = await this.question('Spotify Client : ');
         const redirectUri = await this.question('Redirect URI (e.g., https://yourdomain.com/auth/callback): ');
         
         if (clientId && clientSecret && redirectUri) {

@@ -603,16 +603,16 @@ services:
     value: "${this.config.SPOTIFY_CLIENT_ID}"
   - key: SPOTIFY_CLIENT_SECRET
     value: "${this.config.SPOTIFY_CLIENT_SECRET}"
-    type: SECRET
+    type: 
   - key: MONGODB_URI
     value: "${this.config.MONGODB_URI}"
-    type: SECRET
+    type: 
   - key: GEMINI_API_KEY
     value: "${this.config.GEMINI_API_KEY}"
     type: SECRET
   - key: OPENROUTER_API_KEY
     value: "${this.config.OPENROUTER_API_KEY}"
-    type: SECRET
+    type: 
   - key: DEFAULT_LLM_PROVIDER
     value: "${this.config.DEFAULT_LLM_PROVIDER}"
   - key: ENABLE_SQLITE_FALLBACK

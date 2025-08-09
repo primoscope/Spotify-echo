@@ -513,7 +513,7 @@ display_next_steps() {
     echo ""
     echo "1. 📝 Configure Environment Variables:"
     echo "   sudo nano $APP_DIR/.env"
-    echo "   - Set your Spotify Client ID and Secret"
+    echo "   - Set your Spotify Client ID and "
     echo "   - Configure database URLs if using external services"
     echo ""
     echo "2. 🌐 Configure DNS:"

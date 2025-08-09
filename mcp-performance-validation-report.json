@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-09T10:06:18.593Z",
+  "timestamp": "2025-08-09T10:20:11.054Z",
   "summary": {
     "totalServers": 3,
     "runningServers": 3,
@@ -9,20 +9,20 @@
   "servers": {
     "performance-analyzer": {
       "status": "running",
-      "startupTime": 1029,
+      "startupTime": 30,
       "performanceScore": 100,
       "tests": {
         "performance": {
           "healthCheck": {
-            "averageResponseTime": 1,
-            "maxResponseTime": 2,
-            "minResponseTime": 0,
-            "score": 99.9
+            "averageResponseTime": 1.9,
+            "maxResponseTime": 4,
+            "minResponseTime": 1,
+            "score": 99.81
           },
           "endpointResponsiveness": {
             "endpoints": {
               "/api/metrics/realtime": {
-                "responseTime": 1,
+                "responseTime": 2,
                 "status": "success",
                 "hasData": true
               },
@@ -32,28 +32,28 @@
                 "hasData": true
               },
               "/api/benchmarks": {
-                "responseTime": 0,
+                "responseTime": 1,
                 "status": "success",
                 "hasData": true
               }
             },
             "successRate": 100,
-            "averageResponseTime": 1,
+            "averageResponseTime": 1.6666666666666667,
             "score": 100
           },
           "loadTesting": {
             "concurrentRequests": 10,
             "successCount": 10,
             "successRate": 100,
-            "totalTime": 10,
-            "requestsPerSecond": 1000,
+            "totalTime": 19,
+            "requestsPerSecond": 526.3157894736842,
             "score": 100
           },
           "memoryUsage": {
-            "beforeMemory": 5267864,
-            "afterMemory": 5399904,
-            "memoryIncrease": 132040,
-            "score": 99.87407684326172
+            "beforeMemory": 5024784,
+            "afterMemory": 5156816,
+            "memoryIncrease": 132032,
+            "score": 99.87408447265625
           }
         },
         "functionality": {
@@ -65,7 +65,7 @@
           },
           "benchmarking": {
             "status": "success",
-            "duration": 1002.9311289999998,
+            "duration": 1003.4652819999974,
             "score": 100
           }
         }
@@ -73,25 +73,25 @@
     },
     "code-intelligence": {
       "status": "running",
-      "startupTime": 1034,
+      "startupTime": 34,
       "performanceScore": 100,
       "tests": {
         "performance": {
           "healthCheck": {
-            "averageResponseTime": 0.8,
-            "maxResponseTime": 1,
-            "minResponseTime": 0,
-            "score": 99.92
+            "averageResponseTime": 1.5,
+            "maxResponseTime": 2,
+            "minResponseTime": 1,
+            "score": 99.85
           },
           "endpointResponsiveness": {
             "endpoints": {
               "/api/analyze/comprehensive": {
-                "responseTime": 3,
+                "responseTime": 4,
                 "status": "success",
                 "hasData": true
               },
               "/api/quality/score": {
-                "responseTime": 2,
+                "responseTime": 1,
                 "status": "success",
                 "hasData": true
               },
@@ -109,15 +109,15 @@
             "concurrentRequests": 10,
             "successCount": 10,
             "successRate": 100,
-            "totalTime": 7,
-            "requestsPerSecond": 1428.5714285714287,
+            "totalTime": 15,
+            "requestsPerSecond": 666.6666666666666,
             "score": 100
           },
           "memoryUsage": {
-            "beforeMemory": 5148712,
-            "afterMemory": 5261560,
-            "memoryIncrease": 112848,
-            "score": 99.89237976074219
+            "beforeMemory": 5836160,
+            "afterMemory": 5044520,
+            "memoryIncrease": -791640,
+            "score": 100.75496673583984
           }
         },
         "functionality": {
@@ -139,20 +139,20 @@
     },
     "enhanced-orchestrator-v2": {
       "status": "running",
-      "startupTime": 1037,
+      "startupTime": 39,
       "performanceScore": 100,
       "tests": {
         "performance": {
           "healthCheck": {
-            "averageResponseTime": 0.8,
-            "maxResponseTime": 1,
-            "minResponseTime": 0,
-            "score": 99.92
+            "averageResponseTime": 1.5,
+            "maxResponseTime": 2,
+            "minResponseTime": 1,
+            "score": 99.85
           },
           "endpointResponsiveness": {
             "endpoints": {
               "/api/orchestrator/status": {
-                "responseTime": 1,
+                "responseTime": 3,
                 "status": "success",
                 "hasData": true
               },
@@ -162,28 +162,28 @@
                 "hasData": true
               },
               "/api/system/analyze": {
-                "responseTime": 2,
+                "responseTime": 3,
                 "status": "success",
                 "hasData": true
               }
             },
             "successRate": 100,
-            "averageResponseTime": 1.3333333333333333,
+            "averageResponseTime": 2.3333333333333335,
             "score": 100
           },
           "loadTesting": {
             "concurrentRequests": 10,
             "successCount": 10,
             "successRate": 100,
-            "totalTime": 7,
-            "requestsPerSecond": 1428.5714285714287,
+            "totalTime": 19,
+            "requestsPerSecond": 526.3157894736842,
             "score": 100
           },
           "memoryUsage": {
-            "beforeMemory": 5163232,
-            "afterMemory": 5282184,
-            "memoryIncrease": 118952,
-            "score": 99.88655853271484
+            "beforeMemory": 5791024,
+            "afterMemory": 5942360,
+            "memoryIncrease": 151336,
+            "score": 99.85567474365234
           }
         },
         "functionality": {

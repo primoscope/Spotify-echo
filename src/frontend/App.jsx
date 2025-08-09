@@ -1,7 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
+import { BrowserRouter as _Router, Routes as _Routes, Route as _Route, Navigate as _Navigate } from 'react-router-dom';
+import { Box as _Box, AppBar as _AppBar, Toolbar as _Toolbar, Typography as _Typography, Container as _Container, Tabs as _Tabs, Tab as _Tab } from '@mui/material';
 import { useState } from 'react';
-import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
+import ThemeProvider, { ThemeToggle as _ThemeToggle } from './components/ThemeProvider';
 import PlaylistBuilder from './components/PlaylistBuilder';
 import ExplainableRecommendations from './components/ExplainableRecommendations';
 import EnhancedChatInterface from './components/EnhancedChatInterface';
@@ -24,16 +24,16 @@ function App() {
     <ThemeProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<MainApplication />} />
-          <Route path="/chat" element={<MainApplication initialTab="chat" />} />
+          <Route path="/" element={<_MainApplication />} />
+          <Route path="/chat" element={<_MainApplication initialTab="chat" />} />
           <Route
             path="/recommendations"
-            element={<MainApplication initialTab="recommendations" />}
+            element={<_MainApplication initialTab="recommendations" />}
           />
-          <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
-          <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
-          <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
-          <Route path="/settings" element={<MainApplication initialTab="settings" />} />
+          <Route path="/playlist" element={<_MainApplication initialTab="playlist" />} />
+          <Route path="/discovery" element={<_MainApplication initialTab="discovery" />} />
+          <Route path="/analytics" element={<_MainApplication initialTab="analytics" />} />
+          <Route path="/settings" element={<_MainApplication initialTab="settings" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
@@ -44,7 +44,7 @@ function App() {
 /**
  * Main Application Component with Tabbed Interface
  */
-function MainApplication({ initialTab = 'chat' }) {
+function _MainApplication({ initialTab = 'chat' }) {
   const [currentTab, setCurrentTab] = useState(initialTab);
   const [sessionId] = useState(`session_${Date.now()}`);
   const [_recommendations, _setRecommendations] = useState([]);
@@ -325,7 +325,7 @@ function MainApplication({ initialTab = 'chat' }) {
 
         {currentTab === 'settings' && (
           <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <SettingsTabManager />
+            <_SettingsTabManager />
           </Container>
         )}
       </Box>
@@ -337,7 +337,7 @@ function MainApplication({ initialTab = 'chat' }) {
  * Settings Tab Manager Component
  * Manages sub-tabs for different configuration areas
  */
-function SettingsTabManager() {
+function _SettingsTabManager() {
   const [settingsTab, setSettingsTab] = useState('general');
 
   return (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -7,18 +7,11 @@ import {
   Typography,
   Button,
   Chip,
-  LinearProgress,
   CircularProgress,
   Alert,
   Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   IconButton,
-  Tooltip,
   Divider,
-  Paper,
   Tabs,
   Tab,
   Dialog,
@@ -31,11 +24,8 @@ import {
   PlaylistPlay,
   Add,
   TrendingUp,
-  BarChart,
-  Timeline,
   MusicNote,
   Share,
-  Download,
   Analytics,
   Refresh,
 } from '@mui/icons-material';
@@ -60,7 +50,6 @@ function PlaylistTrendChart({ trends, width = 300, height = 150 }) {
 
   const features = trends.audioFeatures;
   const featureNames = Object.keys(features);
-  const maxValue = 1; // Audio features are normalized 0-1
 
   return (
     <Box>
@@ -209,16 +198,15 @@ function PlaylistsPage() {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [playlistInsights, setPlaylistInsights] = useState({});
   const [tabValue, setTabValue] = useState(0);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     loadPlaylists();
-  }, []);
+  }, [loadPlaylists]);
 
-  const loadPlaylists = async () => {
+  const loadPlaylists = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -262,7 +250,7 @@ function PlaylistsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const loadPlaylistsInsights = async (playlistList) => {
     const insights = {};
@@ -470,7 +458,7 @@ function PlaylistsPage() {
                         <Button
                           size="small"
                           startIcon={<MusicNote />}
-                          onClick={() => setSelectedPlaylist(playlist)}
+                          disabled
                         >
                           View Tracks
                         </Button>

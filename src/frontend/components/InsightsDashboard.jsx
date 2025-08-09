@@ -274,34 +274,6 @@ function InsightsDashboard() {
     loadCacheStats();
   }, [loadInsights]);
 
-  const loadInsights = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({
-        page: currentPage,
-        limit: 50,
-        timeRange,
-        features: selectedFeatures.join(',')
-      });
-
-      const response = await fetch(`/api/insights/listening-trends?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setInsights(data);
-      } else {
-        setError(data.message || 'Failed to load insights');
-      }
-    } catch (err) {
-      setError('Network error loading insights');
-      console.error('Error loading insights:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadCacheStats = async () => {
     try {
       const response = await fetch('/api/insights/cache/stats');

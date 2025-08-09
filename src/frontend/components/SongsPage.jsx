@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -19,12 +19,9 @@ import {
   ListItemText,
   IconButton,
   Tooltip,
-  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
   Collapse,
 } from '@mui/material';
@@ -34,10 +31,7 @@ import {
   ExpandMore,
   ExpandLess,
   PlayArrow,
-  Timeline,
   Assessment,
-  TrendingUp,
-  Info,
 } from '@mui/icons-material';
 
 /**
@@ -108,18 +102,12 @@ function AudioFeatureGauge({ label, value, color = '#1976d2', size = 100 }) {
 /**
  * Song Detail Modal Component
  */
-function SongDetailCard({ trackId, expanded, onToggle }) {
+function SongDetailCard({ trackId, expanded, _onToggle }) {
   const [songInsights, setSongInsights] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (expanded && trackId && !songInsights) {
-      loadSongInsights();
-    }
-  }, [expanded, trackId]);
-
-  const loadSongInsights = async () => {
+  const loadSongInsights = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -137,7 +125,13 @@ function SongDetailCard({ trackId, expanded, onToggle }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [trackId]);
+
+  useEffect(() => {
+    if (expanded && trackId && !songInsights) {
+      loadSongInsights();
+    }
+  }, [expanded, trackId, songInsights, loadSongInsights]);
 
   if (!expanded) return null;
 

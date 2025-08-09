@@ -1,66 +1,7 @@
 [
-  {
-    "title": "Configure production environment variables for MCP validation",
-    "priority": "high",
-    "description": "Set up NODE_ENV and PORT environment variables to complete MCP validation framework",
-    "category": "infrastructure",
-    "estimated_effort": "1 hour",
-    "requirements": ["Environment setup", "Documentation update"]
-  },
-  {
-    "title": "Migrate legacy MCP servers to modern health check endpoints",
-    "priority": "high", 
-    "description": "Update enhanced-server, orchestration-engine, and spotify-server to support /health endpoints",
-    "category": "mcp-integration",
-    "estimated_effort": "3 hours",
-    "requirements": ["Server refactoring", "Health endpoint implementation"]
-  },
-  {
-    "title": "Implement GPT-5 API integration for PR analysis",
-    "priority": "medium",
-    "description": "Replace mock GPT-5 analysis with actual OpenAI GPT-5 API integration in PR slash commands",
-    "category": "ai-integration",
-    "estimated_effort": "4 hours", 
-    "requirements": ["OpenAI API key", "Analysis prompt engineering"]
-  },
-  {
-    "title": "Add comprehensive unit tests for enhanced MCP manager",
-    "priority": "medium",
-    "description": "Create Jest tests for scripts/mcp-manager.js covering all new functionality",
-    "category": "testing",
-    "estimated_effort": "2 hours",
-    "requirements": ["Jest configuration", "Mock implementations"]
-  },
-  {
-    "title": "Implement performance telemetry collection for MCP endpoints",
-    "priority": "medium",
-    "description": "Add response time tracking and performance metrics collection using existing response formatter",
-    "category": "performance", 
-    "estimated_effort": "2 hours",
-    "requirements": ["Telemetry framework", "Metrics dashboard"]
-  },
-  {
-    "title": "Create MCP server performance optimization and caching layer",
-    "priority": "low",
-    "description": "Implement Redis-based caching for frequently accessed MCP server responses",
-    "category": "performance",
-    "estimated_effort": "3 hours",
-    "requirements": ["Redis integration", "Cache invalidation strategy"]
-  },
-  {
-    "title": "Expand integration test coverage for community MCP servers",
-    "priority": "low",
-    "description": "Add specific integration tests for Browserbase, Mermaid, and other community servers",
-    "category": "testing",
-    "estimated_effort": "2 hours", 
-    "requirements": ["Test server setup", "Mock external dependencies"]
-  },
-  {
-    "title": "Update MCP documentation to include Sentry server configuration",
-    "priority": "low",
-    "description": "Add Sentry MCP server documentation to resolve configuration coherence validation issue",
-    "category": "documentation",
-    "estimated_effort": "30 minutes",
-    "requirements": ["Documentation update", "Configuration validation"]
-  }
+  { "title": "Expand MCP integration tests for Spotify MCP server", "priority": "high" },
+  { "title": "Adopt response-formatter across existing endpoints", "priority": "medium" },
+  { "title": "Add caching guardrails and TTLs to recommendation endpoints", "priority": "medium" },
+  { "title": "Enhance CI to run unit tests with Jest and coverage thresholds", "priority": "medium" },
+  { "title": "Document Browser automation MCP optional setup in MCP README", "priority": "low" }
 ]

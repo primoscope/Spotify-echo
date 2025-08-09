@@ -1,0 +1,23 @@
+name: CI (Lint & Tests)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps (best-effort)
+        run: |
+          if [ -f package.json ]; then npm ci || true; fi
+      - name: Lint (placeholder)
+        run: |
+          if [ -f package.json ] && npx --yes eslint -v >/dev/null 2>&1; then npx eslint .; else echo 'eslint not configured, skipping'; fi
+      - name: Run tests
+        run: node scripts/run-tests.js

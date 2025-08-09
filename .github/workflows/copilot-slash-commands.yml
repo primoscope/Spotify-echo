@@ -1488,8 +1488,29 @@ jobs:
             gh pr comment $CONTEXT_NUMBER --body-file /tmp/contributing_success.md
           fi
 
-      - name: Execute Help Command
-        if: steps.parse.outputs.command == 'help'
+      - name: Dispatch MCP Health
+        if: steps.parse.outputs.command == 'mcp-health-check'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          event-type: mcp-health-check
+          client-payload: '{"pr_number": "${{ steps.parse.outputs.context_number }}"}'
+
+      - name: Dispatch MCP Validation
+        if: steps.parse.outputs.command == 'run-mcp-validation'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          event-type: run-mcp-validation
+          client-payload: '{"pr_number": "${{ steps.parse.outputs.context_number }}"}'
+
+      - name: Dispatch GPT-5 Analyze
+        if: steps.parse.outputs.command == 'gpt5' && contains(steps.parse.outputs.params, 'analyze')
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          event-type: gpt5-analyze
+          client-payload: '{"pr_number": "${{ steps.parse.outputs.context_number }}"}'
         run: |
           CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
 

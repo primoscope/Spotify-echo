@@ -1,14 +1,14 @@
-import { BrowserRouter as _Router, Routes as _Routes, Route as _Route, Navigate as _Navigate } from 'react-router-dom';
-import { Box as _Box, AppBar as _AppBar, Toolbar as _Toolbar, Typography as _Typography, Container as _Container, Tabs as _Tabs, Tab as _Tab } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
 import { useState } from 'react';
-import _ThemeProvider, { ThemeToggle as _ThemeToggle } from './components/ThemeProvider';
-import PlaylistBuilder as _PlaylistBuilder from './components/PlaylistBuilder';
-import ExplainableRecommendations as _ExplainableRecommendations from './components/ExplainableRecommendations';
-import EnhancedChatInterface as _EnhancedChatInterface from './components/EnhancedChatInterface';
-import EnhancedMusicDiscovery as _EnhancedMusicDiscovery from './components/EnhancedMusicDiscovery';
-import EnhancedAnalyticsDashboard as _EnhancedAnalyticsDashboard from './components/EnhancedAnalyticsDashboard';
-import MobileResponsiveManager as _MobileResponsiveManager from './components/MobileResponsiveManager';
-import EnhancedConfigPanel as _EnhancedConfigPanel from './components/EnhancedConfigPanel';
+import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
+import PlaylistBuilder from './components/PlaylistBuilder';
+import ExplainableRecommendations from './components/ExplainableRecommendations';
+import EnhancedChatInterface from './components/EnhancedChatInterface';
+import EnhancedMusicDiscovery from './components/EnhancedMusicDiscovery';
+import EnhancedAnalyticsDashboard from './components/EnhancedAnalyticsDashboard';
+import MobileResponsiveManager from './components/MobileResponsiveManager';
+import EnhancedConfigPanel from './components/EnhancedConfigPanel';
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 // import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
@@ -44,11 +44,9 @@ function App() {
 /**
  * Main Application Component with Tabbed Interface
  */
-function _MainApplication({ initialTab = 'chat' }) {
+function MainApplication({ initialTab = 'chat' }) {
   const [currentTab, setCurrentTab] = useState(initialTab);
   const [sessionId] = useState(`session_${Date.now()}`);
-  const [_recommendations, _setRecommendations] = useState([]);
-  const [_playlistTracks, _setPlaylistTracks] = useState([]);
 
   // Mock data for demonstration
   const mockRecommendations = [

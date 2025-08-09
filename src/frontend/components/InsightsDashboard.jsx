@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Button,
   Select,
   MenuItem,
   FormControl,
@@ -17,20 +16,15 @@ import {
   Pagination,
   Tooltip,
   IconButton,
-  Switch,
-  FormControlLabel,
   Divider,
 } from '@mui/material';
 import {
   TrendingUp,
   TrendingDown,
-  MusicNote,
-  Timeline,
   Refresh,
   Download,
   ClearAll,
   Cached,
-  Info,
 } from '@mui/icons-material';
 
 /**

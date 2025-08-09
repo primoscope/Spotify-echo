@@ -298,7 +298,7 @@ class SpotifyInsightsService {
     }
   }
 
-  async getSongListeningData(trackId, options) {
+  async getSongListeningData(trackId, _options) {
     const db = this.dbManager.getDatabase();
     const collection = db.collection('listening_history');
     

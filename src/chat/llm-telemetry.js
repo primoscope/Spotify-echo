@@ -240,7 +240,7 @@ class LLMTelemetry {
         insights.recommendations.push({
           type: 'reliability',
           provider: providerId,
-          message: `High retry rate detected. Consider adjusting retry configuration or switching providers.`,
+          message: 'High retry rate detected. Consider adjusting retry configuration or switching providers.',
           severity: 'medium'
         });
       }

@@ -191,7 +191,7 @@ class ModelRegistry {
       // Instead, we'll mark models as available based on environment variables
       const availableProviders = this.getAvailableProviders();
       
-      for (const [providerId, providerModels] of this.models) {
+      for (const [providerId] of this.models) {
         if (availableProviders.includes(providerId)) {
           await this.discoverProviderModels(providerId);
         }
@@ -302,7 +302,7 @@ class ModelRegistry {
   /**
    * Test model response (for future use when integrated with actual providers)
    */
-  async testModelResponse(providerId, modelId, prompt) {
+  async testModelResponse(providerId, modelId, _prompt) {
     // This method is placeholder for future integration with provider manager
     // For now, we'll just simulate a response
     return {
@@ -401,7 +401,6 @@ class ModelRegistry {
       capabilities = ['text'],
       maxLatency = 5000,
       maxCost = 0.01,
-      minQuality = 'good',
       preferOpenSource = false
     } = taskRequirements;
 

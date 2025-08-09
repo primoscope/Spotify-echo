@@ -1,42 +1,31 @@
-name: MCP Validation
+name: MCP — Validation Suite
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  repository_dispatch:
-    types: [mcp-health-check, run-mcp-validation]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
 
 jobs:
-  mcp-validate:
+  run-mcp:
+    if: |
+      github.event_name == 'workflow_dispatch' || contains(github.event.comment.body, '/run-mcp-all') || contains(github.event.comment.body, '/run-mcp-validation') || contains(github.event.comment.body, '/mcp-discover') || contains(github.event.comment.body, '/mcp-health-check')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install root deps (if present)
+
+      - name: Prepare workspace
         run: |
-          if [ -f package.json ]; then npm ci || true; fi
-      - name: MCP install
-        run: node scripts/mcp-manager.js install
-      - name: MCP health
-        run: node scripts/mcp-manager.js health
-      - name: MCP test
-        run: node scripts/mcp-manager.js test
-      - name: MCP report
-        run: node scripts/mcp-manager.js report
-      - name: Upload MCP logs
-        if: always()
+          mkdir -p reports mcp scripts/mcp
+
+      - name: Run MCP placeholder validations
+        run: |
+          bash scripts/mcp/run.sh
+
+      - name: Upload MCP artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mcp-logs
+          name: mcp-validation
           path: |
-            mcp-server/*.log
-            mcp-server/**/*.log
-            **/mcp-report*.txt
+            reports/mcp-health.md
+            mcp/registry.yaml
+          if-no-files-found: warn

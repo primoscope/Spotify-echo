@@ -3,10 +3,13 @@ import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/mat
 import { useState } from 'react';
 import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
 import PlaylistBuilder from './components/PlaylistBuilder';
+import PlaylistsPage from './components/PlaylistsPage'; // Enhanced playlists page
 import ExplainableRecommendations from './components/ExplainableRecommendations';
 import EnhancedChatInterface from './components/EnhancedChatInterface';
 import EnhancedMusicDiscovery from './components/EnhancedMusicDiscovery';
 import EnhancedAnalyticsDashboard from './components/EnhancedAnalyticsDashboard';
+import InsightsDashboard from './components/InsightsDashboard'; // New insights dashboard
+import SongsPage from './components/SongsPage'; // New songs analysis page
 import MobileResponsiveManager from './components/MobileResponsiveManager';
 import EnhancedConfigPanel from './components/EnhancedConfigPanel';
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -31,8 +34,11 @@ function App() {
             element={<MainApplication initialTab="recommendations" />}
           />
           <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
+          <Route path="/playlists" element={<MainApplication initialTab="playlists" />} />
+          <Route path="/songs" element={<MainApplication initialTab="songs" />} />
           <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
           <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
+          <Route path="/insights" element={<MainApplication initialTab="insights" />} />
           <Route path="/settings" element={<MainApplication initialTab="settings" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -267,8 +273,11 @@ function MainApplication({ initialTab = 'chat' }) {
             <Tab label="🤖 AI Chat" value="chat" />
             <Tab label="🎯 Recommendations" value="recommendations" />
             <Tab label="🎵 Playlist Builder" value="playlist" />
+            <Tab label="📋 Playlists" value="playlists" />
+            <Tab label="🎶 Songs" value="songs" />
             <Tab label="🔍 Discovery" value="discovery" />
             <Tab label="📊 Analytics" value="analytics" />
+            <Tab label="💡 Insights" value="insights" />
             <Tab label="⚙️ Settings" value="settings" />
           </Tabs>
         </Container>
@@ -311,6 +320,18 @@ function MainApplication({ initialTab = 'chat' }) {
           </Container>
         )}
 
+        {currentTab === 'playlists' && (
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <PlaylistsPage />
+          </Container>
+        )}
+
+        {currentTab === 'songs' && (
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <SongsPage />
+          </Container>
+        )}
+
         {currentTab === 'discovery' && (
           <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
             <EnhancedMusicDiscovery />
@@ -320,6 +341,12 @@ function MainApplication({ initialTab = 'chat' }) {
         {currentTab === 'analytics' && (
           <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
             <EnhancedAnalyticsDashboard />
+          </Container>
+        )}
+
+        {currentTab === 'insights' && (
+          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+            <InsightsDashboard />
           </Container>
         )}
 

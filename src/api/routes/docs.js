@@ -17,14 +17,17 @@ const router = express.Router();
 
 // Serve Swagger UI
 router.use('/', swaggerUi.serve);
-router.get('/', swaggerUi.setup(swaggerSpec, {
-  customCss: `
+router.get(
+  '/',
+  swaggerUi.setup(swaggerSpec, {
+    customCss: `
     .swagger-ui .topbar { display: none }
     .swagger-ui .info .title { color: #1976d2 }
     .swagger-ui .info .description { color: #666 }
   `,
-  customSiteTitle: 'EchoTune AI API Documentation'
-}));
+    customSiteTitle: 'EchoTune AI API Documentation',
+  })
+);
 
 // Serve raw OpenAPI spec as JSON
 router.get('/openapi.json', (req, res) => {
@@ -63,7 +66,7 @@ router.get('/health', (req, res) => {
     status: 'healthy',
     version: swaggerSpec.info.version,
     endpoints: paths.length,
-    spec_url: `${req.protocol}://${req.get('host')}/api/docs/openapi.json`
+    spec_url: `${req.protocol}://${req.get('host')}/api/docs/openapi.json`,
   });
 });
 

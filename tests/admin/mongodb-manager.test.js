@@ -188,7 +188,9 @@ describe('MongoDBManager Admin Tools', () => {
             severity: 'medium',
             description: expect.stringContaining('never been used')
           })
-        ])
+        ]),
+        performanceImpact: 'low',
+        optimizationSuggestions: []
       });
     });
 

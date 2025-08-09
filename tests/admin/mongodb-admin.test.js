@@ -111,7 +111,9 @@ describe('MongoDB Admin API Routes', () => {
         healthyIndexes: 12, // Changed from healthy to healthyIndexes
         problematicIndexes: 1, // Changed from problematic to problematicIndexes  
         unusedIndexes: 2, // Changed from unused to unusedIndexes
-        recommendations: mockDashboardData.indexHealth.recommendations
+        recommendations: mockDashboardData.indexHealth.recommendations,
+        performanceImpact: 'low',
+        optimizationSuggestions: []
       });
       mongoDBManager.getDatabaseStats.mockResolvedValue(mockDashboardData.overview);
       mongoDBManager.validateAdminAccess.mockResolvedValue({
@@ -128,6 +130,8 @@ describe('MongoDB Admin API Routes', () => {
       expect(response.body.dashboard.collections).toHaveLength(2);
       expect(response.body.dashboard.indexHealth.healthy).toBe(12);
       expect(response.body.dashboard.lastUpdated).toBeDefined();
+      expect(response.body.dashboard.dataQuality).toBeDefined();
+      expect(response.body.dashboard.systemHealth).toBeDefined();
     });
 
     it('should return graceful response when MongoDB is not connected', async () => {
@@ -141,17 +145,36 @@ describe('MongoDB Admin API Routes', () => {
       expect(response.body.error).toBe('MongoDB not connected');
       expect(response.body.dashboard).toBeDefined();
       expect(response.body.dashboard.overview.database).toBe('N/A');
+      expect(response.body.dashboard.offline).toBe(true);
     });
 
     it('should handle dashboard data loading errors gracefully', async () => {
       mongoDBManager.isConnected.mockReturnValue(true);
       mongoDBManager.getCollectionStats.mockRejectedValue(new Error('Access denied'));
+      mongoDBManager.analyzeIndexHealth.mockResolvedValue({
+        healthyIndexes: 0,
+        problematicIndexes: 0,
+        unusedIndexes: 0,
+        recommendations: [],
+        performanceImpact: 'low',
+        optimizationSuggestions: []
+      });
+      mongoDBManager.getDatabaseStats.mockResolvedValue({
+        database: 'test',
+        uptime: 0,
+        connections: { current: 0, available: 0 },
+        operations: { query: 0, insert: 0, update: 0, delete: 0 },
+        memory: { resident: 0, virtual: 0 }
+      });
+      mongoDBManager.validateAdminAccess.mockResolvedValue({
+        permissions: { readAccess: true, adminAccess: false }
+      });
 
       const response = await request(app)
         .get('/api/admin/dashboard')
         .expect(200); // Changed from 500 to 200 as we now handle errors gracefully
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.success).toBe(true); // Still succeeds with partial data
       expect(response.body.dashboard).toBeDefined();
       expect(response.body.dashboard.warnings).toContain('Collection stats: Access denied');
     });

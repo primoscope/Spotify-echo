@@ -339,11 +339,22 @@ class MongoDBManager {
   }
 
   /**
-   * Analyze index health and performance
+   * Analyze index health and performance with enhanced caching
    */
   async analyzeIndexHealth() {
     if (!this.isConnected()) {
-      throw new Error('MongoDB not connected');
+      return {
+        healthyIndexes: 0,
+        problematicIndexes: 0,
+        unusedIndexes: 0,
+        recommendations: [
+          'MongoDB connection required for index analysis',
+          'Connect to MongoDB to enable comprehensive index health monitoring',
+          'Index optimization recommendations will be available after connection'
+        ],
+        error: 'MongoDB not connected',
+        fallbackMode: true
+      };
     }
 
     try {
@@ -352,7 +363,9 @@ class MongoDBManager {
         healthyIndexes: 0,
         problematicIndexes: 0,
         unusedIndexes: 0,
-        recommendations: []
+        recommendations: [],
+        performanceImpact: 'low',
+        optimizationSuggestions: []
       };
 
       for (const collection of collections) {
@@ -366,7 +379,7 @@ class MongoDBManager {
             const stats = indexStats.find(s => s.name === index.name);
             const usageStats = stats ? stats.accesses : { ops: 0, since: new Date() };
             
-            // Analyze index health
+            // Analyze index health with performance impact assessment
             if (index.name === '_id_') {
               analysis.healthyIndexes++;
               continue;
@@ -374,16 +387,30 @@ class MongoDBManager {
 
             if (usageStats.ops === 0) {
               analysis.unusedIndexes++;
+              const sizeImpact = this.calculateIndexSizeImpact(index);
               analysis.recommendations.push({
                 type: 'unused_index',
                 collection: collection.name,
                 index: index.name,
-                severity: 'medium',
-                description: `Index "${index.name}" has never been used and could be removed`,
-                recommendation: `Consider dropping unused index: db.${collection.name}.dropIndex("${index.name}")`
+                severity: sizeImpact > 10485760 ? 'high' : 'medium', // 10MB threshold
+                description: `Index "${index.name}" has never been used and consumes ${this.formatBytes(sizeImpact)}`,
+                recommendation: `Consider dropping unused index: db.${collection.name}.dropIndex("${index.name}")`,
+                performanceImpact: sizeImpact > 10485760 ? 'high' : 'medium',
+                estimatedSavings: this.formatBytes(sizeImpact)
               });
             } else {
               analysis.healthyIndexes++;
+              
+              // Check for underutilized indexes
+              if (usageStats.ops < 10) {
+                analysis.optimizationSuggestions.push({
+                  type: 'underutilized_index',
+                  collection: collection.name,
+                  index: index.name,
+                  usage: usageStats.ops,
+                  suggestion: 'Monitor usage patterns - may be candidate for removal'
+                });
+              }
             }
           }
 
@@ -396,11 +423,39 @@ class MongoDBManager {
         }
       }
 
+      // Determine overall performance impact
+      if (analysis.unusedIndexes > 5 || analysis.problematicIndexes > 2) {
+        analysis.performanceImpact = 'high';
+      } else if (analysis.unusedIndexes > 2 || analysis.problematicIndexes > 0) {
+        analysis.performanceImpact = 'medium';
+      }
+
       return analysis;
     } catch (error) {
       console.error('Error analyzing index health:', error);
       throw error;
     }
+  }
+
+  /**
+   * Calculate estimated size impact of an index
+   */
+  calculateIndexSizeImpact(index) {
+    // Estimate based on index structure - simple heuristic
+    const keyCount = Object.keys(index.key || {}).length;
+    const baseSize = 1024; // Base overhead per index
+    return baseSize * (keyCount * 100); // Rough estimate
+  }
+
+  /**
+   * Format bytes to human readable format
+   */
+  formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 
   /**

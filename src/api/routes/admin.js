@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const mongoDBManager = require('../../database/mongodb-manager');
 
+// Simple in-memory cache for dashboard data
+const dashboardCache = {
+  data: null,
+  lastUpdated: null,
+  ttl: 30000 // 30 seconds
+};
+
 /**
  * MongoDB Admin API Routes
  * Provides comprehensive database insights and administration tools
@@ -9,44 +16,69 @@ const mongoDBManager = require('../../database/mongodb-manager');
  */
 
 /**
- * Get comprehensive MongoDB dashboard data
+ * Get comprehensive MongoDB dashboard data with caching
  */
 router.get('/dashboard', async (req, res) => {
   try {
+    // Check cache first
+    const now = Date.now();
+    if (dashboardCache.data && 
+        dashboardCache.lastUpdated && 
+        (now - dashboardCache.lastUpdated) < dashboardCache.ttl) {
+      
+      return res.json({
+        success: true,
+        dashboard: {
+          ...dashboardCache.data,
+          cached: true,
+          cacheAge: Math.floor((now - dashboardCache.lastUpdated) / 1000)
+        }
+      });
+    }
+
     if (!mongoDBManager.isConnected()) {
+      const fallbackDashboard = {
+        overview: {
+          database: 'N/A',
+          totalCollections: 0,
+          totalDocuments: 0,
+          totalDataSize: 0,
+          totalIndexSize: 0,
+          uptime: 0,
+          connections: { current: 0, available: 0 }
+        },
+        collections: [],
+        indexHealth: {
+          healthy: 0,
+          problematic: 0,
+          unused: 0,
+          recommendations: [
+            'MongoDB connection required for index analysis',
+            'Establish connection to view comprehensive dashboard data',
+            'Admin features will be available once connected'
+          ],
+          fallbackMode: true
+        },
+        performance: {
+          operations: { query: 0, insert: 0, update: 0, delete: 0 },
+          memory: { resident: 0, virtual: 0 }
+        },
+        permissions: {
+          connection: false,
+          readAccess: false,
+          adminAccess: false,
+          profilingAccess: false,
+          indexAccess: false
+        },
+        lastUpdated: new Date().toISOString(),
+        offline: true,
+        helpText: 'Connect to MongoDB to unlock full admin capabilities'
+      };
+
       return res.json({
         success: false,
         error: 'MongoDB not connected',
-        dashboard: {
-          overview: {
-            database: 'N/A',
-            totalCollections: 0,
-            totalDocuments: 0,
-            totalDataSize: 0,
-            totalIndexSize: 0,
-            uptime: 0,
-            connections: { current: 0, available: 0 }
-          },
-          collections: [],
-          indexHealth: {
-            healthy: 0,
-            problematic: 0,
-            unused: 0,
-            recommendations: ['MongoDB connection required for index analysis']
-          },
-          performance: {
-            operations: { query: 0, insert: 0, update: 0, delete: 0 },
-            memory: { resident: 0, virtual: 0 }
-          },
-          permissions: {
-            connection: false,
-            readAccess: false,
-            adminAccess: false,
-            profilingAccess: false,
-            indexAccess: false
-          },
-          lastUpdated: new Date().toISOString()
-        }
+        dashboard: fallbackDashboard
       });
     }
 
@@ -85,7 +117,9 @@ router.get('/dashboard', async (req, res) => {
         healthy: indexHealth.healthyIndexes || 0,
         problematic: indexHealth.problematicIndexes || 0,
         unused: indexHealth.unusedIndexes || 0,
-        recommendations: indexHealth.recommendations || []
+        recommendations: indexHealth.recommendations || [],
+        performanceImpact: indexHealth.performanceImpact || 'low',
+        optimizationSuggestions: indexHealth.optimizationSuggestions || []
       },
       performance: {
         operations: dbStats.operations || { query: 0, insert: 0, update: 0, delete: 0 },
@@ -99,6 +133,8 @@ router.get('/dashboard', async (req, res) => {
         indexAccess: false
       },
       lastUpdated: new Date().toISOString(),
+      dataQuality: assessDataQuality(collectionStats, indexHealth),
+      systemHealth: calculateSystemHealth(dbStats, indexHealth),
       warnings: [
         ...(collectionStats.error ? [`Collection stats: ${collectionStats.error}`] : []),
         ...(indexHealth.error ? [`Index health: ${indexHealth.error}`] : []),
@@ -106,6 +142,10 @@ router.get('/dashboard', async (req, res) => {
         ...(adminAccess.error ? [`Admin access: ${adminAccess.error}`] : [])
       ]
     };
+
+    // Cache the results
+    dashboardCache.data = dashboard;
+    dashboardCache.lastUpdated = Date.now();
 
     res.json({
       success: true,
@@ -472,5 +512,78 @@ router.get('/recommendations', async (req, res) => {
     });
   }
 });
+
+/**
+ * Assess data quality based on collection and index analysis
+ */
+function assessDataQuality(collectionStats, indexHealth) {
+  let score = 100;
+  let issues = [];
+  
+  // Penalize for unused indexes
+  if (indexHealth.unusedIndexes > 0) {
+    score -= indexHealth.unusedIndexes * 10;
+    issues.push(`${indexHealth.unusedIndexes} unused indexes detected`);
+  }
+  
+  // Penalize for problematic indexes
+  if (indexHealth.problematicIndexes > 0) {
+    score -= indexHealth.problematicIndexes * 15;
+    issues.push(`${indexHealth.problematicIndexes} problematic indexes`);
+  }
+  
+  // Check for collections with errors
+  const errorCollections = (collectionStats.collections || []).filter(c => c.error).length;
+  if (errorCollections > 0) {
+    score -= errorCollections * 20;
+    issues.push(`${errorCollections} collections have access issues`);
+  }
+  
+  score = Math.max(0, Math.min(100, score));
+  
+  return {
+    score: Math.round(score),
+    grade: score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F',
+    issues: issues,
+    status: score >= 80 ? 'good' : score >= 60 ? 'fair' : 'needs_attention'
+  };
+}
+
+/**
+ * Calculate overall system health
+ */
+function calculateSystemHealth(dbStats, indexHealth) {
+  let healthScore = 100;
+  let concerns = [];
+  
+  // Memory usage concerns
+  if (dbStats.memory && dbStats.memory.resident > 1000) { // > 1GB
+    healthScore -= 10;
+    concerns.push('High memory usage detected');
+  }
+  
+  // Connection concerns  
+  if (dbStats.connections && dbStats.connections.current > (dbStats.connections.available * 0.8)) {
+    healthScore -= 15;
+    concerns.push('Connection pool near capacity');
+  }
+  
+  // Index health impact
+  if (indexHealth.performanceImpact === 'high') {
+    healthScore -= 20;
+    concerns.push('Index optimization needed');
+  } else if (indexHealth.performanceImpact === 'medium') {
+    healthScore -= 10;
+    concerns.push('Minor index optimization recommended');
+  }
+  
+  healthScore = Math.max(0, Math.min(100, healthScore));
+  
+  return {
+    score: Math.round(healthScore),
+    status: healthScore >= 90 ? 'excellent' : healthScore >= 75 ? 'good' : healthScore >= 60 ? 'fair' : 'poor',
+    concerns: concerns
+  };
+}
 
 module.exports = router;

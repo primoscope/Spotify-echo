@@ -81,6 +81,70 @@
             font-size: 1.2em;
         }
 
+        .health-score {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .health-score.excellent {
+            background: linear-gradient(135deg, var(--success-color), #22c55e);
+            color: white;
+        }
+
+        .health-score.good {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .health-score.fair {
+            background: linear-gradient(135deg, var(--warning-color), #f59e0b);
+            color: white;
+        }
+
+        .health-score.poor {
+            background: linear-gradient(135deg, var(--error-color), #dc2626);
+            color: white;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .performance-badge.low {
+            background-color: var(--success-color);
+            color: var(--secondary-color);
+        }
+
+        .performance-badge.medium {
+            background-color: var(--warning-color);
+            color: var(--secondary-color);
+        }
+
+        .performance-badge.high {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .cache-indicator {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: rgba(29, 185, 84, 0.2);
+            color: var(--primary-color);
+            border-radius: 4px;
+            font-size: 0.7em;
+            margin-left: 8px;
+        }
+
         .metric {
             display: flex;
             justify-content: space-between;
@@ -323,6 +387,16 @@
                     <h2>⚡ Index Health</h2>
                     <div id="index-health" class="loading">Loading index analysis...</div>
                 </div>
+
+                <div class="card">
+                    <h2>🎯 System Health Score</h2>
+                    <div id="system-health" class="loading">Calculating system health...</div>
+                </div>
+
+                <div class="card">
+                    <h2>📊 Data Quality Assessment</h2>
+                    <div id="data-quality" class="loading">Analyzing data quality...</div>
+                </div>
             </div>
         </div>
 
@@ -443,6 +517,12 @@
                 if (data.success && data.dashboard) {
                     dashboardData = data.dashboard;
                     renderDashboard(dashboardData);
+                    
+                    // Show cache indicator if data is cached
+                    if (data.dashboard.cached) {
+                        const header = document.querySelector('.header p');
+                        header.innerHTML += `<span class="cache-indicator">Cached ${data.dashboard.cacheAge}s ago</span>`;
+                    }
                 } else {
                     // Show fallback dashboard with helpful information
                     const fallbackData = data.dashboard || {
@@ -543,7 +623,7 @@
                 ${isOffline ? '<div style="color: var(--warning-color); font-size: 0.9em; margin-top: 10px;">⚠️ Performance data requires active connection</div>' : ''}
             `;
 
-            // Index health
+            // Index health with enhanced performance indicators
             const indexDiv = document.getElementById('index-health');
             const totalIndexes = (data.indexHealth.healthy || 0) + (data.indexHealth.problematic || 0) + (data.indexHealth.unused || 0);
             indexDiv.innerHTML = `
@@ -566,11 +646,64 @@
                     <span class="metric-value">${data.indexHealth.problematic || 0}</span>
                 </div>
                 <div class="metric">
+                    <span class="metric-label">Performance Impact</span>
+                    <span class="metric-value">
+                        <span class="performance-badge ${data.indexHealth.performanceImpact || 'low'}">
+                            ${(data.indexHealth.performanceImpact || 'low').toUpperCase()}
+                        </span>
+                    </span>
+                </div>
+                <div class="metric">
                     <span class="metric-label">Recommendations</span>
                     <span class="metric-value">${data.indexHealth.recommendations?.length || 0}</span>
                 </div>
                 ${isOffline ? '<div style="color: var(--warning-color); font-size: 0.9em; margin-top: 10px;">⚠️ Index analysis requires MongoDB connection</div>' : ''}
             `;
+
+            // System Health Score
+            if (data.systemHealth) {
+                const healthDiv = document.getElementById('system-health');
+                healthDiv.innerHTML = `
+                    <div class="health-score ${data.systemHealth.status}">
+                        <div>
+                            <div style="font-size: 1.2em;">Overall Health</div>
+                            <div style="font-size: 0.9em; opacity: 0.8;">${data.systemHealth.concerns?.length || 0} concerns identified</div>
+                        </div>
+                        <div style="font-size: 2em;">${data.systemHealth.score}/100</div>
+                    </div>
+                    ${data.systemHealth.concerns?.length > 0 ? 
+                        '<div style="margin-top: 10px;"><strong>Concerns:</strong><ul style="margin: 5px 0; padding-left: 20px;">' +
+                        data.systemHealth.concerns.map(c => `<li>${c}</li>`).join('') + 
+                        '</ul></div>' : 
+                        '<div style="color: var(--success-color); margin-top: 10px;">✅ System running optimally</div>'
+                    }
+                `;
+            }
+
+            // Data Quality Assessment
+            if (data.dataQuality) {
+                const qualityDiv = document.getElementById('data-quality');
+                qualityDiv.innerHTML = `
+                    <div class="metric">
+                        <span class="metric-label">Quality Score</span>
+                        <span class="metric-value">${data.dataQuality.score}/100 (Grade ${data.dataQuality.grade})</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Status</span>
+                        <span class="metric-value">
+                            <span class="performance-badge ${data.dataQuality.status === 'good' ? 'low' : data.dataQuality.status === 'fair' ? 'medium' : 'high'}">
+                                ${data.dataQuality.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                        </span>
+                    </div>
+                    ${data.dataQuality.issues?.length > 0 ?
+                        '<div style="margin-top: 10px;"><strong>Issues:</strong><ul style="margin: 5px 0; padding-left: 20px;">' +
+                        data.dataQuality.issues.map(i => `<li>${i}</li>`).join('') +
+                        '</ul></div>' :
+                        '<div style="color: var(--success-color); margin-top: 10px;">✅ Data quality is excellent</div>'
+                    }
+                `;
+            }
             
             // Show warnings if any
             if (data.warnings && data.warnings.length > 0) {

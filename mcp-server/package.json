@@ -49,6 +49,19 @@
       },
       "timeout": 30000,
       "retries": 3
+    },
+    "browserbase": {
+      "command": "npx",
+      "args": ["@browserbasehq/mcp-server-browserbase"],
+      "port": 3010,
+      "healthPath": "/health",
+      "requiredEnv": ["BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID"],
+      "env": {
+        "NODE_ENV": "production",
+        "MCP_SERVER_NAME": "browserbase"
+      },
+      "timeout": 30000,
+      "retries": 3
     }
   },
   "dependencies": {

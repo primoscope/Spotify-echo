@@ -78,6 +78,14 @@ async function install() {
 }
 
 function startServer(name, def) {
+  // Check if server has required environment variables
+  if (def.requiredEnv) {
+    const missing = def.requiredEnv.filter(envVar => !process.env[envVar]);
+    if (missing.length > 0) {
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+  }
+
   const port = def.port || process.env.MCP_PORT || 3001;
   const env = { ...process.env, ...(def.env || {}), MCP_PORT: String(port) };
   const cmd = def.command;
@@ -119,6 +127,15 @@ async function health() {
     const url = `http://localhost:${def.port || 3001}${def.healthPath || '/health'}`;
     log(`→ ${name} @ ${url}`);
 
+    // Check if server has required environment variables
+    if (def.requiredEnv) {
+      const missing = def.requiredEnv.filter(envVar => !process.env[envVar]);
+      if (missing.length > 0) {
+        log(`⚠️ ${name}: skipped (missing env vars: ${missing.join(', ')})`);
+        continue;
+      }
+    }
+
     let ps;
     try {
       ps = startServer(name, def);
@@ -140,6 +157,16 @@ async function test() {
   for (const name of names) {
     const def = servers[name];
     const url = `http://localhost:${def.port || 3001}${def.healthPath || '/health'}`;
+
+    // Check if server has required environment variables
+    if (def.requiredEnv) {
+      const missing = def.requiredEnv.filter(envVar => !process.env[envVar]);
+      if (missing.length > 0) {
+        log(`⚠️ Smoke test skipped: ${name} (missing env vars: ${missing.join(', ')})`);
+        continue;
+      }
+    }
+
     let ps;
     try {
       ps = startServer(name, def);
@@ -168,7 +195,11 @@ async function report() {
   // List configured servers
   log('📋 Configured servers:');
   for (const [name, def] of Object.entries(servers)) {
-    log(`  - ${name}: ${def.command} ${(def.args||[]).join(' ')} (port ${def.port||'n/a'})`);
+    const envStatus = def.requiredEnv ? 
+      (def.requiredEnv.every(env => process.env[env]) ? '🟢' : '🔴') : 
+      '⚪';
+    const envInfo = def.requiredEnv ? ` (requires: ${def.requiredEnv.join(', ')})` : '';
+    log(`  ${envStatus} ${name}: ${def.command} ${(def.args||[]).join(' ')} (port ${def.port||'n/a'})${envInfo}`);
   }
 
   // Show presence of key files

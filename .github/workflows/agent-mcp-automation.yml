@@ -221,6 +221,10 @@ jobs:
     needs: [pre-merge-validation-gate]
     if: always() && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && (needs.pre-merge-validation-gate.outputs.requires-mcp-validation == 'true' || github.event_name == 'workflow_dispatch')
     
+    env:
+      BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+      BROWSERBASE_PROJECT_ID: ${{ secrets.BROWSERBASE_PROJECT_ID }}
+    
     outputs:
       validation-status: ${{ steps.validation.outputs.status }}
       critical-failures: ${{ steps.validation.outputs.critical-failures }}
@@ -278,6 +282,18 @@ jobs:
             cat mcp-orchestrator.log
             exit 1
           fi
+
+      - name: Run MCP Manager Validation
+        run: |
+          echo "🔍 Running MCP Manager validation suite..."
+          
+          # Run install, health, test, and report
+          node scripts/mcp-manager.js install
+          node scripts/mcp-manager.js health
+          node scripts/mcp-manager.js test
+          node scripts/mcp-manager.js report
+          
+          echo "✅ MCP Manager validation completed"
 
       - name: Run Comprehensive MCP Validation
         id: validation

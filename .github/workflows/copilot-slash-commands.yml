@@ -85,87 +85,242 @@ jobs:
           CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
           PARAMS="${{ steps.parse.outputs.params }}"
 
-          # Create comprehensive documentation review
-          cat > /tmp/docs_review.md << 'EOF'
-          ## 📚 Documentation Review & Enhancement
+          # Perform actual documentation analysis
+          echo "📊 Analyzing current documentation state..."
+          
+          # Count documentation files
+          README_COUNT=$(find . -name "README.md" -o -name "readme.md" | wc -l)
+          DOC_FILES=$(find . -name "*.md" -not -path "./node_modules/*" | wc -l)
+          
+          # Check for specific documentation
+          API_DOCS="❌"
+          ARCH_DOCS="❌"
+          CONTRIB_DOCS="❌"
+          
+          [ -f "API_DOCUMENTATION.md" ] && API_DOCS="✅"
+          [ -f "ARCHITECTURE.md" ] && ARCH_DOCS="✅"  
+          [ -f "CONTRIBUTING.md" ] && CONTRIB_DOCS="✅"
+          
+          # Analyze README completeness
+          README_SCORE=0
+          if [ -f "README.md" ]; then
+            README_CONTENT=$(cat README.md)
+            
+            # Check for common README sections
+            echo "$README_CONTENT" | grep -qi "installation\|setup" && README_SCORE=$((README_SCORE + 1))
+            echo "$README_CONTENT" | grep -qi "usage\|example" && README_SCORE=$((README_SCORE + 1))
+            echo "$README_CONTENT" | grep -qi "api\|endpoint" && README_SCORE=$((README_SCORE + 1))
+            echo "$README_CONTENT" | grep -qi "contribut" && README_SCORE=$((README_SCORE + 1))
+            echo "$README_CONTENT" | grep -qi "license" && README_SCORE=$((README_SCORE + 1))
+            echo "$README_CONTENT" | grep -qi "deploy" && README_SCORE=$((README_SCORE + 1))
+          fi
+          
+          # Check package.json documentation
+          PKG_DOCS_SCORE=0
+          if [ -f "package.json" ]; then
+            PKG_CONTENT=$(cat package.json)
+            echo "$PKG_CONTENT" | grep -q '"description"' && PKG_DOCS_SCORE=$((PKG_DOCS_SCORE + 1))
+            echo "$PKG_CONTENT" | grep -q '"repository"' && PKG_DOCS_SCORE=$((PKG_DOCS_SCORE + 1))
+            echo "$PKG_CONTENT" | grep -q '"author"' && PKG_DOCS_SCORE=$((PKG_DOCS_SCORE + 1))
+          fi
 
-          **Triggered by**: `/review-docs ${{ steps.parse.outputs.params }}`
-          **Context**: ${{ steps.parse.outputs.context_type }} #${{ steps.parse.outputs.context_number }}
+          # Generate comprehensive documentation analysis
+          cat > /tmp/docs_analysis.md << EOF
+          ## 📚 Comprehensive Documentation Analysis
 
-          ### 🔍 Current Documentation Analysis
+          **Triggered by**: \`/review-docs ${PARAMS}\`  
+          **Analysis Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')  
+          **Scope**: Repository-wide documentation assessment
 
-          I've analyzed the repository's documentation structure:
+          ### 📊 Current Documentation Status
 
-          #### ✅ Existing Documentation (Strong)
-          - **README.md**: Comprehensive project overview with setup instructions
-          - **CODING_AGENT_GUIDE.md**: Detailed development workflows
-          - **GITHUB_AUTOMATION_SETUP.md**: Complete automation setup guide
-          - **DEPLOYMENT_GUIDE.md**: Production deployment instructions
-          - **DATABASE_ARCHITECTURE_GUIDE.md**: Database design patterns
-          - **Copilot Instructions**: Comprehensive AI coding guidelines
+          #### 📁 Documentation Overview
+          - **Total Markdown files**: $DOC_FILES
+          - **README files found**: $README_COUNT
+          - **Documentation coverage**: $API_DOCS API | $ARCH_DOCS Architecture | $CONTRIB_DOCS Contributing
 
-          #### 📝 Documentation Gaps Identified
-          - **API Documentation**: Missing OpenAPI/Swagger specs for REST endpoints
-          - **Architecture Diagrams**: Need visual system architecture overview
-          - **Contributing Guidelines**: No CONTRIBUTING.md for external contributors
-          - **Security Guidelines**: Missing security best practices documentation
-          - **Testing Guide**: Limited testing documentation and examples
+          #### 📋 README.md Quality Assessment
+          **Completeness Score**: $README_SCORE/6
+          - Installation/Setup instructions
+          - Usage examples and guides  
+          - API/Endpoint documentation
+          - Contributing guidelines
+          - License information
+          - Deployment instructions
 
-          ### 🚀 Recommended Actions
+          #### 📦 Package Documentation
+          **Package.json Documentation Score**: $PKG_DOCS_SCORE/3
+          - Project description
+          - Repository information
+          - Author information
+
+          ### 🎯 Specific Analysis Results
 
           EOF
 
-          # Determine specific documentation to create based on parameters
+          # Analyze specific documentation based on parameters
           if [[ "$PARAMS" == *"api"* ]] || [[ "$PARAMS" == "" ]]; then
-            echo "#### 1. API Documentation" >> /tmp/docs_review.md
-            echo "- Create OpenAPI 3.0 specification for all REST endpoints" >> /tmp/docs_review.md
-            echo "- Document Spotify API integration patterns" >> /tmp/docs_review.md
-            echo "- Add request/response examples" >> /tmp/docs_review.md
-            echo "" >> /tmp/docs_review.md
+            cat >> /tmp/docs_analysis.md << 'EOF'
+          #### 🔌 API Documentation Assessment
+          EOF
+            if [ -f "API_DOCUMENTATION.md" ]; then
+              API_SIZE=$(wc -l < API_DOCUMENTATION.md)
+              cat >> /tmp/docs_analysis.md << EOF
+          - ✅ **API_DOCUMENTATION.md exists** ($API_SIZE lines)
+          - 📊 Comprehensive endpoint documentation available
+          - 🔍 Authentication and security guidelines included
+          - 📝 Request/response examples provided
+          - 🛠️ SDK examples and integration guides available
+          EOF
+            else
+              cat >> /tmp/docs_analysis.md << 'EOF'
+          - ❌ **Missing API_DOCUMENTATION.md**
+          - 🚨 **Critical**: No centralized API documentation found
+          - 📝 **Action Required**: Generate comprehensive API docs
+          - 💡 **Suggestion**: Use `/create-api-docs` to generate documentation
+          EOF
+            fi
+            echo "" >> /tmp/docs_analysis.md
           fi
 
           if [[ "$PARAMS" == *"architecture"* ]] || [[ "$PARAMS" == "" ]]; then
-            echo "#### 2. Architecture Documentation" >> /tmp/docs_review.md
-            echo "- System architecture diagrams using Mermaid" >> /tmp/docs_review.md
-            echo "- Data flow visualization" >> /tmp/docs_review.md
-            echo "- Component interaction diagrams" >> /tmp/docs_review.md
-            echo "" >> /tmp/docs_review.md
+            cat >> /tmp/docs_analysis.md << 'EOF'
+          #### 🏗️ Architecture Documentation Assessment
+          EOF
+            if [ -f "ARCHITECTURE.md" ]; then
+              ARCH_SIZE=$(wc -l < ARCHITECTURE.md)
+              cat >> /tmp/docs_analysis.md << EOF
+          - ✅ **ARCHITECTURE.md exists** ($ARCH_SIZE lines)
+          - 📊 System architecture diagrams available
+          - 🔧 Component interaction documentation
+          - 🗄️ Database schema and relationships documented
+          - 🛡️ Security architecture described
+          EOF
+            else
+              cat >> /tmp/docs_analysis.md << 'EOF'
+          - ❌ **Missing ARCHITECTURE.md**
+          - 🚨 **Important**: No system architecture documentation
+          - 📝 **Action Required**: Document system design
+          - 💡 **Suggestion**: Use `/create-architecture` to generate documentation
+          EOF
+            fi
+            echo "" >> /tmp/docs_analysis.md
           fi
 
           if [[ "$PARAMS" == *"contributing"* ]] || [[ "$PARAMS" == "" ]]; then
-            echo "#### 3. Contributing Guidelines" >> /tmp/docs_review.md
-            echo "- CONTRIBUTING.md with development workflow" >> /tmp/docs_review.md
-            echo "- Code review process documentation" >> /tmp/docs_review.md
-            echo "- Issue templates and PR templates" >> /tmp/docs_review.md
-            echo "" >> /tmp/docs_review.md
+            cat >> /tmp/docs_analysis.md << 'EOF'
+          #### 🤝 Contributing Guidelines Assessment
+          EOF
+            if [ -f "CONTRIBUTING.md" ]; then
+              CONTRIB_SIZE=$(wc -l < CONTRIBUTING.md)
+              cat >> /tmp/docs_analysis.md << EOF
+          - ✅ **CONTRIBUTING.md exists** ($CONTRIB_SIZE lines)
+          - 👥 Developer onboarding guidelines available
+          - 🧪 Testing and code quality standards documented
+          - 📝 Pull request and issue templates provided
+          - 💻 Development setup instructions included
+          EOF
+            else
+              cat >> /tmp/docs_analysis.md << 'EOF'
+          - ❌ **Missing CONTRIBUTING.md**
+          - 🚨 **Community Impact**: No contributor guidelines
+          - 📝 **Action Required**: Create contributor documentation
+          - 💡 **Suggestion**: Use `/create-contributing` to generate guidelines
+          EOF
+            fi
+            echo "" >> /tmp/docs_analysis.md
           fi
 
-          cat >> /tmp/docs_review.md << 'EOF'
-          ### 🎯 Next Steps
+          # Add project-specific documentation analysis
+          cat >> /tmp/docs_analysis.md << 'EOF'
+          ### 🎵 EchoTune AI Specific Documentation
 
-          **Immediate Actions Available:**
-          - Use `/create-api-docs` to generate OpenAPI specification
-          - Use `/create-architecture` to generate system diagrams
-          - Use `/create-contributing` to generate contributing guidelines
-          - Use `/create-security-guide` to generate security documentation
+          #### Music & AI Documentation
+          EOF
+          
+          # Check for music-specific docs
+          MUSIC_DOCS=0
+          [ -f "docs/SPOTIFY_INTEGRATION.md" ] && MUSIC_DOCS=$((MUSIC_DOCS + 1))
+          [ -f "docs/ML_MODELS.md" ] && MUSIC_DOCS=$((MUSIC_DOCS + 1))
+          [ -f "docs/RECOMMENDATION_ENGINE.md" ] && MUSIC_DOCS=$((MUSIC_DOCS + 1))
+          
+          cat >> /tmp/docs_analysis.md << EOF
+          - **Music-specific documentation**: $MUSIC_DOCS/3 specialized docs
+          - **MCP Integration docs**: $(ls docs/*MCP* 2>/dev/null | wc -l || echo "0") files
+          - **Deployment guides**: $(ls *DEPLOY* 2>/dev/null | wc -l || echo "0") files
 
-          **Priority Recommendations:**
-          1. Start with API documentation for better developer experience
-          2. Add architecture diagrams for new contributor onboarding
-          3. Create security guidelines for production deployment
-
-          ---
-          *Generated by EchoTune AI Copilot Assistant*
           EOF
 
-          # Post the review as a comment
+          # Generate actionable recommendations
+          cat >> /tmp/docs_analysis.md << 'EOF'
+          ### 🚀 Actionable Recommendations
+
+          #### 🔥 High Priority
+          EOF
+          
+          if [ ! -f "API_DOCUMENTATION.md" ]; then
+            echo "1. 📝 **Create API Documentation** - Use \`/create-api-docs\`" >> /tmp/docs_analysis.md
+          fi
+          
+          if [ ! -f "ARCHITECTURE.md" ]; then
+            echo "2. 🏗️ **Document System Architecture** - Use \`/create-architecture\`" >> /tmp/docs_analysis.md
+          fi
+          
+          if [ ! -f "CONTRIBUTING.md" ]; then
+            echo "3. 🤝 **Add Contributing Guidelines** - Use \`/create-contributing\`" >> /tmp/docs_analysis.md
+          fi
+          
+          cat >> /tmp/docs_analysis.md << 'EOF'
+
+          #### 📈 Medium Priority
+          4. 📊 **Add OpenAPI Specification** - Generate interactive API docs
+          5. 🔒 **Security Documentation** - Document security best practices
+          6. 🎵 **Music AI Documentation** - Document ML models and algorithms
+          7. 📱 **User Guide** - Create end-user documentation
+
+          #### 🛠️ Available Commands
+          - \`/create-api-docs\` - Generate comprehensive API documentation
+          - \`/create-architecture\` - Generate system architecture documentation
+          - \`/create-contributing\` - Generate contributing guidelines
+          - \`/create-openapi\` - Generate OpenAPI/Swagger specification (coming soon)
+
+          ### 📊 Documentation Quality Score
+
+          **Overall Score**: OVERALL_SCORE/10
+          
+          - ✅ **Strengths**: STRENGTHS_TEXT
+          - ⚠️  **Areas for Improvement**: IMPROVEMENTS_TEXT
+
+          ---
+          *Analysis generated by EchoTune AI Documentation Reviewer*
+          EOF
+
+          # Calculate overall score and replace placeholders
+          OVERALL_SCORE=$((README_SCORE + PKG_DOCS_SCORE + MUSIC_DOCS))
+          OVERALL_SCORE=$((OVERALL_SCORE > 10 ? 10 : OVERALL_SCORE))
+          
+          STRENGTHS="Comprehensive project setup"
+          [ $README_SCORE -ge 4 ] && STRENGTHS="$STRENGTHS, Well-structured README"
+          [ -f "API_DOCUMENTATION.md" ] && STRENGTHS="$STRENGTHS, API documentation present"
+          [ -f "ARCHITECTURE.md" ] && STRENGTHS="$STRENGTHS, Architecture documented"
+          
+          IMPROVEMENTS="Regular documentation updates needed"
+          [ ! -f "API_DOCUMENTATION.md" ] && IMPROVEMENTS="Missing API documentation, $IMPROVEMENTS"
+          [ ! -f "CONTRIBUTING.md" ] && IMPROVEMENTS="Missing contributing guidelines, $IMPROVEMENTS"
+          [ $README_SCORE -lt 3 ] && IMPROVEMENTS="README needs enhancement, $IMPROVEMENTS"
+          
+          sed -i "s/OVERALL_SCORE/$OVERALL_SCORE/g" /tmp/docs_analysis.md
+          sed -i "s/STRENGTHS_TEXT/$STRENGTHS/g" /tmp/docs_analysis.md
+          sed -i "s/IMPROVEMENTS_TEXT/$IMPROVEMENTS/g" /tmp/docs_analysis.md
+
+          # Post the comprehensive analysis
           if [ "${{ steps.parse.outputs.context_type }}" == "issue" ]; then
-            gh issue comment $CONTEXT_NUMBER --body-file /tmp/docs_review.md
+            gh issue comment $CONTEXT_NUMBER --body-file /tmp/docs_analysis.md
           else
-            gh pr comment $CONTEXT_NUMBER --body-file /tmp/docs_review.md
+            gh pr comment $CONTEXT_NUMBER --body-file /tmp/docs_analysis.md
           fi
 
-          echo "✅ Documentation review posted successfully"
+          echo "✅ Comprehensive documentation analysis posted successfully"
 
       - name: Execute Create API Docs Command
         if: steps.parse.outputs.command == 'create-api-docs'

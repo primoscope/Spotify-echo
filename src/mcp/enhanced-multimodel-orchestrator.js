@@ -305,7 +305,7 @@ class MultiModelOrchestrator extends EventEmitter {
      */
     optimizeModelSelection() {
         // Analyze performance metrics and adjust priorities
-        for (const [modelId, model] of this.models.entries()) {
+        for (const [_modelId, model] of this.models.entries()) {
             if (model.totalRequests > 0) {
                 // Penalize high-latency models
                 if (model.averageLatency > 5000) {

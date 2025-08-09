@@ -59,7 +59,6 @@ servers:
   - name: workflow-manager
     status: $(file_status "mcp-servers/enhanced-file-utilities.js")
     type: file-operations
-    capabilities: ["read", "validate", "security-scan"]
     
   - name: comprehensive-validator  
     status: $(file_status "mcp-servers/comprehensive-validator.js")

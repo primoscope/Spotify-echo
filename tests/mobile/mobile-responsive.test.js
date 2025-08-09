@@ -4,11 +4,16 @@
 
 // Ensure proper import in test environment  
 let MobileResponsiveManager;
+let shouldSkipTests = false;
+
 try {
   MobileResponsiveManager = require('../../src/mobile/mobile-responsive').MobileResponsiveManager;
 } catch (error) {
   console.warn('MobileResponsiveManager import issue - skipping tests:', error.message);
-  
+  shouldSkipTests = true;
+}
+
+if (shouldSkipTests) {
   // Skip tests gracefully without exiting process
   describe('MobileResponsiveManager', () => {
     it('should skip tests due to import issues', () => {
@@ -17,13 +22,15 @@ try {
   });
   
   module.exports = {};
-  return;
-}
+} else {
 
 // Ensure proper import in test environment
 if (typeof MobileResponsiveManager !== 'function') {
     console.warn('MobileResponsiveManager not available - skipping tests');
-    
+    shouldSkipTests = true;
+}
+
+if (shouldSkipTests) {
     // Skip tests gracefully without exiting process
     describe('MobileResponsiveManager', () => {
       it('should skip tests due to unavailable MobileResponsiveManager', () => {
@@ -32,8 +39,7 @@ if (typeof MobileResponsiveManager !== 'function') {
     });
     
     module.exports = {};
-    return;
-}
+} else {
 
 // Debug the import
 console.log('MobileResponsiveManager:', MobileResponsiveManager);
@@ -350,4 +356,4 @@ describe('MobileResponsiveManager', () => {
       expect(mockDocument.createElement).not.toHaveBeenCalled();
     });
   });
-});
+}

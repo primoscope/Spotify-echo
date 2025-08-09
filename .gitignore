@@ -449,3 +449,16 @@ mcp-servers/*/logs/
 testing_screenshots/
 coverage/
 .nyc_output/
+
+# Analysis and validation reports (temporary files)
+documentation-analysis-*.json
+documentation-analysis-*.md
+automation-analysis-*.json
+automation-analysis-*.md
+mcp-validation-report.json
+mcp-command-results.log
+docs-command-results.log
+gpt5_analysis.md
+mcp_results.txt
+target_files.txt
+automation_analysis.log

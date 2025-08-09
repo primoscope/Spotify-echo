@@ -31,7 +31,7 @@ class SpotifyMCPServer:
     def __init__(self):
         self.client_id = os.getenv('SPOTIFY_CLIENT_ID')
         self.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://localhost:3000/callback')
+        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'https://primosphere.studio/auth/callback')
         self.access_token = None
         self.refresh_token = None
         self.token_expires_at = None

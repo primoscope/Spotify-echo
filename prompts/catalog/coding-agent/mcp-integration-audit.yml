@@ -1,0 +1,290 @@
+# MCP Integration Audit - Coding Agent Task Prompt
+
+## Metadata
+```yaml
+name: mcp-integration-audit
+version: 1.0.0
+category: automation-validation
+complexity: high
+estimated_duration: 30-45 minutes
+agent_type: coding-agent
+```
+
+## Objective
+Execute a comprehensive end-to-end MCP (Model Context Protocol) integration audit for EchoTune AI, including health validation, discrepancy reporting, automated fixes, deployment verification, and roadmap generation.
+
+## Prerequisites
+- Repository: dzp5103/Spotify-echo
+- Branch: Current working branch
+- Environment: Development or staging
+- Tools: Node.js 20+, npm, bash, curl, jq
+
+## Execution Steps
+
+### Phase 1: MCP Server Health Validation
+Execute these commands in sequence:
+
+```bash
+# Start MCP health server
+node mcp-server/health.js &
+HEALTH_PID=$!
+
+# Wait for server startup (max 60 seconds)
+timeout 60 bash -c 'until curl -f http://localhost:3001/health > /dev/null 2>&1; do echo "Waiting for MCP server..."; sleep 2; done'
+
+# Test all health endpoints
+curl -f http://localhost:3001/health | jq '.'
+curl -f http://localhost:3001/status | jq '.' || echo "Status endpoint not available"
+curl -f http://localhost:3001/metrics || echo "Metrics endpoint not available"
+
+# Save health results
+curl -f http://localhost:3001/health > mcp-health-audit.json
+
+# Cleanup
+kill $HEALTH_PID
+```
+
+**Success Criteria:** Health server starts within 60 seconds, returns valid JSON from /health endpoint
+
+### Phase 2: Repository Validation Scan
+```bash
+# Execute comprehensive repository validation
+npm run validate:repo
+
+# Verify reports were generated
+ls -la VALIDATION_REPORT.md reports/validation-report.json
+
+# Extract key metrics
+jq -r '.summary' reports/validation-report.json
+```
+
+**Success Criteria:** Validation completes successfully, generates both markdown and JSON reports
+
+### Phase 3: Discrepancy Analysis & Reporting
+```bash
+# Run MCP registry validation
+bash scripts/mcp/run.sh
+
+# Compare validation results with MCP health
+npm run validate:all
+
+# Generate discrepancy report
+echo "## MCP Integration Discrepancies" > MCP_DISCREPANCY_REPORT.md
+echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> MCP_DISCREPANCY_REPORT.md
+echo "" >> MCP_DISCREPANCY_REPORT.md
+
+# Analyze critical findings
+CRITICAL_COUNT=$(jq -r '.summary.Critical // 0' reports/validation-report.json)
+HIGH_COUNT=$(jq -r '.summary.High // 0' reports/validation-report.json)
+
+if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ]; then
+    echo "🚨 **CRITICAL ISSUES DETECTED**" >> MCP_DISCREPANCY_REPORT.md
+    echo "- Critical: $CRITICAL_COUNT" >> MCP_DISCREPANCY_REPORT.md
+    echo "- High: $HIGH_COUNT" >> MCP_DISCREPANCY_REPORT.md
+    echo "" >> MCP_DISCREPANCY_REPORT.md
+fi
+```
+
+### Phase 4: Automated Fix Execution
+Priority-based automated fixes (implement safeguards):
+
+```bash
+# Create fixes log
+echo "# Automated Fixes Log" > AUTOMATED_FIXES.md
+echo "Started: $(date)" >> AUTOMATED_FIXES.md
+
+# Fix 1: Remove committed .env file (if safe)
+if [ -f ".env" ] && grep -q "example\|template\|demo" .env; then
+    echo "Removing demo .env file" >> AUTOMATED_FIXES.md
+    # Only remove if it's clearly a demo/example file
+    # Production agents should use extreme caution here
+fi
+
+# Fix 2: Update .gitignore for security
+if ! grep -q "^\.env$" .gitignore 2>/dev/null; then
+    echo "Adding .env to .gitignore" >> AUTOMATED_FIXES.md
+    echo ".env" >> .gitignore
+fi
+
+# Fix 3: Lint critical JavaScript files
+echo "Running ESLint fixes on critical files..." >> AUTOMATED_FIXES.md
+npx eslint --fix src/security/ src/middleware/ || true
+
+echo "Completed: $(date)" >> AUTOMATED_FIXES.md
+```
+
+### Phase 5: Environment Variable Analysis
+```bash
+# Analyze environment configuration
+echo "## Environment Variable Analysis" > ENV_ANALYSIS.md
+echo "" >> ENV_ANALYSIS.md
+
+# Extract environment variables from validation report
+jq -r '.environment_variables[] | "| `\(.name)` | \(.status) | \(.referenced_in | join(", ")) |"' reports/validation-report.json > env_table_data.txt
+
+echo "| Variable | Status | Referenced In |" >> ENV_ANALYSIS.md
+echo "|----------|--------|---------------|" >> ENV_ANALYSIS.md
+cat env_table_data.txt >> ENV_ANALYSIS.md
+rm env_table_data.txt
+
+# Identify critical missing variables
+echo "" >> ENV_ANALYSIS.md
+echo "### Critical Missing Variables" >> ENV_ANALYSIS.md
+echo "Variables marked as 'Required' should be configured:" >> ENV_ANALYSIS.md
+jq -r '.environment_variables[] | select(.status == "Required") | "- \(.name)"' reports/validation-report.json >> ENV_ANALYSIS.md
+```
+
+### Phase 6: E2E Test Validation
+```bash
+# Automated basic E2E test
+echo "## E2E Validation Results" > E2E_RESULTS.md
+
+# Test 1: Server startup
+echo "Testing server startup..." >> E2E_RESULTS.md
+timeout 30 npm start &
+SERVER_PID=$!
+sleep 10
+
+if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+    echo "✅ Main server health check passed" >> E2E_RESULTS.md
+else
+    echo "❌ Main server health check failed" >> E2E_RESULTS.md
+fi
+
+kill $SERVER_PID 2>/dev/null || true
+
+# Test 2: MCP integration
+echo "Testing MCP integration..." >> E2E_RESULTS.md
+if npm run mcp:health > /dev/null 2>&1; then
+    echo "✅ MCP health checks passed" >> E2E_RESULTS.md
+else
+    echo "❌ MCP health checks failed" >> E2E_RESULTS.md
+fi
+```
+
+### Phase 7: Frontend Strategy Assessment
+```bash
+# Analyze frontend codebase
+echo "## Frontend Strategy Analysis" > FRONTEND_ANALYSIS.md
+echo "" >> FRONTEND_ANALYSIS.md
+
+# Count React components
+COMPONENT_COUNT=$(find src/frontend -name "*.jsx" -o -name "*.js" | wc -l)
+echo "- React Components: $COMPONENT_COUNT" >> FRONTEND_ANALYSIS.md
+
+# Check for critical frontend files
+if [ -f "src/frontend/App.jsx" ]; then
+    echo "✅ Main App component exists" >> FRONTEND_ANALYSIS.md
+else
+    echo "❌ Main App component missing" >> FRONTEND_ANALYSIS.md
+fi
+
+# Analyze build configuration
+if [ -f "vite.config.js" ]; then
+    echo "✅ Vite build configuration found" >> FRONTEND_ANALYSIS.md
+else
+    echo "⚠️ Build configuration may be incomplete" >> FRONTEND_ANALYSIS.md
+fi
+```
+
+### Phase 8: Task Prioritization & Roadmap
+```bash
+# Generate MoSCoW prioritized backlog
+echo "# MoSCoW Prioritized Backlog" > MOSCOW_BACKLOG.md
+echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> MOSCOW_BACKLOG.md
+echo "" >> MOSCOW_BACKLOG.md
+
+# Must Have (Critical)
+echo "## Must Have (Critical Priority)" >> MOSCOW_BACKLOG.md
+jq -r '.findings[] | select(.severity == "Critical") | "- [ ] \(.file): \(.description)"' reports/validation-report.json | head -5 >> MOSCOW_BACKLOG.md
+
+# Should Have (High)
+echo "" >> MOSCOW_BACKLOG.md
+echo "## Should Have (High Priority)" >> MOSCOW_BACKLOG.md
+jq -r '.findings[] | select(.severity == "High") | "- [ ] \(.file): \(.description)"' reports/validation-report.json | head -5 >> MOSCOW_BACKLOG.md
+
+# Could Have (Medium)
+echo "" >> MOSCOW_BACKLOG.md
+echo "## Could Have (Medium Priority)" >> MOSCOW_BACKLOG.md
+jq -r '.findings[] | select(.severity == "Medium") | "- [ ] \(.file): \(.description)"' reports/validation-report.json | head -3 >> MOSCOW_BACKLOG.md
+
+# Won't Have (Low - Future)
+echo "" >> MOSCOW_BACKLOG.md
+echo "## Won't Have This Iteration (Future)" >> MOSCOW_BACKLOG.md
+jq -r '.findings[] | select(.severity == "Low") | "- [ ] \(.file): \(.description)"' reports/validation-report.json | head -3 >> MOSCOW_BACKLOG.md
+```
+
+## Acceptance Criteria
+
+### Technical Validation
+- [ ] MCP health server starts and responds within 60 seconds
+- [ ] Repository validation completes without errors
+- [ ] Both VALIDATION_REPORT.md and JSON report are generated
+- [ ] At least 3 categories of findings are detected (security, incomplete-code, etc.)
+- [ ] Environment variables are properly catalogued
+
+### Security Compliance
+- [ ] No actual secret values are exposed in logs or reports
+- [ ] All secrets are properly masked (****) in outputs
+- [ ] Critical security findings are flagged with 'Critical' severity
+- [ ] Dangerous configurations are identified
+
+### Automation Quality
+- [ ] All shell commands execute successfully
+- [ ] Error handling prevents script termination on non-critical failures
+- [ ] Generated reports are properly formatted and readable
+- [ ] MoSCoW backlog is populated with actionable items
+
+### Output Artifacts
+Required files after completion:
+- `VALIDATION_REPORT.md`
+- `reports/validation-report.json` 
+- `MCP_DISCREPANCY_REPORT.md`
+- `AUTOMATED_FIXES.md`
+- `ENV_ANALYSIS.md`
+- `E2E_RESULTS.md`
+- `FRONTEND_ANALYSIS.md`
+- `MOSCOW_BACKLOG.md`
+
+## Success Metrics
+- **Coverage**: >95% of repository scanned for issues
+- **Accuracy**: >90% of flagged issues are legitimate concerns
+- **Performance**: Complete audit in <10 minutes
+- **Actionability**: >80% of findings include specific remediation steps
+
+## Error Handling
+```bash
+# Implement error handling wrapper
+set -euo pipefail
+trap 'echo "❌ Audit failed at line $LINENO"; exit 1' ERR
+
+# Timeout protection for long-running commands
+timeout 300 your-command || {
+    echo "⏰ Command timed out after 5 minutes"
+    exit 1
+}
+```
+
+## Post-Execution Validation
+```bash
+# Validate all required artifacts exist
+REQUIRED_FILES=("VALIDATION_REPORT.md" "reports/validation-report.json" "MCP_DISCREPANCY_REPORT.md" "MOSCOW_BACKLOG.md")
+
+for file in "${REQUIRED_FILES[@]}"; do
+    if [ ! -f "$file" ]; then
+        echo "❌ Required file missing: $file"
+        exit 1
+    fi
+done
+
+echo "✅ MCP Integration Audit completed successfully"
+echo "📊 Generated $(ls -1 *.md | wc -l) analysis reports"
+echo "🎯 Check MOSCOW_BACKLOG.md for prioritized next steps"
+```
+
+## Notes for Agent Implementation
+1. **Safety First**: Never commit or expose actual secret values
+2. **Incremental Progress**: Each phase can be executed independently
+3. **Error Resilience**: Continue execution even if individual checks fail
+4. **Documentation**: Update PROGRESSION.md after completion
+5. **Validation**: Always verify outputs before proceeding to next phase

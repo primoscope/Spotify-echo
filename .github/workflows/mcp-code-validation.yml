@@ -1,0 +1,250 @@
+name: MCP Code Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+
+  mcp-health:
+    name: MCP Health Check
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Start MCP Health Server
+        run: |
+          # Start health server in background
+          node mcp-server/health.js &
+          HEALTH_PID=$!
+          echo "HEALTH_PID=$HEALTH_PID" >> $GITHUB_ENV
+          
+          # Wait for server to be ready (max 60s)
+          echo "🔍 Waiting for MCP health server to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3001/health > /dev/null 2>&1; do echo "Waiting..."; sleep 2; done' || {
+            echo "❌ Health server failed to start within 60 seconds"
+            exit 1
+          }
+          
+          echo "✅ MCP health server is running"
+        
+      - name: Probe Health Endpoints
+        run: |
+          echo "📊 Testing MCP health endpoints..."
+          
+          # Test /health endpoint
+          echo "Testing /health endpoint:"
+          curl -f http://localhost:3001/health | jq '.' || echo "❌ /health endpoint failed"
+          
+          # Test /status endpoint if available
+          echo "Testing /status endpoint:"
+          curl -f http://localhost:3001/status | jq '.' || echo "ℹ️ /status endpoint not available"
+          
+          # Test /metrics endpoint if available
+          echo "Testing /metrics endpoint:"
+          curl -f http://localhost:3001/metrics | head -20 || echo "ℹ️ /metrics endpoint not available"
+          
+          # Generate health report
+          curl -f http://localhost:3001/health > mcp-health-results.json
+          
+      - name: Cleanup Health Server
+        run: |
+          if [ ! -z "$HEALTH_PID" ]; then
+            kill $HEALTH_PID || true
+          fi
+          
+      - name: Upload Health Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-health-results
+          path: mcp-health-results.json
+          retention-days: 7
+
+  repo-validate:
+    name: Repository Validation
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run Repository Validation
+        run: |
+          echo "🔍 Running repository validation..."
+          npm run validate:repo
+          
+          # Validate that reports were generated
+          if [ ! -f "VALIDATION_REPORT.md" ]; then
+            echo "❌ VALIDATION_REPORT.md was not generated"
+            exit 1
+          fi
+          
+          if [ ! -f "reports/validation-report.json" ]; then
+            echo "❌ JSON validation report was not generated"
+            exit 1
+          fi
+          
+          echo "✅ Validation completed successfully"
+          
+          # Show summary
+          echo "📊 Validation Summary:"
+          head -20 VALIDATION_REPORT.md
+        
+      - name: Upload Validation Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-reports
+          path: |
+            VALIDATION_REPORT.md
+            reports/validation-report.json
+          retention-days: 30
+
+  pr-comment:
+    name: PR Comment Summary
+    runs-on: ubuntu-latest
+    needs: [mcp-health, repo-validate]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Generate Validation Summary
+        run: |
+          # Re-run validation to get fresh results for PR comment
+          npm run validate:repo
+          
+          # Extract summary data from JSON report
+          CRITICAL=$(jq -r '.summary.Critical // 0' reports/validation-report.json)
+          HIGH=$(jq -r '.summary.High // 0' reports/validation-report.json)
+          MEDIUM=$(jq -r '.summary.Medium // 0' reports/validation-report.json)  
+          LOW=$(jq -r '.summary.Low // 0' reports/validation-report.json)
+          TOTAL=$(jq -r '.metadata.total_findings' reports/validation-report.json)
+          
+          # Determine success/warning status
+          if [ "$CRITICAL" -eq 0 ] && [ "$HIGH" -eq 0 ]; then
+            STATUS_EMOJI="✅"
+            STATUS_MSG="Validation passed with no critical or high severity issues"
+          else
+            STATUS_EMOJI="⚠️"
+            STATUS_MSG="Validation found issues that need attention"
+          fi
+          
+          # Create PR comment content
+          cat > pr-comment.md <<EOF
+          ## $STATUS_EMOJI MCP Code Validation Results
+          
+          $STATUS_MSG
+          
+          ### 📊 Summary
+          
+          | Severity | Count |
+          |----------|-------|
+          | 🔴 Critical | $CRITICAL |
+          | 🟠 High | $HIGH |
+          | 🟡 Medium | $MEDIUM |
+          | 🔵 Low | $LOW |
+          | **Total** | **$TOTAL** |
+          
+          ### 🔗 Detailed Reports
+          
+          - **Validation Report**: Check the artifacts for detailed findings and remediation steps
+          - **MCP Health**: MCP server health checks completed
+          
+          ### 🎯 Next Steps
+          
+          $(if [ "$CRITICAL" -gt 0 ]; then echo "- 🚨 **Address Critical Issues**: $CRITICAL critical security/config issues found"; fi)
+          $(if [ "$HIGH" -gt 0 ]; then echo "- ⚠️ **Fix High Priority**: $HIGH high priority issues found"; fi)
+          $(if [ "$MEDIUM" -gt 0 ]; then echo "- 📝 **Review Medium Priority**: $MEDIUM medium priority improvements identified"; fi)
+          
+          *Generated by MCP Code Validation workflow*
+          EOF
+          
+          echo "PR_COMMENT_FILE=pr-comment.md" >> $GITHUB_ENV
+          
+      - name: Post PR Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const commentBody = fs.readFileSync(process.env.PR_COMMENT_FILE, 'utf8');
+            
+            // Check if we already commented on this PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('MCP Code Validation Results')
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+              console.log('Updated existing PR comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+              console.log('Created new PR comment');
+            }

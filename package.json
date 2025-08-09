@@ -226,7 +226,9 @@
     "mcp:hismaserver_puppeteer": "node mcp-servers/new-candidates/@hisma/server-puppeteer/integration.js",
     "test:hismaserver_puppeteer": "jest mcp-servers/new-candidates/@hisma/server-puppeteer/test.js",
     "mcp:candidates": "node scripts/run-all-candidates.js",
-    "test:candidates": "jest mcp-servers/new-candidates/*/test.js"
+    "test:candidates": "jest mcp-servers/new-candidates/*/test.js",
+    "validate:repo": "node scripts/validation/generate-validation-report.js",
+    "validate:all": "npm run -s validate:repo && bash scripts/mcp/run.sh"
   },
   "keywords": [
     "music",

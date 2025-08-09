@@ -249,6 +249,7 @@
     "@browserbasehq/mcp-server-browserbase": "github:browserbase/mcp-server-browserbase",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@eslint/js": "^9.33.0",
     "@google/generative-ai": "^0.2.1",
     "@hisma/server-puppeteer": "^0.6.5",
     "@modelcontextprotocol/sdk": "^1.17.2",

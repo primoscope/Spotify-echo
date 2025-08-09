@@ -4,33 +4,63 @@
  */
 
 const cors = require('cors');
+const { verifyJWT, verifyRefreshToken } = require('../utils/auth-helpers');
+const { getRedisManager } = require('../utils/redis');
 
 /**
- * Simple authentication middleware
- * For development, accepts any bearer token or user ID
+ * Production authentication middleware
+ * Verifies JWT tokens and maintains session state
  */
 function requireAuth(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
+  // Development fallback mode
+  if (process.env.NODE_ENV !== 'production' && process.env.AUTH_DEVELOPMENT_MODE === 'true') {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      if (token) {
+        req.userId = token;
+        req.user = { id: token, display_name: `Dev User ${token}` };
+        return next();
+      }
+    }
     return res.status(401).json({
       error: 'Authorization required',
       message: 'Please provide an authorization header',
     });
   }
 
-  // Extract token/user ID from Authorization header
-  const token = authHeader.replace('Bearer ', '');
+  // Production JWT-based authentication
+  const authHeader = req.headers.authorization;
+  const token = req.cookies?.access_token || (authHeader && authHeader.replace('Bearer ', ''));
 
   if (!token) {
     return res.status(401).json({
-      error: 'Invalid authorization format',
-      message: 'Authorization header must be in format: Bearer <token>',
+      error: 'Authorization required',
+      message: 'Please login to access this resource',
+      code: 'AUTH_REQUIRED'
     });
   }
 
-  // For development, accept any non-empty token
-  req.userId = token;
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    console.error('JWT_SECRET not configured');
+    return res.status(500).json({
+      error: 'Authentication service unavailable',
+      message: 'Server configuration error'
+    });
+  }
+
+  const decoded = verifyJWT(token, jwtSecret);
+  if (!decoded) {
+    return res.status(401).json({
+      error: 'Invalid or expired token',
+      message: 'Please login again',
+      code: 'TOKEN_INVALID'
+    });
+  }
+
+  req.userId = decoded.id;
+  req.user = decoded;
   next();
 }
 
@@ -38,53 +68,115 @@ function requireAuth(req, res, next) {
  * Extract user information from request (optional)
  */
 function extractUser(req, res, next) {
-  const authHeader = req.headers.authorization;
+  // Development fallback mode
+  if (process.env.NODE_ENV !== 'production' && process.env.AUTH_DEVELOPMENT_MODE === 'true') {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      if (token) {
+        req.userId = token;
+        req.user = { id: token, display_name: `Dev User ${token}` };
+      }
+    }
+    return next();
+  }
 
-  if (authHeader) {
-    const token = authHeader.replace('Bearer ', '');
-    req.userId = token;
+  // Production JWT extraction
+  const authHeader = req.headers.authorization;
+  const token = req.cookies?.access_token || (authHeader && authHeader.replace('Bearer ', ''));
+
+  if (token && process.env.JWT_SECRET) {
+    const decoded = verifyJWT(token, process.env.JWT_SECRET);
+    if (decoded) {
+      req.userId = decoded.id;
+      req.user = decoded;
+    }
   }
 
   next();
 }
 
 /**
- * Create rate limiter with custom options
- * Simple in-memory rate limiting for development
+ * Create rate limiter with Redis backing or in-memory fallback
  */
 function createRateLimit(options = {}) {
   const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes default
-  const max = options.max || 100; // limit each IP to 100 requests per windowMs
+  const max = options.max || 100;
+  const windowSeconds = Math.floor(windowMs / 1000);
+  
+  // In-memory fallback for when Redis is not available
   const requests = new Map();
 
-  return (req, res, next) => {
-    const key = req.ip || req.connection.remoteAddress;
-    const now = Date.now();
+  return async (req, res, next) => {
+    try {
+      const redisManager = getRedisManager();
+      const key = options.keyGenerator ? 
+        options.keyGenerator(req) : 
+        `rate_limit:${req.ip || req.connection.remoteAddress}`;
 
-    // Clean old entries
-    const cutoff = now - windowMs;
-    for (const [k, v] of requests.entries()) {
-      if (v.resetTime < cutoff) {
-        requests.delete(k);
+      let rateLimitResult;
+
+      if (redisManager.useRedis && redisManager.isConnected) {
+        // Use Redis-backed rate limiting
+        rateLimitResult = await redisManager.rateLimit(key, max, windowSeconds);
+      } else {
+        // Fallback to in-memory rate limiting
+        const now = Date.now();
+        const cutoff = now - windowMs;
+        
+        // Clean old entries
+        for (const [k, v] of requests.entries()) {
+          if (v.resetTime < cutoff) {
+            requests.delete(k);
+          }
+        }
+
+        const requestInfo = requests.get(key) || { count: 0, resetTime: now + windowMs };
+        
+        if (requestInfo.count >= max) {
+          rateLimitResult = {
+            allowed: false,
+            count: requestInfo.count,
+            limit: max,
+            resetTime: requestInfo.resetTime,
+            remaining: 0
+          };
+        } else {
+          requestInfo.count++;
+          requests.set(key, requestInfo);
+          rateLimitResult = {
+            allowed: true,
+            count: requestInfo.count,
+            limit: max,
+            resetTime: requestInfo.resetTime,
+            remaining: Math.max(0, max - requestInfo.count)
+          };
+        }
       }
-    }
 
-    // Check current request count
-    const requestInfo = requests.get(key) || { count: 0, resetTime: now + windowMs };
-
-    if (requestInfo.count >= max) {
-      return res.status(429).json({
-        error: 'Too many requests',
-        message: options.message || 'Too many requests, please try again later.',
-        retryAfter: Math.ceil((requestInfo.resetTime - now) / 1000),
+      // Set rate limit headers
+      res.set({
+        'X-RateLimit-Limit': rateLimitResult.limit,
+        'X-RateLimit-Remaining': rateLimitResult.remaining,
+        'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime / 1000)
       });
+
+      if (!rateLimitResult.allowed) {
+        return res.status(429).json({
+          error: 'Too many requests',
+          message: options.message || 'Too many requests, please try again later.',
+          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Rate limiting error:', error.message);
+      // Fail open on rate limiting errors
+      next();
     }
-
-    // Update request count
-    requestInfo.count++;
-    requests.set(key, requestInfo);
-
-    next();
   };
 }
 
@@ -171,19 +263,18 @@ function errorHandler(err, req, res, _next) {
 }
 
 /**
- * Security headers middleware
+ * Security headers middleware with enhanced protection
  */
 function securityHeaders(req, res, next) {
-  // Basic security headers
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-
-  // Content Security Policy
-  const csp =
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://api.spotify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.scdn.co; connect-src 'self' https://api.spotify.com https://accounts.spotify.com; media-src 'self' https://p.scdn.co; frame-src https://open.spotify.com";
-  res.setHeader('Content-Security-Policy', csp);
+  const isProduction = process.env.NODE_ENV === 'production';
+  const { getSecurityHeaders } = require('../utils/auth-helpers');
+  
+  const headers = getSecurityHeaders(isProduction);
+  
+  // Apply all security headers
+  Object.entries(headers).forEach(([key, value]) => {
+    res.setHeader(key, value);
+  });
 
   next();
 }
@@ -248,6 +339,37 @@ function requestSizeLimit(req, res, next) {
   next();
 }
 
+/**
+ * Specialized rate limiters for different endpoints
+ */
+const authRateLimit = createRateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 auth attempts per 15 minutes
+  message: 'Too many authentication attempts, please try again later',
+  keyGenerator: (req) => `auth:${req.ip || 'unknown'}`
+});
+
+const apiRateLimit = createRateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes  
+  max: 100, // 100 API requests per 15 minutes
+  message: 'Too many API requests, please slow down',
+  keyGenerator: (req) => `api:${req.user?.id || req.ip || 'unknown'}`
+});
+
+const spotifyRateLimit = createRateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // Higher limit for Spotify operations
+  message: 'Too many Spotify API requests, please slow down',
+  keyGenerator: (req) => `spotify:${req.user?.id || req.ip || 'unknown'}`
+});
+
+const chatRateLimit = createRateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // 20 chat messages per minute
+  message: 'Too many chat messages, please slow down',
+  keyGenerator: (req) => `chat:${req.user?.id || req.ip || 'unknown'}`
+});
+
 module.exports = {
   requireAuth,
   extractUser,
@@ -259,4 +381,9 @@ module.exports = {
   securityHeaders,
   sanitizeInput,
   requestSizeLimit,
+  // Specialized rate limiters
+  authRateLimit,
+  apiRateLimit,
+  spotifyRateLimit,
+  chatRateLimit,
 };

@@ -226,7 +226,13 @@
     "mcp:hismaserver_puppeteer": "node mcp-servers/new-candidates/@hisma/server-puppeteer/integration.js",
     "test:hismaserver_puppeteer": "jest mcp-servers/new-candidates/@hisma/server-puppeteer/test.js",
     "mcp:candidates": "node scripts/run-all-candidates.js",
-    "test:candidates": "jest mcp-servers/new-candidates/*/test.js"
+    "test:candidates": "jest mcp-servers/new-candidates/*/test.js",
+    "enhanced-mcp:start": "node src/mcp/enhanced-multimodel-orchestrator.js",
+    "enhanced-mcp:workflow": "node src/mcp/workflow-integration-manager.js", 
+    "enhanced-mcp:test": "node -e \"const WorkflowManager = require('./src/mcp/workflow-integration-manager'); const manager = new WorkflowManager(); console.log('Enhanced MCP system initialized successfully');\"",
+    "enhanced-mcp:health": "curl -s http://localhost:3000/api/enhanced-mcp/health | jq '.' || echo 'Enhanced MCP server not running'",
+    "enhanced-mcp:capabilities": "curl -s http://localhost:3000/api/enhanced-mcp/capabilities | jq '.' || echo 'Enhanced MCP server not running'",
+    "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'"
   },
   "keywords": [
     "music",
@@ -276,9 +282,11 @@
     "csv-parser": "^3.2.0",
     "express": "^4.18.0",
     "express-rate-limit": "^7.1.5",
+    "express-session": "^1.18.2",
     "express-slow-down": "^2.0.1",
     "FileScopeMCP": "github:admica/FileScopeMCP",
     "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mcp-server-code-runner": "^0.1.7",
     "mongodb-mcp-server": "^0.2.0",

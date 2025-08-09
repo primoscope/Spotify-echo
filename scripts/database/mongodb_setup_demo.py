@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-MongoDB Setup and Migration Demo for EchoTune AI
-Demonstrates the complete setup process with the provided MongoDB credentials
+MongoDB Setup Guide for EchoTune AI
+Demonstrates the complete setup process using environment variables
+
+IMPORTANT: This script has been sanitized - hardcoded credentials removed.
+Configure your MongoDB connection using environment variables in .env file.
 """
 
 import os
@@ -67,72 +70,111 @@ def main():
     print_header("MONGODB CONNECTION SETUP - ECHOTUNE AI")
     
     print("""
-This demonstration shows the complete MongoDB setup process using the provided
-credentials for the EchoTune AI Spotify recommendation system.
+This guide demonstrates the MongoDB setup process for the EchoTune AI 
+Spotify recommendation system using environment variables.
 
-Connection Details:
-- MongoDB URI: mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/
-- Username: copilot
-- Password: DapperMan77
-- Database: spotify_analytics
-- Collection: listening_history
+SECURITY NOTE: 
+Previous versions of this script contained hardcoded credentials.
+All credentials have been removed and must now be configured via environment variables.
+
+Required Environment Variables:
+- MONGODB_URI: Full MongoDB connection string
+- MONGODB_DATABASE: Database name (default: echotune)
+- MONGODB_COLLECTION: Collection name (default: listening_history)
+
+Example .env configuration:
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority
+MONGODB_DATABASE=echotune
+MONGODB_COLLECTION=listening_history
 """)
     
-    print_step(1, "Testing MongoDB Connection")
-    print("Running connection test...")
-    os.system("cd /home/runner/work/Spotify-echo/Spotify-echo && python scripts/test_mongodb_connection.py")
-    
-    print_step(2, "Sample Data Migration")
-    print("The migration has already been tested with sample data.")
-    print("Current database state:")
-    
-    # Show current database state
-    from pymongo import MongoClient
+    print_step(1, "Checking Environment Configuration")
     
     mongodb_uri = os.getenv('MONGODB_URI')
-    database_name = os.getenv('MONGODB_DATABASE', 'spotify_analytics')
+    database_name = os.getenv('MONGODB_DATABASE', 'echotune')
     collection_name = os.getenv('MONGODB_COLLECTION', 'listening_history')
     
-    client = MongoClient(mongodb_uri)
-    db = client[database_name]
-    collection = db[collection_name]
+    if not mongodb_uri:
+        print("❌ ERROR: MONGODB_URI environment variable not set")
+        print("\nPlease configure your .env file with:")
+        print("MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database")
+        print("\nFor security reasons, credentials should NEVER be hardcoded in scripts.")
+        return
     
-    count = collection.count_documents({})
-    users = collection.distinct("user.username")
-    tracks = collection.distinct("spotify_track_uri")
+    # Mask credentials in URI for display
+    display_uri = mongodb_uri
+    if '@' in display_uri:
+        # Hide credentials for security
+        parts = display_uri.split('@')
+        if len(parts) >= 2:
+            scheme_and_creds = parts[0]
+            if '://' in scheme_and_creds:
+                scheme = scheme_and_creds.split('://')[0]
+                display_uri = f"{scheme}://***:***@{'@'.join(parts[1:])}"
     
-    print(f"  ✅ Total documents: {count:,}")
-    print(f"  ✅ Unique users: {len(users):,}")
-    print(f"  ✅ Unique tracks: {len(tracks):,}")
+    print(f"✅ MongoDB URI configured: {display_uri}")
+    print(f"✅ Database: {database_name}")
+    print(f"✅ Collection: {collection_name}")
     
-    # Show indexes
-    indexes = list(collection.list_indexes())
-    print(f"  ✅ Database indexes: {len(indexes)} created")
+    print_step(2, "Testing MongoDB Connection")
+    print("Running connection test...")
     
-    # Show sample document
-    sample = collection.find_one()
-    if sample:
-        print(f"  ✅ Sample document ID: {sample.get('_id', 'N/A')}")
-        print(f"  ✅ Sample track: {sample.get('track', {}).get('name', 'N/A')} by {sample.get('track', {}).get('artist', 'N/A')}")
-    
-    client.close()
+    try:
+        # Test connection without exposing credentials
+        from pymongo import MongoClient
+        
+        client = MongoClient(mongodb_uri)
+        db = client[database_name]
+        collection = db[collection_name]
+        
+        # Test connection
+        client.admin.command('ping')
+        print("✅ MongoDB connection successful")
+        
+        # Get basic statistics
+        count = collection.count_documents({})
+        print(f"✅ Total documents in {collection_name}: {count:,}")
+        
+        if count > 0:
+            users = collection.distinct("user.username")
+            tracks = collection.distinct("spotify_track_uri")
+            print(f"✅ Unique users: {len(users):,}")
+            print(f"✅ Unique tracks: {len(tracks):,}")
+            
+            # Show indexes
+            indexes = list(collection.list_indexes())
+            print(f"✅ Database indexes: {len(indexes)} created")
+            
+            # Show sample document (without sensitive data)
+            sample = collection.find_one()
+            if sample:
+                print(f"✅ Sample document ID: {sample.get('_id', 'N/A')}")
+                track_info = sample.get('track', {})
+                print(f"✅ Sample track: {track_info.get('name', 'N/A')} by {track_info.get('artist', 'N/A')}")
+        
+        client.close()
+        
+    except Exception as e:
+        print(f"❌ MongoDB connection failed: {str(e)}")
+        print("Please check your MONGODB_URI configuration.")
+        return
     
     print_step(3, "Available Commands")
     print("""
 Key scripts and commands available:
 
 1. Test MongoDB Connection:
-   python scripts/test_mongodb_connection.py
+   python scripts/database/test_mongodb_connection.py
 
 2. Migrate CSV Data to MongoDB:
-   python scripts/migrate_to_mongodb.py --input data/spotify_listening_history_combined.csv
+   python scripts/database/migrate_to_mongodb.py --input data/spotify_listening_history_combined.csv
 
 3. Migrate with custom options:
-   python scripts/migrate_to_mongodb.py --input <file> --batch-size 1000 --update
+   python scripts/database/migrate_to_mongodb.py --input <file> --batch-size 1000 --update
 
 4. Environment Variables (in .env):
-   MONGODB_URI=mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-   MONGODB_DATABASE=spotify_analytics
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database?options
+   MONGODB_DATABASE=echotune
    MONGODB_COLLECTION=listening_history
 """)
     
@@ -140,12 +182,12 @@ Key scripts and commands available:
     print("""
 For production migration of the full dataset:
 
-1. The full CSV file is available at: data/spotify_listening_history_combined.csv
-2. Size: ~80MB with ~208,934 records
+1. Ensure your MongoDB URI is configured in .env
+2. The full CSV file should be available at: data/spotify_listening_history_combined.csv
 3. Migration command:
-   python scripts/migrate_to_mongodb.py --input data/spotify_listening_history_combined.csv --batch-size 1000
+   python scripts/database/migrate_to_mongodb.py --input data/spotify_listening_history_combined.csv --batch-size 1000
 
-Estimated migration time: 5-10 minutes for full dataset.
+Note: Migration time depends on dataset size and network connectivity.
 """)
     
     print_step(5, "Database Schema")
@@ -154,16 +196,21 @@ The MongoDB collection uses the following document structure:
 """)
     print(get_sample_document_json_structure())
     
-    print_header("SETUP COMPLETE")
+    print_header("SETUP GUIDE COMPLETE")
     print("""
-✅ MongoDB connection tested and working
-✅ Database and collection created: spotify_analytics.listening_history
-✅ Sample data migrated successfully
-✅ Indexes created for optimal performance
-✅ Ready for production data migration
+✅ Environment variable configuration checked
+✅ MongoDB connection tested (if properly configured)  
+✅ Database schema documented
+✅ Migration commands provided
 
-The MongoDB setup is complete and ready for use with the EchoTune AI system.
-All connection credentials have been configured and tested successfully.
+SECURITY REMINDERS:
+🔒 Never commit credentials to version control
+🔒 Use environment variables for sensitive configuration
+🔒 Regularly rotate database passwords
+🔒 Use least-privilege database user accounts
+
+The MongoDB setup guide is complete. Ensure all environment variables
+are properly configured for your deployment environment.
 """)
 
 if __name__ == "__main__":

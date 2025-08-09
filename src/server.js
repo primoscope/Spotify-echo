@@ -11,6 +11,10 @@ const compression = require('compression');
 // Load environment variables
 dotenv.config();
 
+// Import Redis and session management
+const session = require('express-session');
+const { initializeRedis, getRedisManager } = require('./utils/redis');
+
 // Import configuration and validation
 const { validateProductionConfig, getEnvironmentConfig } = require('./config/production');
 
@@ -40,6 +44,7 @@ const llmProvidersRoutes = require('./api/routes/llm-providers'); // Enhanced LL
 const advancedSettingsRoutes = require('./api/advanced-settings'); // Advanced Settings UI API
 const docsRoutes = require('./api/routes/docs'); // API documentation
 const adminRoutes = require('./api/routes/admin'); // MongoDB admin dashboard and tools
+const enhancedMCPRoutes = require('./api/routes/enhanced-mcp'); // Enhanced MCP and multimodel capabilities
 const {
   extractUser,
   ensureDatabase,
@@ -49,6 +54,11 @@ const {
   createRateLimit,
   sanitizeInput,
   requestSizeLimit,
+  securityHeaders,
+  authRateLimit,
+  apiRateLimit,
+  spotifyRateLimit,
+  chatRateLimit,
 } = require('./api/middleware');
 
 // Import enhanced systems
@@ -76,6 +86,21 @@ const PORT = config.server.port;
 
 // Initialize enhanced systems
 const securityManager = new SecurityManager();
+
+// Initialize Redis and session management
+let redisManager = null;
+
+async function initializeRedisSession() {
+  try {
+    redisManager = await initializeRedis();
+    console.log('🔄 Redis manager initialized');
+    return redisManager;
+  } catch (error) {
+    console.warn('⚠️ Redis initialization failed:', error.message);
+    console.log('📦 Using in-memory fallback for sessions');
+    return null;
+  }
+}
 
 // Performance monitoring
 app.use(performanceMonitor.requestTracker());
@@ -128,11 +153,33 @@ if (config.server.compression) {
   );
 }
 
-// Global rate limiting
+// Session management with Redis store or memory fallback
+const sessionConfig = {
+  secret: process.env.SESSION_SECRET || 'fallback-dev-secret-change-in-production',
+  name: 'echotune.session',
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+  }
+};
+
+// Note: Redis session store will be configured during initialization
+app.use(session(sessionConfig));
+
+// Enhanced security headers (replaces basic securityHeaders)
+app.use(securityHeaders);
+
+// Global rate limiting with Redis backing
 const globalRateLimit = createRateLimit({
-  windowMs: config.security.rateLimit.windowMs,
-  max: config.security.rateLimit.max,
+  windowMs: config.security?.rateLimit?.windowMs || 15 * 60 * 1000,
+  max: config.security?.rateLimit?.max || 1000,
   message: 'Too many requests from this IP, please try again later',
+  keyGenerator: (req) => `global:${req.ip || 'unknown'}`
 });
 app.use(globalRateLimit);
 
@@ -243,10 +290,12 @@ app.use(extractUser);
 // Enhanced API routes with new systems
 app.use('/api', healthRoutes);
 
-// Add rate limiting to API routes
-app.use('/api/chat', securityManager.chatRateLimit);
-app.use('/api/recommendations', securityManager.recommendationRateLimit);
-app.use('/auth', securityManager.authRateLimit);
+// Add specialized rate limiting to API routes
+app.use('/api/chat', chatRateLimit);
+app.use('/api/recommendations', apiRateLimit);
+app.use('/api/spotify', spotifyRateLimit);
+app.use('/auth', authRateLimit);
+app.use('/api/spotify/auth', authRateLimit); // Additional auth endpoint protection
 
 // Performance monitoring route
 app.get('/api/performance', (req, res) => {
@@ -254,10 +303,29 @@ app.get('/api/performance', (req, res) => {
   res.json(report);
 });
 
-// Cache statistics route
+// Cache statistics route - now includes Redis stats
 app.get('/api/cache/stats', (req, res) => {
-  const stats = cacheManager.getStats();
-  res.json(stats);
+  const cacheStats = cacheManager.getStats();
+  const redisStats = redisManager ? redisManager.getStats() : null;
+  
+  res.json({
+    cache_manager: cacheStats,
+    redis: redisStats
+  });
+});
+
+// Redis health check route
+app.get('/api/redis/health', async (req, res) => {
+  try {
+    const redisManager = getRedisManager();
+    const health = await redisManager.healthCheck();
+    res.json(health);
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      error: error.message
+    });
+  }
 });
 
 // Security statistics route (admin only in production)
@@ -606,7 +674,7 @@ app.post('/api/chat', async (req, res) => {
 
     if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
       response =
-        "I'd love to recommend some music for you! What mood are you in? Or what genre would you like to explore?";
+        'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
       action = 'recommend';
     } else if (lowerMessage.includes('playlist')) {
       response =
@@ -618,10 +686,10 @@ app.post('/api/chat', async (req, res) => {
       action = 'mood_analysis';
     } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
       response =
-        "Hello! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?";
+        'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
     } else {
       response =
-        "I'm here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.";
+        'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
     }
 
     res.json({
@@ -655,6 +723,7 @@ app.use('/api/insights', insightsRoutes); // Enhanced Spotify insights with cach
 app.use('/api/feedback', feedbackRoutes); // New feedback system
 app.use('/api/music', musicDiscoveryRoutes); // Enhanced music discovery system
 app.use('/api/admin', adminRoutes); // MongoDB admin dashboard and tools
+app.use('/api/enhanced-mcp', enhancedMCPRoutes); // Enhanced MCP and multimodel capabilities
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');
@@ -897,6 +966,19 @@ server.listen(PORT, '0.0.0.0', async () => {
   console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔑 Spotify configured: ${!!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)}`);
+  console.log(`🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`);
+
+  // Initialize Redis first
+  try {
+    redisManager = await initializeRedisSession();
+    if (redisManager && redisManager.useRedis) {
+      console.log('💾 Redis initialized for sessions and caching');
+    } else {
+      console.log('💾 Using in-memory fallback for sessions and caching');
+    }
+  } catch (error) {
+    console.warn('⚠️ Redis setup failed:', error.message);
+  }
 
   // Initialize database manager with fallback support
   try {

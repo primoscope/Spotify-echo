@@ -26,7 +26,9 @@ class WorkflowValidator {
 
         const workflowDir = '.github/workflows';
         const files = await fs.readdir(workflowDir);
-        const ymlFiles = files.filter(file => file.endsWith('.yml') && !file.includes('.disabled'));
+        const ymlFiles = files.filter(file => (
+            (file.endsWith('.yml') || file.endsWith('.yaml')) && !file.includes('.disabled')
+        ));
 
         this.results.total = ymlFiles.length;
         console.log(`📋 Found ${ymlFiles.length} active workflow files\n`);

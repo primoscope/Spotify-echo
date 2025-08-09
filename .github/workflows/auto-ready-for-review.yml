@@ -1,0 +1,69 @@
+name: Auto convert draft PRs to ready-for-review when checks pass
+
+on:
+  workflow_run:
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  mark-ready:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Convert associated draft PR to ready-for-review when all checks succeed
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const sha = context.payload.workflow_run.head_sha;
+            core.info(`Looking up PRs for commit: ${sha}`);
+
+            // Find PRs associated with the commit
+            const prs = await github.request('GET /repos/{owner}/{repo}/commits/{ref}/pulls', {
+              owner, repo, ref: sha,
+              mediaType: { previews: ['groot'] }
+            });
+
+            if (!prs.data.length) {
+              core.info('No PR found for this commit. Skipping.');
+              return;
+            }
+
+            for (const pr of prs.data) {
+              if (pr.state !== 'open') {
+                core.info(`PR #${pr.number} is not open; skipping.`);
+                continue;
+              }
+              if (!pr.draft) {
+                core.info(`PR #${pr.number} is already ready for review; skipping.`);
+                continue;
+              }
+
+              // Ensure all check suites for the PR head SHA are successful/neutral/skipped
+              const suites = await github.request('GET /repos/{owner}/{repo}/commits/{ref}/check-suites', {
+                owner, repo, ref: pr.head.sha
+              });
+
+              const okConclusions = new Set(['success', 'neutral', 'skipped']);
+              const suitesArr = suites.data.check_suites || [];
+
+              if (!suitesArr.length) {
+                core.info(`No check suites yet for PR #${pr.number}; will wait for another run.`);
+                continue;
+              }
+
+              const allOk = suitesArr.every(cs => okConclusions.has(cs.conclusion || ''));
+              if (!allOk) {
+                core.info(`Not all check suites are successful for PR #${pr.number}. Will wait for another run.`);
+                continue;
+              }
+
+              await github.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+                owner, repo, pull_number: pr.number, draft: false
+              });
+              core.notice(`Converted PR #${pr.number} to ready for review.`);
+            }

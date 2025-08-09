@@ -11,15 +11,15 @@
 
 const express = require('express');
 const { spawn, execSync } = require('child_process');
-const WebSocket = require('ws');
-const cors = require('cors');
+// const WebSocket = require('ws'); // Optional for now
+// const cors = require('cors'); // Optional for now  
 const fs = require('fs');
 const path = require('path');
 
 class EnhancedMCPServer {
   constructor() {
     this.app = express();
-    this.port = process.env.MCP_SERVER_PORT || 3001;
+    this.port = process.env.MCP_PORT || 3002; // Use 3002 for orchestrator
     this.servers = new Map();
     this.capabilities = {
       diagrams: ['mermaid'],
@@ -36,13 +36,13 @@ class EnhancedMCPServer {
   }
 
   setupMiddleware() {
-    this.app.use(cors());
+    // this.app.use(cors()); // Optional for now
     this.app.use(express.json());
     this.app.use(express.static('public'));
   }
 
   setupRoutes() {
-    // Health check endpoint
+    // Enhanced health check endpoint
     this.app.get('/health', (req, res) => {
       const serverStatus = {};
       for (const [name, server] of this.servers) {
@@ -54,11 +54,23 @@ class EnhancedMCPServer {
       }
 
       res.json({
-        status: 'running',
+        status: 'healthy',
+        service: 'mcp-orchestrator',
+        timestamp: new Date().toISOString(),
         port: this.port,
         servers: serverStatus,
         totalServers: this.servers.size,
-        uptime: process.uptime()
+        uptime: process.uptime(),
+        uptime_human: this.formatUptime(process.uptime()),
+        memory: {
+          rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
+          heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024)
+        },
+        system: {
+          platform: process.platform,
+          node_version: process.version
+        },
+        capabilities: this.capabilities
       });
     });
 
@@ -179,6 +191,13 @@ class EnhancedMCPServer {
   getServerCapabilities(serverName) {
     const server = this.servers.get(serverName);
     return server ? server.capabilities : [];
+  }
+
+  formatUptime(seconds) {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hrs}h ${mins}m ${secs}s`;
   }
 
   async generateDiagram(type, content, filename) {

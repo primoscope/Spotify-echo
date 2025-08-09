@@ -227,11 +227,79 @@ class MCPWorkflowManager {
         return analytics;
     }
 
+    // Express server setup for status endpoint
+    setupStatusServer() {
+        const express = require('express');
+        const app = express();
+        const port = process.env.MCP_PORT || 3003;
+        
+        app.use(express.json());
+        
+        // Status endpoint for health checks
+        app.get('/status', async (req, res) => {
+            const analytics = await this.getWorkflowAnalytics();
+            res.json({
+                status: 'healthy',
+                service: 'mcp-workflow-manager',
+                timestamp: new Date().toISOString(),
+                uptime: process.uptime(),
+                workflows: {
+                    scheduled: this.scheduledWorkflows.size,
+                    total_executions: analytics.totalExecutions,
+                    successful: analytics.successfulExecutions,
+                    failed: analytics.failedExecutions,
+                    avg_execution_time_ms: Math.round(analytics.averageExecutionTime)
+                },
+                server_info: {
+                    node_version: process.version,
+                    platform: process.platform,
+                    memory_mb: Math.round(process.memoryUsage().rss / 1024 / 1024)
+                }
+            });
+        });
+        
+        // Health endpoint alias
+        app.get('/health', (req, res) => {
+            res.redirect('/status');
+        });
+        
+        // Analytics endpoint
+        app.get('/analytics', async (req, res) => {
+            const analytics = await this.getWorkflowAnalytics();
+            res.json(analytics);
+        });
+        
+        if (require.main === module) {
+            app.listen(port, () => {
+                console.log(`🔄 MCP Workflow Manager running on port ${port}`);
+                console.log(`📊 Status: http://localhost:${port}/status`);
+                console.log(`📈 Analytics: http://localhost:${port}/analytics`);
+            });
+        }
+        
+        return app;
+    }
+
     async shutdown() {
         if (this.schedulerInterval) {
             clearInterval(this.schedulerInterval);
         }
     }
+}
+
+// Initialize and run if called directly
+if (require.main === module) {
+    const config = {
+        projectRoot: path.join(__dirname, '..')
+    };
+    
+    const workflowManager = new MCPWorkflowManager(config);
+    workflowManager.initialize()
+        .then(() => {
+            workflowManager.setupStatusServer();
+            console.log('🎵 EchoTune MCP Workflow Manager ready!');
+        })
+        .catch(console.error);
 }
 
 module.exports = { MCPWorkflowManager };

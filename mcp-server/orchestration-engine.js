@@ -5,7 +5,7 @@
  */
 
 const EventEmitter = require('events');
-const axios = require('axios');
+// const axios = require('axios'); // Optional for now
 
 class MCPOrchestrationEngine extends EventEmitter {
     constructor(config) {

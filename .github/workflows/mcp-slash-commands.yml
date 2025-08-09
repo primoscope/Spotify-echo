@@ -7,7 +7,8 @@ on:
     types: [created]
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NODE_ENV: development
 
 jobs:
@@ -248,6 +249,7 @@ jobs:
           script: |
             const command = '${{ needs.parse-slash-commands.outputs.command }}';
             const target = '${{ needs.parse-slash-commands.outputs.target }}';
+            const contextNumber = '${{ needs.parse-slash-commands.outputs.context_number }}';
             
             // Map slash commands to workflow inputs
             let tasks = 'analyze';
@@ -257,51 +259,70 @@ jobs:
               tasks = 'optimize';
             }
             
-            // Trigger the enhanced GPT-5 workflow
+            // Post immediate confirmation comment
+            const confirmationComment = `## 🤖 GPT-5 Analysis Initiated
+            
+            **Command**: \`/${command}\`  
+            **Tasks**: ${tasks}  
+            **Target**: ${target || 'Repository-wide'}  
+            **Triggered by**: @${{ github.actor }}
+            **Model**: GPT-5 Enhanced Multimodal
+            
+            🚀 **Status**: Triggering comprehensive analysis workflow...
+            
+            **What's happening:**
+            - 📊 Repository structure analysis
+            - 🔍 Code quality review
+            - 🎯 Target-specific deep analysis
+            - 🔧 MCP integration validation
+            - ⚡ Performance optimization insights
+            
+            **Track Progress**: [View workflow runs](${{ github.server_url }}/${{ github.repository }}/actions)
+            
+            *Results will be posted when analysis is complete (typically 2-3 minutes)*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: confirmationComment
+            });
+            
+            // Trigger the enhanced GPT-5 workflow via repository dispatch
             try {
-              await github.rest.actions.createWorkflowDispatch({
+              await github.rest.repos.createDispatchEvent({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                workflow_id: 'gpt5-advanced-multimodel.yml',
-                ref: context.ref || 'main',
-                inputs: {
-                  gpt_model: 'gpt-5',
+                event_type: 'gpt5-analyze',
+                client_payload: {
+                  pr_number: contextNumber,
+                  model: 'gpt-5',
                   tasks: tasks,
-                  target: target || ''
+                  target: target || '',
+                  triggered_by: '${{ github.actor }}',
+                  trigger_type: 'slash_command',
+                  command: command
                 }
               });
               
-              // Post confirmation comment
-              const contextNumber = '${{ needs.parse-slash-commands.outputs.context_number }}';
-              const confirmationComment = `## 🤖 GPT-5 Analysis Triggered
-              
-              **Command**: \`/${command}\`  
-              **Tasks**: ${tasks}  
-              **Target**: ${target || 'Repository-wide'}  
-              **Triggered by**: @${{ github.actor }}
-              
-              The enhanced GPT-5 workflow has been started. Results will be posted when analysis is complete.
-              
-              **Track Progress**: [View workflow runs](${{ github.server_url }}/${{ github.repository }}/actions)`;
-              
-              await github.rest.issues.createComment({
-                issue_number: contextNumber,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: confirmationComment
-              });
+              console.log(`✅ Successfully triggered GPT-5 analysis for ${command}`);
               
             } catch (error) {
               console.error('Failed to trigger GPT-5 workflow:', error);
               
               // Post error comment
-              const contextNumber = '${{ needs.parse-slash-commands.outputs.context_number }}';
-              const errorComment = `## ❌ GPT-5 Command Failed
+              const errorComment = `## ❌ GPT-5 Analysis Failed to Start
               
               **Command**: \`/${command}\`  
-              **Error**: Failed to trigger enhanced GPT-5 workflow
+              **Error**: ${error.message}
               
-              Please check the workflow configuration or try again later.`;
+              **Troubleshooting:**
+              - Check if the GPT-5 workflow file exists and is valid
+              - Ensure proper permissions for repository dispatch events
+              - Try again in a few minutes
+              
+              **Manual Alternative**: 
+              You can manually trigger the workflow from the [Actions tab](${{ github.server_url }}/${{ github.repository }}/actions/workflows/gpt5-advanced-multimodel.yml)`;
               
               await github.rest.issues.createComment({
                 issue_number: contextNumber,

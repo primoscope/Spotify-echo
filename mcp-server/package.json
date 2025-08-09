@@ -1,264 +1,67 @@
 {
   "name": "echotune-mcp",
   "version": "1.0.0",
-  "description": "MCP server for EchoTune AI automation and browser integration",
-  "main": "index.js",
+  "private": true,
+  "description": "EchoTune AI MCP Server Infrastructure",
   "scripts": {
-    "start": "node enhanced-mcp-orchestrator.js",
-    "dev": "nodemon enhanced-mcp-orchestrator.js",
-    "test": "jest",
-    "spotify-server": "python spotify_server.py",
-    "orchestrator": "node enhanced-mcp-orchestrator.js",
-    "legacy-server": "node enhanced-server.js"
-  },
-  "dependencies": {
-    "puppeteer": "^24.16.0",
-    "express": "^4.18.0",
-    "ws": "^8.14.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.0",
-    "jest": "^29.0.0"
+    "start": "node health.js",
+    "start:health": "node health.js",
+    "start:orchestrator": "node enhanced-mcp-orchestrator.js", 
+    "start:workflow": "node workflow-manager.js",
+    "health": "curl -fsS http://localhost:${MCP_PORT:-3001}/health || exit 1",
+    "health:all": "npm run health && node ../scripts/mcp-manager.js health",
+    "test": "node ../scripts/mcp-manager.js test",
+    "validate": "node ../scripts/mcp-manager.js install && npm run health:all && npm run test"
   },
   "servers": {
-    "sequential-thinking": {
+    "mcpHealth": {
       "command": "node",
-      "args": ["mcp-servers/sequential-thinking/dist/index.js"],
-      "description": "Structured thinking and reasoning capabilities"
-    },
-    "github": {
-      "command": "docker",
-      "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
+      "args": ["health.js"],
+      "port": 3001,
+      "healthPath": "/health",
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}"
+        "NODE_ENV": "production",
+        "MCP_SERVER_NAME": "mcpHealth"
       },
-      "description": "Official GitHub integration for repository management, PRs, issues, and Actions"
+      "timeout": 30000,
+      "retries": 3
     },
-    "filesystem": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-filesystem", "--path", "${PWD}/.."],
+    "mcpOrchestrator": {
+      "command": "node", 
+      "args": ["enhanced-mcp-orchestrator.js"],
+      "port": 3002,
+      "healthPath": "/health",
       "env": {
-        "ALLOWED_PATHS": "${PWD}/..,${PWD}/../src,${PWD}/../scripts,${PWD}/../data"
+        "NODE_ENV": "production",
+        "MCP_SERVER_NAME": "mcpOrchestrator"
       },
-      "description": "File system operations and repository management"
+      "timeout": 45000,
+      "retries": 3
     },
-    "sqlite": {
-      "command": "python",
-      "args": ["-m", "mcp_server_sqlite", "--db-path", "data/echotune.db"],
-      "description": "SQLite database operations with built-in analysis features"
-    },
-    "memory": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-memory"],
-      "description": "Knowledge graph-based persistent memory system"
-    },
-    "postgres": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-postgres"],
-      "env": {
-        "POSTGRES_CONNECTION_STRING": "${DATABASE_URL}"
-      },
-      "description": "PostgreSQL database integration with schema inspection and query capabilities"
-    },
-    "brave-search": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-brave-search"],
-      "env": {
-        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
-      },
-      "description": "Web search capabilities using Brave's Search API"
-    },
-    "screenshot-website": {
+    "mcpWorkflow": {
       "command": "node",
-      "args": ["mcp-servers/screenshot-website/dist/index.js"],
-      "description": "Fast website screenshot capabilities"
-    },
-    "browserbase": {
-      "command": "npx",
-      "args": ["@browserbasehq/mcp-server-browserbase"],
+      "args": ["workflow-manager.js"], 
+      "port": 3003,
+      "healthPath": "/status",
       "env": {
-        "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
-        "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}",
-        "BROWSERBASE_SESSION_ID": "${BROWSERBASE_SESSION_ID}"
+        "NODE_ENV": "production", 
+        "MCP_SERVER_NAME": "mcpWorkflow"
       },
-      "description": "Cloud browser automation and interaction"
-    },
-    "mermaid": {
-      "command": "npx",
-      "args": ["mcp-mermaid"],
-      "description": "Mermaid diagram generation for workflow visualization"
-    },
-    "browser": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-puppeteer"],
-      "env": {
-        "PUPPETEER_HEADLESS": "true",
-        "PUPPETEER_ARGS": "--no-sandbox --disable-setuid-sandbox"
-      },
-      "description": "Browser automation for web scraping and interaction"
-    },
-    "spotify": {
-      "command": "python",
-      "args": ["spotify_server.py"],
-      "env": {
-        "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
-        "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}",
-        "SPOTIFY_REDIRECT_URI": "${SPOTIFY_REDIRECT_URI}"
-      },
-      "description": "Spotify API integration and music intelligence"
-    },
-    "sentry": {
-      "command": "node",
-      "args": ["../mcp-servers/sentry-mcp/sentry-mcp-server.js"],
-      "env": {
-        "SENTRY_MCP_PORT": "3012",
-        "NODE_ENV": "${NODE_ENV:-development}",
-        "SENTRY_DSN": "${SENTRY_DSN}"
-      },
-      "description": "Sentry monitoring and error tracking for comprehensive observability"
+      "timeout": 30000,
+      "retries": 3
     }
   },
-  "tools": {
-    "spotify_get_recommendations": {
-      "description": "Get personalized music recommendations using ML model",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "description": "User ID for personalized recommendations"
-          },
-          "limit": {
-            "type": "number",
-            "description": "Number of recommendations to return",
-            "default": 20
-          },
-          "seed_genres": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "Seed genres for recommendations"
-          },
-          "target_features": {
-            "type": "object",
-            "description": "Target audio features (danceability, energy, valence, etc.)"
-          }
-        },
-        "required": ["user_id"]
-      }
-    },
-    "spotify_create_playlist": {
-      "description": "Create a new Spotify playlist with specified tracks",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Playlist name"
-          },
-          "tracks": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "Array of Spotify track URIs"
-          },
-          "description": {
-            "type": "string",
-            "description": "Playlist description"
-          },
-          "public": {
-            "type": "boolean",
-            "description": "Whether playlist should be public",
-            "default": false
-          }
-        },
-        "required": ["name", "tracks"]
-      }
-    },
-    "spotify_analyze_listening_data": {
-      "description": "Analyze user listening patterns from CSV data",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "data_file": {
-            "type": "string",
-            "description": "Path to CSV file with listening data"
-          },
-          "analysis_type": {
-            "type": "string",
-            "enum": ["summary", "trends", "preferences", "discovery"],
-            "description": "Type of analysis to perform"
-          },
-          "time_range": {
-            "type": "string",
-            "description": "Time range for analysis (e.g., '30d', '6m', '1y')"
-          }
-        },
-        "required": ["data_file", "analysis_type"]
-      }
-    },
-    "browser_automate_spotify": {
-      "description": "Automate Spotify Web Player interactions",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string",
-            "enum": ["login", "play_track", "create_playlist", "follow_artist", "save_track"],
-            "description": "Action to perform"
-          },
-          "target": {
-            "type": "string",
-            "description": "Target for the action (track URI, artist URI, etc.)"
-          },
-          "credentials": {
-            "type": "object",
-            "properties": {
-              "username": {"type": "string"},
-              "password": {"type": "string"}
-            },
-            "description": "Spotify login credentials (use environment variables)"
-          }
-        },
-        "required": ["action"]
-      }
-    },
-    "browser_scrape_spotify_data": {
-      "description": "Scrape additional data from Spotify Web Player",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "data_type": {
-            "type": "string",
-            "enum": ["playlists", "liked_songs", "recently_played", "top_artists"],
-            "description": "Type of data to scrape"
-          },
-          "limit": {
-            "type": "number",
-            "description": "Number of items to scrape",
-            "default": 50
-          }
-        },
-        "required": ["data_type"]
-      }
-    }
+  "dependencies": {
+    "express": "^5.1.0",
+    "ws": "^8.16.0",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
   },
-  "resources": {
-    "user_profile": {
-      "description": "Get user's music profile and preferences",
-      "uri_template": "echotune://user/{user_id}/profile"
-    },
-    "listening_history": {
-      "description": "Access to user's listening history data",
-      "uri_template": "echotune://user/{user_id}/history"
-    },
-    "recommendations": {
-      "description": "Generated recommendations for user",
-      "uri_template": "echotune://user/{user_id}/recommendations"
-    },
-    "playlists": {
-      "description": "User's Spotify playlists",
-      "uri_template": "echotune://user/{user_id}/playlists"
-    }
-  }
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": ["mcp", "model-context-protocol", "echotune", "ai", "automation"],
+  "author": "EchoTune AI Team",
+  "license": "MIT"
 }

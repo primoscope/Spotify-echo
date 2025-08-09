@@ -2,7 +2,7 @@
 
 ## Overall Status: WARNING
 - **Score**: 77%
-- **Duration**: 6s
+- **Duration**: 5s
 - **Tests**: 91 total (69 passed, 2 failed)
 
 ## Category Results
@@ -23,4 +23,4 @@
 - Set up continuous monitoring
 - Schedule regular validation runs
 
-Generated: 2025-08-09T07:06:45.789Z
+Generated: 2025-08-09T09:44:00.196Z

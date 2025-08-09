@@ -36,8 +36,10 @@ class SpotifyAudioFeaturesPopulator:
         self.requests_made = 0
         self.last_request_time = 0
         
-        # Cache database for API responses
-        self.cache_db_path = '/tmp/spotify_audio_features_cache.db'
+        # Cache database for API responses - use configurable cache directory
+        cache_dir = os.getenv('CACHE_DIR', os.path.expanduser('~/.cache/echotune'))
+        os.makedirs(cache_dir, exist_ok=True)
+        self.cache_db_path = os.path.join(cache_dir, 'spotify_audio_features_cache.db')
         self.init_cache_db()
         
         if not self.client_id or not self.client_secret:

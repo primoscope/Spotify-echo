@@ -473,7 +473,7 @@ class SupabaseMigrator:
             execute_batch(
                 self.cursor,
                 """INSERT INTO artists (id, name, spotify_uri, genres) 
-                   VALUES (%s, %s, %s, %s) ON CONFLICT (name) DO NOTHING""",
+                   VALUES (%s, %s, %s, %s) ON CONFLICT (spotify_artist_id) DO NOTHING""",
                 artists_data
             )
             
@@ -493,7 +493,7 @@ class SupabaseMigrator:
             execute_batch(
                 self.cursor,
                 """INSERT INTO albums (id, name, spotify_uri, release_date, label, genres) 
-                   VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (name) DO NOTHING""",
+                   VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (spotify_album_id) DO NOTHING""",
                 albums_data
             )
             

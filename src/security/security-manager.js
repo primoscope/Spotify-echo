@@ -58,12 +58,12 @@ class SecurityManager {
     if (typeof document === 'undefined') return;
 
     const csp = {
-      'default-src': ['\'self\''],
-      'script-src': ['\'self\'', '\'unsafe-inline\'', 'https://api.spotify.com'],
-      'style-src': ['\'self\'', '\'unsafe-inline\''],
-      'img-src': ['\'self\'', 'data:', 'https://i.scdn.co'],
-      'connect-src': ['\'self\'', 'https://api.spotify.com', 'https://accounts.spotify.com'],
-      'media-src': ['\'self\'', 'https://p.scdn.co'],
+      'default-src': ["'self'"],
+      'script-src': ["'self'", "'unsafe-inline'", 'https://api.spotify.com'],
+      'style-src': ["'self'", "'unsafe-inline'"],
+      'img-src': ["'self'", 'data:', 'https://i.scdn.co'],
+      'connect-src': ["'self'", 'https://api.spotify.com', 'https://accounts.spotify.com'],
+      'media-src': ["'self'", 'https://p.scdn.co'],
       'frame-src': ['https://open.spotify.com'],
       'upgrade-insecure-requests': [],
     };
@@ -216,7 +216,7 @@ class SecurityManager {
             '<': '&lt;',
             '>': '&gt;',
             '"': '&quot;',
-            '\'': '&#x27;',
+            "'": '&#x27;',
             '&': '&amp;',
           };
           return entities[match] || match;

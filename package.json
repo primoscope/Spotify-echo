@@ -243,7 +243,15 @@
     "enhanced-mcp:test": "node -e \"const WorkflowManager = require('./src/mcp/workflow-integration-manager'); const manager = new WorkflowManager(); console.log('Enhanced MCP system initialized successfully');\"",
     "enhanced-mcp:health": "curl -s http://localhost:3000/api/enhanced-mcp/health | jq '.' || echo 'Enhanced MCP server not running'",
     "enhanced-mcp:capabilities": "curl -s http://localhost:3000/api/enhanced-mcp/capabilities | jq '.' || echo 'Enhanced MCP server not running'",
-    "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'"
+    "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'",
+    "production-readiness": "node scripts/production-readiness-analyzer.js",
+    "production-automation": "node scripts/mcp-production-automation.js",
+    "production-analysis": "node scripts/production-readiness-orchestrator.js",
+    "production-analysis:quick": "node scripts/production-readiness-orchestrator.js --quick",
+    "production-analysis:full": "node scripts/production-readiness-orchestrator.js --full",
+    "production-check": "node scripts/production-readiness-orchestrator.js --production-check",
+    "production-fixes": "npm run lint:fix && npm audit fix && npm run format",
+    "production-ready": "npm run production-analysis && echo 'Check PRODUCTION_READINESS_EXECUTIVE_SUMMARY.md for results'"
   },
   "keywords": [
     "music",

@@ -530,7 +530,7 @@ async function generateRecommendationExplanation(recommendation, trackId, userId
     switch (recommendation.recommendation_type) {
       case 'content_based':
         explanation.summary =
-          'This recommendation is based on the musical characteristics of songs you\'ve enjoyed.';
+          "This recommendation is based on the musical characteristics of songs you've enjoyed.";
         explanation.reasons.push('Analyzes audio features like tempo, energy, and mood');
         explanation.factors.push({
           type: 'audio_features',
@@ -607,7 +607,7 @@ async function generateRecommendationExplanation(recommendation, trackId, userId
     }
 
     if (userProfile.recentlyPlayedArtists && userProfile.recentlyPlayedArtists.length > 0) {
-      explanation.reasons.push('Similar to artists you\'ve been listening to recently');
+      explanation.reasons.push("Similar to artists you've been listening to recently");
     }
 
     // Add specific track explanation if trackId provided

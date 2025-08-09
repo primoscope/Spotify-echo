@@ -37,7 +37,7 @@ function requireAuth(req, res, next) {
     return res.status(401).json({
       error: 'Authorization required',
       message: 'Please login to access this resource',
-      code: 'AUTH_REQUIRED'
+      code: 'AUTH_REQUIRED',
     });
   }
 
@@ -46,7 +46,7 @@ function requireAuth(req, res, next) {
     console.error('JWT_SECRET not configured');
     return res.status(500).json({
       error: 'Authentication service unavailable',
-      message: 'Server configuration error'
+      message: 'Server configuration error',
     });
   }
 
@@ -55,7 +55,7 @@ function requireAuth(req, res, next) {
     return res.status(401).json({
       error: 'Invalid or expired token',
       message: 'Please login again',
-      code: 'TOKEN_INVALID'
+      code: 'TOKEN_INVALID',
     });
   }
 
@@ -103,16 +103,16 @@ function createRateLimit(options = {}) {
   const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes default
   const max = options.max || 100;
   const windowSeconds = Math.floor(windowMs / 1000);
-  
+
   // In-memory fallback for when Redis is not available
   const requests = new Map();
 
   return async (req, res, next) => {
     try {
       const redisManager = getRedisManager();
-      const key = options.keyGenerator ? 
-        options.keyGenerator(req) : 
-        `rate_limit:${req.ip || req.connection.remoteAddress}`;
+      const key = options.keyGenerator
+        ? options.keyGenerator(req)
+        : `rate_limit:${req.ip || req.connection.remoteAddress}`;
 
       let rateLimitResult;
 
@@ -123,7 +123,7 @@ function createRateLimit(options = {}) {
         // Fallback to in-memory rate limiting
         const now = Date.now();
         const cutoff = now - windowMs;
-        
+
         // Clean old entries
         for (const [k, v] of requests.entries()) {
           if (v.resetTime < cutoff) {
@@ -132,14 +132,14 @@ function createRateLimit(options = {}) {
         }
 
         const requestInfo = requests.get(key) || { count: 0, resetTime: now + windowMs };
-        
+
         if (requestInfo.count >= max) {
           rateLimitResult = {
             allowed: false,
             count: requestInfo.count,
             limit: max,
             resetTime: requestInfo.resetTime,
-            remaining: 0
+            remaining: 0,
           };
         } else {
           requestInfo.count++;
@@ -149,7 +149,7 @@ function createRateLimit(options = {}) {
             count: requestInfo.count,
             limit: max,
             resetTime: requestInfo.resetTime,
-            remaining: Math.max(0, max - requestInfo.count)
+            remaining: Math.max(0, max - requestInfo.count),
           };
         }
       }
@@ -158,7 +158,7 @@ function createRateLimit(options = {}) {
       res.set({
         'X-RateLimit-Limit': rateLimitResult.limit,
         'X-RateLimit-Remaining': rateLimitResult.remaining,
-        'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime / 1000)
+        'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime / 1000),
       });
 
       if (!rateLimitResult.allowed) {
@@ -167,7 +167,7 @@ function createRateLimit(options = {}) {
           message: options.message || 'Too many requests, please try again later.',
           retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
           limit: rateLimitResult.limit,
-          remaining: rateLimitResult.remaining
+          remaining: rateLimitResult.remaining,
         });
       }
 
@@ -268,9 +268,9 @@ function errorHandler(err, req, res, _next) {
 function securityHeaders(req, res, next) {
   const isProduction = process.env.NODE_ENV === 'production';
   const { getSecurityHeaders } = require('../utils/auth-helpers');
-  
+
   const headers = getSecurityHeaders(isProduction);
-  
+
   // Apply all security headers
   Object.entries(headers).forEach(([key, value]) => {
     res.setHeader(key, value);
@@ -346,28 +346,28 @@ const authRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 auth attempts per 15 minutes
   message: 'Too many authentication attempts, please try again later',
-  keyGenerator: (req) => `auth:${req.ip || 'unknown'}`
+  keyGenerator: (req) => `auth:${req.ip || 'unknown'}`,
 });
 
 const apiRateLimit = createRateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes  
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // 100 API requests per 15 minutes
   message: 'Too many API requests, please slow down',
-  keyGenerator: (req) => `api:${req.user?.id || req.ip || 'unknown'}`
+  keyGenerator: (req) => `api:${req.user?.id || req.ip || 'unknown'}`,
 });
 
 const spotifyRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // Higher limit for Spotify operations
   message: 'Too many Spotify API requests, please slow down',
-  keyGenerator: (req) => `spotify:${req.user?.id || req.ip || 'unknown'}`
+  keyGenerator: (req) => `spotify:${req.user?.id || req.ip || 'unknown'}`,
 });
 
 const chatRateLimit = createRateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 20, // 20 chat messages per minute
   message: 'Too many chat messages, please slow down',
-  keyGenerator: (req) => `chat:${req.user?.id || req.ip || 'unknown'}`
+  keyGenerator: (req) => `chat:${req.user?.id || req.ip || 'unknown'}`,
 });
 
 module.exports = {

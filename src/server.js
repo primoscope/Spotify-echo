@@ -174,8 +174,8 @@ const sessionConfig = {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
-  }
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+  },
 };
 
 // Note: Redis session store will be configured during initialization
@@ -307,19 +307,19 @@ app.get('/api/performance', async (req, res) => {
     const report = performanceMonitor.getPerformanceReport();
     const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
     const slowRequestMetrics = getSlowRequestMetrics();
-    
+
     // Combine performance data
     const enhancedReport = {
       ...report,
       slow_requests: slowRequestMetrics,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     res.json(enhancedReport);
   } catch (error) {
     res.status(500).json({
       error: 'Failed to get performance report',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -328,19 +328,19 @@ app.get('/api/performance', async (req, res) => {
 app.get('/api/rate-limit/stats', (req, res) => {
   try {
     const stats = {};
-    
+
     for (const [name, limiter] of Object.entries(rateLimiters)) {
       stats[name] = limiter.getStats();
     }
-    
+
     res.json({
       rate_limiters: stats,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       error: 'Failed to get rate limiter stats',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -353,7 +353,7 @@ app.get('/api/mcp/analytics', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       error: 'Failed to generate MCP analytics report',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -365,21 +365,21 @@ app.post('/api/performance/baseline', async (req, res) => {
     const options = {
       baseURL: req.body.baseURL || `http://localhost:${PORT}`,
       testDuration: req.body.testDuration || 30000,
-      concurrentRequests: req.body.concurrentRequests || 3
+      concurrentRequests: req.body.concurrentRequests || 3,
     };
-    
+
     const baseline = new PerformanceBaseline(options);
     const results = await baseline.runBaseline();
-    
+
     res.json({
       success: true,
       results: results,
-      message: 'Performance baseline completed'
+      message: 'Performance baseline completed',
     });
   } catch (error) {
     res.status(500).json({
       error: 'Failed to run performance baseline',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -390,16 +390,16 @@ app.get('/api/cache/stats', async (req, res) => {
     const cacheStats = await cacheManager.getStats();
     const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
     const slowRequestMetrics = getSlowRequestMetrics();
-    
+
     res.json({
       cache: cacheStats,
       performance: slowRequestMetrics,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       error: 'Failed to get cache stats',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -413,7 +413,7 @@ app.get('/api/redis/health', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -764,7 +764,7 @@ app.post('/api/chat', async (req, res) => {
 
     if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
       response =
-        'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
+        "I'd love to recommend some music for you! What mood are you in? Or what genre would you like to explore?";
       action = 'recommend';
     } else if (lowerMessage.includes('playlist')) {
       response =
@@ -776,10 +776,10 @@ app.post('/api/chat', async (req, res) => {
       action = 'mood_analysis';
     } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
       response =
-        'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
+        "Hello! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?";
     } else {
       response =
-        'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
+        "I'm here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.";
     }
 
     res.json({
@@ -1057,7 +1057,9 @@ server.listen(PORT, '0.0.0.0', async () => {
   console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔑 Spotify configured: ${!!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)}`);
-  console.log(`🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`);
+  console.log(
+    `🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`
+  );
 
   // Initialize Redis first
   try {

@@ -2,14 +2,14 @@ const express = require('express');
 const axios = require('axios');
 const SpotifyAudioFeaturesService = require('../../spotify/audio-features');
 const { requireAuth, createRateLimit, authRateLimit } = require('../middleware');
-const { 
-  generatePKCEChallenge, 
-  generateNonce, 
-  createJWT, 
+const {
+  generatePKCEChallenge,
+  generateNonce,
+  createJWT,
   createRefreshToken,
   verifyRefreshToken,
   sanitizeUserData,
-  getSecureCookieOptions
+  getSecureCookieOptions,
 } = require('../../utils/auth-helpers');
 const { getRedisManager } = require('../../utils/redis');
 
@@ -25,7 +25,9 @@ const getRedirectUri = () => {
   if (process.env.NODE_ENV === 'production') {
     return process.env.SPOTIFY_REDIRECT_URI || `https://${process.env.DOMAIN}/auth/callback`;
   }
-  return process.env.SPOTIFY_REDIRECT_URI || `http://localhost:${process.env.PORT || 3000}/auth/callback`;
+  return (
+    process.env.SPOTIFY_REDIRECT_URI || `http://localhost:${process.env.PORT || 3000}/auth/callback`
+  );
 };
 
 // Rate limiting for Spotify endpoints
@@ -44,7 +46,7 @@ router.get('/auth/login', authRateLimit, async (req, res) => {
     if (!SPOTIFY_CLIENT_ID) {
       return res.status(500).json({
         error: 'Spotify not configured',
-        message: 'SPOTIFY_CLIENT_ID not set'
+        message: 'SPOTIFY_CLIENT_ID not set',
       });
     }
 
@@ -52,13 +54,13 @@ router.get('/auth/login', authRateLimit, async (req, res) => {
     const pkce = generatePKCEChallenge();
     const scope = [
       'user-read-private',
-      'user-read-email', 
+      'user-read-email',
       'playlist-modify-public',
       'playlist-modify-private',
       'user-read-recently-played',
       'user-top-read',
       'user-read-playback-state',
-      'user-modify-playback-state'
+      'user-modify-playback-state',
     ].join(' ');
 
     // Store PKCE challenge and state in Redis/session store
@@ -67,33 +69,34 @@ router.get('/auth/login', authRateLimit, async (req, res) => {
       code_verifier: pkce.code_verifier,
       state,
       timestamp: Date.now(),
-      ip: req.ip
+      ip: req.ip,
     };
 
     await redisManager.set(`oauth:${state}`, authData, 600); // 10 minute expiry
 
-    const authURL = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({
-      response_type: 'code',
-      client_id: SPOTIFY_CLIENT_ID,
-      scope,
-      redirect_uri: getRedirectUri(),
-      state,
-      code_challenge: pkce.code_challenge,
-      code_challenge_method: pkce.code_challenge_method
-    }).toString();
+    const authURL =
+      'https://accounts.spotify.com/authorize?' +
+      new URLSearchParams({
+        response_type: 'code',
+        client_id: SPOTIFY_CLIENT_ID,
+        scope,
+        redirect_uri: getRedirectUri(),
+        state,
+        code_challenge: pkce.code_challenge,
+        code_challenge_method: pkce.code_challenge_method,
+      }).toString();
 
     res.json({
       success: true,
       authUrl: authURL,
       state,
-      expiresAt: Date.now() + 600000 // 10 minutes
+      expiresAt: Date.now() + 600000, // 10 minutes
     });
-
   } catch (error) {
     console.error('OAuth login error:', error);
     res.status(500).json({
       error: 'Authentication setup failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -101,7 +104,7 @@ router.get('/auth/login', authRateLimit, async (req, res) => {
 /**
  * Handle Spotify OAuth callback
  * GET /api/spotify/auth/callback
- */  
+ */
 router.get('/auth/callback', authRateLimit, async (req, res) => {
   try {
     const { code, state, error: oauthError } = req.query;
@@ -111,25 +114,25 @@ router.get('/auth/callback', authRateLimit, async (req, res) => {
       return res.status(400).json({
         error: 'OAuth failed',
         message: oauthError,
-        code: 'SPOTIFY_OAUTH_ERROR'
+        code: 'SPOTIFY_OAUTH_ERROR',
       });
     }
 
     if (!code || !state) {
       return res.status(400).json({
         error: 'Missing parameters',
-        message: 'Authorization code and state are required'
+        message: 'Authorization code and state are required',
       });
     }
 
     // Verify state and get stored PKCE data
     const redisManager = getRedisManager();
     const authData = await redisManager.get(`oauth:${state}`);
-    
+
     if (!authData) {
       return res.status(400).json({
         error: 'Invalid state',
-        message: 'State parameter is invalid or expired'
+        message: 'State parameter is invalid or expired',
       });
     }
 
@@ -144,13 +147,13 @@ router.get('/auth/callback', authRateLimit, async (req, res) => {
         code,
         redirect_uri: getRedirectUri(),
         client_id: SPOTIFY_CLIENT_ID,
-        code_verifier: authData.code_verifier
+        code_verifier: authData.code_verifier,
       }),
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
-        }
+          Authorization: `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
+        },
       }
     );
 
@@ -158,7 +161,7 @@ router.get('/auth/callback', authRateLimit, async (req, res) => {
 
     // Get user profile
     const userResponse = await axios.get('https://api.spotify.com/v1/me', {
-      headers: { Authorization: `Bearer ${access_token}` }
+      headers: { Authorization: `Bearer ${access_token}` },
     });
 
     const spotifyUser = userResponse.data;
@@ -178,8 +181,8 @@ router.get('/auth/callback', authRateLimit, async (req, res) => {
       user: userData,
       spotify_access_token: access_token,
       spotify_refresh_token: refresh_token,
-      spotify_expires_at: Date.now() + (expires_in * 1000),
-      created_at: new Date().toISOString()
+      spotify_expires_at: Date.now() + expires_in * 1000,
+      created_at: new Date().toISOString(),
     };
 
     await redisManager.setSession(userData.id, sessionData, 7 * 24 * 60 * 60); // 7 days
@@ -192,9 +195,9 @@ router.get('/auth/callback', authRateLimit, async (req, res) => {
     const cookieOptions = getSecureCookieOptions(isProduction);
 
     res.cookie('access_token', accessTokenJWT, cookieOptions);
-    res.cookie('refresh_token', refreshTokenJWT, { 
-      ...cookieOptions, 
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days for refresh token
+    res.cookie('refresh_token', refreshTokenJWT, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for refresh token
     });
 
     res.json({
@@ -202,15 +205,14 @@ router.get('/auth/callback', authRateLimit, async (req, res) => {
       user: userData,
       access_token: accessTokenJWT,
       expires_in: 3600,
-      message: 'Authentication successful'
+      message: 'Authentication successful',
     });
-
   } catch (error) {
     console.error('OAuth callback error:', error.response?.data || error.message);
     res.status(500).json({
-      error: 'Authentication failed', 
+      error: 'Authentication failed',
       message: 'Failed to complete Spotify authentication',
-      details: error.response?.data?.error_description || error.message
+      details: error.response?.data?.error_description || error.message,
     });
   }
 });
@@ -222,11 +224,11 @@ router.get('/auth/callback', authRateLimit, async (req, res) => {
 router.post('/auth/refresh', authRateLimit, async (req, res) => {
   try {
     const refreshToken = req.cookies?.refresh_token || req.body.refresh_token;
-    
+
     if (!refreshToken) {
       return res.status(401).json({
         error: 'Refresh token required',
-        message: 'No refresh token provided'
+        message: 'No refresh token provided',
       });
     }
 
@@ -239,7 +241,7 @@ router.post('/auth/refresh', authRateLimit, async (req, res) => {
     if (!decoded) {
       return res.status(401).json({
         error: 'Invalid refresh token',
-        message: 'Refresh token is invalid or expired'
+        message: 'Refresh token is invalid or expired',
       });
     }
 
@@ -250,35 +252,36 @@ router.post('/auth/refresh', authRateLimit, async (req, res) => {
     if (!sessionData || !sessionData.spotify_refresh_token) {
       return res.status(401).json({
         error: 'Session expired',
-        message: 'Please login again'
+        message: 'Please login again',
       });
     }
 
     // Refresh Spotify token if needed
-    if (sessionData.spotify_expires_at < Date.now() + 300000) { // Refresh if expires in 5 minutes
+    if (sessionData.spotify_expires_at < Date.now() + 300000) {
+      // Refresh if expires in 5 minutes
       const refreshResponse = await axios.post(
         'https://accounts.spotify.com/api/token',
         new URLSearchParams({
           grant_type: 'refresh_token',
-          refresh_token: sessionData.spotify_refresh_token
+          refresh_token: sessionData.spotify_refresh_token,
         }),
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
-          }
+            Authorization: `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
+          },
         }
       );
 
       const { access_token, expires_in, refresh_token: newRefreshToken } = refreshResponse.data;
-      
+
       // Update session with new tokens
       sessionData.spotify_access_token = access_token;
-      sessionData.spotify_expires_at = Date.now() + (expires_in * 1000);
+      sessionData.spotify_expires_at = Date.now() + expires_in * 1000;
       if (newRefreshToken) {
         sessionData.spotify_refresh_token = newRefreshToken;
       }
-      
+
       await redisManager.setSession(userId, sessionData, 7 * 24 * 60 * 60);
     }
 
@@ -294,14 +297,13 @@ router.post('/auth/refresh', authRateLimit, async (req, res) => {
       success: true,
       access_token: newAccessToken,
       expires_in: 3600,
-      user: sessionData.user
+      user: sessionData.user,
     });
-
   } catch (error) {
     console.error('Token refresh error:', error);
     res.status(500).json({
       error: 'Token refresh failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -313,7 +315,7 @@ router.post('/auth/refresh', authRateLimit, async (req, res) => {
 router.post('/auth/logout', async (req, res) => {
   try {
     const userId = req.user?.id;
-    
+
     if (userId) {
       const redisManager = getRedisManager();
       await redisManager.deleteSession(userId);
@@ -326,7 +328,7 @@ router.post('/auth/logout', async (req, res) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'strict' : 'lax',
-      path: '/'
+      path: '/',
     };
 
     res.clearCookie('access_token', clearOptions);
@@ -334,14 +336,13 @@ router.post('/auth/logout', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Logged out successfully'
+      message: 'Logged out successfully',
     });
-
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({
       error: 'Logout failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -354,11 +355,11 @@ router.get('/auth/me', requireAuth, async (req, res) => {
   try {
     const redisManager = getRedisManager();
     const cachedUser = await redisManager.getCachedSpotifyUser(req.user.id);
-    
+
     if (cachedUser) {
       return res.json({
         success: true,
-        user: cachedUser
+        user: cachedUser,
       });
     }
 
@@ -367,20 +368,19 @@ router.get('/auth/me', requireAuth, async (req, res) => {
     if (sessionData && sessionData.user) {
       return res.json({
         success: true,
-        user: sessionData.user
+        user: sessionData.user,
       });
     }
 
     res.status(404).json({
       error: 'User not found',
-      message: 'User session expired'
+      message: 'User session expired',
     });
-
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({
       error: 'Failed to get user',
-      message: error.message
+      message: error.message,
     });
   }
 });

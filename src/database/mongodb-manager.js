@@ -278,7 +278,7 @@ class MongoDBManager {
   }
 
   // MongoDB Insights and Admin Tools
-  
+
   /**
    * Get comprehensive collection statistics
    */
@@ -295,7 +295,7 @@ class MongoDBManager {
         try {
           const collectionStats = await this.db.collection(collection.name).stats();
           const indexes = await this.db.collection(collection.name).indexes();
-          
+
           stats.push({
             name: collection.name,
             count: collectionStats.count || 0,
@@ -304,14 +304,14 @@ class MongoDBManager {
             totalIndexSize: collectionStats.totalIndexSize || 0,
             avgObjSize: collectionStats.avgObjSize || 0,
             indexCount: indexes.length,
-            indexes: indexes.map(idx => ({
+            indexes: indexes.map((idx) => ({
               name: idx.name,
               key: idx.key,
               size: idx.size || 0,
               unique: idx.unique || false,
               sparse: idx.sparse || false,
-              expireAfterSeconds: idx.expireAfterSeconds
-            }))
+              expireAfterSeconds: idx.expireAfterSeconds,
+            })),
           });
         } catch (error) {
           console.warn(`Could not get stats for collection ${collection.name}:`, error.message);
@@ -320,7 +320,7 @@ class MongoDBManager {
             error: error.message,
             count: 0,
             size: 0,
-            indexes: []
+            indexes: [],
           });
         }
       }
@@ -330,7 +330,7 @@ class MongoDBManager {
         totalCollections: stats.length,
         totalDocuments: stats.reduce((sum, col) => sum + (col.count || 0), 0),
         totalDataSize: stats.reduce((sum, col) => sum + (col.size || 0), 0),
-        totalIndexSize: stats.reduce((sum, col) => sum + (col.totalIndexSize || 0), 0)
+        totalIndexSize: stats.reduce((sum, col) => sum + (col.totalIndexSize || 0), 0),
       };
     } catch (error) {
       console.error('Error getting collection stats:', error);
@@ -350,10 +350,10 @@ class MongoDBManager {
         recommendations: [
           'MongoDB connection required for index analysis',
           'Connect to MongoDB to enable comprehensive index health monitoring',
-          'Index optimization recommendations will be available after connection'
+          'Index optimization recommendations will be available after connection',
         ],
         error: 'MongoDB not connected',
-        fallbackMode: true
+        fallbackMode: true,
       };
     }
 
@@ -365,20 +365,21 @@ class MongoDBManager {
         unusedIndexes: 0,
         recommendations: [],
         performanceImpact: 'low',
-        optimizationSuggestions: []
+        optimizationSuggestions: [],
       };
 
       for (const collection of collections) {
         try {
           const indexes = await this.db.collection(collection.name).indexes();
-          const indexStats = await this.db.collection(collection.name).aggregate([
-            { $indexStats: {} }
-          ]).toArray();
+          const indexStats = await this.db
+            .collection(collection.name)
+            .aggregate([{ $indexStats: {} }])
+            .toArray();
 
           for (const index of indexes) {
-            const stats = indexStats.find(s => s.name === index.name);
+            const stats = indexStats.find((s) => s.name === index.name);
             const usageStats = stats ? stats.accesses : { ops: 0, since: new Date() };
-            
+
             // Analyze index health with performance impact assessment
             if (index.name === '_id_') {
               analysis.healthyIndexes++;
@@ -396,11 +397,11 @@ class MongoDBManager {
                 description: `Index "${index.name}" has never been used and consumes ${this.formatBytes(sizeImpact)}`,
                 recommendation: `Consider dropping unused index: db.${collection.name}.dropIndex("${index.name}")`,
                 performanceImpact: sizeImpact > 10485760 ? 'high' : 'medium',
-                estimatedSavings: this.formatBytes(sizeImpact)
+                estimatedSavings: this.formatBytes(sizeImpact),
               });
             } else {
               analysis.healthyIndexes++;
-              
+
               // Check for underutilized indexes
               if (usageStats.ops < 10) {
                 analysis.optimizationSuggestions.push({
@@ -408,7 +409,7 @@ class MongoDBManager {
                   collection: collection.name,
                   index: index.name,
                   usage: usageStats.ops,
-                  suggestion: 'Monitor usage patterns - may be candidate for removal'
+                  suggestion: 'Monitor usage patterns - may be candidate for removal',
                 });
               }
             }
@@ -416,7 +417,6 @@ class MongoDBManager {
 
           // Check for missing recommended indexes
           await this.checkMissingIndexes(collection.name, analysis);
-          
         } catch (error) {
           console.warn(`Could not analyze indexes for ${collection.name}:`, error.message);
           analysis.problematicIndexes++;
@@ -465,28 +465,28 @@ class MongoDBManager {
     try {
       const collection = this.db.collection(collectionName);
       const existingIndexes = await collection.indexes();
-      const indexKeys = existingIndexes.map(idx => Object.keys(idx.key).join(','));
+      const indexKeys = existingIndexes.map((idx) => Object.keys(idx.key).join(','));
 
       // Define recommended indexes based on collection patterns
       const recommendations = {
-        'echotune_users': [
+        echotune_users: [
           { key: { spotifyId: 1 }, reason: 'Frequently queried by Spotify ID' },
           { key: { email: 1 }, reason: 'User authentication queries' },
-          { key: { lastActive: 1 }, reason: 'User activity tracking' }
+          { key: { lastActive: 1 }, reason: 'User activity tracking' },
         ],
-        'echotune_listening_history': [
+        echotune_listening_history: [
           { key: { userId: 1, playedAt: -1 }, reason: 'User timeline queries' },
           { key: { trackId: 1 }, reason: 'Track popularity analysis' },
-          { key: { playedAt: -1 }, reason: 'Recent activity queries' }
+          { key: { playedAt: -1 }, reason: 'Recent activity queries' },
         ],
-        'echotune_recommendations': [
+        echotune_recommendations: [
           { key: { userId: 1, score: -1 }, reason: 'User recommendations by score' },
-          { key: { createdAt: 1 }, reason: 'TTL and cleanup queries' }
-        ]
+          { key: { createdAt: 1 }, reason: 'TTL and cleanup queries' },
+        ],
       };
 
       const collectionRecs = recommendations[collectionName] || [];
-      
+
       for (const rec of collectionRecs) {
         const keyString = Object.keys(rec.key).join(',');
         if (!indexKeys.includes(keyString)) {
@@ -497,7 +497,7 @@ class MongoDBManager {
             severity: 'high',
             description: `Missing recommended index for ${collectionName}`,
             reason: rec.reason,
-            recommendation: `Create index: db.${collectionName}.createIndex(${JSON.stringify(rec.key)})`
+            recommendation: `Create index: db.${collectionName}.createIndex(${JSON.stringify(rec.key)})`,
           });
         }
       }
@@ -516,13 +516,13 @@ class MongoDBManager {
         totalSlowQueries: 0,
         queries: [],
         error: 'MongoDB not connected',
-        recommendations: ['Connect to MongoDB to enable slow query analysis']
+        recommendations: ['Connect to MongoDB to enable slow query analysis'],
       };
     }
 
     try {
       const { threshold = 100, limit = 50 } = options;
-      
+
       // Check if profiling is available
       let profilingStatus;
       try {
@@ -546,11 +546,11 @@ class MongoDBManager {
           recommendations: [
             'MongoDB profiling is disabled or not accessible',
             'Enable profiling with: db.setProfilingLevel(1, { slowms: 100 })',
-            'Requires admin privileges on MongoDB'
-          ]
+            'Requires admin privileges on MongoDB',
+          ],
         };
       }
-      
+
       // Enable profiling temporarily if not enabled
       let wasProfilingEnabled = profilingStatus.was > 0;
       if (!wasProfilingEnabled) {
@@ -567,8 +567,8 @@ class MongoDBManager {
             recommendations: [
               'Requires admin privileges to enable profiling',
               'Ask database administrator to enable profiling',
-              'Alternative: Use MongoDB Compass for query analysis'
-            ]
+              'Alternative: Use MongoDB Compass for query analysis',
+            ],
           };
         }
       }
@@ -576,12 +576,12 @@ class MongoDBManager {
       // Query the profiler collection
       const profileCollection = this.db.collection('system.profile');
       let slowQueries = [];
-      
+
       try {
         slowQueries = await profileCollection
-          .find({ 
+          .find({
             ts: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // Last 24 hours
-            millis: { $gte: threshold }
+            millis: { $gte: threshold },
           })
           .sort({ millis: -1 })
           .limit(limit)
@@ -612,7 +612,7 @@ class MongoDBManager {
       return {
         threshold,
         totalSlowQueries: slowQueries.length,
-        queries: slowQueries.map(query => ({
+        queries: slowQueries.map((query) => ({
           timestamp: query.ts,
           duration: query.millis,
           collection: query.ns ? query.ns.split('.').pop() : 'unknown',
@@ -621,9 +621,9 @@ class MongoDBManager {
           planSummary: query.planSummary || 'Not available',
           docsExamined: query.docsExamined || 0,
           docsReturned: query.docsReturned || 0,
-          keysExamined: query.keysExamined || 0
+          keysExamined: query.keysExamined || 0,
         })),
-        recommendations
+        recommendations,
       };
     } catch (error) {
       console.warn('Error analyzing slow queries:', error.message);
@@ -635,8 +635,8 @@ class MongoDBManager {
         recommendations: [
           'Slow query analysis failed',
           'Check MongoDB permissions and configuration',
-          'Consider using MongoDB Compass for performance analysis'
-        ]
+          'Consider using MongoDB Compass for performance analysis',
+        ],
       };
     }
   }
@@ -646,13 +646,13 @@ class MongoDBManager {
    */
   sanitizeCommand(command) {
     if (!command) return {};
-    
+
     // Remove sensitive data and limit size
     const sanitized = { ...command };
     delete sanitized.password;
     delete sanitized.pwd;
     delete sanitized.key;
-    
+
     const str = JSON.stringify(sanitized);
     return str.length > 200 ? JSON.parse(str.substring(0, 197) + '...') : sanitized;
   }
@@ -664,21 +664,21 @@ class MongoDBManager {
     const recommendations = [];
     const collectionIssues = {};
 
-    slowQueries.forEach(query => {
+    slowQueries.forEach((query) => {
       const collection = query.ns ? query.ns.split('.').pop() : 'unknown';
-      
+
       if (!collectionIssues[collection]) {
         collectionIssues[collection] = { count: 0, avgDuration: 0, issues: [] };
       }
-      
+
       collectionIssues[collection].count++;
       collectionIssues[collection].avgDuration += query.millis;
-      
+
       // Analyze query patterns
       if (query.docsExamined > query.docsReturned * 10) {
         collectionIssues[collection].issues.push('inefficient_scan');
       }
-      
+
       if (!query.planSummary || query.planSummary.includes('COLLSCAN')) {
         collectionIssues[collection].issues.push('missing_index');
       }
@@ -686,24 +686,24 @@ class MongoDBManager {
 
     Object.entries(collectionIssues).forEach(([collection, data]) => {
       data.avgDuration = data.avgDuration / data.count;
-      
+
       if (data.issues.includes('missing_index')) {
         recommendations.push({
           type: 'performance',
           collection,
           severity: 'high',
           description: `Collection ${collection} has queries requiring collection scans`,
-          recommendation: `Add appropriate indexes for frequently queried fields in ${collection}`
+          recommendation: `Add appropriate indexes for frequently queried fields in ${collection}`,
         });
       }
-      
+
       if (data.avgDuration > 1000) {
         recommendations.push({
           type: 'performance',
           collection,
           severity: 'medium',
           description: `Collection ${collection} has slow average query time: ${data.avgDuration.toFixed(0)}ms`,
-          recommendation: `Review query patterns and optimize indexes for ${collection}`
+          recommendation: `Review query patterns and optimize indexes for ${collection}`,
         });
       }
     });
@@ -722,7 +722,7 @@ class MongoDBManager {
     try {
       const dbStats = await this.db.admin().command({ dbStats: 1, scale: 1024 });
       const serverStatus = await this.db.admin().command({ serverStatus: 1 });
-      
+
       return {
         database: this.db.databaseName,
         collections: dbStats.collections || 0,
@@ -736,7 +736,7 @@ class MongoDBManager {
         connections: {
           current: serverStatus.connections?.current || 0,
           available: serverStatus.connections?.available || 0,
-          totalCreated: serverStatus.connections?.totalCreated || 0
+          totalCreated: serverStatus.connections?.totalCreated || 0,
         },
         operations: {
           insert: serverStatus.opcounters?.insert || 0,
@@ -744,13 +744,13 @@ class MongoDBManager {
           update: serverStatus.opcounters?.update || 0,
           delete: serverStatus.opcounters?.delete || 0,
           getmore: serverStatus.opcounters?.getmore || 0,
-          command: serverStatus.opcounters?.command || 0
+          command: serverStatus.opcounters?.command || 0,
         },
         memory: {
           resident: serverStatus.mem?.resident || 0,
           virtual: serverStatus.mem?.virtual || 0,
-          mapped: serverStatus.mem?.mapped || 0
-        }
+          mapped: serverStatus.mem?.mapped || 0,
+        },
       };
     } catch (error) {
       console.error('Error getting database stats:', error);
@@ -773,7 +773,7 @@ class MongoDBManager {
         format: options.format || 'json',
         data: options.format === 'csv' ? '' : [],
         error: 'MongoDB not connected',
-        recommendations: ['Establish MongoDB connection to enable data export']
+        recommendations: ['Establish MongoDB connection to enable data export'],
       };
     }
 
@@ -784,7 +784,7 @@ class MongoDBManager {
         query = {},
         projection = {},
         sanitize = true,
-        format = 'json'
+        format = 'json',
       } = options;
 
       // Verify collection exists with better error handling
@@ -803,10 +803,10 @@ class MongoDBManager {
           format,
           data: format === 'csv' ? '' : [],
           error: 'Cannot access collections list',
-          recommendations: ['Check database permissions for collection access']
+          recommendations: ['Check database permissions for collection access'],
         };
       }
-      
+
       if (collections.length === 0) {
         return {
           collection: collectionName,
@@ -819,23 +819,23 @@ class MongoDBManager {
           recommendations: [
             'Verify collection name spelling',
             'Check if collection exists in database',
-            'Collection may be empty or not created yet'
-          ]
+            'Collection may be empty or not created yet',
+          ],
         };
       }
 
       const collection = this.db.collection(collectionName);
-      
+
       // Execute export query with error handling
       let documents = [];
       let totalCount = 0;
-      
+
       try {
         let cursor = collection.find(query, { projection });
-        
+
         if (skip > 0) cursor = cursor.skip(skip);
         if (limit > 0) cursor = cursor.limit(limit);
-        
+
         documents = await cursor.toArray();
         totalCount = await collection.countDocuments(query);
       } catch (error) {
@@ -851,8 +851,8 @@ class MongoDBManager {
           recommendations: [
             'Check query syntax and parameters',
             'Verify collection schema and field names',
-            'Ensure sufficient database permissions'
-          ]
+            'Ensure sufficient database permissions',
+          ],
         };
       }
 
@@ -867,9 +867,10 @@ class MongoDBManager {
         format,
         data: format === 'csv' ? this.convertToCSV(exportData) : exportData,
         sanitized: sanitize,
-        recommendations: exportData.length > 0 ? 
-          ['Export completed successfully', 'Data has been sanitized for security'] :
-          ['Collection is empty', 'No data available for export']
+        recommendations:
+          exportData.length > 0
+            ? ['Export completed successfully', 'Data has been sanitized for security']
+            : ['Collection is empty', 'No data available for export'],
       };
     } catch (error) {
       console.warn(`Error exporting collection ${collectionName}:`, error.message);
@@ -884,8 +885,8 @@ class MongoDBManager {
         recommendations: [
           'Check MongoDB connection and permissions',
           'Verify collection exists and is accessible',
-          'Review export parameters and try again'
-        ]
+          'Review export parameters and try again',
+        ],
       };
     }
   }
@@ -895,16 +896,25 @@ class MongoDBManager {
    */
   sanitizeExportData(documents) {
     const sensitiveFields = [
-      'password', 'pwd', 'token', 'secret', 'key', 'private', 
-      'email', 'phone', 'ssn', 'creditCard', 'bankAccount'
+      'password',
+      'pwd',
+      'token',
+      'secret',
+      'key',
+      'private',
+      'email',
+      'phone',
+      'ssn',
+      'creditCard',
+      'bankAccount',
     ];
 
-    return documents.map(doc => {
+    return documents.map((doc) => {
       const sanitized = { ...doc };
-      
+
       // Remove sensitive fields
-      sensitiveFields.forEach(field => {
-        Object.keys(sanitized).forEach(key => {
+      sensitiveFields.forEach((field) => {
+        Object.keys(sanitized).forEach((key) => {
           if (key.toLowerCase().includes(field.toLowerCase())) {
             sanitized[key] = '[REDACTED]';
           }
@@ -920,23 +930,25 @@ class MongoDBManager {
    */
   convertToCSV(documents) {
     if (!documents || documents.length === 0) return '';
-    
+
     // Get all unique keys from documents
-    const allKeys = [...new Set(documents.flatMap(doc => Object.keys(doc)))];
-    
+    const allKeys = [...new Set(documents.flatMap((doc) => Object.keys(doc)))];
+
     // Create CSV header
     const header = allKeys.join(',');
-    
+
     // Create CSV rows
-    const rows = documents.map(doc => {
-      return allKeys.map(key => {
-        const value = doc[key];
-        if (value === null || value === undefined) return '';
-        if (typeof value === 'object') return JSON.stringify(value);
-        return String(value).includes(',') ? `"${value}"` : value;
-      }).join(',');
+    const rows = documents.map((doc) => {
+      return allKeys
+        .map((key) => {
+          const value = doc[key];
+          if (value === null || value === undefined) return '';
+          if (typeof value === 'object') return JSON.stringify(value);
+          return String(value).includes(',') ? `"${value}"` : value;
+        })
+        .join(',');
     });
-    
+
     return [header, ...rows].join('\n');
   }
 
@@ -950,11 +962,11 @@ class MongoDBManager {
 
     try {
       const collection = this.db.collection(collectionName);
-      
+
       const [stats, sample, indexes] = await Promise.all([
         collection.stats(),
         collection.findOne(),
-        collection.indexes()
+        collection.indexes(),
       ]);
 
       return {
@@ -964,11 +976,11 @@ class MongoDBManager {
         totalDataSize: stats.size || 0,
         sampleDocument: this.sanitizeExportData([sample])[0] || null,
         availableFields: sample ? Object.keys(sample) : [],
-        indexes: indexes.map(idx => ({
+        indexes: indexes.map((idx) => ({
           name: idx.name,
-          keys: Object.keys(idx.key)
+          keys: Object.keys(idx.key),
         })),
-        recommendedBatchSize: this.calculateRecommendedBatchSize(stats.avgObjSize || 1024)
+        recommendedBatchSize: this.calculateRecommendedBatchSize(stats.avgObjSize || 1024),
       };
     } catch (error) {
       console.error(`Error getting export metadata for ${collectionName}:`, error);
@@ -984,7 +996,7 @@ class MongoDBManager {
     const targetBatchSizeMB = 10;
     const targetBatchSizeBytes = targetBatchSizeMB * 1024 * 1024;
     const recommendedSize = Math.floor(targetBatchSizeBytes / avgDocSize);
-    
+
     // Keep within reasonable bounds
     return Math.max(100, Math.min(10000, recommendedSize));
   }
@@ -1003,13 +1015,13 @@ class MongoDBManager {
           readAccess: false,
           adminAccess: false,
           profilingAccess: false,
-          indexAccess: false
+          indexAccess: false,
         },
         recommendations: [
           'MongoDB connection is not available',
           'Check MONGODB_URI environment variable',
-          'Verify MongoDB server is running'
-        ]
+          'Verify MongoDB server is running',
+        ],
       };
     }
 
@@ -1018,7 +1030,7 @@ class MongoDBManager {
       readAccess: false,
       adminAccess: false,
       profilingAccess: false,
-      indexAccess: false
+      indexAccess: false,
     };
 
     try {
@@ -1093,7 +1105,7 @@ class MongoDBManager {
       return {
         isValid: tests.connection || tests.readAccess, // More permissive validation
         permissions: tests,
-        recommendations: this.generatePermissionRecommendations(tests)
+        recommendations: this.generatePermissionRecommendations(tests),
       };
     } catch (error) {
       console.warn('Admin access validation error:', error.message);
@@ -1104,8 +1116,8 @@ class MongoDBManager {
         recommendations: [
           'Check MongoDB connection and credentials',
           'Verify database permissions',
-          'Consider upgrading MongoDB driver version'
-        ]
+          'Consider upgrading MongoDB driver version',
+        ],
       };
     }
   }
@@ -1115,15 +1127,15 @@ class MongoDBManager {
    */
   generatePermissionRecommendations(permissions) {
     const recommendations = [];
-    
+
     if (!permissions.adminAccess) {
       recommendations.push('Limited admin access - some features may not be available');
     }
-    
+
     if (!permissions.profilingAccess) {
       recommendations.push('No profiling access - slow query analysis unavailable');
     }
-    
+
     if (!permissions.indexAccess) {
       recommendations.push('Limited index access - index analysis may be incomplete');
     }

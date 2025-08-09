@@ -49,7 +49,7 @@ function AudioFeatureGauge({ label, value, color = '#1976d2', size = 100 }) {
 
   const percentage = Math.round(value * 100);
   const circumference = 2 * Math.PI * 35;
-  const strokeDashoffset = circumference - (value * circumference);
+  const strokeDashoffset = circumference - value * circumference;
 
   return (
     <Box textAlign="center">
@@ -59,16 +59,16 @@ function AudioFeatureGauge({ label, value, color = '#1976d2', size = 100 }) {
       <Box position="relative" display="inline-flex">
         <svg width={size} height={size}>
           <circle
-            cx={size/2}
-            cy={size/2}
+            cx={size / 2}
+            cy={size / 2}
             r="35"
             fill="transparent"
             stroke="#e0e0e0"
             strokeWidth="8"
           />
           <circle
-            cx={size/2}
-            cy={size/2}
+            cx={size / 2}
+            cy={size / 2}
             r="35"
             fill="transparent"
             stroke={color}
@@ -76,7 +76,7 @@ function AudioFeatureGauge({ label, value, color = '#1976d2', size = 100 }) {
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            transform={`rotate(-90 ${size/2} ${size/2})`}
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
           />
         </svg>
         <Box
@@ -167,7 +167,7 @@ function SongDetailCard({ trackId, expanded, _onToggle }) {
 
   const featureColors = {
     energy: '#f44336',
-    valence: '#4caf50', 
+    valence: '#4caf50',
     danceability: '#ff9800',
     acousticness: '#9c27b0',
     instrumentalness: '#607d8b',
@@ -220,7 +220,9 @@ function SongDetailCard({ trackId, expanded, _onToggle }) {
                   <TableRow>
                     <TableCell>Duration</TableCell>
                     <TableCell>
-                      {features.duration_ms ? `${Math.round(features.duration_ms / 1000)}s` : 'Unknown'}
+                      {features.duration_ms
+                        ? `${Math.round(features.duration_ms / 1000)}s`
+                        : 'Unknown'}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -241,24 +243,34 @@ function SongDetailCard({ trackId, expanded, _onToggle }) {
                 Analysis Summary
               </Typography>
               <Box>
-                <Chip 
-                  label={`Energy: ${analysis.energy_level || 'Unknown'}`} 
-                  color={analysis.energy_level === 'high' ? 'success' : 
-                         analysis.energy_level === 'medium' ? 'warning' : 'default'}
+                <Chip
+                  label={`Energy: ${analysis.energy_level || 'Unknown'}`}
+                  color={
+                    analysis.energy_level === 'high'
+                      ? 'success'
+                      : analysis.energy_level === 'medium'
+                        ? 'warning'
+                        : 'default'
+                  }
                   sx={{ mr: 1, mb: 1 }}
                 />
-                <Chip 
+                <Chip
                   label={`Mood: ${analysis.mood || 'Unknown'}`}
-                  color={analysis.mood === 'happy' ? 'success' :
-                         analysis.mood === 'sad' ? 'error' : 'default'}
+                  color={
+                    analysis.mood === 'happy'
+                      ? 'success'
+                      : analysis.mood === 'sad'
+                        ? 'error'
+                        : 'default'
+                  }
                   sx={{ mr: 1, mb: 1 }}
                 />
-                <Chip 
+                <Chip
                   label={`Danceability: ${analysis.danceability_level || 'Unknown'}`}
                   color={analysis.danceability_level === 'high' ? 'success' : 'default'}
                   sx={{ mr: 1, mb: 1 }}
                 />
-                <Chip 
+                <Chip
                   label={`Tempo: ${analysis.tempo_category || 'Unknown'}`}
                   sx={{ mr: 1, mb: 1 }}
                 />
@@ -277,31 +289,39 @@ function SongDetailCard({ trackId, expanded, _onToggle }) {
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={3}>
-                    <Typography variant="caption" color="text.secondary">Total Plays</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Total Plays
+                    </Typography>
                     <Typography variant="h6">{songInsights.listening.totalPlays || 0}</Typography>
                   </Grid>
                   <Grid item xs={3}>
-                    <Typography variant="caption" color="text.secondary">Unique Listeners</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Unique Listeners
+                    </Typography>
                     <Typography variant="h6">
-                      {songInsights.listening.uniqueListeners ? songInsights.listening.uniqueListeners.length : 0}
+                      {songInsights.listening.uniqueListeners
+                        ? songInsights.listening.uniqueListeners.length
+                        : 0}
                     </Typography>
                   </Grid>
                   <Grid item xs={3}>
-                    <Typography variant="caption" color="text.secondary">First Played</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      First Played
+                    </Typography>
                     <Typography variant="body2">
-                      {songInsights.listening.firstPlayed 
+                      {songInsights.listening.firstPlayed
                         ? new Date(songInsights.listening.firstPlayed).toLocaleDateString()
-                        : 'Unknown'
-                      }
+                        : 'Unknown'}
                     </Typography>
                   </Grid>
                   <Grid item xs={3}>
-                    <Typography variant="caption" color="text.secondary">Last Played</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Last Played
+                    </Typography>
                     <Typography variant="body2">
-                      {songInsights.listening.lastPlayed 
+                      {songInsights.listening.lastPlayed
                         ? new Date(songInsights.listening.lastPlayed).toLocaleDateString()
-                        : 'Unknown'
-                      }
+                        : 'Unknown'}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -374,7 +394,7 @@ function SongsPage() {
         const uniqueTracks = [];
         const trackIds = new Set();
 
-        data.data.forEach(item => {
+        data.data.forEach((item) => {
           if (item.trackId && !trackIds.has(item.trackId)) {
             trackIds.add(item.trackId);
             uniqueTracks.push({
@@ -382,7 +402,7 @@ function SongsPage() {
               trackName: item.trackName || item.trackId,
               artist: item.artist || 'Unknown Artist',
               playedAt: item.playedAt,
-              audioFeatures: item.audioFeatures
+              audioFeatures: item.audioFeatures,
             });
           }
         });
@@ -406,11 +426,12 @@ function SongsPage() {
     try {
       // This would typically search your music database
       // For now, we'll filter the existing songs
-      const filteredSongs = songs.filter(song => 
-        song.trackName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        song.artist.toLowerCase().includes(searchTerm.toLowerCase())
+      const filteredSongs = songs.filter(
+        (song) =>
+          song.trackName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          song.artist.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      
+
       setSongs(filteredSongs);
     } catch (err) {
       setError('Failed to search songs');
@@ -425,11 +446,11 @@ function SongsPage() {
 
   const getAudioFeatureSummary = (features) => {
     if (!features) return 'No audio features available';
-    
+
     const energy = features.energy ? Math.round(features.energy * 100) : 0;
     const valence = features.valence ? Math.round(features.valence * 100) : 0;
     const danceability = features.danceability ? Math.round(features.danceability * 100) : 0;
-    
+
     return `Energy: ${energy}% • Mood: ${valence}% • Dance: ${danceability}%`;
   };
 
@@ -451,7 +472,7 @@ function SongsPage() {
         <Typography variant="body1" color="text.secondary" gutterBottom>
           Explore detailed audio features and insights for your music collection
         </Typography>
-        
+
         {/* Search */}
         <Box display="flex" gap={1} mt={2}>
           <TextField
@@ -461,7 +482,7 @@ function SongsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && searchSongs()}
             InputProps={{
-              startAdornment: <Search color="action" sx={{ mr: 1 }} />
+              startAdornment: <Search color="action" sx={{ mr: 1 }} />,
             }}
           />
           <Button variant="contained" onClick={searchSongs}>
@@ -482,9 +503,7 @@ function SongsPage() {
 
       {/* Songs List */}
       {songs.length === 0 && !loading ? (
-        <Alert severity="info">
-          No songs found. Try searching or loading recent tracks.
-        </Alert>
+        <Alert severity="info">No songs found. Try searching or loading recent tracks.</Alert>
       ) : (
         <Grid container spacing={2}>
           {songs.map((song, index) => (
@@ -508,7 +527,7 @@ function SongsPage() {
                         </Typography>
                       )}
                     </Box>
-                    
+
                     <Box display="flex" alignItems="center">
                       <Tooltip title="Play track">
                         <IconButton>
@@ -520,7 +539,7 @@ function SongsPage() {
                           <Assessment />
                         </IconButton>
                       </Tooltip>
-                      <IconButton 
+                      <IconButton
                         onClick={() => toggleSongDetails(song.trackId)}
                         aria-expanded={expandedSong === song.trackId}
                       >
@@ -529,10 +548,10 @@ function SongsPage() {
                     </Box>
                   </Box>
                 </CardContent>
-                
+
                 <Collapse in={expandedSong === song.trackId}>
                   <Divider />
-                  <SongDetailCard 
+                  <SongDetailCard
                     trackId={song.trackId}
                     expanded={expandedSong === song.trackId}
                     onToggle={() => toggleSongDetails(song.trackId)}

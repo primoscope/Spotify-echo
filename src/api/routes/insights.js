@@ -4,9 +4,9 @@ const NodeCache = require('node-cache');
 const { requireAuth, createRateLimit } = require('../middleware');
 
 // Enhanced cache for insights with longer TTL
-const insightsCache = new NodeCache({ 
+const insightsCache = new NodeCache({
   stdTTL: 300, // 5 minutes cache for insights
-  checkperiod: 60 
+  checkperiod: 60,
 });
 
 // Rate limiting specifically for insights endpoints
@@ -41,7 +41,7 @@ class SpotifyInsightsService {
         limit = 50,
         timeRange = '30d',
         userId,
-        features = ['energy', 'valence', 'danceability']
+        features = ['energy', 'valence', 'danceability'],
       } = options;
 
       const offset = (page - 1) * limit;
@@ -68,17 +68,17 @@ class SpotifyInsightsService {
               from: 'audio_features',
               localField: 'trackId',
               foreignField: 'trackId',
-              as: 'audioFeatures'
-            }
+              as: 'audioFeatures',
+            },
           },
           {
             $addFields: {
-              audioFeatures: { $arrayElemAt: ['$audioFeatures', 0] }
-            }
+              audioFeatures: { $arrayElemAt: ['$audioFeatures', 0] },
+            },
           },
           { $sort: { playedAt: -1 } },
           { $skip: offset },
-          { $limit: limit }
+          { $limit: limit },
         ])
         .toArray();
 
@@ -96,17 +96,16 @@ class SpotifyInsightsService {
           totalCount,
           totalPages: Math.ceil(totalCount / limit),
           hasNext: page * limit < totalCount,
-          hasPrev: page > 1
+          hasPrev: page > 1,
         },
         trends: trendAnalysis,
         features,
         timeRange,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
 
       insightsCache.set(cacheKey, response);
       return response;
-
     } catch (error) {
       console.error('Error getting listening trends:', error);
       throw new Error(`Failed to get listening trends: ${error.message}`);
@@ -129,12 +128,12 @@ class SpotifyInsightsService {
       }
 
       const db = this.dbManager.getDatabase();
-      
+
       // Get audio features and listening data
       const [audioFeatures, listeningData, similarTracks] = await Promise.all([
         db.collection('audio_features').findOne({ trackId }),
         this.getSongListeningData(trackId, options),
-        this.getSimilarTracks(trackId, options.limit || 10)
+        this.getSimilarTracks(trackId, options.limit || 10),
       ]);
 
       const insights = {
@@ -143,12 +142,11 @@ class SpotifyInsightsService {
         listening: listeningData,
         similarTracks,
         analysis: this.analyzeTrackFeatures(audioFeatures),
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
 
       insightsCache.set(cacheKey, insights);
       return insights;
-
     } catch (error) {
       console.error('Error getting song insights:', error);
       throw new Error(`Failed to get song insights: ${error.message}`);
@@ -173,7 +171,7 @@ class SpotifyInsightsService {
       }
 
       const db = this.dbManager.getDatabase();
-      
+
       // Get playlist data
       const playlist = await db.collection('playlists').findOne({ id: playlistId });
       if (!playlist) {
@@ -184,12 +182,13 @@ class SpotifyInsightsService {
         playlistId,
         name: playlist.name,
         trackCount: playlist.tracks?.length || 0,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
 
       if (includeAudioFeatures && playlist.tracks) {
-        const trackIds = playlist.tracks.map(t => t.id || t.trackId);
-        const audioFeatures = await db.collection('audio_features')
+        const trackIds = playlist.tracks.map((t) => t.id || t.trackId);
+        const audioFeatures = await db
+          .collection('audio_features')
           .find({ trackId: { $in: trackIds } })
           .toArray();
 
@@ -202,7 +201,6 @@ class SpotifyInsightsService {
 
       insightsCache.set(cacheKey, insights);
       return insights;
-
     } catch (error) {
       console.error('Error getting playlist insights:', error);
       throw new Error(`Failed to get playlist insights: ${error.message}`);
@@ -213,12 +211,18 @@ class SpotifyInsightsService {
   getTimeFilter(timeRange) {
     const now = new Date();
     switch (timeRange) {
-      case '24h': return new Date(now - 24 * 60 * 60 * 1000);
-      case '7d': return new Date(now - 7 * 24 * 60 * 60 * 1000);
-      case '30d': return new Date(now - 30 * 24 * 60 * 60 * 1000);
-      case '90d': return new Date(now - 90 * 24 * 60 * 60 * 1000);
-      case '1y': return new Date(now - 365 * 24 * 60 * 60 * 1000);
-      default: return new Date(now - 30 * 24 * 60 * 60 * 1000);
+      case '24h':
+        return new Date(now - 24 * 60 * 60 * 1000);
+      case '7d':
+        return new Date(now - 7 * 24 * 60 * 60 * 1000);
+      case '30d':
+        return new Date(now - 30 * 24 * 60 * 60 * 1000);
+      case '90d':
+        return new Date(now - 90 * 24 * 60 * 60 * 1000);
+      case '1y':
+        return new Date(now - 365 * 24 * 60 * 60 * 1000);
+      default:
+        return new Date(now - 30 * 24 * 60 * 60 * 1000);
     }
   }
 
@@ -226,18 +230,18 @@ class SpotifyInsightsService {
     if (!data || data.length === 0) return {};
 
     const trends = {};
-    features.forEach(feature => {
+    features.forEach((feature) => {
       const values = data
-        .filter(item => item.audioFeatures && item.audioFeatures[feature] !== undefined)
-        .map(item => item.audioFeatures[feature]);
-      
+        .filter((item) => item.audioFeatures && item.audioFeatures[feature] !== undefined)
+        .map((item) => item.audioFeatures[feature]);
+
       if (values.length > 0) {
         trends[feature] = {
           average: values.reduce((a, b) => a + b, 0) / values.length,
           min: Math.min(...values),
           max: Math.max(...values),
           trend: this.calculateTrend(values),
-          dataPoints: values.length
+          dataPoints: values.length,
         };
       }
     });
@@ -247,13 +251,13 @@ class SpotifyInsightsService {
 
   calculateTrend(values) {
     if (values.length < 2) return 'stable';
-    
+
     const firstHalf = values.slice(0, Math.floor(values.length / 2));
     const secondHalf = values.slice(Math.floor(values.length / 2));
-    
+
     const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
     const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-    
+
     const diff = secondAvg - firstAvg;
     if (Math.abs(diff) < 0.05) return 'stable';
     return diff > 0 ? 'increasing' : 'decreasing';
@@ -268,7 +272,7 @@ class SpotifyInsightsService {
       danceability_level: this.categorizeValue(audioFeatures.danceability, 'danceability'),
       tempo_category: this.categorizeValue(audioFeatures.tempo, 'tempo'),
       key_signature: audioFeatures.key,
-      time_signature: audioFeatures.time_signature
+      time_signature: audioFeatures.time_signature,
     };
 
     return analysis;
@@ -301,19 +305,21 @@ class SpotifyInsightsService {
   async getSongListeningData(trackId, _options) {
     const db = this.dbManager.getDatabase();
     const collection = db.collection('listening_history');
-    
-    const data = await collection.aggregate([
-      { $match: { trackId } },
-      {
-        $group: {
-          _id: null,
-          totalPlays: { $sum: 1 },
-          uniqueListeners: { $addToSet: '$userId' },
-          firstPlayed: { $min: '$playedAt' },
-          lastPlayed: { $max: '$playedAt' }
-        }
-      }
-    ]).toArray();
+
+    const data = await collection
+      .aggregate([
+        { $match: { trackId } },
+        {
+          $group: {
+            _id: null,
+            totalPlays: { $sum: 1 },
+            uniqueListeners: { $addToSet: '$userId' },
+            firstPlayed: { $min: '$playedAt' },
+            lastPlayed: { $max: '$playedAt' },
+          },
+        },
+      ])
+      .toArray();
 
     return data[0] || { totalPlays: 0, uniqueListeners: [], firstPlayed: null, lastPlayed: null };
   }
@@ -322,14 +328,15 @@ class SpotifyInsightsService {
     // Simplified similar tracks based on audio features
     const db = this.dbManager.getDatabase();
     const targetFeatures = await db.collection('audio_features').findOne({ trackId });
-    
+
     if (!targetFeatures) return [];
 
-    const similar = await db.collection('audio_features')
-      .find({ 
+    const similar = await db
+      .collection('audio_features')
+      .find({
         trackId: { $ne: trackId },
         energy: { $gte: targetFeatures.energy - 0.1, $lte: targetFeatures.energy + 0.1 },
-        valence: { $gte: targetFeatures.valence - 0.1, $lte: targetFeatures.valence + 0.1 }
+        valence: { $gte: targetFeatures.valence - 0.1, $lte: targetFeatures.valence + 0.1 },
       })
       .limit(limit)
       .toArray();
@@ -343,14 +350,14 @@ class SpotifyInsightsService {
     const features = ['energy', 'valence', 'danceability', 'acousticness', 'instrumentalness'];
     const analysis = {};
 
-    features.forEach(feature => {
-      const values = audioFeatures.map(f => f[feature]).filter(v => v !== undefined);
+    features.forEach((feature) => {
+      const values = audioFeatures.map((f) => f[feature]).filter((v) => v !== undefined);
       if (values.length > 0) {
         analysis[feature] = {
           average: values.reduce((a, b) => a + b, 0) / values.length,
           min: Math.min(...values),
           max: Math.max(...values),
-          distribution: this.calculateDistribution(values)
+          distribution: this.calculateDistribution(values),
         };
       }
     });
@@ -361,39 +368,37 @@ class SpotifyInsightsService {
   calculateDistribution(values) {
     const bins = [0, 0.2, 0.4, 0.6, 0.8, 1.0];
     const distribution = bins.map(() => 0);
-    
-    values.forEach(value => {
+
+    values.forEach((value) => {
       const binIndex = Math.min(Math.floor(value * 5), 4);
       distribution[binIndex]++;
     });
 
-    return distribution.map(count => count / values.length);
+    return distribution.map((count) => count / values.length);
   }
 
   async analyzePlaylistTrends(playlistId) {
     // Analyze how playlist composition has changed over time
     const db = this.dbManager.getDatabase();
     const collection = db.collection('playlist_history');
-    
-    const history = await collection
-      .find({ playlistId })
-      .sort({ timestamp: 1 })
-      .toArray();
+
+    const history = await collection.find({ playlistId }).sort({ timestamp: 1 }).toArray();
 
     return {
       totalChanges: history.length,
       lastModified: history[history.length - 1]?.timestamp,
-      changeFrequency: this.calculateChangeFrequency(history)
+      changeFrequency: this.calculateChangeFrequency(history),
     };
   }
 
   calculateChangeFrequency(history) {
     if (history.length < 2) return 'static';
-    
-    const timeSpan = new Date(history[history.length - 1].timestamp) - new Date(history[0].timestamp);
+
+    const timeSpan =
+      new Date(history[history.length - 1].timestamp) - new Date(history[0].timestamp);
     const daysSpan = timeSpan / (1000 * 60 * 60 * 24);
     const changesPerDay = history.length / daysSpan;
-    
+
     if (changesPerDay > 1) return 'very_active';
     if (changesPerDay > 0.5) return 'active';
     if (changesPerDay > 0.1) return 'moderate';
@@ -404,11 +409,18 @@ class SpotifyInsightsService {
   getFallbackTrends(options) {
     return {
       data: [],
-      pagination: { page: 1, limit: options.limit || 50, totalCount: 0, totalPages: 0, hasNext: false, hasPrev: false },
+      pagination: {
+        page: 1,
+        limit: options.limit || 50,
+        totalCount: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+      },
       trends: {},
       features: options.features || [],
       fallback: true,
-      message: 'Using fallback data - MongoDB not connected'
+      message: 'Using fallback data - MongoDB not connected',
     };
   }
 
@@ -420,7 +432,7 @@ class SpotifyInsightsService {
       similarTracks: [],
       analysis: null,
       fallback: true,
-      message: 'Using fallback data - MongoDB not connected'
+      message: 'Using fallback data - MongoDB not connected',
     };
   }
 
@@ -430,7 +442,7 @@ class SpotifyInsightsService {
       name: 'Unknown Playlist',
       trackCount: 0,
       fallback: true,
-      message: 'Using fallback data - MongoDB not connected'
+      message: 'Using fallback data - MongoDB not connected',
     };
   }
 }
@@ -448,22 +460,23 @@ router.get('/listening-trends', requireAuth, insightsRateLimit, async (req, res)
       limit: Math.min(parseInt(req.query.limit) || 50, 100), // Max 100 items per page
       timeRange: req.query.timeRange || '30d',
       userId: req.query.userId,
-      features: req.query.features ? req.query.features.split(',') : ['energy', 'valence', 'danceability']
+      features: req.query.features
+        ? req.query.features.split(',')
+        : ['energy', 'valence', 'danceability'],
     };
 
     const result = await insightsService.getListeningTrends(options);
-    
+
     res.json({
       success: true,
-      ...result
+      ...result,
     });
-
   } catch (error) {
     console.error('Error getting listening trends:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get listening trends',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -476,22 +489,21 @@ router.get('/song/:trackId', requireAuth, insightsRateLimit, async (req, res) =>
   try {
     const { trackId } = req.params;
     const options = {
-      limit: parseInt(req.query.limit) || 10
+      limit: parseInt(req.query.limit) || 10,
     };
 
     const result = await insightsService.getSongInsights(trackId, options);
-    
+
     res.json({
       success: true,
-      ...result
+      ...result,
     });
-
   } catch (error) {
     console.error('Error getting song insights:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get song insights',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -505,22 +517,21 @@ router.get('/playlist/:playlistId', requireAuth, insightsRateLimit, async (req, 
     const { playlistId } = req.params;
     const options = {
       includeAudioFeatures: req.query.includeAudioFeatures !== 'false',
-      analyzeTrends: req.query.analyzeTrends !== 'false'
+      analyzeTrends: req.query.analyzeTrends !== 'false',
     };
 
     const result = await insightsService.getPlaylistInsights(playlistId, options);
-    
+
     res.json({
       success: true,
-      ...result
+      ...result,
     });
-
   } catch (error) {
     console.error('Error getting playlist insights:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get playlist insights',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -532,19 +543,18 @@ router.get('/playlist/:playlistId', requireAuth, insightsRateLimit, async (req, 
 router.post('/cache/clear', requireAuth, async (req, res) => {
   try {
     insightsCache.flushAll();
-    
+
     res.json({
       success: true,
       message: 'Insights cache cleared successfully',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Error clearing cache:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to clear cache',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -556,7 +566,7 @@ router.post('/cache/clear', requireAuth, async (req, res) => {
 router.get('/cache/stats', requireAuth, async (req, res) => {
   try {
     const stats = insightsCache.getStats();
-    
+
     res.json({
       success: true,
       cache: {
@@ -565,17 +575,16 @@ router.get('/cache/stats', requireAuth, async (req, res) => {
         misses: stats.misses,
         hitRate: stats.hits / (stats.hits + stats.misses) || 0,
         ksize: stats.ksize,
-        vsize: stats.vsize
+        vsize: stats.vsize,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Error getting cache stats:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get cache stats',
-      message: error.message
+      message: error.message,
     });
   }
 });

@@ -18,14 +18,7 @@ import {
   IconButton,
   Divider,
 } from '@mui/material';
-import {
-  TrendingUp,
-  TrendingDown,
-  Refresh,
-  Download,
-  ClearAll,
-  Cached,
-} from '@mui/icons-material';
+import { TrendingUp, TrendingDown, Refresh, Download, ClearAll, Cached } from '@mui/icons-material';
 
 /**
  * Simple SVG-based Chart Component
@@ -40,16 +33,18 @@ function SimpleChart({ data, type = 'line', width = 300, height = 200, color = '
     );
   }
 
-  const maxValue = Math.max(...data.map(d => d.value || d));
-  const minValue = Math.min(...data.map(d => d.value || d));
+  const maxValue = Math.max(...data.map((d) => d.value || d));
+  const minValue = Math.min(...data.map((d) => d.value || d));
   const range = maxValue - minValue || 1;
 
-  const points = data.map((item, index) => {
-    const x = (index / (data.length - 1)) * (width - 40) + 20;
-    const value = typeof item === 'object' ? item.value : item;
-    const y = height - 20 - ((value - minValue) / range) * (height - 40);
-    return `${x},${y}`;
-  }).join(' ');
+  const points = data
+    .map((item, index) => {
+      const x = (index / (data.length - 1)) * (width - 40) + 20;
+      const value = typeof item === 'object' ? item.value : item;
+      const y = height - 20 - ((value - minValue) / range) * (height - 40);
+      return `${x},${y}`;
+    })
+    .join(' ');
 
   if (type === 'bar') {
     return (
@@ -60,7 +55,7 @@ function SimpleChart({ data, type = 'line', width = 300, height = 200, color = '
           const x = (index / data.length) * (width - 40) + 20;
           const y = height - 20 - barHeight;
           const barWidth = Math.max((width - 40) / data.length - 2, 1);
-          
+
           return (
             <rect
               key={index}
@@ -81,25 +76,14 @@ function SimpleChart({ data, type = 'line', width = 300, height = 200, color = '
 
   return (
     <svg width={width} height={height} style={{ overflow: 'visible' }}>
-      <polyline
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        points={points}
-      />
+      <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
       {data.map((item, index) => {
         const x = (index / (data.length - 1)) * (width - 40) + 20;
         const value = typeof item === 'object' ? item.value : item;
         const y = height - 20 - ((value - minValue) / range) * (height - 40);
-        
+
         return (
-          <circle
-            key={index}
-            cx={x}
-            cy={y}
-            r="4"
-            fill={color}
-          >
+          <circle key={index} cx={x} cy={y} r="4" fill={color}>
             <title>{typeof item === 'object' ? `${item.label}: ${item.value}` : value}</title>
           </circle>
         );
@@ -132,7 +116,7 @@ function AudioFeaturesRadar({ features, size = 200 }) {
     <Box position="relative">
       <svg width={size} height={size}>
         {/* Background circles */}
-        {[0.2, 0.4, 0.6, 0.8, 1.0].map(r => (
+        {[0.2, 0.4, 0.6, 0.8, 1.0].map((r) => (
           <circle
             key={r}
             cx={center}
@@ -143,7 +127,7 @@ function AudioFeaturesRadar({ features, size = 200 }) {
             strokeWidth="1"
           />
         ))}
-        
+
         {/* Axis lines */}
         {featureNames.map((_, index) => {
           const angle = (index / featureNames.length) * 2 * Math.PI - Math.PI / 2;
@@ -161,7 +145,7 @@ function AudioFeaturesRadar({ features, size = 200 }) {
             />
           );
         })}
-        
+
         {/* Data polygon */}
         <polygon
           points={polygonPoints}
@@ -170,31 +154,25 @@ function AudioFeaturesRadar({ features, size = 200 }) {
           stroke="#1976d2"
           strokeWidth="2"
         />
-        
+
         {/* Data points */}
         {points.map((point, index) => {
           const [x, y] = point.split(',').map(Number);
           return (
-            <circle
-              key={index}
-              cx={x}
-              cy={y}
-              r="4"
-              fill="#1976d2"
-            >
+            <circle key={index} cx={x} cy={y} r="4" fill="#1976d2">
               <title>{`${featureNames[index]}: ${(features[featureNames[index]] || 0).toFixed(2)}`}</title>
             </circle>
           );
         })}
       </svg>
-      
+
       {/* Labels */}
       {featureNames.map((feature, index) => {
         const angle = (index / featureNames.length) * 2 * Math.PI - Math.PI / 2;
         const labelRadius = radius + 15;
         const x = center + Math.cos(angle) * labelRadius;
         const y = center + Math.sin(angle) * labelRadius;
-        
+
         return (
           <Typography
             key={feature}
@@ -205,7 +183,7 @@ function AudioFeaturesRadar({ features, size = 200 }) {
               top: y - 6,
               textAlign: 'center',
               width: 40,
-              fontSize: '0.7rem'
+              fontSize: '0.7rem',
             }}
           >
             {feature}
@@ -231,14 +209,19 @@ function InsightsDashboard() {
 
   const timeRanges = {
     '24h': 'Last 24 Hours',
-    '7d': 'Last 7 Days', 
+    '7d': 'Last 7 Days',
     '30d': 'Last 30 Days',
     '90d': 'Last 3 Months',
   };
 
   const audioFeatures = [
-    'energy', 'valence', 'danceability', 'acousticness', 
-    'instrumentalness', 'speechiness', 'tempo'
+    'energy',
+    'valence',
+    'danceability',
+    'acousticness',
+    'instrumentalness',
+    'speechiness',
+    'tempo',
   ];
 
   const loadInsights = useCallback(async () => {
@@ -250,7 +233,7 @@ function InsightsDashboard() {
         page: currentPage,
         limit: 50,
         timeRange,
-        features: selectedFeatures.join(',')
+        features: selectedFeatures.join(','),
       });
 
       const response = await fetch(`/api/insights/listening-trends?${params}`);
@@ -309,8 +292,10 @@ function InsightsDashboard() {
 
   const renderTrendIndicator = (trend) => {
     if (!trend || trend === 'stable') return <Chip size="small" label="Stable" />;
-    if (trend === 'increasing') return <Chip size="small" icon={<TrendingUp />} label="Rising" color="success" />;
-    if (trend === 'decreasing') return <Chip size="small" icon={<TrendingDown />} label="Falling" color="warning" />;
+    if (trend === 'increasing')
+      return <Chip size="small" icon={<TrendingUp />} label="Rising" color="success" />;
+    if (trend === 'decreasing')
+      return <Chip size="small" icon={<TrendingDown />} label="Falling" color="warning" />;
     return <Chip size="small" label="Unknown" />;
   };
 
@@ -319,7 +304,7 @@ function InsightsDashboard() {
 
     const chartData = Array.from({ length: 10 }, (_, i) => ({
       label: `Point ${i + 1}`,
-      value: featureData.average + (Math.random() - 0.5) * 0.2
+      value: featureData.average + (Math.random() - 0.5) * 0.2,
     }));
 
     return (
@@ -331,32 +316,32 @@ function InsightsDashboard() {
             </Typography>
             {renderTrendIndicator(featureData.trend)}
           </Box>
-          
+
           <Box mb={2}>
-            <SimpleChart 
-              data={chartData} 
-              type="line" 
-              width={280} 
-              height={120}
-              color="#1976d2"
-            />
+            <SimpleChart data={chartData} type="line" width={280} height={120} color="#1976d2" />
           </Box>
-          
+
           <Grid container spacing={1}>
             <Grid item xs={4}>
-              <Typography variant="caption" color="text.secondary">Average</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Average
+              </Typography>
               <Typography variant="body2">{featureData.average?.toFixed(3)}</Typography>
             </Grid>
             <Grid item xs={4}>
-              <Typography variant="caption" color="text.secondary">Min</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Min
+              </Typography>
               <Typography variant="body2">{featureData.min?.toFixed(3)}</Typography>
             </Grid>
             <Grid item xs={4}>
-              <Typography variant="caption" color="text.secondary">Max</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Max
+              </Typography>
               <Typography variant="body2">{featureData.max?.toFixed(3)}</Typography>
             </Grid>
           </Grid>
-          
+
           <Box mt={1}>
             <Typography variant="caption" color="text.secondary">
               Data Points: {featureData.dataPoints}
@@ -382,19 +367,25 @@ function InsightsDashboard() {
         <Typography variant="h4" gutterBottom>
           Music Insights Dashboard
         </Typography>
-        
+
         <Grid container spacing={2} alignItems="center">
           <Grid item>
             <FormControl size="small" sx={{ minWidth: 140 }}>
               <InputLabel>Time Range</InputLabel>
-              <Select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} label="Time Range">
+              <Select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                label="Time Range"
+              >
                 {Object.entries(timeRanges).map(([value, label]) => (
-                  <MenuItem key={value} value={value}>{label}</MenuItem>
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Grid>
-          
+
           <Grid item>
             <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel>Audio Features</InputLabel>
@@ -404,7 +395,7 @@ function InsightsDashboard() {
                 onChange={(e) => setSelectedFeatures(e.target.value)}
                 label="Audio Features"
               >
-                {audioFeatures.map(feature => (
+                {audioFeatures.map((feature) => (
                   <MenuItem key={feature} value={feature}>
                     <Box textTransform="capitalize">{feature}</Box>
                   </MenuItem>
@@ -412,7 +403,7 @@ function InsightsDashboard() {
               </Select>
             </FormControl>
           </Grid>
-          
+
           <Grid item>
             <Tooltip title="Refresh insights">
               <IconButton onClick={loadInsights} disabled={loading}>
@@ -420,7 +411,7 @@ function InsightsDashboard() {
               </IconButton>
             </Tooltip>
           </Grid>
-          
+
           <Grid item>
             <Tooltip title="Export data">
               <IconButton onClick={exportData}>
@@ -428,7 +419,7 @@ function InsightsDashboard() {
               </IconButton>
             </Tooltip>
           </Grid>
-          
+
           <Grid item>
             <Tooltip title="Clear cache">
               <IconButton onClick={clearCache}>
@@ -462,9 +453,7 @@ function InsightsDashboard() {
       {/* Fallback Notice */}
       {insights.fallback && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          <Typography variant="body2">
-            {insights.message}
-          </Typography>
+          <Typography variant="body2">{insights.message}</Typography>
         </Alert>
       )}
 
@@ -475,15 +464,15 @@ function InsightsDashboard() {
           <Typography variant="h5" gutterBottom>
             Audio Features Trends
           </Typography>
-          
+
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            {selectedFeatures.map(feature => 
+            {selectedFeatures.map((feature) =>
               renderFeatureCard(feature, insights.trends[feature])
             )}
           </Grid>
-          
+
           <Divider sx={{ my: 3 }} />
-          
+
           {/* Data Summary */}
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
@@ -494,28 +483,38 @@ function InsightsDashboard() {
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <Typography variant="caption" color="text.secondary">Time Range</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Time Range
+                      </Typography>
                       <Typography>{timeRanges[timeRange]}</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="caption" color="text.secondary">Total Records</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Total Records
+                      </Typography>
                       <Typography>{insights.pagination?.totalCount || 0}</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="caption" color="text.secondary">Current Page</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Current Page
+                      </Typography>
                       <Typography>{currentPage}</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="caption" color="text.secondary">Generated At</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Generated At
+                      </Typography>
                       <Typography variant="body2">
-                        {insights.generatedAt ? new Date(insights.generatedAt).toLocaleTimeString() : '-'}
+                        {insights.generatedAt
+                          ? new Date(insights.generatedAt).toLocaleTimeString()
+                          : '-'}
                       </Typography>
                     </Grid>
                   </Grid>
                 </CardContent>
               </Card>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
@@ -527,7 +526,7 @@ function InsightsDashboard() {
                       <Typography variant="body2" color="text.secondary" gutterBottom>
                         Average audio features for selected time range
                       </Typography>
-                      <AudioFeaturesRadar 
+                      <AudioFeaturesRadar
                         features={Object.fromEntries(
                           Object.entries(insights.trends).map(([key, data]) => [key, data.average])
                         )}
@@ -535,9 +534,7 @@ function InsightsDashboard() {
                       />
                     </Box>
                   ) : (
-                    <Typography color="text.secondary">
-                      No feature data available
-                    </Typography>
+                    <Typography color="text.secondary">No feature data available</Typography>
                   )}
                 </CardContent>
               </Card>
@@ -558,9 +555,7 @@ function InsightsDashboard() {
         </Box>
       )}
 
-      {loading && (
-        <LinearProgress sx={{ mt: 2 }} />
-      )}
+      {loading && <LinearProgress sx={{ mt: 2 }} />}
     </Box>
   );
 }

@@ -12,29 +12,29 @@ const swaggerOptions = {
       contact: {
         name: 'EchoTune AI Team',
         url: 'https://github.com/dzp5103/Spotify-echo',
-        email: 'support@echotune-ai.com'
+        email: 'support@echotune-ai.com',
       },
       license: {
         name: 'MIT',
-        url: 'https://github.com/dzp5103/Spotify-echo/blob/main/LICENSE'
-      }
+        url: 'https://github.com/dzp5103/Spotify-echo/blob/main/LICENSE',
+      },
     },
     servers: [
       {
         url: process.env.FRONTEND_URL || 'http://localhost:3000',
-        description: 'Production server'
+        description: 'Production server',
       },
       {
         url: 'http://localhost:3000',
-        description: 'Development server'
-      }
+        description: 'Development server',
+      },
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT'
+          bearerFormat: 'JWT',
         },
         spotifyAuth: {
           type: 'oauth2',
@@ -50,11 +50,11 @@ const swaggerOptions = {
                 'user-top-read': 'Read top artists and tracks',
                 'playlist-read-private': 'Read private playlists',
                 'playlist-modify-public': 'Modify public playlists',
-                'playlist-modify-private': 'Modify private playlists'
-              }
-            }
-          }
-        }
+                'playlist-modify-private': 'Modify private playlists',
+              },
+            },
+          },
+        },
       },
       schemas: {
         Track: {
@@ -62,11 +62,11 @@ const swaggerOptions = {
           properties: {
             id: {
               type: 'string',
-              description: 'Spotify track ID'
+              description: 'Spotify track ID',
             },
             name: {
               type: 'string',
-              description: 'Track name'
+              description: 'Track name',
             },
             artists: {
               type: 'array',
@@ -74,9 +74,9 @@ const swaggerOptions = {
                 type: 'object',
                 properties: {
                   id: { type: 'string' },
-                  name: { type: 'string' }
-                }
-              }
+                  name: { type: 'string' },
+                },
+              },
             },
             album: {
               type: 'object',
@@ -90,121 +90,118 @@ const swaggerOptions = {
                     properties: {
                       url: { type: 'string' },
                       height: { type: 'number' },
-                      width: { type: 'number' }
-                    }
-                  }
-                }
-              }
+                      width: { type: 'number' },
+                    },
+                  },
+                },
+              },
             },
             duration_ms: {
               type: 'number',
-              description: 'Track duration in milliseconds'
+              description: 'Track duration in milliseconds',
             },
             popularity: {
               type: 'number',
-              description: 'Track popularity (0-100)'
+              description: 'Track popularity (0-100)',
             },
             preview_url: {
               type: 'string',
-              description: 'Preview URL for the track'
-            }
-          }
+              description: 'Preview URL for the track',
+            },
+          },
         },
         Recommendation: {
           type: 'object',
           properties: {
             id: {
               type: 'string',
-              description: 'Recommendation ID'
+              description: 'Recommendation ID',
             },
             track: {
-              $ref: '#/components/schemas/Track'
+              $ref: '#/components/schemas/Track',
             },
             score: {
               type: 'number',
-              description: 'Recommendation score (0-1)'
+              description: 'Recommendation score (0-1)',
             },
             reason: {
               type: 'string',
-              description: 'Reason for recommendation'
+              description: 'Reason for recommendation',
             },
             timestamp: {
               type: 'string',
-              format: 'date-time'
-            }
-          }
+              format: 'date-time',
+            },
+          },
         },
         ChatMessage: {
           type: 'object',
           properties: {
             message: {
               type: 'string',
-              description: 'User message'
+              description: 'User message',
             },
             provider: {
               type: 'string',
               enum: ['openai', 'gemini', 'azure', 'openrouter', 'mock'],
-              description: 'AI provider to use'
+              description: 'AI provider to use',
             },
             context: {
               type: 'object',
-              description: 'Additional context for the conversation'
-            }
+              description: 'Additional context for the conversation',
+            },
           },
-          required: ['message']
+          required: ['message'],
         },
         ChatResponse: {
           type: 'object',
           properties: {
             response: {
               type: 'string',
-              description: 'AI response'
+              description: 'AI response',
             },
             recommendations: {
               type: 'array',
               items: {
-                $ref: '#/components/schemas/Recommendation'
-              }
+                $ref: '#/components/schemas/Recommendation',
+              },
             },
             intent: {
               type: 'object',
-              description: 'Detected user intent'
+              description: 'Detected user intent',
             },
             provider: {
               type: 'string',
-              description: 'AI provider used'
-            }
-          }
+              description: 'AI provider used',
+            },
+          },
         },
         Error: {
           type: 'object',
           properties: {
             error: {
               type: 'string',
-              description: 'Error message'
+              description: 'Error message',
             },
             code: {
               type: 'string',
-              description: 'Error code'
+              description: 'Error code',
             },
             details: {
               type: 'object',
-              description: 'Additional error details'
-            }
-          }
-        }
-      }
+              description: 'Additional error details',
+            },
+          },
+        },
+      },
     },
     security: [
       {
-        bearerAuth: []
-      }
-    ]
+        bearerAuth: [],
+      },
+    ],
   },
-  apis: [
-    './src/api/routes/*.js',
-    './src/api/middleware/*.js'
-  ]
+  apis: ['./src/api/routes/*.js', './src/api/middleware/*.js'],
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
@@ -212,5 +209,5 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions);
 module.exports = {
   swaggerSpec,
   swaggerUi,
-  swaggerOptions
+  swaggerOptions,
 };

@@ -1,5 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
+const modelRegistry = require('./model-registry');
+const llmTelemetry = require('./llm-telemetry');
 
 /**
  * Enhanced LLM Provider Manager
@@ -16,7 +18,7 @@ class LLMProviderManager {
   }
 
   /**
-   * Initialize provider manager with automatic key refresh
+   * Initialize provider manager with automatic key refresh and enhanced systems
    */
   async initialize() {
     try {
@@ -29,8 +31,17 @@ class LLMProviderManager {
       // Setup key refresh monitoring
       this.setupKeyRefreshMonitoring();
 
+      // Initialize enhanced systems
+      await modelRegistry.initialize();
+      llmTelemetry.initialize();
+
+      // Register providers with telemetry system
+      for (const [providerId, provider] of this.providers) {
+        llmTelemetry.registerProvider(providerId, provider);
+      }
+
       this.initialized = true;
-      console.log('✅ LLM Provider Manager initialized');
+      console.log('✅ LLM Provider Manager initialized with enhanced features');
 
       return true;
     } catch (error) {
@@ -466,10 +477,25 @@ class LLMProviderManager {
   }
 
   /**
-   * Send message with automatic provider management
+   * Send message with automatic provider management and model selection
    */
   async sendMessage(message, options = {}) {
     const providerId = options.provider || (await this.getBestProvider());
+    let modelId = options.model;
+    
+    // Use model registry to get optimal model if not specified
+    if (!modelId && providerId !== 'mock') {
+      const recommendation = modelRegistry.recommendModel({
+        capabilities: options.capabilities || ['text'],
+        maxCost: options.maxCost || 0.02,
+        maxLatency: options.maxLatency || 10000
+      });
+      
+      if (recommendation && recommendation.providerId === providerId) {
+        modelId = recommendation.id;
+      }
+    }
+
     const provider = this.providers.get(providerId);
     const config = this.providerConfigs.get(providerId);
 
@@ -478,7 +504,10 @@ class LLMProviderManager {
     }
 
     try {
-      const response = await provider.generateResponse(message, options);
+      const response = await provider.generateCompletion(
+        [{ role: 'user', content: message }], 
+        { ...options, model: modelId }
+      );
 
       // Update last used timestamp
       if (config) {
@@ -486,9 +515,10 @@ class LLMProviderManager {
       }
 
       return {
-        response,
+        response: response.content,
         provider: providerId,
-        model: config?.model,
+        model: modelId || config?.model,
+        metadata: response.metadata || {}
       };
     } catch (error) {
       console.error(`Provider ${providerId} failed:`, error.message);
@@ -499,12 +529,16 @@ class LLMProviderManager {
         if (refreshed) {
           // Retry with refreshed key
           const newProvider = this.providers.get(providerId);
-          const response = await newProvider.generateResponse(message, options);
+          const retryResponse = await newProvider.generateCompletion(
+            [{ role: 'user', content: message }],
+            { ...options, model: modelId }
+          );
           return {
-            response,
+            response: retryResponse.content,
             provider: providerId,
-            model: config?.model,
+            model: modelId || config?.model,
             refreshed: true,
+            metadata: retryResponse.metadata || {}
           };
         }
       }
@@ -513,12 +547,14 @@ class LLMProviderManager {
       if (providerId !== 'mock') {
         console.log(`Falling back to mock provider due to ${providerId} failure`);
         const mockProvider = this.providers.get('mock');
-        const response = await mockProvider.generateResponse(message, options);
+        const fallbackResponse = await mockProvider.generateCompletion(
+          [{ role: 'user', content: message }]
+        );
         return {
-          response,
+          response: fallbackResponse.content,
           provider: 'mock',
           fallback: true,
-          originalError: error.message,
+          originalError: error.message
         };
       }
 
@@ -527,12 +563,15 @@ class LLMProviderManager {
   }
 
   /**
-   * Get provider status information
+   * Get provider status information with enhanced telemetry
    */
   getProviderStatus() {
     const status = {};
 
     for (const [providerId, config] of this.providerConfigs) {
+      // Get telemetry data if available
+      const telemetryData = llmTelemetry.getProviderMetrics(providerId);
+      
       status[providerId] = {
         name: config.name,
         available: config.available,
@@ -543,6 +582,12 @@ class LLMProviderManager {
         lastRefreshed: config.lastRefreshed,
         refreshable: config.refreshable,
         error: config.error,
+        telemetry: telemetryData?.current || null,
+        performance: {
+          averageLatency: telemetryData?.current?.averageLatency || null,
+          successRate: telemetryData?.current?.successRate || null,
+          totalRequests: telemetryData?.current?.requests || 0
+        }
       };
     }
 
@@ -550,7 +595,96 @@ class LLMProviderManager {
       providers: status,
       current: this.currentProvider,
       fallbackOrder: this.fallbackOrder,
+      modelRegistry: modelRegistry.getRegistryStats(),
+      telemetryOverview: llmTelemetry.getAggregatedMetrics()
     };
+  }
+
+  /**
+   * Get enhanced insights including model recommendations
+   */
+  getProviderInsights() {
+    const telemetryInsights = llmTelemetry.getPerformanceInsights();
+    const registryStats = modelRegistry.getRegistryStats();
+    
+    return {
+      performance: telemetryInsights,
+      models: {
+        totalAvailable: registryStats.totalModels,
+        currentlyOnline: registryStats.availableModels,
+        recommendations: this.getModelRecommendations()
+      },
+      health: this.getSystemHealth()
+    };
+  }
+
+  /**
+   * Get model recommendations for common tasks
+   */
+  getModelRecommendations() {
+    return {
+      textGeneration: modelRegistry.recommendModel({
+        capabilities: ['text'],
+        maxCost: 0.005,
+        latencyTier: 'fast'
+      }),
+      codeGeneration: modelRegistry.recommendModel({
+        capabilities: ['text', 'function-calling'],
+        minQuality: 'high',
+        maxLatency: 5000
+      }),
+      imageAnalysis: modelRegistry.recommendModel({
+        capabilities: ['text', 'vision'],
+        maxCost: 0.01,
+        minQuality: 'high'
+      }),
+      longForm: modelRegistry.recommendModel({
+        capabilities: ['text'],
+        minContextWindow: 100000,
+        minQuality: 'highest'
+      })
+    };
+  }
+
+  /**
+   * Get system health summary
+   */
+  getSystemHealth() {
+    const aggregated = llmTelemetry.getAggregatedMetrics();
+    const insights = llmTelemetry.getPerformanceInsights();
+    
+    return {
+      overall: this.calculateHealthScore(aggregated, insights),
+      activeProviders: aggregated.activeProviders,
+      totalRequests: aggregated.totalRequests,
+      successRate: aggregated.successRate,
+      criticalAlerts: insights.alerts.filter(a => a.severity === 'critical').length,
+      recommendations: insights.recommendations.length
+    };
+  }
+
+  /**
+   * Calculate overall system health score
+   */
+  calculateHealthScore(aggregated, insights) {
+    let score = 100;
+    
+    // Reduce score for low success rate
+    const successRate = parseFloat(aggregated.successRate) || 0;
+    if (successRate < 95) score -= (95 - successRate) * 2;
+    
+    // Reduce score for critical alerts
+    const criticalAlerts = insights.alerts.filter(a => a.severity === 'critical').length;
+    score -= criticalAlerts * 20;
+    
+    // Reduce score for high alerts
+    const highAlerts = insights.alerts.filter(a => a.severity === 'high').length;
+    score -= highAlerts * 10;
+    
+    // Reduce score if no providers are active
+    if (aggregated.activeProviders === 0) score = 0;
+    
+    return Math.max(0, Math.min(100, score));
   }
 }
 

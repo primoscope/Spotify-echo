@@ -1,6 +1,8 @@
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
+const modelRegistry = require('../../chat/model-registry');
+const llmTelemetry = require('../../chat/llm-telemetry');
 const router = express.Router();
 
 /**
@@ -605,6 +607,240 @@ router.get('/llm-providers/status', async (req, res) => {
       success: false,
       error: 'Failed to get provider status',
       details: error.message,
+    });
+  }
+});
+
+/**
+ * @route GET /api/settings/llm-providers/models
+ * @desc Get all available models from dynamic registry
+ */
+router.get('/llm-providers/models', async (req, res) => {
+  try {
+    const { provider, capability, maxCost, includeUnavailable } = req.query;
+    
+    let models;
+    if (provider) {
+      models = modelRegistry.getProviderModels(provider, !includeUnavailable);
+    } else {
+      const filters = {};
+      if (capability) {
+        filters.capabilities = capability.split(',');
+      }
+      if (maxCost) {
+        filters.maxCost = parseFloat(maxCost);
+      }
+      if (includeUnavailable === 'true') {
+        filters.includeUnavailable = true;
+      }
+      
+      models = modelRegistry.getAvailableModels(filters);
+    }
+
+    res.json({
+      success: true,
+      models,
+      totalCount: models.length,
+      registryStats: modelRegistry.getRegistryStats()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load models from registry',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/settings/llm-providers/models/:provider/:modelId
+ * @desc Get detailed information about a specific model
+ */
+router.get('/llm-providers/models/:provider/:modelId', async (req, res) => {
+  try {
+    const { provider, modelId } = req.params;
+    
+    const modelInfo = modelRegistry.getModelInfo(provider, modelId);
+    
+    if (!modelInfo) {
+      return res.status(404).json({
+        success: false,
+        error: 'Model not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      model: {
+        id: modelId,
+        providerId: provider,
+        fullId: `${provider}/${modelId}`,
+        ...modelInfo
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get model information',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/settings/llm-providers/models/recommend
+ * @desc Get model recommendation based on task requirements
+ */
+router.post('/llm-providers/models/recommend', async (req, res) => {
+  try {
+    const taskRequirements = req.body;
+    
+    const recommendedModel = modelRegistry.recommendModel(taskRequirements);
+    
+    if (!recommendedModel) {
+      return res.status(404).json({
+        success: false,
+        error: 'No suitable model found for the given requirements'
+      });
+    }
+
+    res.json({
+      success: true,
+      recommendation: recommendedModel,
+      requirements: taskRequirements
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate model recommendation',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/settings/llm-providers/models/refresh
+ * @desc Refresh model registry by discovering available models
+ */
+router.post('/llm-providers/models/refresh', async (req, res) => {
+  try {
+    await modelRegistry.discoverModels();
+    
+    const stats = modelRegistry.getRegistryStats();
+    
+    res.json({
+      success: true,
+      message: 'Model registry refreshed successfully',
+      stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to refresh model registry',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/settings/llm-providers/telemetry
+ * @desc Get telemetry data for all providers
+ */
+router.get('/llm-providers/telemetry', async (req, res) => {
+  try {
+    const { provider, hours } = req.query;
+    
+    if (provider) {
+      const providerMetrics = llmTelemetry.getProviderMetrics(provider);
+      
+      if (!providerMetrics) {
+        return res.status(404).json({
+          success: false,
+          error: 'Provider not found in telemetry system'
+        });
+      }
+      
+      res.json({
+        success: true,
+        provider,
+        metrics: providerMetrics
+      });
+    } else {
+      const currentMetrics = llmTelemetry.getCurrentMetrics();
+      const aggregated = llmTelemetry.getAggregatedMetrics();
+      const insights = llmTelemetry.getPerformanceInsights();
+      
+      let history = null;
+      if (hours) {
+        history = llmTelemetry.getMetricsHistory(parseInt(hours));
+      }
+      
+      res.json({
+        success: true,
+        current: currentMetrics,
+        aggregated,
+        insights,
+        history
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get telemetry data',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/settings/llm-providers/telemetry/reset
+ * @desc Reset all telemetry data
+ */
+router.post('/llm-providers/telemetry/reset', async (req, res) => {
+  try {
+    llmTelemetry.resetMetrics();
+    
+    res.json({
+      success: true,
+      message: 'Telemetry data reset successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reset telemetry data',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/settings/llm-providers/telemetry/export
+ * @desc Export telemetry data in various formats
+ */
+router.get('/llm-providers/telemetry/export', async (req, res) => {
+  try {
+    const { format = 'json' } = req.query;
+    
+    const exportedData = llmTelemetry.exportMetrics(format);
+    
+    const filename = `llm-telemetry-${Date.now()}.${format}`;
+    
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    
+    if (format === 'csv') {
+      res.setHeader('Content-Type', 'text/csv');
+    } else {
+      res.setHeader('Content-Type', 'application/json');
+    }
+    
+    res.send(exportedData);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to export telemetry data',
+      details: error.message
     });
   }
 });

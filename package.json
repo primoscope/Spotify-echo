@@ -217,7 +217,20 @@
     "mcp:hismaserver_puppeteer": "node mcp-servers/new-candidates/@hisma/server-puppeteer/integration.js",
     "test:hismaserver_puppeteer": "jest mcp-servers/new-candidates/@hisma/server-puppeteer/test.js",
     "mcp:candidates": "node scripts/run-all-candidates.js",
-    "test:candidates": "jest mcp-servers/new-candidates/*/test.js"
+    "test:candidates": "jest mcp-servers/new-candidates/*/test.js",
+    "ci:hardened": "node scripts/hardened-ci-runner.js",
+    "ci:performance": "node scripts/performance-benchmark.js",
+    "ci:coverage": "node scripts/coverage-validator.js",
+    "ci:security": "node scripts/security-scanner.js",
+    "ci:quality-gate": "npm run ci:coverage && npm run ci:security && npm run ci:performance",
+    "docs:changelog": "node scripts/changelog-generator.js",
+    "docs:changelog-version": "node scripts/changelog-generator.js --version",
+    "docs:update": "node scripts/changelog-generator.js && npm run docs:api",
+    "docs:api": "echo 'API documentation generation - implement as needed'",
+    "quality:all": "npm run lint && npm run test && npm run ci:quality-gate",
+    "quality:score": "node -e \"console.log('Quality Score: Run npm run quality:all for full assessment')\"",
+    "pipeline:validate": "npm run lint && npm run test && npm run ci:security && npm run ci:coverage",
+    "pipeline:full": "npm run quality:all && npm run docs:changelog"
   },
   "keywords": [
     "music",

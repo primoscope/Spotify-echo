@@ -33,6 +33,7 @@ class SecurityManager {
     this.rateLimiters = new Map();
     this.securityEvents = [];
     this.threatPatterns = this.initializeThreatPatterns();
+    this.monitoringInterval = null;
 
     // Initialize method objects
     this.sessionManager = this.createSessionManager();
@@ -396,11 +397,22 @@ class SecurityManager {
    * Security monitoring
    */
   startSecurityMonitoring() {
-    setInterval(() => {
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+    }
+    
+    this.monitoringInterval = setInterval(() => {
       this.detectAnomalies();
       this.checkSuspiciousSessions();
       this.analyzeSecurityTrends();
     }, 60000); // Every minute
+  }
+
+  stopSecurityMonitoring() {
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = null;
+    }
   }
 
   detectAnomalies() {

@@ -47,14 +47,14 @@ ENV_MATCHES="[]"
 for BR in "${BRANCHES[@]}"; do
   # Skip HEAD pointer
   if [[ "$BR" == "origin/HEAD" ]]; then continue; fi
-  while IFS= read -r PATH; do
+  while IFS= read -r FILE_PATH; do
     # Last commit that touched this path on the branch
-    LAST_COMMIT=$(git rev-list -n 1 "$BR" -- "$PATH" || true)
+    LAST_COMMIT=$(git rev-list -n 1 "$BR" -- "$FILE_PATH" || true)
     META="{}"
     if [[ -n "$LAST_COMMIT" ]]; then
       META=$(git show -s --format='{"commit":"%H","committed":"%cI","author_name":"%an","author_email":"%ae"}' "$LAST_COMMIT")
     fi
-    ITEM=$(jq -n --arg branch "$BR" --arg path "$PATH" --argjson meta "$META" '{branch:$branch, path:$path} + $meta')
+    ITEM=$(jq -n --arg branch "$BR" --arg path "$FILE_PATH" --argjson meta "$META" '{branch:$branch, path:$path} + $meta')
     ENV_MATCHES=$(jq -n --argjson agg "$ENV_MATCHES" --argjson item "$ITEM" '$agg + [$item]')
   done < <(
     git ls-tree -r --name-only "$BR" \

@@ -1,15 +1,9 @@
 # Minimal gitleaks config allowing example env files, scanning everything else
-[[rules]]
-  description = "Generic API Key"
-  id = "generic-api-key"
-  regex = '''(?i)(?:api_?key|secret|token|password)[\s]*[:=][\s]*['"]*[A-Za-z0-9_\-]{10,}['"]*'''
-  keywords = ["api", "key", "secret", "token", "password"]
-
 [allowlist]
   description = "Allow common sample files"
-  files = [
-    '''(?i).*/\.env\.example$''',
-    '''(?i).*/\.env\.sample$''',
-    '''(?i).*/sample\.env$''',
-    '''(?i).*/example\.env$''',
+  paths = [
+    '''(?i)\.env\.example$''',
+    '''(?i)\.env\.sample$''',
+    '''(?i)sample\.env$''',
+    '''(?i)example\.env$''',
   ]

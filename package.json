@@ -243,7 +243,10 @@
     "enhanced-mcp:test": "node -e \"const WorkflowManager = require('./src/mcp/workflow-integration-manager'); const manager = new WorkflowManager(); console.log('Enhanced MCP system initialized successfully');\"",
     "enhanced-mcp:health": "curl -s http://localhost:3000/api/enhanced-mcp/health | jq '.' || echo 'Enhanced MCP server not running'",
     "enhanced-mcp:capabilities": "curl -s http://localhost:3000/api/enhanced-mcp/capabilities | jq '.' || echo 'Enhanced MCP server not running'",
-    "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'"
+    "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'",
+    "mcp:health": "node scripts/mcp/probes/probe-n8n.js && node scripts/mcp/probes/probe-mongodb.js",
+    "mcp:health:n8n": "node scripts/mcp/probes/probe-n8n.js",
+    "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js"
   },
   "keywords": [
     "music",

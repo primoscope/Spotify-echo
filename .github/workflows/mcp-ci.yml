@@ -1,0 +1,32 @@
+name: MCP Config CI
+
+on:
+  pull_request:
+    paths:
+      - "mcp/**"
+      - "scripts/mcp/**"
+      - "docs/mcp/**"
+      - ".env.mcp.example"
+      - ".github/workflows/mcp-ci.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON structure
+        run: |
+          if command -v jq >/dev/null 2>&1; then
+            jq . mcp/servers.example.json >/dev/null
+          else
+            echo "jq not available; skipping JSON validation"
+          fi
+
+      - name: Check env example safety
+        run: |
+          if grep -q 'MONGODB_MCP_ALLOW_WRITE="true"' .env.mcp.example; then
+            echo "Do not enable production writes by default in example file." && exit 1
+          else
+            echo "Env example safe."
+          fi

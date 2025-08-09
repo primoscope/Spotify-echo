@@ -1,0 +1,546 @@
+name: 'MCP Comprehensive Validation & Auto-Merge Gateway'
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, labeled]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  repository_dispatch:
+    types: [mcp-validation, mcp-health-check, gpt5-analysis]
+  workflow_dispatch:
+    inputs:
+      validation_type:
+        description: 'Type of validation to run'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - health-only  
+          - quick
+      pr_number:
+        description: 'PR number for targeted validation'
+        required: false
+        type: string
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+  MCP_VALIDATION_TIMEOUT: '300'
+
+jobs:
+  # Pre-validation setup and dependency installation
+  setup-validation:
+    runs-on: ubuntu-latest
+    outputs:
+      should-validate: ${{ steps.check.outputs.should-validate }}
+      is-agent-pr: ${{ steps.check.outputs.is-agent-pr }}
+      validation-type: ${{ steps.check.outputs.validation-type }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check validation requirements
+        id: check
+        run: |
+          # Check if this should trigger MCP validation
+          SHOULD_VALIDATE="false"
+          IS_AGENT_PR="false"
+          VALIDATION_TYPE="quick"
+          
+          # Check PR labels for agent/automation indicators
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if echo '${{ toJSON(github.event.pull_request.labels.*.name) }}' | grep -q "agent-pr\|copilot-coding-agent\|automation\|mcp-validation"; then
+              SHOULD_VALIDATE="true"
+              IS_AGENT_PR="true"
+              VALIDATION_TYPE="full"
+            fi
+            
+            # Check if PR touches MCP-related files
+            if git diff --name-only HEAD~1 | grep -E "(mcp-|scripts/.*mcp|package.*json|workflows/.*mcp)" > /dev/null; then
+              SHOULD_VALIDATE="true"
+              VALIDATION_TYPE="full"
+            fi
+          fi
+          
+          # Always validate on repository_dispatch
+          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            SHOULD_VALIDATE="true"
+            case "${{ github.event.client_payload.type }}" in
+              "mcp-health-check") VALIDATION_TYPE="health-only" ;;
+              "gpt5-analysis") VALIDATION_TYPE="quick" ;;
+              *) VALIDATION_TYPE="full" ;;
+            esac
+          fi
+          
+          # Workflow dispatch override
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            SHOULD_VALIDATE="true"
+            VALIDATION_TYPE="${{ github.event.inputs.validation_type }}"
+          fi
+          
+          echo "should-validate=$SHOULD_VALIDATE" >> $GITHUB_OUTPUT
+          echo "is-agent-pr=$IS_AGENT_PR" >> $GITHUB_OUTPUT
+          echo "validation-type=$VALIDATION_TYPE" >> $GITHUB_OUTPUT
+          
+          echo "🔍 Validation Check:"
+          echo "  Should Validate: $SHOULD_VALIDATE"
+          echo "  Is Agent PR: $IS_AGENT_PR"
+          echo "  Validation Type: $VALIDATION_TYPE"
+
+  # Core MCP validation pipeline
+  mcp-validation:
+    runs-on: ubuntu-latest
+    needs: setup-validation
+    if: needs.setup-validation.outputs.should-validate == 'true'
+    outputs:
+      validation-status: ${{ steps.validation.outputs.status }}
+      validation-summary: ${{ steps.validation.outputs.summary }}
+      health-score: ${{ steps.validation.outputs.health-score }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq lsof netcat-openbsd
+          
+          # Install essential tools for MCP validation
+          curl --version
+          jq --version
+
+      - name: Install dependencies
+        timeout-minutes: 10
+        run: |
+          echo "🔧 Installing dependencies..."
+          npm ci --prefer-offline --no-audit
+          
+          # Install Python dependencies if they exist
+          if [ -f "requirements.txt" ]; then
+            python -m pip install --upgrade pip
+            pip install --quiet --disable-pip-version-check -r requirements.txt
+          fi
+
+      - name: Install MCP dependencies  
+        timeout-minutes: 15
+        run: |
+          echo "📦 Installing MCP dependencies..."
+          node scripts/mcp-manager.js install
+          
+      - name: Run MCP validation
+        id: validation
+        timeout-minutes: ${{ fromJSON(env.MCP_VALIDATION_TIMEOUT) }}
+        run: |
+          echo "🧪 Running MCP validation (type: ${{ needs.setup-validation.outputs.validation-type }})"
+          
+          VALIDATION_TYPE="${{ needs.setup-validation.outputs.validation-type }}"
+          
+          case "$VALIDATION_TYPE" in
+            "health-only")
+              echo "Running health checks only..."
+              node scripts/mcp-manager.js health | tee mcp-health.log
+              STATUS=$?
+              SUMMARY="Health check completed"
+              ;;
+            "quick")
+              echo "Running quick validation..."
+              node scripts/mcp-manager.js health | tee mcp-health.log
+              node scripts/mcp-manager.js report | tee mcp-report.log
+              STATUS=$?
+              SUMMARY="Quick validation completed"
+              ;;
+            "full"|*)
+              echo "Running comprehensive validation..."
+              node scripts/mcp-manager.js validate | tee mcp-validation.log
+              STATUS=$?
+              SUMMARY="Full validation completed"
+              ;;
+          esac
+          
+          # Parse health score if available
+          HEALTH_SCORE="0"
+          if [ -f "mcp-validation-results.json" ]; then
+            HEALTH_SCORE=$(jq -r '.components.health.results | map(select(.status == "healthy")) | length' mcp-validation-results.json 2>/dev/null || echo "0")
+          fi
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "summary=$SUMMARY" >> $GITHUB_OUTPUT  
+          echo "health-score=$HEALTH_SCORE" >> $GITHUB_OUTPUT
+          
+          echo "📊 Validation Results:"
+          echo "  Status: $STATUS"
+          echo "  Summary: $SUMMARY"
+          echo "  Health Score: $HEALTH_SCORE"
+
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcp-validation-results
+          path: |
+            mcp-*.log
+            mcp-*.json
+            mcp-status-report.json
+            mcp-validation-results.json
+          retention-days: 7
+
+  # Linting and code quality checks
+  lint-and-quality:
+    runs-on: ubuntu-latest
+    needs: setup-validation
+    if: needs.setup-validation.outputs.should-validate == 'true'
+    outputs:
+      lint-status: ${{ steps.lint.outputs.status }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run ESLint
+        id: lint
+        continue-on-error: true
+        run: |
+          echo "🧹 Running ESLint with modern config..."
+          
+          # Install ESLint globals if needed
+          if ! npm list @eslint/js > /dev/null 2>&1; then
+            npm install --no-save @eslint/js globals
+          fi
+          
+          # Run ESLint
+          npx eslint --config eslint.config.js src/ scripts/ mcp-server/ --ext .js,.ts,.jsx,.tsx > lint-results.txt 2>&1
+          LINT_STATUS=$?
+          
+          echo "status=$LINT_STATUS" >> $GITHUB_OUTPUT
+          
+          if [ $LINT_STATUS -eq 0 ]; then
+            echo "✅ Linting passed"
+          else
+            echo "⚠️ Linting issues found:"
+            cat lint-results.txt
+          fi
+
+      - name: Upload lint results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-results
+          path: lint-results.txt
+          retention-days: 7
+
+  # Integration testing
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: setup-validation
+    if: needs.setup-validation.outputs.should-validate == 'true' && needs.setup-validation.outputs.validation-type != 'health-only'
+    outputs:
+      test-status: ${{ steps.tests.outputs.status }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          if [ -f "requirements.txt" ]; then
+            pip install --quiet -r requirements.txt
+          fi
+
+      - name: Run integration tests
+        id: tests
+        timeout-minutes: 10
+        run: |
+          echo "🧪 Running integration tests..."
+          
+          # Run MCP-specific tests
+          node scripts/mcp-manager.js test | tee test-results.log
+          TEST_STATUS=$?
+          
+          echo "status=$TEST_STATUS" >> $GITHUB_OUTPUT
+          
+          if [ $TEST_STATUS -eq 0 ]; then
+            echo "✅ Tests passed"
+          else
+            echo "⚠️ Some tests failed"
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: test-results.log
+          retention-days: 7
+
+  # Security and dependency audit
+  security-audit:
+    runs-on: ubuntu-latest
+    needs: setup-validation
+    if: needs.setup-validation.outputs.should-validate == 'true' && needs.setup-validation.outputs.validation-type == 'full'
+    outputs:
+      security-status: ${{ steps.audit.outputs.status }}
+    steps:
+      - name: Checkout repository  
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Run security audit
+        id: audit
+        continue-on-error: true
+        run: |
+          echo "🔒 Running security audit..."
+          
+          # Run npm audit
+          npm audit --audit-level=moderate > audit-results.txt 2>&1
+          AUDIT_STATUS=$?
+          
+          # Check for secrets in code (basic check)
+          echo "🔍 Checking for exposed secrets..."
+          if grep -r -E "(api[_-]?key|secret|token|password)\s*=\s*['\"][^'\"]{10,}" src/ scripts/ --exclude-dir=node_modules || true; then
+            echo "⚠️ Potential secrets found in code"
+            AUDIT_STATUS=1
+          fi
+          
+          echo "status=$AUDIT_STATUS" >> $GITHUB_OUTPUT
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-results
+          path: audit-results.txt
+          retention-days: 7
+
+  # Generate comprehensive validation report
+  validation-report:
+    runs-on: ubuntu-latest
+    needs: [setup-validation, mcp-validation, lint-and-quality, integration-tests, security-audit]
+    if: always() && needs.setup-validation.outputs.should-validate == 'true'
+    outputs:
+      overall-status: ${{ steps.report.outputs.overall-status }}
+      auto-merge-ready: ${{ steps.report.outputs.auto-merge-ready }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: validation-artifacts/
+
+      - name: Generate validation report
+        id: report
+        run: |
+          echo "📊 Generating comprehensive validation report..."
+          
+          # Initialize report
+          cat > validation-report.md << 'EOF'
+          # 🛡️ MCP Validation Gateway Report
+          
+          **Generated**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")  
+          **PR**: #${{ github.event.pull_request.number || 'N/A' }}  
+          **Validation Type**: ${{ needs.setup-validation.outputs.validation-type }}  
+          **Is Agent PR**: ${{ needs.setup-validation.outputs.is-agent-pr }}
+          
+          ## 📋 Validation Summary
+          
+          EOF
+          
+          # Collect results
+          MCP_STATUS="${{ needs.mcp-validation.outputs.validation-status || '1' }}"
+          LINT_STATUS="${{ needs.lint-and-quality.outputs.lint-status || '1' }}"
+          TEST_STATUS="${{ needs.integration-tests.outputs.test-status || '1' }}"
+          SECURITY_STATUS="${{ needs.security-audit.outputs.security-status || '0' }}"
+          HEALTH_SCORE="${{ needs.mcp-validation.outputs.health-score || '0' }}"
+          
+          # Generate status badges
+          echo "| Component | Status | Details |" >> validation-report.md
+          echo "|-----------|--------|---------|" >> validation-report.md
+          
+          if [ "$MCP_STATUS" = "0" ]; then
+            echo "| 🛡️ MCP Validation | ✅ PASSED | ${{ needs.mcp-validation.outputs.validation-summary }} |" >> validation-report.md
+          else
+            echo "| 🛡️ MCP Validation | ❌ FAILED | Check MCP server configurations |" >> validation-report.md
+          fi
+          
+          if [ "$LINT_STATUS" = "0" ]; then
+            echo "| 🧹 Code Quality | ✅ PASSED | ESLint checks passed |" >> validation-report.md
+          else
+            echo "| 🧹 Code Quality | ⚠️ ISSUES | ESLint found issues |" >> validation-report.md
+          fi
+          
+          if [ "$TEST_STATUS" = "0" ]; then
+            echo "| 🧪 Integration Tests | ✅ PASSED | All tests successful |" >> validation-report.md
+          else
+            echo "| 🧪 Integration Tests | ❌ FAILED | Some tests failed |" >> validation-report.md
+          fi
+          
+          if [ "$SECURITY_STATUS" = "0" ]; then
+            echo "| 🔒 Security Audit | ✅ PASSED | No security issues |" >> validation-report.md  
+          else
+            echo "| 🔒 Security Audit | ⚠️ ISSUES | Security concerns found |" >> validation-report.md
+          fi
+          
+          # Overall status calculation
+          OVERALL_STATUS="failed"
+          AUTO_MERGE_READY="false"
+          
+          if [ "$MCP_STATUS" = "0" ] && [ "$LINT_STATUS" = "0" ] && [ "$TEST_STATUS" = "0" ] && [ "$SECURITY_STATUS" = "0" ]; then
+            OVERALL_STATUS="passed"
+            if [ "${{ needs.setup-validation.outputs.is-agent-pr }}" = "true" ] && [ "$HEALTH_SCORE" -gt "0" ]; then
+              AUTO_MERGE_READY="true"
+            fi
+          elif [ "$MCP_STATUS" = "0" ] && [ "$HEALTH_SCORE" -gt "0" ]; then
+            OVERALL_STATUS="partial"
+          fi
+          
+          echo "" >> validation-report.md
+          echo "## 🎯 Overall Result" >> validation-report.md
+          echo "" >> validation-report.md
+          
+          if [ "$OVERALL_STATUS" = "passed" ]; then
+            echo "### ✅ VALIDATION PASSED" >> validation-report.md
+            echo "All validation checks completed successfully." >> validation-report.md
+          elif [ "$OVERALL_STATUS" = "partial" ]; then
+            echo "### ⚠️ PARTIAL SUCCESS" >> validation-report.md
+            echo "Core MCP validation passed with $HEALTH_SCORE healthy servers, but some quality checks have issues." >> validation-report.md
+          else
+            echo "### ❌ VALIDATION FAILED" >> validation-report.md
+            echo "Critical validation checks failed. Review the issues above." >> validation-report.md
+          fi
+          
+          if [ "$AUTO_MERGE_READY" = "true" ]; then
+            echo "" >> validation-report.md
+            echo "### 🚀 Auto-Merge Status: **READY**" >> validation-report.md
+            echo "This PR meets all criteria for automatic merging." >> validation-report.md
+          fi
+          
+          # Add available commands
+          echo "" >> validation-report.md
+          echo "## 🔄 Available Commands" >> validation-report.md
+          echo "" >> validation-report.md
+          echo "- \`/mcp-health-check\` - Run quick health validation" >> validation-report.md
+          echo "- \`/run-mcp-validation\` - Run comprehensive MCP validation" >> validation-report.md  
+          echo "- \`/gpt5 analyze\` - Run GPT-5 analysis of changes" >> validation-report.md
+          echo "- \`/approve-merge\` - (Maintainers only) Override validation and approve merge" >> validation-report.md
+          
+          echo "overall-status=$OVERALL_STATUS" >> $GITHUB_OUTPUT
+          echo "auto-merge-ready=$AUTO_MERGE_READY" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportContent = fs.readFileSync('validation-report.md', 'utf8');
+            
+            // Find existing validation comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const existingComment = comments.data.find(comment => 
+              comment.user.login === 'github-actions[bot]' && 
+              comment.body.includes('🛡️ MCP Validation Gateway Report')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: reportContent
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: reportContent
+              });
+            }
+
+      - name: Upload validation report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-report
+          path: |
+            validation-report.md
+            validation-artifacts/
+          retention-days: 30
+
+  # Auto-merge for validated agent PRs
+  auto-merge:
+    runs-on: ubuntu-latest
+    needs: [setup-validation, validation-report]
+    if: |
+      github.event_name == 'pull_request' && 
+      needs.validation-report.outputs.auto-merge-ready == 'true' &&
+      needs.setup-validation.outputs.is-agent-pr == 'true' &&
+      !github.event.pull_request.draft
+    steps:
+      - name: Enable auto-merge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: '🤖 Auto-approved by MCP validation gateway - all checks passed!'
+            });
+            
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              merge_method: 'squash',
+              commit_title: 'MCP: Auto-merge validated changes',
+              commit_message: 'Automatically merged after successful MCP validation gateway checks.'
+            });

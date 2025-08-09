@@ -1,0 +1,221 @@
+{
+  "timestamp": "2025-08-09T03:08:36.078Z",
+  "summary": {
+    "totalServers": 25,
+    "serversByType": {
+      "configured": 9,
+      "mcp-server": 13,
+      "legacy": 3
+    },
+    "health": {
+      "healthy": 22,
+      "unhealthy": 3,
+      "total": 25
+    }
+  },
+  "details": {
+    "health": [
+      {
+        "name": "browser",
+        "status": "healthy",
+        "responseTime": 130,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "browserbase",
+        "status": "healthy",
+        "responseTime": 119,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "filesystem",
+        "status": "healthy",
+        "responseTime": 7,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "spotify",
+        "status": "healthy",
+        "responseTime": 3,
+        "endpoint": "command:python",
+        "details": "python is available"
+      },
+      {
+        "name": "sequential-thinking",
+        "status": "healthy",
+        "responseTime": 6,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "screenshot-website",
+        "status": "healthy",
+        "responseTime": 6,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "enhanced-file-utilities",
+        "status": "healthy",
+        "responseTime": 5,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "enhanced-browser-tools",
+        "status": "healthy",
+        "responseTime": 5,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "comprehensive-validator",
+        "status": "healthy",
+        "responseTime": 5,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "mcp-sequential-thinking",
+        "status": "healthy",
+        "responseTime": 5,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "mcp-github",
+        "status": "healthy",
+        "responseTime": 4,
+        "endpoint": "command:docker",
+        "details": "docker is available"
+      },
+      {
+        "name": "mcp-filesystem",
+        "status": "healthy",
+        "responseTime": 139,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "mcp-sqlite",
+        "status": "healthy",
+        "responseTime": 5,
+        "endpoint": "command:python",
+        "details": "python is available"
+      },
+      {
+        "name": "mcp-memory",
+        "status": "healthy",
+        "responseTime": 132,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "mcp-postgres",
+        "status": "healthy",
+        "responseTime": 137,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "mcp-brave-search",
+        "status": "healthy",
+        "responseTime": 119,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "mcp-screenshot-website",
+        "status": "healthy",
+        "responseTime": 6,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "mcp-browserbase",
+        "status": "healthy",
+        "responseTime": 99,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "mcp-mermaid",
+        "status": "healthy",
+        "responseTime": 102,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "mcp-browser",
+        "status": "healthy",
+        "responseTime": 102,
+        "endpoint": "command:npx",
+        "details": "npx is available"
+      },
+      {
+        "name": "mcp-spotify",
+        "status": "healthy",
+        "responseTime": 3,
+        "endpoint": "command:python",
+        "details": "python is available"
+      },
+      {
+        "name": "mcp-sentry",
+        "status": "healthy",
+        "responseTime": 6,
+        "endpoint": "command:node",
+        "details": "node is available"
+      },
+      {
+        "name": "enhanced-server",
+        "status": "unhealthy",
+        "error": "Port 3001 not responding: No health endpoint on port 3001",
+        "type": "legacy"
+      },
+      {
+        "name": "orchestration-engine",
+        "status": "unhealthy",
+        "error": "Port 3002 not responding: No health endpoint on port 3002",
+        "type": "legacy"
+      },
+      {
+        "name": "spotify-server",
+        "status": "unhealthy",
+        "error": "Port 3003 not responding: No health endpoint on port 3003",
+        "type": "legacy"
+      }
+    ],
+    "environment": {
+      "found": 0,
+      "total": 8,
+      "missing": [
+        "NODE_ENV",
+        "PORT",
+        "SPOTIFY_CLIENT_ID",
+        "SPOTIFY_CLIENT_SECRET",
+        "MONGODB_URI",
+        "OPENAI_API_KEY",
+        "GEMINI_API_KEY",
+        "BROWSERBASE_API_KEY"
+      ],
+      "hasRequired": false,
+      "requiredMissing": [
+        "NODE_ENV",
+        "PORT"
+      ]
+    },
+    "fileSystem": {
+      "MCP Server Config": true,
+      "Response Formatter": true,
+      "Environment Template": true,
+      "Integration Tests": true
+    }
+  },
+  "recommendations": [
+    "Fix 3 unhealthy servers",
+    "Configure required environment variables: NODE_ENV, PORT"
+  ]
+}

@@ -9,6 +9,8 @@ import sys
 import json
 import argparse
 import logging
+import requests
+import base64
 from typing import Dict, Optional
 from pathlib import Path
 
@@ -174,8 +176,6 @@ class DatabaseSetupHelper:
         # Test Spotify API
         if self.config.get('SPOTIFY_CLIENT_ID') and self.config.get('SPOTIFY_CLIENT_SECRET'):
             try:
-                import requests
-                import base64
                 
                 auth_header = base64.b64encode(
                     f"{self.config['SPOTIFY_CLIENT_ID']}:{self.config['SPOTIFY_CLIENT_SECRET']}".encode()

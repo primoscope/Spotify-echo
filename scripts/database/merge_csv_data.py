@@ -25,6 +25,9 @@ class CSVDataMerger:
         self.input_pattern = input_pattern
         self.output_file = output_file
         self.combined_df = None
+        # Configure file exclusion patterns (can be overridden via environment)
+        exclude_patterns_env = os.getenv('CSV_EXCLUDE_PATTERNS', '/jf,\\jf')
+        self.exclude_patterns = [pattern.strip() for pattern in exclude_patterns_env.split(',') if pattern.strip()]
         
     def find_csv_files(self) -> List[str]:
         """Find all CSV files matching the pattern"""
@@ -36,8 +39,9 @@ class CSVDataMerger:
         # Find files in databases directory
         csv_files.extend(glob.glob("databases/split_data_part_*.csv"))
         
-        # Remove the jf file if it exists
-        csv_files = [f for f in csv_files if not f.endswith('/jf') and not f.endswith('\\jf')]
+        # Exclude files matching the exclude_patterns
+        for pattern in self.exclude_patterns:
+            csv_files = [f for f in csv_files if not f.endswith(pattern)]
         
         logger.info(f"Found {len(csv_files)} CSV files to merge")
         for file in csv_files:

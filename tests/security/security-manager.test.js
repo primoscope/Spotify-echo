@@ -23,6 +23,9 @@ describe('SecurityManager', () => {
   let mockNavigator;
 
   beforeEach(() => {
+    // Use fake timers to control intervals
+    jest.useFakeTimers();
+    
     mockWindow = {
       crypto: {
         getRandomValues: jest.fn(() => new Uint8Array(32).fill(42)),
@@ -64,7 +67,13 @@ describe('SecurityManager', () => {
   });
 
   afterEach(() => {
+    // Stop any running monitoring intervals
+    if (securityManager && securityManager.stopSecurityMonitoring) {
+      securityManager.stopSecurityMonitoring();
+    }
     jest.clearAllMocks();
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   describe('Session Management', () => {

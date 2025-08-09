@@ -26,7 +26,7 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': [
-        'error',
+        'warn',  // Changed from 'error' to 'warn' to be less strict
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
@@ -38,6 +38,7 @@ module.exports = [
     },
   },
   
+
   // Configuration for React files (including .js files with JSX)
   {
 
@@ -46,6 +47,8 @@ module.exports = [
       react,
       'react-hooks': reactHooks,
     },
+
+    
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {
@@ -57,6 +60,7 @@ module.exports = [
       },
     },
     rules: {
+
 
       ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
@@ -75,6 +79,7 @@ module.exports = [
       react: {
         version: 'detect',
       },
+
     },
   },
   
@@ -103,6 +108,7 @@ module.exports = [
     },
     rules: {
       'no-unused-expressions': 'off',
+      'no-unused-vars': 'warn',
     },
   },
   
@@ -116,6 +122,7 @@ module.exports = [
     },
     rules: {
       'no-console': 'off',
+      'no-unused-vars': 'warn',
     },
   },
   

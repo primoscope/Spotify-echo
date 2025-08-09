@@ -39,6 +39,7 @@ const musicDiscoveryRoutes = require('./api/routes/music-discovery'); // New mus
 const llmProvidersRoutes = require('./api/routes/llm-providers'); // Enhanced LLM provider management
 const advancedSettingsRoutes = require('./api/advanced-settings'); // Advanced Settings UI API
 const docsRoutes = require('./api/routes/docs'); // API documentation
+const adminRoutes = require('./api/routes/admin'); // MongoDB admin dashboard and tools
 const {
   extractUser,
   ensureDatabase,
@@ -653,6 +654,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/insights', insightsRoutes); // Enhanced Spotify insights with caching and pagination
 app.use('/api/feedback', feedbackRoutes); // New feedback system
 app.use('/api/music', musicDiscoveryRoutes); // Enhanced music discovery system
+app.use('/api/admin', adminRoutes); // MongoDB admin dashboard and tools
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

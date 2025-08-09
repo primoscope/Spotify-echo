@@ -312,7 +312,7 @@ router.get('/status', async (req, res) => {
 /**
  * Development endpoints (only available in dev mode)
  */
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEVELOPMENT_MODE === 'true') {
   /**
    * POST /auth/dev/login
    * Development mode login bypass

@@ -416,12 +416,20 @@
                             <span class="metric-label">Response Time</span>
                             <span class="metric-value">${healthData.mongodb.responseTime || 'N/A'}</span>
                         </div>
+                        <div class="metric">
+                            <span class="metric-label">Admin Tools Version</span>
+                            <span class="metric-value">${healthData.adminTools.version || '1.0.0'}</span>
+                        </div>
                     `;
                 } else {
                     statusDiv.innerHTML = `
                         <div class="error">
                             <span class="status-indicator status-error"></span>
-                            MongoDB is not connected. Some features may not be available.
+                            MongoDB is not connected. Admin tools are running with limited functionality.
+                            <br><br>
+                            <strong>Current Status:</strong> ${healthData.mongodb?.message || 'Database unavailable'}
+                            <br>
+                            <strong>Fallback Mode:</strong> SQLite database is active for basic functionality.
                         </div>
                     `;
                     return;

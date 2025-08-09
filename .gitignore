@@ -152,6 +152,15 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Generated analysis reports (temporary files)
+automation-analysis-*.json
+automation-analysis-*.md
+mcp-validation-report.json
+mcp-results.txt
+target_files.txt
+gpt5_analysis.md
+automation_analysis.log
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be added to the global gitignore or merged into this project gitignore.  For a PyCharm

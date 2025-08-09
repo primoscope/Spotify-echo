@@ -1,12 +1,12 @@
 📁 FileMCP ✅: read on /home/runner/work/Spotify-echo/Spotify-echo/package.json
 {
   "status": "healthy",
-  "timestamp": "2025-08-09T11:16:09.186Z",
+  "timestamp": "2025-08-09T11:18:27.836Z",
   "metrics": {
     "read": {
-      "averageMs": 1,
-      "minMs": 1,
-      "maxMs": 1,
+      "averageMs": 2,
+      "minMs": 2,
+      "maxMs": 2,
       "count": 1
     }
   },

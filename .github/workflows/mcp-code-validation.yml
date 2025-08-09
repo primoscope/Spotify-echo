@@ -163,11 +163,11 @@ jobs:
           npm run validate:repo
           
           # Extract summary data from JSON report
-          CRITICAL=$(jq -r '.summary.Critical // 0' reports/validation-report.json)
-          HIGH=$(jq -r '.summary.High // 0' reports/validation-report.json)
-          MEDIUM=$(jq -r '.summary.Medium // 0' reports/validation-report.json)  
-          LOW=$(jq -r '.summary.Low // 0' reports/validation-report.json)
-          TOTAL=$(jq -r '.metadata.total_findings' reports/validation-report.json)
+          CRITICAL=$(jq -r '.summary.Critical // 0' reports/validation-report.json || echo "0")
+          HIGH=$(jq -r '.summary.High // 0' reports/validation-report.json || echo "0")
+          MEDIUM=$(jq -r '.summary.Medium // 0' reports/validation-report.json || echo "0")  
+          LOW=$(jq -r '.summary.Low // 0' reports/validation-report.json || echo "0")
+          TOTAL=$(jq -r '.metadata.total_findings' reports/validation-report.json || echo "unknown")
           
           # Determine success/warning status
           if [ "$CRITICAL" -eq 0 ] && [ "$HIGH" -eq 0 ]; then

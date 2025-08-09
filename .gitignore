@@ -435,10 +435,17 @@ archive/
 *.bak
 *.orig
 
-# Environment files (keep only the example tracked)
+# Secrets and local env
 .env
 .env.*
 !.env.example
+
+# Secret inventory outputs and encrypted backups
+exports/
+*.age
+*.gpg
+*.asc
+*.tar.gz
 
 # MCP server logs
 mcp-server/*.log

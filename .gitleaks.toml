@@ -1,0 +1,9 @@
+# Minimal gitleaks config allowing example env files, scanning everything else
+[allowlist]
+  description = "Allow common sample files"
+  files = [
+    "(?i).*/\\.env\\.example$",
+    "(?i).*/\\.env\\.sample$",
+    "(?i).*/sample\\.env$",
+    "(?i).*/example\\.env$"
+  ]

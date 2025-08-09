@@ -59,6 +59,24 @@ spec:
     - key: LOG_LEVEL
       value: info
     
+    # Production secrets (managed via DigitalOcean console)
+    - key: SPOTIFY_CLIENT_ID
+      type: SECRET
+    - key: SPOTIFY_CLIENT_SECRET
+      type: SECRET
+    - key: BROWSERBASE_API_KEY
+      type: SECRET
+    - key: OPENAI_API_KEY
+      type: SECRET
+    - key: GEMINI_API_KEY
+      type: SECRET
+    - key: MONGODB_URI
+      type: SECRET
+    - key: REDIS_URL
+      type: SECRET
+    - key: DIGITALOCEAN_ACCESS_TOKEN
+      type: SECRET
+    
     # Routing
     routes:
     - path: /

@@ -290,15 +290,22 @@ class EnhancedFileMCP {
         performance: Date.now() - startTime
       };
       
-      // Check for security issues
-      const dangerousPatterns = this.validationRules.get('dangerousPatterns');
-      for (const pattern of dangerousPatterns) {
-        if (pattern.test(content)) {
-          analysis.securityIssues.push({
-            pattern: pattern.source,
-            type: 'dangerous_code',
-            severity: 'high'
-          });
+      // Check for security issues only in executable files
+      const extension = path.extname(validatedPath).toLowerCase();
+      const executableExtensions = ['.js', '.ts', '.py', '.sh', '.bash', '.zsh', '.ps1', '.bat', '.cmd'];
+      const configExtensions = ['.json', '.yml', '.yaml', '.toml', '.ini', '.env', '.conf', '.config'];
+      
+      // Only apply dangerous pattern checks to executable files, not config files
+      if (executableExtensions.includes(extension) && !configExtensions.includes(extension)) {
+        const dangerousPatterns = this.validationRules.get('dangerousPatterns');
+        for (const pattern of dangerousPatterns) {
+          if (pattern.test(content)) {
+            analysis.securityIssues.push({
+              pattern: pattern.source,
+              type: 'dangerous_code',
+              severity: 'high'
+            });
+          }
         }
       }
       

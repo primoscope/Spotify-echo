@@ -45,14 +45,14 @@ jobs:
       - name: Run Node tests (if present)
         run: |
           if [ -f package.json ]; then
-            npm test --silent --if-present || echo "Node tests not found or failed; ensure tests are added"
+            npm test --silent --if-present || echo "Node tests failed; reviewing CI artifacts for details"
           fi
 
       - name: Run Python tests (if present)
         run: |
           if compgen -G "**/test_*.py" > /dev/null; then
             pip install pytest pytest-cov || true
-            pytest -q || echo "Pytests failed; ensure tests are added"
+            pytest -q || echo "Python tests failed; reviewing CI artifacts for details"
           else
             echo "No Python tests detected"
           fi

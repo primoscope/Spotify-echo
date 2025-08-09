@@ -1,7 +1,36 @@
+# MCP Server Registry - Generated 2025-08-09T05:32:38Z
+metadata:
+  generated: 2025-08-09T05:32:38Z
+  validation_status: partially_validated
+  
 servers:
+  - name: enhanced-file-utilities
+    status: available
+    type: file-operations
+    capabilities: ["read", "validate", "security-scan"]
+    
+  - name: comprehensive-validator  
+    status: available
+    type: system-validation
+    capabilities: ["health-check", "resource-validation"]
+    
+  - name: mcp-orchestrator
+    status: available
+    type: orchestration
+    capabilities: ["server-management", "workflow-coordination"]
+    
+  - name: workflow-manager
+    status: available
+    type: automation
+    capabilities: ["workflow-execution", "task-scheduling"]
+
+community_integrations:
   - name: filesystem
     status: unknown
-  - name: puppeteer
+    source: community
+  - name: puppeteer  
     status: unknown
+    source: community
   - name: analytics
     status: unknown
+    source: community

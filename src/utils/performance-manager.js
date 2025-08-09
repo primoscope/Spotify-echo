@@ -127,7 +127,7 @@ class PerformanceManager {
 
       has: (key) => {
         const entry = this.cacheStorage.get(key);
-        return entry && Date.now() <= entry.expiresAt;
+        return entry ? Date.now() <= entry.expiresAt : false;
       },
 
       delete: (key) => {

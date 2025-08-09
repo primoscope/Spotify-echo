@@ -50,6 +50,8 @@ jobs:
             COMMAND="run-mcp-validation"
           elif echo "$COMMENT_BODY" | grep -qi "/mcp-health-check"; then
             COMMAND="mcp-health-check"
+          elif echo "$COMMENT_BODY" | grep -qi "/mcp-status"; then
+            COMMAND="mcp-status"
           elif echo "$COMMENT_BODY" | grep -qi "/mcp-discover"; then
             COMMAND="mcp-discover"
           elif echo "$COMMENT_BODY" | grep -qi "/analyze-gpt5"; then
@@ -116,33 +118,77 @@ jobs:
           
           case "$COMMAND" in
             "run-mcp-all")
-              echo "Running comprehensive MCP validation..."
-              if [ -f scripts/comprehensive-mcp-validation.js ]; then
-                node scripts/comprehensive-mcp-validation.js --comprehensive > mcp-command-results.log 2>&1 || true
-              else
-                echo "⚠️ MCP validation script not found" > mcp-command-results.log
-              fi
+              echo "Triggering comprehensive MCP validation workflow..."
+              # Trigger the enhanced agent-mcp-automation workflow
+              gh workflow run agent-mcp-automation.yml \
+                --ref ${{ github.ref || 'main' }} \
+                --field validation_level=comprehensive \
+                --field force_validation=true \
+                > mcp-command-results.log 2>&1 || true
+              
+              echo "✅ Comprehensive MCP validation workflow triggered" >> mcp-command-results.log
+              echo "📊 View progress: ${{ github.server_url }}/${{ github.repository }}/actions" >> mcp-command-results.log
               ;;
             "run-mcp-validation")
-              echo "Running MCP validation..."
+              echo "Triggering MCP validation workflow..."
+              # Trigger the enhanced agent-mcp-automation workflow  
+              gh workflow run agent-mcp-automation.yml \
+                --ref ${{ github.ref || 'main' }} \
+                --field validation_level=full \
+                --field force_validation=true \
+                > mcp-command-results.log 2>&1 || true
+              
+              echo "✅ MCP validation workflow triggered" >> mcp-command-results.log
+              echo "📊 View progress: ${{ github.server_url }}/${{ github.repository }}/actions" >> mcp-command-results.log
+              
+              # Also run quick local validation for immediate feedback
               if [ -f scripts/comprehensive-mcp-validation.js ]; then
-                node scripts/comprehensive-mcp-validation.js --full > mcp-command-results.log 2>&1 || true
-              else
-                echo "⚠️ MCP validation script not found" > mcp-command-results.log
+                echo "" >> mcp-command-results.log
+                echo "🔍 Quick local validation results:" >> mcp-command-results.log
+                node scripts/comprehensive-mcp-validation.js --quick >> mcp-command-results.log 2>&1 || true
               fi
               ;;
             "mcp-health-check")
               echo "Running MCP health check..."
-              if [ -f scripts/comprehensive-mcp-validation.js ]; then
+              if [ -f scripts/mcp-manager.js ]; then
+                node scripts/mcp-manager.js health > mcp-command-results.log 2>&1 || true
+              elif [ -f scripts/comprehensive-mcp-validation.js ]; then
                 node scripts/comprehensive-mcp-validation.js --health-check > mcp-command-results.log 2>&1 || true
               else
-                echo "⚠️ MCP validation script not found" > mcp-command-results.log
+                echo "⚠️ MCP health check scripts not found" > mcp-command-results.log
               fi
               ;;
+            "mcp-status")
+              echo "Checking MCP validation system status..."
+              # Show recent workflow runs and validation status
+              echo "📊 MCP Validation System Status Report" > mcp-command-results.log
+              echo "Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> mcp-command-results.log
+              echo "" >> mcp-command-results.log
+              
+              # Quick health check
+              if [ -f scripts/mcp-manager.js ]; then
+                echo "🔍 Quick Health Check:" >> mcp-command-results.log
+                node scripts/mcp-manager.js health >> mcp-command-results.log 2>&1 || true
+                echo "" >> mcp-command-results.log
+              fi
+              
+              echo "🔗 Recent Validation Runs:" >> mcp-command-results.log
+              echo "${{ github.server_url }}/${{ github.repository }}/actions/workflows/agent-mcp-automation.yml" >> mcp-command-results.log
+              echo "" >> mcp-command-results.log
+              echo "💡 To run new validation: /run-mcp-validation" >> mcp-command-results.log
+              ;;
             "mcp-discover")
-              echo "Running MCP discovery..."
+              echo "Running MCP server discovery..."
               if [ -f scripts/discover-new-mcp-servers.js ]; then
                 node scripts/discover-new-mcp-servers.js > mcp-command-results.log 2>&1 || true
+                
+                # Check if discoveries were made and provide follow-up info
+                if [ -f "mcp-discovery-report.json" ]; then
+                  echo "" >> mcp-command-results.log
+                  echo "📊 Discovery Summary:" >> mcp-command-results.log
+                  jq '.total_discoveries' mcp-discovery-report.json 2>/dev/null >> mcp-command-results.log || true
+                  echo "📋 Full report available in workflow artifacts" >> mcp-command-results.log
+                fi
               else
                 echo "⚠️ MCP discovery script not found" > mcp-command-results.log
               fi
@@ -173,9 +219,10 @@ jobs:
             }
             
             const commandDescriptions = {
-              'run-mcp-all': 'Comprehensive MCP Validation',
-              'run-mcp-validation': 'Full MCP Validation',
+              'run-mcp-all': 'Comprehensive MCP Validation Suite',
+              'run-mcp-validation': 'Enhanced MCP Validation',
               'mcp-health-check': 'MCP Health Check',
+              'mcp-status': 'MCP System Status Report',
               'mcp-discover': 'MCP Server Discovery'
             };
             
@@ -199,12 +246,22 @@ jobs:
             
             ### 🔄 Available Follow-up Commands
             
-            - \`/run-mcp-all\` - Run comprehensive MCP validation
-            - \`/mcp-health-check\` - Quick health check
-            - \`/mcp-discover\` - Discover new MCP servers
-            - \`/analyze-gpt5\` - Trigger GPT-5 analysis
+            **Validation Commands:**
+            - \`/run-mcp-all\` - Run comprehensive MCP validation suite
+            - \`/run-mcp-validation\` - Run enhanced MCP validation  
+            - \`/mcp-health-check\` - Quick MCP server health check
+            - \`/mcp-status\` - Check MCP system status
             
-            *Command executed by MCP Slash Commands Handler*`;
+            **Discovery & Analysis:**
+            - \`/mcp-discover\` - Discover new MCP servers
+            - \`/analyze-gpt5\` - Trigger GPT-5 code analysis
+            - \`/review-gpt5\` - GPT-5 comprehensive code review
+            
+            **Maintainer Commands:**
+            - \`/approve-merge\` - Override validation and approve merge
+            - \`/force-validation\` - Force validation even if not required
+            
+            *Command executed by Enhanced MCP Slash Commands Handler*`;
             
             // Post comment
             if (contextType === 'issue') {

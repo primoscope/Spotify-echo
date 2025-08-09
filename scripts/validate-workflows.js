@@ -136,7 +136,9 @@ class WorkflowValidator {
         });
 
         // Check for proper secrets usage
-        if (workflowStr.includes('secrets.') && !workflowStr.includes('${{ secrets.')) {
+        // Refined check: flag 'secrets.' usage that is not in ${{ secrets. }} and not 'secrets.inherit' or 'secrets: inherit'
+        const improperSecretsPattern = /(?<!\${{\s*)secrets\.(?!inherit\b)/g;
+        if (improperSecretsPattern.test(workflowStr)) {
             this.logWarning(filename, 'Possible improper secrets reference');
         }
     }

@@ -1,15 +1,388 @@
 const express = require('express');
+const axios = require('axios');
 const SpotifyAudioFeaturesService = require('../../spotify/audio-features');
-const { requireAuth, createRateLimit } = require('../middleware');
+const { requireAuth, createRateLimit, authRateLimit } = require('../middleware');
+const { 
+  generatePKCEChallenge, 
+  generateNonce, 
+  createJWT, 
+  createRefreshToken,
+  verifyRefreshToken,
+  sanitizeUserData,
+  getSecureCookieOptions
+} = require('../../utils/auth-helpers');
+const { getRedisManager } = require('../../utils/redis');
 
 const router = express.Router();
 const spotifyService = new SpotifyAudioFeaturesService();
+
+// Spotify OAuth configuration
+const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+
+// Environment-aware redirect URI
+const getRedirectUri = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.SPOTIFY_REDIRECT_URI || `https://${process.env.DOMAIN}/auth/callback`;
+  }
+  return process.env.SPOTIFY_REDIRECT_URI || `http://localhost:${process.env.PORT || 3000}/auth/callback`;
+};
 
 // Rate limiting for Spotify endpoints
 const spotifyRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // Higher limit for data processing
   message: 'Too many Spotify API requests, please slow down',
+});
+
+/**
+ * Initiate Spotify OAuth 2.0 PKCE flow
+ * GET /api/spotify/auth/login
+ */
+router.get('/auth/login', authRateLimit, async (req, res) => {
+  try {
+    if (!SPOTIFY_CLIENT_ID) {
+      return res.status(500).json({
+        error: 'Spotify not configured',
+        message: 'SPOTIFY_CLIENT_ID not set'
+      });
+    }
+
+    const state = generateNonce();
+    const pkce = generatePKCEChallenge();
+    const scope = [
+      'user-read-private',
+      'user-read-email', 
+      'playlist-modify-public',
+      'playlist-modify-private',
+      'user-read-recently-played',
+      'user-top-read',
+      'user-read-playback-state',
+      'user-modify-playback-state'
+    ].join(' ');
+
+    // Store PKCE challenge and state in Redis/session store
+    const redisManager = getRedisManager();
+    const authData = {
+      code_verifier: pkce.code_verifier,
+      state,
+      timestamp: Date.now(),
+      ip: req.ip
+    };
+
+    await redisManager.set(`oauth:${state}`, authData, 600); // 10 minute expiry
+
+    const authURL = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({
+      response_type: 'code',
+      client_id: SPOTIFY_CLIENT_ID,
+      scope,
+      redirect_uri: getRedirectUri(),
+      state,
+      code_challenge: pkce.code_challenge,
+      code_challenge_method: pkce.code_challenge_method
+    }).toString();
+
+    res.json({
+      success: true,
+      authUrl: authURL,
+      state,
+      expiresAt: Date.now() + 600000 // 10 minutes
+    });
+
+  } catch (error) {
+    console.error('OAuth login error:', error);
+    res.status(500).json({
+      error: 'Authentication setup failed',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Handle Spotify OAuth callback
+ * GET /api/spotify/auth/callback
+ */  
+router.get('/auth/callback', authRateLimit, async (req, res) => {
+  try {
+    const { code, state, error: oauthError } = req.query;
+
+    if (oauthError) {
+      console.error('Spotify OAuth error:', oauthError);
+      return res.status(400).json({
+        error: 'OAuth failed',
+        message: oauthError,
+        code: 'SPOTIFY_OAUTH_ERROR'
+      });
+    }
+
+    if (!code || !state) {
+      return res.status(400).json({
+        error: 'Missing parameters',
+        message: 'Authorization code and state are required'
+      });
+    }
+
+    // Verify state and get stored PKCE data
+    const redisManager = getRedisManager();
+    const authData = await redisManager.get(`oauth:${state}`);
+    
+    if (!authData) {
+      return res.status(400).json({
+        error: 'Invalid state',
+        message: 'State parameter is invalid or expired'
+      });
+    }
+
+    // Clean up used state
+    await redisManager.del(`oauth:${state}`);
+
+    // Exchange code for tokens
+    const tokenResponse = await axios.post(
+      'https://accounts.spotify.com/api/token',
+      new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: getRedirectUri(),
+        client_id: SPOTIFY_CLIENT_ID,
+        code_verifier: authData.code_verifier
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
+        }
+      }
+    );
+
+    const { access_token, refresh_token, expires_in } = tokenResponse.data;
+
+    // Get user profile
+    const userResponse = await axios.get('https://api.spotify.com/v1/me', {
+      headers: { Authorization: `Bearer ${access_token}` }
+    });
+
+    const spotifyUser = userResponse.data;
+    const userData = sanitizeUserData(spotifyUser);
+
+    // Create JWT tokens
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET not configured');
+    }
+
+    const accessTokenJWT = createJWT(userData, jwtSecret, { expiresIn: '1h' });
+    const refreshTokenJWT = createRefreshToken(userData, jwtSecret);
+
+    // Store session data
+    const sessionData = {
+      user: userData,
+      spotify_access_token: access_token,
+      spotify_refresh_token: refresh_token,
+      spotify_expires_at: Date.now() + (expires_in * 1000),
+      created_at: new Date().toISOString()
+    };
+
+    await redisManager.setSession(userData.id, sessionData, 7 * 24 * 60 * 60); // 7 days
+
+    // Cache user data for quick access
+    await redisManager.cacheSpotifyUser(userData.id, userData, 3600); // 1 hour
+
+    // Set secure cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = getSecureCookieOptions(isProduction);
+
+    res.cookie('access_token', accessTokenJWT, cookieOptions);
+    res.cookie('refresh_token', refreshTokenJWT, { 
+      ...cookieOptions, 
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days for refresh token
+    });
+
+    res.json({
+      success: true,
+      user: userData,
+      access_token: accessTokenJWT,
+      expires_in: 3600,
+      message: 'Authentication successful'
+    });
+
+  } catch (error) {
+    console.error('OAuth callback error:', error.response?.data || error.message);
+    res.status(500).json({
+      error: 'Authentication failed', 
+      message: 'Failed to complete Spotify authentication',
+      details: error.response?.data?.error_description || error.message
+    });
+  }
+});
+
+/**
+ * Refresh access token
+ * POST /api/spotify/auth/refresh
+ */
+router.post('/auth/refresh', authRateLimit, async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.refresh_token || req.body.refresh_token;
+    
+    if (!refreshToken) {
+      return res.status(401).json({
+        error: 'Refresh token required',
+        message: 'No refresh token provided'
+      });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET not configured');
+    }
+
+    const decoded = verifyRefreshToken(refreshToken, jwtSecret);
+    if (!decoded) {
+      return res.status(401).json({
+        error: 'Invalid refresh token',
+        message: 'Refresh token is invalid or expired'
+      });
+    }
+
+    const userId = decoded.id;
+    const redisManager = getRedisManager();
+    const sessionData = await redisManager.getSession(userId);
+
+    if (!sessionData || !sessionData.spotify_refresh_token) {
+      return res.status(401).json({
+        error: 'Session expired',
+        message: 'Please login again'
+      });
+    }
+
+    // Refresh Spotify token if needed
+    if (sessionData.spotify_expires_at < Date.now() + 300000) { // Refresh if expires in 5 minutes
+      const refreshResponse = await axios.post(
+        'https://accounts.spotify.com/api/token',
+        new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: sessionData.spotify_refresh_token
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
+          }
+        }
+      );
+
+      const { access_token, expires_in, refresh_token: newRefreshToken } = refreshResponse.data;
+      
+      // Update session with new tokens
+      sessionData.spotify_access_token = access_token;
+      sessionData.spotify_expires_at = Date.now() + (expires_in * 1000);
+      if (newRefreshToken) {
+        sessionData.spotify_refresh_token = newRefreshToken;
+      }
+      
+      await redisManager.setSession(userId, sessionData, 7 * 24 * 60 * 60);
+    }
+
+    // Create new JWT access token
+    const newAccessToken = createJWT(sessionData.user, jwtSecret, { expiresIn: '1h' });
+
+    // Update cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = getSecureCookieOptions(isProduction);
+    res.cookie('access_token', newAccessToken, cookieOptions);
+
+    res.json({
+      success: true,
+      access_token: newAccessToken,
+      expires_in: 3600,
+      user: sessionData.user
+    });
+
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(500).json({
+      error: 'Token refresh failed',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Logout and clear session
+ * POST /api/spotify/auth/logout
+ */
+router.post('/auth/logout', async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    
+    if (userId) {
+      const redisManager = getRedisManager();
+      await redisManager.deleteSession(userId);
+      await redisManager.del(`spotify:user:${userId}`);
+    }
+
+    // Clear cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    const clearOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      path: '/'
+    };
+
+    res.clearCookie('access_token', clearOptions);
+    res.clearCookie('refresh_token', clearOptions);
+
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      error: 'Logout failed',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Get current user profile
+ * GET /api/spotify/auth/me
+ */
+router.get('/auth/me', requireAuth, async (req, res) => {
+  try {
+    const redisManager = getRedisManager();
+    const cachedUser = await redisManager.getCachedSpotifyUser(req.user.id);
+    
+    if (cachedUser) {
+      return res.json({
+        success: true,
+        user: cachedUser
+      });
+    }
+
+    // Fallback to session data
+    const sessionData = await redisManager.getSession(req.user.id);
+    if (sessionData && sessionData.user) {
+      return res.json({
+        success: true,
+        user: sessionData.user
+      });
+    }
+
+    res.status(404).json({
+      error: 'User not found',
+      message: 'User session expired'
+    });
+
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({
+      error: 'Failed to get user',
+      message: error.message
+    });
+  }
 });
 
 /**

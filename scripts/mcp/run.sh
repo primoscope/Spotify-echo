@@ -13,7 +13,7 @@ VALIDATION_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Try to test actual MCP components if they exist
 if [ -f "mcp-servers/enhanced-file-utilities.js" ]; then
     echo "📁 Testing Enhanced File MCP..."
-    if node mcp-servers/enhanced-file-utilities.js health > /tmp/mcp-file-health.json 2>/dev/null; then
+    if node mcp-servers/enhanced-file-utilities.js health > mcp/mcp-file-health.json 2>/dev/null; then
         HEALTH_STATUS+="✅ Enhanced File MCP: Healthy\n"
         MCP_AVAILABLE=true
     else

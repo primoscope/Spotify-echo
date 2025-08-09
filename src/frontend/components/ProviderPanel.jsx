@@ -1,7 +1,7 @@
 // React is needed for JSX
 
 import { useLLM } from '../contexts/LLMContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function ProviderPanel() {
   const { currentProvider, providers, loading, switchProvider, refreshProviders } = useLLM();
@@ -14,9 +14,9 @@ function ProviderPanel() {
   useEffect(() => {
     loadAvailableModels();
     loadTelemetryData();
-  }, [currentProvider]);
+  }, [currentProvider, loadAvailableModels, loadTelemetryData]);
 
-  const loadAvailableModels = async () => {
+  const loadAvailableModels = useCallback(async () => {
     if (currentProvider === 'mock') return;
     
     setRefreshingModels(true);
@@ -38,9 +38,9 @@ function ProviderPanel() {
     } finally {
       setRefreshingModels(false);
     }
-  };
+  }, [currentProvider, selectedModel]);
 
-  const loadTelemetryData = async () => {
+  const loadTelemetryData = useCallback(async () => {
     try {
       const response = await fetch(`/api/settings/llm-providers/telemetry?provider=${currentProvider}`);
       const data = await response.json();
@@ -51,7 +51,7 @@ function ProviderPanel() {
     } catch (error) {
       console.error('Failed to load telemetry:', error);
     }
-  };
+  }, [currentProvider]);
 
   const handleProviderChange = async (e) => {
     const newProvider = e.target.value;
@@ -322,7 +322,7 @@ function ProviderPanel() {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .provider-panel {
           background: var(--card-bg);
           border: 1px solid var(--border-color);

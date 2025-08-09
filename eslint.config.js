@@ -3,6 +3,8 @@
 
 const js = require('@eslint/js');
 const globals = require('globals');
+const reactPlugin = require('eslint-plugin-react');
+const reactHooksPlugin = require('eslint-plugin-react-hooks');
 
 module.exports = [
   // Base recommended configuration
@@ -37,6 +39,10 @@ module.exports = [
   // Configuration for React files
   {
     files: ['src/**/*.jsx', 'src/**/*.tsx'],
+    plugins: {
+      react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
+    },
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {
@@ -48,9 +54,17 @@ module.exports = [
       },
     },
     rules: {
+      ...reactPlugin.configs.recommended.rules,
+      ...reactHooksPlugin.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
       'react/jsx-uses-react': 'off',
       'react/prop-types': 'off',
+      'react/jsx-uses-vars': 'error',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
     },
   },
   

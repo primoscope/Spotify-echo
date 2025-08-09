@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -225,7 +225,7 @@ function InsightsDashboard() {
   const [loading, setLoading] = useState(true);
   const [insights, setInsights] = useState({});
   const [selectedFeatures, setSelectedFeatures] = useState(['energy', 'valence', 'danceability']);
-  const [cacheEnabled, setCacheEnabled] = useState(true);
+  const [_cacheEnabled, _setCacheEnabled] = useState(true);
   const [error, setError] = useState(null);
   const [cacheStats, setCacheStats] = useState({});
 
@@ -241,10 +241,38 @@ function InsightsDashboard() {
     'instrumentalness', 'speechiness', 'tempo'
   ];
 
+  const loadInsights = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 50,
+        timeRange,
+        features: selectedFeatures.join(',')
+      });
+
+      const response = await fetch(`/api/insights/listening-trends?${params}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setInsights(data);
+      } else {
+        setError(data.message || 'Failed to load insights');
+      }
+    } catch (err) {
+      setError('Network error loading insights');
+      console.error('Error loading insights:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [timeRange, currentPage, selectedFeatures]);
+
   useEffect(() => {
     loadInsights();
     loadCacheStats();
-  }, [timeRange, currentPage, selectedFeatures]);
+  }, [loadInsights]);
 
   const loadInsights = async () => {
     setLoading(true);

@@ -4,7 +4,7 @@
  */
 
 const cors = require('cors');
-const { verifyJWT, verifyRefreshToken } = require('../utils/auth-helpers');
+const { verifyJWT, verifyRefreshToken: _verifyRefreshToken } = require('../utils/auth-helpers');
 const { getRedisManager } = require('../utils/redis');
 
 /**

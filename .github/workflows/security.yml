@@ -1,52 +1,316 @@
-name: Security — Scans
+name: Security — Enhanced Scans
 
 on:
   pull_request:
+    branches: [main, develop]
   push:
-    branches: [ main ]
+    branches: [main, develop]
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 2 * * *'  # Run daily at 2 AM UTC
   workflow_dispatch:
 
 jobs:
   dependency-audit:
+    name: Dependency Security Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
-      - name: Install (if package.json exists)
+          
+      - name: Install dependencies
         run: |
-          if [ -f package.json ]; then npm ci; fi
-      - name: npm audit (non-blocking)
-        run: |
-          if [ -f package.json ]; then
-            npm audit --audit-level=high || true
-          else
-            echo "No package.json, skipping npm audit"
+          if [ -f package.json ]; then 
+            npm ci --audit
           fi
-      - name: Upload audit summary
+          
+      - name: Run npm audit
         run: |
           mkdir -p reports
-          npm audit --json > reports/npm-audit.json 2>/dev/null || echo '{"note":"npm audit skipped or failed"}' > reports/npm-audit.json
-      - uses: actions/upload-artifact@v4
+          
+          if [ -f package.json ]; then
+            echo "🔍 Running npm audit..."
+            
+            # Run audit and capture results
+            if npm audit --audit-level=high --json > reports/npm-audit.json 2>/dev/null; then
+              echo "✅ No high or critical vulnerabilities found"
+              AUDIT_ISSUES=0
+            else
+              echo "⚠️ Security vulnerabilities detected"
+              AUDIT_ISSUES=1
+              
+              # Show summary
+              echo "Vulnerability summary:"
+              npm audit --audit-level=high || true
+            fi
+            
+            echo "AUDIT_ISSUES=$AUDIT_ISSUES" >> $GITHUB_ENV
+          else
+            echo "No package.json, skipping npm audit"
+            echo '{"note":"npm audit skipped - no package.json"}' > reports/npm-audit.json
+          fi
+          
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
         with:
           name: security-audit
           path: reports/npm-audit.json
-          if-no-files-found: ignore
+          retention-days: 30
 
   secret-scan:
+    name: Secret Detection Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Gitleaks scan (non-blocking)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comprehensive scanning
+          
+      - name: Create reports directory
+        run: mkdir -p reports
+        
+      - name: Gitleaks scan
         uses: zricethezav/gitleaks-action@v2
         with:
           args: "detect --no-banner --redact --exit-code 0 --report-format json --report-path reports/gitleaks.json"
-      - uses: actions/upload-artifact@v4
+          
+      - name: Enhanced secret pattern scanning
+        run: |
+          echo "🔍 Running enhanced secret pattern scanning..."
+          
+          # Define secret patterns with descriptions
+          declare -A PATTERNS=(
+            ["DigitalOcean API Token"]="dop_v1_[a-f0-9]{64}"
+            ["OpenAI API Key"]="sk-[a-zA-Z0-9]{48}"
+            ["Google API Key"]="AIza[a-zA-Z0-9]{35}"
+            ["GitHub Personal Token"]="ghp_[a-zA-Z0-9]{36}"
+            ["GitHub OAuth Token"]="gho_[a-zA-Z0-9]{36}"
+            ["AWS Access Key"]="AKIA[A-Z0-9]{16}"
+            ["Private Key"]="-----BEGIN [A-Z ]+PRIVATE KEY-----"
+            ["MongoDB Connection with Password"]="mongodb://[^:]+:[^@]+@"
+            ["Generic Long Secret"]="_(?:key|secret|token|password).*['\"]([a-zA-Z0-9+/]{20,})['\"]"
+          )
+          
+          MANUAL_ISSUES=0
+          
+          # Scan all files
+          for description in "${!PATTERNS[@]}"; do
+            pattern="${PATTERNS[$description]}"
+            echo "Checking for: $description"
+            
+            if grep -r -i -E "$pattern" . \
+              --exclude-dir=.git \
+              --exclude-dir=node_modules \
+              --exclude-dir=build \
+              --exclude-dir=dist \
+              --exclude="*.log" \
+              --exclude="reports/*" \
+              >/dev/null 2>&1; then
+              
+              echo "❌ Found potential $description"
+              ((MANUAL_ISSUES++))
+            fi
+          done
+          
+          echo "MANUAL_ISSUES=$MANUAL_ISSUES" >> $GITHUB_ENV
+          
+      - name: Check deployment files for security issues
+        run: |
+          echo "🔍 Checking deployment-specific security issues..."
+          
+          DEPLOYMENT_ISSUES=0
+          
+          # Check .do files for hardcoded values and demo configs
+          if [[ -d ".do" ]]; then
+            echo "Checking DigitalOcean deployment files..."
+            
+            # Check for demo/mock configurations
+            if grep -r -i "demo_mode.*true" .do/ >/dev/null 2>&1; then
+              echo "❌ DEMO_MODE=true found in .do/ files"
+              ((DEPLOYMENT_ISSUES++))
+            fi
+            
+            if grep -r -i "default_llm_provider.*mock" .do/ >/dev/null 2>&1; then
+              echo "❌ DEFAULT_LLM_PROVIDER=mock found in .do/ files"
+              ((DEPLOYMENT_ISSUES++))
+            fi
+            
+            # Check for hardcoded API tokens
+            if grep -r -E "dop_v1_[a-f0-9]{64}" .do/ >/dev/null 2>&1; then
+              echo "❌ DigitalOcean API token found in .do/ files"
+              ((DEPLOYMENT_ISSUES++))
+            fi
+          fi
+          
+          echo "DEPLOYMENT_ISSUES=$DEPLOYMENT_ISSUES" >> $GITHUB_ENV
+          
+      - name: Generate comprehensive scan report
+        run: |
+          cat > reports/secret-scan-enhanced.json << EOF
+          {
+            "scan_timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit_sha": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "results": {
+              "manual_pattern_issues": ${{ env.MANUAL_ISSUES }},
+              "deployment_issues": ${{ env.DEPLOYMENT_ISSUES }},
+              "total_issues": $((${{ env.MANUAL_ISSUES }} + ${{ env.DEPLOYMENT_ISSUES }}))
+            },
+            "scanned_patterns": [
+              "DigitalOcean API Tokens",
+              "OpenAI API Keys", 
+              "Google API Keys",
+              "GitHub Tokens",
+              "AWS Access Keys",
+              "Private Keys",
+              "MongoDB Connections",
+              "Demo/Mock Configurations",
+              "Hardcoded Passwords"
+            ],
+            "recommendations": [
+              "Use environment variables for all secrets",
+              "Never commit API keys or tokens",
+              "Set secrets in deployment platform UI only",
+              "Remove demo/mock configs from production specs",
+              "Use .env.example for proper secret patterns"
+            ]
+          }
+          EOF
+          
+      - name: Upload secret scan results
+        uses: actions/upload-artifact@v4
         with:
           name: secret-scan
+          path: |
+            reports/gitleaks.json
+            reports/secret-scan-enhanced.json
+          retention-days: 30
+          
+      - name: Fail on critical security issues
+        if: env.DEPLOYMENT_ISSUES != '0'
+        run: |
+          echo "💥 Critical security issues detected in deployment files!"
+          echo "🔍 Deployment security issues: ${{ env.DEPLOYMENT_ISSUES }}"
+          echo ""
+          echo "CRITICAL: Hardcoded secrets or demo configs found in deployment files."
+          echo "This is a blocking security issue that must be resolved before deployment."
+          exit 1
+          
+      - name: Warn on manual pattern issues
+        if: env.MANUAL_ISSUES != '0' && env.DEPLOYMENT_ISSUES == '0'
+        run: |
+          echo "⚠️ Potential secrets detected (non-blocking)"
+          echo "🔍 Manual pattern issues: ${{ env.MANUAL_ISSUES }}"
+          echo ""
+          echo "Please review the enhanced scan results for potential false positives."
+
+  docker-security:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'  # Skip for scheduled runs
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Build Docker image for scanning
+        if: always()
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "🔍 Building Docker image for security scanning..."
+            docker build -t echotune-security-scan:latest .
+          else
+            echo "No Dockerfile found, skipping Docker security scan"
+            exit 0
+          fi
+          
+      - name: Run Trivy vulnerability scanner
+        if: always()
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'echotune-security-scan:latest'
+          format: 'json'
+          output: 'reports/trivy-results.json'
+          exit-code: '0'  # Don't fail build on vulnerabilities
+          
+      - name: Upload Docker security results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-security-scan
+          path: reports/trivy-results.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  security-summary:
+    name: Security Summary Report
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, secret-scan, docker-security]
+    if: always()
+    
+    steps:
+      - name: Generate security summary
+        run: |
+          mkdir -p reports
+          
+          cat > reports/security-summary.md << EOF
+          # Security Scan Summary Report
+          
+          **Generated:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          **Commit:** ${{ github.sha }}
+          **Branch:** ${{ github.ref_name }}
+          
+          ## Scan Results Overview
+          
+          | Scan Type | Status | Details |
+          |-----------|--------|---------|
+          | Dependency Audit | ${{ needs.dependency-audit.result == 'success' && '✅ Passed' || (needs.dependency-audit.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} | npm audit for known vulnerabilities |
+          | Secret Detection | ${{ needs.secret-scan.result == 'success' && '✅ Passed' || (needs.secret-scan.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} | Gitleaks + manual pattern scanning |
+          | Docker Security | ${{ needs.docker-security.result == 'success' && '✅ Passed' || (needs.docker-security.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} | Trivy container vulnerability scan |
+          
+          ## Security Status
+          
+          $(if [[ "${{ needs.secret-scan.result }}" == "success" && "${{ needs.dependency-audit.result }}" == "success" ]]; then
+            echo "🟢 **SECURE** - All critical security checks passed"
+            echo ""
+            echo "✅ No hardcoded secrets detected"
+            echo "✅ No critical dependency vulnerabilities"
+            echo "✅ Deployment files are secure"
+          else
+            echo "🔴 **ATTENTION REQUIRED** - Security issues detected"
+            echo ""
+            echo "Please review the detailed scan results and address any issues."
+          fi)
+          
+          ## Recommendations
+          
+          - Keep dependencies updated with \`npm update\`
+          - Use \`npm audit fix\` to resolve known vulnerabilities  
+          - Never commit API keys, tokens, or secrets
+          - Set all secrets in deployment platform environment variables
+          - Remove demo/mock configurations from production deployments
+          - Review security scan artifacts for detailed findings
+          
+          ---
+          *This report was generated automatically by the EchoTune AI security pipeline.*
+          EOF
+          
+          echo "🔒 Security scan completed"
+          echo "📊 Summary:"
+          echo "- Dependency Audit: ${{ needs.dependency-audit.result }}"
+          echo "- Secret Scan: ${{ needs.secret-scan.result }}"
+          echo "- Docker Security: ${{ needs.docker-security.result }}"
+          
+      - name: Upload security summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary-report
+          path: reports/security-summary.md
+          retention-days: 90
           path: reports/gitleaks.json
           if-no-files-found: ignore

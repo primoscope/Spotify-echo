@@ -63,9 +63,14 @@ const {
 
 // Import enhanced systems
 const healthRoutes = require('./api/health/health-routes');
-const cacheManager = require('./api/cache/cache-manager');
+const cacheManager = require('./api/cache/redis-cache-manager');
 const SecurityManager = require('./api/security/security-manager');
 const performanceMonitor = require('./api/monitoring/performance-monitor');
+
+// Import Redis-backed rate limiting and performance monitoring
+const { rateLimiters } = require('./middleware/redis-rate-limiter');
+const { middleware: slowRequestMiddleware } = require('./middleware/slow-request-logger');
+const { MCPPerformanceAnalytics } = require('./utils/mcp-performance-analytics');
 
 const app = express();
 const server = http.createServer(app);
@@ -102,8 +107,12 @@ async function initializeRedisSession() {
   }
 }
 
-// Performance monitoring
+// Performance monitoring and slow request logging
 app.use(performanceMonitor.requestTracker());
+app.use(slowRequestMiddleware);
+
+// Initialize MCP Performance Analytics
+const mcpAnalytics = new MCPPerformanceAnalytics();
 
 // Trust proxy if in production (for proper IP detection behind reverse proxy)
 if (config.server.trustProxy) {
@@ -175,13 +184,7 @@ app.use(session(sessionConfig));
 app.use(securityHeaders);
 
 // Global rate limiting with Redis backing
-const globalRateLimit = createRateLimit({
-  windowMs: config.security?.rateLimit?.windowMs || 15 * 60 * 1000,
-  max: config.security?.rateLimit?.max || 1000,
-  message: 'Too many requests from this IP, please try again later',
-  keyGenerator: (req) => `global:${req.ip || 'unknown'}`
-});
-app.use(globalRateLimit);
+app.use(rateLimiters.global);
 
 // Request logging and monitoring
 app.use(requestLogger);
@@ -290,28 +293,114 @@ app.use(extractUser);
 // Enhanced API routes with new systems
 app.use('/api', healthRoutes);
 
-// Add specialized rate limiting to API routes
-app.use('/api/chat', chatRateLimit);
-app.use('/api/recommendations', apiRateLimit);
-app.use('/api/spotify', spotifyRateLimit);
-app.use('/auth', authRateLimit);
-app.use('/api/spotify/auth', authRateLimit); // Additional auth endpoint protection
+// Add specialized Redis-backed rate limiting to API routes
+app.use('/api/chat', rateLimiters.chat);
+app.use('/api/recommendations', rateLimiters.api);
+app.use('/api/spotify', rateLimiters.spotify);
+app.use('/auth', rateLimiters.auth);
+app.use('/api/spotify/auth', rateLimiters.auth); // Additional auth endpoint protection
 
-// Performance monitoring route
-app.get('/api/performance', (req, res) => {
-  const report = performanceMonitor.getPerformanceReport();
-  res.json(report);
+// Enhanced performance monitoring route
+app.get('/api/performance', async (req, res) => {
+  try {
+    const report = performanceMonitor.getPerformanceReport();
+    const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
+    const slowRequestMetrics = getSlowRequestMetrics();
+    
+    // Combine performance data
+    const enhancedReport = {
+      ...report,
+      slow_requests: slowRequestMetrics,
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json(enhancedReport);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get performance report',
+      message: error.message
+    });
+  }
 });
 
-// Cache statistics route - now includes Redis stats
-app.get('/api/cache/stats', (req, res) => {
-  const cacheStats = cacheManager.getStats();
-  const redisStats = redisManager ? redisManager.getStats() : null;
-  
-  res.json({
-    cache_manager: cacheStats,
-    redis: redisStats
-  });
+// Rate limiter statistics route
+app.get('/api/rate-limit/stats', (req, res) => {
+  try {
+    const stats = {};
+    
+    for (const [name, limiter] of Object.entries(rateLimiters)) {
+      stats[name] = limiter.getStats();
+    }
+    
+    res.json({
+      rate_limiters: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get rate limiter stats',
+      message: error.message
+    });
+  }
+});
+
+// MCP Analytics endpoint
+app.get('/api/mcp/analytics', async (req, res) => {
+  try {
+    const report = await mcpAnalytics.generateMCPReport();
+    res.json(report);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to generate MCP analytics report',
+      message: error.message
+    });
+  }
+});
+
+// Performance baseline endpoint
+app.post('/api/performance/baseline', async (req, res) => {
+  try {
+    const { PerformanceBaseline } = require('./utils/performance-baseline');
+    const options = {
+      baseURL: req.body.baseURL || `http://localhost:${PORT}`,
+      testDuration: req.body.testDuration || 30000,
+      concurrentRequests: req.body.concurrentRequests || 3
+    };
+    
+    const baseline = new PerformanceBaseline(options);
+    const results = await baseline.runBaseline();
+    
+    res.json({
+      success: true,
+      results: results,
+      message: 'Performance baseline completed'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to run performance baseline',
+      message: error.message
+    });
+  }
+});
+
+// Enhanced cache statistics route - now includes Redis stats and performance metrics
+app.get('/api/cache/stats', async (req, res) => {
+  try {
+    const cacheStats = await cacheManager.getStats();
+    const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
+    const slowRequestMetrics = getSlowRequestMetrics();
+    
+    res.json({
+      cache: cacheStats,
+      performance: slowRequestMetrics,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get cache stats',
+      message: error.message
+    });
+  }
 });
 
 // Redis health check route

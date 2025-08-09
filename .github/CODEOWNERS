@@ -1,0 +1,7 @@
+# Require owner approval for MCP integrations and guards
+/mcp/** @dzp5103
+/scripts/mcp/** @dzp5103
+/docs/mcp/** @dzp5103
+/.github/workflows/mcp-ci.yml @dzp5103
+/.github/workflows/mcp-connectivity.yml @dzp5103
+/.env.mcp.example @dzp5103

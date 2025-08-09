@@ -461,3 +461,6 @@ gpt5_analysis.md
 mcp_results.txt
 target_files.txt
 automation_analysis.log
+
+# MCP local env
+.env.mcp

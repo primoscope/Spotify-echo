@@ -2,26 +2,31 @@
  * Comprehensive tests for Mobile Responsive Manager
  */
 
-// Try to import MobileResponsiveManager
+// Try to import MobileResponsiveManager with enhanced error handling
 let MobileResponsiveManager;
 let shouldSkipTests = false;
+let skipReason = '';
 
 try {
   const mobileModule = require('../../src/mobile/mobile-responsive');
   MobileResponsiveManager = mobileModule.MobileResponsiveManager;
   
   if (typeof MobileResponsiveManager !== 'function') {
-    console.warn('MobileResponsiveManager not available as function - skipping tests');
     shouldSkipTests = true;
+    skipReason = 'MobileResponsiveManager not available as function';
   }
 } catch (error) {
-  console.warn('MobileResponsiveManager import error - skipping tests:', error.message);
   shouldSkipTests = true;
+  skipReason = `Import error: ${error.message}`;
+  // Don't warn in test output unless in verbose mode
+  if (process.env.VERBOSE_TESTS) {
+    console.warn('MobileResponsiveManager import issue:', error.message);
+  }
 }
 
 describe('MobileResponsiveManager', () => {
   if (shouldSkipTests) {
-    it('should skip tests due to import issues', () => {
+    it(`should skip tests - ${skipReason}`, () => {
       expect(true).toBe(true);
     });
     return;

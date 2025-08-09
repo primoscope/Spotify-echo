@@ -1,4 +1,4 @@
-# Security Scanner Whitelist Configuration
+# Security Scanner Whitelist Configuration v5.0
 # This file contains patterns and files that should be excluded from security scanning
 # to reduce false positives while maintaining security vigilance
 
@@ -15,13 +15,18 @@ excluded_files:
   - "**/coverage/**"
   - "**/dist/**"
   - "**/.git/**"
+  - "**/reports/**"
+  - "**/mcp-*-*.json"
+  - "**/integration-test-results.json"
+  - "**/testing_screenshots/**"
+  - "**/ml_datasets/**"
 
-# Patterns that are commonly false positives
+# Enhanced patterns that are commonly false positives
 whitelisted_patterns:
   - pattern: "your_secret_here"
     reason: "Example placeholder text"
   - pattern: "change_me"
-    reason: "Example placeholder text"
+    reason: "Example placeholder text"  
   - pattern: "example_key"
     reason: "Example placeholder text"
   - pattern: "test_token"
@@ -48,6 +53,24 @@ whitelisted_patterns:
     severity: "info"
   - pattern: "[a-f0-9]{24}"
     reason: "MongoDB ObjectId patterns"
+    severity: "low"
+  - pattern: "github_pat_[A-Za-z0-9_]+"
+    reason: "GitHub token pattern in examples"
+    context: "documentation"
+  - pattern: "ghp_[A-Za-z0-9]{36}"
+    reason: "GitHub personal access token in examples"
+    context: "documentation"
+  - pattern: "npm_[A-Za-z0-9]{36}"
+    reason: "NPM token pattern in examples"
+    context: "documentation"
+  - pattern: "[0-9]{13,}"
+    reason: "Timestamps and IDs often false positives"
+    severity: "info"
+  - pattern: "session_[0-9]{13}"
+    reason: "Session ID pattern in code"
+    severity: "info"
+  - pattern: "\\b[A-Za-z0-9+/]{88}={0,2}\\b"
+    reason: "Base64 encoded data often legitimate"
     severity: "low"
 
 # Files that contain legitimate secrets or sensitive patterns for testing

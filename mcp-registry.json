@@ -51,18 +51,28 @@
         "BROWSERBASE_API_KEY",
         "BROWSERBASE_PROJECT_ID"
       ],
-      "description": "",
+      "requiredEnv": [
+        "BROWSERBASE_API_KEY",
+        "BROWSERBASE_PROJECT_ID"
+      ],
+      "envPassthrough": [
+        "BROWSERBASE_API_KEY",
+        "BROWSERBASE_PROJECT_ID"
+      ],
+      "description": "Browserbase cloud browser automation service with environment-gated startup",
+      "notes": "Server will only start when both BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID environment variables are present. Gracefully skipped during validation when envs are missing.",
       "categories": [
         "browser-automation"
       ],
       "capabilities": [
         "screenshot",
         "web-automation",
-        "scraping"
+        "scraping",
+        "cloud-browser"
       ],
       "status": "configured",
       "addedDate": "2025-08-09T05:19:07.829Z",
-      "lastUpdated": "2025-08-09T05:19:13.771Z"
+      "lastUpdated": "2025-01-17T00:00:00.000Z"
     },
     "filesystem": {
       "name": "filesystem",

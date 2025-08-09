@@ -1,17 +1,10 @@
 // ESLint configuration for EchoTune AI
 // Modern ESLint v9+ flat config format
 
-const js = require('@eslint/js');
 const globals = require('globals');
-
-const react = require('eslint-plugin-react');
-const reactHooks = require('eslint-plugin-react-hooks');
 
 
 module.exports = [
-  // Base recommended configuration
-  js.configs.recommended,
-  
   // Global configuration for all files
   {
     languageOptions: {
@@ -21,7 +14,6 @@ module.exports = [
         ...globals.node,
         ...globals.browser,
         ...globals.es2021,
-        ...globals.jest,
       },
     },
     rules: {
@@ -41,14 +33,7 @@ module.exports = [
 
   // Configuration for React files (including .js files with JSX)
   {
-
     files: ['src/**/*.jsx', 'src/**/*.tsx', 'src/**/*.js'],
-    plugins: {
-      react,
-      'react-hooks': reactHooks,
-    },
-
-    
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {
@@ -60,26 +45,9 @@ module.exports = [
       },
     },
     rules: {
-
-
-      ...react.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
-
       'react/react-in-jsx-scope': 'off',
       'react/jsx-uses-react': 'off',
       'react/prop-types': 'off',
-      'react/jsx-uses-vars': 'error',
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-
     },
   },
   

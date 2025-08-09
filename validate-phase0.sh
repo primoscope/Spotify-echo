@@ -71,17 +71,28 @@ fi
 
 # Check for potential secrets in codebase
 echo "Scanning for potential secrets..."
-SECRET_COUNT=$(grep -r -i -E "(password|secret|key|token).*=.*['\"][a-zA-Z0-9+/=]{10,}['\"]" . \
-    --exclude-dir=node_modules \
-    --exclude-dir=.git \
-    --exclude="*.test.js" \
-    --exclude="*.example" \
-    --exclude="validate-phase0.sh" 2>/dev/null | wc -l || echo "0")
-
-if [ "$SECRET_COUNT" -eq 0 ]; then
-    print_status "pass" "No hardcoded secrets detected"
+if [ -x "scripts/enhanced-secret-scan.sh" ]; then
+    ./scripts/enhanced-secret-scan.sh > /dev/null 2>&1
+    SCAN_EXIT_CODE=$?
+    if [ $SCAN_EXIT_CODE -eq 0 ]; then
+        print_status "pass" "No hardcoded secrets detected (enhanced scan)"
+    else
+        print_status "warn" "Potential secrets found - review required"
+    fi
 else
-    print_status "warn" "$SECRET_COUNT potential secrets found (review needed)"
+    # Fallback to basic pattern detection with smart filtering
+    SECRET_COUNT=$(grep -r -i -E "(password|secret|key|token).*=.*['\"][a-zA-Z0-9+/=]{10,}['\"]" . \
+        --exclude-dir=node_modules \
+        --exclude-dir=.git \
+        --exclude="*.test.js" \
+        --exclude="*.example" \
+        --exclude="validate-phase0.sh" 2>/dev/null | wc -l || echo "0")
+    
+    if [ "$SECRET_COUNT" -eq 0 ]; then
+        print_status "pass" "No hardcoded secrets detected"
+    else
+        print_status "warn" "$SECRET_COUNT potential secrets found (review needed)"
+    fi
 fi
 
 echo

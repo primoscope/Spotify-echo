@@ -44,6 +44,7 @@ const llmProvidersRoutes = require('./api/routes/llm-providers'); // Enhanced LL
 const advancedSettingsRoutes = require('./api/advanced-settings'); // Advanced Settings UI API
 const docsRoutes = require('./api/routes/docs'); // API documentation
 const adminRoutes = require('./api/routes/admin'); // MongoDB admin dashboard and tools
+const enhancedMCPRoutes = require('./api/routes/enhanced-mcp'); // Enhanced MCP and multimodel capabilities
 const {
   extractUser,
   ensureDatabase,
@@ -673,7 +674,7 @@ app.post('/api/chat', async (req, res) => {
 
     if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
       response =
-        "I'd love to recommend some music for you! What mood are you in? Or what genre would you like to explore?";
+        'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
       action = 'recommend';
     } else if (lowerMessage.includes('playlist')) {
       response =
@@ -685,10 +686,10 @@ app.post('/api/chat', async (req, res) => {
       action = 'mood_analysis';
     } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
       response =
-        "Hello! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?";
+        'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
     } else {
       response =
-        "I'm here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.";
+        'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
     }
 
     res.json({
@@ -722,6 +723,7 @@ app.use('/api/insights', insightsRoutes); // Enhanced Spotify insights with cach
 app.use('/api/feedback', feedbackRoutes); // New feedback system
 app.use('/api/music', musicDiscoveryRoutes); // Enhanced music discovery system
 app.use('/api/admin', adminRoutes); // MongoDB admin dashboard and tools
+app.use('/api/enhanced-mcp', enhancedMCPRoutes); // Enhanced MCP and multimodel capabilities
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

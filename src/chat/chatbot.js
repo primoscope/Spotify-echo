@@ -1057,7 +1057,7 @@ Just ask me anything about music and I'll help you discover your next favorite s
       if (features.energy?.average > 0.7) {
         insights.push('You prefer high-energy, upbeat music that gets you moving!');
       } else if (features.energy?.average < 0.3) {
-        insights.push("You enjoy calm, low-energy music that's perfect for relaxation.");
+        insights.push('You enjoy calm, low-energy music that\'s perfect for relaxation.');
       }
 
       if (features.danceability?.average > 0.7) {
@@ -1067,7 +1067,7 @@ Just ask me anything about music and I'll help you discover your next favorite s
       if (features.valence?.average > 0.7) {
         insights.push('Your music tends to be very positive and uplifting!');
       } else if (features.valence?.average < 0.3) {
-        insights.push("You're drawn to more melancholic or introspective music.");
+        insights.push('You\'re drawn to more melancholic or introspective music.');
       }
 
       if (features.acousticness?.average > 0.7) {
@@ -1079,13 +1079,13 @@ Just ask me anything about music and I'll help you discover your next favorite s
     if (analysis.listening_patterns.most_active_hours.length > 0) {
       const topHour = analysis.listening_patterns.most_active_hours[0];
       if (topHour.hour >= 6 && topHour.hour < 12) {
-        insights.push("You're most active listening to music in the morning!");
+        insights.push('You\'re most active listening to music in the morning!');
       } else if (topHour.hour >= 12 && topHour.hour < 18) {
         insights.push('Afternoon is your prime music listening time!');
       } else if (topHour.hour >= 18 && topHour.hour < 22) {
-        insights.push("You're an evening music lover!");
+        insights.push('You\'re an evening music lover!');
       } else {
-        insights.push("You're a night owl when it comes to music!");
+        insights.push('You\'re a night owl when it comes to music!');
       }
     }
 
@@ -1101,7 +1101,7 @@ Just ask me anything about music and I'll help you discover your next favorite s
   async chat(message, sessionId) {
     const response = await this.sendMessage(sessionId, message);
     return {
-      text: response.content || response.text || "I'm having trouble processing that request.",
+      text: response.content || response.text || 'I\'m having trouble processing that request.',
       provider: this.currentProvider,
       sessionId: sessionId,
     };

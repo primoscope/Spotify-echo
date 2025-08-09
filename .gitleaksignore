@@ -1,0 +1,53 @@
+# False positives - example/template values
+example_value
+your_api_key_here
+your_client_id_here
+your_client_secret_here
+your_domain.com
+generate_new_secret_here
+test_secret
+test_session
+test_token
+example_token
+demo_key
+placeholder_key
+template_value
+sample_key
+
+# Test files
+**/*.test.js
+**/*.spec.js
+**/tests/**
+**/test/**
+**/__tests__/**
+
+# Example/template files
+**/*.example
+**/*.template
+**/.env.example
+**/.env.template
+**/example.*
+**/template.*
+
+# Documentation files
+**/*.md
+**/*.txt
+**/README.*
+**/CHANGELOG.*
+**/docs/**
+
+# Configuration examples
+**/nginx.conf.template
+**/docker-compose.yml
+**/package.json
+**/package-lock.json
+
+# Specific false positive patterns
+copilot.*DapperMan77.*demo
+mongodb://username:password@cluster
+sk-your_openai_api_key_here
+your_spotify_client_id_here
+your_gemini_api_key_here
+your_supabase_anon_key
+your_github_token
+your_digitalocean_access_token

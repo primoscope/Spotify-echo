@@ -240,6 +240,16 @@ router.post('/llm/test', async (req, res) => {
 });
 
 /**
+ * @swagger
+ * /api/settings/export:
+ *   get:
+ *     summary: Export current advanced settings (sanitized)
+ *     tags: [Settings]
+ *     responses:
+ *       200:
+ *         description: JSON settings backup without secrets
+ */
+/**
  * GET /api/settings/export
  * Export current settings for backup (sanitized)
  */
@@ -258,6 +268,22 @@ router.get('/export', (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/settings/import:
+ *   post:
+ *     summary: Import advanced settings from a sanitized backup
+ *     tags: [Settings]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Settings imported (API keys preserved server-side)
+ */
 /**
  * POST /api/settings/import
  * Import settings from backup (expects JSON body). Does not accept API keys from client.
@@ -289,6 +315,28 @@ router.post('/import', (req, res) => {
 });
 
 /**
+ * @swagger
+ * /api/settings/ssl/request:
+ *   post:
+ *     summary: Create a plan for automated Let's Encrypt SSL request
+ *     tags: [Settings]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [domain]
+ *             properties:
+ *               domain:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: SSL plan created and saved to reports
+ */
+/**
  * POST /api/settings/ssl/request
  * Plan an automated SSL (Let\'s Encrypt) request. Writes an instruction plan to reports.
  */
@@ -316,6 +364,16 @@ router.post('/ssl/request', (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/settings/self-test:
+ *   get:
+ *     summary: Validate advanced settings read/write path
+ *     tags: [Settings]
+ *     responses:
+ *       200:
+ *         description: Self test status
+ */
 /**
  * GET /api/settings/self-test
  * Validate that advanced settings read/write is functioning

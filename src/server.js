@@ -219,12 +219,13 @@ app.use(sanitizeInput);
 // Serve built React application static files first
 app.use(
   express.static(path.join(__dirname, '../dist'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+    maxAge: process.env.NODE_ENV === 'production' ? '1y' : 0,
     etag: true,
     lastModified: true,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
-        res.setHeader('Cache-Control', 'public, max-age=3600');
+        // Hashed asset filenames are immutable
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       }
     },
   })
@@ -259,18 +260,18 @@ app.use(
 );
 
 // Serve src directory for JavaScript modules with no-cache in development
-app.use(
-  '/src',
-  express.static(path.join(__dirname), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
-    etag: false,
-    setHeaders: (res) => {
-      if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production') {
+  app.use(
+    '/src',
+    express.static(path.join(__dirname), {
+      maxAge: 0,
+      etag: false,
+      setHeaders: (res) => {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      }
-    },
-  })
-);
+      },
+    })
+  );
+}
 
 // Serve docs directory for API documentation
 app.use(

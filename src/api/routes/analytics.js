@@ -641,6 +641,45 @@ router.post('/track-event', async (req, res) => {
 });
 
 /**
+ * Real-time user behavior tracking endpoint
+ */
+router.post('/events', async (req, res) => {
+  try {
+    if (!analytics.dbManager.isConnected()) {
+      return res.status(503).json({ error: 'Analytics database not connected' });
+    }
+
+    const { type, userId, sessionId, payload } = req.body || {};
+    if (!type || typeof type !== 'string' || type.length > 100) {
+      return res.status(400).json({ error: 'Invalid event type' });
+    }
+
+    const event = {
+      type,
+      userId: userId || null,
+      sessionId: sessionId || null,
+      payload: typeof payload === 'object' ? payload : { value: payload },
+      userAgent: req.headers['user-agent'] || '',
+      ip: req.ip,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days TTL
+    };
+
+    const db = analytics.dbManager.getDatabase();
+    const coll = db.collection('user_events');
+
+    // Ensure TTL index exists (no-op if created)
+    await coll.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }).catch(() => {});
+    await coll.createIndex({ type: 1, createdAt: -1 }).catch(() => {});
+    await coll.insertOne(event);
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to record event', message: error.message });
+  }
+});
+
+/**
  * Enhanced analytics helper functions
  */
 

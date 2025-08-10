@@ -1,0 +1,8 @@
+# MCP Configuration - Generated Sun Aug 10 12:34:03 AM UTC 2025
+install_timestamp=2025-08-10T00:34:03Z
+os_type=linux
+browserbase_enabled=false
+spotify_enabled=true
+openai_enabled=false
+gemini_enabled=false
+mongodb_enabled=true

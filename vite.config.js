@@ -147,6 +147,6 @@ export default defineConfig({
       'react-dom',
       'react-router-dom'
     ],
-    exclude: ['web-vitals']
+    exclude: []
   }
 });

@@ -41,7 +41,18 @@ class ErrorBoundary extends React.Component {
   }
   render() {
     if (this.state.hasError) {
-      const errorPageStyle = { padding: '2rem', textAlign: 'center', fontFamily: 'Inter, sans-serif', background: 'linear-gradient(135deg, #121212 0%, #191414 100%)', color: '#ffffff', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' };
+      const errorPageStyle = {
+        padding: '2rem',
+        textAlign: 'center',
+        fontFamily: 'Inter, sans-serif',
+        background: 'linear-gradient(135deg, #121212 0%, #191414 100%)',
+        color: '#ffffff',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      };
       const headingStyle = { fontSize: '2rem', marginBottom: '1rem', color: '#1db954' };
       const textStyle = { color: '#b3b3b3', marginBottom: '2rem' };
       const buttonStyle = { background: 'linear-gradient(135deg, #1db954, #1ed760)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '25px', fontSize: '1rem', cursor: 'pointer', fontWeight: '600' };

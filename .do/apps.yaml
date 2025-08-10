@@ -9,8 +9,31 @@ services:
     build_command: "./deploy-doctl.sh"
     run_command: "npm start"
     envs:
-      - key: DO_API_TOKEN
-        value: "dop_v1_afa7b76a55cca84f89f48986d212d8f2fc08de48872034eb7c8cc1ae0978d22e"
+      # SECURITY: DO NOT commit API tokens directly
+      # Set these in DigitalOcean UI or GitHub Secrets
+      - key: NODE_ENV
+        value: "production"
+        scope: RUN_AND_BUILD
+      - key: PORT
+        value: "3000"
+        scope: RUN_AND_BUILD
+      # Spotify API (set in DO UI)
+      - key: SPOTIFY_CLIENT_ID
+        scope: RUN_AND_BUILD
+      - key: SPOTIFY_CLIENT_SECRET
+        scope: RUN_AND_BUILD
+      # LLM Providers (set in DO UI) 
+      - key: OPENAI_API_KEY
+        scope: RUN_AND_BUILD
+      - key: GEMINI_API_KEY
+        scope: RUN_AND_BUILD
+      - key: LLM_PROVIDER
+        value: "openai"
+        scope: RUN_AND_BUILD
+      # Database connections (set in DO UI)
+      - key: MONGODB_URI
+        scope: RUN_AND_BUILD
+      - key: REDIS_URL
         scope: RUN_AND_BUILD
     instance_size_slug: professional-xs
     instance_count: 1

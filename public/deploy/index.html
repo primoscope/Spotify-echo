@@ -509,7 +509,7 @@
                     <li>Hot reload development server</li>
                     <li>Integrated debugging tools</li>
                     <li>Environment variable templates</li>
-                    <li>Mock LLM providers included</li>
+                    <li>Production-ready configuration</li>
                     <li>Full feature testing</li>
                 </ul>
             </div>
@@ -727,8 +727,8 @@ wget https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/deploy-universa
 chmod +x deploy-universal.sh
 ./deploy-universal.sh --production --domain yourdomain.com
 
-# For demo/testing:
-./deploy-universal.sh --demo
+# For production deployment:
+./deploy-universal.sh --production
                 `.trim();
                 
                 completeDeployment('Universal deployment script ready! Works on any server.');

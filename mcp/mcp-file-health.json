@@ -1,0 +1,16 @@
+📁 FileMCP ✅: read on /workspace/package.json
+{
+  "status": "healthy",
+  "timestamp": "2025-08-10T00:34:31.591Z",
+  "metrics": {
+    "read": {
+      "averageMs": 1,
+      "minMs": 1,
+      "maxMs": 1,
+      "count": 1
+    }
+  },
+  "recentOperations": 1,
+  "allowedDirectories": 6,
+  "allowedExtensions": 14
+}

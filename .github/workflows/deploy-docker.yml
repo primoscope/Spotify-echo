@@ -1,0 +1,194 @@
+name: Deploy Docker Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: echotune-ai
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+        labels: |
+          org.opencontainers.image.title=EchoTune AI
+          org.opencontainers.image.description=AI-powered music recommendation system
+          org.opencontainers.image.vendor=EchoTune AI Team
+          
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          BUILD_VERSION=${{ steps.meta.outputs.version }}
+          BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+          VCS_REF=${{ github.sha }}
+          
+    - name: Test Docker image
+      if: github.event_name != 'pull_request'
+      run: |
+        # Test that the image runs and health check passes
+        docker run --rm -d --name test-echotune \
+          -p 3000:3000 \
+          -e NODE_ENV=production \
+          -e HEALTH_CHECK_ENABLED=true \
+          -e DATABASE_TYPE=sqlite \
+          ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+        
+        # Wait for startup
+        sleep 30
+        
+        # Test health endpoint
+        curl -f http://localhost:3000/health || exit 1
+        
+        # Stop test container
+        docker stop test-echotune
+        
+    - name: Update Docker Compose for production
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+      run: |
+        # Update image reference in docker-compose.yml to use the new image
+        sed -i "s|image: echotune-ai:latest|image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest|g" docker-compose.yml
+        
+        # Validate docker-compose
+        docker-compose -f docker-compose.yml config > /dev/null
+        
+    - name: Generate deployment manifest
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+      run: |
+        cat > deployment-manifest.yml << EOF
+        # EchoTune AI - Deployment Manifest
+        # Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        # Commit: ${{ github.sha }}
+        
+        version: '1.0'
+        application:
+          name: echotune-ai
+          version: ${{ steps.meta.outputs.version }}
+          
+        docker:
+          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+          registry: ${{ env.REGISTRY }}
+          
+        health_check:
+          endpoint: /health
+          timeout: 30s
+          interval: 10s
+          
+        environment:
+          NODE_ENV: production
+          PORT: 3000
+          HEALTH_CHECK_ENABLED: true
+          
+        deployment:
+          platforms:
+            - linux/amd64
+            - linux/arm64
+          build_date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          commit_sha: ${{ github.sha }}
+        EOF
+        
+    - name: Upload deployment artifacts
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-artifacts
+        path: |
+          docker-compose.yml
+          deployment-manifest.yml
+        retention-days: 30
+        
+    - name: Comment on PR with image info
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const output = `🐳 **Docker Build Results**
+          
+          ✅ Docker image built successfully for PR #${{ github.event.number }}
+          
+          **Image Tags:**
+          \`\`\`
+          ${{ steps.meta.outputs.tags }}
+          \`\`\`
+          
+          **Platforms:** linux/amd64, linux/arm64
+          
+          **Next Steps:**
+          - Image will be published when PR is merged to main
+          - Production deployment will be triggered automatically`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          });
+          
+  notify:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Notify on success
+      if: needs.build-and-push.result == 'success'
+      run: |
+        echo "✅ Docker build and push completed successfully"
+        echo "Image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest"
+        
+    - name: Notify on failure
+      if: needs.build-and-push.result == 'failure'
+      run: |
+        echo "❌ Docker build and push failed"
+        exit 1

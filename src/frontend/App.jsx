@@ -1,22 +1,42 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
-import { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
-import PlaylistBuilder from './components/PlaylistBuilder';
-import PlaylistsPage from './components/PlaylistsPage'; // Enhanced playlists page
-import ExplainableRecommendations from './components/ExplainableRecommendations';
-import EnhancedChatInterface from './components/EnhancedChatInterface';
-import EnhancedMusicDiscovery from './components/EnhancedMusicDiscovery';
-import EnhancedAnalyticsDashboard from './components/EnhancedAnalyticsDashboard';
-import InsightsDashboard from './components/InsightsDashboard'; // New insights dashboard
-import SongsPage from './components/SongsPage'; // New songs analysis page
-import MobileResponsiveManager from './components/MobileResponsiveManager';
-import EnhancedConfigPanel from './components/EnhancedConfigPanel';
-import GitHubInfo from '../components/GitHubInfo'; // GitHub repository information component
+// Convert heavy components to lazy-loaded chunks for better initial bundle size
+const PlaylistBuilder = lazy(() => import('./components/PlaylistBuilder'));
+const PlaylistsPage = lazy(() => import('./components/PlaylistsPage'));
+const ExplainableRecommendations = lazy(() => import('./components/ExplainableRecommendations'));
+const EnhancedChatInterface = lazy(() => import('./components/EnhancedChatInterface'));
+const EnhancedMusicDiscovery = lazy(() => import('./components/EnhancedMusicDiscovery'));
+const EnhancedAnalyticsDashboard = lazy(() => import('./components/EnhancedAnalyticsDashboard'));
+const InsightsDashboard = lazy(() => import('./components/InsightsDashboard'));
+const SongsPage = lazy(() => import('./components/SongsPage'));
+const MobileResponsiveManager = lazy(() => import('./components/MobileResponsiveManager'));
+const EnhancedConfigPanel = lazy(() => import('./components/EnhancedConfigPanel'));
+const GitHubInfo = lazy(() => import('../components/GitHubInfo'));
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 // import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
 import './styles/App.css';
+
+// Prefetch maps to warm lazy chunks on hover
+const prefetchers = {
+  chat: () => import('./components/EnhancedChatInterface'),
+  recommendations: () => import('./components/ExplainableRecommendations'),
+  playlist: () => import('./components/PlaylistBuilder'),
+  playlists: () => import('./components/PlaylistsPage'),
+  songs: () => import('./components/SongsPage'),
+  discovery: () => import('./components/EnhancedMusicDiscovery'),
+  analytics: () => import('./components/EnhancedAnalyticsDashboard'),
+  insights: () => import('./components/InsightsDashboard'),
+  settings: () => Promise.all([
+    import('./components/EnhancedConfigPanel'),
+    import('./components/MobileResponsiveManager'),
+    import('../components/GitHubInfo')
+  settingsGeneral: () => import('./components/EnhancedConfigPanel'),
+  settingsMobile: () => import('./components/MobileResponsiveManager'),
+  settingsGithub: () => import('../components/GitHubInfo')
+};
 
 /**
  * Enhanced EchoTune AI Application
@@ -27,22 +47,24 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <Routes>
-          <Route path="/" element={<MainApplication />} />
-          <Route path="/chat" element={<MainApplication initialTab="chat" />} />
-          <Route
-            path="/recommendations"
-            element={<MainApplication initialTab="recommendations" />}
-          />
-          <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
-          <Route path="/playlists" element={<MainApplication initialTab="playlists" />} />
-          <Route path="/songs" element={<MainApplication initialTab="songs" />} />
-          <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
-          <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
-          <Route path="/insights" element={<MainApplication initialTab="insights" />} />
-          <Route path="/settings" element={<MainApplication initialTab="settings" />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading…</div>}>
+          <Routes>
+            <Route path="/" element={<MainApplication />} />
+            <Route path="/chat" element={<MainApplication initialTab="chat" />} />
+            <Route
+              path="/recommendations"
+              element={<MainApplication initialTab="recommendations" />}
+            />
+            <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
+            <Route path="/playlists" element={<MainApplication initialTab="playlists" />} />
+            <Route path="/songs" element={<MainApplication initialTab="songs" />} />
+            <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
+            <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
+            <Route path="/insights" element={<MainApplication initialTab="insights" />} />
+            <Route path="/settings" element={<MainApplication initialTab="settings" />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </Router>
     </ThemeProvider>
   );
@@ -244,6 +266,14 @@ function MainApplication({ initialTab = 'chat' }) {
     };
   };
 
+  const handlePrefetch = (tab) => {
+    const run = prefetchers[tab];
+    if (run) {
+      const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+      idle(() => run().catch(() => {}));
+    }
+  };
+
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* App Bar */}
@@ -271,91 +301,93 @@ function MainApplication({ initialTab = 'chat' }) {
             onChange={(_, newValue) => setCurrentTab(newValue)}
             aria-label="EchoTune AI navigation"
           >
-            <Tab label="🤖 AI Chat" value="chat" />
-            <Tab label="🎯 Recommendations" value="recommendations" />
-            <Tab label="🎵 Playlist Builder" value="playlist" />
-            <Tab label="📋 Playlists" value="playlists" />
-            <Tab label="🎶 Songs" value="songs" />
-            <Tab label="🔍 Discovery" value="discovery" />
-            <Tab label="📊 Analytics" value="analytics" />
-            <Tab label="💡 Insights" value="insights" />
-            <Tab label="⚙️ Settings" value="settings" />
+            <Tab label="🤖 AI Chat" value="chat" onMouseEnter={() => handlePrefetch('chat')} />
+            <Tab label="🎯 Recommendations" value="recommendations" onMouseEnter={() => handlePrefetch('recommendations')} />
+            <Tab label="🎵 Playlist Builder" value="playlist" onMouseEnter={() => handlePrefetch('playlist')} />
+            <Tab label="📋 Playlists" value="playlists" onMouseEnter={() => handlePrefetch('playlists')} />
+            <Tab label="🎶 Songs" value="songs" onMouseEnter={() => handlePrefetch('songs')} />
+            <Tab label="🔍 Discovery" value="discovery" onMouseEnter={() => handlePrefetch('discovery')} />
+            <Tab label="📊 Analytics" value="analytics" onMouseEnter={() => handlePrefetch('analytics')} />
+            <Tab label="💡 Insights" value="insights" onMouseEnter={() => handlePrefetch('insights')} />
+            <Tab label="⚙️ Settings" value="settings" onMouseEnter={() => handlePrefetch('settings')} />
           </Tabs>
         </Container>
       </Box>
 
       {/* Main Content */}
       <Box sx={{ flex: 1, overflow: 'hidden' }}>
-        {currentTab === 'chat' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <EnhancedChatInterface
-              sessionId={sessionId}
-              onSendMessage={handleSendChatMessage}
-              onProvideFeedback={handleProvideFeedback}
-              loading={false}
-            />
-          </Container>
-        )}
+        <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading section…</div>}>
+          {currentTab === 'chat' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <EnhancedChatInterface
+                sessionId={sessionId}
+                onSendMessage={handleSendChatMessage}
+                onProvideFeedback={handleProvideFeedback}
+                loading={false}
+              />
+            </Container>
+          )}
 
-        {currentTab === 'recommendations' && (
-          <Container maxWidth="xl" sx={{ py: 3 }}>
-            <ExplainableRecommendations
-              recommendations={mockRecommendations}
-              onGetExplanation={handleGetExplanation}
-              onProvideFeedback={handleProvideFeedback}
-              loading={false}
-            />
-          </Container>
-        )}
+          {currentTab === 'recommendations' && (
+            <Container maxWidth="xl" sx={{ py: 3 }}>
+              <ExplainableRecommendations
+                recommendations={mockRecommendations}
+                onGetExplanation={handleGetExplanation}
+                onProvideFeedback={handleProvideFeedback}
+                loading={false}
+              />
+            </Container>
+          )}
 
-        {currentTab === 'playlist' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <PlaylistBuilder
-              initialTracks={[]}
-              recommendations={mockRecommendations}
-              onSave={handleSavePlaylist}
-              onShare={handleSharePlaylist}
-              onGetExplanation={handleGetExplanation}
-              onProvideFeedback={handleProvideFeedback}
-            />
-          </Container>
-        )}
+          {currentTab === 'playlist' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <PlaylistBuilder
+                initialTracks={[]}
+                recommendations={mockRecommendations}
+                onSave={handleSavePlaylist}
+                onShare={handleSharePlaylist}
+                onGetExplanation={handleGetExplanation}
+                onProvideFeedback={handleProvideFeedback}
+              />
+            </Container>
+          )}
 
-        {currentTab === 'playlists' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <PlaylistsPage />
-          </Container>
-        )}
+          {currentTab === 'playlists' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <PlaylistsPage />
+            </Container>
+          )}
 
-        {currentTab === 'songs' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <SongsPage />
-          </Container>
-        )}
+          {currentTab === 'songs' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <SongsPage />
+            </Container>
+          )}
 
-        {currentTab === 'discovery' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <EnhancedMusicDiscovery />
-          </Container>
-        )}
+          {currentTab === 'discovery' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <EnhancedMusicDiscovery />
+            </Container>
+          )}
 
-        {currentTab === 'analytics' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <EnhancedAnalyticsDashboard />
-          </Container>
-        )}
+          {currentTab === 'analytics' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <EnhancedAnalyticsDashboard />
+            </Container>
+          )}
 
-        {currentTab === 'insights' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <InsightsDashboard />
-          </Container>
-        )}
+          {currentTab === 'insights' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <InsightsDashboard />
+            </Container>
+          )}
 
-        {currentTab === 'settings' && (
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-            <SettingsTabManager />
-          </Container>
-        )}
+          {currentTab === 'settings' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <SettingsTabManager />
+            </Container>
+          )}
+        </Suspense>
       </Box>
     </Box>
   );
@@ -380,9 +412,11 @@ function SettingsTabManager() {
         <Tab label="🐙 GitHub" value="github" />
       </Tabs>
 
-      {settingsTab === 'general' && <EnhancedConfigPanel />}
-      {settingsTab === 'mobile' && <MobileResponsiveManager />}
-      {settingsTab === 'github' && <GitHubInfo />}
+      <Suspense fallback={<div style={{ padding: '1rem' }}>Loading settings…</div>}>
+        {settingsTab === 'general' && <EnhancedConfigPanel />}
+        {settingsTab === 'mobile' && <MobileResponsiveManager />}
+        {settingsTab === 'github' && <GitHubInfo />}
+      </Suspense>
     </Box>
   );
 }

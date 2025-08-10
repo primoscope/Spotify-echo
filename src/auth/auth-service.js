@@ -16,7 +16,7 @@ const {
   createRefreshToken,
   verifyRefreshToken,
   sanitizeUserData,
-  getSecureCookieOptions
+  getSecureCookieOptions,
 } = require('../utils/auth-helpers');
 
 class AuthService {
@@ -28,39 +28,39 @@ class AuthService {
         redirectUri: process.env.SPOTIFY_REDIRECT_URI,
         scopes: [
           'user-read-private',
-          'user-read-email', 
+          'user-read-email',
           'playlist-modify-public',
           'playlist-modify-private',
           'user-read-recently-played',
           'user-top-read',
           'user-library-read',
-          'user-library-modify'
-        ]
+          'user-library-modify',
+        ],
       },
       jwt: {
         secret: process.env.JWT_SECRET || 'fallback-dev-secret-change-in-production',
         accessTokenExpiresIn: '1h',
-        refreshTokenExpiresIn: '7d'
+        refreshTokenExpiresIn: '7d',
       },
       session: {
         secret: process.env.SESSION_SECRET || 'fallback-dev-secret-change-in-production',
         ttl: 7 * 24 * 60 * 60, // 7 days in seconds
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
       },
       security: {
         stateTimeout: 10 * 60 * 1000, // 10 minutes
-        nonceTimeout: 5 * 60 * 1000,  // 5 minutes
+        nonceTimeout: 5 * 60 * 1000, // 5 minutes
         maxFailedAttempts: 5,
-        lockoutTime: 15 * 60 * 1000   // 15 minutes
+        lockoutTime: 15 * 60 * 1000, // 15 minutes
       },
-      ...options
+      ...options,
     };
 
     // Merge nested spotify config if provided
     if (options.spotify) {
       this.config.spotify = {
         ...this.config.spotify,
-        ...options.spotify
+        ...options.spotify,
       };
     }
 
@@ -68,7 +68,7 @@ class AuthService {
     this.authStates = new Map();
     this.sessions = new Map();
     this.failedAttempts = new Map();
-    
+
     // Redis manager will be injected
     this.redisManager = null;
   }
@@ -90,7 +90,7 @@ class AuthService {
 
     // Generate PKCE challenge
     const { code_verifier, code_challenge, code_challenge_method } = generatePKCEChallenge();
-    
+
     // Generate state and nonce for security
     const state = generateRandomString(32);
     const nonce = generateNonce();
@@ -103,7 +103,7 @@ class AuthService {
       nonce,
       timestamp: Date.now(),
       ip: options.ip || 'unknown',
-      userAgent: options.userAgent || 'unknown'
+      userAgent: options.userAgent || 'unknown',
     };
 
     this.storeAuthState(state, authData);
@@ -117,13 +117,13 @@ class AuthService {
       state: state,
       code_challenge: code_challenge,
       code_challenge_method: code_challenge_method,
-      show_dialog: options.forceDialog ? 'true' : 'false'
+      show_dialog: options.forceDialog ? 'true' : 'false',
     });
 
     return {
       authUrl: `https://accounts.spotify.com/authorize?${params.toString()}`,
       state: state,
-      nonce: nonce
+      nonce: nonce,
     };
   }
 
@@ -154,10 +154,10 @@ class AuthService {
     try {
       // Exchange authorization code for tokens using PKCE
       const tokenResponse = await this.exchangeCodeForTokens(code, authData.code_verifier);
-      
+
       // Get user profile from Spotify
       const userProfile = await this.getSpotifyUserProfile(tokenResponse.access_token);
-      
+
       // Create secure session and JWT tokens
       const sessionResult = await this.createUserSession(userProfile, tokenResponse);
 
@@ -171,14 +171,13 @@ class AuthService {
         tokens: {
           access_token: sessionResult.accessToken,
           refresh_token: sessionResult.refreshToken,
-          expires_in: sessionResult.expiresIn
-        }
+          expires_in: sessionResult.expiresIn,
+        },
       };
-
     } catch (error) {
       // Record failed attempt
       this.recordFailedAttempt(options.ip);
-      
+
       console.error('OAuth callback error:', error.message);
       throw new Error(`Authentication failed: ${error.message}`);
     }
@@ -193,7 +192,7 @@ class AuthService {
       code: code,
       redirect_uri: this.config.spotify.redirectUri,
       client_id: this.config.spotify.clientId,
-      code_verifier: codeVerifier
+      code_verifier: codeVerifier,
     });
 
     // Use client credentials for authentication (PKCE doesn't require client_secret in header)
@@ -201,16 +200,12 @@ class AuthService {
       `${this.config.spotify.clientId}:${this.config.spotify.clientSecret}`
     ).toString('base64');
 
-    const response = await axios.post(
-      'https://accounts.spotify.com/api/token',
-      params.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${authHeader}`
-        }
-      }
-    );
+    const response = await axios.post('https://accounts.spotify.com/api/token', params.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${authHeader}`,
+      },
+    });
 
     if (!response.data.access_token) {
       throw new Error('Failed to obtain access token');
@@ -225,8 +220,8 @@ class AuthService {
   async getSpotifyUserProfile(accessToken) {
     const response = await axios.get('https://api.spotify.com/v1/me', {
       headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
 
     return response.data;
@@ -244,7 +239,7 @@ class AuthService {
       {
         userId: user.id,
         sessionId: sessionId,
-        type: 'access_token'
+        type: 'access_token',
       },
       this.config.jwt.secret,
       { expiresIn: this.config.jwt.accessTokenExpiresIn }
@@ -255,7 +250,7 @@ class AuthService {
       {
         userId: user.id,
         sessionId: sessionId,
-        type: 'refresh_token'
+        type: 'refresh_token',
       },
       this.config.jwt.secret
     );
@@ -268,13 +263,13 @@ class AuthService {
       spotifyTokens: {
         access_token: tokenResponse.access_token,
         refresh_token: tokenResponse.refresh_token,
-        expires_at: Date.now() + (tokenResponse.expires_in * 1000),
-        token_type: tokenResponse.token_type || 'Bearer'
+        expires_at: Date.now() + tokenResponse.expires_in * 1000,
+        token_type: tokenResponse.token_type || 'Bearer',
       },
       createdAt: new Date(),
       lastActivity: new Date(),
       ip: user.ip || 'unknown',
-      userAgent: user.userAgent || 'unknown'
+      userAgent: user.userAgent || 'unknown',
     };
 
     // Store session
@@ -284,11 +279,11 @@ class AuthService {
       user: user,
       session: {
         sessionId: sessionId,
-        expiresAt: Date.now() + this.config.session.maxAge
+        expiresAt: Date.now() + this.config.session.maxAge,
       },
       accessToken: accessToken,
       refreshToken: refreshToken,
-      expiresIn: 3600 // 1 hour
+      expiresIn: 3600, // 1 hour
     };
   }
 
@@ -321,9 +316,8 @@ class AuthService {
         valid: true,
         user: session.user,
         session: session,
-        spotifyTokens: session.spotifyTokens
+        spotifyTokens: session.spotifyTokens,
       };
-
     } catch (error) {
       return { valid: false, error: error.message };
     }
@@ -358,7 +352,7 @@ class AuthService {
         session.spotifyTokens = {
           ...spotifyTokens,
           ...newSpotifyTokens,
-          expires_at: Date.now() + (newSpotifyTokens.expires_in * 1000)
+          expires_at: Date.now() + newSpotifyTokens.expires_in * 1000,
         };
         await this.updateSession(decoded.sessionId, session);
       }
@@ -368,7 +362,7 @@ class AuthService {
         {
           userId: decoded.userId,
           sessionId: decoded.sessionId,
-          type: 'access_token'
+          type: 'access_token',
         },
         this.config.jwt.secret,
         { expiresIn: this.config.jwt.accessTokenExpiresIn }
@@ -378,9 +372,8 @@ class AuthService {
         access_token: newAccessToken,
         token_type: 'Bearer',
         expires_in: 3600,
-        user: session.user
+        user: session.user,
       };
-
     } catch (error) {
       console.error('Refresh token error:', error.message);
       throw new Error('Token refresh failed');
@@ -393,23 +386,19 @@ class AuthService {
   async refreshSpotifyToken(spotifyRefreshToken) {
     const params = new URLSearchParams({
       grant_type: 'refresh_token',
-      refresh_token: spotifyRefreshToken
+      refresh_token: spotifyRefreshToken,
     });
 
     const authHeader = Buffer.from(
       `${this.config.spotify.clientId}:${this.config.spotify.clientSecret}`
     ).toString('base64');
 
-    const response = await axios.post(
-      'https://accounts.spotify.com/api/token',
-      params.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${authHeader}`
-        }
-      }
-    );
+    const response = await axios.post('https://accounts.spotify.com/api/token', params.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${authHeader}`,
+      },
+    });
 
     return response.data;
   }
@@ -523,12 +512,12 @@ class AuthService {
 
     const key = `failed_auth:${ip}`;
     const current = this.failedAttempts.get(key) || { count: 0, timestamp: Date.now() };
-    
+
     current.count++;
     current.timestamp = Date.now();
-    
+
     this.failedAttempts.set(key, current);
-    
+
     // Cleanup old entries
     setTimeout(() => {
       const entry = this.failedAttempts.get(key);
@@ -543,15 +532,15 @@ class AuthService {
 
     const key = `failed_auth:${ip}`;
     const attempts = this.failedAttempts.get(key);
-    
+
     if (!attempts) return false;
-    
+
     // Check if lockout period has expired
     if (Date.now() - attempts.timestamp > this.config.security.lockoutTime) {
       this.failedAttempts.delete(key);
       return false;
     }
-    
+
     return attempts.count >= this.config.security.maxFailedAttempts;
   }
 
@@ -569,10 +558,15 @@ class AuthService {
     const status = {
       auth_service: 'healthy',
       spotify_configured: !!(this.config.spotify.clientId && this.config.spotify.clientSecret),
-      redis_connected: this.redisManager ? await this.redisManager.ping().then(() => true).catch(() => false) : false,
+      redis_connected: this.redisManager
+        ? await this.redisManager
+            .ping()
+            .then(() => true)
+            .catch(() => false)
+        : false,
       active_sessions: this.sessions.size,
       pending_auth_states: this.authStates.size,
-      failed_attempts: this.failedAttempts.size
+      failed_attempts: this.failedAttempts.size,
     };
 
     return status;

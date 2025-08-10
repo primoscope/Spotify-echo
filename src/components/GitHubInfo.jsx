@@ -1,7 +1,7 @@
 /**
  * GitHub Repository Information Component
  * Displays project repository information, issues, and contribution details
- * 
+ *
  * This component addresses the "G" issue by providing GitHub integration
  * and repository information display functionality.
  */
@@ -17,14 +17,14 @@ import {
   Link,
   Grid,
   CircularProgress,
-  Alert
+  Alert,
 } from '@mui/material';
 import {
   GitHub as GitHubIcon,
   Star as StarIcon,
   BugReport as IssuesIcon,
   Code as CodeIcon,
-  People as ContributorsIcon
+  People as ContributorsIcon,
 } from '@mui/icons-material';
 
 const GitHubInfo = () => {
@@ -47,7 +47,7 @@ const GitHubInfo = () => {
     try {
       // Fetch basic repository information
       const repoResponse = await fetch(`${GITHUB_API_BASE}/repos/${REPO_OWNER}/${REPO_NAME}`);
-      
+
       if (!repoResponse.ok) {
         throw new Error(`Failed to fetch repository info: ${repoResponse.status}`);
       }
@@ -57,7 +57,7 @@ const GitHubInfo = () => {
       // Fetch additional information (issues, contributors)
       const [issuesResponse, contributorsResponse] = await Promise.all([
         fetch(`${GITHUB_API_BASE}/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=open&per_page=1`),
-        fetch(`${GITHUB_API_BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contributors?per_page=5`)
+        fetch(`${GITHUB_API_BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contributors?per_page=5`),
       ]);
 
       const issuesData = issuesResponse.ok ? await issuesResponse.json() : [];
@@ -77,9 +77,8 @@ const GitHubInfo = () => {
         html_url: repoData.html_url,
         clone_url: repoData.clone_url,
         contributors: contributorsData.length,
-        topics: repoData.topics || []
+        topics: repoData.topics || [],
       });
-
     } catch (err) {
       setError(err.message);
       console.error('GitHub API error:', err);
@@ -99,7 +98,7 @@ const GitHubInfo = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -130,11 +129,7 @@ const GitHubInfo = () => {
           <Alert severity="error" sx={{ mb: 2 }}>
             Failed to load GitHub repository information: {error}
           </Alert>
-          <Button 
-            variant="outlined" 
-            onClick={fetchRepoInfo}
-            startIcon={<GitHubIcon />}
-          >
+          <Button variant="outlined" onClick={fetchRepoInfo} startIcon={<GitHubIcon />}>
             Retry
           </Button>
         </CardContent>
@@ -232,12 +227,7 @@ const GitHubInfo = () => {
             </Typography>
             <Box display="flex" flexWrap="wrap" gap={1}>
               {repoInfo.topics.map((topic, index) => (
-                <Chip 
-                  key={index} 
-                  label={topic} 
-                  size="small" 
-                  variant="outlined" 
-                />
+                <Chip key={index} label={topic} size="small" variant="outlined" />
               ))}
             </Box>
           </Box>
@@ -252,7 +242,7 @@ const GitHubInfo = () => {
           >
             View on GitHub
           </Button>
-          
+
           <Button
             variant="outlined"
             startIcon={<IssuesIcon />}
@@ -274,15 +264,15 @@ const GitHubInfo = () => {
 
         <Alert severity="info" sx={{ mt: 2 }}>
           <Typography variant="body2">
-            <strong>Contribute:</strong> Found a bug or have a feature request? 
-            <Link 
+            <strong>Contribute:</strong> Found a bug or have a feature request?
+            <Link
               component="button"
               variant="body2"
               onClick={() => handleLinkClick(`${repoInfo.html_url}/issues/new`)}
               sx={{ ml: 0.5 }}
             >
               Create an issue
-            </Link> 
+            </Link>
             or submit a pull request!
           </Typography>
         </Alert>

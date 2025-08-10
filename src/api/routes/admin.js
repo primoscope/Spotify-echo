@@ -6,7 +6,7 @@ const mongoDBManager = require('../../database/mongodb-manager');
 const dashboardCache = {
   data: null,
   lastUpdated: null,
-  ttl: 30000 // 30 seconds
+  ttl: 30000, // 30 seconds
 };
 
 /**
@@ -22,17 +22,18 @@ router.get('/dashboard', async (req, res) => {
   try {
     // Check cache first
     const now = Date.now();
-    if (dashboardCache.data && 
-        dashboardCache.lastUpdated && 
-        (now - dashboardCache.lastUpdated) < dashboardCache.ttl) {
-      
+    if (
+      dashboardCache.data &&
+      dashboardCache.lastUpdated &&
+      now - dashboardCache.lastUpdated < dashboardCache.ttl
+    ) {
       return res.json({
         success: true,
         dashboard: {
           ...dashboardCache.data,
           cached: true,
-          cacheAge: Math.floor((now - dashboardCache.lastUpdated) / 1000)
-        }
+          cacheAge: Math.floor((now - dashboardCache.lastUpdated) / 1000),
+        },
       });
     }
 
@@ -45,7 +46,7 @@ router.get('/dashboard', async (req, res) => {
           totalDataSize: 0,
           totalIndexSize: 0,
           uptime: 0,
-          connections: { current: 0, available: 0 }
+          connections: { current: 0, available: 0 },
         },
         collections: [],
         indexHealth: {
@@ -55,45 +56,119 @@ router.get('/dashboard', async (req, res) => {
           recommendations: [
             'MongoDB connection required for index analysis',
             'Establish connection to view comprehensive dashboard data',
-            'Admin features will be available once connected'
+            'Admin features will be available once connected',
           ],
-          fallbackMode: true
+          fallbackMode: true,
         },
         performance: {
           operations: { query: 0, insert: 0, update: 0, delete: 0 },
-          memory: { resident: 0, virtual: 0 }
+          memory: { resident: 0, virtual: 0 },
         },
         permissions: {
           connection: false,
           readAccess: false,
           adminAccess: false,
           profilingAccess: false,
-          indexAccess: false
+          indexAccess: false,
         },
         lastUpdated: new Date().toISOString(),
         offline: true,
-        helpText: 'Connect to MongoDB to unlock full admin capabilities'
+        helpText: 'Connect to MongoDB to unlock full admin capabilities',
       };
 
       return res.json({
         success: false,
         error: 'MongoDB not connected',
-        dashboard: fallbackDashboard
+        dashboard: fallbackDashboard,
       });
     }
 
     // Collect data with individual error handling
     const results = await Promise.allSettled([
-      mongoDBManager.getCollectionStats().catch(err => ({ error: err.message, collections: [], totalCollections: 0, totalDocuments: 0, totalDataSize: 0, totalIndexSize: 0 })),
-      mongoDBManager.analyzeIndexHealth().catch(err => ({ error: err.message, healthyIndexes: 0, problematicIndexes: 0, unusedIndexes: 0, recommendations: [`Index analysis failed: ${err.message}`] })),
-      mongoDBManager.getDatabaseStats().catch(err => ({ error: err.message, database: 'Unknown', uptime: 0, connections: { current: 0, available: 0 }, operations: { query: 0, insert: 0, update: 0, delete: 0 }, memory: { resident: 0, virtual: 0 } })),
-      mongoDBManager.validateAdminAccess().catch(err => ({ error: err.message, permissions: { connection: false, readAccess: false, adminAccess: false, profilingAccess: false, indexAccess: false } }))
+      mongoDBManager
+        .getCollectionStats()
+        .catch((err) => ({
+          error: err.message,
+          collections: [],
+          totalCollections: 0,
+          totalDocuments: 0,
+          totalDataSize: 0,
+          totalIndexSize: 0,
+        })),
+      mongoDBManager
+        .analyzeIndexHealth()
+        .catch((err) => ({
+          error: err.message,
+          healthyIndexes: 0,
+          problematicIndexes: 0,
+          unusedIndexes: 0,
+          recommendations: [`Index analysis failed: ${err.message}`],
+        })),
+      mongoDBManager
+        .getDatabaseStats()
+        .catch((err) => ({
+          error: err.message,
+          database: 'Unknown',
+          uptime: 0,
+          connections: { current: 0, available: 0 },
+          operations: { query: 0, insert: 0, update: 0, delete: 0 },
+          memory: { resident: 0, virtual: 0 },
+        })),
+      mongoDBManager
+        .validateAdminAccess()
+        .catch((err) => ({
+          error: err.message,
+          permissions: {
+            connection: false,
+            readAccess: false,
+            adminAccess: false,
+            profilingAccess: false,
+            indexAccess: false,
+          },
+        })),
     ]);
 
-    const collectionStats = results[0].status === 'fulfilled' ? results[0].value : results[0].reason || { collections: [], totalCollections: 0, totalDocuments: 0, totalDataSize: 0, totalIndexSize: 0 };
-    const indexHealth = results[1].status === 'fulfilled' ? results[1].value : results[1].reason || { healthyIndexes: 0, problematicIndexes: 0, unusedIndexes: 0, recommendations: ['Index analysis unavailable'] };
-    const dbStats = results[2].status === 'fulfilled' ? results[2].value : results[2].reason || { database: 'Unknown', uptime: 0, connections: { current: 0, available: 0 }, operations: { query: 0, insert: 0, update: 0, delete: 0 }, memory: { resident: 0, virtual: 0 } };
-    const adminAccess = results[3].status === 'fulfilled' ? results[3].value : results[3].reason || { permissions: { connection: false, readAccess: false, adminAccess: false, profilingAccess: false, indexAccess: false } };
+    const collectionStats =
+      results[0].status === 'fulfilled'
+        ? results[0].value
+        : results[0].reason || {
+            collections: [],
+            totalCollections: 0,
+            totalDocuments: 0,
+            totalDataSize: 0,
+            totalIndexSize: 0,
+          };
+    const indexHealth =
+      results[1].status === 'fulfilled'
+        ? results[1].value
+        : results[1].reason || {
+            healthyIndexes: 0,
+            problematicIndexes: 0,
+            unusedIndexes: 0,
+            recommendations: ['Index analysis unavailable'],
+          };
+    const dbStats =
+      results[2].status === 'fulfilled'
+        ? results[2].value
+        : results[2].reason || {
+            database: 'Unknown',
+            uptime: 0,
+            connections: { current: 0, available: 0 },
+            operations: { query: 0, insert: 0, update: 0, delete: 0 },
+            memory: { resident: 0, virtual: 0 },
+          };
+    const adminAccess =
+      results[3].status === 'fulfilled'
+        ? results[3].value
+        : results[3].reason || {
+            permissions: {
+              connection: false,
+              readAccess: false,
+              adminAccess: false,
+              profilingAccess: false,
+              indexAccess: false,
+            },
+          };
 
     const dashboard = {
       overview: {
@@ -103,34 +178,36 @@ router.get('/dashboard', async (req, res) => {
         totalDataSize: collectionStats.totalDataSize,
         totalIndexSize: collectionStats.totalIndexSize,
         uptime: dbStats.uptime,
-        connections: dbStats.connections
+        connections: dbStats.connections,
       },
-      collections: collectionStats.collections ? collectionStats.collections.map(col => ({
-        name: col.name,
-        count: col.count,
-        size: col.size,
-        avgSize: col.avgObjSize,
-        indexCount: col.indexCount,
-        hasErrors: !!col.error
-      })) : [],
+      collections: collectionStats.collections
+        ? collectionStats.collections.map((col) => ({
+            name: col.name,
+            count: col.count,
+            size: col.size,
+            avgSize: col.avgObjSize,
+            indexCount: col.indexCount,
+            hasErrors: !!col.error,
+          }))
+        : [],
       indexHealth: {
         healthy: indexHealth.healthyIndexes || 0,
         problematic: indexHealth.problematicIndexes || 0,
         unused: indexHealth.unusedIndexes || 0,
         recommendations: indexHealth.recommendations || [],
         performanceImpact: indexHealth.performanceImpact || 'low',
-        optimizationSuggestions: indexHealth.optimizationSuggestions || []
+        optimizationSuggestions: indexHealth.optimizationSuggestions || [],
       },
       performance: {
         operations: dbStats.operations || { query: 0, insert: 0, update: 0, delete: 0 },
-        memory: dbStats.memory || { resident: 0, virtual: 0 }
+        memory: dbStats.memory || { resident: 0, virtual: 0 },
       },
       permissions: adminAccess.permissions || {
         connection: false,
         readAccess: false,
         adminAccess: false,
         profilingAccess: false,
-        indexAccess: false
+        indexAccess: false,
       },
       lastUpdated: new Date().toISOString(),
       dataQuality: assessDataQuality(collectionStats, indexHealth),
@@ -139,8 +216,8 @@ router.get('/dashboard', async (req, res) => {
         ...(collectionStats.error ? [`Collection stats: ${collectionStats.error}`] : []),
         ...(indexHealth.error ? [`Index health: ${indexHealth.error}`] : []),
         ...(dbStats.error ? [`Database stats: ${dbStats.error}`] : []),
-        ...(adminAccess.error ? [`Admin access: ${adminAccess.error}`] : [])
-      ]
+        ...(adminAccess.error ? [`Admin access: ${adminAccess.error}`] : []),
+      ],
     };
 
     // Cache the results
@@ -149,7 +226,7 @@ router.get('/dashboard', async (req, res) => {
 
     res.json({
       success: true,
-      dashboard
+      dashboard,
     });
   } catch (error) {
     console.warn('Dashboard error:', error.message);
@@ -157,7 +234,7 @@ router.get('/dashboard', async (req, res) => {
       success: false,
       error: 'Failed to load dashboard data',
       details: error.message,
-      dashboard: null
+      dashboard: null,
     });
   }
 });
@@ -170,12 +247,12 @@ router.get('/collections', async (req, res) => {
     if (!mongoDBManager.isConnected()) {
       return res.status(503).json({
         success: false,
-        error: 'MongoDB not connected'
+        error: 'MongoDB not connected',
       });
     }
 
     const stats = await mongoDBManager.getCollectionStats();
-    
+
     res.json({
       success: true,
       collections: stats.collections,
@@ -183,15 +260,15 @@ router.get('/collections', async (req, res) => {
         totalCollections: stats.totalCollections,
         totalDocuments: stats.totalDocuments,
         totalDataSize: stats.totalDataSize,
-        totalIndexSize: stats.totalIndexSize
-      }
+        totalIndexSize: stats.totalIndexSize,
+      },
     });
   } catch (error) {
     console.error('Collections stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get collection statistics',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -204,22 +281,22 @@ router.get('/indexes', async (req, res) => {
     if (!mongoDBManager.isConnected()) {
       return res.status(503).json({
         success: false,
-        error: 'MongoDB not connected'
+        error: 'MongoDB not connected',
       });
     }
 
     const analysis = await mongoDBManager.analyzeIndexHealth();
-    
+
     res.json({
       success: true,
-      indexAnalysis: analysis
+      indexAnalysis: analysis,
     });
   } catch (error) {
     console.error('Index analysis error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to analyze indexes',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -232,19 +309,19 @@ router.get('/slow-queries', async (req, res) => {
     if (!mongoDBManager.isConnected()) {
       return res.status(503).json({
         success: false,
-        error: 'MongoDB not connected'
+        error: 'MongoDB not connected',
       });
     }
 
     const { threshold = 100, limit = 50 } = req.query;
-    const analysis = await mongoDBManager.analyzeSlowQueries({ 
-      threshold: parseInt(threshold), 
-      limit: parseInt(limit) 
+    const analysis = await mongoDBManager.analyzeSlowQueries({
+      threshold: parseInt(threshold),
+      limit: parseInt(limit),
     });
-    
+
     res.json({
       success: true,
-      slowQueries: analysis
+      slowQueries: analysis,
     });
   } catch (error) {
     console.error('Slow query analysis error:', error);
@@ -252,7 +329,7 @@ router.get('/slow-queries', async (req, res) => {
       success: false,
       error: 'Failed to analyze slow queries',
       details: error.message,
-      note: 'Query profiling may need to be enabled'
+      note: 'Query profiling may need to be enabled',
     });
   }
 });
@@ -265,22 +342,22 @@ router.get('/stats', async (req, res) => {
     if (!mongoDBManager.isConnected()) {
       return res.status(503).json({
         success: false,
-        error: 'MongoDB not connected'
+        error: 'MongoDB not connected',
       });
     }
 
     const stats = await mongoDBManager.getDatabaseStats();
-    
+
     res.json({
       success: true,
-      stats
+      stats,
     });
   } catch (error) {
     console.error('Database stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get database statistics',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -293,23 +370,23 @@ router.get('/collections/:name/export-info', async (req, res) => {
     if (!mongoDBManager.isConnected()) {
       return res.status(503).json({
         success: false,
-        error: 'MongoDB not connected'
+        error: 'MongoDB not connected',
       });
     }
 
     const { name } = req.params;
     const metadata = await mongoDBManager.getExportMetadata(name);
-    
+
     res.json({
       success: true,
-      exportMetadata: metadata
+      exportMetadata: metadata,
     });
   } catch (error) {
     console.error(`Export metadata error for ${req.params.name}:`, error);
     res.status(500).json({
       success: false,
       error: 'Failed to get export metadata',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -326,14 +403,14 @@ router.post('/collections/:name/export', async (req, res) => {
       query = {},
       projection = {},
       format = 'json',
-      sanitize = true
+      sanitize = true,
     } = req.body;
 
     // Validate input limits for safety
     if (limit > 10000) {
       return res.json({
         success: false,
-        error: 'Export limit cannot exceed 10,000 documents for safety'
+        error: 'Export limit cannot exceed 10,000 documents for safety',
       });
     }
 
@@ -344,7 +421,7 @@ router.post('/collections/:name/export', async (req, res) => {
       query,
       projection,
       format,
-      sanitize: sanitize !== false
+      sanitize: sanitize !== false,
     });
 
     // Check if export returned error state
@@ -353,7 +430,7 @@ router.post('/collections/:name/export', async (req, res) => {
         success: false,
         error: exportData.error,
         details: exportData.recommendations?.join(', ') || 'Export failed',
-        exportData: exportData
+        exportData: exportData,
       });
     }
 
@@ -365,17 +442,17 @@ router.post('/collections/:name/export', async (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Content-Disposition', `attachment; filename="${name}_export.json"`);
     }
-    
+
     res.json({
       success: true,
-      export: exportData
+      export: exportData,
     });
   } catch (error) {
     console.warn(`Export error for ${req.params.name}:`, error.message);
     res.json({
       success: false,
       error: 'Failed to export collection data',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -386,17 +463,17 @@ router.post('/collections/:name/export', async (req, res) => {
 router.get('/access-check', async (req, res) => {
   try {
     const validation = await mongoDBManager.validateAdminAccess();
-    
+
     res.json({
       success: true,
-      access: validation
+      access: validation,
     });
   } catch (error) {
     console.error('Access validation error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to validate admin access',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -409,9 +486,9 @@ router.get('/health', async (req, res) => {
     const isConnected = mongoDBManager.isConnected();
     let health = {
       status: 'unhealthy',
-      message: 'Not connected to MongoDB'
+      message: 'Not connected to MongoDB',
     };
-    
+
     if (isConnected) {
       try {
         health = await mongoDBManager.healthCheck();
@@ -419,11 +496,11 @@ router.get('/health', async (req, res) => {
         console.warn('Health check failed:', error.message);
         health = {
           status: 'unhealthy',
-          message: error.message
+          message: error.message,
         };
       }
     }
-    
+
     res.json({
       success: isConnected && health.status === 'healthy',
       mongodb: {
@@ -431,14 +508,14 @@ router.get('/health', async (req, res) => {
         status: health.status,
         message: health.message,
         responseTime: health.responseTime,
-        database: health.database
+        database: health.database,
       },
       adminTools: {
         available: isConnected,
         readOnly: true,
-        version: '1.0.0'
+        version: '1.0.0',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.warn('Admin health check error:', error.message);
@@ -447,14 +524,14 @@ router.get('/health', async (req, res) => {
       mongodb: {
         connected: false,
         status: 'unhealthy',
-        message: `Health check failed: ${error.message}`
+        message: `Health check failed: ${error.message}`,
       },
       adminTools: {
         available: false,
         readOnly: true,
-        version: '1.0.0'
+        version: '1.0.0',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -467,27 +544,28 @@ router.get('/recommendations', async (req, res) => {
     if (!mongoDBManager.isConnected()) {
       return res.status(503).json({
         success: false,
-        error: 'MongoDB not connected'
+        error: 'MongoDB not connected',
       });
     }
 
     const [indexHealth, slowQueries] = await Promise.all([
       mongoDBManager.analyzeIndexHealth(),
-      mongoDBManager.analyzeSlowQueries({ threshold: 100, limit: 10 }).catch(() => ({ recommendations: [] }))
+      mongoDBManager
+        .analyzeSlowQueries({ threshold: 100, limit: 10 })
+        .catch(() => ({ recommendations: [] })),
     ]);
 
-    const allRecommendations = [
-      ...indexHealth.recommendations,
-      ...slowQueries.recommendations
-    ];
+    const allRecommendations = [...indexHealth.recommendations, ...slowQueries.recommendations];
 
     // Categorize recommendations
     const categorized = {
-      critical: allRecommendations.filter(r => r.severity === 'high'),
-      important: allRecommendations.filter(r => r.severity === 'medium'),
-      suggestions: allRecommendations.filter(r => r.severity === 'low' || !r.severity),
-      performance: allRecommendations.filter(r => r.type === 'performance'),
-      indexOptimization: allRecommendations.filter(r => r.type === 'missing_index' || r.type === 'unused_index')
+      critical: allRecommendations.filter((r) => r.severity === 'high'),
+      important: allRecommendations.filter((r) => r.severity === 'medium'),
+      suggestions: allRecommendations.filter((r) => r.severity === 'low' || !r.severity),
+      performance: allRecommendations.filter((r) => r.type === 'performance'),
+      indexOptimization: allRecommendations.filter(
+        (r) => r.type === 'missing_index' || r.type === 'unused_index'
+      ),
     };
 
     res.json({
@@ -499,16 +577,16 @@ router.get('/recommendations', async (req, res) => {
           criticalCount: categorized.critical.length,
           importantCount: categorized.important.length,
           performanceCount: categorized.performance.length,
-          indexCount: categorized.indexOptimization.length
-        }
-      }
+          indexCount: categorized.indexOptimization.length,
+        },
+      },
     });
   } catch (error) {
     console.error('Recommendations error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate recommendations',
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -519,33 +597,33 @@ router.get('/recommendations', async (req, res) => {
 function assessDataQuality(collectionStats, indexHealth) {
   let score = 100;
   let issues = [];
-  
+
   // Penalize for unused indexes
   if (indexHealth.unusedIndexes > 0) {
     score -= indexHealth.unusedIndexes * 10;
     issues.push(`${indexHealth.unusedIndexes} unused indexes detected`);
   }
-  
+
   // Penalize for problematic indexes
   if (indexHealth.problematicIndexes > 0) {
     score -= indexHealth.problematicIndexes * 15;
     issues.push(`${indexHealth.problematicIndexes} problematic indexes`);
   }
-  
+
   // Check for collections with errors
-  const errorCollections = (collectionStats.collections || []).filter(c => c.error).length;
+  const errorCollections = (collectionStats.collections || []).filter((c) => c.error).length;
   if (errorCollections > 0) {
     score -= errorCollections * 20;
     issues.push(`${errorCollections} collections have access issues`);
   }
-  
+
   score = Math.max(0, Math.min(100, score));
-  
+
   return {
     score: Math.round(score),
     grade: score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F',
     issues: issues,
-    status: score >= 80 ? 'good' : score >= 60 ? 'fair' : 'needs_attention'
+    status: score >= 80 ? 'good' : score >= 60 ? 'fair' : 'needs_attention',
   };
 }
 
@@ -555,19 +633,20 @@ function assessDataQuality(collectionStats, indexHealth) {
 function calculateSystemHealth(dbStats, indexHealth) {
   let healthScore = 100;
   let concerns = [];
-  
+
   // Memory usage concerns
-  if (dbStats.memory && dbStats.memory.resident > 1000) { // > 1GB
+  if (dbStats.memory && dbStats.memory.resident > 1000) {
+    // > 1GB
     healthScore -= 10;
     concerns.push('High memory usage detected');
   }
-  
-  // Connection concerns  
-  if (dbStats.connections && dbStats.connections.current > (dbStats.connections.available * 0.8)) {
+
+  // Connection concerns
+  if (dbStats.connections && dbStats.connections.current > dbStats.connections.available * 0.8) {
     healthScore -= 15;
     concerns.push('Connection pool near capacity');
   }
-  
+
   // Index health impact
   if (indexHealth.performanceImpact === 'high') {
     healthScore -= 20;
@@ -576,13 +655,20 @@ function calculateSystemHealth(dbStats, indexHealth) {
     healthScore -= 10;
     concerns.push('Minor index optimization recommended');
   }
-  
+
   healthScore = Math.max(0, Math.min(100, healthScore));
-  
+
   return {
     score: Math.round(healthScore),
-    status: healthScore >= 90 ? 'excellent' : healthScore >= 75 ? 'good' : healthScore >= 60 ? 'fair' : 'poor',
-    concerns: concerns
+    status:
+      healthScore >= 90
+        ? 'excellent'
+        : healthScore >= 75
+          ? 'good'
+          : healthScore >= 60
+            ? 'fair'
+            : 'poor',
+    concerns: concerns,
   };
 }
 

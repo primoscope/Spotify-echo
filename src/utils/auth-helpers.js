@@ -21,15 +21,12 @@ function generateRandomString(length = 32) {
  */
 function generatePKCEChallenge() {
   const code_verifier = crypto.randomBytes(32).toString('base64url');
-  const code_challenge = crypto
-    .createHash('sha256')
-    .update(code_verifier)
-    .digest('base64url');
-  
+  const code_challenge = crypto.createHash('sha256').update(code_verifier).digest('base64url');
+
   return {
     code_verifier,
     code_challenge,
-    code_challenge_method: 'S256'
+    code_challenge_method: 'S256',
   };
 }
 
@@ -53,14 +50,14 @@ function createJWT(payload, secret, options = {}) {
     expiresIn: '1h',
     issuer: 'echotune-ai',
     audience: 'echotune-users',
-    ...options
+    ...options,
   };
-  
+
   // Ensure expiresIn is valid
   if (typeof defaultOptions.expiresIn === 'number') {
     defaultOptions.expiresIn = `${defaultOptions.expiresIn}s`;
   }
-  
+
   return jwt.sign(payload, secret, defaultOptions);
 }
 
@@ -74,7 +71,7 @@ function verifyJWT(token, secret) {
   try {
     return jwt.verify(token, secret, {
       issuer: 'echotune-ai',
-      audience: 'echotune-users'
+      audience: 'echotune-users',
     });
   } catch (error) {
     console.error('JWT verification failed:', error.message);
@@ -92,7 +89,7 @@ function createRefreshToken(payload, secret) {
   return jwt.sign(payload, secret, {
     expiresIn: '7d',
     issuer: 'echotune-ai-refresh',
-    audience: 'echotune-users'
+    audience: 'echotune-users',
   });
 }
 
@@ -106,7 +103,7 @@ function verifyRefreshToken(token, secret) {
   try {
     return jwt.verify(token, secret, {
       issuer: 'echotune-ai-refresh',
-      audience: 'echotune-users'
+      audience: 'echotune-users',
     });
   } catch (error) {
     console.error('Refresh token verification failed:', error.message);
@@ -167,7 +164,7 @@ function sanitizeUserData(spotifyUser) {
     premium: spotifyUser.product === 'premium',
     followers: spotifyUser.followers?.total || 0,
     images: spotifyUser.images?.[0]?.url || null,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 }
 
@@ -182,7 +179,7 @@ function getSecureCookieOptions(isProduction = false) {
     secure: isProduction,
     sameSite: isProduction ? 'strict' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/'
+    path: '/',
   };
 }
 
@@ -216,21 +213,22 @@ function getRateLimitKey(req, type = 'default') {
  */
 function generateCSP(isDevelopment = false) {
   const basePolicy = [
-    'default-src \'self\'',
-    'script-src \'self\' \'unsafe-inline\' https://api.spotify.com https://sdk.scdn.co',
-    'style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com',
-    'font-src \'self\' https://fonts.gstatic.com',
-    'img-src \'self\' data: https://i.scdn.co https://mosaic.scdn.co https://lineup-images.scdn.co',
-    'connect-src \'self\' https://api.spotify.com https://accounts.spotify.com wss:',
-    'media-src \'self\' https://p.scdn.co',
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://api.spotify.com https://sdk.scdn.co",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https://i.scdn.co https://mosaic.scdn.co https://lineup-images.scdn.co",
+    "connect-src 'self' https://api.spotify.com https://accounts.spotify.com wss:",
+    "media-src 'self' https://p.scdn.co",
     'frame-src https://open.spotify.com https://sdk.scdn.co',
-    'worker-src \'self\' blob:',
-    'child-src \'self\' https://open.spotify.com'
+    "worker-src 'self' blob:",
+    "child-src 'self' https://open.spotify.com",
   ];
 
   if (isDevelopment) {
     // Allow localhost connections in development
-    basePolicy[3] = 'connect-src \'self\' https://api.spotify.com https://accounts.spotify.com ws://localhost:* wss://localhost:* http://localhost:*';
+    basePolicy[3] =
+      "connect-src 'self' https://api.spotify.com https://accounts.spotify.com ws://localhost:* wss://localhost:* http://localhost:*";
   }
 
   return basePolicy.join('; ');
@@ -250,8 +248,8 @@ function getSecurityHeaders(isProduction = false) {
     'Permissions-Policy': 'microphone=(), camera=(), geolocation=()',
     'Content-Security-Policy': generateCSP(!isProduction),
     ...(isProduction && {
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
-    })
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+    }),
   };
 }
 
@@ -271,5 +269,5 @@ module.exports = {
   isValidSpotifyToken,
   getRateLimitKey,
   generateCSP,
-  getSecurityHeaders
+  getSecurityHeaders,
 };

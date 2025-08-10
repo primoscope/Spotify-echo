@@ -60,8 +60,24 @@ class ErrorBoundary extends React.Component {
         'div',
         { style: errorPageStyle },
         React.createElement('h1', { style: headingStyle }, '🎵 Oops! Something went wrong'),
+
+        React.createElement(
+          'p',
+          { style: textStyle },
+          "We're sorry, but something unexpected happened. Please refresh the page to try again."
+        ),
+        React.createElement(
+          'button',
+          {
+            onClick: () => window.location.reload(),
+            style: buttonStyle,
+          },
+          'Refresh Page'
+        )
+=======
         React.createElement('p', { style: textStyle }, "We're sorry, but something unexpected happened. Please refresh the page to try again."),
         React.createElement('button', { onClick: () => window.location.reload(), style: buttonStyle }, 'Refresh Page')
+
       );
     }
     return this.props.children;

@@ -17,7 +17,7 @@ class RedisManager {
       misses: 0,
       sets: 0,
       deletes: 0,
-      errors: 0
+      errors: 0,
     };
   }
 
@@ -27,7 +27,7 @@ class RedisManager {
    */
   async initialize() {
     const redisUrl = process.env.REDIS_URL;
-    
+
     if (!redisUrl) {
       console.log('⚠️ REDIS_URL not configured, using in-memory fallback');
       return false;
@@ -42,7 +42,7 @@ class RedisManager {
         maxRetriesPerRequest: 3,
         lazyConnect: true,
         connectTimeout: 10000,
-        commandTimeout: 5000
+        commandTimeout: 5000,
       });
 
       // Set up error handling
@@ -71,10 +71,10 @@ class RedisManager {
 
       // Attempt connection
       await this.client.connect();
-      
+
       // Test connection with ping
       await this.client.ping();
-      
+
       return true;
     } catch (error) {
       console.warn('⚠️ Redis connection failed, using in-memory fallback:', error.message);
@@ -223,13 +223,13 @@ class RedisManager {
     try {
       const count = await this.incr(key, windowSeconds);
       const allowed = count <= limit;
-      
+
       return {
         allowed,
         count,
         limit,
-        resetTime: Date.now() + (windowSeconds * 1000),
-        remaining: Math.max(0, limit - count)
+        resetTime: Date.now() + windowSeconds * 1000,
+        remaining: Math.max(0, limit - count),
       };
     } catch (error) {
       console.error('Rate limit error:', error.message);
@@ -239,8 +239,8 @@ class RedisManager {
         allowed: true,
         count: 1,
         limit,
-        resetTime: Date.now() + (windowSeconds * 1000),
-        remaining: limit - 1
+        resetTime: Date.now() + windowSeconds * 1000,
+        remaining: limit - 1,
       };
     }
   }
@@ -342,11 +342,11 @@ class RedisManager {
         }
         // Limited pattern support for fallback
         const keys = this.fallbackCache.keys();
-        const matchingKeys = keys.filter(key => {
+        const matchingKeys = keys.filter((key) => {
           const regex = new RegExp(pattern.replace(/\*/g, '.*'));
           return regex.test(key);
         });
-        matchingKeys.forEach(key => this.fallbackCache.del(key));
+        matchingKeys.forEach((key) => this.fallbackCache.del(key));
         return matchingKeys.length;
       }
       return 0;
@@ -366,11 +366,13 @@ class RedisManager {
       ...this.stats,
       connected: this.isConnected,
       using_redis: this.useRedis,
-      fallback_stats: this.useRedis ? null : {
-        keys: this.fallbackCache.keys().length,
-        hits: this.fallbackCache.getStats().hits,
-        misses: this.fallbackCache.getStats().misses
-      }
+      fallback_stats: this.useRedis
+        ? null
+        : {
+            keys: this.fallbackCache.keys().length,
+            hits: this.fallbackCache.getStats().hits,
+            misses: this.fallbackCache.getStats().misses,
+          },
     };
   }
 
@@ -386,7 +388,7 @@ class RedisManager {
           status: 'healthy',
           type: 'redis',
           connected: true,
-          stats: this.getStats()
+          stats: this.getStats(),
         };
       } else {
         return {
@@ -394,7 +396,7 @@ class RedisManager {
           type: 'memory_fallback',
           connected: false,
           stats: this.getStats(),
-          message: 'Using in-memory cache fallback'
+          message: 'Using in-memory cache fallback',
         };
       }
     } catch (error) {
@@ -403,7 +405,7 @@ class RedisManager {
         type: 'redis',
         connected: false,
         error: error.message,
-        stats: this.getStats()
+        stats: this.getStats(),
       };
     }
   }
@@ -459,5 +461,5 @@ async function initializeRedis() {
 module.exports = {
   RedisManager,
   getRedisManager,
-  initializeRedis
+  initializeRedis,
 };

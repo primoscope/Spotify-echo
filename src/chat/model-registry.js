@@ -116,7 +116,7 @@ class ModelRegistry {
       openrouter: {
         'anthropic/claude-3.5-sonnet': {
           name: 'Claude 3.5 Sonnet',
-          description: 'Anthropic\'s most advanced model for complex reasoning',
+          description: "Anthropic's most advanced model for complex reasoning",
           capabilities: ['text', 'vision', 'function-calling', 'artifacts'],
           maxTokens: 8192,
           contextWindow: 200000,
@@ -136,7 +136,7 @@ class ModelRegistry {
         },
         'meta-llama/llama-3.1-405b-instruct': {
           name: 'Llama 3.1 405B',
-          description: 'Meta\'s largest open-source model',
+          description: "Meta's largest open-source model",
           capabilities: ['text', 'function-calling'],
           maxTokens: 4096,
           contextWindow: 131072,

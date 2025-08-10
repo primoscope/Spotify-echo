@@ -32,14 +32,14 @@ router.get('/login', async (req, res) => {
     if (!authService) {
       return res.status(500).json({
         error: 'Auth service not initialized',
-        message: 'Authentication service is not available'
+        message: 'Authentication service is not available',
       });
     }
 
     const options = {
       ip: getClientIP(req),
       userAgent: req.get('User-Agent'),
-      forceDialog: req.query.force === 'true'
+      forceDialog: req.query.force === 'true',
     };
 
     const authUrl = authService.generateAuthUrl(options);
@@ -48,14 +48,13 @@ router.get('/login', async (req, res) => {
       success: true,
       authUrl: authUrl.authUrl,
       state: authUrl.state,
-      message: 'Redirect user to authUrl to start authentication'
+      message: 'Redirect user to authUrl to start authentication',
     });
-
   } catch (error) {
     console.error('Login endpoint error:', error);
     res.status(500).json({
       error: 'Login failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -71,62 +70,62 @@ router.get('/callback', async (req, res) => {
     if (oauthError) {
       return res.status(400).json({
         error: 'OAuth error',
-        message: oauthError === 'access_denied' ? 
-          'User denied access to Spotify account' : 
-          `OAuth error: ${oauthError}`
+        message:
+          oauthError === 'access_denied'
+            ? 'User denied access to Spotify account'
+            : `OAuth error: ${oauthError}`,
       });
     }
 
     if (!code || !state) {
       return res.status(400).json({
         error: 'Missing parameters',
-        message: 'Authorization code and state are required'
+        message: 'Authorization code and state are required',
       });
     }
 
     if (!authService) {
       return res.status(500).json({
-        error: 'Auth service not initialized'
+        error: 'Auth service not initialized',
       });
     }
 
     const options = {
       ip: getClientIP(req),
-      userAgent: req.get('User-Agent')
+      userAgent: req.get('User-Agent'),
     };
 
     const result = await authService.handleCallback(code, state, options);
 
     // Set secure cookies
     const cookieOptions = authService.getCookieOptions();
-    
+
     res.cookie('auth_token', result.tokens.access_token, {
       ...cookieOptions,
-      maxAge: 60 * 60 * 1000 // 1 hour for access token
+      maxAge: 60 * 60 * 1000, // 1 hour for access token
     });
-    
+
     res.cookie('refresh_token', result.tokens.refresh_token, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days for refresh token
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for refresh token
     });
-    
+
     res.cookie('session_id', result.session.sessionId, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days for session
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for session
     });
 
     res.json({
       success: true,
       user: result.user,
       session: result.session,
-      message: 'Authentication successful'
+      message: 'Authentication successful',
     });
-
   } catch (error) {
     console.error('Callback endpoint error:', error);
     res.status(400).json({
       error: 'Authentication failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -138,7 +137,7 @@ router.get('/callback', async (req, res) => {
 router.post('/refresh', async (req, res) => {
   try {
     let refreshToken = req.body.refresh_token;
-    
+
     // Check cookies if not in body
     if (!refreshToken && req.cookies?.refresh_token) {
       refreshToken = req.cookies.refresh_token;
@@ -147,13 +146,13 @@ router.post('/refresh', async (req, res) => {
     if (!refreshToken) {
       return res.status(401).json({
         error: 'Refresh token required',
-        message: 'Please provide refresh token'
+        message: 'Please provide refresh token',
       });
     }
 
     if (!authService) {
       return res.status(500).json({
-        error: 'Auth service not initialized'
+        error: 'Auth service not initialized',
       });
     }
 
@@ -163,7 +162,7 @@ router.post('/refresh', async (req, res) => {
     const cookieOptions = authService.getCookieOptions();
     res.cookie('auth_token', result.access_token, {
       ...cookieOptions,
-      maxAge: 60 * 60 * 1000 // 1 hour
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
 
     res.json({
@@ -172,20 +171,19 @@ router.post('/refresh', async (req, res) => {
       token_type: result.token_type,
       expires_in: result.expires_in,
       user: result.user,
-      message: 'Token refreshed successfully'
+      message: 'Token refreshed successfully',
     });
-
   } catch (error) {
     console.error('Refresh endpoint error:', error);
-    
+
     // Clear invalid refresh token cookies
     res.clearCookie('auth_token');
     res.clearCookie('refresh_token');
     res.clearCookie('session_id');
-    
+
     res.status(401).json({
       error: 'Token refresh failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -197,12 +195,12 @@ router.post('/refresh', async (req, res) => {
 router.post('/logout', async (req, res) => {
   try {
     let sessionId = req.body.session_id;
-    
+
     // Check cookies and auth context
     if (!sessionId && req.cookies?.session_id) {
       sessionId = req.cookies.session_id;
     }
-    
+
     if (!sessionId && req.auth?.sessionId) {
       sessionId = req.auth.sessionId;
     }
@@ -212,33 +210,32 @@ router.post('/logout', async (req, res) => {
     }
 
     // Clear all auth cookies
-    const cookieOptions = { 
-      httpOnly: true, 
+    const cookieOptions = {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      path: '/'
+      path: '/',
     };
-    
+
     res.clearCookie('auth_token', cookieOptions);
     res.clearCookie('refresh_token', cookieOptions);
     res.clearCookie('session_id', cookieOptions);
 
     res.json({
       success: true,
-      message: 'Logged out successfully'
+      message: 'Logged out successfully',
     });
-
   } catch (error) {
     console.error('Logout endpoint error:', error);
-    
+
     // Still clear cookies even if logout fails
     res.clearCookie('auth_token');
     res.clearCookie('refresh_token');
     res.clearCookie('session_id');
-    
+
     res.json({
       success: true,
-      message: 'Logged out (session cleanup may have failed)'
+      message: 'Logged out (session cleanup may have failed)',
     });
   }
 });
@@ -252,7 +249,7 @@ router.get('/me', async (req, res) => {
     if (!req.auth || !req.auth.isAuthenticated) {
       return res.status(401).json({
         error: 'Authorization required',
-        message: 'Please log in to access user information'
+        message: 'Please log in to access user information',
       });
     }
 
@@ -262,19 +259,18 @@ router.get('/me', async (req, res) => {
       session: {
         sessionId: req.auth.sessionId,
         lastActivity: req.auth.session?.lastActivity,
-        createdAt: req.auth.session?.createdAt
+        createdAt: req.auth.session?.createdAt,
       },
       spotify: {
         hasTokens: !!req.auth.spotifyTokens,
-        tokenExpiry: req.auth.spotifyTokens?.expires_at
-      }
+        tokenExpiry: req.auth.spotifyTokens?.expires_at,
+      },
     });
-
   } catch (error) {
     console.error('Me endpoint error:', error);
     res.status(500).json({
       error: 'Failed to get user info',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -288,7 +284,7 @@ router.get('/status', async (req, res) => {
     const status = {
       authenticated: req.auth?.isAuthenticated || false,
       user: req.auth?.user || null,
-      development_mode: process.env.AUTH_DEVELOPMENT_MODE === 'true'
+      development_mode: process.env.AUTH_DEVELOPMENT_MODE === 'true',
     };
 
     if (authService) {
@@ -299,12 +295,11 @@ router.get('/status', async (req, res) => {
     }
 
     res.json(status);
-
   } catch (error) {
     console.error('Status endpoint error:', error);
     res.status(500).json({
       error: 'Status check failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -329,7 +324,7 @@ if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEVELOPMENT_MODE =
       secure: false,
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      path: '/'
+      path: '/',
     };
 
     // Create simple dev token
@@ -342,14 +337,14 @@ if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEVELOPMENT_MODE =
         id: userId,
         display_name: displayName,
         email: `${userId}@dev.example.com`,
-        premium: true
+        premium: true,
       },
-      message: 'Development login successful'
+      message: 'Development login successful',
     });
   });
 }
 
 module.exports = {
   router,
-  initializeAuthRoutes
+  initializeAuthRoutes,
 };

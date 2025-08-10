@@ -45,7 +45,7 @@ function createAuthMiddleware(options = {}) {
       // Store client info for security
       req.clientInfo = {
         ip: getClientIP(req),
-        userAgent: req.get('User-Agent') || 'unknown'
+        userAgent: req.get('User-Agent') || 'unknown',
       };
 
       // Initialize auth context
@@ -55,13 +55,13 @@ function createAuthMiddleware(options = {}) {
         session: null,
         spotifyTokens: null,
         sessionId: sessionId,
-        authService: authService
+        authService: authService,
       };
 
       // If we have a token, verify it
       if (token) {
         const verification = await authService.verifyToken(token);
-        
+
         if (verification.valid) {
           req.auth.isAuthenticated = true;
           req.auth.user = verification.user;
@@ -79,7 +79,6 @@ function createAuthMiddleware(options = {}) {
       }
 
       next();
-
     } catch (error) {
       console.error('Auth middleware error:', error);
       // Continue without authentication rather than blocking the request
@@ -96,7 +95,7 @@ function createAuthMiddleware(options = {}) {
       return res.status(401).json({
         error: 'Authentication required',
         message: 'Please log in to access this resource',
-        code: 'UNAUTHORIZED'
+        code: 'UNAUTHORIZED',
       });
     }
 
@@ -105,7 +104,7 @@ function createAuthMiddleware(options = {}) {
       return res.status(401).json({
         error: 'Session invalid',
         message: 'Your session has expired. Please log in again.',
-        code: 'SESSION_EXPIRED'
+        code: 'SESSION_EXPIRED',
       });
     }
 
@@ -129,21 +128,21 @@ function createAuthMiddleware(options = {}) {
       if (!req.auth || !req.auth.isAuthenticated) {
         return res.status(401).json({
           error: 'Authentication required',
-          message: 'Please log in to access this resource'
+          message: 'Please log in to access this resource',
         });
       }
 
       // For now, assume all required scopes are granted during auth
       // In a full implementation, you'd check the actual granted scopes
       const userScopes = req.auth.session?.scopes || authService.config.spotify.scopes;
-      const hasRequiredScopes = requiredScopes.every(scope => userScopes.includes(scope));
+      const hasRequiredScopes = requiredScopes.every((scope) => userScopes.includes(scope));
 
       if (!hasRequiredScopes) {
         return res.status(403).json({
           error: 'Insufficient permissions',
           message: 'Additional Spotify permissions required',
           required_scopes: requiredScopes,
-          granted_scopes: userScopes
+          granted_scopes: userScopes,
         });
       }
 
@@ -160,7 +159,7 @@ function createAuthMiddleware(options = {}) {
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ') && !req.auth.isAuthenticated) {
         const token = authHeader.substring(7);
-        
+
         // Create a mock user for development
         req.auth.isAuthenticated = true;
         req.auth.user = {
@@ -169,18 +168,18 @@ function createAuthMiddleware(options = {}) {
           email: `dev-${token}@example.com`,
           country: 'US',
           premium: true,
-          followers: 0
+          followers: 0,
         };
         req.auth.session = {
           sessionId: `dev-${token}`,
           createdAt: new Date(),
-          lastActivity: new Date()
+          lastActivity: new Date(),
         };
-        
+
         // Legacy compatibility
         req.user = req.auth.user;
         req.userId = req.auth.user.id;
-        
+
         console.log(`[DEV MODE] Authenticated user: ${token}`);
       }
     }
@@ -192,7 +191,7 @@ function createAuthMiddleware(options = {}) {
    */
   function authRateLimit(req, res, next) {
     const key = getRateLimitKey(req, 'auth');
-    
+
     // For now, just log the rate limit attempt
     // In production, this would integrate with Redis rate limiter
     console.log(`Auth rate limit check for key: ${key}`);
@@ -206,7 +205,7 @@ function createAuthMiddleware(options = {}) {
     optionalAuth,
     requireScopes,
     developmentBypass,
-    authRateLimit
+    authRateLimit,
   };
 }
 
@@ -214,13 +213,15 @@ function createAuthMiddleware(options = {}) {
  * Get client IP with proxy support
  */
 function getClientIP(req) {
-  return req.ip ||
+  return (
+    req.ip ||
     req.connection?.remoteAddress ||
     req.socket?.remoteAddress ||
     req.connection?.socket?.remoteAddress ||
     req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
     req.headers['x-real-ip'] ||
-    'unknown';
+    'unknown'
+  );
 }
 
 /**
@@ -235,10 +236,9 @@ function sessionCleanup(authService, intervalMs = 60000) {
       try {
         // This would be implemented to clean up expired sessions
         console.log('Session cleanup check...');
-        
+
         // If using Redis, expired keys are automatically cleaned up
         // For in-memory storage, we'd need to implement manual cleanup
-        
       } catch (error) {
         console.error('Session cleanup error:', error);
       }
@@ -254,12 +254,12 @@ function sessionCleanup(authService, intervalMs = 60000) {
 
   return {
     start: startCleanup,
-    stop: stopCleanup
+    stop: stopCleanup,
   };
 }
 
 module.exports = {
   createAuthMiddleware,
   sessionCleanup,
-  getClientIP
+  getClientIP,
 };

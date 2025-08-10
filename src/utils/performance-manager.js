@@ -290,10 +290,10 @@ class PerformanceManager {
 
     for (let i = 0; i < items.length; i += batchSize) {
       const batch = items.slice(i, i + batchSize);
-      
+
       // Process batch with concurrency control
       const processChunk = async (chunk) => {
-        const chunkPromises = chunk.map((item, j) => 
+        const chunkPromises = chunk.map((item, j) =>
           this.rateLimitedRequest(limiterName, () => processFn(item), options)
             .then((result) => {
               results.push({ item, result, index: i + j });

@@ -20,7 +20,7 @@ class RedisSessionStore extends session.Store {
     try {
       const key = this.prefix + sessionId;
       const sessionData = await this.redisManager.get(key);
-      
+
       if (sessionData) {
         callback(null, sessionData);
       } else {
@@ -38,7 +38,7 @@ class RedisSessionStore extends session.Store {
   async set(sessionId, sessionData, callback) {
     try {
       const key = this.prefix + sessionId;
-      
+
       // Calculate TTL from maxAge or use default
       let ttl = this.ttl;
       if (sessionData.cookie && sessionData.cookie.maxAge) {
@@ -130,7 +130,7 @@ function createRedisSession(redisManager, options = {}) {
   const sessionOptions = {
     store: new RedisSessionStore(redisManager, {
       prefix: options.prefix || 'echotune:session:',
-      ttl: options.ttl || 7 * 24 * 60 * 60 // 7 days
+      ttl: options.ttl || 7 * 24 * 60 * 60, // 7 days
     }),
     secret: process.env.SESSION_SECRET || 'fallback-dev-secret-change-in-production',
     name: 'echotune.session',
@@ -141,9 +141,9 @@ function createRedisSession(redisManager, options = {}) {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: options.maxAge || 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
     },
-    ...options
+    ...options,
   };
 
   return session(sessionOptions);
@@ -151,5 +151,5 @@ function createRedisSession(redisManager, options = {}) {
 
 module.exports = {
   RedisSessionStore,
-  createRedisSession
+  createRedisSession,
 };

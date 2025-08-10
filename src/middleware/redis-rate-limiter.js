@@ -15,17 +15,17 @@ class RedisRateLimiter {
     this.skipSuccessfulRequests = options.skipSuccessfulRequests || false;
     this.skipFailedRequests = options.skipFailedRequests || false;
     this.onLimitReached = options.onLimitReached || (() => {});
-    
+
     // Redis configuration
     this.redisClient = null;
     this.redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
     this.keyPrefix = options.keyPrefix || 'rl:';
-    
+
     // Performance tracking
     this.stats = {
       totalRequests: 0,
       limitedRequests: 0,
-      errors: 0
+      errors: 0,
     };
   }
 
@@ -38,8 +38,8 @@ class RedisRateLimiter {
         url: this.redisUrl,
         socket: {
           connectTimeout: 10000,
-          reconnectStrategy: (retries) => Math.min(retries * 50, 500)
-        }
+          reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+        },
       });
 
       this.redisClient.on('error', (err) => {
@@ -87,12 +87,12 @@ class RedisRateLimiter {
       }
 
       const count = await this.redisClient.incr(key);
-      
+
       // Set expiration on first increment
       if (count === 1) {
         await this.redisClient.pExpire(key, this.windowMs);
       }
-      
+
       return count;
     } catch (error) {
       console.error('Redis rate limiter increment error:', error);
@@ -125,46 +125,46 @@ class RedisRateLimiter {
     return async (req, res, next) => {
       try {
         this.stats.totalRequests++;
-        
+
         const key = this.keyPrefix + this.keyGenerator(req);
         const count = await this.incrementCount(key);
         const ttl = await this.getTTL(key);
-        
+
         // Add rate limit headers
         res.set({
           'X-RateLimit-Limit': this.max,
           'X-RateLimit-Remaining': Math.max(0, this.max - count),
-          'X-RateLimit-Reset': new Date(Date.now() + ttl).toISOString()
+          'X-RateLimit-Reset': new Date(Date.now() + ttl).toISOString(),
         });
 
         if (count > this.max) {
           this.stats.limitedRequests++;
-          
+
           // Call limit reached callback
           this.onLimitReached(req, res);
-          
+
           // Set Retry-After header
           res.set('Retry-After', Math.ceil(ttl / 1000));
-          
+
           return res.status(this.statusCode).json({
             error: 'Too Many Requests',
             message: this.message,
-            retryAfter: Math.ceil(ttl / 1000)
+            retryAfter: Math.ceil(ttl / 1000),
           });
         }
 
         // Skip counting for certain responses if configured
         const originalSend = res.send;
-        res.send = function(body) {
-          const shouldSkip = 
+        res.send = function (body) {
+          const shouldSkip =
             (this.skipSuccessfulRequests && res.statusCode < 400) ||
             (this.skipFailedRequests && res.statusCode >= 400);
-          
+
           if (shouldSkip) {
             // Decrement the counter since we don't want to count this request
             this.redisClient?.decr(key).catch(() => {}); // Ignore errors
           }
-          
+
           return originalSend.call(this, body);
         }.bind(this);
 
@@ -188,8 +188,8 @@ class RedisRateLimiter {
       configuration: {
         windowMs: this.windowMs,
         max: this.max,
-        keyPrefix: this.keyPrefix
-      }
+        keyPrefix: this.keyPrefix,
+      },
     };
   }
 
@@ -200,7 +200,7 @@ class RedisRateLimiter {
     this.stats = {
       totalRequests: 0,
       limitedRequests: 0,
-      errors: 0
+      errors: 0,
     };
   }
 
@@ -220,7 +220,7 @@ class RedisRateLimiter {
  */
 function createRedisRateLimit(options = {}) {
   const limiter = new RedisRateLimiter(options);
-  
+
   // Auto-initialize when first used
   let initialized = false;
   const middleware = async (req, res, next) => {
@@ -228,15 +228,15 @@ function createRedisRateLimit(options = {}) {
       await limiter.initialize();
       initialized = true;
     }
-    
+
     return limiter.createMiddleware()(req, res, next);
   };
-  
+
   // Attach limiter instance and stats to middleware
   middleware.limiter = limiter;
   middleware.getStats = () => limiter.getStats();
   middleware.resetStats = () => limiter.resetStats();
-  
+
   return middleware;
 }
 
@@ -249,7 +249,7 @@ const rateLimiters = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 1000,
     keyPrefix: 'global:',
-    message: 'Too many requests from this IP, please try again later'
+    message: 'Too many requests from this IP, please try again later',
   }),
 
   // API rate limiter - moderate limits
@@ -257,7 +257,7 @@ const rateLimiters = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 500,
     keyPrefix: 'api:',
-    message: 'Too many API requests, please slow down'
+    message: 'Too many API requests, please slow down',
   }),
 
   // Chat rate limiter - stricter limits
@@ -265,7 +265,7 @@ const rateLimiters = {
     windowMs: 1 * 60 * 1000, // 1 minute
     max: 30,
     keyPrefix: 'chat:',
-    message: 'Too many chat messages, please wait before sending more'
+    message: 'Too many chat messages, please wait before sending more',
   }),
 
   // Spotify API rate limiter - conservative limits
@@ -273,7 +273,7 @@ const rateLimiters = {
     windowMs: 1 * 60 * 1000, // 1 minute
     max: 50,
     keyPrefix: 'spotify:',
-    message: 'Spotify API rate limit exceeded, please try again later'
+    message: 'Spotify API rate limit exceeded, please try again later',
   }),
 
   // Auth rate limiter - very strict limits
@@ -281,12 +281,12 @@ const rateLimiters = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 20,
     keyPrefix: 'auth:',
-    message: 'Too many authentication attempts, please try again later'
-  })
+    message: 'Too many authentication attempts, please try again later',
+  }),
 };
 
 module.exports = {
   RedisRateLimiter,
   createRedisRateLimit,
-  rateLimiters
+  rateLimiters,
 };

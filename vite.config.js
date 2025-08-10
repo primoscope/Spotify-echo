@@ -1,10 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import viteCompression from 'vite-plugin-compression';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    viteCompression({ algorithm: 'gzip' }),
+    viteCompression({ algorithm: 'brotliCompress', ext: '.br' })
+  ],
   
   // Entry point for the React application
   root: 'src/frontend',
@@ -43,6 +48,17 @@ export default defineConfig({
             return 'assets/css/[name]-[hash].[ext]';
           }
           return 'assets/[name]-[hash].[ext]';
+        },
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('/react/')) return 'react';
+            if (id.includes('react-dom')) return 'react';
+            if (id.includes('@mui/icons-material')) return 'mui-icons';
+            if (id.includes('@mui/')) return 'mui';
+            if (id.includes('@emotion/')) return 'mui';
+            if (id.includes('web-vitals')) return 'web-vitals';
+            return 'vendor';
+          }
         }
       }
     },
@@ -130,6 +146,7 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom'
-    ]
+    ],
+    exclude: []
   }
 });

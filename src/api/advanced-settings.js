@@ -240,6 +240,98 @@ router.post('/llm/test', async (req, res) => {
 });
 
 /**
+ * GET /api/settings/export
+ * Export current settings for backup (sanitized)
+ */
+router.get('/export', (req, res) => {
+  try {
+    const config = loadConfig();
+    const sanitized = {
+      ...config,
+      llm: { ...config.llm, apiKey: config.llm?.apiKey ? '••••••••••••' : '' },
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="advanced-settings-backup.json"');
+    res.status(200).send(JSON.stringify(sanitized, null, 2));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to export settings' });
+  }
+});
+
+/**
+ * POST /api/settings/import
+ * Import settings from backup (expects JSON body). Does not accept API keys from client.
+ */
+router.post('/import', (req, res) => {
+  try {
+    const incoming = req.body || {};
+    const current = loadConfig();
+
+    // Never accept raw API keys via import; keep existing
+    const merged = {
+      ...current,
+      ...incoming,
+      llm: {
+        ...current.llm,
+        ...incoming.llm,
+        apiKey: current.llm?.apiKey || '',
+      },
+    };
+
+    if (!saveConfig(merged)) {
+      return res.status(500).json({ error: 'Failed to save imported settings' });
+    }
+
+    res.json({ success: true, message: 'Settings imported (API keys preserved on server)' });
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid import payload' });
+  }
+});
+
+/**
+ * POST /api/settings/ssl/request
+ * Plan an automated SSL (Let\'s Encrypt) request. Writes an instruction plan to reports.
+ */
+router.post('/ssl/request', (req, res) => {
+  try {
+    const { domain, email } = req.body || {};
+    if (!domain || !/^[A-Za-z0-9.-]+$/.test(domain)) {
+      return res.status(400).json({ error: 'Valid domain is required' });
+    }
+    const plan = {
+      domain,
+      email: email || process.env.SSL_EMAIL || `admin@${domain}`,
+      script: 'nginx/ssl-setup.sh',
+      command: `DOMAIN=\"${domain}\" SSL_EMAIL=\"${email || ''}\" sudo bash nginx/ssl-setup.sh`,
+      createdAt: new Date().toISOString(),
+      note: 'Run on the server with root privileges. This endpoint does not execute the command.'
+    };
+    const reportsDir = path.join(__dirname, '..', '..', 'reports');
+    if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
+    const file = path.join(reportsDir, `ssl-request-${Date.now()}.json`);
+    fs.writeFileSync(file, JSON.stringify(plan, null, 2));
+    res.json({ success: true, plan, report: file });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create SSL request plan' });
+  }
+});
+
+/**
+ * GET /api/settings/self-test
+ * Validate that advanced settings read/write is functioning
+ */
+router.get('/self-test', (req, res) => {
+  try {
+    const before = loadConfig();
+    const ok = saveConfig({ ...before, _lastSelfTest: new Date().toISOString() });
+    const after = loadConfig();
+    res.json({ success: ok, before: !!before, after: !!after, timestamp: new Date().toISOString() });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
  * GET /api/settings/database/insights
  * Get comprehensive database analytics and insights
  */

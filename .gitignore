@@ -435,11 +435,10 @@ archive/
 *.bak
 *.orig
 
-# Environment files (except examples)
+# Environment files (keep only the example tracked)
 .env
-.env.local
-.env.production
-api_keys.env
+.env.*
+!.env.example
 
 # MCP server logs
 mcp-server/*.log
@@ -462,3 +461,6 @@ gpt5_analysis.md
 mcp_results.txt
 target_files.txt
 automation_analysis.log
+
+# MCP local env
+.env.mcp

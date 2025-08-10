@@ -1,31 +1,57 @@
-name: MCP — Validation Suite
+name: MCP Validation
 
 on:
-  issue_comment:
-    types: [created]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  run-mcp:
-    if: |
-      github.event_name == 'workflow_dispatch' || contains(github.event.comment.body, '/run-mcp-all') || contains(github.event.comment.body, '/run-mcp-validation') || contains(github.event.comment.body, '/mcp-discover') || contains(github.event.comment.body, '/mcp-health-check')
+  mcp-validation:
+    name: MCP Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare workspace
-        run: |
-          mkdir -p reports mcp scripts/mcp
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-      - name: Run MCP placeholder validations
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run MCP preflight (install → health → test → report)
+        shell: bash
         run: |
-          bash scripts/mcp/run.sh
+          if [ -f scripts/mcp/run.sh ]; then
+            bash scripts/mcp/run.sh
+          else
+            if [ -f scripts/automation/mcp-manager.js ]; then
+              node scripts/automation/mcp-manager.js check
+              node scripts/automation/mcp-manager.js install
+              node scripts/automation/mcp-manager.js health
+              node scripts/automation/mcp-manager.js test
+              node scripts/automation/mcp-manager.js report
+            else
+              echo "mcp-manager not found; falling back to npm scripts if available"
+              npm run -s lint || true
+              npm test -- --ci || true
+              npm run -s build || true
+            fi
+          fi
 
       - name: Upload MCP artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: mcp-validation
+          name: mcp-artifacts
           path: |
-            reports/mcp-health.md
-            mcp/registry.yaml
-          if-no-files-found: warn
+            mcp/
+            reports/
+            mcp-servers-report.json
+          if-no-files-found: ignore

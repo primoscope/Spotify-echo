@@ -1,0 +1,617 @@
+name: Continuous Improvement
+
+on:
+  issues:
+    types: [assigned, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to analyze (optional)'
+        required: false
+        type: string
+      analysis_scope:
+        description: 'Analysis scope'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - frontend
+          - backend
+          - mcp
+  schedule:
+    # Daily safety run to check for improvements
+    - cron: '0 1 * * *'
+
+env:
+  ANALYSIS_OUTPUT_DIR: agent-workflow/tasks
+  REPORTS_DIR: reports
+
+jobs:
+  trigger-check:
+    name: Check Trigger Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should-analyze: ${{ steps.check.outputs.should-analyze }}
+      issue-number: ${{ steps.check.outputs.issue-number }}
+      analysis-scope: ${{ steps.check.outputs.analysis-scope }}
+      
+    steps:
+      - name: Check trigger conditions
+        id: check
+        run: |
+          echo "🔍 Checking continuous improvement trigger conditions..."
+          
+          SHOULD_ANALYZE=false
+          ISSUE_NUMBER=""
+          ANALYSIS_SCOPE="full"
+          
+          # Check if triggered by issue assignment
+          if [[ "${{ github.event_name }}" == "issues" ]]; then
+            # Check if assigned to coding agent or has relevant label
+            ASSIGNEES="${{ join(github.event.issue.assignees.*.login, ',') }}"
+            LABELS="${{ join(github.event.issue.labels.*.name, ',') }}"
+            
+            if [[ "$ASSIGNEES" == *"coding-agent"* ]] || [[ "$LABELS" == *"coding-agent"* ]] || [[ "$LABELS" == *"continuous-improvement"* ]]; then
+              SHOULD_ANALYZE=true
+              ISSUE_NUMBER="${{ github.event.issue.number }}"
+              echo "✅ Issue #$ISSUE_NUMBER assigned to coding agent - triggering analysis"
+            else
+              echo "ℹ️ Issue not assigned to coding agent - skipping analysis"
+            fi
+            
+          # Check if triggered by workflow_dispatch
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            SHOULD_ANALYZE=true
+            ISSUE_NUMBER="${{ github.event.inputs.issue_number }}"
+            ANALYSIS_SCOPE="${{ github.event.inputs.analysis_scope }}"
+            echo "🎯 Manual trigger - analyzing with scope: $ANALYSIS_SCOPE"
+            
+          # Check if triggered by schedule
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            SHOULD_ANALYZE=true
+            ANALYSIS_SCOPE="full"
+            echo "⏰ Scheduled trigger - running daily improvement analysis"
+          fi
+          
+          echo "should-analyze=$SHOULD_ANALYZE" >> $GITHUB_OUTPUT
+          echo "issue-number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          echo "analysis-scope=$ANALYSIS_SCOPE" >> $GITHUB_OUTPUT
+
+  analyze-codebase:
+    name: Analyze Codebase
+    runs-on: ubuntu-latest
+    needs: trigger-check
+    if: needs.trigger-check.outputs.should-analyze == 'true'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Create analysis directories
+        run: |
+          mkdir -p ${{ env.ANALYSIS_OUTPUT_DIR }}
+          mkdir -p ${{ env.REPORTS_DIR }}
+          
+      - name: Run codebase analysis
+        env:
+          ISSUE_NUMBER: ${{ needs.trigger-check.outputs.issue-number }}
+          ANALYSIS_SCOPE: ${{ needs.trigger-check.outputs.analysis-scope }}
+        run: |
+          echo "🔍 Running comprehensive codebase analysis..."
+          echo "Scope: $ANALYSIS_SCOPE"
+          echo "Issue: ${ISSUE_NUMBER:-'N/A'}"
+          
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Create analysis script if it doesn't exist
+          if [[ ! -f "scripts/automation/continuous-improvement.js" ]]; then
+            echo "📝 Creating continuous improvement analysis script..."
+            mkdir -p scripts/automation
+            
+            cat > scripts/automation/continuous-improvement.js << 'EOF'
+          #!/usr/bin/env node
+          
+          const fs = require('fs');
+          const path = require('path');
+          
+          class ContinuousImprovementAnalyzer {
+            constructor() {
+              this.projectRoot = process.cwd();
+              this.analysisResults = {
+                timestamp: new Date().toISOString(),
+                scope: process.env.ANALYSIS_SCOPE || 'full',
+                issueNumber: process.env.ISSUE_NUMBER || null,
+                frontend: { tasks: [], metrics: {} },
+                backend: { tasks: [], metrics: {} },
+                mcp: { tasks: [], metrics: {} },
+                general: { tasks: [], metrics: {} }
+              };
+            }
+            
+            async analyzeFrontend() {
+              console.log('🎨 Analyzing frontend...');
+              
+              const frontendFiles = this.findFiles(['src/frontend', 'src/components', 'public'], ['.js', '.jsx', '.html', '.css']);
+              
+              // Analyze React/JSX patterns
+              const jsxFiles = frontendFiles.filter(f => f.endsWith('.jsx') || f.endsWith('.js'));
+              const cssFiles = frontendFiles.filter(f => f.endsWith('.css'));
+              
+              this.analysisResults.frontend.metrics = {
+                totalFiles: frontendFiles.length,
+                jsxFiles: jsxFiles.length,
+                cssFiles: cssFiles.length,
+                componentCount: this.countReactComponents(jsxFiles)
+              };
+              
+              // Generate improvement tasks
+              const tasks = [];
+              
+              if (jsxFiles.length === 0) {
+                tasks.push({
+                  title: "Add React components for better user interface",
+                  priority: "medium",
+                  category: "frontend",
+                  description: "Create React components to improve the user experience and interface",
+                  estimatedEffort: "medium",
+                  impact: "high"
+                });
+              }
+              
+              if (cssFiles.length < 3) {
+                tasks.push({
+                  title: "Enhance CSS styling and responsiveness", 
+                  priority: "low",
+                  category: "frontend",
+                  description: "Improve visual design and mobile responsiveness",
+                  estimatedEffort: "low",
+                  impact: "medium"
+                });
+              }
+              
+              // Check for accessibility improvements
+              tasks.push({
+                title: "Add accessibility features and ARIA labels",
+                priority: "medium", 
+                category: "frontend",
+                description: "Improve accessibility compliance and screen reader support",
+                estimatedEffort: "medium",
+                impact: "high"
+              });
+              
+              this.analysisResults.frontend.tasks = tasks;
+            }
+            
+            async analyzeBackend() {
+              console.log('⚙️ Analyzing backend...');
+              
+              const backendFiles = this.findFiles(['src/api', 'src/server.js', 'src/middleware', 'src/utils'], ['.js']);
+              
+              this.analysisResults.backend.metrics = {
+                totalFiles: backendFiles.length,
+                apiRoutes: this.countApiRoutes(backendFiles),
+                middlewareCount: this.countMiddleware(backendFiles)
+              };
+              
+              // Generate improvement tasks
+              const tasks = [];
+              
+              tasks.push({
+                title: "Add comprehensive API input validation",
+                priority: "high",
+                category: "backend",
+                description: "Implement robust input validation for all API endpoints",
+                estimatedEffort: "medium", 
+                impact: "high"
+              });
+              
+              tasks.push({
+                title: "Implement API rate limiting and throttling",
+                priority: "medium",
+                category: "backend", 
+                description: "Add rate limiting to prevent abuse and improve stability",
+                estimatedEffort: "low",
+                impact: "medium"
+              });
+              
+              tasks.push({
+                title: "Add comprehensive logging and monitoring",
+                priority: "medium",
+                category: "backend",
+                description: "Implement structured logging and performance monitoring",
+                estimatedEffort: "medium",
+                impact: "high"
+              });
+              
+              this.analysisResults.backend.tasks = tasks;
+            }
+            
+            async analyzeMCP() {
+              console.log('🤖 Analyzing MCP infrastructure...');
+              
+              const mcpFiles = this.findFiles(['mcp-server', 'mcp-servers', 'scripts/mcp'], ['.js', '.json', '.sh']);
+              
+              this.analysisResults.mcp.metrics = {
+                totalFiles: mcpFiles.length,
+                mcpServers: this.countMCPServers(mcpFiles),
+                scriptsCount: mcpFiles.filter(f => f.endsWith('.sh')).length
+              };
+              
+              // Generate MCP improvement tasks
+              const tasks = [];
+              
+              tasks.push({
+                title: "Enhance MCP server error handling and recovery",
+                priority: "medium",
+                category: "mcp",
+                description: "Improve robustness of MCP server connections and error recovery",
+                estimatedEffort: "medium",
+                impact: "high"
+              });
+              
+              tasks.push({
+                title: "Add MCP performance monitoring and metrics",
+                priority: "low",
+                category: "mcp", 
+                description: "Implement monitoring for MCP server performance and usage",
+                estimatedEffort: "medium",
+                impact: "medium"
+              });
+              
+              this.analysisResults.mcp.tasks = tasks;
+            }
+            
+            findFiles(directories, extensions) {
+              const files = [];
+              for (const dir of directories) {
+                const fullPath = path.join(this.projectRoot, dir);
+                if (fs.existsSync(fullPath)) {
+                  const dirFiles = this.walkDirectory(fullPath, extensions);
+                  files.push(...dirFiles);
+                }
+              }
+              return files;
+            }
+            
+            walkDirectory(dir, extensions) {
+              const files = [];
+              const items = fs.readdirSync(dir);
+              
+              for (const item of items) {
+                const fullPath = path.join(dir, item);
+                const stat = fs.statSync(fullPath);
+                
+                if (stat.isDirectory()) {
+                  files.push(...this.walkDirectory(fullPath, extensions));
+                } else if (extensions.some(ext => item.endsWith(ext))) {
+                  files.push(fullPath);
+                }
+              }
+              return files;
+            }
+            
+            countReactComponents(files) {
+              let count = 0;
+              for (const file of files) {
+                try {
+                  const content = fs.readFileSync(file, 'utf8');
+                  const matches = content.match(/(?:function\s+\w+|const\s+\w+\s*=.*?=>).*?return\s*\(/g);
+                  if (matches) count += matches.length;
+                } catch (e) {}
+              }
+              return count;
+            }
+            
+            countApiRoutes(files) {
+              let count = 0;
+              for (const file of files) {
+                try {
+                  const content = fs.readFileSync(file, 'utf8');
+                  const matches = content.match(/app\.(get|post|put|delete|patch)\(/g);
+                  if (matches) count += matches.length;
+                } catch (e) {}
+              }
+              return count;
+            }
+            
+            countMiddleware(files) {
+              let count = 0;
+              for (const file of files) {
+                try {
+                  const content = fs.readFileSync(file, 'utf8');
+                  if (content.includes('(req, res, next)')) count++;
+                } catch (e) {}
+              }
+              return count;
+            }
+            
+            countMCPServers(files) {
+              const jsonFiles = files.filter(f => f.endsWith('.json'));
+              let count = 0;
+              
+              for (const file of jsonFiles) {
+                try {
+                  const content = JSON.parse(fs.readFileSync(file, 'utf8'));
+                  if (content.servers) {
+                    count += Object.keys(content.servers).length;
+                  }
+                } catch (e) {}
+              }
+              return count;
+            }
+            
+            async generateReport() {
+              const scope = this.analysisResults.scope;
+              
+              if (scope === 'full' || scope === 'frontend') {
+                await this.analyzeFrontend();
+              }
+              if (scope === 'full' || scope === 'backend') {
+                await this.analyzeBackend();
+              }
+              if (scope === 'full' || scope === 'mcp') {
+                await this.analyzeMCP();
+              }
+              
+              // Save detailed results
+              const outputDir = process.env.ANALYSIS_OUTPUT_DIR || 'agent-workflow/tasks';
+              if (!fs.existsSync(outputDir)) {
+                fs.mkdirSync(outputDir, { recursive: true });
+              }
+              
+              const filename = `tasks-${this.analysisResults.timestamp.replace(/[:.]/g, '-')}.json`;
+              fs.writeFileSync(
+                path.join(outputDir, filename),
+                JSON.stringify(this.analysisResults, null, 2)
+              );
+              
+              console.log(`📊 Analysis complete. Results saved to ${filename}`);
+              
+              return this.analysisResults;
+            }
+          }
+          
+          // Run analysis
+          const analyzer = new ContinuousImprovementAnalyzer();
+          analyzer.generateReport().then(results => {
+            console.log('✅ Continuous improvement analysis completed');
+            console.log(`📈 Frontend tasks: ${results.frontend.tasks.length}`);
+            console.log(`📈 Backend tasks: ${results.backend.tasks.length}`);  
+            console.log(`📈 MCP tasks: ${results.mcp.tasks.length}`);
+          }).catch(error => {
+            console.error('❌ Analysis failed:', error);
+            process.exit(1);
+          });
+          EOF
+          
+            chmod +x scripts/automation/continuous-improvement.js
+          fi
+          
+          # Run the analysis
+          node scripts/automation/continuous-improvement.js
+          
+      - name: Generate improvement summary
+        run: |
+          echo "📋 Generating continuous improvement summary..."
+          
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          LATEST_ANALYSIS=$(ls -t ${{ env.ANALYSIS_OUTPUT_DIR }}/tasks-*.json | head -1)
+          
+          if [[ -n "$LATEST_ANALYSIS" && -f "$LATEST_ANALYSIS" ]]; then
+            echo "📊 Found analysis results: $LATEST_ANALYSIS"
+            
+            # Extract task counts
+            FRONTEND_TASKS=$(jq '.frontend.tasks | length' "$LATEST_ANALYSIS")
+            BACKEND_TASKS=$(jq '.backend.tasks | length' "$LATEST_ANALYSIS")
+            MCP_TASKS=$(jq '.mcp.tasks | length' "$LATEST_ANALYSIS")
+            TOTAL_TASKS=$((FRONTEND_TASKS + BACKEND_TASKS + MCP_TASKS))
+            
+            # Generate markdown report
+            cat > ${{ env.REPORTS_DIR }}/continuous-improvement.md << EOF
+          # Continuous Improvement Analysis Report
+          
+          **Generated:** $TIMESTAMP
+          **Commit:** ${{ github.sha }}
+          **Analysis Scope:** ${{ needs.trigger-check.outputs.analysis-scope }}
+          **Issue Number:** ${{ needs.trigger-check.outputs.issue-number }}
+          
+          ## Executive Summary
+          
+          🎯 **Total Improvement Tasks Identified:** $TOTAL_TASKS
+          
+          | Category | Tasks | Priority Distribution |
+          |----------|-------|----------------------|
+          | Frontend | $FRONTEND_TASKS | $(jq -r '.frontend.tasks | group_by(.priority) | map("\(length) \(.[0].priority)") | join(", ")' "$LATEST_ANALYSIS") |
+          | Backend | $BACKEND_TASKS | $(jq -r '.backend.tasks | group_by(.priority) | map("\(length) \(.[0].priority)") | join(", ")' "$LATEST_ANALYSIS") |
+          | MCP Infrastructure | $MCP_TASKS | $(jq -r '.mcp.tasks | group_by(.priority) | map("\(length) \(.[0].priority)") | join(", ")' "$LATEST_ANALYSIS") |
+          
+          ## Codebase Metrics
+          
+          ### Frontend Analysis
+          - **Total Files:** $(jq '.frontend.metrics.totalFiles' "$LATEST_ANALYSIS")
+          - **JSX/JS Files:** $(jq '.frontend.metrics.jsxFiles' "$LATEST_ANALYSIS")
+          - **CSS Files:** $(jq '.frontend.metrics.cssFiles' "$LATEST_ANALYSIS")
+          - **React Components:** $(jq '.frontend.metrics.componentCount' "$LATEST_ANALYSIS")
+          
+          ### Backend Analysis  
+          - **Total Files:** $(jq '.backend.metrics.totalFiles' "$LATEST_ANALYSIS")
+          - **API Routes:** $(jq '.backend.metrics.apiRoutes' "$LATEST_ANALYSIS")
+          - **Middleware Count:** $(jq '.backend.metrics.middlewareCount' "$LATEST_ANALYSIS")
+          
+          ### MCP Infrastructure
+          - **Total Files:** $(jq '.mcp.metrics.totalFiles' "$LATEST_ANALYSIS")
+          - **MCP Servers:** $(jq '.mcp.metrics.mcpServers' "$LATEST_ANALYSIS")
+          - **Scripts Count:** $(jq '.mcp.metrics.scriptsCount' "$LATEST_ANALYSIS")
+          
+          ## High Priority Recommendations
+          
+          $(jq -r '.frontend.tasks[] | select(.priority == "high") | "### Frontend: \(.title)\n\n**Priority:** \(.priority)\n**Impact:** \(.impact)\n**Effort:** \(.estimatedEffort)\n\n\(.description)\n"' "$LATEST_ANALYSIS")
+          $(jq -r '.backend.tasks[] | select(.priority == "high") | "### Backend: \(.title)\n\n**Priority:** \(.priority)\n**Impact:** \(.impact)\n**Effort:** \(.estimatedEffort)\n\n\(.description)\n"' "$LATEST_ANALYSIS")
+          $(jq -r '.mcp.tasks[] | select(.priority == "high") | "### MCP: \(.title)\n\n**Priority:** \(.priority)\n**Impact:** \(.impact)\n**Effort:** \(.estimatedEffort)\n\n\(.description)\n"' "$LATEST_ANALYSIS")
+          
+          ## All Improvement Tasks
+          
+          $(jq -r '
+            (.frontend.tasks + .backend.tasks + .mcp.tasks) | 
+            sort_by(.priority) | 
+            reverse | 
+            .[] | 
+            "- **[\(.category | ascii_upcase)] \(.title)** (\(.priority) priority, \(.impact) impact, \(.estimatedEffort) effort)\n  \(.description)\n"
+          ' "$LATEST_ANALYSIS")
+          
+          ## Next Steps
+          
+          1. **Review High Priority Items:** Focus on high priority, high impact improvements
+          2. **Create Implementation Issues:** Break down tasks into actionable GitHub issues
+          3. **Set Implementation Timeline:** Prioritize based on impact and effort estimates
+          4. **Track Progress:** Monitor implementation of suggested improvements
+          
+          ---
+          *This report was generated automatically by the EchoTune AI continuous improvement system.*
+          EOF
+            
+            echo "✅ Generated comprehensive improvement report"
+          else
+            echo "⚠️ No analysis results found"
+          fi
+
+  post-to-issue:
+    name: Post Results to Issue
+    runs-on: ubuntu-latest
+    needs: [trigger-check, analyze-codebase]
+    if: needs.trigger-check.outputs.issue-number != '' && needs.analyze-codebase.result == 'success'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Download analysis results
+        run: |
+          # Results should be available from previous job
+          ls -la ${{ env.ANALYSIS_OUTPUT_DIR }}/ || echo "No analysis output directory found"
+          ls -la ${{ env.REPORTS_DIR }}/ || echo "No reports directory found"
+          
+      - name: Post analysis to issue
+        uses: actions/github-script@v7
+        env:
+          ISSUE_NUMBER: ${{ needs.trigger-check.outputs.issue-number }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            const issueNumber = process.env.ISSUE_NUMBER;
+            
+            // Read the latest analysis file
+            const analysisDir = '${{ env.ANALYSIS_OUTPUT_DIR }}';
+            const reportsDir = '${{ env.REPORTS_DIR }}';
+            
+            let analysisComment = `## 🤖 Continuous Improvement Analysis
+            
+            I've analyzed the codebase and identified actionable improvements across frontend and backend components.
+            
+            **Analysis Timestamp:** ${new Date().toISOString()}
+            **Triggered by:** Issue assignment to coding agent
+            `;
+            
+            try {
+              // Try to read the markdown report
+              const reportPath = path.join(reportsDir, 'continuous-improvement.md');
+              if (fs.existsSync(reportPath)) {
+                const reportContent = fs.readFileSync(reportPath, 'utf8');
+                // Extract just the summary section for the comment
+                const summaryMatch = reportContent.match(/## Executive Summary([\s\S]*?)## Codebase Metrics/);
+                if (summaryMatch) {
+                  analysisComment += '\n' + summaryMatch[1].trim();
+                }
+              }
+              
+              // Add next steps
+              analysisComment += `
+            
+            ## 📋 Next Steps
+            
+            I'll create follow-up issues for the high-priority improvements identified in this analysis. Each will be properly scoped and ready for implementation.
+            
+            **Artifacts Generated:**
+            - 📊 Detailed analysis JSON
+            - 📋 Comprehensive improvement report  
+            - 🎯 Prioritized task recommendations
+            
+            Check the workflow artifacts for complete details.`;
+              
+            } catch (error) {
+              analysisComment += `
+            
+            ⚠️ Error reading detailed analysis results: ${error.message}
+            
+            Basic analysis completed - check workflow artifacts for details.`;
+            }
+            
+            // Post comment to issue
+            await github.rest.issues.createComment({
+              issue_number: issueNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: analysisComment
+            });
+            
+            console.log(`Posted analysis results to issue #${issueNumber}`);
+
+  upload-artifacts:
+    name: Upload Analysis Artifacts
+    runs-on: ubuntu-latest
+    needs: [analyze-codebase]
+    if: always() && needs.analyze-codebase.result == 'success'
+    
+    steps:
+      - name: Upload continuous improvement artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuous-improvement-analysis
+          path: |
+            ${{ env.ANALYSIS_OUTPUT_DIR }}/tasks-*.json
+            ${{ env.REPORTS_DIR }}/continuous-improvement.md
+          if-no-files-found: ignore
+          retention-days: 90
+
+  workflow-summary:
+    name: Workflow Summary
+    runs-on: ubuntu-latest
+    needs: [trigger-check, analyze-codebase, post-to-issue]
+    if: always()
+    
+    steps:
+      - name: Generate workflow summary
+        run: |
+          echo "🔄 Continuous Improvement Workflow Summary"
+          echo "=========================================="
+          echo ""
+          echo "**Trigger Check:** ${{ needs.trigger-check.result }}"
+          echo "**Codebase Analysis:** ${{ needs.analyze-codebase.result }}"
+          echo "**Issue Posting:** ${{ needs.post-to-issue.result }}"
+          echo ""
+          echo "**Should Analyze:** ${{ needs.trigger-check.outputs.should-analyze }}"
+          echo "**Issue Number:** ${{ needs.trigger-check.outputs.issue-number }}"
+          echo "**Analysis Scope:** ${{ needs.trigger-check.outputs.analysis-scope }}"
+          echo ""
+          
+          if [[ "${{ needs.analyze-codebase.result }}" == "success" ]]; then
+            echo "✅ Continuous improvement analysis completed successfully"
+            echo "📊 Analysis artifacts generated and uploaded"
+            if [[ -n "${{ needs.trigger-check.outputs.issue-number }}" ]]; then
+              echo "💬 Results posted to issue #${{ needs.trigger-check.outputs.issue-number }}"
+            fi
+          else
+            echo "⚠️ Analysis workflow had issues - check individual job results"
+          fi

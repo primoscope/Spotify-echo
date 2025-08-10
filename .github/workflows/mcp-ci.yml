@@ -1,0 +1,356 @@
+name: MCP Config CI
+
+on:
+  pull_request:
+    paths:
+      - "mcp/**"
+      - "scripts/mcp/**"
+      - "docs/mcp/**"
+      - ".env.mcp.example"
+      - "scripts/install-mcp-servers.sh"
+      - "package.json"
+      - ".github/workflows/mcp-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "mcp/**"
+      - "scripts/mcp/**"
+
+jobs:
+  validate-structure:
+    name: Validate MCP Structure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON structure
+        run: |
+          echo "🔍 Validating MCP JSON configurations..."
+          
+          JSON_FILES=(
+            "mcp/servers.example.json"
+            "mcp-registry.json"
+          )
+          
+          VALIDATION_ERRORS=0
+          
+          for json_file in "${JSON_FILES[@]}"; do
+            if [[ -f "$json_file" ]]; then
+              echo "Validating $json_file..."
+              if command -v jq >/dev/null 2>&1; then
+                if jq . "$json_file" >/dev/null; then
+                  echo "✅ $json_file is valid JSON"
+                else
+                  echo "❌ $json_file has invalid JSON syntax"
+                  ((VALIDATION_ERRORS++))
+                fi
+              else
+                echo "⚠️ jq not available; using python for JSON validation"
+                if python3 -c "import json; json.load(open('$json_file'))" 2>/dev/null; then
+                  echo "✅ $json_file is valid JSON"
+                else
+                  echo "❌ $json_file has invalid JSON syntax"
+                  ((VALIDATION_ERRORS++))
+                fi
+              fi
+            else
+              echo "⚠️ $json_file not found"
+            fi
+          done
+          
+          if [[ $VALIDATION_ERRORS -gt 0 ]]; then
+            echo "💥 JSON validation failed with $VALIDATION_ERRORS errors"
+            exit 1
+          else
+            echo "✅ All JSON files validated successfully"
+          fi
+
+      - name: Check env example safety
+        run: |
+          echo "🔍 Checking environment example safety..."
+          
+          if [[ -f ".env.mcp.example" ]]; then
+            if grep -q 'MONGODB_MCP_ALLOW_WRITE="true"' .env.mcp.example; then
+              echo "❌ Do not enable production writes by default in example file."
+              exit 1
+            else
+              echo "✅ Environment example is safe."
+            fi
+          else
+            echo "ℹ️ No .env.mcp.example found - skipping check"
+          fi
+
+      - name: Validate MCP registry structure
+        run: |
+          echo "🔍 Validating MCP registry structure..."
+          
+          if [[ -f "mcp-registry.json" ]]; then
+            # Check required fields in registry
+            if command -v jq >/dev/null 2>&1; then
+              # Validate required top-level fields
+              required_fields=("version" "totalServers" "servers")
+              
+              for field in "${required_fields[@]}"; do
+                if jq -e "has(\"$field\")" mcp-registry.json >/dev/null; then
+                  echo "✅ Registry has required field: $field"
+                else
+                  echo "❌ Registry missing required field: $field"
+                  exit 1
+                fi
+              done
+              
+              # Check server entries have required fields
+              server_count=$(jq '.servers | keys | length' mcp-registry.json)
+              echo "📊 Registry contains $server_count servers"
+              
+            else
+              echo "⚠️ jq not available - skipping detailed registry validation"
+            fi
+          else
+            echo "⚠️ mcp-registry.json not found"
+          fi
+
+  test-scripts:
+    name: Test MCP Scripts
+    runs-on: ubuntu-latest
+    needs: validate-structure
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/mcp/*.sh
+          chmod +x scripts/install-mcp-servers.sh
+          
+      - name: Test MCP validation script
+        run: |
+          echo "🧪 Testing MCP validation script..."
+          
+          # Test the enhanced MCP validation script
+          if ./scripts/mcp/run.sh; then
+            echo "✅ MCP validation script executed successfully"
+          else
+            echo "❌ MCP validation script failed"
+            exit 1
+          fi
+          
+      - name: Test MCP health check script
+        run: |
+          echo "🧪 Testing MCP health check script..."
+          
+          # Test the health check script
+          if ./scripts/mcp/healthcheck.sh; then
+            echo "✅ MCP health check script executed successfully"
+          else
+            echo "❌ MCP health check script failed"
+            exit 1
+          fi
+          
+      - name: Test MCP installation script (dry run)
+        run: |
+          echo "🧪 Testing MCP installation script (dry run)..."
+          
+          # Test installation script help and validation
+          if ./scripts/install-mcp-servers.sh --help >/dev/null; then
+            echo "✅ MCP installation script help works"
+          else
+            echo "❌ MCP installation script help failed"
+            exit 1
+          fi
+          
+      - name: Validate generated reports
+        run: |
+          echo "🧪 Validating generated MCP reports..."
+          
+          # Check if health reports were generated
+          if [[ -f "reports/mcp-health.md" && -f "reports/mcp-health.json" ]]; then
+            echo "✅ Health reports generated successfully"
+            
+            # Validate JSON report structure
+            if command -v jq >/dev/null 2>&1; then
+              if jq -e '.timestamp and .overall_status and .results' reports/mcp-health.json >/dev/null; then
+                echo "✅ Health report JSON structure is valid"
+              else
+                echo "❌ Health report JSON structure is invalid"
+                exit 1
+              fi
+            fi
+          else
+            echo "⚠️ Health reports not found - scripts may not have run completely"
+          fi
+          
+          # Check if registry YAML was generated
+          if [[ -f "mcp/registry.yaml" ]]; then
+            echo "✅ Registry YAML generated successfully"
+          else
+            echo "⚠️ Registry YAML not found"
+          fi
+
+  test-package-scripts:
+    name: Test Package.json MCP Scripts
+    runs-on: ubuntu-latest
+    needs: validate-structure
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Test MCP package scripts
+        run: |
+          echo "🧪 Testing MCP package.json scripts..."
+          
+          # Test individual MCP scripts
+          MCP_SCRIPTS=(
+            "mcp:health"
+            "mcp:report"
+          )
+          
+          for script in "${MCP_SCRIPTS[@]}"; do
+            echo "Testing npm run $script..."
+            if npm run "$script" --if-present >/dev/null 2>&1; then
+              echo "✅ $script executed successfully"
+            else
+              echo "⚠️ $script failed or not available"
+            fi
+          done
+          
+      - name: Test MCP validation chain
+        run: |
+          echo "🧪 Testing MCP validation chain..."
+          
+          # Test the full validation chain (without installation)
+          if npm run mcp:health && npm run mcp:report; then
+            echo "✅ MCP validation chain completed successfully"
+          else
+            echo "❌ MCP validation chain failed"
+            exit 1
+          fi
+
+  upload-artifacts:
+    name: Upload MCP Artifacts
+    runs-on: ubuntu-latest
+    needs: [test-scripts, test-package-scripts]
+    if: always()
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Generate MCP validation reports
+        run: |
+          chmod +x scripts/mcp/*.sh
+          ./scripts/mcp/healthcheck.sh || true
+          ./scripts/mcp/run.sh || true
+          
+      - name: Upload MCP validation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-validation-results
+          path: |
+            reports/mcp-health.md
+            reports/mcp-health.json
+            mcp/registry.yaml
+            mcp/mcp-file-health.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  security-check:
+    name: MCP Security Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Check for hardcoded secrets in MCP configs
+        run: |
+          echo "🔍 Checking MCP configurations for hardcoded secrets..."
+          
+          SECURITY_ISSUES=0
+          
+          # Check for API keys in MCP files
+          if grep -r -i -E "api_?key.*['\"][a-zA-Z0-9+/]{20,}['\"]" mcp/ scripts/mcp/ 2>/dev/null; then
+            echo "❌ Potential API keys found in MCP configurations"
+            ((SECURITY_ISSUES++))
+          fi
+          
+          # Check for passwords
+          if grep -r -i -E "password.*['\"][^'\"]{8,}['\"]" mcp/ scripts/mcp/ 2>/dev/null; then
+            echo "❌ Potential passwords found in MCP configurations"
+            ((SECURITY_ISSUES++))
+          fi
+          
+          # Check for connection strings with embedded credentials
+          if grep -r -i -E "mongodb://[^:]+:[^@]+@" mcp/ scripts/mcp/ 2>/dev/null; then
+            echo "❌ MongoDB connection strings with credentials found"
+            ((SECURITY_ISSUES++))
+          fi
+          
+          if [[ $SECURITY_ISSUES -gt 0 ]]; then
+            echo "💥 MCP security check failed with $SECURITY_ISSUES issues"
+            echo "Please remove hardcoded secrets and use environment variables instead"
+            exit 1
+          else
+            echo "✅ MCP security check passed - no hardcoded secrets found"
+          fi
+
+  mcp-summary:
+    name: MCP CI Summary
+    runs-on: ubuntu-latest
+    needs: [validate-structure, test-scripts, test-package-scripts, security-check]
+    if: always()
+    
+    steps:
+      - name: Generate MCP CI summary
+        run: |
+          echo "📋 MCP CI Pipeline Summary"
+          echo "=========================="
+          echo ""
+          echo "**Structure Validation:** ${{ needs.validate-structure.result }}"
+          echo "**Script Testing:** ${{ needs.test-scripts.result }}"
+          echo "**Package Scripts:** ${{ needs.test-package-scripts.result }}"
+          echo "**Security Check:** ${{ needs.security-check.result }}"
+          echo ""
+          
+          # Determine overall status
+          if [[ "${{ needs.validate-structure.result }}" == "success" && 
+                "${{ needs.test-scripts.result }}" == "success" && 
+                "${{ needs.test-package-scripts.result }}" == "success" && 
+                "${{ needs.security-check.result }}" == "success" ]]; then
+            echo "✅ **MCP CI Pipeline: ALL CHECKS PASSED**"
+            echo "🚀 MCP infrastructure is ready for deployment"
+          else
+            echo "❌ **MCP CI Pipeline: ISSUES DETECTED**"
+            echo "🔧 Please review and fix the failed checks above"
+          fi

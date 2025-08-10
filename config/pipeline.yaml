@@ -1,0 +1,22 @@
+# Personal music pipeline configuration
+merge:
+  output_csv: data/spotify_listening_history_combined.csv
+  verbose: true
+
+mongodb:
+  # batch size for Mongo bulk ops during CSV migration
+  batch_size: 1000
+  # upsert documents instead of insert-only
+  update_mode: true
+
+audio_features:
+  chunk_size: 100         # fetch AF in chunks
+  max_tracks: 50000       # safety cap (increase if needed)
+  include_metadata: true  # also cache track metadata
+
+analysis:
+  max_rows: 50000         # bound DataFrame for speed in CI
+
+artifacts:
+  commit_branch: data-pipeline-artifacts
+  auto_pr_title: "chore(data): update personal music artifacts"

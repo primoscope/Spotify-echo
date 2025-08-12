@@ -76,6 +76,34 @@ EchoTune AI now features a **comprehensive Model Context Protocol (MCP) server e
 - **Testing Automation** - Unit, integration, API, and UI testing with coverage reports
 - **Package Management** - Automated dependency updates and security monitoring
 
+### 🔬 **Research-to-PR Loop (Perplexity + MCP)** ⭐ NEW
+
+**Fully automated research → code → roadmap workflow:**
+
+```bash
+# Quick start with Perplexity research capabilities
+npm run mcpperplexity          # Start Perplexity MCP server  
+npm run testperplexity         # Smoke test research functionality
+npm run generate-cursor-mcp    # Generate Cursor IDE configuration
+```
+
+**🎯 Key Features:**
+- **Perplexity Research Integration** - AI-powered research with citations and web search
+- **Cursor IDE Support** - Auto-generated MCP configuration with cost controls
+- **Performance Budgets** - Automated p95≤1500ms (Perplexity), p95≤500ms (local) enforcement
+- **Agent Preflight Validation** - Early secret and provider health validation
+- **Comprehensive Artifacts** - JSON reports, baselines, and PR comment automation
+
+**📊 Current Metrics:**
+- Validation Score: Auto-generated from latest pipeline run
+- Active MCP Servers: 8+ integrated (Perplexity, Filesystem, Browser, Analytics, etc.)
+- Performance: Sub-1500ms research queries, sub-500ms local operations
+
+**🔗 Quick Links:**
+- [Enhanced MCP Validation Report](enhanced-mcp-validation-report.json)
+- [Performance Baseline](enhanced-mcp-performance-baseline.json) 
+- [Validation Summary](MCP_VALIDATION_SUMMARY.md)
+
 ## 🚀 Quick Start
 
 **Get running in under 5 minutes** - Choose your preferred method:

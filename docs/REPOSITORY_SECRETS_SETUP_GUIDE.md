@@ -38,12 +38,13 @@ Essential for music recommendation functionality:
 
 ### 🤖 AI/LLM Provider API Keys (REQUIRED for GPT-5 Workflows)
 
-Required for the enhanced GPT-5 multimodal analysis:
+Required for the enhanced GPT-5 multimodal analysis and research capabilities:
 
 | Secret Name | Description | Where to Get | Priority |
 |-------------|-------------|--------------|----------|
 | `OPENAI_API_KEY` | OpenAI API key for GPT models | [OpenAI API](https://platform.openai.com/api-keys) | **HIGH** |
 | `GEMINI_API_KEY` | Google Gemini API key | [Google AI Studio](https://makersuite.google.com/app/apikey) | **HIGH** |
+| `PERPLEXITY_API_KEY` | Perplexity AI research API key | [Perplexity API](https://www.perplexity.ai/settings/api) | **NEW** |
 | `ANTHROPIC_API_KEY` | Anthropic Claude API key | [Anthropic Console](https://console.anthropic.com/) | Medium |
 | `OPENROUTER_API_KEY` | OpenRouter API key (multi-model) | [OpenRouter](https://openrouter.ai/keys) | Medium |
 
@@ -51,9 +52,35 @@ Required for the enhanced GPT-5 multimodal analysis:
 ```bash
 OPENAI_API_KEY=sk-proj-abcd1234...
 GEMINI_API_KEY=AIza...
+PERPLEXITY_API_KEY=pplx-abcd1234...
 ANTHROPIC_API_KEY=sk-ant-api03-...
 OPENROUTER_API_KEY=sk-or-v1-...
 ```
+
+#### 🔬 Perplexity API Setup (NEW)
+
+**Perplexity AI** enables advanced research capabilities with real-time web search and citations:
+
+1. **Get API Key**: 
+   - Go to [Perplexity API Settings](https://www.perplexity.ai/settings/api)
+   - Sign up/login to Perplexity
+   - Generate a new API key
+   - Copy the key (format: `pplx-...`)
+
+2. **Add to Repository**:
+   - Name: `PERPLEXITY_API_KEY`
+   - Value: Your API key from step 1
+
+3. **Optional Environment Variables**:
+   - `PERPLEXITY_BASE_URL`: Default `https://api.perplexity.ai`
+   - `PERPLEXITY_MODEL`: Default `llama-3.1-sonar-small-128k-online`
+
+**Features Enabled**:
+- 🔍 Real-time web search and research
+- 📚 Automatic citation extraction
+- 🎯 Configurable time filters (hour/day/week/month/year)
+- 💰 Cost-controlled queries (budget: $0.50/session)
+- ⚡ Performance budgets (p95 ≤ 1500ms)
 
 ### 🗄️ Database Configuration
 
@@ -87,7 +114,7 @@ For production deployment:
 
 | Secret Name | Description | Provider |
 |-------------|-------------|----------|
-| `DO_ACCESS_TOKEN` | DigitalOcean API token | [DigitalOcean API](https://cloud.digitalocean.com/account/api/tokens) |
+| `DO_API_TOKEN` | DigitalOcean API token | [DigitalOcean API](https://cloud.digitalocean.com/account/api/tokens) |
 | `DO_REGISTRY_TOKEN` | DigitalOcean registry token | DigitalOcean Container Registry |
 | `BROWSERBASE_API_KEY` | Browser automation service | [Browserbase](https://browserbase.com) |
 | `BROWSERBASE_PROJECT_ID` | Browserbase project ID | Browserbase Dashboard |

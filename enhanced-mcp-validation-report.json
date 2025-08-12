@@ -1,162 +1,162 @@
 {
-  "timestamp": "2025-08-09T09:43:55.023Z",
-  "totalTests": 91,
-  "passedTests": 69,
+  "timestamp": "2025-08-12T18:21:55.743Z",
+  "totalTests": 106,
+  "passedTests": 80,
   "failedTests": 2,
-  "warnings": 8,
-  "score": 77,
-  "duration": 5172,
+  "warnings": 10,
+  "score": 76,
+  "duration": 12810,
   "categories": {
     "installation": {
       "passed": 20,
       "failed": 0,
       "tests": [
         {
-          "timestamp": "2025-08-09T09:43:55.027Z",
+          "timestamp": "2025-08-12T18:21:55.748Z",
           "type": "progress",
           "message": "Phase 1: Validating Installation and Dependencies",
           "status": "info",
-          "duration": 4
+          "duration": 5
         },
         {
-          "timestamp": "2025-08-09T09:43:55.029Z",
+          "timestamp": "2025-08-12T18:21:55.749Z",
           "type": "success",
           "message": "MCP dependency @modelcontextprotocol/sdk found",
           "status": "passed",
           "duration": 6
         },
         {
-          "timestamp": "2025-08-09T09:43:55.029Z",
+          "timestamp": "2025-08-12T18:21:55.749Z",
           "description": "MCP dependency @modelcontextprotocol/sdk found",
           "passed": true,
           "category": "installation",
           "duration": 6
         },
         {
-          "timestamp": "2025-08-09T09:43:55.029Z",
+          "timestamp": "2025-08-12T18:21:55.749Z",
           "type": "success",
           "message": "MCP dependency @modelcontextprotocol/server-filesystem found",
           "status": "passed",
           "duration": 6
         },
         {
-          "timestamp": "2025-08-09T09:43:55.029Z",
+          "timestamp": "2025-08-12T18:21:55.749Z",
           "description": "MCP dependency @modelcontextprotocol/server-filesystem found",
           "passed": true,
           "category": "installation",
           "duration": 6
         },
         {
-          "timestamp": "2025-08-09T09:43:55.029Z",
+          "timestamp": "2025-08-12T18:21:55.749Z",
           "type": "success",
           "message": "MCP dependency @browserbasehq/mcp-server-browserbase found",
           "status": "passed",
           "duration": 6
         },
         {
-          "timestamp": "2025-08-09T09:43:55.030Z",
+          "timestamp": "2025-08-12T18:21:55.749Z",
           "description": "MCP dependency @browserbasehq/mcp-server-browserbase found",
           "passed": true,
           "category": "installation",
-          "duration": 7
+          "duration": 6
         },
         {
-          "timestamp": "2025-08-09T09:43:55.030Z",
+          "timestamp": "2025-08-12T18:21:55.750Z",
           "type": "success",
           "message": "MCP dependency puppeteer-mcp-server found",
           "status": "passed",
           "duration": 7
         },
         {
-          "timestamp": "2025-08-09T09:43:55.030Z",
+          "timestamp": "2025-08-12T18:21:55.750Z",
           "description": "MCP dependency puppeteer-mcp-server found",
           "passed": true,
           "category": "installation",
           "duration": 7
         },
         {
-          "timestamp": "2025-08-09T09:43:55.030Z",
+          "timestamp": "2025-08-12T18:21:55.750Z",
           "type": "success",
           "message": "MCP dependency mongodb-mcp-server found",
           "status": "passed",
           "duration": 7
         },
         {
-          "timestamp": "2025-08-09T09:43:55.030Z",
+          "timestamp": "2025-08-12T18:21:55.750Z",
           "description": "MCP dependency mongodb-mcp-server found",
           "passed": true,
           "category": "installation",
           "duration": 7
         },
         {
-          "timestamp": "2025-08-09T09:43:55.030Z",
+          "timestamp": "2025-08-12T18:21:55.750Z",
           "type": "success",
           "message": "Node modules directory exists",
           "status": "passed",
           "duration": 7
         },
         {
-          "timestamp": "2025-08-09T09:43:55.030Z",
+          "timestamp": "2025-08-12T18:21:55.750Z",
           "description": "Node modules directory exists",
           "passed": true,
           "category": "installation",
           "duration": 7
         },
         {
-          "timestamp": "2025-08-09T09:43:55.037Z",
+          "timestamp": "2025-08-12T18:21:55.756Z",
           "type": "success",
           "message": "Command node available",
           "status": "passed",
-          "duration": 14
+          "duration": 13
         },
         {
-          "timestamp": "2025-08-09T09:43:55.037Z",
+          "timestamp": "2025-08-12T18:21:55.756Z",
           "description": "Command node available",
           "passed": true,
           "category": "installation",
-          "duration": 14
+          "duration": 13
         },
         {
-          "timestamp": "2025-08-09T09:43:55.040Z",
+          "timestamp": "2025-08-12T18:21:55.758Z",
           "type": "success",
           "message": "Command npm available",
           "status": "passed",
-          "duration": 17
+          "duration": 15
         },
         {
-          "timestamp": "2025-08-09T09:43:55.040Z",
+          "timestamp": "2025-08-12T18:21:55.759Z",
           "description": "Command npm available",
           "passed": true,
           "category": "installation",
-          "duration": 17
+          "duration": 16
         },
         {
-          "timestamp": "2025-08-09T09:43:55.043Z",
+          "timestamp": "2025-08-12T18:21:55.761Z",
           "type": "success",
           "message": "Command python available",
           "status": "passed",
-          "duration": 20
+          "duration": 18
         },
         {
-          "timestamp": "2025-08-09T09:43:55.043Z",
+          "timestamp": "2025-08-12T18:21:55.761Z",
           "description": "Command python available",
           "passed": true,
           "category": "installation",
-          "duration": 20
+          "duration": 18
         },
         {
-          "timestamp": "2025-08-09T09:43:55.047Z",
+          "timestamp": "2025-08-12T18:21:55.764Z",
           "type": "success",
           "message": "Command curl available",
           "status": "passed",
-          "duration": 24
+          "duration": 21
         },
         {
-          "timestamp": "2025-08-09T09:43:55.047Z",
+          "timestamp": "2025-08-12T18:21:55.764Z",
           "description": "Command curl available",
           "passed": true,
           "category": "installation",
-          "duration": 24
+          "duration": 21
         }
       ]
     },
@@ -165,246 +165,246 @@
       "failed": 2,
       "tests": [
         {
-          "timestamp": "2025-08-09T09:43:55.047Z",
+          "timestamp": "2025-08-12T18:21:55.764Z",
           "type": "progress",
           "message": "Phase 2: Validating Configuration",
           "status": "info",
-          "duration": 24
+          "duration": 21
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Found 9 MCP server configurations",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Found 9 MCP server configurations",
           "passed": true,
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server browser properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server browser properly configured",
           "passed": [
             "@modelcontextprotocol/server-puppeteer"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server browserbase properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server browserbase properly configured",
           "passed": [
             "@browserbasehq/mcp-server-browserbase"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server filesystem properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server filesystem properly configured",
           "passed": [
             "node_modules/FileScopeMCP/dist/mcp-server.js"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server spotify properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server spotify properly configured",
           "passed": [
             "mcp-server/spotify_server.py"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server sequential-thinking properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server sequential-thinking properly configured",
           "passed": [
             "mcp-servers/sequential-thinking/dist/index.js"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server screenshot-website properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server screenshot-website properly configured",
           "passed": [
             "mcp-servers/screenshot-website/dist/index.js"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server enhanced-file-utilities properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server enhanced-file-utilities properly configured",
           "passed": [
             "mcp-servers/enhanced-file-utilities.js"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "type": "success",
           "message": "Server enhanced-browser-tools properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.765Z",
           "description": "Server enhanced-browser-tools properly configured",
           "passed": [
             "mcp-servers/enhanced-browser-tools.js"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 22
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "success",
           "message": "Server comprehensive-validator properly configured",
           "status": "passed",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "description": "Server comprehensive-validator properly configured",
           "passed": [
             "mcp-servers/comprehensive-validator.js"
           ],
           "category": "configuration",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "success",
           "message": "Environment variable NODE_ENV configured",
           "status": "passed",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "description": "Environment variable NODE_ENV configured",
           "passed": true,
           "category": "configuration",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "warning",
           "message": "Environment variable SPOTIFY_CLIENT_ID configured (for Spotify integration)",
           "status": "info",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "description": "Environment variable SPOTIFY_CLIENT_ID configured (for Spotify integration)",
           "passed": false,
           "category": "configuration",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "warning",
           "message": "Environment variable SPOTIFY_CLIENT_SECRET configured (for Spotify integration)",
           "status": "info",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.048Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "description": "Environment variable SPOTIFY_CLIENT_SECRET configured (for Spotify integration)",
           "passed": false,
           "category": "configuration",
-          "duration": 25
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.049Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "success",
           "message": "MCP server file enhanced-mcp-orchestrator.js exists",
           "status": "passed",
-          "duration": 26
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.049Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "success",
           "message": "MCP server file workflow-manager.js exists",
           "status": "passed",
-          "duration": 26
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.049Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "success",
           "message": "MCP server file health.js exists",
           "status": "passed",
-          "duration": 26
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.049Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "success",
           "message": "MCP server file enhanced-health-monitor.js exists",
           "status": "passed",
-          "duration": 26
+          "duration": 23
         },
         {
-          "timestamp": "2025-08-09T09:43:55.049Z",
+          "timestamp": "2025-08-12T18:21:55.766Z",
           "type": "success",
           "message": "MCP server file enhanced-registry-orchestrator.js exists",
           "status": "passed",
-          "duration": 26
+          "duration": 23
         }
       ]
     },
@@ -413,87 +413,129 @@
       "failed": 0,
       "tests": [
         {
-          "timestamp": "2025-08-09T09:43:55.049Z",
+          "timestamp": "2025-08-12T18:21:55.767Z",
           "type": "progress",
           "message": "Phase 3: Validating Health and Connectivity",
           "status": "info",
-          "duration": 26
+          "duration": 24
         },
         {
-          "timestamp": "2025-08-09T09:43:55.062Z",
+          "timestamp": "2025-08-12T18:21:55.777Z",
           "type": "warning",
           "message": "Health check main-app failed: ",
           "status": "info",
-          "duration": 39
+          "duration": 34
         },
         {
-          "timestamp": "2025-08-09T09:43:55.063Z",
+          "timestamp": "2025-08-12T18:21:55.779Z",
           "type": "warning",
           "message": "Health check mcp-health failed: ",
           "status": "info",
-          "duration": 40
+          "duration": 36
         },
         {
-          "timestamp": "2025-08-09T09:43:55.064Z",
+          "timestamp": "2025-08-12T18:21:55.779Z",
           "type": "warning",
           "message": "Health check mcp-orchestrator failed: ",
           "status": "info",
-          "duration": 41
+          "duration": 36
         },
         {
-          "timestamp": "2025-08-09T09:43:55.065Z",
+          "timestamp": "2025-08-12T18:21:55.780Z",
           "type": "warning",
           "message": "Health check mcp-workflow failed: ",
           "status": "info",
-          "duration": 42
+          "duration": 37
         },
         {
-          "timestamp": "2025-08-09T09:43:58.319Z",
+          "timestamp": "2025-08-12T18:22:07.481Z",
           "type": "success",
           "message": "MCP health command executed successfully",
           "status": "passed",
-          "duration": 3296
+          "duration": 11738
         }
       ]
     },
     "performance": {
-      "passed": 4,
+      "passed": 6,
       "failed": 0,
       "tests": [
         {
-          "timestamp": "2025-08-09T09:43:58.319Z",
+          "timestamp": "2025-08-12T18:22:07.481Z",
           "type": "progress",
           "message": "Phase 4: Performance Testing",
           "status": "info",
-          "duration": 3296
+          "duration": 11738
         },
         {
-          "timestamp": "2025-08-09T09:43:58.319Z",
+          "timestamp": "2025-08-12T18:22:07.481Z",
           "type": "success",
-          "message": "Memory usage 47MB - Excellent",
+          "message": "Memory usage 45MB - Excellent",
           "status": "passed",
-          "duration": 3296
+          "duration": 11738
         },
         {
-          "timestamp": "2025-08-09T09:43:58.319Z",
-          "type": "success",
-          "message": "Package.json read: 0ms - Fast",
-          "status": "passed",
-          "duration": 3296
+          "timestamp": "2025-08-12T18:22:07.481Z",
+          "type": "warning",
+          "message": "Perplexity API key not configured - MCP disabled",
+          "status": "info",
+          "duration": 11738
         },
         {
-          "timestamp": "2025-08-09T09:43:58.320Z",
-          "type": "success",
-          "message": "File system scan: 1ms - Fast",
-          "status": "passed",
-          "duration": 3297
+          "timestamp": "2025-08-12T18:22:07.481Z",
+          "type": "progress",
+          "message": "Validating performance budgets...",
+          "status": "info",
+          "duration": 11738
         },
         {
-          "timestamp": "2025-08-09T09:43:58.320Z",
+          "timestamp": "2025-08-12T18:22:07.481Z",
           "type": "success",
-          "message": "MCP config parse: 0ms - Fast",
+          "message": "Memory budget: 45MB ≤ 256MB ✓",
           "status": "passed",
-          "duration": 3297
+          "duration": 11738
+        },
+        {
+          "timestamp": "2025-08-12T18:22:07.482Z",
+          "type": "success",
+          "message": "Package.json read: 1ms - Fast",
+          "status": "passed",
+          "duration": 11739
+        },
+        {
+          "timestamp": "2025-08-12T18:22:07.482Z",
+          "type": "success",
+          "message": "File system scan: 0ms - Fast",
+          "status": "passed",
+          "duration": 11739
+        },
+        {
+          "timestamp": "2025-08-12T18:22:07.483Z",
+          "type": "success",
+          "message": "MCP config parse: 1ms - Fast",
+          "status": "passed",
+          "duration": 11740
+        },
+        {
+          "timestamp": "2025-08-12T18:22:07.483Z",
+          "type": "progress",
+          "message": "Comparing with performance baseline...",
+          "status": "info",
+          "duration": 11740
+        },
+        {
+          "timestamp": "2025-08-12T18:22:07.484Z",
+          "type": "warning",
+          "message": "No baseline found, creating new baseline",
+          "status": "info",
+          "duration": 11741
+        },
+        {
+          "timestamp": "2025-08-12T18:22:07.484Z",
+          "type": "success",
+          "message": "Performance baseline updated",
+          "status": "passed",
+          "duration": 11741
         }
       ]
     },
@@ -502,32 +544,32 @@
       "failed": 0,
       "tests": [
         {
-          "timestamp": "2025-08-09T09:43:58.320Z",
+          "timestamp": "2025-08-12T18:22:07.484Z",
           "type": "progress",
           "message": "Phase 5: Security Validation",
           "status": "info",
-          "duration": 3297
+          "duration": 11741
         },
         {
-          "timestamp": "2025-08-09T09:43:58.321Z",
+          "timestamp": "2025-08-12T18:22:07.485Z",
           "type": "success",
           "message": "Security check Environment variables passed",
           "status": "passed",
-          "duration": 3298
+          "duration": 11742
         },
         {
-          "timestamp": "2025-08-09T09:43:58.322Z",
+          "timestamp": "2025-08-12T18:22:07.486Z",
           "type": "success",
           "message": "Security check File permissions passed",
           "status": "passed",
-          "duration": 3299
+          "duration": 11743
         },
         {
-          "timestamp": "2025-08-09T09:44:00.190Z",
+          "timestamp": "2025-08-12T18:22:08.549Z",
           "type": "success",
           "message": "Security check Package vulnerabilities passed",
           "status": "passed",
-          "duration": 5168
+          "duration": 12806
         }
       ]
     },
@@ -536,139 +578,212 @@
       "failed": 0,
       "tests": [
         {
-          "timestamp": "2025-08-09T09:44:00.191Z",
+          "timestamp": "2025-08-12T18:22:08.549Z",
           "type": "progress",
           "message": "Phase 6: Integration Testing",
           "status": "info",
-          "duration": 5168
+          "duration": 12806
         },
         {
-          "timestamp": "2025-08-09T09:44:00.191Z",
+          "timestamp": "2025-08-12T18:22:08.549Z",
           "type": "success",
           "message": "Integration test Filesystem MCP passed",
           "status": "passed",
-          "duration": 5168
+          "duration": 12806
         },
         {
-          "timestamp": "2025-08-09T09:44:00.191Z",
+          "timestamp": "2025-08-12T18:22:08.549Z",
           "type": "warning",
           "message": "Integration test Browserbase MCP failed: Browserbase credentials not configured",
           "status": "info",
-          "duration": 5168
+          "duration": 12806
         },
         {
-          "timestamp": "2025-08-09T09:44:00.191Z",
+          "timestamp": "2025-08-12T18:22:08.549Z",
           "type": "warning",
           "message": "Integration test Spotify MCP failed: Spotify credentials not configured",
           "status": "info",
-          "duration": 5168
+          "duration": 12806
         },
         {
-          "timestamp": "2025-08-09T09:44:00.192Z",
+          "timestamp": "2025-08-12T18:22:08.550Z",
           "type": "success",
           "message": "Integration test Sequential Thinking MCP passed",
           "status": "passed",
-          "duration": 5169
+          "duration": 12807
         }
       ]
     },
     "automation": {
-      "passed": 12,
+      "passed": 21,
       "failed": 0,
       "tests": [
         {
-          "timestamp": "2025-08-09T09:44:00.192Z",
+          "timestamp": "2025-08-12T18:22:08.550Z",
           "type": "progress",
           "message": "Phase 7: Automation and Workflows",
           "status": "info",
-          "duration": 5169
+          "duration": 12807
         },
         {
-          "timestamp": "2025-08-09T09:44:00.192Z",
+          "timestamp": "2025-08-12T18:22:08.550Z",
           "type": "success",
           "message": "NPM script mcp:health configured",
           "status": "passed",
-          "duration": 5169
+          "duration": 12807
         },
         {
-          "timestamp": "2025-08-09T09:44:00.193Z",
+          "timestamp": "2025-08-12T18:22:08.551Z",
           "type": "success",
           "message": "NPM script mcp:validate configured",
           "status": "passed",
-          "duration": 5170
+          "duration": 12808
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.551Z",
           "type": "success",
           "message": "NPM script mcp-orchestrator configured",
           "status": "passed",
-          "duration": 5171
+          "duration": 12808
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
           "type": "success",
           "message": "NPM script mcp-workflow configured",
           "status": "passed",
-          "duration": 5171
+          "duration": 12809
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
           "type": "success",
-          "message": "Found 7 MCP-related workflows",
+          "message": "Found 16 MCP-related workflows",
           "status": "passed",
-          "duration": 5171
+          "duration": 12809
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
           "type": "success",
           "message": "Workflow #mcp-inntegration.yml available",
           "status": "passed",
-          "duration": 5171
+          "duration": 12809
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
           "type": "success",
           "message": "Workflow agent-mcp-automation.yml available",
           "status": "passed",
-          "duration": 5171
+          "duration": 12809
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow celebrate-mcp-success.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow coding-agent-workflow-analyzer.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.552Z",
           "type": "success",
           "message": "Workflow continuous-agent.yml.disabled available",
           "status": "passed",
-          "duration": 5171
+          "duration": 12809
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow copilot-agent-preflight.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow enhanced-mcp-phase1.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow mcp-browserbase-validation.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow mcp-ci.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow mcp-connectivity.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.552Z",
           "type": "success",
           "message": "Workflow mcp-health.yml available",
           "status": "passed",
-          "duration": 5171
+          "duration": 12809
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
           "type": "success",
           "message": "Workflow mcp-slash-commands.yml available",
           "status": "passed",
-          "duration": 5171
+          "duration": 12809
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.552Z",
+          "type": "success",
+          "message": "Workflow mcp-validate-and-do-spec.yml available",
+          "status": "passed",
+          "duration": 12809
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.553Z",
           "type": "success",
           "message": "Workflow mcp-validation-gateway.yml available",
           "status": "passed",
-          "duration": 5171
+          "duration": 12810
         },
         {
-          "timestamp": "2025-08-09T09:44:00.194Z",
+          "timestamp": "2025-08-12T18:22:08.553Z",
           "type": "success",
           "message": "Workflow mcp-validation.yml available",
           "status": "passed",
-          "duration": 5171
+          "duration": 12810
+        },
+        {
+          "timestamp": "2025-08-12T18:22:08.553Z",
+          "type": "success",
+          "message": "Workflow test-agent.yml available",
+          "status": "passed",
+          "duration": 12810
         }
       ]
     }
+  },
+  "performanceMetrics": {
+    "memory": 45,
+    "timestamp": 1755022927481
+  },
+  "budgets": {
+    "perplexity_p95": 1500,
+    "local_services_p95": 500,
+    "memory_per_server": 256,
+    "cpu_per_server": 0.5
   },
   "summary": {
     "overallStatus": "WARNING",

@@ -1,18 +1,18 @@
 # Enhanced MCP Validation Report
 
 ## Overall Status: WARNING
-- **Score**: 77%
-- **Duration**: 5s
-- **Tests**: 91 total (69 passed, 2 failed)
+- **Score**: 76%
+- **Duration**: 13s
+- **Tests**: 106 total (80 passed, 2 failed)
 
 ## Category Results
 - **installation**: 20 passed, 0 failed
 - **configuration**: 27 passed, 2 failed
 - **health**: 1 passed, 0 failed
-- **performance**: 4 passed, 0 failed
+- **performance**: 6 passed, 0 failed
 - **security**: 3 passed, 0 failed
 - **integration**: 2 passed, 0 failed
-- **automation**: 12 passed, 0 failed
+- **automation**: 21 passed, 0 failed
 
 ## Recommendations
 - Run validation pipeline regularly
@@ -23,4 +23,4 @@
 - Set up continuous monitoring
 - Schedule regular validation runs
 
-Generated: 2025-08-09T09:44:00.196Z
+Generated: 2025-08-12T18:22:08.553Z

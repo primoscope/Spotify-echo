@@ -104,6 +104,199 @@ npm run generate-cursor-mcp    # Generate Cursor IDE configuration
 - [Performance Baseline](enhanced-mcp-performance-baseline.json) 
 - [Validation Summary](MCP_VALIDATION_SUMMARY.md)
 
+## 🤖 **Agent Runbooks & Automation Workflows**
+
+Comprehensive task automation for **GitHub Copilot Coding Agent** and **Cursor IDE** with research-backed implementation strategies.
+
+### 🔬 **Research-to-PR Automation Workflows**
+
+#### **Research & Implement (30 minutes)**
+```bash
+# Quick research and implementation workflow
+npm run mcpperplexity          # Start Perplexity research server  
+npm run generate-cursor-mcp    # Generate Cursor IDE configuration
+npm run mcp:enhanced-validation # Validate system health
+
+# Agent Commands (use in GitHub Copilot or Cursor):
+# @perplexity research "latest trends in music recommendation algorithms"
+# @sequential-thinking plan implementation strategy for research findings
+# @filesystem implement changes based on research
+# @github create PR with research citations and benchmarks
+```
+
+#### **Code Review & Analysis (20 minutes)**
+```bash
+# Comprehensive code review automation
+npm run mcp:health-monitor     # Start health monitoring
+npm run mcp:orchestrator-start # Launch MCP orchestration
+
+# Agent Commands:
+# @filesystem analyze changed files for code quality issues
+# @perplexity research best practices for identified patterns  
+# @sequential-thinking structure review feedback
+# @github update PR with research-backed suggestions
+```
+
+#### **Performance Optimization (45 minutes)**
+```bash
+# Performance analysis and optimization workflow
+npm run mcp:enhanced-validation # Get current performance metrics
+npm run performance:baseline   # Establish performance baseline
+
+# Agent Commands:
+# @health-monitor get current system performance metrics
+# @perplexity research optimization strategies for performance bottlenecks
+# @sequential-thinking create optimization implementation plan
+# @filesystem implement performance improvements with benchmarks
+```
+
+### 🎵 **Music Data Analysis Workflows**
+
+#### **Spotify Data Research (30 minutes)**
+```bash
+# Music data analysis and insights generation
+npm run validate:spotify       # Validate Spotify API connection
+npm run mcp:orchestrator-status # Check MCP ecosystem health
+
+# Agent Commands:
+# @spotify fetch user listening history and preferences
+# @sqlite query historical music data patterns
+# @perplexity research current music trend analysis methods
+# @sequential-thinking structure music insights and recommendations
+```
+
+#### **ML Model Enhancement (60 minutes)**
+```bash
+# Machine learning model research and improvement
+npm run analyze:listening-history # Analyze current data patterns
+npm run train-model              # Run existing ML training
+
+# Agent Commands:
+# @perplexity research latest music recommendation ML techniques
+# @sqlite analyze user behavior patterns and feature importance
+# @sequential-thinking design improved recommendation algorithm
+# @filesystem implement ML model improvements with validation
+```
+
+### 🛠️ **Development & DevOps Workflows**
+
+#### **Deployment Validation (15 minutes)**
+```bash
+# Pre-deployment validation and health checks
+npm run mcp:enhanced-validation # Comprehensive system validation
+npm run validate:deployment-config # Check deployment configuration
+
+# Agent Commands:
+# @health-monitor verify all systems operational
+# @perplexity research deployment best practices for current stack
+# @github verify CI/CD pipeline status and requirements
+# @sequential-thinking create deployment checklist
+```
+
+#### **Security Audit (25 minutes)**
+```bash
+# Security analysis and improvement workflow
+npm run security:audit         # Run security scans
+npm run validate:api-keys --security # Validate API key security
+
+# Agent Commands:
+# @filesystem scan for potential security vulnerabilities
+# @perplexity research latest security best practices for Node.js apps
+# @sequential-thinking create security improvement plan
+# @github create security-focused PR with research citations
+```
+
+#### **Documentation Enhancement (20 minutes)**
+```bash
+# Living documentation updates with validation
+npm run mcp:auto-docs          # Auto-generate documentation updates
+npm run validate:comprehensive # Full system validation
+
+# Agent Commands:
+# @filesystem analyze documentation for outdated sections
+# @perplexity research current documentation standards and tools
+# @mcp-orchestrator get current system metrics for docs
+# @sequential-thinking structure documentation improvements
+```
+
+### 📊 **Monitoring & Analytics Workflows**
+
+#### **System Health Analysis (10 minutes)**
+```bash
+# Quick system health check and optimization recommendations
+npm run mcp:health-all         # Check all MCP server health
+npm run performance:smoke-test # Run performance validation
+
+# Agent Commands:
+# @health-monitor generate comprehensive system health report
+# @perplexity research system optimization strategies
+# @sequential-thinking prioritize optimization opportunities
+```
+
+#### **Performance Regression Analysis (30 minutes)**  
+```bash
+# Performance regression detection and resolution
+npm run mcp:enhanced-validation # Get current performance metrics
+npm run performance:mcp-analytics # Analyze MCP performance trends
+
+# Agent Commands:
+# @health-monitor compare current metrics with baseline
+# @perplexity research performance regression debugging techniques
+# @sequential-thinking create performance recovery plan
+# @filesystem implement performance fixes with benchmarks
+```
+
+### 🎯 **Daily Agent Commands Reference**
+
+| Workflow | Primary Command | Duration | Outcome |
+|----------|----------------|----------|---------|
+| **Quick Research** | `@perplexity research [topic] + @sequential-thinking plan` | 10 min | Research + Action Plan |
+| **Code Analysis** | `@filesystem analyze + @perplexity best practices` | 15 min | Quality Improvements |
+| **Health Check** | `@health-monitor status + @mcp-orchestrator report` | 5 min | System Status |
+| **Music Insights** | `@spotify data + @sqlite patterns + @perplexity trends` | 20 min | Music Analytics |
+| **Security Scan** | `@filesystem security + @perplexity vulnerabilities` | 15 min | Security Report |
+| **Performance Opt** | `@health-monitor metrics + @perplexity optimization` | 25 min | Performance Plan |
+
+### 🔧 **Environment Setup for Agent Workflows**
+
+#### **Required Environment Variables**
+```bash
+# Research Capabilities
+PERPLEXITY_API_KEY=pplx-...     # For research automation
+PERPLEXITY_COST_BUDGET_USD=0.50 # Cost control per session
+
+# Provider Configuration
+OPENAI_API_KEY=sk-...           # For enhanced AI capabilities
+GOOGLE_GEMINI_API_KEY=AI...     # Alternative AI provider
+ANTHROPIC_API_KEY=sk-ant-...    # Claude integration
+
+# System Integration
+REDIS_URL=redis://localhost:6379 # Caching for performance
+MONGODB_URI=mongodb://...        # Data analysis capabilities
+```
+
+#### **Agent Configuration Files**
+- **`.vscode/mcp.json`**: Auto-generated Cursor IDE MCP configuration
+- **`.cursor/ai-workflows.json`**: Pre-defined workflow templates
+- **`.cursor/project-context.md`**: Project-specific context for agents
+
+### 💡 **Best Practices for Agent Workflows**
+
+1. **Start with Research**: Always begin workflows with `@perplexity` research for evidence-based implementation
+2. **Use Sequential Thinking**: Employ `@sequential-thinking` for complex multi-step processes
+3. **Validate Continuously**: Run `npm run mcp:enhanced-validation` after major changes
+4. **Monitor Performance**: Check `@health-monitor` metrics during intensive operations
+5. **Document Decisions**: Include research citations and performance benchmarks in PRs
+
+### 📚 **Agent Training Resources**
+
+- **[Complete Agent Setup Guide](docs/guides/AGENTS.md)** - Detailed MCP configuration and usage
+- **[Performance Budget Guidelines](docs/performance/budgets.md)** - Understanding system limits
+- **[Research Standards](docs/research/standards.md)** - Citation and evidence requirements
+- **[Workflow Templates](docs/workflows/)** - Pre-built automation workflows
+
+**🚀 Ready to start?** Run `npm run generate-cursor-mcp` to set up your development environment with all MCP capabilities enabled.
+
 ## 🚀 Quick Start
 
 **Get running in under 5 minutes** - Choose your preferred method:

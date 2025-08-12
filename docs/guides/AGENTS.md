@@ -1,83 +1,299 @@
-# MCP Server Integration Guide
+# 🤖 Agent Development Guide
+**Complete setup and workflow guide for GitHub Copilot Coding Agent and Cursor IDE integration with EchoTune AI**
 
-This document provides comprehensive information about the Model Context Protocol (MCP) servers integrated into EchoTune AI and instructions for GitHub Coding Agents to leverage these capabilities.
+## 🎯 Overview
 
-## Overview
+EchoTune AI provides a comprehensive **Model Context Protocol (MCP) ecosystem** designed for seamless integration with AI coding agents. This guide covers setup, workflows, and best practices for maximizing productivity with research-driven development.
 
-EchoTune AI uses MCP servers to enhance development workflows, automation, and system capabilities. These servers provide AI agents with powerful tools for code analysis, browser automation, file management, and more.
+### 🚀 Quick Setup Summary
 
-## Available MCP Servers
+```bash
+# 1. Generate Cursor configuration
+npm run generate-cursor-mcp
 
-### Research & AI Servers
+# 2. Start MCP ecosystem  
+npm run mcp:orchestrator-start
 
-#### 🔬 Perplexity Research Server ⭐ NEW
-- **Package**: Custom implementation (`mcp-servers/perplexity-mcp/`)
-- **Purpose**: AI-powered research, web search, and knowledge queries with citations
-- **Port**: stdio transport
-- **Configuration**: Requires `PERPLEXITY_API_KEY`
-- **Capabilities**: 
-  - Real-time web search and research
-  - Citation extraction and attribution
-  - Configurable models and parameters
-  - Built-in caching (5-minute expiry)
-- **Performance Budgets**:
-  - Latency: p95 ≤ 1500ms
-  - Memory: ≤ 256MB per instance
-  - CPU: ≤ 0.5 core per instance
-- **Usage**: 
-  ```bash
-  npm run mcpperplexity      # Start server
-  npm run testperplexity     # Smoke test
-  ```
+# 3. Validate system health
+npm run mcp:enhanced-validation
 
-**Research SOPs (Standard Operating Procedures):**
+# 4. Test Perplexity research (if configured)
+npm run testperplexity
+```
 
-1. **Query Formulation**:
-   - Use specific, focused questions
-   - Include context when possible
-   - Specify time constraints (recency_filter: 'week', 'month', etc.)
-   - Example: "What are the latest developments in AI music generation in 2024?"
+## 📋 Prerequisites
 
-2. **Citation Requirements**:
-   - Always include citations in research outputs
-   - Verify citation validity before use
-   - Prefer recent sources (within requested timeframe)
-   - Cross-reference multiple sources for accuracy
+### Required Software
+- **Cursor IDE** v0.47+ or **GitHub Copilot** with Coding Agent access
+- **Node.js** 20+ and **npm** 10+
+- **Git** with repository access
 
-3. **Research Acceptance Criteria**:
-   - Response includes at least 2 credible citations
-   - Information is relevant to the specific query
-   - Response time under performance budget (1500ms)
-   - No hallucinated or unsupported claims
-   - Clear distinction between facts and analysis
+### Required Environment Variables
+```bash
+# Core Research Capabilities
+PERPLEXITY_API_KEY=pplx-...           # Perplexity AI research
+PERPLEXITY_COST_BUDGET_USD=0.50       # Cost control per session
+PERPLEXITY_MAX_LATENCY_MS=1500        # Performance budget
 
-4. **Example Research Prompts**:
-   ```javascript
-   {
-     "q": "Latest research on personalized music recommendation algorithms",
-     "opts": {
-       "model": "llama-3.1-sonar-large-128k-online",
-       "max_tokens": 2000,
-       "temperature": 0.3,
-       "recency_filter": "month"
-     }
-   }
+# AI Providers (Optional but Recommended)
+OPENAI_API_KEY=sk-...                 # Enhanced AI capabilities
+GOOGLE_GEMINI_API_KEY=AI...           # Alternative provider
+ANTHROPIC_API_KEY=sk-ant-...          # Claude integration
+
+# System Integration
+REDIS_URL=redis://localhost:6379      # Caching for performance
+MONGODB_URI=mongodb://...             # Data analysis capabilities
+SPOTIFY_CLIENT_ID=...                 # Music data integration
+SPOTIFY_CLIENT_SECRET=...             # Spotify API access
+
+# Development & Deployment
+GITHUB_TOKEN=ghp_...                  # Repository operations
+DO_API_TOKEN=dop_v1_...               # DigitalOcean deployment
+BROWSERBASE_API_KEY=bb_...            # Cloud browser automation
+BROWSERBASE_PROJECT_ID=...            # Browserbase project
+```
+
+## 🔧 Cursor IDE Setup
+
+### Automated Configuration
+```bash
+# Generate complete Cursor configuration
+npm run generate-cursor-mcp
+
+# This creates:
+# - .vscode/mcp.json (MCP server configuration)
+# - .cursor/ai-workflows.json (workflow templates)  
+# - .cursor/project-context.md (project documentation)
+```
+
+### Manual Configuration (Alternative)
+Create `.vscode/mcp.json`:
+```json
+{
+  "inputs": [
+    {
+      "id": "perplexity-key",
+      "type": "promptString", 
+      "description": "Perplexity API Key",
+      "password": true
+    }
+  ],
+  "mcpServers": {
+    "perplexity": {
+      "command": "node",
+      "args": ["mcp-servers/perplexity-mcp/perplexity-mcp-server.js"],
+      "env": {
+        "PERPLEXITY_API_KEY": "${input:perplexity-key}",
+        "PERPLEXITY_MAX_LATENCY_MS": "1500",
+        "PERPLEXITY_MAX_MEMORY_MB": "256",
+        "PERPLEXITY_COST_BUDGET_USD": "0.50"
+      },
+      "description": "AI-powered research with performance budgets"
+    }
+  }
+}
+```
+
+## 🛠️ GitHub Copilot Coding Agent Setup
+
+### Repository Configuration
+1. **Enable Coding Agent** in repository settings
+2. **Configure Secrets** in `Settings → Secrets and variables → Actions`
+3. **Add Labels** to enable agent workflows:
+   - `copilot-coding-agent`: Triggers agent preflight validation
+   - `needs-research`: Indicates research requirement
+   - `performance-critical`: Enforces strict performance budgets
+
+### Agent Workflow Integration
+The repository includes automated agent workflows:
+
+- **`copilot-agent-preflight.yml`**: Validates secrets and provider latency
+- **`agent-mcp-automation.yml`**: MCP validation with performance budgets
+- **`mcp-validation-gateway.yml`**: Pre-merge validation gates
+
+## 📊 Performance Budgets & Validation
+
+### Performance Budget Enforcement
+All MCP operations must comply with performance budgets:
+
+| Service | Latency (p95) | Memory | CPU | Cost |
+|---------|---------------|---------|-----|------|
+| **Perplexity** | ≤1500ms | ≤256MB | ≤0.5 cores | ≤$0.50/session |
+| **Local Services** | ≤500ms | ≤128MB | ≤0.25 cores | N/A |
+| **Global System** | ≤2000ms | ≤512MB | ≤70% | ≤$2.00/hour |
+
+### Budget Validation Commands
+```bash
+# Check current performance metrics
+npm run mcp:enhanced-validation
+
+# Monitor system health
+npm run mcp:health-monitor
+
+# View performance baseline
+cat enhanced-mcp-performance-baseline.json
+
+# Test Perplexity performance
+npm run testperplexity
+```
+
+## 🔄 Research Standards & Protocols
+
+### Research-to-PR Loop Requirements
+Every research-driven PR must include:
+
+1. **Research Evidence**
+   - Perplexity search queries and results
+   - Academic sources and citations
+   - Industry best practices references
+
+2. **Performance Benchmarks**
+   - Baseline performance measurements
+   - Post-implementation performance comparison
+   - Budget compliance validation
+
+3. **Implementation Documentation**
+   - Step-by-step implementation rationale
+   - Trade-offs and alternatives considered
+   - Testing strategy and results
+
+### Research Query Standards
+```javascript
+// Example research query structure
+{
+  "q": "What are the latest developments in AI music recommendation systems in 2024?",
+  "opts": {
+    "model": "llama-3.1-sonar-large-128k-online",
+    "max_tokens": 2000,
+    "temperature": 0.3,
+    "recency_filter": "month",
+    "domain_filter": ["arxiv.org", "ieee.org", "acm.org"]
+  }
+}
+```
+
+## 🔄 Standard Operating Procedures (SOPs)
+
+### SOP 1: Research-Backed Bug Fix (30 minutes)
+1. **Research Phase (10 min)**
+   ```
+   @perplexity research "[error message] debugging techniques latest practices"
+   @sequential-thinking analyze error patterns and root causes
    ```
 
-5. **Cost and Performance Guidelines**:
-   - Monitor query costs (target <$0.50 per research session)
-   - Use caching for repeated queries
-   - Prefer smaller models for simple queries
-   - Set appropriate token limits
+2. **Implementation Phase (15 min)**
+   ```
+   @filesystem identify and analyze problematic code sections
+   @github check related issues and historical fixes
+   @sequential-thinking plan comprehensive fix strategy
+   ```
 
-6. **Quality Assurance Checklist**:
-   - [ ] Citations included and formatted properly
-   - [ ] Response time within budget
-   - [ ] Information accuracy verified
-   - [ ] No sensitive data in queries
-   - [ ] Appropriate model selected for query complexity
+3. **Validation Phase (5 min)**
+   ```
+   @health-monitor verify system performance post-fix
+   @github create PR with research citations and testing evidence
+   ```
 
-### Core MCP Servers
+### SOP 2: Feature Implementation with Research (45 minutes)
+1. **Research & Planning (15 min)**
+   ```
+   @perplexity research "[feature] implementation best practices [technology stack]"
+   @sequential-thinking create detailed implementation plan
+   @github analyze existing codebase architecture
+   ```
+
+2. **Implementation (25 min)**
+   ```
+   @filesystem implement feature following research guidelines
+   @sqlite add necessary database schema changes
+   @browser test user interface and experience
+   ```
+
+3. **Documentation & Testing (5 min)**
+   ```
+   @filesystem create comprehensive tests and documentation
+   @health-monitor validate performance impact
+   @github create PR with research citations and benchmarks
+   ```
+
+### SOP 3: Performance Optimization (60 minutes)
+1. **Analysis Phase (20 min)**
+   ```
+   @health-monitor generate comprehensive performance report
+   @perplexity research "Node.js performance optimization techniques 2024"
+   @sequential-thinking identify optimization opportunities
+   ```
+
+2. **Implementation Phase (30 min)**
+   ```
+   @filesystem implement performance optimizations
+   @sqlite optimize database queries and indexes
+   @redis implement caching strategies
+   ```
+
+3. **Validation Phase (10 min)**
+   ```
+   @health-monitor compare before/after performance metrics
+   @github document performance improvements with benchmarks
+   ```
+
+## 🚨 Error Handling & Troubleshooting
+
+### Common Issues & Solutions
+
+#### MCP Server Not Available
+```bash
+# Diagnosis
+npm run mcp:health-all
+
+# Resolution
+npm run mcp:orchestrator-start
+npm run mcp:enhanced-validation
+```
+
+#### Perplexity API Errors
+```bash
+# Check API key and quota
+npm run validate:api-keys --perplexity
+
+# Test connectivity
+npm run testperplexity
+
+# Review cost budget
+echo $PERPLEXITY_COST_BUDGET_USD
+```
+
+#### Performance Budget Violations
+```bash
+# Get current metrics
+npm run mcp:enhanced-validation
+
+# Review baseline comparison  
+cat enhanced-mcp-performance-baseline.json
+
+# Identify bottlenecks
+npm run performance:mcp-analytics
+```
+
+---
+
+## 🎉 Getting Started Checklist
+
+- [ ] Install Cursor IDE or enable GitHub Copilot Coding Agent
+- [ ] Configure environment variables (minimum: `PERPLEXITY_API_KEY`)
+- [ ] Run `npm run generate-cursor-mcp` to set up configuration
+- [ ] Test basic functionality with `npm run testperplexity`
+- [ ] Validate system health with `npm run mcp:enhanced-validation`
+- [ ] Try first research workflow: `@perplexity research "EchoTune AI architecture"`
+- [ ] Review performance budgets with `@health-monitor status`
+
+**Ready to start?** Your AI-powered development environment is now configured for maximum productivity with research-backed implementation capabilities!
+
+---
+
+## 📚 Legacy MCP Server Documentation
+
+### Core MCP Servers (Historical Reference)
 
 #### 1. Browser Automation Server
 - **Package**: `@modelcontextprotocol/server-puppeteer`

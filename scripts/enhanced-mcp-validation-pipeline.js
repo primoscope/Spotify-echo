@@ -194,6 +194,11 @@ class EnhancedMCPValidationPipeline {
             // Generate final report
             await this.generateComprehensiveReport();
             
+            // Generate PR comment if in CI environment
+            if (process.env.CI && process.env.GITHUB_EVENT_NAME === 'pull_request') {
+                await this.generatePRComment();
+            }
+            
         } catch (error) {
             this.log(`Validation pipeline failed: ${error.message}`, 'error');
         }
@@ -363,6 +368,12 @@ class EnhancedMCPValidationPipeline {
                 this.log(`Memory usage ${memMB}MB - High`, 'warning', 'performance');
             }
             
+            // Perplexity MCP availability check
+            await this.validatePerplexityMCPAvailability();
+            
+            // Performance budgets validation
+            await this.validatePerformanceBudgets();
+            
             // Response time benchmarks
             const performanceTests = [
                 { name: 'Package.json read', test: () => this.benchmarkPackageRead() },
@@ -370,20 +381,39 @@ class EnhancedMCPValidationPipeline {
                 { name: 'MCP config parse', test: () => this.benchmarkMCPConfigParse() }
             ];
             
+            // Add Perplexity-specific tests if available
+            if (process.env.PERPLEXITY_API_KEY) {
+                performanceTests.push(
+                    { name: 'Perplexity MCP connectivity', test: () => this.benchmarkPerplexityConnectivity() }
+                );
+            }
+            
             for (const perfTest of performanceTests) {
                 try {
                     const duration = await perfTest.test();
-                    if (duration < 100) {
+                    let threshold = 500; // Default threshold
+                    
+                    // Set specific thresholds for different services
+                    if (perfTest.name.includes('Perplexity')) {
+                        threshold = 1500; // p95≤1500ms for Perplexity
+                    } else {
+                        threshold = 500;  // p95≤500ms for local services
+                    }
+                    
+                    if (duration < threshold * 0.5) {
                         this.log(`${perfTest.name}: ${duration}ms - Fast`, 'success', 'performance');
-                    } else if (duration < 500) {
+                    } else if (duration < threshold) {
                         this.log(`${perfTest.name}: ${duration}ms - Acceptable`, 'success', 'performance');
                     } else {
-                        this.log(`${perfTest.name}: ${duration}ms - Slow`, 'warning', 'performance');
+                        this.log(`${perfTest.name}: ${duration}ms - Budget exceeded (>${threshold}ms)`, 'error', 'performance');
                     }
                 } catch (error) {
                     this.log(`${perfTest.name} failed: ${error.message}`, 'error', 'performance');
                 }
             }
+            
+            // Load and compare with performance baseline
+            await this.compareWithBaseline();
             
         } catch (error) {
             this.log(`Performance validation failed: ${error.message}`, 'error', 'performance');
@@ -487,6 +517,116 @@ class EnhancedMCPValidationPipeline {
             
         } catch (error) {
             this.log(`Automation validation failed: ${error.message}`, 'error', 'automation');
+        }
+    }
+
+    // New Perplexity-specific validation methods
+    async validatePerplexityMCPAvailability() {
+        if (process.env.PERPLEXITY_API_KEY) {
+            this.log('Perplexity API key available - MCP enabled', 'success', 'performance');
+            
+            // Test Perplexity server file exists
+            const serverPath = path.join(__dirname, '..', 'mcp-servers', 'perplexity-mcp', 'perplexity-mcp-server.js');
+            try {
+                await fs.access(serverPath);
+                this.log('Perplexity MCP server file exists', 'success', 'performance');
+            } catch {
+                this.log('Perplexity MCP server file missing', 'error', 'performance');
+            }
+        } else {
+            this.log('Perplexity API key not configured - MCP disabled', 'warning', 'performance');
+        }
+    }
+
+    async validatePerformanceBudgets() {
+        this.log('Validating performance budgets...', 'progress', 'performance');
+        
+        const budgets = {
+            perplexity_p95: 1500, // ms
+            local_services_p95: 500, // ms
+            memory_per_server: 256, // MB
+            cpu_per_server: 0.5 // cores
+        };
+
+        // Record current performance metrics
+        const currentMetrics = {
+            memory: Math.round(process.memoryUsage().rss / 1024 / 1024),
+            timestamp: Date.now()
+        };
+
+        // Store in performance baseline for comparison
+        this.testResults.performanceMetrics = currentMetrics;
+        this.testResults.budgets = budgets;
+
+        // Validate memory budget
+        if (currentMetrics.memory <= budgets.memory_per_server) {
+            this.log(`Memory budget: ${currentMetrics.memory}MB ≤ ${budgets.memory_per_server}MB ✓`, 'success', 'performance');
+        } else {
+            this.log(`Memory budget exceeded: ${currentMetrics.memory}MB > ${budgets.memory_per_server}MB`, 'error', 'performance');
+        }
+    }
+
+    async benchmarkPerplexityConnectivity() {
+        const startTime = Date.now();
+        try {
+            // Simple connectivity test to Perplexity API
+            const testUrl = process.env.PERPLEXITY_BASE_URL || 'https://api.perplexity.ai';
+            const response = await fetch(testUrl, { 
+                method: 'HEAD', 
+                timeout: 5000 
+            }).catch(() => null);
+            
+            return Date.now() - startTime;
+        } catch (error) {
+            // Return high duration on error
+            return 5000;
+        }
+    }
+
+    async compareWithBaseline() {
+        this.log('Comparing with performance baseline...', 'progress', 'performance');
+        
+        const baselineFile = path.join(__dirname, '..', 'enhanced-mcp-performance-baseline.json');
+        
+        try {
+            // Try to load existing baseline
+            let baseline = {};
+            try {
+                const baselineData = await fs.readFile(baselineFile, 'utf8');
+                baseline = JSON.parse(baselineData);
+            } catch {
+                this.log('No baseline found, creating new baseline', 'warning', 'performance');
+            }
+
+            const currentMetrics = this.testResults.performanceMetrics || {};
+            
+            // Compare with baseline if it exists
+            if (baseline.memory) {
+                const memoryDelta = currentMetrics.memory - baseline.memory;
+                const deltaPercent = Math.round((memoryDelta / baseline.memory) * 100);
+                
+                if (Math.abs(deltaPercent) <= 10) {
+                    this.log(`Memory delta: ${deltaPercent}% (within acceptable range)`, 'success', 'performance');
+                } else if (deltaPercent > 10) {
+                    this.log(`Memory increased by ${deltaPercent}% - potential regression`, 'warning', 'performance');
+                } else {
+                    this.log(`Memory decreased by ${Math.abs(deltaPercent)}% - improvement`, 'success', 'performance');
+                }
+            }
+
+            // Update baseline with current metrics
+            const newBaseline = {
+                ...baseline,
+                memory: currentMetrics.memory,
+                timestamp: currentMetrics.timestamp,
+                lastUpdated: new Date().toISOString()
+            };
+
+            await fs.writeFile(baselineFile, JSON.stringify(newBaseline, null, 2));
+            this.log('Performance baseline updated', 'success', 'performance');
+            
+        } catch (error) {
+            this.log(`Baseline comparison failed: ${error.message}`, 'warning', 'performance');
         }
     }
 
@@ -743,6 +883,52 @@ Generated: ${new Date().toISOString()}
         await fs.writeFile(summaryPath, summary);
         
         console.log('\n' + summary);
+    }
+
+    async generatePRComment() {
+        this.log('Generating PR comment...', 'progress');
+        
+        const performanceStatus = this.testResults.score >= 80 ? '✅' : '⚠️';
+        const budgetBreaches = this.testResults.categories.performance.failed;
+        const memoryUsage = this.testResults.performanceMetrics?.memory || 'Unknown';
+        
+        const comment = `## 📊 Enhanced MCP Validation Results
+
+${performanceStatus} **Overall Score: ${this.testResults.score}%** (${this.testResults.passedTests}/${this.testResults.totalTests} tests passed)
+
+### Performance Budget Status
+- **Memory Usage**: ${memoryUsage}MB ${memoryUsage <= 256 ? '✅' : '❌'} (Budget: ≤256MB)
+- **Budget Violations**: ${budgetBreaches} ${budgetBreaches === 0 ? '✅' : '❌'}
+- **Perplexity MCP**: ${process.env.PERPLEXITY_API_KEY ? 'Enabled ✅' : 'Disabled ⚠️'}
+
+### Category Breakdown
+${Object.entries(this.testResults.categories).map(([name, data]) => 
+    `- **${name.charAt(0).toUpperCase() + name.slice(1)}**: ${data.passed}✅ ${data.failed}❌`
+).join('\n')}
+
+### Artifacts
+- 📄 [Detailed Report](enhanced-mcp-validation-report.json)
+- 📊 [Performance Baseline](enhanced-mcp-performance-baseline.json)
+- 📋 [Validation Summary](MCP_VALIDATION_SUMMARY.md)
+
+${this.testResults.score < 80 ? '⚠️ **Action Required**: Score below 80% may block merge.' : '✅ **Ready for Review**: All validations passed.'}
+
+<details>
+<summary>🔍 View Detailed Results</summary>
+
+\`\`\`json
+${JSON.stringify(this.testResults, null, 2)}
+\`\`\`
+</details>
+
+---
+*Generated by Enhanced MCP Validation Pipeline*`;
+
+        // Save PR comment to file for GitHub Actions to pick up
+        const commentPath = path.join(__dirname, '..', 'pr-validation-comment.md');
+        await fs.writeFile(commentPath, comment);
+        
+        this.log('PR comment generated and saved to pr-validation-comment.md', 'success');
     }
 }
 

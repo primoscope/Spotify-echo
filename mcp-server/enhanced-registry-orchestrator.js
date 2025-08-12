@@ -80,12 +80,36 @@ class EnhancedMCPRegistryOrchestrator extends EventEmitter {
         const packageData = JSON.parse(await fs.readFile(packagePath, 'utf8'));
         const mcpServers = packageData.mcp?.servers || {};
 
+        // Add Perplexity MCP server if API key is present
+        if (process.env.PERPLEXITY_API_KEY) {
+            mcpServers['perplexity'] = {
+                command: 'node',
+                args: ['mcp-servers/perplexity-mcp/perplexity-mcp-server.js'],
+                env: {
+                    'PERPLEXITY_API_KEY': process.env.PERPLEXITY_API_KEY,
+                    'PERPLEXITY_BASE_URL': process.env.PERPLEXITY_BASE_URL || 'https://api.perplexity.ai',
+                    'PERPLEXITY_MODEL': process.env.PERPLEXITY_MODEL || 'llama-3.1-sonar-small-128k-online'
+                },
+                description: 'Perplexity AI research and query capabilities',
+                capabilities: ['research', 'web_search', 'knowledge_queries'],
+                resources: {
+                    maxMemory: '256MB',
+                    maxCpu: '0.5'
+                },
+                healthCheck: {
+                    path: '/health',
+                    timeout: 5000,
+                    interval: 30000
+                }
+            };
+        }
+
         for (const [serverName, config] of Object.entries(mcpServers)) {
             await this.registerServer(serverName, {
                 ...config,
                 type: 'package-mcp',
                 status: 'registered',
-                source: 'package.json'
+                source: serverName === 'perplexity' ? 'env-gated' : 'package.json'
             });
         }
     }

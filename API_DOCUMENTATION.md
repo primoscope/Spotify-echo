@@ -2,6 +2,7 @@
 
 ## Overview
 
+
 EchoTune AI provides a comprehensive REST API for music recommendation and Spotify integration. This documentation covers all available endpoints, authentication methods, and usage examples.
 
 ## Base URL

@@ -1,0 +1,83 @@
+name: Secret Scan (Scheduled)
+
+on:
+  schedule:
+    # Run at 3:23 AM UTC daily
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  secret-scan:
+    name: Scheduled Secret Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comprehensive scan
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: "detect --no-banner --redact --verbose --report-format sarif --report-path gitleaks-scheduled.sarif"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: gitleaks-scheduled.sarif
+          category: "gitleaks-scheduled"
+
+      - name: Generate Security Report
+        if: always()
+        run: |
+          echo "# Scheduled Security Scan Report" > security-scan-report.md
+          echo "Date: $(date)" >> security-scan-report.md
+          echo "Scan Type: Full Repository History" >> security-scan-report.md
+          echo "" >> security-scan-report.md
+          
+          if [ -f gitleaks-scheduled.sarif ]; then
+            echo "✅ Gitleaks scan completed successfully" >> security-scan-report.md
+            
+            # Check for findings in SARIF
+            if grep -q '"results":' gitleaks-scheduled.sarif && ! grep -q '"results": \[\]' gitleaks-scheduled.sarif; then
+              echo "⚠️ Security findings detected - check GitHub Security tab" >> security-scan-report.md
+            else
+              echo "✅ No security issues found" >> security-scan-report.md
+            fi
+          else
+            echo "❌ Gitleaks scan failed" >> security-scan-report.md
+          fi
+          
+          echo "" >> security-scan-report.md
+          echo "## Next Steps" >> security-scan-report.md
+          echo "- Review findings in GitHub Security tab" >> security-scan-report.md
+          echo "- Address any exposed secrets immediately" >> security-scan-report.md
+          echo "- Update .gitleaksignore if needed for false positives" >> security-scan-report.md
+
+      - name: Upload Security Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheduled-security-scan
+          path: |
+            gitleaks-scheduled.sarif
+            security-scan-report.md
+          retention-days: 30
+
+      - name: Notify on Findings (Future Enhancement)
+        if: failure()
+        run: |
+          echo "🚨 Security scan detected potential issues"
+          echo "This job failed, indicating potential security findings"
+          echo "Review the Security tab and uploaded artifacts for details"
+          # Future: Add notification to Slack, email, or issue creation

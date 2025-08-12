@@ -566,6 +566,8 @@ For detailed configuration options, see: [**Configuration Guide**](CONFIGURATION
 
 | Guide | Description |
 |-------|-------------|
+| [**Agent Roadmap**](docs/AGENT_ROADMAP.md) | 🤖 Comprehensive agent-first development roadmap with prioritized workstreams |
+| [**Copilot Instructions**](.github/copilot-instructions.md) | 🎯 GitHub Copilot task taxonomy, labels, and workflow guidance |
 | [**Configuration Guide**](CONFIGURATION_GUIDE.md) | Complete settings and optimization guide |
 | [**DigitalOcean Deployment**](DEPLOYMENT.md) | Complete automated deployment guide with GitHub Actions |
 | [**Quick Start Guide**](docs/QUICK_START.md) | Get running in under 5 minutes |

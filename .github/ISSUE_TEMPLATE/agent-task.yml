@@ -1,0 +1,136 @@
+name: Agent Task
+description: A focused task designed for automated execution by coding agents
+title: "[AGENT] "
+labels: ["copilot-coding-agent", "P2"]
+assignees:
+  - dzp5103
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Task Summary
+      description: Brief, clear description of what needs to be accomplished
+      placeholder: "Implement user authentication API endpoints"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How urgent is this task?
+      options:
+        - P0 (Critical - Blocks other work)
+        - P1 (High - Important for current milestone)
+        - P2 (Medium - Normal priority)
+        - P3 (Low - Nice to have)
+      default: 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Task Category
+      description: Which area does this task focus on?
+      options:
+        - MCP (Model Context Protocol related)
+        - CI/CD (Continuous integration/deployment)
+        - Backend (Server-side functionality)
+        - Frontend (User interface)
+        - Security (Security improvements)
+        - Documentation (Docs and guides)
+        - Testing (Test coverage and quality)
+        - Performance (Optimization)
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and Background
+      description: |
+        Provide relevant context, links to related issues/PRs, and background information.
+        Include links to relevant files, documentation, or external resources.
+      placeholder: |
+        - Related to issue #123
+        - Affects files: src/auth/, scripts/auth.js
+        - Documentation: docs/api/authentication.md
+        - Depends on: MCP server health validation
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Define what success looks like. Be specific and measurable.
+      placeholder: |
+        - [ ] API endpoint `/api/auth/login` returns 200 on valid credentials
+        - [ ] API endpoint `/api/auth/logout` clears session properly
+        - [ ] Error handling for invalid credentials (401 response)
+        - [ ] Unit tests achieve 90%+ coverage
+        - [ ] Integration tests pass
+        - [ ] MCP health reports uploaded (if applicable)
+        - [ ] Documentation updated
+        - [ ] Security scan passes (no new vulnerabilities)
+      value: |
+        - [ ] Implementation complete and tested
+        - [ ] Lint and format checks pass
+        - [ ] All tests pass (unit + integration)
+        - [ ] MCP health validation passes (if applicable)
+        - [ ] Documentation updated
+        - [ ] Security considerations addressed
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: Technical Implementation Notes
+      description: |
+        Any specific technical requirements, constraints, or implementation guidance.
+        Include preferred patterns, libraries to use/avoid, performance considerations.
+      placeholder: |
+        - Use existing authentication pattern from src/auth/base-auth.js
+        - Follow OpenAPI 3.0 spec for API documentation
+        - Implement rate limiting (use express-rate-limit)
+        - Log authentication attempts for security monitoring
+        - Environment gating: skip tests if AUTH_SECRET not set
+    validations:
+      required: false
+
+  - type: textarea
+    id: definition_of_done
+    attributes:
+      label: Definition of Done
+      description: Additional criteria that must be met before considering this task complete
+      placeholder: |
+        - [ ] PR reviewed and approved
+        - [ ] CI pipeline passes all checks
+        - [ ] No breaking changes to existing functionality
+        - [ ] Performance impact assessed and documented
+        - [ ] Security review completed
+      value: |
+        - [ ] Code review completed
+        - [ ] All CI checks pass
+        - [ ] No breaking changes
+        - [ ] Security review completed (if applicable)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: agent_validation
+    attributes:
+      label: Agent Execution Validation
+      description: Confirm this task is suitable for automated agent execution
+      options:
+        - label: This task has clear, measurable acceptance criteria
+          required: true
+        - label: The task scope is well-defined and focused
+          required: true
+        - label: Required context and resources are provided or accessible
+          required: true
+        - label: The task can be completed without significant human interaction
+          required: true

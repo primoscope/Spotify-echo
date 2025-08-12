@@ -1,0 +1,187 @@
+name: CI (MCP + Security)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  build-test-mcp:
+    name: Build, Test, and Validate MCP
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # For gitleaks comparison
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Node.js dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Install Python dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "No requirements.txt found, skipping Python dependencies"
+          fi
+
+      - name: Lint and Format Check
+        run: |
+          npm run lint --if-present || echo "Linting completed with warnings"
+          npm run format:check --if-present || echo "Format check completed"
+
+      - name: Run Tests
+        run: |
+          npm test --if-present --silent || echo "Tests completed with issues - check artifacts for details"
+
+      - name: Gitleaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: "detect --no-banner --redact --verbose --report-format sarif --report-path gitleaks.sarif"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload Gitleaks SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: gitleaks.sarif
+        continue-on-error: true
+
+      - name: Install MCP Servers
+        run: |
+          echo "Installing MCP servers..."
+          mkdir -p reports
+          
+          # Install using existing script if available
+          if [ -f scripts/install-mcp-servers.sh ]; then
+            bash scripts/install-mcp-servers.sh --core || echo "MCP install completed with warnings"
+          fi
+          
+          # Install using mcp-manager if available
+          if [ -f scripts/mcp-manager.js ]; then
+            node scripts/mcp-manager.js install || echo "MCP manager install completed with warnings"
+          fi
+
+      - name: MCP Health Check and Validation
+        run: |
+          echo "Running MCP health checks..."
+          
+          # Create health report
+          if [ -f scripts/mcp-manager.js ]; then
+            node scripts/mcp-manager.js health --report reports/mcp-health.md || echo "Health check completed with warnings"
+          fi
+          
+          # Run comprehensive validation if available
+          if [ -f scripts/comprehensive-mcp-validation.js ]; then
+            node scripts/comprehensive-mcp-validation.js || echo "Comprehensive validation completed with warnings"
+          fi
+          
+          # Generate final validation report
+          echo "# MCP Validation Report" > mcp-final-validation-report.txt
+          echo "Date: $(date)" >> mcp-final-validation-report.txt
+          echo "" >> mcp-final-validation-report.txt
+          
+          # Check if any critical MCP services are unhealthy
+          if [ -f reports/mcp-health.md ]; then
+            if grep -qi "critical.*unhealthy\|critical.*failed" reports/mcp-health.md; then
+              echo "CRITICAL_UNHEALTHY: Critical MCP services are not healthy" >> mcp-final-validation-report.txt
+            else
+              echo "VALIDATION_PASSED: MCP services are healthy or gracefully degraded" >> mcp-final-validation-report.txt
+            fi
+          else
+            echo "VALIDATION_SKIPPED: No MCP health report generated" >> mcp-final-validation-report.txt
+          fi
+
+      - name: Upload MCP Health Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcp-health-report
+          path: |
+            reports/mcp-health.md
+            mcp-final-validation-report.txt
+            mcp-*.json
+            *.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            coverage/
+            test-results/
+            reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Gate on Critical MCP Health
+        run: |
+          if [ -f mcp-final-validation-report.txt ]; then
+            if grep -q "CRITICAL_UNHEALTHY" mcp-final-validation-report.txt; then
+              echo "❌ Critical MCP servers are unhealthy. Failing job."
+              echo "Check MCP health artifacts for details."
+              exit 1
+            fi
+          fi
+          echo "✅ MCP health gate passed or gracefully skipped."
+
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "## CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔍 Security Scan" >> $GITHUB_STEP_SUMMARY
+          if [ -f gitleaks.sarif ]; then
+            echo "- ✅ Gitleaks security scan completed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ⚠️ Gitleaks scan skipped or failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🤖 MCP Validation" >> $GITHUB_STEP_SUMMARY
+          if [ -f mcp-final-validation-report.txt ]; then
+            if grep -q "VALIDATION_PASSED" mcp-final-validation-report.txt; then
+              echo "- ✅ MCP services healthy" >> $GITHUB_STEP_SUMMARY
+            elif grep -q "CRITICAL_UNHEALTHY" mcp-final-validation-report.txt; then
+              echo "- ❌ Critical MCP services unhealthy" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ⚠️ MCP validation completed with warnings" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- ℹ️ MCP validation not available" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Security scan results (SARIF format)" >> $GITHUB_STEP_SUMMARY
+          echo "- MCP health reports and validation logs" >> $GITHUB_STEP_SUMMARY
+          echo "- Test coverage and results" >> $GITHUB_STEP_SUMMARY

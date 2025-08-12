@@ -1,0 +1,121 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/specification/main/schema/client_config.json",
+  "mcpServers": {
+    "core": {
+      "enabled": true,
+      "description": "Core MCP servers required for basic functionality",
+      "servers": {
+        "filesystem": {
+          "command": "node",
+          "args": [
+            "node_modules/FileScopeMCP/dist/mcp-server.js"
+          ],
+          "env": {
+            "ALLOWED_DIRECTORIES": "${PWD},${PWD}/src,${PWD}/scripts,${PWD}/mcp-server"
+          },
+          "critical": true,
+          "health": "/health",
+          "timeout": 10000
+        },
+        "sequential-thinking": {
+          "command": "node",
+          "args": [
+            "mcp-servers/sequential-thinking/dist/index.js"
+          ],
+          "description": "Structured thinking and reasoning capabilities for complex tasks",
+          "critical": false,
+          "health": "/health",
+          "timeout": 10000
+        }
+      }
+    },
+    "browser": {
+      "enabled": true,
+      "description": "Browser automation servers",
+      "env_required": [],
+      "servers": {
+        "puppeteer": {
+          "command": "npx",
+          "args": [
+            "@modelcontextprotocol/server-puppeteer"
+          ],
+          "env": {
+            "PUPPETEER_HEADLESS": "true"
+          },
+          "critical": false,
+          "health": "/health",
+          "timeout": 15000
+        }
+      }
+    },
+    "browserbase": {
+      "enabled": false,
+      "description": "Browserbase cloud browser service - requires API key",
+      "critical": false,
+      "env_required": ["BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID"],
+      "note": "Enable only when API key is configured. Pipelines should skip gracefully when disabled.",
+      "servers": {
+        "browserbase": {
+          "command": "npx",
+          "args": [
+            "@browserbasehq/mcp-server-browserbase"
+          ],
+          "env": {
+            "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
+            "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}"
+          },
+          "critical": false,
+          "health": "/health",
+          "timeout": 20000
+        }
+      }
+    },
+    "optional-services": {
+      "enabled": true,
+      "description": "Optional services that enhance functionality when available",
+      "env_gated": true,
+      "servers": {
+        "spotify": {
+          "command": "python",
+          "args": [
+            "mcp-server/spotify_server.py"
+          ],
+          "env": {
+            "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
+            "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}"
+          },
+          "env_required": ["SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET"],
+          "critical": false,
+          "health": "/health",
+          "timeout": 15000
+        },
+        "enhanced-file-utilities": {
+          "command": "node",
+          "args": [
+            "mcp-servers/enhanced-file-utilities.js"
+          ],
+          "description": "Enhanced file handling with validation and security",
+          "critical": false,
+          "health": "/health",
+          "timeout": 10000
+        }
+      }
+    }
+  },
+  "validation": {
+    "critical_servers_required": true,
+    "timeout_ms": 30000,
+    "retry_attempts": 3,
+    "health_check_interval": 60000,
+    "report_format": "markdown"
+  },
+  "development": {
+    "auto_start": true,
+    "dev_mode": true,
+    "log_level": "debug",
+    "port_range": {
+      "start": 3001,
+      "end": 3099
+    }
+  }
+}

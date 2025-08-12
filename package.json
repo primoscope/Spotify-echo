@@ -174,15 +174,13 @@
     "gemini-test": "node scripts/test-gemini-integration.js",
     "gemini-health": "node scripts/test-gemini-integration.js",
     "test:gemini-integration": "node scripts/test-gemini-integration.js",
-
-    "production-check": "./scripts/production-readiness-check.sh",
+    "production-check": "node scripts/production-readiness-orchestrator.js --production-check",
     "production-deploy": "./scripts/deploy-digitalocean.sh",
     "workflow:analyze": "node scripts/workflow-optimizer.js analyze",
     "workflow:optimize": "node scripts/workflow-optimizer.js optimize",
     "workflow:optimize:apply": "node scripts/workflow-optimizer.js optimize --apply",
     "workflow:status": "node agent-workflow/workflow-cli.js status",
     "workflow:report": "node scripts/workflow-optimizer.js report",
-
     "agent:run": "node scripts/continuous-agent.js",
     "agent:analyze": "node scripts/continuous-agent.js analyze",
     "agent:create-issue": "node scripts/continuous-agent.js create-issue",
@@ -241,20 +239,17 @@
     "enhanced-mcp:health": "curl -s http://localhost:3000/api/enhanced-mcp/health | jq '.' || echo 'Enhanced MCP server not running'",
     "enhanced-mcp:capabilities": "curl -s http://localhost:3000/api/enhanced-mcp/capabilities | jq '.' || echo 'Enhanced MCP server not running'",
     "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'",
-
     "production-readiness": "node scripts/production-readiness-analyzer.js",
     "production-automation": "node scripts/mcp-production-automation.js",
     "production-analysis": "node scripts/production-readiness-orchestrator.js",
     "production-analysis:quick": "node scripts/production-readiness-orchestrator.js --quick",
     "production-analysis:full": "node scripts/production-readiness-orchestrator.js --full",
-    "production-check": "node scripts/production-readiness-orchestrator.js --production-check",
-
     "production-fixes": "npm run lint:fix && npm audit fix && npm run format",
     "production-ready": "npm run production-analysis && echo 'Check PRODUCTION_READINESS_EXECUTIVE_SUMMARY.md for results'",
-
     "mcp:health:n8n": "node scripts/mcp/probes/probe-n8n.js",
-    "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js"
-
+    "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js",
+    "mcp:up": "node scripts/mcp-manager.js install && node scripts/mcp-manager.js health --report reports/mcp-health.md",
+    "dev:agent": "concurrently \"npm start\" \"node scripts/mcp-health-monitor.js --interval=30000\" \"npm run mcp:up\""
   },
   "keywords": [
     "music",
@@ -302,6 +297,7 @@
     "better-sqlite3": "^12.2.0",
     "commander": "^12.0.0",
     "compression": "^1.7.4",
+    "concurrently": "^8.2.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",

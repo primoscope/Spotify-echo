@@ -23,6 +23,35 @@
 6. **MCP Ecosystem Integration**: Leverage community MCP servers for enhanced development workflow
 7. **Automated Testing & Validation**: Continuous integration with automated code analysis and optimization
 
+## 🤖 Enhanced Agent-First Development Workflow
+
+### Labels and Task Classification
+- **Primary Label**: `copilot-coding-agent` - Applied to tasks intended for automated execution
+- **Priority Labels**: `P0` (critical), `P1` (high), `P2` (medium), `P3` (low)
+- **Category Labels**: 
+  - `MCP` - Work involving MCP servers, health checks, integration, or client config
+  - `CI/CD` - Workflows, caching, validation gates, and security scanners
+  - `Backend` - Server-side feature or bugfix tasks
+  - `Frontend` - User interface and client-side functionality
+  - `Security` - Secret hygiene, scanning, and vulnerability management
+  - `Documentation` - Docs, guides, and knowledge management
+  - `Testing` - Test coverage, automation, and quality assurance
+  - `Performance` - Optimization and scalability improvements
+
+### Agent Workflow Process
+1. **Issue Selection**: Pick issues labeled `copilot-coding-agent` with appropriate priority
+2. **Branch Naming**: Use `agent/<short-task-slug>` for automated tasks
+3. **Local Validation**: Run `npm run mcp:up; npm test; npm run lint` before committing
+4. **PR Validation**: Ensure MCP health reports and security scans pass
+5. **Environment Gating**: Skip optional integrations gracefully when secrets are missing
+
+### MCP Auto-Start Integration
+- **Development Scripts**:
+  - `npm run mcp:up` - Install and health check MCP servers
+  - `npm run dev:agent` - Concurrent app start with MCP monitoring
+- **DevContainer**: Automatic MCP setup via postCreateCommand
+- **CI Integration**: MCP validation with proper environment gating
+
 ## 🤖 Enhanced GitHub Copilot Integration & MCP Automation
 
 **EchoTune AI** features advanced GitHub Copilot integration with comprehensive MCP (Model Context Protocol) automation and validation gating system.

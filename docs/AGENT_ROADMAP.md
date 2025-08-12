@@ -1,13 +1,16 @@
 # EchoTune AI — Agent Roadmap and MCP Auto-Start Integration
 
-Last updated: 2025-08-12
+Last updated: 2025-01-12
 
-Overview
+## Overview
 This roadmap aligns open PRs and issues with an agent-first execution plan, emphasizing fast, reliable MCP startup, CI validation, and iterative delivery. It includes:
 - Prioritized workstreams with concrete tasks
 - PR-by-PR and issue-by-issue next actions
 - MCP auto-start and CI hardening plan
 - Progress tracking checklists
+
+## Status Summary
+**Current Focus**: Agent-first pull request with comprehensive MCP auto-start, CI/CD hardening, and actionable roadmap implementation.
 
 Snapshot: What’s in flight
 Open PRs (selected intent)

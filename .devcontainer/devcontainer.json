@@ -1,0 +1,56 @@
+{
+  "name": "Spotify-echo Dev",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "postCreateCommand": {
+    "install-deps": "npm ci && pip install -r requirements.txt",
+    "mcp-setup": "npm run mcp:up || echo 'MCP setup completed with warnings - check logs for details'"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-json",
+        "ms-python.python",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "python.defaultInterpreterPath": "/usr/local/bin/python3"
+      }
+    },
+    "codespaces": {
+      "openFiles": [
+        "docs/AGENT_ROADMAP.md",
+        ".github/copilot-instructions.md",
+        "README.md"
+      ]
+    }
+  },
+  "portsAttributes": {
+    "3000": {
+      "label": "Main App",
+      "onAutoForward": "notify"
+    },
+    "3001": {
+      "label": "MCP Server",
+      "onAutoForward": "silent"
+    }
+  },
+  "forwardPorts": [3000, 3001],
+  "mounts": [
+    "source=${localWorkspaceFolder}/.env.example,target=/workspace/.env,type=bind,readonly"
+  ],
+  "remoteEnv": {
+    "NODE_ENV": "development",
+    "MCP_AUTO_START": "true",
+    "DEVELOPMENT_MODE": "true"
+  }
+}

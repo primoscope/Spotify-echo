@@ -281,6 +281,60 @@ class PerplexityMCPServer {
               required: ['task_type'],
             },
           },
+          {
+            name: 'trigger_processing',
+            description: 'Process natural language triggers for automatic workflow optimization (e.g., "use perplexity grok-4")',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                trigger_text: {
+                  type: 'string',
+                  description: 'Natural language trigger text to process',
+                },
+                context: {
+                  type: 'object',
+                  description: 'Additional context for trigger processing',
+                  properties: {
+                    file_type: { type: 'string' },
+                    project_type: { type: 'string' },
+                    selected_code: { type: 'string' },
+                    team_size: { type: 'string' }
+                  }
+                },
+              },
+              required: ['trigger_text'],
+            },
+          },
+          {
+            name: 'smart_research',
+            description: 'Intelligent research with automatic trigger detection and workflow optimization',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                input: {
+                  type: 'string',
+                  description: 'Research input with optional trigger patterns',
+                },
+                context: {
+                  type: 'object',
+                  description: 'Context for intelligent optimization',
+                  properties: {
+                    editor: { type: 'string' },
+                    language: { type: 'string' },
+                    framework: { type: 'string' },
+                    urgency: { type: 'string' },
+                    budget_limit: { type: 'number' }
+                  }
+                },
+                auto_optimize: {
+                  type: 'boolean',
+                  description: 'Enable automatic workflow optimization',
+                  default: true
+                },
+              },
+              required: ['input'],
+            },
+          },
         ],
       };
     });
@@ -303,6 +357,10 @@ class PerplexityMCPServer {
           return await this.handleModelComparison(args);
         } else if (name === 'workflow_optimization') {
           return await this.handleWorkflowOptimization(args);
+        } else if (name === 'trigger_processing') {
+          return await this.handleTriggerProcessing(args);
+        } else if (name === 'smart_research') {
+          return await this.handleSmartResearch(args);
         } else {
           throw new McpError(
             ErrorCode.MethodNotFound,
@@ -1141,6 +1199,113 @@ class PerplexityMCPServer {
     });
     
     return output;
+  }
+
+  async handleTriggerProcessing(args) {
+    const { trigger_text, context = {} } = args;
+    
+    try {
+      // Import the TriggerProcessor class
+      const TriggerProcessor = require('../../coding-agent-workflows/automation/trigger-processor');
+      const processor = new TriggerProcessor();
+      
+      const result = await processor.processTrigger(trigger_text, context);
+      
+      if (result && !result.error) {
+        return {
+          content: [{
+            type: 'text',
+            text: `🎯 **Trigger Processing Results**\n\n**Detected:** ${result.trigger.type} (${result.confidence * 100}% confidence)\n**Model:** ${result.workflow.model}\n**Query:** ${result.trigger.query}\n\n**Optimized Configuration:**\n\`\`\`json\n${JSON.stringify(result.configuration, null, 2)}\n\`\`\`\n\n**Performance Estimates:**\n- Cost: $${result.workflow.estimatedCost.toFixed(4)}\n- Latency: ${result.workflow.estimatedLatency}ms\n- Processing Time: ${result.processingTime}ms`
+          }],
+          meta: result
+        };
+      } else {
+        return {
+          content: [{
+            type: 'text',
+            text: `❌ **Trigger Processing Failed**\n\nNo valid trigger pattern detected in: "${trigger_text}"\n\nSupported patterns:\n- "use perplexity {model}"\n- "research with {model}"\n- "debug using {model}"\n- "compare models for {task}"`
+          }],
+          meta: { error: result?.error || 'No trigger detected' }
+        };
+      }
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text',
+          text: `❌ **Error processing trigger:** ${error.message}`
+        }],
+        meta: { error: error.message }
+      };
+    }
+  }
+
+  async handleSmartResearch(args) {
+    const { input, context = {}, auto_optimize = true } = args;
+    
+    try {
+      let finalQuery = input;
+      let selectedModel = this.model;
+      let optimizedParams = {};
+      
+      if (auto_optimize) {
+        // Try to detect and process triggers
+        const TriggerProcessor = require('../../coding-agent-workflows/automation/trigger-processor');
+        const processor = new TriggerProcessor();
+        
+        const triggerResult = await processor.processTrigger(input, context);
+        
+        if (triggerResult && !triggerResult.error) {
+          finalQuery = triggerResult.trigger.query;
+          selectedModel = triggerResult.workflow.model;
+          optimizedParams = triggerResult.workflow.parameters;
+          
+          // Execute optimized research
+          const researchResult = await this.handleResearch({
+            q: finalQuery,
+            opts: {
+              model: selectedModel,
+              ...optimizedParams
+            }
+          });
+          
+          // Add optimization metadata to response
+          researchResult.meta = {
+            ...researchResult.meta,
+            trigger_detected: true,
+            optimization_applied: triggerResult.workflow.optimizations,
+            estimated_improvement: {
+              cost: triggerResult.workflow.estimatedCost,
+              latency: triggerResult.workflow.estimatedLatency,
+              confidence: triggerResult.confidence
+            }
+          };
+          
+          // Enhance response text with optimization info
+          const originalText = researchResult.content[0].text;
+          researchResult.content[0].text = `🚀 **Smart Research Results** (Optimized)\n\n**Optimization Applied:** ${triggerResult.workflow.optimizations.join(', ')}\n**Model Selected:** ${selectedModel} (${(triggerResult.confidence * 100).toFixed(1)}% confidence)\n**Cost Estimate:** $${triggerResult.workflow.estimatedCost.toFixed(4)}\n\n---\n\n${originalText}`;
+          
+          return researchResult;
+        }
+      }
+      
+      // Fallback to regular research if no trigger detected or auto_optimize disabled
+      return await this.handleResearch({
+        q: finalQuery,
+        opts: {
+          model: selectedModel,
+          ...optimizedParams
+        }
+      });
+      
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text', 
+          text: `❌ **Smart research error:** ${error.message}`
+        }],
+        meta: { error: error.message }
+      };
+    }
   }
 
   async shutdown() {

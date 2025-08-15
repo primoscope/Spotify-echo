@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-08-15T16:53:05.151Z",
+  "timestamp": "2025-08-15T17:43:27.362Z",
   "totalTests": 12,
-  "passed": 7,
-  "failed": 5,
+  "passed": 9,
+  "failed": 3,
   "warnings": 0,
   "secrets": {
     "SPOTIFY_API": {
       "status": "✅ WORKING",
-      "responseTime": "441ms",
+      "responseTime": "433ms",
       "features": [
         "OAuth authentication",
         "Search API",
@@ -15,24 +15,24 @@
       ],
       "testData": "Found 1 tracks in search test",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:05.598Z"
+      "timestamp": "2025-08-15T17:43:27.800Z"
     },
     "PERPLEXITY_API": {
       "status": "✅ WORKING",
-      "responseTime": "4288ms",
+      "responseTime": "4088ms",
       "features": [
         "AI research queries",
         "Citations",
         "Real-time web data"
       ],
-      "testData": "Response length: 1102 characters",
+      "testData": "Response length: 1118 characters",
       "cost": "$0.003 per query (estimated)",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:09.886Z"
+      "timestamp": "2025-08-15T17:43:31.889Z"
     },
     "BRAVE_API": {
       "status": "✅ WORKING",
-      "responseTime": "590ms",
+      "responseTime": "220ms",
       "features": [
         "Privacy-focused search",
         "Web results",
@@ -40,25 +40,39 @@
       ],
       "testData": "Found 5 search results",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:10.476Z"
+      "timestamp": "2025-08-15T17:43:32.109Z"
     },
     "BROWSERBASE_API": {
-      "status": "❌ FAILED",
-      "error": "Browserbase API failed: 401 Unauthorized",
+      "status": "✅ WORKING",
+      "responseTime": "716ms",
+      "features": [
+        "Cloud browser automation",
+        "Session management",
+        "Spotify Web Player automation",
+        "Stagehand integration ready"
+      ],
+      "testData": "Projects accessible: 1",
+      "projectId": "df31bafd-8541-40f2-80a8-2f6ea30df60e",
+      "projectIdValid": "✅ Valid project ID",
+      "sessionCreation": "✅ Working",
+      "planDetails": "Free plan: 1 browser concurrency",
+      "stagehendReady": "✅ Ready",
+      "apiKeyStatus": "LATEST: bb_live_P4BWp-i1Atz_NMBWXr521kxcrXw",
+      "authMethod": "✅ Fixed: Uses x-bb-api-key header instead of Bearer token",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:10.743Z"
+      "timestamp": "2025-08-15T17:43:32.825Z"
     },
     "DIGITALOCEAN_API": {
       "status": "❌ FAILED",
       "error": "DigitalOcean API failed: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:11.002Z"
+      "timestamp": "2025-08-15T17:43:32.985Z"
     },
     "GITHUB_API": {
       "status": "❌ FAILED",
       "error": "Both tokens failed: ❌ GH_PAT: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:11.123Z"
+      "timestamp": "2025-08-15T17:43:33.186Z"
     },
     "CURSOR_API": {
       "status": "✅ VALIDATED",
@@ -70,11 +84,11 @@
       ],
       "testData": "Key format valid: 68 characters starting with 'key_'",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:11.124Z"
+      "timestamp": "2025-08-15T17:43:33.186Z"
     },
     "MONGODB_URI": {
       "status": "✅ WORKING",
-      "responseTime": "2032ms",
+      "responseTime": "2079ms",
       "features": [
         "Database connectivity",
         "User data storage",
@@ -82,17 +96,32 @@
       ],
       "testData": "Ping result: Connected",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:13.158Z"
+      "timestamp": "2025-08-15T17:43:35.268Z"
     },
     "REDIS_URI": {
-      "status": "❌ FAILED",
-      "error": "WRONGPASS invalid username-password pair",
+      "status": "✅ WORKING",
+      "responseTime": "1122ms",
+      "features": [
+        "High-speed caching",
+        "Session storage",
+        "Performance optimization"
+      ],
+      "testData": "Ping successful, Set/Get operations working",
+      "connectionDetails": {
+        "host": "redis-15392.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:15392",
+        "username": "default",
+        "passwordLength": "32 chars"
+      },
+      "alternativeAPIs": {
+        "accountAPI": "✅ Available",
+        "usedAPI": "✅ Available"
+      },
       "tested": true,
-      "timestamp": "2025-08-15T16:53:13.532Z"
+      "timestamp": "2025-08-15T17:43:36.545Z"
     },
     "GEMINI_API": {
       "status": "✅ WORKING",
-      "responseTime": "2340ms",
+      "responseTime": "2046ms",
       "features": [
         "AI text generation",
         "Multimodal AI",
@@ -111,17 +140,17 @@
       "totalKeys": 6,
       "workingKeys": 6,
       "tested": true,
-      "timestamp": "2025-08-15T16:53:15.873Z"
+      "timestamp": "2025-08-15T17:43:38.592Z"
     },
     "OPENROUTER_API": {
       "status": "❌ FAILED",
       "error": "All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:16.731Z"
+      "timestamp": "2025-08-15T17:43:39.527Z"
     },
     "SECURITY_SECRETS": {
       "status": "✅ WORKING",
-      "responseTime": "21ms",
+      "responseTime": "23ms",
       "features": [
         "JWT token generation",
         "Session security",
@@ -129,16 +158,14 @@
       ],
       "testData": "JWT secret length: 64 characters",
       "tested": true,
-      "timestamp": "2025-08-15T16:53:16.752Z"
+      "timestamp": "2025-08-15T17:43:39.550Z"
     }
   },
   "performance": {},
   "recommendations": [],
   "errors": [
-    "BROWSERBASE_API: Browserbase API failed: 401 Unauthorized",
     "DIGITALOCEAN_API: DigitalOcean API failed: 401 Unauthorized",
     "GITHUB_API: Both tokens failed: ❌ GH_PAT: 401 Unauthorized",
-    "REDIS_URI: WRONGPASS invalid username-password pair",
     "OPENROUTER_API: All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized"
   ]
 }

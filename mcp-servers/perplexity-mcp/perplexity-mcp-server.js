@@ -37,7 +37,7 @@ class PerplexityMCPServer {
     // Environment configuration
     this.apiKey = process.env.PERPLEXITY_API_KEY;
     this.baseUrl = process.env.PERPLEXITY_BASE_URL || 'https://api.perplexity.ai';
-    this.model = process.env.PERPLEXITY_MODEL || 'llama-3.1-sonar-large-128k-online';
+    this.model = process.env.PERPLEXITY_MODEL || 'sonar-pro';
     
     // Performance budgets and limits
     this.performanceBudgets = {
@@ -133,7 +133,7 @@ class PerplexityMCPServer {
                     model: {
                       type: 'string',
                       description: 'Perplexity model (sonar-large-128k-online, sonar-reasoning-pro, etc.)',
-                      enum: ['llama-3.1-sonar-large-128k-online', 'llama-3.1-sonar-small-128k-online', 'sonar-reasoning-pro'],
+                      enum: ['sonar-pro', 'sonar', 'llama-3.1-sonar-small-128k-online', 'llama-3.1-sonar-large-128k-online'],
                     },
                     max_tokens: {
                       type: 'number',
@@ -631,7 +631,6 @@ class PerplexityMCPServer {
       console.error(`[Perplexity MCP] Cache backend: ${this.redisClient ? 'Redis' : 'Memory'}`);
     }
   }
-}
 }
 
 // Global fetch polyfill for Node.js

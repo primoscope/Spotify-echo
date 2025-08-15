@@ -41,7 +41,7 @@
     "mcp:continuous-monitor": "node scripts/continuous-mcp-monitor.js",
     "mcpperplexity": "node mcp-servers/perplexity-mcp/perplexity-mcp-server.js",
     "testperplexity": "node -e \"const server = require('./mcp-servers/perplexity-mcp/perplexity-mcp-server.js'); console.log('Perplexity MCP server test passed');\"",
-    "generate-cursor-mcp": "node scripts/generate-cursor-mcp.js",
+    "generate-cursor-mcp": "node scripts/generate-cursor-mcp-enhanced.js",
     "dev": "nodemon src/index.js",
     "dev:frontend": "vite",
     "build": "vite build",
@@ -177,15 +177,13 @@
     "gemini-test": "node scripts/test-gemini-integration.js",
     "gemini-health": "node scripts/test-gemini-integration.js",
     "test:gemini-integration": "node scripts/test-gemini-integration.js",
-
-    "production-check": "./scripts/production-readiness-check.sh",
+    "production-check": "node scripts/production-readiness-orchestrator.js --production-check",
     "production-deploy": "./scripts/deploy-digitalocean.sh",
     "workflow:analyze": "node scripts/workflow-optimizer.js analyze",
     "workflow:optimize": "node scripts/workflow-optimizer.js optimize",
     "workflow:optimize:apply": "node scripts/workflow-optimizer.js optimize --apply",
     "workflow:status": "node agent-workflow/workflow-cli.js status",
     "workflow:report": "node scripts/workflow-optimizer.js report",
-
     "agent:run": "node scripts/continuous-agent.js",
     "agent:analyze": "node scripts/continuous-agent.js analyze",
     "agent:create-issue": "node scripts/continuous-agent.js create-issue",
@@ -244,20 +242,15 @@
     "enhanced-mcp:health": "curl -s http://localhost:3000/api/enhanced-mcp/health | jq '.' || echo 'Enhanced MCP server not running'",
     "enhanced-mcp:capabilities": "curl -s http://localhost:3000/api/enhanced-mcp/capabilities | jq '.' || echo 'Enhanced MCP server not running'",
     "enhanced-mcp:models": "curl -s http://localhost:3000/api/enhanced-mcp/models | jq '.' || echo 'Enhanced MCP server not running'",
-
     "production-readiness": "node scripts/production-readiness-analyzer.js",
     "production-automation": "node scripts/mcp-production-automation.js",
     "production-analysis": "node scripts/production-readiness-orchestrator.js",
     "production-analysis:quick": "node scripts/production-readiness-orchestrator.js --quick",
     "production-analysis:full": "node scripts/production-readiness-orchestrator.js --full",
-    "production-check": "node scripts/production-readiness-orchestrator.js --production-check",
-
     "production-fixes": "npm run lint:fix && npm audit fix && npm run format",
     "production-ready": "npm run production-analysis && echo 'Check PRODUCTION_READINESS_EXECUTIVE_SUMMARY.md for results'",
-
     "mcp:health:n8n": "node scripts/mcp/probes/probe-n8n.js",
     "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js"
-
   },
   "keywords": [
     "music",
@@ -291,7 +284,7 @@
     "@emotion/styled": "^11.14.1",
     "@google/generative-ai": "^0.2.1",
     "@hisma/server-puppeteer": "^0.6.5",
-    "@modelcontextprotocol/sdk": "^1.17.2",
+    "@modelcontextprotocol/sdk": "^1.17.3",
     "@modelcontextprotocol/server-filesystem": "^2025.7.29",
     "@modelcontextprotocol/server-puppeteer": "^2025.5.12",
     "@modelcontextprotocol/server-sequential-thinking": "^2025.7.1",

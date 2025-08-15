@@ -1,6 +1,6 @@
 # MCP Health Check Report
 
-**Generated:** 2025-08-12T18:21:55Z  
+**Generated:** 2025-08-15T15:44:48Z  
 **Overall Status:** warning  
 **Total Checks:** 38
 
@@ -18,7 +18,7 @@
 | Comprehensive Validator MCP | ✅ healthy | File present at mcp-servers/comprehensive-validator.js |
 | MCP Orchestrator | ✅ healthy | File present at mcp-server/enhanced-mcp-orchestrator.js |
 | Workflow Manager | ✅ healthy | File present at mcp-server/workflow-manager.js |
-| MCP SDK | ✅ healthy | Package installed (v1.17.2) |
+| MCP SDK | ✅ healthy | Package installed (v1.17.3) |
 | Filesystem MCP | ✅ healthy | Package installed (v2025.7.29) |
 | Browserbase MCP | ✅ healthy | Package installed (vgithub.com/browserbase/mcp-server-browserbase.git#056e479778a0a6fc401d7e1743aa3128a16f869c)) |
 | FileScope MCP | ✅ healthy | Package installed (vgithub.com/admica/FileScopeMCP.git#cf35d164f8c73240619ef78c4b09955f073ddba1)) |
@@ -26,9 +26,9 @@
 | MongoDB Database | ⚠️ warning | Environment variable not set (optional) |
 | N8N Base URL | ⚠️ warning | Environment variable not set (optional) |
 | N8N API Key | ⚠️ warning | Environment variable not set (optional) |
-| Brave Search API | ⚠️ warning | Environment variable not set (optional) |
+| Brave Search API | ✅ healthy | Environment variable configured |
 | Screenshot Engine | ⚠️ warning | Environment variable not set (optional) |
-| Browserbase API | ⚠️ warning | Environment variable not set (optional) |
+| Browserbase API | ✅ healthy | Environment variable configured |
 | Browserbase Project | ⚠️ warning | Environment variable not set (optional) |
 | Spotify API | ⚠️ warning | Environment variable not set (optional) |
 | Spotify API Secret | ⚠️ warning | Environment variable not set (optional) |

@@ -11,6 +11,12 @@
       "id": "brave-api-key",
       "description": "Brave Search API Key (optional - for research capabilities)",
       "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "perplexity-api-key", 
+      "description": "Perplexity API Key (optional - for enhanced research with grok-4, sonar-pro, GPT-5)",
+      "password": true
     }
   ],
   "servers": {
@@ -64,6 +70,17 @@
         "BRAVE_API_KEY": "${input:brave-api-key}"
       },
       "description": "Privacy-focused web research (optional, requires API key)"
+    },
+    "perplexity-enhanced": {
+      "command": "node",
+      "args": ["${workspaceFolder}/mcp-servers/perplexity-mcp/perplexity-mcp-server.js"],
+      "env": {
+        "PERPLEXITY_API_KEY": "${input:perplexity-api-key}",
+        "PERPLEXITY_MODEL": "sonar-pro",
+        "PERPLEXITY_MAX_LATENCY_MS": "3000",
+        "PERPLEXITY_COST_BUDGET_USD": "0.50"
+      },
+      "description": "Enhanced Perplexity research with model comparison (grok-4, sonar-pro, GPT-5) and workflow optimization"
     }
   }
 }

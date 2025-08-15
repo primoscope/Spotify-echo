@@ -42,6 +42,8 @@
     "mcp:continuous-monitor": "node scripts/continuous-mcp-monitor.js",
     "mcpperplexity": "node mcp-servers/perplexity-mcp/perplexity-mcp-server.js",
     "testperplexity": "node -e \"const server = require('./mcp-servers/perplexity-mcp/perplexity-mcp-server.js'); console.log('Perplexity MCP server test passed');\"",
+    "test:perplexity-enhanced": "node mcp-servers/perplexity-mcp/test-enhanced-perplexity.js",
+    "validate:perplexity-enhanced": "./mcp-servers/perplexity-mcp/validate-enhanced-perplexity.sh",
     "generate-cursor-mcp": "node scripts/generate-cursor-mcp-enhanced.js",
     "dev": "nodemon src/index.js",
     "dev:frontend": "vite",

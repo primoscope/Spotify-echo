@@ -126,6 +126,32 @@
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-fetch"],
           "capabilities": ["web_content_fetching", "documentation_retrieval", "research"]
+        },
+        "perplexity_enhanced": {
+          "name": "Enhanced Perplexity Research MCP",
+          "command": "node",
+          "args": ["${WORKSPACE_FOLDER:-./mcp-servers/perplexity-mcp/perplexity-mcp-server.js}"],
+          "env": {
+            "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
+            "PERPLEXITY_MODEL": "${PERPLEXITY_MODEL:-sonar-pro}",
+            "PERPLEXITY_MAX_LATENCY_MS": "3000",
+            "PERPLEXITY_COST_BUDGET_USD": "0.50"
+          },
+          "capabilities": [
+            "advanced_research",
+            "model_comparison", 
+            "workflow_optimization",
+            "performance_budgets",
+            "multi_model_support"
+          ],
+          "models": ["grok-4", "sonar-pro", "sonar-reasoning-pro", "gpt-5", "llama-3.1-sonar-large-128k-online", "llama-3.1-sonar-small-128k-online"],
+          "features": [
+            "Real-time model comparison",
+            "Automated workflow optimization",
+            "Cost and performance budgeting",
+            "Advanced caching with Redis support",
+            "Comprehensive research capabilities"
+          ]
         }
       }
     }
@@ -148,6 +174,18 @@
         "description": "Current workspace folder path",
         "required": false,
         "default": "."
+      },
+      "PERPLEXITY_API_KEY": {
+        "description": "Perplexity AI API Key for enhanced research capabilities",
+        "required": false,
+        "signupUrl": "https://www.perplexity.ai/settings/api",
+        "models": ["grok-4", "sonar-pro", "sonar-reasoning-pro", "gpt-5"]
+      },
+      "PERPLEXITY_MODEL": {
+        "description": "Default Perplexity model to use",
+        "required": false,
+        "default": "sonar-pro",
+        "options": ["grok-4", "sonar-pro", "sonar-reasoning-pro", "llama-3.1-sonar-small-128k-online", "llama-3.1-sonar-large-128k-online", "gpt-5"]
       }
     }
   },

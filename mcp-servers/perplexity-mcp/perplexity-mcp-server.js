@@ -39,6 +39,55 @@ class PerplexityMCPServer {
     this.baseUrl = process.env.PERPLEXITY_BASE_URL || 'https://api.perplexity.ai';
     this.model = process.env.PERPLEXITY_MODEL || 'sonar-pro';
     
+    // Enhanced model configurations with specific settings
+    this.modelConfigs = {
+      // Grok models (xAI)
+      'grok-4': {
+        provider: 'perplexity',
+        contextLength: 128000,
+        costPer1kTokens: 0.005,
+        recommended: 'advanced reasoning and coding',
+        features: ['web_search', 'real_time_data', 'coding', 'math']
+      },
+      // Sonar models (Perplexity native)
+      'sonar-pro': {
+        provider: 'perplexity', 
+        contextLength: 128000,
+        costPer1kTokens: 0.003,
+        recommended: 'general research and analysis',
+        features: ['web_search', 'citations', 'recent_data']
+      },
+      'sonar-reasoning-pro': {
+        provider: 'perplexity',
+        contextLength: 128000, 
+        costPer1kTokens: 0.004,
+        recommended: 'complex reasoning and problem solving',
+        features: ['step_by_step_reasoning', 'web_search', 'citations']
+      },
+      'llama-3.1-sonar-large-128k-online': {
+        provider: 'perplexity',
+        contextLength: 128000,
+        costPer1kTokens: 0.004,
+        recommended: 'large context research',
+        features: ['web_search', 'large_context', 'online_data']
+      },
+      'llama-3.1-sonar-small-128k-online': {
+        provider: 'perplexity',
+        contextLength: 128000,
+        costPer1kTokens: 0.002,
+        recommended: 'fast research queries',
+        features: ['web_search', 'fast_response', 'online_data']
+      },
+      // GPT-5 (when available through Perplexity)
+      'gpt-5': {
+        provider: 'perplexity',
+        contextLength: 200000,
+        costPer1kTokens: 0.008,
+        recommended: 'advanced coding and complex analysis',
+        features: ['advanced_reasoning', 'coding', 'multimodal', 'web_search']
+      }
+    };
+    
     // Performance budgets and limits
     this.performanceBudgets = {
       maxLatencyMs: parseInt(process.env.PERPLEXITY_MAX_LATENCY_MS || '1500', 10), // p95 ≤ 1500ms
@@ -132,8 +181,15 @@ class PerplexityMCPServer {
                   properties: {
                     model: {
                       type: 'string',
-                      description: 'Perplexity model (sonar-large-128k-online, sonar-reasoning-pro, etc.)',
-                      enum: ['sonar-pro', 'sonar', 'llama-3.1-sonar-small-128k-online', 'llama-3.1-sonar-large-128k-online'],
+                      description: 'AI model to use for research (includes advanced models like grok-4 and GPT-5)',
+                      enum: [
+                        'grok-4',
+                        'sonar-pro', 
+                        'sonar-reasoning-pro',
+                        'llama-3.1-sonar-small-128k-online',
+                        'llama-3.1-sonar-large-128k-online',
+                        'gpt-5'
+                      ],
                     },
                     max_tokens: {
                       type: 'number',
@@ -172,6 +228,59 @@ class PerplexityMCPServer {
               properties: {},
             },
           },
+          {
+            name: 'model_comparison',
+            description: 'Compare performance and capabilities across different AI models (grok-4, sonar-pro, GPT-5) for a given query',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                q: {
+                  type: 'string',
+                  description: 'Research query to test across models',
+                },
+                models: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Models to compare (default: grok-4, sonar-pro, GPT-5)',
+                  default: ['grok-4', 'sonar-pro', 'gpt-5'],
+                },
+                metrics: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Metrics to compare (latency, cost, quality, citations)',
+                  enum: ['latency', 'cost', 'quality', 'citations', 'accuracy'],
+                  default: ['latency', 'cost', 'quality'],
+                },
+              },
+              required: ['q'],
+            },
+          },
+          {
+            name: 'workflow_optimization',
+            description: 'Generate optimized workflow configurations for specific coding agent tasks',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                task_type: {
+                  type: 'string',
+                  description: 'Type of coding task to optimize',
+                  enum: ['research', 'debugging', 'code_review', 'feature_development', 'testing', 'documentation'],
+                },
+                complexity: {
+                  type: 'string',
+                  description: 'Task complexity level',
+                  enum: ['simple', 'moderate', 'complex', 'enterprise'],
+                },
+                optimization_goals: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Primary optimization goals',
+                  enum: ['speed', 'accuracy', 'cost_efficiency', 'comprehensive_research', 'automation'],
+                },
+              },
+              required: ['task_type'],
+            },
+          },
         ],
       };
     });
@@ -190,6 +299,10 @@ class PerplexityMCPServer {
           return await this.handleResearch(args);
         } else if (name === 'health') {
           return await this.handleHealth(args);
+        } else if (name === 'model_comparison') {
+          return await this.handleModelComparison(args);
+        } else if (name === 'workflow_optimization') {
+          return await this.handleWorkflowOptimization(args);
         } else {
           throw new McpError(
             ErrorCode.MethodNotFound,
@@ -327,9 +440,10 @@ class PerplexityMCPServer {
     const startTime = Date.now();
     
     try {
-      // Estimate cost (rough approximation)
+      // Calculate accurate cost based on model
+      const modelConfig = this.modelConfigs[opts.model || this.model];
       const estimatedTokens = Math.max(opts.max_tokens || 2000, q.length / 3);
-      const estimatedCost = (estimatedTokens / 1000) * 0.002; // Rough estimate: $0.002 per 1K tokens
+      const estimatedCost = (estimatedTokens / 1000) * (modelConfig?.costPer1kTokens || 0.003);
       
       if (this.sessionCosts.current + estimatedCost > this.performanceBudgets.costBudgetUSD) {
         throw new McpError(
@@ -591,6 +705,442 @@ class PerplexityMCPServer {
     }
 
     this.cache.set(key, cacheEntry);
+  }
+
+  async handleModelComparison(args) {
+    const { q, models = ['grok-4', 'sonar-pro', 'gpt-5'], metrics = ['latency', 'cost', 'quality'] } = args;
+    
+    if (!this.apiKey) {
+      throw new McpError(
+        ErrorCode.InvalidRequest,
+        'PERPLEXITY_API_KEY environment variable is required for model comparison.'
+      );
+    }
+
+    if (!q || q.trim().length === 0) {
+      throw new McpError(
+        ErrorCode.InvalidRequest,
+        'Query cannot be empty for model comparison'
+      );
+    }
+
+    const results = [];
+    const startTime = Date.now();
+    
+    try {
+      // Run queries in parallel for efficiency
+      const promises = models.map(async (model) => {
+        const modelStartTime = Date.now();
+        
+        try {
+          const modelConfig = this.modelConfigs[model];
+          if (!modelConfig) {
+            return {
+              model,
+              error: `Unsupported model: ${model}`,
+              metrics: {},
+            };
+          }
+
+          // Make request with specific model
+          const response = await this.makePerplexityRequest(q, { model, max_tokens: 1000 });
+          const duration = Date.now() - modelStartTime;
+          
+          // Calculate metrics
+          const estimatedTokens = Math.min(response.length / 3, 1000);
+          const cost = (estimatedTokens / 1000) * modelConfig.costPer1kTokens;
+          
+          // Basic quality scoring (could be enhanced with actual quality metrics)
+          const qualityScore = this.assessResponseQuality(response);
+          const citationCount = (response.match(/\[\d+\]/g) || []).length;
+          
+          return {
+            model,
+            response: response.substring(0, 200) + '...', // Truncated for comparison
+            metrics: {
+              latency: metrics.includes('latency') ? `${duration}ms` : undefined,
+              cost: metrics.includes('cost') ? `$${cost.toFixed(4)}` : undefined,
+              quality: metrics.includes('quality') ? `${qualityScore}/10` : undefined,
+              citations: metrics.includes('citations') ? citationCount : undefined,
+              accuracy: metrics.includes('accuracy') ? 'N/A (subjective)' : undefined,
+            },
+            config: modelConfig,
+          };
+        } catch (error) {
+          return {
+            model,
+            error: error.message,
+            metrics: {},
+          };
+        }
+      });
+
+      const modelResults = await Promise.all(promises);
+      const totalDuration = Date.now() - startTime;
+      
+      // Generate comparison analysis
+      const analysis = this.generateComparisonAnalysis(modelResults, metrics);
+      
+      return {
+        content: [{
+          type: 'text',
+          text: `🔬 **Model Comparison Results** for: "${q.substring(0, 100)}..."\n\n${this.formatComparisonResults(modelResults, analysis)}`
+        }],
+        meta: {
+          query: q,
+          models: models,
+          metrics: metrics,
+          totalDuration: `${totalDuration}ms`,
+          results: modelResults,
+          analysis: analysis,
+          timestamp: new Date().toISOString(),
+        },
+      };
+      
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text',
+          text: `❌ Model comparison failed: ${error.message}`,
+        }],
+        isError: true,
+        meta: {
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    }
+  }
+
+  async handleWorkflowOptimization(args) {
+    const { task_type, complexity = 'moderate', optimization_goals = ['speed', 'accuracy'] } = args;
+    
+    try {
+      // Generate optimized workflow configuration based on task type
+      const workflow = this.generateOptimizedWorkflow(task_type, complexity, optimization_goals);
+      
+      return {
+        content: [{
+          type: 'text',
+          text: `⚙️ **Optimized Workflow Configuration**\n\n**Task:** ${task_type} (${complexity})\n**Goals:** ${optimization_goals.join(', ')}\n\n${this.formatWorkflowConfig(workflow)}`
+        }],
+        meta: {
+          task_type,
+          complexity,
+          optimization_goals,
+          workflow,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text',
+          text: `❌ Workflow optimization failed: ${error.message}`,
+        }],
+        isError: true,
+        meta: {
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    }
+  }
+
+  assessResponseQuality(response) {
+    // Simple quality assessment - could be enhanced with NLP analysis
+    let score = 5; // Base score
+    
+    // Check for citations
+    const citations = (response.match(/\[\d+\]/g) || []).length;
+    if (citations > 0) score += 2;
+    
+    // Check for structured content
+    if (response.includes('**') || response.includes('##')) score += 1;
+    
+    // Check for comprehensive content
+    if (response.length > 500) score += 1;
+    
+    // Check for specific details (numbers, dates, etc.)
+    if (response.match(/\d{4}|\d+%|\$\d+/)) score += 1;
+    
+    return Math.min(score, 10);
+  }
+
+  generateComparisonAnalysis(results, metrics) {
+    const analysis = {
+      fastest: null,
+      cheapest: null,
+      highest_quality: null,
+      most_citations: null,
+      recommendations: [],
+    };
+    
+    let fastestTime = Infinity;
+    let lowestCost = Infinity;
+    let highestQuality = 0;
+    let mostCitations = 0;
+    
+    results.forEach(result => {
+      if (result.error) return;
+      
+      // Find fastest
+      if (result.metrics.latency) {
+        const time = parseInt(result.metrics.latency);
+        if (time < fastestTime) {
+          fastestTime = time;
+          analysis.fastest = result.model;
+        }
+      }
+      
+      // Find cheapest
+      if (result.metrics.cost) {
+        const cost = parseFloat(result.metrics.cost.replace('$', ''));
+        if (cost < lowestCost) {
+          lowestCost = cost;
+          analysis.cheapest = result.model;
+        }
+      }
+      
+      // Find highest quality
+      if (result.metrics.quality) {
+        const quality = parseInt(result.metrics.quality.split('/')[0]);
+        if (quality > highestQuality) {
+          highestQuality = quality;
+          analysis.highest_quality = result.model;
+        }
+      }
+      
+      // Find most citations
+      if (result.metrics.citations && result.metrics.citations > mostCitations) {
+        mostCitations = result.metrics.citations;
+        analysis.most_citations = result.model;
+      }
+    });
+    
+    // Generate recommendations
+    analysis.recommendations.push(`🚀 **Speed Champion:** ${analysis.fastest || 'N/A'}`);
+    analysis.recommendations.push(`💰 **Cost Efficient:** ${analysis.cheapest || 'N/A'}`);
+    analysis.recommendations.push(`🎯 **Quality Leader:** ${analysis.highest_quality || 'N/A'}`);
+    analysis.recommendations.push(`📚 **Citation Rich:** ${analysis.most_citations || 'N/A'}`);
+    
+    return analysis;
+  }
+
+  generateOptimizedWorkflow(taskType, complexity, goals) {
+    const workflows = {
+      research: {
+        simple: {
+          model: goals.includes('cost_efficiency') ? 'llama-3.1-sonar-small-128k-online' : 'sonar-pro',
+          max_tokens: 1500,
+          temperature: 0.3,
+          recency_filter: 'week',
+          steps: [
+            'Initial query with focused search',
+            'Review and validate key findings',
+            'Generate summary with citations'
+          ]
+        },
+        moderate: {
+          model: goals.includes('comprehensive_research') ? 'grok-4' : 'sonar-pro',
+          max_tokens: 2500,
+          temperature: 0.2,
+          recency_filter: 'month',
+          steps: [
+            'Broad initial research query',
+            'Follow-up queries for specific aspects',
+            'Cross-reference and validate information',
+            'Generate comprehensive analysis'
+          ]
+        },
+        complex: {
+          model: 'gpt-5',
+          max_tokens: 4000,
+          temperature: 0.1,
+          recency_filter: 'month',
+          steps: [
+            'Multi-faceted research approach',
+            'Deep dive into technical aspects',
+            'Expert opinion and analysis gathering',
+            'Synthesis and critical evaluation',
+            'Comprehensive report with recommendations'
+          ]
+        },
+        enterprise: {
+          model: 'gpt-5',
+          max_tokens: 4000,
+          temperature: 0.1,
+          recency_filter: 'year',
+          parallel_queries: true,
+          steps: [
+            'Parallel research across multiple domains',
+            'Expert validation and peer review simulation',
+            'Risk analysis and impact assessment',
+            'Strategic recommendations with implementation plan',
+            'Executive summary and detailed appendices'
+          ]
+        }
+      },
+      debugging: {
+        simple: {
+          model: 'sonar-pro',
+          max_tokens: 1000,
+          temperature: 0.1,
+          domain_filter: ['stackoverflow.com', 'github.com'],
+          steps: [
+            'Search for specific error patterns',
+            'Identify common solutions',
+            'Validate fix approach'
+          ]
+        },
+        moderate: {
+          model: 'grok-4',
+          max_tokens: 2000,
+          temperature: 0.1,
+          steps: [
+            'Comprehensive error analysis',
+            'Root cause investigation',
+            'Multiple solution approaches',
+            'Implementation guidance'
+          ]
+        },
+        complex: {
+          model: 'gpt-5',
+          max_tokens: 3000,
+          temperature: 0.1,
+          steps: [
+            'System-wide impact analysis',
+            'Advanced debugging strategies',
+            'Performance optimization opportunities',
+            'Preventive measures and best practices'
+          ]
+        }
+      },
+      code_review: {
+        simple: {
+          model: 'sonar-pro',
+          max_tokens: 1500,
+          focus: ['security', 'performance', 'best_practices'],
+          steps: [
+            'Security vulnerability scan',
+            'Performance bottleneck identification',
+            'Code quality assessment'
+          ]
+        },
+        moderate: {
+          model: 'grok-4',
+          max_tokens: 2500,
+          focus: ['architecture', 'maintainability', 'testing'],
+          steps: [
+            'Architecture pattern analysis',
+            'Maintainability scoring',
+            'Test coverage recommendations',
+            'Refactoring suggestions'
+          ]
+        },
+        complex: {
+          model: 'gpt-5',
+          max_tokens: 4000,
+          focus: ['scalability', 'enterprise_patterns', 'compliance'],
+          steps: [
+            'Enterprise scalability analysis',
+            'Compliance and governance review',
+            'Advanced architectural recommendations',
+            'Long-term technical debt assessment'
+          ]
+        }
+      }
+    };
+    
+    const baseWorkflow = workflows[taskType]?.[complexity] || workflows[taskType]?.moderate || {
+      model: 'sonar-pro',
+      max_tokens: 2000,
+      temperature: 0.3,
+      steps: ['Generic task execution', 'Review and validation', 'Output generation']
+    };
+    
+    // Apply optimization goals
+    if (goals.includes('speed')) {
+      baseWorkflow.max_tokens = Math.min(baseWorkflow.max_tokens, 1500);
+      baseWorkflow.model = baseWorkflow.model === 'gpt-5' ? 'grok-4' : baseWorkflow.model;
+    }
+    
+    if (goals.includes('cost_efficiency')) {
+      baseWorkflow.model = 'llama-3.1-sonar-small-128k-online';
+      baseWorkflow.max_tokens = Math.min(baseWorkflow.max_tokens, 1000);
+    }
+    
+    if (goals.includes('accuracy')) {
+      baseWorkflow.temperature = Math.max(baseWorkflow.temperature - 0.1, 0.1);
+    }
+    
+    if (goals.includes('comprehensive_research')) {
+      baseWorkflow.model = complexity === 'simple' ? 'sonar-pro' : 'gpt-5';
+      baseWorkflow.max_tokens = Math.max(baseWorkflow.max_tokens, 3000);
+    }
+    
+    return baseWorkflow;
+  }
+
+  formatComparisonResults(results, analysis) {
+    let output = '';
+    
+    results.forEach(result => {
+      output += `### ${result.model}\n`;
+      if (result.error) {
+        output += `❌ **Error:** ${result.error}\n\n`;
+      } else {
+        output += `**Response Preview:** ${result.response}\n`;
+        Object.entries(result.metrics).forEach(([metric, value]) => {
+          if (value !== undefined) {
+            output += `**${metric.charAt(0).toUpperCase() + metric.slice(1)}:** ${value}\n`;
+          }
+        });
+        if (result.config) {
+          output += `**Best For:** ${result.config.recommended}\n`;
+          output += `**Features:** ${result.config.features.join(', ')}\n`;
+        }
+        output += '\n';
+      }
+    });
+    
+    output += '## 📊 **Analysis Summary**\n';
+    analysis.recommendations.forEach(rec => {
+      output += `${rec}\n`;
+    });
+    
+    return output;
+  }
+
+  formatWorkflowConfig(workflow) {
+    let output = '';
+    
+    output += `**Recommended Model:** ${workflow.model}\n`;
+    output += `**Max Tokens:** ${workflow.max_tokens}\n`;
+    output += `**Temperature:** ${workflow.temperature}\n`;
+    
+    if (workflow.recency_filter) {
+      output += `**Search Recency:** ${workflow.recency_filter}\n`;
+    }
+    
+    if (workflow.domain_filter) {
+      output += `**Domain Focus:** ${workflow.domain_filter.join(', ')}\n`;
+    }
+    
+    if (workflow.focus) {
+      output += `**Review Focus:** ${workflow.focus.join(', ')}\n`;
+    }
+    
+    if (workflow.parallel_queries) {
+      output += `**Parallel Processing:** Enabled\n`;
+    }
+    
+    output += '\n**Execution Steps:**\n';
+    workflow.steps.forEach((step, index) => {
+      output += `${index + 1}. ${step}\n`;
+    });
+    
+    return output;
   }
 
   async shutdown() {

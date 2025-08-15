@@ -1,0 +1,540 @@
+{
+  "timestamp": "2025-08-15T22:21:27.838Z",
+  "environment": {
+    "nodeVersion": "v20.19.4",
+    "platform": "linux",
+    "apiKeyPresent": false,
+    "testDuration": 22876
+  },
+  "connectivity": {
+    "name": "API Connectivity",
+    "status": "SKIPPED",
+    "startTime": 1755296487844,
+    "attempts": 0,
+    "maxAttempts": 3,
+    "errors": [],
+    "reason": "No API key provided - using mock responses",
+    "endTime": 1755296487844,
+    "duration": 0,
+    "mockMode": true
+  },
+  "modelTests": {
+    "grok-4": {
+      "name": "Model Test: grok-4",
+      "model": "grok-4",
+      "status": "PASS",
+      "startTime": 1755296487844,
+      "testCases": [
+        {
+          "name": "Basic Response",
+          "prompt": "Respond with exactly \"TEST_PASSED\" to confirm functionality",
+          "expectedPattern": {},
+          "maxTokens": 10,
+          "status": "PASS",
+          "response": "TEST_PASSED - Mock Response",
+          "duration": 1,
+          "passed": true
+        },
+        {
+          "name": "Code Analysis",
+          "prompt": "Analyze this JavaScript code and provide a brief assessment: function test() { return \"hello\"; }",
+          "expectedPattern": {},
+          "maxTokens": 100,
+          "status": "PASS",
+          "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Structured Response",
+          "prompt": "Provide a JSON response with status \"success\" and message \"working\"",
+          "expectedPattern": {},
+          "maxTokens": 50,
+          "status": "PASS",
+          "response": "{\"status\": \"success\", \"message\": \"working\"}",
+          "duration": 0,
+          "passed": true
+        }
+      ],
+      "performance": {
+        "successRate": 100,
+        "averageResponseTime": 0,
+        "totalTests": 3,
+        "passedTests": 3
+      },
+      "endTime": 1755296487845,
+      "duration": 1
+    },
+    "claude-3.5-sonnet": {
+      "name": "Model Test: claude-3.5-sonnet",
+      "model": "claude-3.5-sonnet",
+      "status": "PASS",
+      "startTime": 1755296487845,
+      "testCases": [
+        {
+          "name": "Basic Response",
+          "prompt": "Respond with exactly \"TEST_PASSED\" to confirm functionality",
+          "expectedPattern": {},
+          "maxTokens": 10,
+          "status": "PASS",
+          "response": "TEST_PASSED - Mock Response",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Code Analysis",
+          "prompt": "Analyze this JavaScript code and provide a brief assessment: function test() { return \"hello\"; }",
+          "expectedPattern": {},
+          "maxTokens": 100,
+          "status": "PASS",
+          "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Structured Response",
+          "prompt": "Provide a JSON response with status \"success\" and message \"working\"",
+          "expectedPattern": {},
+          "maxTokens": 50,
+          "status": "PASS",
+          "response": "{\"status\": \"success\", \"message\": \"working\"}",
+          "duration": 0,
+          "passed": true
+        }
+      ],
+      "performance": {
+        "successRate": 100,
+        "averageResponseTime": 0,
+        "totalTests": 3,
+        "passedTests": 3
+      },
+      "endTime": 1755296487845,
+      "duration": 0
+    },
+    "sonar-pro": {
+      "name": "Model Test: sonar-pro",
+      "model": "sonar-pro",
+      "status": "PASS",
+      "startTime": 1755296487846,
+      "testCases": [
+        {
+          "name": "Basic Response",
+          "prompt": "Respond with exactly \"TEST_PASSED\" to confirm functionality",
+          "expectedPattern": {},
+          "maxTokens": 10,
+          "status": "PASS",
+          "response": "TEST_PASSED - Mock Response",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Code Analysis",
+          "prompt": "Analyze this JavaScript code and provide a brief assessment: function test() { return \"hello\"; }",
+          "expectedPattern": {},
+          "maxTokens": 100,
+          "status": "PASS",
+          "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Structured Response",
+          "prompt": "Provide a JSON response with status \"success\" and message \"working\"",
+          "expectedPattern": {},
+          "maxTokens": 50,
+          "status": "PASS",
+          "response": "{\"status\": \"success\", \"message\": \"working\"}",
+          "duration": 0,
+          "passed": true
+        }
+      ],
+      "performance": {
+        "successRate": 100,
+        "averageResponseTime": 0,
+        "totalTests": 3,
+        "passedTests": 3
+      },
+      "endTime": 1755296487846,
+      "duration": 0
+    },
+    "llama-3.3-70b": {
+      "name": "Model Test: llama-3.3-70b",
+      "model": "llama-3.3-70b",
+      "status": "PASS",
+      "startTime": 1755296487846,
+      "testCases": [
+        {
+          "name": "Basic Response",
+          "prompt": "Respond with exactly \"TEST_PASSED\" to confirm functionality",
+          "expectedPattern": {},
+          "maxTokens": 10,
+          "status": "PASS",
+          "response": "TEST_PASSED - Mock Response",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Code Analysis",
+          "prompt": "Analyze this JavaScript code and provide a brief assessment: function test() { return \"hello\"; }",
+          "expectedPattern": {},
+          "maxTokens": 100,
+          "status": "PASS",
+          "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Structured Response",
+          "prompt": "Provide a JSON response with status \"success\" and message \"working\"",
+          "expectedPattern": {},
+          "maxTokens": 50,
+          "status": "PASS",
+          "response": "{\"status\": \"success\", \"message\": \"working\"}",
+          "duration": 0,
+          "passed": true
+        }
+      ],
+      "performance": {
+        "successRate": 100,
+        "averageResponseTime": 0,
+        "totalTests": 3,
+        "passedTests": 3
+      },
+      "endTime": 1755296487846,
+      "duration": 0
+    },
+    "o1-preview": {
+      "name": "Model Test: o1-preview",
+      "model": "o1-preview",
+      "status": "PASS",
+      "startTime": 1755296487846,
+      "testCases": [
+        {
+          "name": "Basic Response",
+          "prompt": "Respond with exactly \"TEST_PASSED\" to confirm functionality",
+          "expectedPattern": {},
+          "maxTokens": 10,
+          "status": "PASS",
+          "response": "TEST_PASSED - Mock Response",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Code Analysis",
+          "prompt": "Analyze this JavaScript code and provide a brief assessment: function test() { return \"hello\"; }",
+          "expectedPattern": {},
+          "maxTokens": 100,
+          "status": "PASS",
+          "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
+          "duration": 0,
+          "passed": true
+        },
+        {
+          "name": "Structured Response",
+          "prompt": "Provide a JSON response with status \"success\" and message \"working\"",
+          "expectedPattern": {},
+          "maxTokens": 50,
+          "status": "PASS",
+          "response": "{\"status\": \"success\", \"message\": \"working\"}",
+          "duration": 0,
+          "passed": true
+        }
+      ],
+      "performance": {
+        "successRate": 100,
+        "averageResponseTime": 0,
+        "totalTests": 3,
+        "passedTests": 3
+      },
+      "endTime": 1755296487846,
+      "duration": 0
+    }
+  },
+  "workflowTests": {
+    "research": {
+      "name": "Workflow Integration: research",
+      "workflow": "research",
+      "status": "PASS",
+      "startTime": 1755296487847,
+      "steps": [
+        {
+          "stepNumber": 1,
+          "name": "Initialize research parameters",
+          "status": "COMPLETED",
+          "duration": 1742
+        },
+        {
+          "stepNumber": 2,
+          "name": "Execute analysis request",
+          "status": "COMPLETED",
+          "duration": 852
+        },
+        {
+          "stepNumber": 3,
+          "name": "Process results",
+          "status": "COMPLETED",
+          "duration": 1887
+        },
+        {
+          "stepNumber": 4,
+          "name": "Generate recommendations",
+          "status": "COMPLETED",
+          "duration": 544
+        }
+      ],
+      "integration": {
+        "completionRate": 100,
+        "totalSteps": 4,
+        "completedSteps": 4,
+        "averageStepTime": 1256.25
+      },
+      "endTime": 1755296492872,
+      "duration": 5025
+    },
+    "automation": {
+      "name": "Workflow Integration: automation",
+      "workflow": "automation",
+      "status": "FAIL",
+      "startTime": 1755296492872,
+      "steps": [
+        {
+          "stepNumber": 1,
+          "name": "Configure automation parameters",
+          "status": "FAILED",
+          "error": "Simulated failure in Configure automation parameters",
+          "duration": 2030
+        },
+        {
+          "stepNumber": 2,
+          "name": "Execute automation workflow",
+          "status": "COMPLETED",
+          "duration": 1759
+        },
+        {
+          "stepNumber": 3,
+          "name": "Monitor execution",
+          "status": "COMPLETED",
+          "duration": 1714
+        },
+        {
+          "stepNumber": 4,
+          "name": "Report results",
+          "status": "FAILED",
+          "error": "Simulated failure in Report results",
+          "duration": 1661
+        }
+      ],
+      "integration": {
+        "completionRate": 50,
+        "totalSteps": 4,
+        "completedSteps": 2,
+        "averageStepTime": 1791
+      },
+      "endTime": 1755296500036,
+      "duration": 7164
+    },
+    "coding": {
+      "name": "Workflow Integration: coding",
+      "workflow": "coding",
+      "status": "PARTIAL",
+      "startTime": 1755296500037,
+      "steps": [
+        {
+          "stepNumber": 1,
+          "name": "Parse coding request",
+          "status": "COMPLETED",
+          "duration": 1672
+        },
+        {
+          "stepNumber": 2,
+          "name": "Generate code solution",
+          "status": "FAILED",
+          "error": "Simulated failure in Generate code solution",
+          "duration": 556
+        },
+        {
+          "stepNumber": 3,
+          "name": "Review and validate",
+          "status": "COMPLETED",
+          "duration": 1035
+        },
+        {
+          "stepNumber": 4,
+          "name": "Prepare integration",
+          "status": "COMPLETED",
+          "duration": 1108
+        }
+      ],
+      "integration": {
+        "completionRate": 75,
+        "totalSteps": 4,
+        "completedSteps": 3,
+        "averageStepTime": 1092.75
+      },
+      "endTime": 1755296504408,
+      "duration": 4371
+    },
+    "validation": {
+      "name": "Workflow Integration: validation",
+      "workflow": "validation",
+      "status": "PARTIAL",
+      "startTime": 1755296504408,
+      "steps": [
+        {
+          "stepNumber": 1,
+          "name": "Setup validation parameters",
+          "status": "COMPLETED",
+          "duration": 808
+        },
+        {
+          "stepNumber": 2,
+          "name": "Execute test scenarios",
+          "status": "COMPLETED",
+          "duration": 2463
+        },
+        {
+          "stepNumber": 3,
+          "name": "Analyze results",
+          "status": "COMPLETED",
+          "duration": 689
+        },
+        {
+          "stepNumber": 4,
+          "name": "Generate report",
+          "status": "FAILED",
+          "error": "Simulated failure in Generate report",
+          "duration": 2349
+        }
+      ],
+      "integration": {
+        "completionRate": 75,
+        "totalSteps": 4,
+        "completedSteps": 3,
+        "averageStepTime": 1577.25
+      },
+      "endTime": 1755296510717,
+      "duration": 6309
+    }
+  },
+  "commandProcessing": {
+    "name": "Command Processing",
+    "status": "PARTIAL",
+    "startTime": 1755296510718,
+    "commands": [
+      {
+        "originalCommand": "@copilot use perplexity grok-4 and research current state",
+        "parsed": {
+          "model": "grok-4",
+          "intent": "research",
+          "confidence": 1
+        },
+        "status": "PASS",
+        "confidence": 1,
+        "duration": 0
+      },
+      {
+        "originalCommand": "@copilot use perplexity and begin automation workflow",
+        "parsed": {
+          "model": null,
+          "intent": "automation",
+          "confidence": 0.6000000000000001
+        },
+        "status": "PASS",
+        "confidence": 0.6000000000000001,
+        "duration": 0
+      },
+      {
+        "originalCommand": "@copilot use perplexity claude-3.5-sonnet for code review",
+        "parsed": {
+          "model": "claude-3.5-sonnet",
+          "intent": "coding",
+          "confidence": 1
+        },
+        "status": "PASS",
+        "confidence": 1,
+        "duration": 0
+      },
+      {
+        "originalCommand": "@copilot use perplexity sonar-pro for quick iteration",
+        "parsed": {
+          "model": "sonar-pro",
+          "intent": null,
+          "confidence": 0.6000000000000001
+        },
+        "status": "PASS",
+        "confidence": 0.6000000000000001,
+        "duration": 0
+      },
+      {
+        "originalCommand": "analyze repository with perplexity grok-4",
+        "parsed": {
+          "model": "grok-4",
+          "intent": "research",
+          "confidence": 0.8
+        },
+        "status": "PASS",
+        "confidence": 0.8,
+        "duration": 0
+      },
+      {
+        "originalCommand": "start continuous coding workflow",
+        "parsed": {
+          "model": null,
+          "intent": "automation",
+          "confidence": 0.4
+        },
+        "status": "FAIL",
+        "confidence": 0.4,
+        "duration": 0
+      }
+    ],
+    "performance": {
+      "parseSuccessRate": 83.33333333333334,
+      "averageConfidence": 0.7333333333333334,
+      "averageParseTime": 0
+    },
+    "endTime": 1755296510718,
+    "duration": 0
+  },
+  "performanceMetrics": {
+    "name": "Performance Metrics",
+    "status": "PASS",
+    "startTime": 1755296510718,
+    "metrics": {
+      "averageResponseTime": 0,
+      "responseTimeTests": [
+        {
+          "scenario": "Quick Query",
+          "duration": 0,
+          "withinExpected": true,
+          "expectedTime": 3000
+        },
+        {
+          "scenario": "Medium Query",
+          "duration": 0,
+          "withinExpected": true,
+          "expectedTime": 8000
+        },
+        {
+          "scenario": "Complex Query",
+          "duration": 0,
+          "withinExpected": true,
+          "expectedTime": 15000
+        }
+      ],
+      "performanceScore": 100,
+      "memoryUsage": {
+        "rss": 43810816,
+        "heapTotal": 4694016,
+        "heapUsed": 4455520,
+        "external": 1534699,
+        "arrayBuffers": 10515
+      },
+      "throughputEstimate": null
+    },
+    "endTime": 1755296510719,
+    "duration": 1
+  },
+  "overallScore": 80,
+  "status": "GOOD"
+}

@@ -360,6 +360,8 @@ logs/
 *.error.log
 
 # Backup files
+README_ORIGINAL.md
+README_NEW.md
 backups/
 *.tar.gz
 *.zip

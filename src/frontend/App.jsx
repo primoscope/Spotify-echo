@@ -33,6 +33,7 @@ const prefetchers = {
     import('./components/EnhancedConfigPanel'),
     import('./components/MobileResponsiveManager'),
     import('../components/GitHubInfo')
+  ]),
   settingsGeneral: () => import('./components/EnhancedConfigPanel'),
   settingsMobile: () => import('./components/MobileResponsiveManager'),
   settingsGithub: () => import('../components/GitHubInfo')

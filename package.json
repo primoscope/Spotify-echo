@@ -1,7 +1,7 @@
 {
   "name": "echotune-ai",
   "version": "2.1.0",
-  "description": "EchoTune AI - Next-generation music recommendation system with conversational AI (Optimized)",
+  "description": "EchoTune AI - Advanced music discovery platform with AI-powered recommendations, conversational music search, and comprehensive analytics",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -257,14 +257,14 @@
     "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js"
   },
   "keywords": [
-    "music",
-    "recommendation",
-    "spotify",
-    "ai",
-    "machine-learning",
+    "music-discovery",
+    "music-recommendations", 
+    "spotify-integration",
+    "ai-music-chat",
+    "music-analytics",
     "conversational-ai",
-    "mcp",
-    "automation"
+    "music-platform",
+    "playlist-generation"
   ],
   "author": "EchoTune AI Team",
   "license": "MIT",

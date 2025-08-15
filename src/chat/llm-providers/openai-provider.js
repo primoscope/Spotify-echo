@@ -474,7 +474,7 @@ Respond naturally and avoid being overly technical unless the user asks for spec
       },
       {
         name: 'analyze_listening_habits',
-        description: "Analyze user's listening history and provide insights",
+        description: 'Analyze user\'s listening history and provide insights',
         parameters: {
           type: 'object',
           properties: {

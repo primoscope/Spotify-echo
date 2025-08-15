@@ -1,0 +1,16 @@
+Server Name,Category,Free Status,Primary Benefits for Coding Agents,Setup Complexity,GitHub Integration Level,Repository URL,Ranking Score
+GitHub MCP Server (Official),Official/Repository Management,Free,"Repository management, issue tracking, PR automation, code scanning",Medium,Native,https://github.com/github/github-mcp-server,10
+Filesystem MCP Server,Official/File Operations,Free,"Secure file read/write, directory management, code analysis",Easy,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem,9
+GitHub Repos Manager MCP,Community/Repository Management,Free,"80+ GitHub tools, token-based automation, no Docker needed",Medium,Native,https://github.com/wong2/awesome-mcp-servers#github-repos-manager-mcp-server,9
+Git MCP Server,Official/Version Control,Free,"Git operations, repository search, commit management",Easy,High,https://github.com/modelcontextprotocol/servers/tree/main/src/git,8
+Memory MCP Server,Official/Context Management,Free,"Persistent context across sessions, conversation history",Easy,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/memory,8
+Docker MCP Server,Community/Code Execution,Free,"Isolated code execution, multi-language support, sandboxing",Medium,Indirect,https://github.com/wong2/awesome-mcp-servers#docker,7
+Sequential Thinking MCP,Official/AI Enhancement,Free,Enhanced AI reasoning through step-by-step problem solving,Easy,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/sequential-thinking,7
+Brave Search MCP,Community/Search & Research,Free (2000 queries/month),"Privacy-focused web research, technical documentation search",Medium,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search,6
+Fetch MCP Server,Official/Web Content,Free,"Web content fetching, documentation retrieval, research",Easy,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/fetch,6
+Slack MCP Server,Official/Communication,Free,"Team communication, CI/CD notifications, workflow automation",Medium,High,https://github.com/modelcontextprotocol/servers/tree/main/src/slack,6
+PostgreSQL MCP Server,Official/Database,Free,"Database queries, schema inspection, data analysis",Medium,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/postgresql,5
+Vector Search (Qdrant) MCP,Community/Semantic Search,Free,"Semantic code search, documentation retrieval, context matching",Medium,Indirect,https://github.com/wong2/awesome-mcp-servers#qdrant,5
+Puppeteer MCP Server,Community/Web Automation,Free,"Browser automation, web scraping, UI testing",Hard,Indirect,https://github.com/wong2/awesome-mcp-servers#puppeteer,4
+Everything MCP Server,Official/Testing & Reference,Free,Comprehensive testing platform with multiple capabilities,Easy,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/everything,3
+Time MCP Server,Official/Utilities,Free,"Time zone handling, scheduling, timestamp management",Easy,Indirect,https://github.com/modelcontextprotocol/servers/tree/main/src/time,3

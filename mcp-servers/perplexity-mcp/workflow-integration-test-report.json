@@ -1,0 +1,151 @@
+{
+  "testSuite": "Enhanced Perplexity MCP Server - Workflow Integration",
+  "timestamp": "2025-08-15T20:01:18.616Z",
+  "summary": {
+    "workflows": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "integrations": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "overallStatus": "PASS"
+  },
+  "detailedResults": {
+    "workflows": [
+      {
+        "testCase": {
+          "task_type": "research",
+          "complexity": "simple",
+          "optimization_goals": [
+            "cost_efficiency",
+            "speed"
+          ],
+          "expectedModel": "llama-3.1-sonar-small-128k-online"
+        },
+        "workflow": {
+          "model": "llama-3.1-sonar-small-128k-online",
+          "max_tokens": 1000,
+          "temperature": 0.3,
+          "recency_filter": "week",
+          "steps": [
+            "Initial query with focused search",
+            "Review and validate key findings",
+            "Generate summary with citations"
+          ]
+        },
+        "status": "PASS"
+      },
+      {
+        "testCase": {
+          "task_type": "research",
+          "complexity": "enterprise",
+          "optimization_goals": [
+            "comprehensive_research",
+            "accuracy"
+          ],
+          "expectedModel": "gpt-5"
+        },
+        "workflow": {
+          "model": "gpt-5",
+          "max_tokens": 4000,
+          "temperature": 0.1,
+          "recency_filter": "year",
+          "parallel_queries": true,
+          "steps": [
+            "Parallel research across multiple domains",
+            "Expert validation and peer review simulation",
+            "Risk analysis and impact assessment",
+            "Strategic recommendations with implementation plan",
+            "Executive summary and detailed appendices"
+          ]
+        },
+        "status": "PASS"
+      },
+      {
+        "testCase": {
+          "task_type": "debugging",
+          "complexity": "moderate",
+          "optimization_goals": [
+            "speed",
+            "accuracy"
+          ],
+          "expectedModel": "grok-4"
+        },
+        "workflow": {
+          "model": "grok-4",
+          "max_tokens": 1500,
+          "temperature": 0.1,
+          "steps": [
+            "Comprehensive error analysis",
+            "Root cause investigation",
+            "Multiple solution approaches",
+            "Implementation guidance"
+          ]
+        },
+        "status": "PASS"
+      },
+      {
+        "testCase": {
+          "task_type": "code_review",
+          "complexity": "complex",
+          "optimization_goals": [
+            "comprehensive_research"
+          ],
+          "expectedModel": "gpt-5"
+        },
+        "workflow": {
+          "model": "gpt-5",
+          "max_tokens": 4000,
+          "focus": [
+            "scalability",
+            "enterprise_patterns",
+            "compliance"
+          ],
+          "steps": [
+            "Enterprise scalability analysis",
+            "Compliance and governance review",
+            "Advanced architectural recommendations",
+            "Long-term technical debt assessment"
+          ]
+        },
+        "status": "PASS"
+      }
+    ],
+    "performance": {},
+    "integrations": [
+      {
+        "type": "mcp_config",
+        "status": "PASS"
+      },
+      {
+        "type": "vscode_config",
+        "status": "PASS"
+      },
+      {
+        "type": "package_scripts",
+        "status": "PASS"
+      },
+      {
+        "type": "env_config",
+        "status": "PASS"
+      }
+    ],
+    "summary": {
+      "workflows": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0
+      },
+      "integrations": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0
+      },
+      "overallStatus": "PASS"
+    }
+  }
+}

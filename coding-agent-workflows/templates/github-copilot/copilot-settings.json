@@ -1,0 +1,160 @@
+{
+  "github.copilot.advanced": {
+    "perplexity_integration": {
+      "enabled": true,
+      "api_key_env": "PERPLEXITY_API_KEY",
+      "mcp_server_url": "http://localhost:3001",
+      "default_model": "sonar-pro",
+      "auto_optimize": true,
+      "trigger_detection": {
+        "enabled": true,
+        "patterns": [
+          "use perplexity {model}",
+          "research with {model}", 
+          "debug using {model}",
+          "compare models for {task}",
+          "optimize workflow for {goal}"
+        ],
+        "confidence_threshold": 0.8
+      },
+      "budget_controls": {
+        "daily_limit": "$5.00",
+        "per_query_limit": "$0.50",
+        "session_limit": "$2.00",
+        "warn_threshold": 0.8,
+        "auto_fallback": true
+      },
+      "performance_targets": {
+        "max_latency": "3000ms",
+        "min_quality_score": 8.0,
+        "cache_hit_target": 0.4,
+        "p95_latency_budget": "2500ms"
+      },
+      "optimization_goals": {
+        "default": ["balanced"],
+        "debugging": ["speed", "accuracy"],
+        "research": ["comprehensive", "cost_efficiency"],
+        "code_review": ["accuracy", "comprehensive"]
+      }
+    }
+  },
+  
+  "github.copilot.chat.commands": {
+    "perplexity-research": {
+      "description": "Research using Perplexity AI with automatic model optimization",
+      "shortcut": "Ctrl+Shift+R",
+      "auto_context": true,
+      "parameters": {
+        "model": {
+          "type": "enum",
+          "values": ["auto", "grok-4", "sonar-pro", "GPT-5", "sonar-reasoning-pro", "sonar-small"],
+          "default": "auto"
+        },
+        "complexity": {
+          "type": "enum", 
+          "values": ["simple", "moderate", "complex", "enterprise"],
+          "default": "moderate"
+        },
+        "optimize_for": {
+          "type": "array",
+          "values": ["speed", "accuracy", "cost", "comprehensive"],
+          "default": ["balanced"]
+        }
+      }
+    },
+    
+    "perplexity-debug": {
+      "description": "Debug code issues using Perplexity AI reasoning",
+      "shortcut": "Ctrl+Shift+D",
+      "auto_context": true,
+      "context_extraction": {
+        "include_selection": true,
+        "include_error_logs": true,
+        "include_file_type": true,
+        "include_framework": true
+      }
+    },
+    
+    "perplexity-compare": {
+      "description": "Compare multiple AI models for a specific query",
+      "parameters": {
+        "models": {
+          "type": "array",
+          "default": ["grok-4", "sonar-pro", "GPT-5"]
+        },
+        "metrics": {
+          "type": "array", 
+          "values": ["latency", "cost", "quality", "citations"],
+          "default": ["quality", "cost"]
+        }
+      }
+    },
+    
+    "perplexity-optimize": {
+      "description": "Generate optimized workflow configurations",
+      "parameters": {
+        "task_type": {
+          "type": "enum",
+          "values": ["research", "debugging", "code_review", "architecture"],
+          "required": true
+        },
+        "team_size": {
+          "type": "enum",
+          "values": ["solo", "small", "medium", "large"],
+          "default": "small"
+        }
+      }
+    }
+  },
+  
+  "github.copilot.context.enhancement": {
+    "perplexity_enrichment": {
+      "enabled": true,
+      "auto_research": {
+        "on_error": true,
+        "on_new_concept": true,
+        "on_framework_change": true
+      },
+      "context_window_expansion": {
+        "enabled": true,
+        "max_tokens": 4000,
+        "prioritize_recent": true
+      },
+      "smart_suggestions": {
+        "enabled": true,
+        "based_on_research": true,
+        "include_alternatives": true
+      }
+    }
+  },
+  
+  "github.copilot.performance": {
+    "perplexity_monitoring": {
+      "enabled": true,
+      "track_latency": true,
+      "track_cost": true,
+      "track_quality": true,
+      "generate_reports": true,
+      "optimization_alerts": true
+    }
+  },
+  
+  "perplexity.editor.integration": {
+    "hover_research": {
+      "enabled": true,
+      "trigger_on": ["unknown_functions", "new_libraries", "error_messages"],
+      "auto_model_selection": true
+    },
+    "inline_suggestions": {
+      "enabled": true,
+      "research_based": true,
+      "context_aware": true
+    },
+    "code_actions": {
+      "research_documentation": true,
+      "debug_with_perplexity": true,
+      "optimize_performance": true,
+      "security_analysis": true
+    }
+  }
+}

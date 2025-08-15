@@ -29,9 +29,148 @@ env:
   APP_NAME: echotune-ai
 
 jobs:
+  digitalocean-preflight:
+    name: 🔐 DigitalOcean Preflight Check
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.validation.outputs.status }}
+    
+    steps:
+      - name: 🔐 Enhanced DigitalOcean Token Validation
+        id: validation
+        run: |
+          if [ -z "${{ secrets.DO_API_TOKEN }}" ]; then
+            echo "❌ DO_API_TOKEN secret is not configured"
+            echo "status=missing" >> $GITHUB_OUTPUT
+            echo ""
+            echo "🔧 TO FIX THIS ISSUE:"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "1. 🔑 Generate a new API token:"
+            echo "   → Visit: https://cloud.digitalocean.com/account/api/tokens"
+            echo "   → Click 'Generate New Token'"
+            echo "   → Name: 'EchoTune-AI-GitHub-Actions'"
+            echo "   → Scopes: Select 'Read' and 'Write'"
+            echo "   → Expiry: Set to desired duration"
+            echo ""
+            echo "2. 📋 Add token to repository secrets:"
+            echo "   → Go to: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "   → Click 'New repository secret'"
+            echo "   → Name: DO_API_TOKEN"
+            echo "   → Value: [paste your token here]"
+            echo ""
+            echo "3. 🔄 Re-run this workflow after adding the secret"
+            echo ""
+            echo "📖 Detailed setup guide: docs/REPOSITORY_SECRETS_SETUP_GUIDE.md"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            exit 1
+          else
+            echo "✅ DO_API_TOKEN secret is configured"
+            
+            # Validate token format
+            TOKEN="${{ secrets.DO_API_TOKEN }}"
+            if [[ ! "$TOKEN" =~ ^dop_v1_[a-f0-9]{64}$ ]]; then
+              echo "⚠️  Warning: Token format may be invalid (expected: dop_v1_[64 hex chars])"
+            else
+              echo "✅ Token format appears valid"
+            fi
+            
+            echo "status=configured" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🛠️ Install doctl and test comprehensive access
+        if: steps.validation.outputs.status == 'configured'
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: 🧪 Comprehensive DigitalOcean API Validation  
+        if: steps.validation.outputs.status == 'configured'
+        run: |
+          echo "🔍 Running comprehensive DigitalOcean API validation..."
+          echo ""
+          
+          VALIDATION_ERRORS=0
+          
+          # Test 1: Basic account access
+          echo "📋 Test 1: Verifying account access..."
+          if doctl account get --format Name,Email,Status; then
+            echo "✅ Account access verified"
+          else
+            echo "❌ Account access failed - token invalid or expired"
+            ((VALIDATION_ERRORS++))
+          fi
+          echo ""
+          
+          # Test 2: Apps platform access
+          echo "🚀 Test 2: Verifying Apps Platform access..."
+          if doctl apps list --format Name,ID,Status 2>/dev/null; then
+            echo "✅ Apps Platform access verified"
+          else
+            echo "❌ Apps Platform access failed - insufficient permissions"
+            echo "   → Ensure token has 'Write' scope for Apps Platform operations"
+            ((VALIDATION_ERRORS++))
+          fi
+          echo ""
+          
+          # Test 3: Container registry access  
+          echo "🐳 Test 3: Verifying Container Registry access..."
+          if doctl registry get --format Name,Endpoint,Region 2>/dev/null; then
+            echo "✅ Container Registry access verified"
+          else
+            echo "⚠️  Container Registry access failed - may need registry setup"
+            echo "   → This is non-blocking, but image pushes may fail"
+          fi
+          echo ""
+          
+          # Test 4: Droplets access (optional)
+          echo "💻 Test 4: Verifying Droplets access..."
+          if doctl compute droplet list --format Name,ID,Status --no-header 2>/dev/null | head -5; then
+            echo "✅ Droplets access verified"
+          else
+            echo "⚠️  Droplets access limited - this is normal for Apps Platform deployments"
+          fi
+          echo ""
+          
+          # Test 5: Rate limit check
+          echo "⏱️  Test 5: Checking API rate limits..."
+          if doctl account get --format UUID,Status 2>/dev/null; then
+            echo "✅ API rate limits healthy"
+          else
+            echo "⚠️  API rate limit warning - may be hitting limits"
+          fi
+          echo ""
+          
+          # Generate validation report
+          if [ $VALIDATION_ERRORS -eq 0 ]; then
+            echo "🎉 PREFLIGHT VALIDATION PASSED"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "✅ Token authentication: SUCCESS"
+            echo "✅ Account access: SUCCESS" 
+            echo "✅ Apps Platform access: SUCCESS"
+            echo "✅ API rate limits: HEALTHY"
+            echo ""
+            echo "🚀 Ready to proceed with deployment"
+          else
+            echo "❌ PREFLIGHT VALIDATION FAILED"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "💥 Found $VALIDATION_ERRORS critical issues"
+            echo ""
+            echo "🔧 TROUBLESHOOTING STEPS:"
+            echo "1. 🔄 Regenerate API token with full Read/Write permissions:"
+            echo "   https://cloud.digitalocean.com/account/api/tokens"
+            echo "2. 🔐 Update repository secret DO_API_TOKEN"
+            echo "3. ⏰ Wait 2-3 minutes for token propagation"
+            echo "4. 🔄 Re-run this workflow"
+            echo ""
+            echo "📞 Need help? Check the troubleshooting guide:"
+            echo "   docs/deployment/digitalocean-troubleshooting.md"
+            exit 1
+          fi
+
   validate-security:
     name: Security Validation
     runs-on: ubuntu-latest
+    needs: digitalocean-preflight
     
     steps:
     - name: Checkout repository

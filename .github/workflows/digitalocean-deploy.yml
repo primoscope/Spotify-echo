@@ -46,8 +46,88 @@ env:
   BUILD_ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
 
 jobs:
-  # Pre-deployment validation and setup
+  # DigitalOcean Token and Registry Preflight
+  digitalocean-preflight:
+    name: 🔐 DigitalOcean Preflight Check
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.validation.outputs.status }}
+      registry-status: ${{ steps.registry.outputs.status }}
+    
+    steps:
+      - name: 🔍 Validate DO_API_TOKEN
+        id: validation
+        run: |
+          if [ -z "${{ secrets.DO_API_TOKEN }}" ]; then
+            echo "❌ DO_API_TOKEN secret is not configured"
+            echo "status=missing" >> $GITHUB_OUTPUT
+            echo ""
+            echo "🔧 To fix this issue:"
+            echo "1. Go to repository Settings → Secrets and variables → Actions"
+            echo "2. Add a new repository secret named 'DO_API_TOKEN'"
+            echo "3. Get your API token from: https://cloud.digitalocean.com/account/api/tokens"
+            echo "4. Ensure the token has 'Read' and 'Write' scopes"
+            echo ""
+            echo "📖 See docs/REPOSITORY_SECRETS_SETUP_GUIDE.md for detailed instructions"
+            exit 1
+          else
+            echo "✅ DO_API_TOKEN secret is configured"
+            echo "status=configured" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🛠️ Install doctl
+        if: steps.validation.outputs.status == 'configured'
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: 🔐 Test Registry Authentication
+        id: registry
+        if: steps.validation.outputs.status == 'configured'
+        run: |
+          echo "🔍 Testing DigitalOcean Container Registry access..."
+          
+          # Test registry login
+          if doctl registry login; then
+            echo "✅ Registry authentication successful"
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Registry authentication failed"
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo ""
+            echo "🔧 Possible issues:"
+            echo "1. API token lacks registry permissions"
+            echo "2. Container Registry not enabled in your DigitalOcean account"
+            echo "3. Registry namespace '${DO_REGISTRY_NAMESPACE}' doesn't exist"
+            echo ""
+            echo "💡 To fix:"
+            echo "1. Verify token has 'Read' and 'Write' scopes"
+            echo "2. Enable Container Registry in DigitalOcean control panel"
+            echo "3. Create registry namespace if needed"
+            exit 1
+          fi
+          
+          # Test registry access
+          echo "📋 Testing registry namespace access..."
+          if doctl registry repository list; then
+            echo "✅ Registry namespace accessible"
+          else
+            echo "⚠️  Registry namespace may be empty (this is OK for first deployment)"
+          fi
+
+      - name: 📊 Account Information
+        if: steps.validation.outputs.status == 'configured'
+        run: |
+          echo "🏢 DigitalOcean Account Information:"
+          doctl account get || echo "⚠️  Could not fetch account info"
+          
+          echo ""
+          echo "📦 Available App Platform apps:"
+          doctl apps list || echo "⚠️  No apps found or insufficient permissions"
+
+  # Pre-deployment validation and setup (existing job with dependency)
   validate:
+    needs: digitalocean-preflight
     name: Validate and Setup
     runs-on: ubuntu-latest
     outputs:

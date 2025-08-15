@@ -1,0 +1,36 @@
+{
+  "name": "Bug Fix Research Workflow",
+  "description": "Research-driven bug fixing with root cause analysis",
+  "steps": [
+    {
+      "action": "research",
+      "tool": "perplexity",
+      "prompt": "Research common causes and solutions for error: {error_message}",
+      "timeout": "20s"
+    },
+    {
+      "action": "analyze",
+      "tool": "filesystem",
+      "prompt": "Analyze codebase for patterns matching research findings",
+      "timeout": "30s"
+    },
+    {
+      "action": "fix",
+      "tool": "filesystem",
+      "prompt": "Implement minimal fix based on research best practices",
+      "timeout": "120s"
+    },
+    {
+      "action": "test",
+      "tool": "testing",
+      "prompt": "Test fix and add regression tests",
+      "timeout": "60s"
+    }
+  ],
+  "acceptanceCriteria": [
+    "Root cause identified and documented",
+    "Minimal change set (<20 LOC)",
+    "Regression tests added",
+    "Performance impact validated"
+  ]
+}

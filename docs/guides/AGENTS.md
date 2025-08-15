@@ -1,14 +1,299 @@
-# MCP Server Integration Guide
+# 🤖 Agent Development Guide
+**Complete setup and workflow guide for GitHub Copilot Coding Agent and Cursor IDE integration with EchoTune AI**
 
-This document provides comprehensive information about the Model Context Protocol (MCP) servers integrated into EchoTune AI and instructions for GitHub Coding Agents to leverage these capabilities.
+## 🎯 Overview
 
-## Overview
+EchoTune AI provides a comprehensive **Model Context Protocol (MCP) ecosystem** designed for seamless integration with AI coding agents. This guide covers setup, workflows, and best practices for maximizing productivity with research-driven development.
 
-EchoTune AI uses MCP servers to enhance development workflows, automation, and system capabilities. These servers provide AI agents with powerful tools for code analysis, browser automation, file management, and more.
+### 🚀 Quick Setup Summary
 
-## Available MCP Servers
+```bash
+# 1. Generate Cursor configuration
+npm run generate-cursor-mcp
 
-### Core MCP Servers
+# 2. Start MCP ecosystem  
+npm run mcp:orchestrator-start
+
+# 3. Validate system health
+npm run mcp:enhanced-validation
+
+# 4. Test Perplexity research (if configured)
+npm run testperplexity
+```
+
+## 📋 Prerequisites
+
+### Required Software
+- **Cursor IDE** v0.47+ or **GitHub Copilot** with Coding Agent access
+- **Node.js** 20+ and **npm** 10+
+- **Git** with repository access
+
+### Required Environment Variables
+```bash
+# Core Research Capabilities
+PERPLEXITY_API_KEY=pplx-...           # Perplexity AI research
+PERPLEXITY_COST_BUDGET_USD=0.50       # Cost control per session
+PERPLEXITY_MAX_LATENCY_MS=1500        # Performance budget
+
+# AI Providers (Optional but Recommended)
+OPENAI_API_KEY=sk-...                 # Enhanced AI capabilities
+GOOGLE_GEMINI_API_KEY=AI...           # Alternative provider
+ANTHROPIC_API_KEY=sk-ant-...          # Claude integration
+
+# System Integration
+REDIS_URL=redis://localhost:6379      # Caching for performance
+MONGODB_URI=mongodb://...             # Data analysis capabilities
+SPOTIFY_CLIENT_ID=...                 # Music data integration
+SPOTIFY_CLIENT_SECRET=...             # Spotify API access
+
+# Development & Deployment
+GITHUB_TOKEN=ghp_...                  # Repository operations
+DO_API_TOKEN=dop_v1_...               # DigitalOcean deployment
+BROWSERBASE_API_KEY=bb_...            # Cloud browser automation
+BROWSERBASE_PROJECT_ID=...            # Browserbase project
+```
+
+## 🔧 Cursor IDE Setup
+
+### Automated Configuration
+```bash
+# Generate complete Cursor configuration
+npm run generate-cursor-mcp
+
+# This creates:
+# - .vscode/mcp.json (MCP server configuration)
+# - .cursor/ai-workflows.json (workflow templates)  
+# - .cursor/project-context.md (project documentation)
+```
+
+### Manual Configuration (Alternative)
+Create `.vscode/mcp.json`:
+```json
+{
+  "inputs": [
+    {
+      "id": "perplexity-key",
+      "type": "promptString", 
+      "description": "Perplexity API Key",
+      "password": true
+    }
+  ],
+  "mcpServers": {
+    "perplexity": {
+      "command": "node",
+      "args": ["mcp-servers/perplexity-mcp/perplexity-mcp-server.js"],
+      "env": {
+        "PERPLEXITY_API_KEY": "${input:perplexity-key}",
+        "PERPLEXITY_MAX_LATENCY_MS": "1500",
+        "PERPLEXITY_MAX_MEMORY_MB": "256",
+        "PERPLEXITY_COST_BUDGET_USD": "0.50"
+      },
+      "description": "AI-powered research with performance budgets"
+    }
+  }
+}
+```
+
+## 🛠️ GitHub Copilot Coding Agent Setup
+
+### Repository Configuration
+1. **Enable Coding Agent** in repository settings
+2. **Configure Secrets** in `Settings → Secrets and variables → Actions`
+3. **Add Labels** to enable agent workflows:
+   - `copilot-coding-agent`: Triggers agent preflight validation
+   - `needs-research`: Indicates research requirement
+   - `performance-critical`: Enforces strict performance budgets
+
+### Agent Workflow Integration
+The repository includes automated agent workflows:
+
+- **`copilot-agent-preflight.yml`**: Validates secrets and provider latency
+- **`agent-mcp-automation.yml`**: MCP validation with performance budgets
+- **`mcp-validation-gateway.yml`**: Pre-merge validation gates
+
+## 📊 Performance Budgets & Validation
+
+### Performance Budget Enforcement
+All MCP operations must comply with performance budgets:
+
+| Service | Latency (p95) | Memory | CPU | Cost |
+|---------|---------------|---------|-----|------|
+| **Perplexity** | ≤1500ms | ≤256MB | ≤0.5 cores | ≤$0.50/session |
+| **Local Services** | ≤500ms | ≤128MB | ≤0.25 cores | N/A |
+| **Global System** | ≤2000ms | ≤512MB | ≤70% | ≤$2.00/hour |
+
+### Budget Validation Commands
+```bash
+# Check current performance metrics
+npm run mcp:enhanced-validation
+
+# Monitor system health
+npm run mcp:health-monitor
+
+# View performance baseline
+cat enhanced-mcp-performance-baseline.json
+
+# Test Perplexity performance
+npm run testperplexity
+```
+
+## 🔄 Research Standards & Protocols
+
+### Research-to-PR Loop Requirements
+Every research-driven PR must include:
+
+1. **Research Evidence**
+   - Perplexity search queries and results
+   - Academic sources and citations
+   - Industry best practices references
+
+2. **Performance Benchmarks**
+   - Baseline performance measurements
+   - Post-implementation performance comparison
+   - Budget compliance validation
+
+3. **Implementation Documentation**
+   - Step-by-step implementation rationale
+   - Trade-offs and alternatives considered
+   - Testing strategy and results
+
+### Research Query Standards
+```javascript
+// Example research query structure
+{
+  "q": "What are the latest developments in AI music recommendation systems in 2024?",
+  "opts": {
+    "model": "llama-3.1-sonar-large-128k-online",
+    "max_tokens": 2000,
+    "temperature": 0.3,
+    "recency_filter": "month",
+    "domain_filter": ["arxiv.org", "ieee.org", "acm.org"]
+  }
+}
+```
+
+## 🔄 Standard Operating Procedures (SOPs)
+
+### SOP 1: Research-Backed Bug Fix (30 minutes)
+1. **Research Phase (10 min)**
+   ```
+   @perplexity research "[error message] debugging techniques latest practices"
+   @sequential-thinking analyze error patterns and root causes
+   ```
+
+2. **Implementation Phase (15 min)**
+   ```
+   @filesystem identify and analyze problematic code sections
+   @github check related issues and historical fixes
+   @sequential-thinking plan comprehensive fix strategy
+   ```
+
+3. **Validation Phase (5 min)**
+   ```
+   @health-monitor verify system performance post-fix
+   @github create PR with research citations and testing evidence
+   ```
+
+### SOP 2: Feature Implementation with Research (45 minutes)
+1. **Research & Planning (15 min)**
+   ```
+   @perplexity research "[feature] implementation best practices [technology stack]"
+   @sequential-thinking create detailed implementation plan
+   @github analyze existing codebase architecture
+   ```
+
+2. **Implementation (25 min)**
+   ```
+   @filesystem implement feature following research guidelines
+   @sqlite add necessary database schema changes
+   @browser test user interface and experience
+   ```
+
+3. **Documentation & Testing (5 min)**
+   ```
+   @filesystem create comprehensive tests and documentation
+   @health-monitor validate performance impact
+   @github create PR with research citations and benchmarks
+   ```
+
+### SOP 3: Performance Optimization (60 minutes)
+1. **Analysis Phase (20 min)**
+   ```
+   @health-monitor generate comprehensive performance report
+   @perplexity research "Node.js performance optimization techniques 2024"
+   @sequential-thinking identify optimization opportunities
+   ```
+
+2. **Implementation Phase (30 min)**
+   ```
+   @filesystem implement performance optimizations
+   @sqlite optimize database queries and indexes
+   @redis implement caching strategies
+   ```
+
+3. **Validation Phase (10 min)**
+   ```
+   @health-monitor compare before/after performance metrics
+   @github document performance improvements with benchmarks
+   ```
+
+## 🚨 Error Handling & Troubleshooting
+
+### Common Issues & Solutions
+
+#### MCP Server Not Available
+```bash
+# Diagnosis
+npm run mcp:health-all
+
+# Resolution
+npm run mcp:orchestrator-start
+npm run mcp:enhanced-validation
+```
+
+#### Perplexity API Errors
+```bash
+# Check API key and quota
+npm run validate:api-keys --perplexity
+
+# Test connectivity
+npm run testperplexity
+
+# Review cost budget
+echo $PERPLEXITY_COST_BUDGET_USD
+```
+
+#### Performance Budget Violations
+```bash
+# Get current metrics
+npm run mcp:enhanced-validation
+
+# Review baseline comparison  
+cat enhanced-mcp-performance-baseline.json
+
+# Identify bottlenecks
+npm run performance:mcp-analytics
+```
+
+---
+
+## 🎉 Getting Started Checklist
+
+- [ ] Install Cursor IDE or enable GitHub Copilot Coding Agent
+- [ ] Configure environment variables (minimum: `PERPLEXITY_API_KEY`)
+- [ ] Run `npm run generate-cursor-mcp` to set up configuration
+- [ ] Test basic functionality with `npm run testperplexity`
+- [ ] Validate system health with `npm run mcp:enhanced-validation`
+- [ ] Try first research workflow: `@perplexity research "EchoTune AI architecture"`
+- [ ] Review performance budgets with `@health-monitor status`
+
+**Ready to start?** Your AI-powered development environment is now configured for maximum productivity with research-backed implementation capabilities!
+
+---
+
+## 📚 Legacy MCP Server Documentation
+
+### Core MCP Servers (Historical Reference)
 
 #### 1. Browser Automation Server
 - **Package**: `@modelcontextprotocol/server-puppeteer`
@@ -1240,1105 +1525,100 @@ async function testServer(serverName) {
 
 **Note**: This guide is designed for AI coding agents working with EchoTune AI. It should be used in conjunction with the main MCP servers documentation and community server guides. Always validate server availability and permissions before performing operations.
 
+## 🤖 Agent-Created PR Acceptance Criteria
+
+### Research Evidence Requirements
+- [ ] **Citations**: All research claims include proper citations with sources and dates
+- [ ] **Research Summary**: Clear summary of research methodology and sources used
+- [ ] **Fact Verification**: Cross-reference key facts across multiple credible sources
+- [ ] **Recency Check**: Ensure information is current (prefer sources within requested timeframe)
+
+### Technical Implementation Standards  
+- [ ] **Performance Benchmarks**: Code changes include performance impact analysis
+- [ ] **Tests Added**: New functionality includes appropriate test coverage
+- [ ] **Documentation Updated**: Changes reflected in relevant documentation files
+- [ ] **Error Handling**: Comprehensive error handling with meaningful error messages
+
+### Code Quality Checklist
+- [ ] **Linting Passed**: Code passes all linting and formatting checks
+- [ ] **Security Review**: No new security vulnerabilities introduced
+- [ ] **Dependency Audit**: New dependencies justified and security-scanned
+- [ ] **Breaking Changes**: Breaking changes documented with migration guide
+
+### MCP Integration Requirements
+- [ ] **MCP Health**: All MCP servers remain functional after changes
+- [ ] **Performance Budgets**: Changes don't exceed defined performance budgets
+- [ ] **Resource Limits**: Memory and CPU usage within defined limits
+- [ ] **Backwards Compatibility**: Existing MCP server integrations continue working
+
+### Validation and Artifacts
+- [ ] **Validation Pipeline**: Enhanced MCP validation pipeline passes
+- [ ] **Performance Baseline**: Performance metrics don't regress beyond thresholds
+- [ ] **Artifacts Generated**: Required JSON reports and summaries generated
+- [ ] **PR Comment**: Automated PR comment with validation results posted
+
+### Research Budget Guidelines
+- **Cost Per Research Session**: Target <$0.50 USD for Perplexity queries
+- **Token Limits**: Appropriate max_tokens settings for query complexity
+- **Caching Strategy**: Utilize caching for repeated queries to minimize costs
+- **Model Selection**: Use smallest appropriate model for the research task
+
+### Example Research Validation
+
+#### ✅ Acceptable Research Example:
+```markdown
+## Research Summary
+**Query**: "Latest developments in AI music recommendation systems 2024"
+**Sources**: 3 recent papers from ACM Digital Library, 2 industry reports from Spotify Engineering
+**Methodology**: Searched recent publications (last 6 months), cross-referenced findings
+
+### Key Findings:
+1. **Transformer-based models** showing 15% improvement in recommendation accuracy [1]
+2. **Multi-modal approaches** combining audio and text data gaining adoption [2,3]
+3. **Real-time personalization** becoming standard in major platforms [4,5]
+
+### Citations:
+[1] Smith, J. et al. "Neural Music Recommendation Systems" - ACM RecSys 2024
+[2] Zhang, L. "Multi-modal Music Discovery" - Spotify Engineering Blog, March 2024
+[3] Brown, M. "Audio-Text Fusion for Recommendations" - ISMIR 2024
+[4] Johnson, K. "Real-time Personalization at Scale" - Netflix Tech Blog, Feb 2024
+[5] Davis, R. "Modern Recommendation Architectures" - ACM Computing Surveys, Jan 2024
+
+**Cost**: $0.23 USD, **Response Time**: 1,247ms ✅
+```
+
+#### ❌ Unacceptable Research Example:
+```markdown
+## Research Summary
+AI music recommendation systems use machine learning to suggest songs. They are becoming more advanced.
+
+**Cost**: $0.67 USD, **Response Time**: 2,100ms ❌
+**Issues**: No citations, vague findings, exceeded cost and latency budgets
+```
+
+### Enforcement
+- PRs failing acceptance criteria will be marked for revision
+- Automated validation checks block merge until criteria met  
+- Manual review required for complex research-based changes
+- Repeat violations may result in temporary agent access restrictions
+
+This ensures all agent-created PRs maintain high standards for research quality, technical implementation, and system performance.
+
 ## 🤖 MCP Ecosystem Status Report
 
-**Generated:** 2025-08-08T22:17:43.831Z
-**Auto-generated by:** MCP Documentation Automation
-
-## 📊 Summary
-
-- **Package Dependencies:** 5
-- **Community Servers:** 7
-- **Custom Servers:** 6
-- **Workflow Integrations:** 6
-
-## 📦 Package Dependencies
-
-### @browserbasehq/mcp-server-browserbase
-- **Version:** github:browserbase/mcp-server-browserbase
-- **Type:** automation
-- **Category:** automation
-
-### mcp-server-code-runner
-- **Version:** ^0.1.7
-- **Type:** utility
-- **Category:** utility
-
-### mongodb-mcp-server
-- **Version:** ^0.2.0
-- **Type:** utility
-- **Category:** utility
-
-### n8n-mcp
-- **Version:** ^2.10.3
-- **Type:** utility
-- **Category:** utility
-
-### puppeteer-mcp-server
-- **Version:** ^0.7.2
-- **Type:** automation
-- **Category:** automation
-
-## 🌟 Community MCP Servers
-
-### analytics-server
-- **Files:** 1 files
-- **Main Files:** analytics-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### code-sandbox
-- **Files:** 1 files
-- **Main Files:** code-sandbox-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### new-candidates
-- **Files:** 7 files
-- **Main Files:** 
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### package-management
-- **Files:** 1 files
-- **Main Files:** package-version-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### sentry-mcp
-- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
-- **Version:** 1.0.0
-- **Files:** 5 files
-- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
-- **Documentation:** ✅
-- **Configuration:** ❌
-
-### sequential-thinking
-- **Description:** MCP server for sequential thinking and problem solving
-- **Version:** 0.6.2
-- **Files:** 6 files
-- **Main Files:** index.ts
-- **Documentation:** ✅
-- **Configuration:** ✅
-
-### testing-automation
-- **Files:** 1 files
-- **Main Files:** testing-automation-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-## 🔧 Custom MCP Servers
-
-### coordination-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 201
-- **Functions:** express, path, status, workflows, execution
-- **MCP Integration:** ✅
-
-### enhanced-mcp-orchestrator.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 592
-- **Functions:** express, WebSocket, cors, fs, path
-- **MCP Integration:** ✅
-
-### enhanced-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 347
-- **Functions:** express, puppeteer, cors, fs, path
-- **MCP Integration:** ✅
-
-### orchestration-engine.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 313
-- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
-- **MCP Integration:** ✅
-
-### spotify_server.py
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 1133
-- **Functions:** correctly
-- **MCP Integration:** ✅
-
-### workflow-manager.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 238
-- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
-- **MCP Integration:** ✅
-
-## 🔄 Workflow Integrations
-
-### #mcp-inntegration.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Servers Integration`
-  - Line 7: `- 'mcp-servers/**'`
-  - Line 8: `- 'scripts/mcp-manager.js'`
-  - Line 10: `- '.github/workflows/mcp-integration.yml'`
-  - Line 14: `- 'mcp-servers/**'`
-
-### agent-mcp-automation.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Agent Automation & Validation`
-  - Line 10: `description: 'Run MCP discovery scan'`
-  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
-  - Line 29: `MCP_SERVER_PORT: 3001`
-  - Line 32: `mcp-discovery:`
-
-### copilot-models.yml
-- **MCP References:** 2
-- **Key Lines:**
-  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
-  - Line 541: `- MCP server integration tests`
-
-### copilot-slash-commands.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 510: `MCP[MCP Automation Server]`
-  - Line 540: `LB --> MCP`
-  - Line 554: `MCP --> FILES`
-  - Line 1042: `# Start the MCP automation server (optional)`
-  - Line 1043: `npm run mcp-server`
-
-### digitalocean-deploy.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 42: `MCP_IMAGE: echotune-mcp`
-  - Line 186: `- name: mcp`
-  - Line 187: `dockerfile: mcp-server/Dockerfile`
-  - Line 188: `context: mcp-server`
-  - Line 189: `image: ${{ env.MCP_IMAGE }}`
-
-### gemini-enhanced.yml
-- **MCP References:** 4
-- **Key Lines:**
-  - Line 9: `- 'mcp-server/**'`
-  - Line 99: `src/*|mcp-server/*|scripts/*)`
-  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
-  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
-
-## 🔄 Auto-Update Information
-
-This documentation is automatically updated by the MCP Documentation Automator.
-- **Last Scan:** 2025-08-08T22:17:43.831Z
-- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
-- **Trigger:** On MCP changes, schedule, or manual execution
-
-## 📊 Summary
-
-- **Package Dependencies:** 1
-- **Community Servers:** 6
-- **Custom Servers:** 6
-- **Workflow Integrations:** 6
-
-## 📦 Package Dependencies
-
-### @browserbasehq/mcp-server-browserbase
-- **Version:** github:browserbase/mcp-server-browserbase
-- **Type:** automation
-- **Category:** automation
-
-## 🌟 Community MCP Servers
-
-### analytics-server
-- **Files:** 1 files
-- **Main Files:** analytics-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### code-sandbox
-- **Files:** 1 files
-- **Main Files:** code-sandbox-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### package-management
-- **Files:** 1 files
-- **Main Files:** package-version-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### sentry-mcp
-- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
-- **Version:** 1.0.0
-- **Files:** 5 files
-- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
-- **Documentation:** ✅
-- **Configuration:** ❌
-
-### sequential-thinking
-- **Description:** MCP server for sequential thinking and problem solving
-- **Version:** 0.6.2
-- **Files:** 6 files
-- **Main Files:** index.ts
-- **Documentation:** ✅
-- **Configuration:** ✅
-
-### testing-automation
-- **Files:** 1 files
-- **Main Files:** testing-automation-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-## 🔧 Custom MCP Servers
-
-### coordination-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 201
-- **Functions:** express, path, status, workflows, execution
-- **MCP Integration:** ✅
-
-### enhanced-mcp-orchestrator.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 592
-- **Functions:** express, WebSocket, cors, fs, path
-- **MCP Integration:** ✅
-
-### enhanced-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 347
-- **Functions:** express, puppeteer, cors, fs, path
-- **MCP Integration:** ✅
-
-### orchestration-engine.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 313
-- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
-- **MCP Integration:** ✅
-
-### spotify_server.py
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 1133
-- **Functions:** correctly
-- **MCP Integration:** ✅
-
-### workflow-manager.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 238
-- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
-- **MCP Integration:** ✅
-
-## 🔄 Workflow Integrations
-
-### #mcp-inntegration.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Servers Integration`
-  - Line 7: `- 'mcp-servers/**'`
-  - Line 8: `- 'scripts/mcp-manager.js'`
-  - Line 10: `- '.github/workflows/mcp-integration.yml'`
-  - Line 14: `- 'mcp-servers/**'`
-
-### agent-mcp-automation.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Agent Automation & Validation`
-  - Line 10: `description: 'Run MCP discovery scan'`
-  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
-  - Line 29: `MCP_SERVER_PORT: 3001`
-  - Line 32: `mcp-discovery:`
-
-### copilot-models.yml
-- **MCP References:** 2
-- **Key Lines:**
-  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
-  - Line 541: `- MCP server integration tests`
-
-### copilot-slash-commands.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 510: `MCP[MCP Automation Server]`
-  - Line 540: `LB --> MCP`
-  - Line 554: `MCP --> FILES`
-  - Line 1042: `# Start the MCP automation server (optional)`
-  - Line 1043: `npm run mcp-server`
-
-### digitalocean-deploy.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 42: `MCP_IMAGE: echotune-mcp`
-  - Line 186: `- name: mcp`
-  - Line 187: `dockerfile: mcp-server/Dockerfile`
-  - Line 188: `context: mcp-server`
-  - Line 189: `image: ${{ env.MCP_IMAGE }}`
-
-### gemini-enhanced.yml
-- **MCP References:** 4
-- **Key Lines:**
-  - Line 9: `- 'mcp-server/**'`
-  - Line 99: `src/*|mcp-server/*|scripts/*)`
-  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
-  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
-
-## 🔄 Auto-Update Information
-
-This documentation is automatically updated by the MCP Documentation Automator.
-- **Last Scan:** 2025-08-08T22:10:18.439Z
-- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
-- **Trigger:** On MCP changes, schedule, or manual execution
-
-## 📊 Summary
-
-- **Package Dependencies:** 1
-- **Community Servers:** 6
-- **Custom Servers:** 6
-- **Workflow Integrations:** 6
-
-## 📦 Package Dependencies
-
-### @browserbasehq/mcp-server-browserbase
-- **Version:** github:browserbase/mcp-server-browserbase
-- **Type:** automation
-- **Category:** automation
-
-## 🌟 Community MCP Servers
-
-### analytics-server
-- **Files:** 1 files
-- **Main Files:** analytics-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### code-sandbox
-- **Files:** 1 files
-- **Main Files:** code-sandbox-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### package-management
-- **Files:** 1 files
-- **Main Files:** package-version-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### sentry-mcp
-- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
-- **Version:** 1.0.0
-- **Files:** 5 files
-- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
-- **Documentation:** ✅
-- **Configuration:** ❌
-
-### sequential-thinking
-- **Description:** MCP server for sequential thinking and problem solving
-- **Version:** 0.6.2
-- **Files:** 6 files
-- **Main Files:** index.ts
-- **Documentation:** ✅
-- **Configuration:** ✅
-
-### testing-automation
-- **Files:** 1 files
-- **Main Files:** testing-automation-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-## 🔧 Custom MCP Servers
-
-### coordination-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 201
-- **Functions:** express, path, status, workflows, execution
-- **MCP Integration:** ✅
-
-### enhanced-mcp-orchestrator.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 592
-- **Functions:** express, WebSocket, cors, fs, path
-- **MCP Integration:** ✅
-
-### enhanced-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 347
-- **Functions:** express, puppeteer, cors, fs, path
-- **MCP Integration:** ✅
-
-### orchestration-engine.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 313
-- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
-- **MCP Integration:** ✅
-
-### spotify_server.py
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 1133
-- **Functions:** correctly
-- **MCP Integration:** ✅
-
-### workflow-manager.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 238
-- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
-- **MCP Integration:** ✅
-
-## 🔄 Workflow Integrations
-
-### #mcp-inntegration.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Servers Integration`
-  - Line 7: `- 'mcp-servers/**'`
-  - Line 8: `- 'scripts/mcp-manager.js'`
-  - Line 10: `- '.github/workflows/mcp-integration.yml'`
-  - Line 14: `- 'mcp-servers/**'`
-
-### agent-mcp-automation.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Agent Automation & Validation`
-  - Line 10: `description: 'Run MCP discovery scan'`
-  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
-  - Line 29: `MCP_SERVER_PORT: 3001`
-  - Line 32: `mcp-discovery:`
-
-### copilot-models.yml
-- **MCP References:** 2
-- **Key Lines:**
-  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
-  - Line 541: `- MCP server integration tests`
-
-### copilot-slash-commands.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 510: `MCP[MCP Automation Server]`
-  - Line 540: `LB --> MCP`
-  - Line 554: `MCP --> FILES`
-  - Line 1042: `# Start the MCP automation server (optional)`
-  - Line 1043: `npm run mcp-server`
-
-### digitalocean-deploy.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 42: `MCP_IMAGE: echotune-mcp`
-  - Line 186: `- name: mcp`
-  - Line 187: `dockerfile: mcp-server/Dockerfile`
-  - Line 188: `context: mcp-server`
-  - Line 189: `image: ${{ env.MCP_IMAGE }}`
-
-### gemini-enhanced.yml
-- **MCP References:** 4
-- **Key Lines:**
-  - Line 9: `- 'mcp-server/**'`
-  - Line 99: `src/*|mcp-server/*|scripts/*)`
-  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
-  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
-
-## 🔄 Auto-Update Information
-
-This documentation is automatically updated by the MCP Documentation Automator.
-- **Last Scan:** 2025-08-08T22:10:17.291Z
-- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
-- **Trigger:** On MCP changes, schedule, or manual execution
-
-## 📊 Summary
-
-- **Package Dependencies:** 1
-- **Community Servers:** 6
-- **Custom Servers:** 6
-- **Workflow Integrations:** 6
-
-## 📦 Package Dependencies
-
-### @browserbasehq/mcp-server-browserbase
-- **Version:** github:browserbase/mcp-server-browserbase
-- **Type:** automation
-- **Category:** automation
-
-## 🌟 Community MCP Servers
-
-### analytics-server
-- **Files:** 1 files
-- **Main Files:** analytics-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### code-sandbox
-- **Files:** 1 files
-- **Main Files:** code-sandbox-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### package-management
-- **Files:** 1 files
-- **Main Files:** package-version-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### sentry-mcp
-- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
-- **Version:** 1.0.0
-- **Files:** 5 files
-- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
-- **Documentation:** ✅
-- **Configuration:** ❌
-
-### sequential-thinking
-- **Description:** MCP server for sequential thinking and problem solving
-- **Version:** 0.6.2
-- **Files:** 6 files
-- **Main Files:** index.ts
-- **Documentation:** ✅
-- **Configuration:** ✅
-
-### testing-automation
-- **Files:** 1 files
-- **Main Files:** testing-automation-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-## 🔧 Custom MCP Servers
-
-### coordination-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 201
-- **Functions:** express, path, status, workflows, execution
-- **MCP Integration:** ✅
-
-### enhanced-mcp-orchestrator.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 592
-- **Functions:** express, WebSocket, cors, fs, path
-- **MCP Integration:** ✅
-
-### enhanced-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 347
-- **Functions:** express, puppeteer, cors, fs, path
-- **MCP Integration:** ✅
-
-### orchestration-engine.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 313
-- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
-- **MCP Integration:** ✅
-
-### spotify_server.py
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 1133
-- **Functions:** correctly
-- **MCP Integration:** ✅
-
-### workflow-manager.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 238
-- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
-- **MCP Integration:** ✅
-
-## 🔄 Workflow Integrations
-
-### #mcp-inntegration.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Servers Integration`
-  - Line 7: `- 'mcp-servers/**'`
-  - Line 8: `- 'scripts/mcp-manager.js'`
-  - Line 10: `- '.github/workflows/mcp-integration.yml'`
-  - Line 14: `- 'mcp-servers/**'`
-
-### agent-mcp-automation.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Agent Automation & Validation`
-  - Line 10: `description: 'Run MCP discovery scan'`
-  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
-  - Line 29: `MCP_SERVER_PORT: 3001`
-  - Line 32: `mcp-discovery:`
-
-### copilot-models.yml
-- **MCP References:** 2
-- **Key Lines:**
-  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
-  - Line 541: `- MCP server integration tests`
-
-### copilot-slash-commands.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 510: `MCP[MCP Automation Server]`
-  - Line 540: `LB --> MCP`
-  - Line 554: `MCP --> FILES`
-  - Line 1042: `# Start the MCP automation server (optional)`
-  - Line 1043: `npm run mcp-server`
-
-### digitalocean-deploy.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 42: `MCP_IMAGE: echotune-mcp`
-  - Line 186: `- name: mcp`
-  - Line 187: `dockerfile: mcp-server/Dockerfile`
-  - Line 188: `context: mcp-server`
-  - Line 189: `image: ${{ env.MCP_IMAGE }}`
-
-### gemini-enhanced.yml
-- **MCP References:** 4
-- **Key Lines:**
-  - Line 9: `- 'mcp-server/**'`
-  - Line 99: `src/*|mcp-server/*|scripts/*)`
-  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
-  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
-
-## 🔄 Auto-Update Information
-
-This documentation is automatically updated by the MCP Documentation Automator.
-- **Last Scan:** 2025-08-08T21:59:04.101Z
-- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
-- **Trigger:** On MCP changes, schedule, or manual execution
-
-## 📊 Summary
-
-- **Package Dependencies:** 1
-- **Community Servers:** 6
-- **Custom Servers:** 6
-- **Workflow Integrations:** 6
-
-## 📦 Package Dependencies
-
-### @browserbasehq/mcp-server-browserbase
-- **Version:** github:browserbase/mcp-server-browserbase
-- **Type:** automation
-- **Category:** automation
-
-## 🌟 Community MCP Servers
-
-### analytics-server
-- **Files:** 1 files
-- **Main Files:** analytics-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### code-sandbox
-- **Files:** 1 files
-- **Main Files:** code-sandbox-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### package-management
-- **Files:** 1 files
-- **Main Files:** package-version-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### sentry-mcp
-- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
-- **Version:** 1.0.0
-- **Files:** 5 files
-- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
-- **Documentation:** ✅
-- **Configuration:** ❌
-
-### sequential-thinking
-- **Description:** MCP server for sequential thinking and problem solving
-- **Version:** 0.6.2
-- **Files:** 6 files
-- **Main Files:** index.ts
-- **Documentation:** ✅
-- **Configuration:** ✅
-
-### testing-automation
-- **Files:** 1 files
-- **Main Files:** testing-automation-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-## 🔧 Custom MCP Servers
-
-### coordination-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 201
-- **Functions:** express, path, status, workflows, execution
-- **MCP Integration:** ✅
-
-### enhanced-mcp-orchestrator.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 592
-- **Functions:** express, WebSocket, cors, fs, path
-- **MCP Integration:** ✅
-
-### enhanced-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 347
-- **Functions:** express, puppeteer, cors, fs, path
-- **MCP Integration:** ✅
-
-### orchestration-engine.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 313
-- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
-- **MCP Integration:** ✅
-
-### spotify_server.py
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 1133
-- **Functions:** correctly
-- **MCP Integration:** ✅
-
-### workflow-manager.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 238
-- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
-- **MCP Integration:** ✅
-
-## 🔄 Workflow Integrations
-
-### #mcp-inntegration.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Servers Integration`
-  - Line 7: `- 'mcp-servers/**'`
-  - Line 8: `- 'scripts/mcp-manager.js'`
-  - Line 10: `- '.github/workflows/mcp-integration.yml'`
-  - Line 14: `- 'mcp-servers/**'`
-
-### agent-mcp-automation.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Agent Automation & Validation`
-  - Line 10: `description: 'Run MCP discovery scan'`
-  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
-  - Line 29: `MCP_SERVER_PORT: 3001`
-  - Line 32: `mcp-discovery:`
-
-### copilot-models.yml
-- **MCP References:** 2
-- **Key Lines:**
-  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
-  - Line 541: `- MCP server integration tests`
-
-### copilot-slash-commands.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 510: `MCP[MCP Automation Server]`
-  - Line 540: `LB --> MCP`
-  - Line 554: `MCP --> FILES`
-  - Line 1042: `# Start the MCP automation server (optional)`
-  - Line 1043: `npm run mcp-server`
-
-### digitalocean-deploy.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 42: `MCP_IMAGE: echotune-mcp`
-  - Line 186: `- name: mcp`
-  - Line 187: `dockerfile: mcp-server/Dockerfile`
-  - Line 188: `context: mcp-server`
-  - Line 189: `image: ${{ env.MCP_IMAGE }}`
-
-### gemini-enhanced.yml
-- **MCP References:** 4
-- **Key Lines:**
-  - Line 9: `- 'mcp-server/**'`
-  - Line 99: `src/*|mcp-server/*|scripts/*)`
-  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
-  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
-
-## 🔄 Auto-Update Information
-
-This documentation is automatically updated by the MCP Documentation Automator.
-- **Last Scan:** 2025-08-08T21:57:26.108Z
-- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
-- **Trigger:** On MCP changes, schedule, or manual execution
-
-## 📊 Summary
-
-- **Package Dependencies:** 1
-- **Community Servers:** 6
-- **Custom Servers:** 6
-- **Workflow Integrations:** 6
-
-## 📦 Package Dependencies
-
-### @browserbasehq/mcp-server-browserbase
-- **Version:** github:browserbase/mcp-server-browserbase
-- **Type:** automation
-- **Category:** automation
-
-## 🌟 Community MCP Servers
-
-### analytics-server
-- **Files:** 1 files
-- **Main Files:** analytics-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### code-sandbox
-- **Files:** 1 files
-- **Main Files:** code-sandbox-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### package-management
-- **Files:** 1 files
-- **Main Files:** package-version-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### sentry-mcp
-- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
-- **Version:** 1.0.0
-- **Files:** 5 files
-- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
-- **Documentation:** ✅
-- **Configuration:** ❌
-
-### sequential-thinking
-- **Description:** MCP server for sequential thinking and problem solving
-- **Version:** 0.6.2
-- **Files:** 6 files
-- **Main Files:** index.ts
-- **Documentation:** ✅
-- **Configuration:** ✅
-
-### testing-automation
-- **Files:** 1 files
-- **Main Files:** testing-automation-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-## 🔧 Custom MCP Servers
-
-### coordination-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 201
-- **Functions:** express, path, status, workflows, execution
-- **MCP Integration:** ✅
-
-### enhanced-mcp-orchestrator.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 592
-- **Functions:** express, WebSocket, cors, fs, path
-- **MCP Integration:** ✅
-
-### enhanced-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 347
-- **Functions:** express, puppeteer, cors, fs, path
-- **MCP Integration:** ✅
-
-### orchestration-engine.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 313
-- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
-- **MCP Integration:** ✅
-
-### spotify_server.py
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 1133
-- **Functions:** correctly
-- **MCP Integration:** ✅
-
-### workflow-manager.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 238
-- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
-- **MCP Integration:** ✅
-
-## 🔄 Workflow Integrations
-
-### #mcp-inntegration.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Servers Integration`
-  - Line 7: `- 'mcp-servers/**'`
-  - Line 8: `- 'scripts/mcp-manager.js'`
-  - Line 10: `- '.github/workflows/mcp-integration.yml'`
-  - Line 14: `- 'mcp-servers/**'`
-
-### agent-mcp-automation.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Agent Automation & Validation`
-  - Line 10: `description: 'Run MCP discovery scan'`
-  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
-  - Line 29: `MCP_SERVER_PORT: 3001`
-  - Line 32: `mcp-discovery:`
-
-### copilot-models.yml
-- **MCP References:** 2
-- **Key Lines:**
-  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
-  - Line 541: `- MCP server integration tests`
-
-### copilot-slash-commands.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 510: `MCP[MCP Automation Server]`
-  - Line 540: `LB --> MCP`
-  - Line 554: `MCP --> FILES`
-  - Line 1042: `# Start the MCP automation server (optional)`
-  - Line 1043: `npm run mcp-server`
-
-### digitalocean-deploy.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 42: `MCP_IMAGE: echotune-mcp`
-  - Line 186: `- name: mcp`
-  - Line 187: `dockerfile: mcp-server/Dockerfile`
-  - Line 188: `context: mcp-server`
-  - Line 189: `image: ${{ env.MCP_IMAGE }}`
-
-### gemini-enhanced.yml
-- **MCP References:** 4
-- **Key Lines:**
-  - Line 9: `- 'mcp-server/**'`
-  - Line 99: `src/*|mcp-server/*|scripts/*)`
-  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
-  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
-
-## 🔄 Auto-Update Information
-
-This documentation is automatically updated by the MCP Documentation Automator.
-- **Last Scan:** 2025-08-08T21:57:22.548Z
-- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
-- **Trigger:** On MCP changes, schedule, or manual execution
-
-## 📊 Summary
-
-- **Package Dependencies:** 1
-- **Community Servers:** 6
-- **Custom Servers:** 6
-- **Workflow Integrations:** 6
-
-## 📦 Package Dependencies
-
-### @browserbasehq/mcp-server-browserbase
-- **Version:** github:browserbase/mcp-server-browserbase
-- **Type:** automation
-- **Category:** automation
-
-## 🌟 Community MCP Servers
-
-### analytics-server
-- **Files:** 1 files
-- **Main Files:** analytics-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### code-sandbox
-- **Files:** 1 files
-- **Main Files:** code-sandbox-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### package-management
-- **Files:** 1 files
-- **Main Files:** package-version-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-### sentry-mcp
-- **Description:** Sentry MCP Server for comprehensive error monitoring and performance tracking in EchoTune AI
-- **Version:** 1.0.0
-- **Files:** 5 files
-- **Main Files:** sentry-mcp-server.js, test-sentry-mcp.js
-- **Documentation:** ✅
-- **Configuration:** ❌
-
-### sequential-thinking
-- **Description:** MCP server for sequential thinking and problem solving
-- **Version:** 0.6.2
-- **Files:** 6 files
-- **Main Files:** index.ts
-- **Documentation:** ✅
-- **Configuration:** ✅
-
-### testing-automation
-- **Files:** 1 files
-- **Main Files:** testing-automation-mcp.js
-- **Documentation:** ❌
-- **Configuration:** ❌
-
-## 🔧 Custom MCP Servers
-
-### coordination-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 201
-- **Functions:** express, path, status, workflows, execution
-- **MCP Integration:** ✅
-
-### enhanced-mcp-orchestrator.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 592
-- **Functions:** express, WebSocket, cors, fs, path
-- **MCP Integration:** ✅
-
-### enhanced-server.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 347
-- **Functions:** express, puppeteer, cors, fs, path
-- **MCP Integration:** ✅
-
-### orchestration-engine.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 313
-- **Functions:** EventEmitter, axios, initialize, executeWorkflow, workflow
-- **MCP Integration:** ✅
-
-### spotify_server.py
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 1133
-- **Functions:** correctly
-- **MCP Integration:** ✅
-
-### workflow-manager.js
-- **Description:** Custom MCP server implementation
-- **Lines of Code:** 238
-- **Functions:** fs, path, initialize, createCustomWorkflow, workflowId
-- **MCP Integration:** ✅
-
-## 🔄 Workflow Integrations
-
-### #mcp-inntegration.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Servers Integration`
-  - Line 7: `- 'mcp-servers/**'`
-  - Line 8: `- 'scripts/mcp-manager.js'`
-  - Line 10: `- '.github/workflows/mcp-integration.yml'`
-  - Line 14: `- 'mcp-servers/**'`
-
-### agent-mcp-automation.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 1: `name: MCP Agent Automation & Validation`
-  - Line 10: `description: 'Run MCP discovery scan'`
-  - Line 24: `# Weekly MCP discovery on Sundays at 2 AM UTC`
-  - Line 29: `MCP_SERVER_PORT: 3001`
-  - Line 32: `mcp-discovery:`
-
-### copilot-models.yml
-- **MCP References:** 2
-- **Key Lines:**
-  - Line 406: `- **MCP Integration**: Advanced automation capabilities with 12+ MCP servers`
-  - Line 541: `- MCP server integration tests`
-
-### copilot-slash-commands.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 510: `MCP[MCP Automation Server]`
-  - Line 540: `LB --> MCP`
-  - Line 554: `MCP --> FILES`
-  - Line 1042: `# Start the MCP automation server (optional)`
-  - Line 1043: `npm run mcp-server`
-
-### digitalocean-deploy.yml
-- **MCP References:** 5
-- **Key Lines:**
-  - Line 42: `MCP_IMAGE: echotune-mcp`
-  - Line 186: `- name: mcp`
-  - Line 187: `dockerfile: mcp-server/Dockerfile`
-  - Line 188: `context: mcp-server`
-  - Line 189: `image: ${{ env.MCP_IMAGE }}`
-
-### gemini-enhanced.yml
-- **MCP References:** 4
-- **Key Lines:**
-  - Line 9: `- 'mcp-server/**'`
-  - Line 99: `src/*|mcp-server/*|scripts/*)`
-  - Line 257: `INPUT_INCLUDE: "src,scripts,mcp-server,tests,.github/workflows"`
-  - Line 288: `-E "(api[_-]?key|secret|password|token)" src/ scripts/ mcp-server/ 2>/dev/null | \`
-
-## 🔄 Auto-Update Information
-
-This documentation is automatically updated by the MCP Documentation Automator.
-- **Last Scan:** 2025-08-08T21:55:33.127Z
-- **Auto-Update Script:** `scripts/mcp-documentation-automator.js`
-- **Trigger:** On MCP changes, schedule, or manual execution
+**Generated:** Auto-updated by MCP Documentation Automation
+**Last Update:** Latest pipeline run
+
+### 📊 Quick Stats
+- **Active MCP Servers**: 8+ integrated
+- **Community Servers**: 7 analyzed  
+- **Custom Implementations**: 6 active
+- **Validation Score**: Generated from latest validation run
+
+For detailed server discovery results and integration status, see the latest auto-generated reports:
+- [MCP Integration Summary](../MCP_INTEGRATION_SUMMARY.md)
+- [Enhanced Validation Report](../../enhanced-mcp-validation-report.json)
+- [Performance Baseline](../../enhanced-mcp-performance-baseline.json)
+
+---
 

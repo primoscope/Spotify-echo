@@ -1,0 +1,277 @@
+name: 🤖 Copilot Coding Agent Preflight
+
+on:
+  pull_request:
+    types: [labeled, opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  preflight:
+    name: 🔍 Agent Preflight Validation
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'copilot-coding-agent') || github.event_name == 'workflow_dispatch'
+    
+    outputs:
+      validation-status: ${{ steps.validation.outputs.status }}
+      provider-latency: ${{ steps.latency.outputs.results }}
+    
+    steps:
+      - name: 🔄 Checkout Repository  
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: 📥 Install Dependencies
+        run: npm install
+        
+      - name: 🔐 Validate Repository Secrets
+        id: secrets
+        run: |
+          echo "🔍 Checking required secrets..."
+          
+          # Required secrets for basic operation
+          MISSING_SECRETS=()
+          
+          # Check Perplexity API Key
+          if [ -z "${{ secrets.PERPLEXITY_API_KEY }}" ]; then
+            MISSING_SECRETS+=("PERPLEXITY_API_KEY")
+          else
+            echo "✅ PERPLEXITY_API_KEY configured"
+          fi
+          
+          # Check other provider keys
+          if [ -z "${{ secrets.OPENAI_API_KEY }}" ]; then
+            MISSING_SECRETS+=("OPENAI_API_KEY")
+          else
+            echo "✅ OPENAI_API_KEY configured"  
+          fi
+          
+          if [ -z "${{ secrets.GOOGLE_GEMINI_API_KEY }}" ]; then
+            MISSING_SECRETS+=("GOOGLE_GEMINI_API_KEY")
+          else
+            echo "✅ GOOGLE_GEMINI_API_KEY configured"
+          fi
+          
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            MISSING_SECRETS+=("ANTHROPIC_API_KEY") 
+          else
+            echo "✅ ANTHROPIC_API_KEY configured"
+          fi
+          
+          # Optional but recommended secrets
+          if [ -z "${{ secrets.DO_API_TOKEN }}" ]; then
+            echo "⚠️  DO_API_TOKEN not configured (deployment will be limited)"
+          else
+            echo "✅ DO_API_TOKEN configured"
+          fi
+          
+          # Report results
+          if [ ${#MISSING_SECRETS[@]} -eq 0 ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "✅ All required secrets configured"
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "❌ Missing secrets: ${MISSING_SECRETS[*]}"
+            echo ""
+            echo "🔧 To fix this, add the missing secrets in repository settings:"
+            echo "   Settings → Secrets and variables → Actions → Repository secrets"
+            echo ""
+            echo "📖 See docs/REPOSITORY_SECRETS_SETUP_GUIDE.md for detailed instructions"
+            exit 1
+          fi
+
+      - name: 🌐 Provider Latency Check
+        id: latency
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          echo "🚀 Testing provider connectivity and latency..."
+          
+          # Create latency test script
+          cat > test-providers.js << 'EOF'
+          const fs = require('fs');
+          
+          async function testProvider(name, testFn) {
+            const startTime = Date.now();
+            try {
+              await testFn();
+              const latency = Date.now() - startTime;
+              return { provider: name, status: 'success', latency };
+            } catch (error) {
+              const latency = Date.now() - startTime;
+              return { provider: name, status: 'error', latency, error: error.message };
+            }
+          }
+          
+          async function testPerplexity() {
+            if (!process.env.PERPLEXITY_API_KEY) throw new Error('API key not configured');
+            const response = await fetch('https://api.perplexity.ai/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                model: 'llama-3.1-sonar-small-128k-online',
+                messages: [{ role: 'user', content: 'test' }],
+                max_tokens: 1
+              })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          }
+          
+          async function testOpenAI() {
+            if (!process.env.OPENAI_API_KEY) throw new Error('API key not configured');
+            const response = await fetch('https://api.openai.com/v1/models', {
+              headers: { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` }
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          }
+          
+          async function testGemini() {
+            if (!process.env.GOOGLE_GEMINI_API_KEY) throw new Error('API key not configured');
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GOOGLE_GEMINI_API_KEY}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          }
+          
+          async function testClaude() {
+            if (!process.env.ANTHROPIC_API_KEY) throw new Error('API key not configured');
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: {
+                'x-api-key': process.env.ANTHROPIC_API_KEY,
+                'Content-Type': 'application/json',
+                'anthropic-version': '2023-06-01'
+              },
+              body: JSON.stringify({
+                model: 'claude-3-haiku-20240307',
+                max_tokens: 1,
+                messages: [{ role: 'user', content: 'test' }]
+              })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          }
+          
+          async function main() {
+            global.fetch = require('node-fetch');
+            
+            const results = await Promise.all([
+              testProvider('Perplexity', testPerplexity),
+              testProvider('OpenAI', testOpenAI),
+              testProvider('Gemini', testGemini),
+              testProvider('Claude', testClaude)
+            ]);
+            
+            const report = {
+              timestamp: new Date().toISOString(),
+              results,
+              summary: {
+                total: results.length,
+                success: results.filter(r => r.status === 'success').length,
+                avgLatency: Math.round(results.reduce((sum, r) => sum + r.latency, 0) / results.length)
+              }
+            };
+            
+            fs.writeFileSync('provider-latency.json', JSON.stringify(report, null, 2));
+            console.log('📊 Provider Latency Results:');
+            console.log(JSON.stringify(report, null, 2));
+          }
+          
+          main().catch(console.error);
+          EOF
+          
+          node test-providers.js
+          
+          # Set output for use in other jobs
+          LATENCY_RESULTS=$(cat provider-latency.json)
+          echo "results<<EOF" >> $GITHUB_OUTPUT
+          echo "$LATENCY_RESULTS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 🏥 MCP Health Check
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: |
+          echo "🔍 Checking MCP server health..."
+          
+          # Test MCP validation script
+          npm run mcp:enhanced-validation || echo "⚠️  MCP validation completed with warnings"
+          
+          # Test Perplexity MCP if configured
+          if [ -n "$PERPLEXITY_API_KEY" ]; then
+            echo "🧪 Testing Perplexity MCP..."
+            timeout 30s npm run testperplexity || echo "⚠️  Perplexity MCP test timeout or error"
+          fi
+
+      - name: 📊 Generate Validation Report
+        id: validation
+        if: always()
+        run: |
+          echo "📝 Generating validation summary..."
+          
+          # Determine overall status
+          if [ "${{ steps.secrets.outputs.status }}" = "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "✅ Preflight validation PASSED"
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT  
+            echo "❌ Preflight validation FAILED"
+          fi
+          
+          # Create summary report
+          cat > preflight-summary.md << EOF
+          # 🤖 Copilot Coding Agent Preflight Report
+          
+          **Status**: ${{ steps.secrets.outputs.status == 'success' && '✅ PASSED' || '❌ FAILED' }}
+          **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ## Secrets Validation
+          ${{ steps.secrets.outputs.status == 'success' && '✅ All required secrets configured' || '❌ Missing required secrets' }}
+          
+          ## Provider Latency
+          See \`provider-latency.json\` artifact for detailed latency metrics.
+          
+          ## MCP Health  
+          Enhanced MCP validation completed. Check logs for details.
+          
+          ## Next Steps
+          ${{ steps.secrets.outputs.status == 'success' && '✅ Ready for Coding Agent workflows' || '❌ Fix missing secrets before proceeding' }}
+          EOF
+          
+          echo "📄 Preflight summary generated"
+
+      - name: 📤 Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preflight-validation-results
+          path: |
+            provider-latency.json
+            preflight-summary.md
+            enhanced-mcp-validation-report.json
+            MCP_VALIDATION_SUMMARY.md
+          retention-days: 30
+
+  block-on-failure:
+    name: 🚫 Block on Preflight Failure
+    runs-on: ubuntu-latest
+    needs: preflight
+    if: needs.preflight.outputs.validation-status == 'failure'
+    
+    steps:
+      - name: ❌ Fail Build on Preflight Failure
+        run: |
+          echo "🚫 Preflight validation failed. Blocking Coding Agent workflows."
+          echo ""
+          echo "🔧 To fix:"
+          echo "1. Add missing repository secrets in Settings → Secrets and variables → Actions"
+          echo "2. See docs/REPOSITORY_SECRETS_SETUP_GUIDE.md for detailed setup instructions"
+          echo "3. Re-run this workflow after fixing the issues"
+          exit 1

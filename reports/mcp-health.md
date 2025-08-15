@@ -1,8 +1,8 @@
 # MCP Health Check Report
 
-**Generated:** 2025-08-15T20:39:28Z  
+**Generated:** 2025-08-15T20:43:52Z  
 **Overall Status:** warning  
-**Total Checks:** 38
+**Total Checks:** 37
 
 ## Executive Summary
 
@@ -43,8 +43,7 @@
 | report:MCP Report Generation | ✅ healthy | Script available and functional |
 | Reports Directory | ✅ healthy | Directory exists and is writable |
 | MCP Directory | ✅ healthy | Directory exists and is writable |
-| Logs Directory | ⚠️ warning | Directory does not exist |
-| Logs Directory | ✅ healthy | Directory created successfully |
+| Logs Directory | ✅ healthy | Directory exists and is writable |
 | MCP Servers Directory | ✅ healthy | Directory exists and is writable |
 | MCP Server Directory | ✅ healthy | Directory exists and is writable |
 | Main MCP Server | ⚠️ warning | Server not running on port 3001 (expected in most environments) |

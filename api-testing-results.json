@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-08-15T15:55:03.630Z",
+  "timestamp": "2025-08-15T16:28:27.483Z",
   "totalTests": 12,
-  "passed": 6,
-  "failed": 6,
+  "passed": 8,
+  "failed": 4,
   "warnings": 0,
   "secrets": {
     "SPOTIFY_API": {
       "status": "✅ WORKING",
-      "responseTime": "471ms",
+      "responseTime": "422ms",
       "features": [
         "OAuth authentication",
         "Search API",
@@ -15,24 +15,24 @@
       ],
       "testData": "Found 1 tracks in search test",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:04.106Z"
+      "timestamp": "2025-08-15T16:28:27.910Z"
     },
     "PERPLEXITY_API": {
       "status": "✅ WORKING",
-      "responseTime": "5708ms",
+      "responseTime": "5315ms",
       "features": [
         "AI research queries",
         "Citations",
         "Real-time web data"
       ],
-      "testData": "Response length: 1066 characters",
+      "testData": "Response length: 1090 characters",
       "cost": "$0.003 per query (estimated)",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:09.814Z"
+      "timestamp": "2025-08-15T16:28:33.226Z"
     },
     "BRAVE_API": {
       "status": "✅ WORKING",
-      "responseTime": "425ms",
+      "responseTime": "333ms",
       "features": [
         "Privacy-focused search",
         "Web results",
@@ -40,25 +40,34 @@
       ],
       "testData": "Found 5 search results",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:10.240Z"
+      "timestamp": "2025-08-15T16:28:33.559Z"
     },
     "BROWSERBASE_API": {
       "status": "❌ FAILED",
       "error": "Browserbase API failed: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:10.586Z"
+      "timestamp": "2025-08-15T16:28:33.685Z"
     },
     "DIGITALOCEAN_API": {
       "status": "❌ FAILED",
       "error": "DigitalOcean API failed: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:10.823Z"
+      "timestamp": "2025-08-15T16:28:33.883Z"
     },
     "GITHUB_API": {
-      "status": "❌ FAILED",
-      "error": "GitHub API failed: 401 Unauthorized",
+      "status": "✅ WORKING",
+      "responseTime": "227ms",
+      "features": [
+        "Repository automation",
+        "Issues management",
+        "Workflow integration"
+      ],
+      "testData": "Working token: GH_PAT (Fine-grained Personal Access Token)",
+      "allResults": [
+        "✅ GH_PAT: Working (User: dzp5103)"
+      ],
       "tested": true,
-      "timestamp": "2025-08-15T15:55:10.935Z"
+      "timestamp": "2025-08-15T16:28:34.111Z"
     },
     "CURSOR_API": {
       "status": "✅ VALIDATED",
@@ -70,11 +79,11 @@
       ],
       "testData": "Key format valid: 68 characters starting with 'key_'",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:10.935Z"
+      "timestamp": "2025-08-15T16:28:34.111Z"
     },
     "MONGODB_URI": {
       "status": "✅ WORKING",
-      "responseTime": "2135ms",
+      "responseTime": "2149ms",
       "features": [
         "Database connectivity",
         "User data storage",
@@ -82,25 +91,42 @@
       ],
       "testData": "Ping result: Connected",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:13.073Z"
+      "timestamp": "2025-08-15T16:28:36.263Z"
     },
     "REDIS_URI": {
       "status": "❌ FAILED",
       "error": "WRONGPASS invalid username-password pair",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:13.349Z"
+      "timestamp": "2025-08-15T16:28:36.529Z"
     },
     "GEMINI_API": {
-      "status": "❌ FAILED",
-      "error": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent: [400 Bad Request] API key not valid. Please pass a valid API key. [{\"@type\":\"type.googleapis.com/google.rpc.ErrorInfo\",\"reason\":\"API_KEY_INVALID\",\"domain\":\"googleapis.com\",\"metadata\":{\"service\":\"generativelanguage.googleapis.com\"}},{\"@type\":\"type.googleapis.com/google.rpc.LocalizedMessage\",\"locale\":\"en-US\",\"message\":\"API key not valid. Please pass a valid API key.\"}]",
+      "status": "✅ WORKING",
+      "responseTime": "1969ms",
+      "features": [
+        "AI text generation",
+        "Multimodal AI",
+        "Alternative LLM provider"
+      ],
+      "testData": "Working key: 1 of 6",
+      "workingKey": "Key 1: ...W7ssz3bzTw",
+      "allResults": [
+        "✅ Key 1: Working (Response: \"Four\")",
+        "✅ Key 2: Working (Response: \"Four\")",
+        "✅ Key 3: Working (Response: \"Four\")",
+        "✅ Key 4: Working (Response: \"Four\")",
+        "✅ Key 5: Working (Response: \"Four\")",
+        "✅ Key 6: Working (Response: \"Four\")"
+      ],
+      "totalKeys": 6,
+      "workingKeys": 6,
       "tested": true,
-      "timestamp": "2025-08-15T15:55:13.460Z"
+      "timestamp": "2025-08-15T16:28:38.498Z"
     },
     "OPENROUTER_API": {
       "status": "❌ FAILED",
-      "error": "OpenRouter API failed: 401 Unauthorized",
+      "error": "All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:13.919Z"
+      "timestamp": "2025-08-15T16:28:39.308Z"
     },
     "SECURITY_SECRETS": {
       "status": "✅ WORKING",
@@ -112,7 +138,7 @@
       ],
       "testData": "JWT secret length: 64 characters",
       "tested": true,
-      "timestamp": "2025-08-15T15:55:13.941Z"
+      "timestamp": "2025-08-15T16:28:39.330Z"
     }
   },
   "performance": {},
@@ -120,9 +146,7 @@
   "errors": [
     "BROWSERBASE_API: Browserbase API failed: 401 Unauthorized",
     "DIGITALOCEAN_API: DigitalOcean API failed: 401 Unauthorized",
-    "GITHUB_API: GitHub API failed: 401 Unauthorized",
     "REDIS_URI: WRONGPASS invalid username-password pair",
-    "GEMINI_API: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent: [400 Bad Request] API key not valid. Please pass a valid API key. [{\"@type\":\"type.googleapis.com/google.rpc.ErrorInfo\",\"reason\":\"API_KEY_INVALID\",\"domain\":\"googleapis.com\",\"metadata\":{\"service\":\"generativelanguage.googleapis.com\"}},{\"@type\":\"type.googleapis.com/google.rpc.LocalizedMessage\",\"locale\":\"en-US\",\"message\":\"API key not valid. Please pass a valid API key.\"}]",
-    "OPENROUTER_API: OpenRouter API failed: 401 Unauthorized"
+    "OPENROUTER_API: All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized"
   ]
 }

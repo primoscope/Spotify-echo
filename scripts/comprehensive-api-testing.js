@@ -23,21 +23,53 @@ class ComprehensiveAPITester {
             errors: []
         };
         
-        // Provided secrets from the user
+        // Updated secrets from the user (latest provided)
         this.secrets = {
+            // Spotify API (unchanged)
             SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || 'dcc2df507bde447c93a0199358ca219d',
             SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || '128089720b414d1e8233290d94fb38a0',
+            
+            // Search APIs  
             BRAVE_API: process.env.BRAVE_API || 'BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW',
-            BROWSERBASE_API: process.env.BROWSERBASE_API || 'bb_live_uwB0Y5AQdwH_Bt3azwiOxD0zOfM',
+            
+            // Browser automation - NEW API KEY and PROJECT ID
+            BROWSERBASE_API: process.env.BROWSERBASE_API || 'bb_live_NKhsq1t4-MmXPTZO7vQqX5nCs8Q',
+            BROWSERBASE_PROJECT_ID: process.env.BROWSERBASE_PROJECT_ID || '1b44cfea-5226-4b6e-93be-7e7f8d44a0c2',
+            
+            // AI APIs
             PERPLEXITY_API: process.env.PERPLEXITY_API || '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',
+            
+            // Cloud Infrastructure
             DIGITALOCEAN_API: process.env.DIGITALOCEAN_API || 'dop_v1_93910c446f36d3069ca4462ba1779792e21b84f15da4831688f04094ca6680ff',
-            GITHUB_API: process.env.GITHUB_API || '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',
+            
+            // GitHub tokens - User has two different tokens
+            GH_PAT: process.env.GH_PAT || null, // Fine-grained token
+            GH_GH_TOKEN: process.env.GH_GH_TOKEN || null, // Classic token
+            
+            // Development tools
             CURSOR_API: process.env.CURSOR_API || 'key_694009601be9f42adc51e02c9d5a4e27828043679cd397039c7496e07f00b705',
+            
+            // Database and cache
             MONGODB_URI: process.env.MONGODB_URI || 'mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
             JWT_SECRET: process.env.JWT_SECRET || 'fb66bf34fc84939cc49bf532a573169ee05c70e4f628d1d8b940cab82d5c030f',
             REDIS_URI: process.env.REDIS_URI || 'redis://copilot:DapperMan77$$@redis-15489.c238.us-central1-2.gce.redns.redis-cloud.com:15489',
-            GEMINI_API: process.env.GEMINI_API || 'AIzaSyCv8Dd_4oURTJLOyuaD7aA11wnFfytvsCkAe',
-            OPENROUTER_API: process.env.OPENROUTER_API || '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'
+            
+            // Multiple Gemini API keys to test
+            GEMINI_API_KEYS: [
+                'AIzaSyAVqHaHBRos1lRKk5hi62mC9W7ssz3bzTw',
+                'AIzaSyChRuLP-xS8ucyyu1xbBiE-hrHTti_Ks5E', 
+                'AIzaSyBFKq4XRb505EOdPiy3O7Gt3D192siUr30',
+                'AIzaSyA_rZoxcgGK_7H-lTMzV5oJqoU_vrZfSSc',
+                'AIzaSyBWZMFT-QRim0VYkB_610mMJix13s01ynk',
+                'AIzaSyAKlbqhApEri0ZVKIv5ZGrMrEULLrYQWPM'
+            ],
+            
+            // Multiple OpenRouter API keys to test
+            OPENROUTER_API_KEYS: [
+                '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',
+                'sk-or-v1-3e798d593ede901dadbd0bee0b4ec69f7e90930f33b23be3c865893c2a11297dv',
+                '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'
+            ]
         };
     }
 
@@ -205,7 +237,7 @@ class ComprehensiveAPITester {
         const startTime = performance.now();
         
         try {
-            // Test API key validation
+            // Test API key validation with new key and project ID
             const response = await fetch('https://api.browserbase.com/v1/projects', {
                 headers: {
                     'Authorization': `Bearer ${this.secrets.BROWSERBASE_API}`,
@@ -220,11 +252,19 @@ class ComprehensiveAPITester {
             const data = await response.json();
             const endTime = performance.now();
             
+            // Check if provided project ID exists in projects
+            const hasProjectId = this.secrets.BROWSERBASE_PROJECT_ID ? 
+                Array.isArray(data) && data.some(project => project.id === this.secrets.BROWSERBASE_PROJECT_ID) :
+                false;
+            
             this.recordSuccess('BROWSERBASE_API', {
                 status: '✅ WORKING',
                 responseTime: `${Math.round(endTime - startTime)}ms`,
                 features: ['Cloud browser automation', 'Session management', 'Spotify Web Player ready'],
-                testData: `Projects accessible: ${Array.isArray(data) ? data.length : 'Available'}`
+                testData: `Projects accessible: ${Array.isArray(data) ? data.length : 'Available'}`,
+                projectId: this.secrets.BROWSERBASE_PROJECT_ID,
+                projectIdValid: hasProjectId ? '✅ Valid' : '⚠️ Not found in projects',
+                apiKeyUpdated: 'NEW: bb_live_NKhsq1t4-MmXPTZO7vQqX5nCs8Q'
             });
 
         } catch (error) {
@@ -267,30 +307,73 @@ class ComprehensiveAPITester {
         console.log('🐙 Testing GitHub API...');
         const startTime = performance.now();
         
-        try {
-            const response = await fetch('https://api.github.com/user', {
-                headers: {
-                    'Authorization': `token ${this.secrets.GITHUB_API}`,
-                    'Accept': 'application/vnd.github.v3+json'
+        // Test both GitHub tokens provided by user
+        let workingToken = null;
+        let workingType = null;
+        let testResults = [];
+        
+        // Test GH_PAT (fine-grained token)
+        if (this.secrets.GH_PAT) {
+            try {
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `Bearer ${this.secrets.GH_PAT}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'User-Agent': 'EchoTune-AI'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    workingToken = 'GH_PAT';
+                    workingType = 'Fine-grained Personal Access Token';
+                    testResults.push(`✅ GH_PAT: Working (User: ${data.login})`);
+                } else {
+                    testResults.push(`❌ GH_PAT: ${response.status} ${response.statusText}`);
                 }
-            });
-
-            if (!response.ok) {
-                throw new Error(`GitHub API failed: ${response.status} ${response.statusText}`);
+            } catch (error) {
+                testResults.push(`❌ GH_PAT: ${error.message}`);
             }
+        }
+        
+        // Test GH_GH_TOKEN (classic token)  
+        if (this.secrets.GH_GH_TOKEN) {
+            try {
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `token ${this.secrets.GH_GH_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'User-Agent': 'EchoTune-AI'
+                    }
+                });
 
-            const data = await response.json();
-            const endTime = performance.now();
-            
+                if (response.ok) {
+                    const data = await response.json();
+                    if (!workingToken) {
+                        workingToken = 'GH_GH_TOKEN';
+                        workingType = 'Classic Personal Access Token';
+                    }
+                    testResults.push(`✅ GH_GH_TOKEN: Working (User: ${data.login})`);
+                } else {
+                    testResults.push(`❌ GH_GH_TOKEN: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                testResults.push(`❌ GH_GH_TOKEN: ${error.message}`);
+            }
+        }
+        
+        const endTime = performance.now();
+        
+        if (workingToken) {
             this.recordSuccess('GITHUB_API', {
                 status: '✅ WORKING',
                 responseTime: `${Math.round(endTime - startTime)}ms`,
                 features: ['Repository automation', 'Issues management', 'Workflow integration'],
-                testData: `User: ${data.login || 'Authenticated'}`
+                testData: `Working token: ${workingToken} (${workingType})`,
+                allResults: testResults
             });
-
-        } catch (error) {
-            this.recordFailure('GITHUB_API', error.message);
+        } else {
+            this.recordFailure('GITHUB_API', `Both tokens failed: ${testResults.join(', ')}`);
         }
     }
 
@@ -378,72 +461,132 @@ class ComprehensiveAPITester {
     }
 
     async testGeminiAPI() {
-        console.log('💎 Testing Google Gemini API...');
+        console.log('💎 Testing Google Gemini API (Multiple Keys)...');
         const startTime = performance.now();
         
-        try {
-            const { GoogleGenerativeAI } = require('@google/generative-ai');
-            const genAI = new GoogleGenerativeAI(this.secrets.GEMINI_API);
+        let workingKey = null;
+        let workingKeyIndex = -1;
+        const testResults = [];
+        
+        // Test each Gemini API key
+        for (let i = 0; i < this.secrets.GEMINI_API_KEYS.length; i++) {
+            const apiKey = this.secrets.GEMINI_API_KEYS[i];
+            console.log(`  Testing Gemini key ${i + 1}/${this.secrets.GEMINI_API_KEYS.length}...`);
             
-            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-            const result = await model.generateContent('Test: What is 2+2?');
-            const response = await result.response;
-            
-            const endTime = performance.now();
-            
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: 'Test: What is 2+2? (One word answer)' }]
+                        }]
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Response received';
+                    
+                    if (!workingKey) {
+                        workingKey = apiKey;
+                        workingKeyIndex = i;
+                    }
+                    testResults.push(`✅ Key ${i + 1}: Working (Response: "${responseText.trim()}")`);
+                } else {
+                    testResults.push(`❌ Key ${i + 1}: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                testResults.push(`❌ Key ${i + 1}: ${error.message}`);
+            }
+        }
+        
+        const endTime = performance.now();
+        
+        if (workingKey) {
             this.recordSuccess('GEMINI_API', {
                 status: '✅ WORKING',
                 responseTime: `${Math.round(endTime - startTime)}ms`,
                 features: ['AI text generation', 'Multimodal AI', 'Alternative LLM provider'],
-                testData: `Response length: ${response.text().length} characters`
+                testData: `Working key: ${workingKeyIndex + 1} of ${this.secrets.GEMINI_API_KEYS.length}`,
+                workingKey: `Key ${workingKeyIndex + 1}: ...${workingKey.slice(-10)}`,
+                allResults: testResults,
+                totalKeys: this.secrets.GEMINI_API_KEYS.length,
+                workingKeys: testResults.filter(r => r.includes('✅')).length
             });
-
-        } catch (error) {
-            this.recordFailure('GEMINI_API', error.message);
+        } else {
+            this.recordFailure('GEMINI_API', `All ${this.secrets.GEMINI_API_KEYS.length} keys failed: ${testResults.join(', ')}`);
         }
     }
 
     async testOpenRouterAPI() {
-        console.log('🔀 Testing OpenRouter API...');
+        console.log('🔀 Testing OpenRouter API (Multiple Keys)...');
         const startTime = performance.now();
         
-        try {
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.secrets.OPENROUTER_API}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://echotune-ai.com',
-                    'X-Title': 'EchoTune AI'
-                },
-                body: JSON.stringify({
-                    model: 'meta-llama/llama-3.2-3b-instruct:free',
-                    messages: [
-                        {
-                            role: 'user',
-                            content: 'Test: What is the capital of France? (One word answer)'
-                        }
-                    ],
-                    max_tokens: 10
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`OpenRouter API failed: ${response.status} ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            const endTime = performance.now();
+        let workingKey = null;
+        let workingKeyIndex = -1;
+        const testResults = [];
+        
+        // Test each OpenRouter API key
+        for (let i = 0; i < this.secrets.OPENROUTER_API_KEYS.length; i++) {
+            const apiKey = this.secrets.OPENROUTER_API_KEYS[i];
+            console.log(`  Testing OpenRouter key ${i + 1}/${this.secrets.OPENROUTER_API_KEYS.length}...`);
             
+            try {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': 'https://echotune-ai.com',
+                        'X-Title': 'EchoTune AI'
+                    },
+                    body: JSON.stringify({
+                        model: 'meta-llama/llama-3.2-3b-instruct:free',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: 'Test: What is the capital of France? (One word answer)'
+                            }
+                        ],
+                        max_tokens: 10
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const responseText = data.choices?.[0]?.message?.content || 'Response received';
+                    
+                    if (!workingKey) {
+                        workingKey = apiKey;
+                        workingKeyIndex = i;
+                    }
+                    testResults.push(`✅ Key ${i + 1}: Working (Response: "${responseText.trim()}")`);
+                } else {
+                    testResults.push(`❌ Key ${i + 1}: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                testResults.push(`❌ Key ${i + 1}: ${error.message}`);
+            }
+        }
+        
+        const endTime = performance.now();
+        
+        if (workingKey) {
             this.recordSuccess('OPENROUTER_API', {
                 status: '✅ WORKING',
                 responseTime: `${Math.round(endTime - startTime)}ms`,
                 features: ['Multiple AI models', 'Flexible routing', 'Cost optimization'],
-                testData: `Response: ${data.choices?.[0]?.message?.content || 'Received'}`
+                testData: `Working key: ${workingKeyIndex + 1} of ${this.secrets.OPENROUTER_API_KEYS.length}`,
+                workingKey: `Key ${workingKeyIndex + 1}: ...${workingKey.slice(-10)}`,
+                allResults: testResults,
+                totalKeys: this.secrets.OPENROUTER_API_KEYS.length,
+                workingKeys: testResults.filter(r => r.includes('✅')).length
             });
-
-        } catch (error) {
-            this.recordFailure('OPENROUTER_API', error.message);
+        } else {
+            this.recordFailure('OPENROUTER_API', `All ${this.secrets.OPENROUTER_API_KEYS.length} keys failed: ${testResults.join(', ')}`);
         }
     }
 

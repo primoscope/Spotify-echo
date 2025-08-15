@@ -15,6 +15,25 @@
         "DEBUG": "true"
       }
     },
+    "brave-search": {
+      "command": "node",
+      "args": [
+        "./mcp-servers/brave-search/brave-search-mcp.js"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "browserbase": {
+      "command": "node", 
+      "args": [
+        "./mcp-servers/browserbase/browserbase-mcp.js"
+      ],
+      "env": {
+        "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
+        "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}"
+      }
+    },
     "echotune-filesystem": {
       "command": "npx",
       "args": [
@@ -22,6 +41,13 @@
         "./src",
         "./scripts",
         "./mcp-server"
+      ],
+      "env": {}
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-sequential-thinking"
       ],
       "env": {}
     },
@@ -43,6 +69,13 @@
       "command": "node",
       "args": [
         "./mcp-servers/testing-automation/testing-automation-mcp.js"
+      ],
+      "env": {}
+    },
+    "puppeteer-browser": {
+      "command": "npx",
+      "args": [
+        "@hisma/server-puppeteer"
       ],
       "env": {}
     }

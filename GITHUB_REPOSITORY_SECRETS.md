@@ -84,12 +84,12 @@ Usage: Server-to-server authentication, token refresh
 
 ## 🔍 Search & Data Services
 
-### Brave Search (Optional)
+### Brave Search API
 ```
 Name: BRAVE_API_KEY
-Value: [Your Brave Search API key]
+Value: BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW
 Description: Brave Search API for privacy-focused web search
-Usage: Alternative search provider for MCP servers
+Usage: MCP server, web search capabilities, research automation
 ```
 
 ### MongoDB Atlas
@@ -98,6 +98,21 @@ Name: MONGODB_URI
 Value: [Your MongoDB Atlas connection string]
 Description: MongoDB database connection for production
 Usage: User data storage, listening history, recommendations
+```
+
+### Browserbase API
+```
+Name: BROWSERBASE_API_KEY
+Value: bb_live_uwB0Y5AQdwH_Bt3azwiOxD0zOfM
+Description: Browserbase cloud browser automation API
+Usage: Automated browser testing, web automation, screenshot capture
+```
+
+```
+Name: BROWSERBASE_PROJECT_ID  
+Value: [Your Browserbase project ID from dashboard]
+Description: Browserbase project identifier for browser sessions
+Usage: Browser automation workflows, testing environments
 ```
 
 ---

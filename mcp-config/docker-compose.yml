@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # GitHub MCP Server
+  github-mcp:
+    image: ghcr.io/github/github-mcp-server:latest
+    container_name: echotune-github-mcp
+    environment:
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Filesystem MCP Server (with mounted volumes)
+  filesystem-mcp:
+    image: mcp/filesystem:latest
+    container_name: echotune-filesystem-mcp
+    ports:
+      - "3002:3002"
+    volumes:
+      - .:/workspace:ro
+      - ./src:/workspace/src:ro
+      - ./scripts:/workspace/scripts:ro
+      - ./mcp-server:/workspace/mcp-server:ro
+      - ./docs:/workspace/docs:ro
+      - ./logs:/app/logs
+    environment:
+      - ALLOWED_DIRECTORIES=/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Sequential Thinking MCP Server
+  sequential-thinking-mcp:
+    image: mcp/sequentialthinking:latest
+    container_name: echotune-sequential-thinking-mcp
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Memory MCP Server (with persistent storage)
+  memory-mcp:
+    image: mcp/memory:latest
+    container_name: echotune-memory-mcp
+    ports:
+      - "3004:3004"
+    volumes:
+      - memory-data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Fetch MCP Server
+  fetch-mcp:
+    image: mcp/fetch:latest
+    container_name: echotune-fetch-mcp
+    ports:
+      - "3005:3005"
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - USER_AGENT=EchoTuneAI/1.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Brave Search MCP Server (optional)
+  brave-search-mcp:
+    image: mcp/brave-search:latest
+    container_name: echotune-brave-search-mcp
+    ports:
+      - "3006:3006"
+    environment:
+      - BRAVE_API_KEY=${BRAVE_API_KEY}
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    profiles:
+      - optional
+
+  # Docker MCP Server (with Docker socket access)
+  docker-mcp:
+    image: mcp/docker:latest
+    container_name: echotune-docker-mcp
+    ports:
+      - "3007:3007"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./logs:/app/logs
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    profiles:
+      - optional
+
+volumes:
+  memory-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./mcp-data/memory
+
+networks:
+  default:
+    name: echotune-mcp-network
+    driver: bridge

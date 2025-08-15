@@ -251,7 +251,7 @@ describe('Performance Testing Scenarios', () => {
         ),
         // Invalid operations (should fail gracefully)
         ...Array(5).fill().map(() => 
-          fileMCP.readFile('non-existent-file.txt')
+          fileMCP.readFile('/tmp/test-non-existent-file-' + Math.random() + '.txt')
             .then(() => successCount++)
             .catch(() => errorCount++)
         )

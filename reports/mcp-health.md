@@ -1,6 +1,6 @@
 # MCP Health Check Report
 
-**Generated:** 2025-08-15T15:44:48Z  
+**Generated:** 2025-08-15T20:39:28Z  
 **Overall Status:** warning  
 **Total Checks:** 38
 
@@ -26,9 +26,9 @@
 | MongoDB Database | ⚠️ warning | Environment variable not set (optional) |
 | N8N Base URL | ⚠️ warning | Environment variable not set (optional) |
 | N8N API Key | ⚠️ warning | Environment variable not set (optional) |
-| Brave Search API | ✅ healthy | Environment variable configured |
+| Brave Search API | ⚠️ warning | Environment variable not set (optional) |
 | Screenshot Engine | ⚠️ warning | Environment variable not set (optional) |
-| Browserbase API | ✅ healthy | Environment variable configured |
+| Browserbase API | ⚠️ warning | Environment variable not set (optional) |
 | Browserbase Project | ⚠️ warning | Environment variable not set (optional) |
 | Spotify API | ⚠️ warning | Environment variable not set (optional) |
 | Spotify API Secret | ⚠️ warning | Environment variable not set (optional) |

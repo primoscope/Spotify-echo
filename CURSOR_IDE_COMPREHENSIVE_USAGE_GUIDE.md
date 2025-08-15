@@ -17,32 +17,41 @@ This guide provides **step-by-step instructions** for using Cursor IDE most effe
 ### 1.2 Repository Secrets Setup
 **Navigate to GitHub Repository Settings → Secrets and Variables → Actions**
 
-**Critical Secrets (Required):**
+**Critical Secrets (Live Tested ✅❌):**
 ```
+# WORKING SERVICES ✅
 PERPLEXITY_API_KEY = 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
 CURSOR_API_KEY = key_694009601be9f42adc51e02c9d5a4e27828043679cd397039c7496e07f00b705
 BRAVE_API_KEY = BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW  
+
+# AUTHENTICATION FAILED ❌ (Needs Fix)
 BROWSERBASE_API_KEY = bb_live_uwB0Y5AQdwH_Bt3azwiOxD0zOfM
 ```
 
-**Essential Additional Secrets:**
+**Essential Additional Secrets (Live Tested ✅❌):**
 ```
-GITHUB_TOKEN = [Your GitHub Personal Access Token with repo, workflow, read:org, read:user scopes]
-SPOTIFY_CLIENT_ID = [Your Spotify App Client ID]  
-SPOTIFY_CLIENT_SECRET = [Your Spotify App Client Secret]
-MONGODB_URI = [Your MongoDB Atlas connection string]
-DIGITALOCEAN_TOKEN = [Your DigitalOcean API token]
+# WORKING ✅
+SPOTIFY_CLIENT_ID = dcc2df507bde447c93a0199358ca219d
+SPOTIFY_CLIENT_SECRET = 128089720b414d1e8233290d94fb38a0
+MONGODB_URI = mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET = fb66bf34fc84939cc49bf532a573169ee05c70e4f628d1d8b940cab82d5c030f
+
+# NEEDS FIXING ❌  
+GITHUB_TOKEN = [GENERATE NEW - Current token expired/invalid]
+DIGITALOCEAN_TOKEN = [GENERATE NEW - Current token expired/invalid]
+REDIS_URI = redis://copilot:DapperMan77%24%24@redis-15489.c238.us-central1-2.gce.redns.redis-cloud.com:15489
 SESSION_SECRET = [Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"]
-JWT_SECRET = [Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"]
 ```
 
-**Optional Enhancement Secrets:**
+**Optional Enhancement Secrets (Live Tested ❌):**
 ```
-OPENAI_API_KEY = [Your OpenAI API key for alternative AI provider]
-GEMINI_API_KEY = [Your Google AI Studio API key]
-REDIS_URL = [Your Redis Cloud connection string]
-SENTRY_DSN = [Your Sentry DSN URL]
-BROWSERBASE_PROJECT_ID = [Your Browserbase project ID from dashboard]
+# NEEDS NEW KEYS/TOKENS ❌
+OPENAI_API_KEY = [Your OpenAI API key - optional fallback]
+GEMINI_API_KEY = [GENERATE NEW - Current key invalid]
+REDIS_URL = [FIXED - Use Redis_URI above instead]
+SENTRY_DSN = [Your Sentry DSN URL for error tracking]
+BROWSERBASE_PROJECT_ID = [Required with Browserbase API key]
+OPENROUTER_API_KEY = [GENERATE NEW - Current key invalid/expired]
 ```
 
 ### 1.3 Environment Variables Setup

@@ -91,6 +91,7 @@
     "data:complete-analysis": "npm run analyze:json-data && npm run merge:json-data && npm run validate:merged-data",
     "validate:comprehensive": "node scripts/comprehensive-validation.js",
     "validate:api-keys": "node scripts/validate-api-keys.js --all",
+    "validate:api-comprehensive": "node scripts/comprehensive-api-testing.js",
     "validate:spotify": "node scripts/validate-api-keys.js --spotify",
     "validate:openai": "node scripts/validate-api-keys.js --openai",
     "validate:gemini": "node scripts/validate-api-keys.js --gemini",

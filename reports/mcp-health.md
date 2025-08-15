@@ -1,8 +1,8 @@
 # MCP Health Check Report
 
-**Generated:** 2025-08-15T21:08:25Z  
+**Generated:** 2025-08-15T21:31:52Z  
 **Overall Status:** warning  
-**Total Checks:** 37
+**Total Checks:** 38
 
 ## Executive Summary
 
@@ -18,10 +18,10 @@
 | Comprehensive Validator MCP | ✅ healthy | File present at mcp-servers/comprehensive-validator.js |
 | MCP Orchestrator | ✅ healthy | File present at mcp-server/enhanced-mcp-orchestrator.js |
 | Workflow Manager | ✅ healthy | File present at mcp-server/workflow-manager.js |
-| MCP SDK | ✅ healthy | Package installed (v1.17.3) |
-| Filesystem MCP | ✅ healthy | Package installed (v2025.7.29) |
-| Browserbase MCP | ✅ healthy | Package installed (vgithub.com/browserbase/mcp-server-browserbase.git#056e479778a0a6fc401d7e1743aa3128a16f869c)) |
-| FileScope MCP | ✅ healthy | Package installed (vgithub.com/admica/FileScopeMCP.git#cf35d164f8c73240619ef78c4b09955f073ddba1)) |
+| MCP SDK | ⚠️ warning | Package not installed locally |
+| Filesystem MCP | ⚠️ warning | Package not installed locally |
+| Browserbase MCP | ⚠️ warning | Package not installed locally |
+| FileScope MCP | ⚠️ warning | Package not installed locally |
 | MongoDB Connection | ⚠️ warning | Environment variable not set (optional) |
 | MongoDB Database | ⚠️ warning | Environment variable not set (optional) |
 | N8N Base URL | ⚠️ warning | Environment variable not set (optional) |
@@ -43,7 +43,8 @@
 | report:MCP Report Generation | ✅ healthy | Script available and functional |
 | Reports Directory | ✅ healthy | Directory exists and is writable |
 | MCP Directory | ✅ healthy | Directory exists and is writable |
-| Logs Directory | ✅ healthy | Directory exists and is writable |
+| Logs Directory | ⚠️ warning | Directory does not exist |
+| Logs Directory | ✅ healthy | Directory created successfully |
 | MCP Servers Directory | ✅ healthy | Directory exists and is writable |
 | MCP Server Directory | ✅ healthy | Directory exists and is writable |
 | Main MCP Server | ⚠️ warning | Server not running on port 3001 (expected in most environments) |

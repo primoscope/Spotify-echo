@@ -32,9 +32,9 @@ class ComprehensiveAPITester {
             // Search APIs  
             BRAVE_API: process.env.BRAVE_API || 'BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW',
             
-            // Browser automation - NEW API KEY and PROJECT ID
-            BROWSERBASE_API: process.env.BROWSERBASE_API || 'bb_live_NKhsq1t4-MmXPTZO7vQqX5nCs8Q',
-            BROWSERBASE_PROJECT_ID: process.env.BROWSERBASE_PROJECT_ID || '1b44cfea-5226-4b6e-93be-7e7f8d44a0c2',
+            // Browser automation - LATEST API KEY and PROJECT ID
+            BROWSERBASE_API: process.env.BROWSERBASE_API || 'bb_live_P4BWp-i1Atz_NMBWXr521kxcrXw',
+            BROWSERBASE_PROJECT_ID: process.env.BROWSERBASE_PROJECT_ID || 'df31bafd-8541-40f2-80a8-2f6ea30df60e',
             
             // AI APIs
             PERPLEXITY_API: process.env.PERPLEXITY_API || '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',
@@ -52,7 +52,7 @@ class ComprehensiveAPITester {
             // Database and cache
             MONGODB_URI: process.env.MONGODB_URI || 'mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
             JWT_SECRET: process.env.JWT_SECRET || 'fb66bf34fc84939cc49bf532a573169ee05c70e4f628d1d8b940cab82d5c030f',
-            REDIS_URI: process.env.REDIS_URI || 'redis://copilot:DapperMan77$$@redis-15489.c238.us-central1-2.gce.redns.redis-cloud.com:15489',
+            REDIS_URI: process.env.REDIS_URI || 'redis://copilot:a0a9588bce0ef7c71aba7242de502970bf94651c1fbd1ac569d0ece9a32287ef@redis-15489.c238.us-central1-2.gce.redns.redis-cloud.com:15489',
             
             // Multiple Gemini API keys to test
             GEMINI_API_KEYS: [
@@ -264,7 +264,7 @@ class ComprehensiveAPITester {
                 testData: `Projects accessible: ${Array.isArray(data) ? data.length : 'Available'}`,
                 projectId: this.secrets.BROWSERBASE_PROJECT_ID,
                 projectIdValid: hasProjectId ? '✅ Valid' : '⚠️ Not found in projects',
-                apiKeyUpdated: 'NEW: bb_live_NKhsq1t4-MmXPTZO7vQqX5nCs8Q'
+                apiKeyUpdated: 'LATEST: bb_live_P4BWp-i1Atz_NMBWXr521kxcrXw'
             });
 
         } catch (error) {

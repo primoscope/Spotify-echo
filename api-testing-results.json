@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-08-15T16:28:27.483Z",
+  "timestamp": "2025-08-15T16:53:05.151Z",
   "totalTests": 12,
-  "passed": 8,
-  "failed": 4,
+  "passed": 7,
+  "failed": 5,
   "warnings": 0,
   "secrets": {
     "SPOTIFY_API": {
       "status": "✅ WORKING",
-      "responseTime": "422ms",
+      "responseTime": "441ms",
       "features": [
         "OAuth authentication",
         "Search API",
@@ -15,24 +15,24 @@
       ],
       "testData": "Found 1 tracks in search test",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:27.910Z"
+      "timestamp": "2025-08-15T16:53:05.598Z"
     },
     "PERPLEXITY_API": {
       "status": "✅ WORKING",
-      "responseTime": "5315ms",
+      "responseTime": "4288ms",
       "features": [
         "AI research queries",
         "Citations",
         "Real-time web data"
       ],
-      "testData": "Response length: 1090 characters",
+      "testData": "Response length: 1102 characters",
       "cost": "$0.003 per query (estimated)",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:33.226Z"
+      "timestamp": "2025-08-15T16:53:09.886Z"
     },
     "BRAVE_API": {
       "status": "✅ WORKING",
-      "responseTime": "333ms",
+      "responseTime": "590ms",
       "features": [
         "Privacy-focused search",
         "Web results",
@@ -40,34 +40,25 @@
       ],
       "testData": "Found 5 search results",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:33.559Z"
+      "timestamp": "2025-08-15T16:53:10.476Z"
     },
     "BROWSERBASE_API": {
       "status": "❌ FAILED",
       "error": "Browserbase API failed: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:33.685Z"
+      "timestamp": "2025-08-15T16:53:10.743Z"
     },
     "DIGITALOCEAN_API": {
       "status": "❌ FAILED",
       "error": "DigitalOcean API failed: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:33.883Z"
+      "timestamp": "2025-08-15T16:53:11.002Z"
     },
     "GITHUB_API": {
-      "status": "✅ WORKING",
-      "responseTime": "227ms",
-      "features": [
-        "Repository automation",
-        "Issues management",
-        "Workflow integration"
-      ],
-      "testData": "Working token: GH_PAT (Fine-grained Personal Access Token)",
-      "allResults": [
-        "✅ GH_PAT: Working (User: dzp5103)"
-      ],
+      "status": "❌ FAILED",
+      "error": "Both tokens failed: ❌ GH_PAT: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:34.111Z"
+      "timestamp": "2025-08-15T16:53:11.123Z"
     },
     "CURSOR_API": {
       "status": "✅ VALIDATED",
@@ -79,11 +70,11 @@
       ],
       "testData": "Key format valid: 68 characters starting with 'key_'",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:34.111Z"
+      "timestamp": "2025-08-15T16:53:11.124Z"
     },
     "MONGODB_URI": {
       "status": "✅ WORKING",
-      "responseTime": "2149ms",
+      "responseTime": "2032ms",
       "features": [
         "Database connectivity",
         "User data storage",
@@ -91,17 +82,17 @@
       ],
       "testData": "Ping result: Connected",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:36.263Z"
+      "timestamp": "2025-08-15T16:53:13.158Z"
     },
     "REDIS_URI": {
       "status": "❌ FAILED",
       "error": "WRONGPASS invalid username-password pair",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:36.529Z"
+      "timestamp": "2025-08-15T16:53:13.532Z"
     },
     "GEMINI_API": {
       "status": "✅ WORKING",
-      "responseTime": "1969ms",
+      "responseTime": "2340ms",
       "features": [
         "AI text generation",
         "Multimodal AI",
@@ -120,17 +111,17 @@
       "totalKeys": 6,
       "workingKeys": 6,
       "tested": true,
-      "timestamp": "2025-08-15T16:28:38.498Z"
+      "timestamp": "2025-08-15T16:53:15.873Z"
     },
     "OPENROUTER_API": {
       "status": "❌ FAILED",
       "error": "All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:39.308Z"
+      "timestamp": "2025-08-15T16:53:16.731Z"
     },
     "SECURITY_SECRETS": {
       "status": "✅ WORKING",
-      "responseTime": "22ms",
+      "responseTime": "21ms",
       "features": [
         "JWT token generation",
         "Session security",
@@ -138,7 +129,7 @@
       ],
       "testData": "JWT secret length: 64 characters",
       "tested": true,
-      "timestamp": "2025-08-15T16:28:39.330Z"
+      "timestamp": "2025-08-15T16:53:16.752Z"
     }
   },
   "performance": {},
@@ -146,6 +137,7 @@
   "errors": [
     "BROWSERBASE_API: Browserbase API failed: 401 Unauthorized",
     "DIGITALOCEAN_API: DigitalOcean API failed: 401 Unauthorized",
+    "GITHUB_API: Both tokens failed: ❌ GH_PAT: 401 Unauthorized",
     "REDIS_URI: WRONGPASS invalid username-password pair",
     "OPENROUTER_API: All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized"
   ]

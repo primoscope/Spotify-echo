@@ -1,0 +1,69 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github-token",
+      "description": "GitHub Personal Access Token (repo, issues, pull_requests, actions permissions)",
+      "password": true
+    },
+    {
+      "type": "promptString", 
+      "id": "brave-api-key",
+      "description": "Brave Search API Key (optional - for research capabilities)",
+      "password": true
+    }
+  ],
+  "servers": {
+    "github": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN=${input:github-token}",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "description": "Official GitHub MCP Server - Repository management, issue tracking, PR automation"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/scripts",
+        "${workspaceFolder}/mcp-server",
+        "${workspaceFolder}/docs"
+      ],
+      "description": "Secure file operations within allowed directories"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent context across sessions and conversation history"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "description": "Git operations, repository search, commit management"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Enhanced AI reasoning through step-by-step problem solving"
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "description": "Web content fetching and documentation retrieval"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${input:brave-api-key}"
+      },
+      "description": "Privacy-focused web research (optional, requires API key)"
+    }
+  }
+}

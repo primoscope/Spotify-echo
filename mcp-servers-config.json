@@ -1,0 +1,62 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "mcp-servers/filesystem/index.js"
+      ]
+    },
+    "memory": {
+      "command": "node",
+      "args": [
+        "mcp-servers/memory/index.js"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "node",
+      "args": [
+        "mcp-servers/sequential-thinking/dist/index.js"
+      ]
+    },
+    "github-repos-manager": {
+      "command": "node",
+      "args": [
+        "mcp-servers/github-repos-manager/index.js"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "GITHUB_PAT": "${GITHUB_PAT}"
+      }
+    },
+    "brave-search": {
+      "command": "node",
+      "args": [
+        "mcp-servers/brave-search/brave-search-mcp.js"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "perplexity-mcp": {
+      "command": "node",
+      "args": [
+        "mcp-servers/perplexity-mcp/index.js"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}"
+      }
+    },
+    "analytics-server": {
+      "command": "node",
+      "args": [
+        "mcp-servers/analytics-server/index.js"
+      ]
+    },
+    "code-sandbox": {
+      "command": "node",
+      "args": [
+        "mcp-servers/code-sandbox/index.js"
+      ]
+    }
+  }
+}

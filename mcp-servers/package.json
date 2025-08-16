@@ -9,6 +9,12 @@
     "start:code-sandbox": "node mcp-servers/code-sandbox/code-sandbox-mcp.js",
     "start:analytics": "node mcp-servers/analytics-server/analytics-mcp.js",
     "start:testing": "node mcp-servers/testing-automation/testing-automation-mcp.js",
+    "start:filesystem": "node mcp-servers/filesystem/index.js",
+    "start:memory": "node mcp-servers/memory/index.js",
+    "start:github-repos": "node mcp-servers/github-repos-manager/index.js", 
+    "start:brave-search": "node mcp-servers/brave-search/brave-search-mcp.js",
+    "start:sequential-thinking": "node mcp-servers/sequential-thinking/dist/index.js",
+    "start:all": "concurrently \"npm run start:filesystem\" \"npm run start:memory\" \"npm run start:github-repos\" \"npm run start:brave-search\" \"npm run start:sequential-thinking\"",
     "test": "npm run test:all-servers",
     "test:all-servers": "node scripts/test-mcp-servers.js",
     "validate": "node scripts/validate-mcp-integration.js",
@@ -45,6 +51,71 @@
     "url": "https://github.com/dzp5103/Spotify-echo.git"
   },
   "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "mcp-servers/filesystem/index.js"
+      ],
+      "description": "Secure file operations, directory management, and code analysis",
+      "capabilities": [
+        "file_operations",
+        "directory_management", 
+        "code_analysis",
+        "secure_operations"
+      ]
+    },
+    "memory": {
+      "command": "node",
+      "args": [
+        "mcp-servers/memory/index.js"
+      ],
+      "description": "Persistent context across sessions and knowledge graph storage",
+      "capabilities": [
+        "persistent_context",
+        "knowledge_graph",
+        "conversation_history",
+        "session_management"
+      ]
+    },
+    "githubReposManager": {
+      "command": "node", 
+      "args": [
+        "mcp-servers/github-repos-manager/index.js"
+      ],
+      "description": "GitHub repository management with 80+ GitHub tools and automation",
+      "capabilities": [
+        "github_automation",
+        "repository_management",
+        "issue_management", 
+        "pull_requests"
+      ]
+    },
+    "braveSearch": {
+      "command": "node",
+      "args": [
+        "mcp-servers/brave-search/brave-search-mcp.js" 
+      ],
+      "description": "Privacy-focused web research with 2000 free queries per month",
+      "capabilities": [
+        "web_search",
+        "privacy_search",
+        "research",
+        "documentation_search"
+      ]
+    },
+    "sequentialThinking": {
+      "command": "node",
+      "args": [
+        "mcp-servers/sequential-thinking/dist/index.js"
+      ],
+      "description": "Enhanced AI reasoning and step-by-step problem solving",
+      "capabilities": [
+        "reasoning",
+        "step_by_step_thinking", 
+        "problem_solving",
+        "decision_making"
+      ]
+    },
     "packageManagement": {
       "command": "node",
       "args": [

@@ -1,0 +1,94 @@
+{
+  "timestamp": "2025-08-16T10:44:40.732Z",
+  "summary": {
+    "total": 8,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 3,
+    "successRate": 63
+  },
+  "servers": [
+    {
+      "name": "Filesystem MCP Server",
+      "status": "PASSED",
+      "capabilities": [
+        "file_operations",
+        "directory_management",
+        "code_analysis"
+      ],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/filesystem/index.js",
+      "error": null,
+      "message": "Server started successfully (timed out as expected)"
+    },
+    {
+      "name": "Memory MCP Server",
+      "status": "PASSED",
+      "capabilities": [
+        "persistent_context",
+        "knowledge_graph",
+        "conversation_history"
+      ],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/memory/index.js",
+      "error": null,
+      "message": "Server started successfully (timed out as expected)"
+    },
+    {
+      "name": "GitHub Repos Manager MCP",
+      "status": "SKIPPED",
+      "capabilities": [],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/github-repos-manager/index.js",
+      "error": "Missing authentication: GITHUB_TOKEN or GITHUB_PAT",
+      "message": null
+    },
+    {
+      "name": "Brave Search MCP",
+      "status": "SKIPPED",
+      "capabilities": [],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/brave-search/brave-search-mcp.js",
+      "error": "Missing authentication: BRAVE_API_KEY",
+      "message": null
+    },
+    {
+      "name": "Sequential Thinking Server",
+      "status": "PASSED",
+      "capabilities": [
+        "reasoning",
+        "problem_solving",
+        "decision_making"
+      ],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/sequential-thinking/dist/index.js",
+      "error": null,
+      "message": "Server started successfully (timed out as expected)"
+    },
+    {
+      "name": "Perplexity MCP Server",
+      "status": "SKIPPED",
+      "capabilities": [],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/index.js",
+      "error": "Missing authentication: PERPLEXITY_API_KEY",
+      "message": null
+    },
+    {
+      "name": "Analytics Server",
+      "status": "PASSED",
+      "capabilities": [
+        "metrics",
+        "performance_monitoring"
+      ],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/analytics-server/index.js",
+      "error": null,
+      "message": "Server started successfully (timed out as expected)"
+    },
+    {
+      "name": "Code Sandbox Server",
+      "status": "PASSED",
+      "capabilities": [
+        "secure_execution",
+        "validation"
+      ],
+      "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/code-sandbox/index.js",
+      "error": null,
+      "message": "Server started successfully (timed out as expected)"
+    }
+  ]
+}

@@ -185,12 +185,42 @@ class EnhancedMCPServer {
       status: 'available'
     });
 
+    // Filesystem MCP Server (NEW)
     this.registerServer('filesystem', {
-      command: 'node node_modules/FileScopeMCP/dist/index.js',
-      capabilities: ['file_operations', 'repository_analysis', 'code_analysis'],
+      command: 'node mcp-servers/filesystem/index.js',
+      capabilities: ['file_operations', 'directory_management', 'code_analysis', 'secure_operations'],
       status: 'available'
     });
 
+    // Sequential Thinking Server (ENHANCED)
+    this.registerServer('sequential-thinking', {
+      command: 'node mcp-servers/sequential-thinking/dist/index.js',
+      capabilities: ['reasoning', 'step_by_step_thinking', 'problem_solving', 'decision_making'],
+      status: 'available'
+    });
+
+    // Memory MCP Server (NEW)
+    this.registerServer('memory', {
+      command: 'node mcp-servers/memory/index.js',
+      capabilities: ['persistent_context', 'knowledge_graph', 'conversation_history', 'session_management'],
+      status: 'available'
+    });
+
+    // GitHub Repos Manager MCP (NEW)
+    this.registerServer('github-repos-manager', {
+      command: 'node mcp-servers/github-repos-manager/index.js',
+      capabilities: ['github_automation', 'repository_management', 'issue_management', 'pull_requests'],
+      status: process.env.GITHUB_TOKEN || process.env.GITHUB_PAT ? 'available' : 'needs_credentials'
+    });
+
+    // Brave Search MCP (ENHANCED)
+    this.registerServer('brave-search', {
+      command: 'node mcp-servers/brave-search/brave-search-mcp.js',
+      capabilities: ['web_search', 'privacy_search', 'research', 'documentation_search'],
+      status: process.env.BRAVE_API_KEY ? 'available' : 'needs_credentials'
+    });
+
+    // Existing servers
     this.registerServer('browserbase', {
       command: 'npx @browserbasehq/mcp-server-browserbase',
       capabilities: ['cloud_automation', 'cross_browser', 'screenshots', 'performance'],
@@ -209,7 +239,29 @@ class EnhancedMCPServer {
       status: process.env.SPOTIFY_CLIENT_ID ? 'available' : 'needs_credentials'
     });
 
+    // Perplexity MCP Server
+    this.registerServer('perplexity-mcp', {
+      command: 'node mcp-servers/perplexity-mcp/index.js',
+      capabilities: ['ai_research', 'web_search', 'deep_analysis', 'grok4_equivalent'],
+      status: process.env.PERPLEXITY_API_KEY ? 'available' : 'needs_credentials'
+    });
+
+    // Analytics Server
+    this.registerServer('analytics-server', {
+      command: 'node mcp-servers/analytics-server/index.js',
+      capabilities: ['metrics', 'performance_monitoring', 'system_health', 'telemetry'],
+      status: 'available'
+    });
+
+    // Code Sandbox Server
+    this.registerServer('code-sandbox', {
+      command: 'node mcp-servers/code-sandbox/index.js',
+      capabilities: ['secure_execution', 'javascript_python', 'validation', 'testing'],
+      status: 'available'
+    });
+
     console.log(`✅ Registered ${this.servers.size} MCP servers`);
+    console.log('📋 Available MCP servers:', Array.from(this.servers.keys()).join(', '));
   }
 
   registerServer(name, config) {

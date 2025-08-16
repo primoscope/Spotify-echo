@@ -1,6 +1,6 @@
 # Grok-4 via Perplexity API Connectivity Validation Report
 
-Generated: 2025-08-16T09:01:04.073Z  
+Generated: 2025-08-16T09:05:11.600Z  
 Overall Status: **fully_operational**
 
 ## Test Results Summary
@@ -20,7 +20,7 @@ Overall Status: **fully_operational**
 - **Perplexity Key**: ✅ Valid format
 - **Advanced Model**: sonar-pro (Grok-like capabilities via Perplexity)
 - **Sonar-Pro Model**: sonar-pro (enhanced research)
-- **Sonar-Online Model**: sonar-online (real-time web search)
+- **Sonar-Online Model**: sonar (real-time web search)
 - **Base URL**: https://api.perplexity.ai
 - **Web Search**: Active
 

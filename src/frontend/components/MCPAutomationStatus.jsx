@@ -1,18 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Chip,
-  CircularProgress,
-  Alert,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Divider,
-} from '@mui/material';
+import { List, ListItem, ListItemText, ListItemIcon, Divider } from '@mui/material';
 import {
   AutoFixHigh as AutoIcon,
   Speed as PerformanceIcon,

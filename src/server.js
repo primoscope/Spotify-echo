@@ -197,8 +197,15 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     const end = process.hrtime.bigint();
     const ms = Number(end - start) / 1e6;
-    try { res.setHeader('X-Response-Time', `${ms.toFixed(0)}ms`); } catch {}
-    logger.info('request', { method: req.method, path: req.path, status: res.statusCode, ms: Math.round(ms) });
+    try {
+      res.setHeader('X-Response-Time', `${ms.toFixed(0)}ms`);
+    } catch {}
+    logger.info('request', {
+      method: req.method,
+      path: req.path,
+      status: res.statusCode,
+      ms: Math.round(ms),
+    });
   });
   next();
 });
@@ -789,7 +796,7 @@ app.post('/api/chat', async (req, res) => {
 
     if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
       response =
-        'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
+        "I'd love to recommend some music for you! What mood are you in? Or what genre would you like to explore?";
       action = 'recommend';
     } else if (lowerMessage.includes('playlist')) {
       response =
@@ -801,10 +808,10 @@ app.post('/api/chat', async (req, res) => {
       action = 'mood_analysis';
     } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
       response =
-        'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
+        "Hello! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?";
     } else {
       response =
-        'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
+        "I'm here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.";
     }
 
     res.json({

@@ -213,22 +213,22 @@ function getRateLimitKey(req, type = 'default') {
  */
 function generateCSP(isDevelopment = false) {
   const basePolicy = [
-    'default-src \'self\'',
-    'script-src \'self\' \'unsafe-inline\' https://api.spotify.com https://sdk.scdn.co',
-    'style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com',
-    'font-src \'self\' https://fonts.gstatic.com',
-    'img-src \'self\' data: https://i.scdn.co https://mosaic.scdn.co https://lineup-images.scdn.co',
-    'connect-src \'self\' https://api.spotify.com https://accounts.spotify.com wss:',
-    'media-src \'self\' https://p.scdn.co',
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://api.spotify.com https://sdk.scdn.co",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https://i.scdn.co https://mosaic.scdn.co https://lineup-images.scdn.co",
+    "connect-src 'self' https://api.spotify.com https://accounts.spotify.com wss:",
+    "media-src 'self' https://p.scdn.co",
     'frame-src https://open.spotify.com https://sdk.scdn.co',
-    'worker-src \'self\' blob:',
-    'child-src \'self\' https://open.spotify.com',
+    "worker-src 'self' blob:",
+    "child-src 'self' https://open.spotify.com",
   ];
 
   if (isDevelopment) {
     // Allow localhost connections in development
     basePolicy[3] =
-      'connect-src \'self\' https://api.spotify.com https://accounts.spotify.com ws://localhost:* wss://localhost:* http://localhost:*';
+      "connect-src 'self' https://api.spotify.com https://accounts.spotify.com ws://localhost:* wss://localhost:* http://localhost:*";
   }
 
   return basePolicy.join('; ');

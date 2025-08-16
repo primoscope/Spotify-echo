@@ -51,11 +51,20 @@ class ErrorBoundary extends React.Component {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       };
       const headingStyle = { fontSize: '2rem', marginBottom: '1rem', color: '#1db954' };
       const textStyle = { color: '#b3b3b3', marginBottom: '2rem' };
-      const buttonStyle = { background: 'linear-gradient(135deg, #1db954, #1ed760)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '25px', fontSize: '1rem', cursor: 'pointer', fontWeight: '600' };
+      const buttonStyle = {
+        background: 'linear-gradient(135deg, #1db954, #1ed760)',
+        color: 'white',
+        border: 'none',
+        padding: '12px 24px',
+        borderRadius: '25px',
+        fontSize: '1rem',
+        cursor: 'pointer',
+        fontWeight: '600',
+      };
       return React.createElement(
         'div',
         { style: errorPageStyle },
@@ -64,7 +73,7 @@ class ErrorBoundary extends React.Component {
         React.createElement(
           'p',
           { style: textStyle },
-          'We\'re sorry, but something unexpected happened. Please refresh the page to try again.'
+          "We're sorry, but something unexpected happened. Please refresh the page to try again."
         ),
         React.createElement(
           'button',
@@ -74,7 +83,6 @@ class ErrorBoundary extends React.Component {
           },
           'Refresh Page'
         )
-
       );
     }
     return this.props.children;
@@ -83,7 +91,13 @@ class ErrorBoundary extends React.Component {
 
 // Initialize the React application
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(React.StrictMode, null, React.createElement(ErrorBoundary, null, React.createElement(App))));
+root.render(
+  React.createElement(
+    React.StrictMode,
+    null,
+    React.createElement(ErrorBoundary, null, React.createElement(App))
+  )
+);
 
 // Add app loaded class to hide loading spinner
 document.body.classList.add('app-loaded');

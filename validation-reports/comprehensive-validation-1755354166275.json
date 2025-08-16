@@ -1,0 +1,87 @@
+{
+  "timestamp": "2025-08-16T14:21:30.248Z",
+  "perplexityApi": {
+    "status": "OPERATIONAL",
+    "keyFormat": "pplx-vll...HiOo",
+    "responseTime": 2888,
+    "testResponse": "To test API connectivity and respond with \"API_KEY_WORKING,\" you typically send a request to the API",
+    "models": [
+      "grok-4-equivalent",
+      "sonar-pro",
+      "sonar",
+      "llama-3.1-70b",
+      "llama-3.1-8b"
+    ]
+  },
+  "grok4Integration": {
+    "status": "OPERATIONAL",
+    "model": "sonar-pro",
+    "responseTime": 11013,
+    "capabilities": [
+      "deep_analysis",
+      "repository_structure",
+      "strategic_planning",
+      "web_search",
+      "current_events",
+      "multi_step_reasoning"
+    ],
+    "webSearch": true,
+    "responseLength": 4964,
+    "grokEquivalent": true
+  },
+  "mcpServers": {
+    "total": 7,
+    "operational": 5,
+    "successRate": 71,
+    "servers": {
+      "Filesystem": "OPERATIONAL",
+      "Memory": "OPERATIONAL",
+      "Sequential Thinking": "NOT_FOUND",
+      "Perplexity": "OPERATIONAL",
+      "Brave Search": "NOT_FOUND",
+      "Analytics": "OPERATIONAL",
+      "Code Sandbox": "OPERATIONAL"
+    }
+  },
+  "deepResearch": {
+    "status": "OPERATIONAL",
+    "researchMode": "comprehensive",
+    "responseTime": 19934,
+    "citations": 5,
+    "relatedQuestions": 5,
+    "capabilities": [
+      "deep_analysis",
+      "multi_step_reasoning",
+      "web_search",
+      "current_events",
+      "repository_analysis",
+      "strategic_planning",
+      "research_synthesis",
+      "citation_verification",
+      "cross_validation"
+    ]
+  },
+  "browserIntegration": {},
+  "repositoryAnalysis": {
+    "status": "OPERATIONAL",
+    "totalFiles": 77308,
+    "directories": 6846,
+    "frameworks": [
+      "GitHub Actions",
+      "Docker",
+      "Node.js/JavaScript",
+      "Docker Compose",
+      "API-based architecture",
+      "MCP (Model Context Protocol)",
+      "TypeScript",
+      "Webpack",
+      "Python",
+      "Component-based architecture",
+      "Vite"
+    ],
+    "recommendations": 10,
+    "analysisLength": 11969
+  },
+  "overallHealth": 91,
+  "healthLevel": "EXCELLENT"
+}

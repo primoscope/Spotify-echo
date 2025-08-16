@@ -1,22 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  Button,
-  Grid,
-  TextField,
-  Slider,
-  Avatar,
-  IconButton,
-  Tooltip,
-  LinearProgress,
-  Alert,
-  Snackbar,
-  Fab,
-} from '@mui/material';
+import { TextField, Slider, Avatar, IconButton, Tooltip, Snackbar, Fab } from '@mui/material';
 import {
   Search as SearchIcon,
   Mood as MoodIcon,
@@ -49,11 +32,13 @@ function EnhancedMusicDiscovery() {
   const [error, setError] = useState(null);
   const [trends, setTrends] = useState([]);
   const [socialActivity, setSocialActivity] = useState([]);
-  const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  const renderStart = typeof performance !== 'undefined' ? performance.now() : Date.now();
   useEffect(() => {
-    const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const end = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const dur = Math.round(end - renderStart);
-    try { console.info(`[perf] EnhancedMusicDiscovery mount render ${dur}ms`); } catch {}
+    try {
+      console.info(`[perf] EnhancedMusicDiscovery mount render ${dur}ms`);
+    } catch {}
   }, []);
 
   // Discovery modes configuration
@@ -216,10 +201,26 @@ function EnhancedMusicDiscovery() {
 
   // Mood preset chips
   const moodPresets = [
-    { id: 'chill', label: 'Chill', values: { energy: 30, valence: 60, danceability: 40, acousticness: 70 } },
-    { id: 'party', label: 'Party', values: { energy: 80, valence: 75, danceability: 85, acousticness: 20 } },
-    { id: 'focus', label: 'Focus', values: { energy: 35, valence: 40, danceability: 30, acousticness: 60 } },
-    { id: 'happy', label: 'Happy', values: { energy: 65, valence: 85, danceability: 70, acousticness: 40 } },
+    {
+      id: 'chill',
+      label: 'Chill',
+      values: { energy: 30, valence: 60, danceability: 40, acousticness: 70 },
+    },
+    {
+      id: 'party',
+      label: 'Party',
+      values: { energy: 80, valence: 75, danceability: 85, acousticness: 20 },
+    },
+    {
+      id: 'focus',
+      label: 'Focus',
+      values: { energy: 35, valence: 40, danceability: 30, acousticness: 60 },
+    },
+    {
+      id: 'happy',
+      label: 'Happy',
+      values: { energy: 65, valence: 85, danceability: 70, acousticness: 40 },
+    },
   ];
   const applyPreset = (preset) => setMoodSettings(preset.values);
   const describePreset = (preset) => {
@@ -365,7 +366,13 @@ function EnhancedMusicDiscovery() {
               <Grid container spacing={3}>
                 {Object.entries(moodSettings).map(([key, value]) => (
                   <Grid item xs={12} sm={6} key={key}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
                       <Typography gutterBottom>
                         {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
                       </Typography>

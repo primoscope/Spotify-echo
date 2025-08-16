@@ -1,31 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  IconButton,
-  Tooltip,
-  Chip,
-  Avatar,
-  LinearProgress,
-  CircularProgress,
-  Alert,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
+import { IconButton, Tooltip, Avatar, Paper, Switch, FormControlLabel } from '@mui/material';
 import {
   TrendingUp,
   TrendingDown,
@@ -60,11 +34,13 @@ function EnhancedAnalyticsDashboard() {
   const [perfError, setPerfError] = useState(null);
   const [providersHealth, setProvidersHealth] = useState(null);
   const [providersHealthError, setProvidersHealthError] = useState(null);
-  const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  const renderStart = typeof performance !== 'undefined' ? performance.now() : Date.now();
   useEffect(() => {
-    const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const end = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const dur = Math.round(end - renderStart);
-    try { console.info(`[perf] EnhancedAnalyticsDashboard mount render ${dur}ms`); } catch {}
+    try {
+      console.info(`[perf] EnhancedAnalyticsDashboard mount render ${dur}ms`);
+    } catch {}
   }, []);
 
   // Time range options
@@ -196,7 +172,10 @@ function EnhancedAnalyticsDashboard() {
       const res = await fetch('/api/performance/endpoints?windowMs=300000');
       if (!res.ok) throw new Error(`perf endpoints failed: ${res.status}`);
       const data = await res.json();
-      setEndpointPerf({ windowMs: data.windowMs || 300000, endpoints: Array.isArray(data.endpoints) ? data.endpoints : [] });
+      setEndpointPerf({
+        windowMs: data.windowMs || 300000,
+        endpoints: Array.isArray(data.endpoints) ? data.endpoints : [],
+      });
       setEndpointPerfError(null);
     } catch (e) {
       setEndpointPerfError('Failed to load API performance');
@@ -263,14 +242,22 @@ function EnhancedAnalyticsDashboard() {
         const res = await fetch('/api/performance');
         if (!res.ok) throw new Error(`perf failed: ${res.status}`);
         const data = await res.json();
-        if (!cancelled) { setPerfReport(data); setPerfError(null); }
+        if (!cancelled) {
+          setPerfReport(data);
+          setPerfError(null);
+        }
       } catch (e) {
-        if (!cancelled) { setPerfError('Failed to load system performance'); }
+        if (!cancelled) {
+          setPerfError('Failed to load system performance');
+        }
       }
     };
     loadPerf();
     const id = setInterval(loadPerf, 30000);
-    return () => { cancelled = true; clearInterval(id); };
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
 
   // Poll Providers health every 30s
@@ -281,14 +268,22 @@ function EnhancedAnalyticsDashboard() {
         const res = await fetch('/api/providers/health');
         if (!res.ok) throw new Error(`providers health failed: ${res.status}`);
         const data = await res.json();
-        if (!cancelled) { setProvidersHealth(data); setProvidersHealthError(null); }
+        if (!cancelled) {
+          setProvidersHealth(data);
+          setProvidersHealthError(null);
+        }
       } catch (e) {
-        if (!cancelled) { setProvidersHealthError('Failed to load providers health'); }
+        if (!cancelled) {
+          setProvidersHealthError('Failed to load providers health');
+        }
       }
     };
     loadProvidersHealth();
     const id = setInterval(loadProvidersHealth, 30000);
-    return () => { cancelled = true; clearInterval(id); };
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
 
   // Tiny sparkline generator
@@ -320,7 +315,9 @@ function EnhancedAnalyticsDashboard() {
         change: overview.trendsUp ? '+12.5%' : '-3.2%',
         icon: <PlayArrow />,
         color: '#1db954',
-        series: (analytics.listeningPatterns?.hourlyDistribution || generateHourlyData()).map((d) => d.plays),
+        series: (analytics.listeningPatterns?.hourlyDistribution || generateHourlyData()).map(
+          (d) => d.plays
+        ),
       },
       {
         title: 'Active Users',
@@ -328,7 +325,9 @@ function EnhancedAnalyticsDashboard() {
         change: '+8.3%',
         icon: <People />,
         color: '#1976d2',
-        series: (analytics.listeningPatterns?.hourlyDistribution || generateHourlyData()).map((d) => d.users),
+        series: (analytics.listeningPatterns?.hourlyDistribution || generateHourlyData()).map(
+          (d) => d.users
+        ),
       },
       {
         title: 'Avg Session',
@@ -372,7 +371,9 @@ function EnhancedAnalyticsDashboard() {
                     />
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Avatar sx={{ bgcolor: card.color, width: 40, height: 40, mb: 1 }}>{card.icon}</Avatar>
+                    <Avatar sx={{ bgcolor: card.color, width: 40, height: 40, mb: 1 }}>
+                      {card.icon}
+                    </Avatar>
                     <Sparkline points={card.series} color={card.color} />
                   </Box>
                 </Box>
@@ -660,7 +661,9 @@ function EnhancedAnalyticsDashboard() {
                     <TableBody>
                       {(endpointPerf.endpoints || []).slice(0, 8).map((row, idx) => (
                         <TableRow key={idx}>
-                          <TableCell sx={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <TableCell
+                            sx={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          >
                             {row.endpoint}
                           </TableCell>
                           <TableCell align="right">{row.count}</TableCell>
@@ -695,10 +698,20 @@ function EnhancedAnalyticsDashboard() {
                     Req/min: <strong>{perfReport?.requests?.requests_per_minute ?? 'N/A'}</strong>
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Error rate: <strong>{perfReport?.requests?.error_rate_percent != null ? `${perfReport.requests.error_rate_percent}%` : 'N/A'}</strong>
+                    Error rate:{' '}
+                    <strong>
+                      {perfReport?.requests?.error_rate_percent != null
+                        ? `${perfReport.requests.error_rate_percent}%`
+                        : 'N/A'}
+                    </strong>
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Avg latency: <strong>{perfReport?.requests?.avg_response_time_ms != null ? `${Math.round(perfReport.requests.avg_response_time_ms)}ms` : 'N/A'}</strong>
+                    Avg latency:{' '}
+                    <strong>
+                      {perfReport?.requests?.avg_response_time_ms != null
+                        ? `${Math.round(perfReport.requests.avg_response_time_ms)}ms`
+                        : 'N/A'}
+                    </strong>
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Uptime: <strong>{perfReport?.uptime_human ?? 'N/A'}</strong>
@@ -707,14 +720,17 @@ function EnhancedAnalyticsDashboard() {
                 {perfReport?.system?.memory && (
                   <Box sx={{ mt: 1 }}>
                     <Typography variant="caption" color="text.secondary">
-                      Memory — heap used: {perfReport.system.memory.heap_used_mb}MB, rss: {perfReport.system.memory.rss_mb}MB, system used: {perfReport.system.memory.system_used_percent}%
+                      Memory — heap used: {perfReport.system.memory.heap_used_mb}MB, rss:{' '}
+                      {perfReport.system.memory.rss_mb}MB, system used:{' '}
+                      {perfReport.system.memory.system_used_percent}%
                     </Typography>
                   </Box>
                 )}
                 {perfReport?.system?.load && (
                   <Box sx={{ mt: 0.5 }}>
                     <Typography variant="caption" color="text.secondary">
-                      Load — 1m: {perfReport.system.load.load_1m}, 5m: {perfReport.system.load.load_5m}, 15m: {perfReport.system.load.load_15m}
+                      Load — 1m: {perfReport.system.load.load_1m}, 5m:{' '}
+                      {perfReport.system.load.load_5m}, 15m: {perfReport.system.load.load_15m}
                     </Typography>
                   </Box>
                 )}
@@ -756,7 +772,9 @@ function EnhancedAnalyticsDashboard() {
                         label={`Connected: ${Object.values(providersHealth.providers).filter((p) => (p?.status || '').toLowerCase() === 'connected').length}/${Object.keys(providersHealth.providers).length}`}
                         color={(() => {
                           const total = Object.keys(providersHealth.providers).length || 1;
-                          const connected = Object.values(providersHealth.providers).filter((p) => (p?.status || '').toLowerCase() === 'connected').length;
+                          const connected = Object.values(providersHealth.providers).filter(
+                            (p) => (p?.status || '').toLowerCase() === 'connected'
+                          ).length;
                           const ratio = connected / total;
                           if (ratio >= 0.8) return 'success';
                           if (ratio >= 0.5) return 'warning';
@@ -771,13 +789,21 @@ function EnhancedAnalyticsDashboard() {
                     {Object.entries(providersHealth.providers)
                       .slice(0, 6)
                       .map(([id, p]) => (
-                        <Tooltip title={`Avg latency: ${p.averageLatency ? Math.round(p.averageLatency) + 'ms' : 'N/A'}`}>
+                        <Tooltip
+                          title={`Avg latency: ${p.averageLatency ? Math.round(p.averageLatency) + 'ms' : 'N/A'}`}
+                        >
                           <Chip
-                          key={id}
-                          size="small"
-                          variant="outlined"
-                          label={`${id}: ${p.status}${p.averageLatency ? ` (${Math.round(p.averageLatency)}ms)` : ''}`}
-                          color={((p.status || '').toLowerCase() === 'connected') ? 'success' : ((p.status || '').toLowerCase() === 'error') ? 'error' : 'default'}
+                            key={id}
+                            size="small"
+                            variant="outlined"
+                            label={`${id}: ${p.status}${p.averageLatency ? ` (${Math.round(p.averageLatency)}ms)` : ''}`}
+                            color={
+                              (p.status || '').toLowerCase() === 'connected'
+                                ? 'success'
+                                : (p.status || '').toLowerCase() === 'error'
+                                  ? 'error'
+                                  : 'default'
+                            }
                           />
                         </Tooltip>
                       ))}

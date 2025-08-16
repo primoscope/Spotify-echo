@@ -49,12 +49,16 @@ class KeyPool {
     let cooldown = 0;
     const r = String(reason).toLowerCase();
     if (r.includes('429') || r.includes('rate')) cooldown = this.cooldowns.rate_limit_ms;
-    else if (r.includes('401') || r.includes('403') || r.includes('auth')) cooldown = this.cooldowns.auth_error_ms;
+    else if (r.includes('401') || r.includes('403') || r.includes('auth'))
+      cooldown = this.cooldowns.auth_error_ms;
     else if (r.includes('5') || r.includes('server')) cooldown = this.cooldowns.server_error_ms;
     else cooldown = 15 * 1000;
 
     // Exponential backoff on consecutive failures
-    const backoff = Math.min(cooldown * Math.pow(2, Math.max(0, entry.failures - 1)), 30 * 60 * 1000);
+    const backoff = Math.min(
+      cooldown * Math.pow(2, Math.max(0, entry.failures - 1)),
+      30 * 60 * 1000
+    );
     entry.disabledUntil = now + backoff;
   }
 

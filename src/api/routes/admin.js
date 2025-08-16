@@ -85,47 +85,39 @@ router.get('/dashboard', async (req, res) => {
 
     // Collect data with individual error handling
     const results = await Promise.allSettled([
-      mongoDBManager
-        .getCollectionStats()
-        .catch((err) => ({
-          error: err.message,
-          collections: [],
-          totalCollections: 0,
-          totalDocuments: 0,
-          totalDataSize: 0,
-          totalIndexSize: 0,
-        })),
-      mongoDBManager
-        .analyzeIndexHealth()
-        .catch((err) => ({
-          error: err.message,
-          healthyIndexes: 0,
-          problematicIndexes: 0,
-          unusedIndexes: 0,
-          recommendations: [`Index analysis failed: ${err.message}`],
-        })),
-      mongoDBManager
-        .getDatabaseStats()
-        .catch((err) => ({
-          error: err.message,
-          database: 'Unknown',
-          uptime: 0,
-          connections: { current: 0, available: 0 },
-          operations: { query: 0, insert: 0, update: 0, delete: 0 },
-          memory: { resident: 0, virtual: 0 },
-        })),
-      mongoDBManager
-        .validateAdminAccess()
-        .catch((err) => ({
-          error: err.message,
-          permissions: {
-            connection: false,
-            readAccess: false,
-            adminAccess: false,
-            profilingAccess: false,
-            indexAccess: false,
-          },
-        })),
+      mongoDBManager.getCollectionStats().catch((err) => ({
+        error: err.message,
+        collections: [],
+        totalCollections: 0,
+        totalDocuments: 0,
+        totalDataSize: 0,
+        totalIndexSize: 0,
+      })),
+      mongoDBManager.analyzeIndexHealth().catch((err) => ({
+        error: err.message,
+        healthyIndexes: 0,
+        problematicIndexes: 0,
+        unusedIndexes: 0,
+        recommendations: [`Index analysis failed: ${err.message}`],
+      })),
+      mongoDBManager.getDatabaseStats().catch((err) => ({
+        error: err.message,
+        database: 'Unknown',
+        uptime: 0,
+        connections: { current: 0, available: 0 },
+        operations: { query: 0, insert: 0, update: 0, delete: 0 },
+        memory: { resident: 0, virtual: 0 },
+      })),
+      mongoDBManager.validateAdminAccess().catch((err) => ({
+        error: err.message,
+        permissions: {
+          connection: false,
+          readAccess: false,
+          adminAccess: false,
+          profilingAccess: false,
+          indexAccess: false,
+        },
+      })),
     ]);
 
     const collectionStats =

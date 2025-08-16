@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, Container, Tabs, Tab } from '@mui/material';
+import { AppBar, Toolbar, Container, Tabs, Tab } from '@mui/material';
 import React, { useState, Suspense, lazy } from 'react';
 import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
 // Convert heavy components to lazy-loaded chunks for better initial bundle size
@@ -29,14 +29,15 @@ const prefetchers = {
   discovery: () => import('./components/EnhancedMusicDiscovery'),
   analytics: () => import('./components/EnhancedAnalyticsDashboard'),
   insights: () => import('./components/InsightsDashboard'),
-  settings: () => Promise.all([
-    import('./components/EnhancedConfigPanel'),
-    import('./components/MobileResponsiveManager'),
-    import('../components/GitHubInfo')
-  ]),
+  settings: () =>
+    Promise.all([
+      import('./components/EnhancedConfigPanel'),
+      import('./components/MobileResponsiveManager'),
+      import('../components/GitHubInfo'),
+    ]),
   settingsGeneral: () => import('./components/EnhancedConfigPanel'),
   settingsMobile: () => import('./components/MobileResponsiveManager'),
-  settingsGithub: () => import('../components/GitHubInfo')
+  settingsGithub: () => import('../components/GitHubInfo'),
 };
 
 /**
@@ -50,24 +51,24 @@ function App() {
       <LLMProvider>
         <Router>
           <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading…</div>}>
-          <Routes>
-            <Route path="/" element={<MainApplication />} />
-            <Route path="/chat" element={<MainApplication initialTab="chat" />} />
-            <Route
-              path="/recommendations"
-              element={<MainApplication initialTab="recommendations" />}
-            />
-            <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
-            <Route path="/playlists" element={<MainApplication initialTab="playlists" />} />
-            <Route path="/songs" element={<MainApplication initialTab="songs" />} />
-            <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
-            <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
-            <Route path="/insights" element={<MainApplication initialTab="insights" />} />
-            <Route path="/settings" element={<MainApplication initialTab="settings" />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </Router>
+            <Routes>
+              <Route path="/" element={<MainApplication />} />
+              <Route path="/chat" element={<MainApplication initialTab="chat" />} />
+              <Route
+                path="/recommendations"
+                element={<MainApplication initialTab="recommendations" />}
+              />
+              <Route path="/playlist" element={<MainApplication initialTab="playlist" />} />
+              <Route path="/playlists" element={<MainApplication initialTab="playlists" />} />
+              <Route path="/songs" element={<MainApplication initialTab="songs" />} />
+              <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
+              <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
+              <Route path="/insights" element={<MainApplication initialTab="insights" />} />
+              <Route path="/settings" element={<MainApplication initialTab="settings" />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </Router>
       </LLMProvider>
     </ThemeProvider>
   );
@@ -305,21 +306,51 @@ function MainApplication({ initialTab = 'chat' }) {
             aria-label="EchoTune AI navigation"
           >
             <Tab label="🤖 AI Chat" value="chat" onMouseEnter={() => handlePrefetch('chat')} />
-            <Tab label="🎯 Recommendations" value="recommendations" onMouseEnter={() => handlePrefetch('recommendations')} />
-            <Tab label="🎵 Playlist Builder" value="playlist" onMouseEnter={() => handlePrefetch('playlist')} />
-            <Tab label="📋 Playlists" value="playlists" onMouseEnter={() => handlePrefetch('playlists')} />
+            <Tab
+              label="🎯 Recommendations"
+              value="recommendations"
+              onMouseEnter={() => handlePrefetch('recommendations')}
+            />
+            <Tab
+              label="🎵 Playlist Builder"
+              value="playlist"
+              onMouseEnter={() => handlePrefetch('playlist')}
+            />
+            <Tab
+              label="📋 Playlists"
+              value="playlists"
+              onMouseEnter={() => handlePrefetch('playlists')}
+            />
             <Tab label="🎶 Songs" value="songs" onMouseEnter={() => handlePrefetch('songs')} />
-            <Tab label="🔍 Discovery" value="discovery" onMouseEnter={() => handlePrefetch('discovery')} />
-            <Tab label="📊 Analytics" value="analytics" onMouseEnter={() => handlePrefetch('analytics')} />
-            <Tab label="💡 Insights" value="insights" onMouseEnter={() => handlePrefetch('insights')} />
-            <Tab label="⚙️ Settings" value="settings" onMouseEnter={() => handlePrefetch('settings')} />
+            <Tab
+              label="🔍 Discovery"
+              value="discovery"
+              onMouseEnter={() => handlePrefetch('discovery')}
+            />
+            <Tab
+              label="📊 Analytics"
+              value="analytics"
+              onMouseEnter={() => handlePrefetch('analytics')}
+            />
+            <Tab
+              label="💡 Insights"
+              value="insights"
+              onMouseEnter={() => handlePrefetch('insights')}
+            />
+            <Tab
+              label="⚙️ Settings"
+              value="settings"
+              onMouseEnter={() => handlePrefetch('settings')}
+            />
           </Tabs>
         </Container>
       </Box>
 
       {/* Main Content */}
       <Box sx={{ flex: 1, overflow: 'hidden' }}>
-        <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading section…</div>}>
+        <Suspense
+          fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading section…</div>}
+        >
           {currentTab === 'chat' && (
             <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
               <EnhancedChatInterface

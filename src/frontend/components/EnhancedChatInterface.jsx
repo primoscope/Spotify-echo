@@ -1,29 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Box,
   Paper,
-  Typography,
   TextField,
   IconButton,
-  Chip,
   Avatar,
   List,
   ListItem,
   Stack,
   Divider,
   Tooltip,
-  Card,
-  CardContent,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Rating,
   Menu,
-  MenuItem,
-  Alert,
-  CircularProgress,
   Collapse,
 } from '@mui/material';
 import {
@@ -53,7 +40,7 @@ const EnhancedChatInterface = ({
   loading = false,
   disabled = false,
 }) => {
-  const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  const renderStart = typeof performance !== 'undefined' ? performance.now() : Date.now();
   const [messages, setMessages] = useState(initialMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [contextChips, setContextChips] = useState({});
@@ -71,8 +58,17 @@ const EnhancedChatInterface = ({
   const [providersStatus, setProvidersStatus] = useState('unknown');
   const [avgLatencyMs, setAvgLatencyMs] = useState(null);
 
-  const { currentProvider, providers, switchProvider, loading: providerLoading } = useLLM?.()
-    || { currentProvider: 'mock', providers: {}, switchProvider: async () => false, loading: false };
+  const {
+    currentProvider,
+    providers,
+    switchProvider,
+    loading: providerLoading,
+  } = useLLM?.() || {
+    currentProvider: 'mock',
+    providers: {},
+    switchProvider: async () => false,
+    loading: false,
+  };
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -83,9 +79,11 @@ const EnhancedChatInterface = ({
 
   // Mount-time performance log
   useEffect(() => {
-    const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const end = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const dur = Math.round(end - renderStart);
-    try { console.info(`[perf] EnhancedChatInterface mount render ${dur}ms`); } catch {}
+    try {
+      console.info(`[perf] EnhancedChatInterface mount render ${dur}ms`);
+    } catch {}
   }, []);
 
   // Providers health + latency polling
@@ -95,7 +93,7 @@ const EnhancedChatInterface = ({
       try {
         const [healthRes, telRes] = await Promise.allSettled([
           fetch('/api/providers/health'),
-          fetch(`/api/settings/llm-providers/telemetry?provider=${currentProvider}`)
+          fetch(`/api/settings/llm-providers/telemetry?provider=${currentProvider}`),
         ]);
         if (!cancelled) {
           if (healthRes.status === 'fulfilled' && healthRes.value.ok) {
@@ -119,7 +117,10 @@ const EnhancedChatInterface = ({
     };
     load();
     const id = setInterval(load, 30000);
-    return () => { cancelled = true; clearInterval(id); };
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, [currentProvider]);
 
   // Load context chips
@@ -303,7 +304,11 @@ const EnhancedChatInterface = ({
         {Object.entries(providers)
           .filter(([, p]) => p.available)
           .map(([id, p]) => (
-            <MenuItem key={id} selected={id === currentProviderLocal} onClick={() => handleProviderSelect(id)}>
+            <MenuItem
+              key={id}
+              selected={id === currentProviderLocal}
+              onClick={() => handleProviderSelect(id)}
+            >
               {p.name} {id === currentProviderLocal ? '✓' : ''}
             </MenuItem>
           ))}
@@ -327,12 +332,7 @@ const EnhancedChatInterface = ({
   const ProviderStatusChip = () => {
     const st = providers?.[currentProvider]?.status || 'unknown';
     return (
-      <Chip
-        size="small"
-        label={`Status: ${st}`}
-        color={statusToColor(st)}
-        variant="outlined"
-      />
+      <Chip size="small" label={`Status: ${st}`} color={statusToColor(st)} variant="outlined" />
     );
   };
 

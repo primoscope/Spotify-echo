@@ -195,7 +195,14 @@ jobs:
             async analyzeBackend() {
               console.log('⚙️ Analyzing backend...');
               
-              const backendFiles = this.findFiles(['src/api', 'src/server.js', 'src/middleware', 'src/utils'], ['.js']);
+              const targets = ['src', 'src/api', 'src/middleware', 'src/utils'];
+              const safeDirs = targets.filter((p) => {
+                try {
+                  const full = path.join(this.projectRoot, p);
+                  return fs.existsSync(full) && fs.statSync(full).isDirectory();
+                } catch { return false; }
+              });
+              const backendFiles = this.findFiles(safeDirs, ['.js']);
               
               this.analysisResults.backend.metrics = {
                 totalFiles: backendFiles.length,
@@ -275,10 +282,12 @@ jobs:
               const files = [];
               for (const dir of directories) {
                 const fullPath = path.join(this.projectRoot, dir);
-                if (fs.existsSync(fullPath)) {
-                  const dirFiles = this.walkDirectory(fullPath, extensions);
-                  files.push(...dirFiles);
-                }
+                try {
+                  if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
+                    const dirFiles = this.walkDirectory(fullPath, extensions);
+                    files.push(...dirFiles);
+                  }
+                } catch {}
               }
               return files;
             }

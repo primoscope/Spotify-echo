@@ -404,11 +404,16 @@ class ModelRegistry {
       maxLatency = 5000,
       maxCost = 0.01,
       preferOpenSource = false,
+      minQuality,
     } = taskRequirements;
 
     const availableModels = this.getAvailableModels({
       capabilities,
       maxCost,
+    }).filter((m) => {
+      if (!minQuality) return true;
+      const order = ['testing', 'experimental', 'good', 'high', 'highest'];
+      return order.indexOf(m.qualityTier) >= order.indexOf(minQuality);
     });
 
     let bestModel = null;
@@ -418,7 +423,7 @@ class ModelRegistry {
       let score = 0;
 
       // Quality scoring
-      const qualityScores = { testing: 1, good: 2, high: 3, highest: 4, experimental: 3 };
+      const qualityScores = { testing: 1, experimental: 2, good: 3, high: 4, highest: 5 };
       score += qualityScores[model.qualityTier] || 0;
 
       // Latency scoring

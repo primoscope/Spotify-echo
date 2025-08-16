@@ -196,7 +196,7 @@ class MongoDBManager {
   }
 
   isConnected() {
-    return this._isConnected && this.client && this.db;
+    return !!(this._isConnected && this.client && this.db);
   }
 
   async disconnect() {

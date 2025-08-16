@@ -687,7 +687,7 @@ class LLMProviderManager {
         metadata: {
           ...(response.metadata || {}),
           correlationId,
-          latency,
+          latency: Math.max(1, latency),
           timestamp: new Date().toISOString(),
         },
       };
@@ -713,7 +713,7 @@ class LLMProviderManager {
             metadata: {
               ...(retryResponse.metadata || {}),
               correlationId,
-              latency,
+              latency: Math.max(1, latency),
               timestamp: new Date().toISOString(),
             },
           };
@@ -736,7 +736,7 @@ class LLMProviderManager {
           metadata: {
             ...(fallbackResponse.metadata || {}),
             correlationId,
-            latency,
+            latency: Math.max(1, latency),
             timestamp: new Date().toISOString(),
           },
         };
@@ -796,7 +796,7 @@ class LLMProviderManager {
       providers: status,
       current: this.currentProvider,
       fallbackOrder: this.fallbackOrder,
-      modelRegistry: modelRegistry.getRegistryStats(),
+      modelRegistry: typeof modelRegistry.getRegistryStats === 'function' ? modelRegistry.getRegistryStats() : {},
       telemetryOverview: llmTelemetry.getAggregatedMetrics(),
     };
   }

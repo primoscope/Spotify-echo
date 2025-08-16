@@ -43,6 +43,8 @@ Next Actions:
   - Emphasize securing `PERPLEXITY_API_KEY` and monitoring endpoint reliability.
   - Add observability to MCP endpoints; structured logging and alerting hooks.
   - Keep Cursor workflows for browser research and PR deep-dive documented and discoverable.
+  - Available workflow: `.cursor/workflows/perplexity-browser-research.json` (filesystem + Brave + Perplexity) for targeted research sweeps.
+  - Next sweep topics: LLM provider switching patterns 2025, Spotify SDK best practices, MongoDB index strategies for analytics, Node API timing middleware patterns.
 
 - UI Validation (2025-08-16):
   - EnhancedChatInterface: provider quick-switch renders and updates provider label; relies on `LLMProvider` context, no backend changes.

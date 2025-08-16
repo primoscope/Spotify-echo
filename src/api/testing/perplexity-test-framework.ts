@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import NodeCache from 'node-cache';
+import NodeCache = require('node-cache');
 import { setTimeout } from 'timers/promises';
 
 // Type definitions
@@ -148,22 +148,35 @@ class RateLimiter {
 }
 
 // Advanced caching system
-class AdvancedCache extends NodeCache {
+class AdvancedCache {
+  private cache: NodeCache;
   private hits: number = 0;
   private misses: number = 0;
 
-  constructor(options: NodeCache.Options) {
-    super(options);
+  constructor(options: any) {
+    this.cache = new NodeCache(options);
   }
 
   get<T>(key: string): T | undefined {
-    const result = super.get<T>(key);
+    const result = this.cache.get<T>(key);
     if (result !== undefined) {
       this.hits++;
     } else {
       this.misses++;
     }
     return result;
+  }
+
+  set(key: string, value: any, ttl?: number): boolean {
+    return this.cache.set(key, value, ttl);
+  }
+
+  keys(): string[] {
+    return this.cache.keys();
+  }
+
+  flushAll(): void {
+    this.cache.flushAll();
   }
 
   getHitRate(): number {

@@ -5,7 +5,7 @@
 
 import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
-import path from 'path';
+import * as path from 'path';
 import { performance } from 'perf_hooks';
 import { PerplexityTestClient, Grok4Integration, TestResult } from './perplexity-test-framework';
 import { BrowserResearchClient, ResearchQuery } from './browser-research-automation';
@@ -470,7 +470,7 @@ export class ComprehensiveTestingSuite extends EventEmitter {
             
             const query = {
               model: 'llama-3.1-sonar-small-128k-online',
-              messages: [{ role: 'user', content: 'What is TypeScript?' }],
+              messages: [{ role: 'user' as const, content: 'What is TypeScript?' }],
               max_tokens: 100
             };
             

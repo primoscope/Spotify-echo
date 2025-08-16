@@ -5,8 +5,8 @@
 
 import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
-import path from 'path';
-import crypto from 'crypto';
+import * as path from 'path';
+import * as crypto from 'crypto';
 import { PerplexityTestClient, Grok4Integration, TestResult } from './perplexity-test-framework';
 
 // Types for browser research

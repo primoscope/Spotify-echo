@@ -54,6 +54,27 @@
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       }
+    },
+    "browserbase": {
+      "command": "node",
+      "args": [
+        "./mcp-servers/browserbase/browserbase-mcp.js"
+      ],
+      "env": {
+        "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
+        "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}",
+        "BROWSERBASE_SESSION_ID": "${BROWSERBASE_SESSION_ID}"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_DB_PATH": ".cursor/memory.sqlite",
+        "MEMORY_MAX_MB": "64"
+      }
     }
   }
 }

@@ -1,0 +1,25 @@
+{
+  "default": "llama-3.1-8b",
+  "rules": [
+    {
+      "if": { "mentions": ["@web", "docs", "latest", "2025"] },
+      "use": "perplexity.sonar-pro",
+      "reason": "Real-time research with citations"
+    },
+    {
+      "if": { "filesTouched": { ">=": 3 } },
+      "use": "gpt-4",
+      "reason": "Multi-file reasoning and refactor"
+    },
+    {
+      "if": { "pattern": ["architect", "refactor", "monorepo", "schema"] },
+      "use": "claude-3.7",
+      "reason": "Nuanced long-context reasoning"
+    },
+    {
+      "if": { "latencyMs": { "<=": 1500 } },
+      "use": "llama-3.1-8b",
+      "reason": "Fast iteration"
+    }
+  ]
+}

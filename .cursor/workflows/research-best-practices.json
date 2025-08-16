@@ -1,0 +1,24 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "Research Best Practices",
+  "description": "Cross-reference code with current best practices via Perplexity + Brave",
+  "steps": [
+    {
+      "tool": "echotune-filesystem",
+      "action": "scan",
+      "args": { "paths": ["./src", "./server.js"], "maxFiles": 80 }
+    },
+    {
+      "tool": "brave-search",
+      "action": "search",
+      "args": { "query": "React 19 Vite best practices 2025 error boundaries suspense routing", "count": 5 }
+    },
+    {
+      "tool": "echotune-perplexity",
+      "action": "research",
+      "args": {
+        "prompt": "Review the scanned code structure and external findings. List 5 concrete improvements with references."
+      }
+    }
+  ]
+}

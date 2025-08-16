@@ -1,0 +1,10 @@
+{
+  "provider": "none",
+  "status": "not_configured",
+  "requiredEnv": [
+    "NOTION_TOKEN",
+    "CONFLUENCE_USER",
+    "CONFLUENCE_TOKEN"
+  ],
+  "message": "Set provider and credentials to enable external docs sync."
+}

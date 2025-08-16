@@ -16,11 +16,18 @@ class LLMProviderManager {
     this.fallbackOrder = ['gemini', 'openai', 'openrouter', 'mock']; // Prioritize Gemini first
     this.currentProvider = 'gemini'; // Default to Gemini
     this.initialized = false;
+    const coalesceEnv = (...names) => {
+      for (const name of names) {
+        const v = process.env[name];
+        if (typeof v === 'string' && v.trim().length > 0) return v;
+      }
+      return '';
+    };
     this.keyPools = {
-      gemini: new KeyPool((process.env.GEMINI_API_KEYS || '').split(/[\s,]+/).filter(Boolean)),
-      openrouter: new KeyPool(
-        (process.env.OPENROUTER_API_KEYS || '').split(/[\s,]+/).filter(Boolean)
-      ),
+
+      gemini: new KeyPool(coalesceEnv('GEMINI_API_KEYS', 'GEMINI_API', 'GEMINI_API_KEY').split(/[\s,]+/).filter(Boolean)),
+      openrouter: new KeyPool(coalesceEnv('OPENROUTER_API_KEYS', 'OPENROUTER_API_KEY', 'OPENROUTER_API').split(/[\s,]+/).filter(Boolean)),
+
     };
 
     // Circuit breaker state
@@ -95,6 +102,13 @@ class LLMProviderManager {
    */
   async loadProviderConfigs() {
     // Base configurations from environment
+    const coalesceEnv = (...names) => {
+      for (const name of names) {
+        const v = process.env[name];
+        if (typeof v === 'string' && v.trim().length > 0) return v;
+      }
+      return undefined;
+    };
     const configs = {
       mock: {
         name: 'Demo Mode (Mock)',
@@ -105,7 +119,7 @@ class LLMProviderManager {
       },
       gemini: {
         name: 'Google Gemini',
-        apiKey: process.env.GEMINI_API_KEY || this.keyPools.gemini.getCurrentKey(),
+        apiKey: coalesceEnv('GEMINI_API_KEY', 'GEMINI_API', 'GEMINI_API_KEYS'),
         model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
         endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
         refreshable: true,
@@ -128,7 +142,7 @@ class LLMProviderManager {
       },
       openrouter: {
         name: 'OpenRouter',
-        apiKey: process.env.OPENROUTER_API_KEY || this.keyPools.openrouter.getCurrentKey(),
+        apiKey: coalesceEnv('OPENROUTER_API_KEY', 'OPENROUTER_API', 'OPENROUTER_API_KEYS'),
         model: process.env.OPENROUTER_MODEL || 'anthropic/claude-3-haiku',
         endpoint: 'https://openrouter.ai/api/v1/chat/completions',
         refreshable: true,
@@ -558,6 +572,12 @@ class LLMProviderManager {
     return breaker.state !== 'OPEN';
   }
 
+  shouldAttemptRecovery(breaker) {
+    if (!breaker || breaker.state !== 'OPEN') return false;
+    if (!breaker.openUntil) return false;
+    return Date.now() >= breaker.openUntil;
+  }
+
   /**
    * Record request latency and check for circuit breaker conditions
    */
@@ -668,11 +688,15 @@ class LLMProviderManager {
       throw new Error(`Provider ${providerId} not available`);
     }
 
+    const correlationId = this.generateCorrelationId();
+    const startMs = Date.now();
+
     try {
       const response = await provider.generateCompletion([{ role: 'user', content: message }], {
         ...options,
         model: modelId,
       });
+      const latency = Date.now() - startMs;
 
       // Update last used timestamp
       if (config) {
@@ -683,7 +707,12 @@ class LLMProviderManager {
         response: response.content,
         provider: providerId,
         model: modelId || config?.model,
-        metadata: response.metadata || {},
+        metadata: {
+          ...(response.metadata || {}),
+          correlationId,
+          latency,
+          timestamp: new Date().toISOString(),
+        },
       };
     } catch (error) {
       console.error(`Provider ${providerId} failed:`, error.message);
@@ -698,12 +727,18 @@ class LLMProviderManager {
             [{ role: 'user', content: message }],
             { ...options, model: modelId }
           );
+          const latency = Date.now() - startMs;
           return {
             response: retryResponse.content,
             provider: providerId,
             model: modelId || config?.model,
             refreshed: true,
-            metadata: retryResponse.metadata || {},
+            metadata: {
+              ...(retryResponse.metadata || {}),
+              correlationId,
+              latency,
+              timestamp: new Date().toISOString(),
+            },
           };
         }
       }
@@ -715,11 +750,18 @@ class LLMProviderManager {
         const fallbackResponse = await mockProvider.generateCompletion([
           { role: 'user', content: message },
         ]);
+        const latency = Date.now() - startMs;
         return {
           response: fallbackResponse.content,
           provider: 'mock',
           fallback: true,
-          originalError: error.message,
+          originalProvider: providerId,
+          metadata: {
+            ...(fallbackResponse.metadata || {}),
+            correlationId,
+            latency,
+            timestamp: new Date().toISOString(),
+          },
         };
       }
 
@@ -877,4 +919,24 @@ class LLMProviderManager {
 // Singleton instance
 const llmProviderManager = new LLMProviderManager();
 
-module.exports = llmProviderManager;
+// Constructor-compatible default export with singleton delegation
+function LLMProviderManagerExport(...args) {
+  return new LLMProviderManager(...args);
+}
+// Delegate commonly used members to the singleton for app runtime
+['getProviderStatus', 'testProvider', 'initialize', 'initializeCircuitBreakers', 'sendMessage', 'getBestProvider'].forEach((method) => {
+  LLMProviderManagerExport[method] = (...args) => llmProviderManager[method](...args);
+});
+Object.defineProperty(LLMProviderManagerExport, 'currentProvider', {
+  get: () => llmProviderManager.currentProvider,
+  set: (v) => {
+    llmProviderManager.currentProvider = v;
+  },
+});
+Object.defineProperty(LLMProviderManagerExport, 'providerConfigs', {
+  get: () => llmProviderManager.providerConfigs,
+});
+
+module.exports = LLMProviderManagerExport;
+module.exports.LLMProviderManager = LLMProviderManager;
+module.exports.instance = llmProviderManager;

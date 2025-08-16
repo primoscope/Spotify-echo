@@ -289,6 +289,7 @@ class PromptExecutor {
      }
 
      const providerConfig = this.config.providers?.perplexity || {};
+     const debugLog = process.env.PERPLEXITY_LOG === '1' || process.env.DEBUG === '1';
 
      const modelParams = {
        ...(this.config.models?.perplexity?.[prompt.model] || {}),
@@ -321,7 +322,11 @@ class PromptExecutor {
 
     let lastError;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const start = Date.now();
       try {
+        if (debugLog) {
+          console.debug(`[perplexity] attempt=${attempt}/${maxAttempts} model=${apiModel}`);
+        }
         const response = await axios.post(
           `${baseUrl}/chat/completions`,
           requestData,
@@ -333,6 +338,11 @@ class PromptExecutor {
             timeout: timeoutMs
           }
         );
+        const latency = Date.now() - start;
+        if (debugLog) {
+          const usage = response?.data?.usage || {};
+          console.debug(`[perplexity] success latency_ms=${latency} usage=${JSON.stringify(usage)}`);
+        }
 
         return {
           content: response.data.choices?.[0]?.message?.content || response.data.content || '',
@@ -341,6 +351,7 @@ class PromptExecutor {
           provider: 'perplexity'
         };
       } catch (error) {
+        const latency = Date.now() - start;
         lastError = error;
         const status = error?.response?.status;
         const isRetryable = (
@@ -348,6 +359,9 @@ class PromptExecutor {
           status === 429 || // rate limit
           (status >= 500 && status < 600) // server errors
         );
+        if (debugLog) {
+          console.debug(`[perplexity] error latency_ms=${latency} status=${status || 'n/a'} message=${error.message}`);
+        }
         if (attempt < maxAttempts && isRetryable) {
           const delay = retryDelayMs * attempt;
           await new Promise(r => setTimeout(r, delay));

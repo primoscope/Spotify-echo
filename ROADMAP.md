@@ -24,7 +24,21 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 
 ### 4) Advanced Configuration
 - Enhanced settings UI (glassmorphism)
-- LLM provider manager, DB tools, health thresholds
+- LLM provider manager, DB tools, health monitors
+
+---
+
+## Performance (standing lane)
+- Targets:
+  - API p95: chat/providers < 800ms; analytics/dashboard < 1200ms; music/discover < 1500ms (dev env)
+  - Frontend bundle: total JS < 500kB gzip; top chunk < 120kB gzip
+- Automation:
+  - scripts/bench/api-latency.js — measure p50/p95/min/max per endpoint (local)
+  - scripts/ui/bundle-stats.js — summarize dist bundle sizes
+  - sonar-project.properties — baseline static analysis and coverage mapping
+- Next steps:
+  - [ ] Add simple request timing middleware per route and persist rolling window to memory/Redis
+  - [ ] Capture baseline metrics in test-results/ and append summary to WORKFLOW_STATE.md after builds
 
 ---
 

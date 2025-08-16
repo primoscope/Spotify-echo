@@ -52,4 +52,9 @@ Next Actions:
 
 - UI Construct (2025-08-16):
   - Added provider status chip to `EnhancedChatInterface.jsx` header.
-  - Added mood preset chips to `EnhancedMusicDiscovery.jsx` for fast context setting. 
+  - Added mood preset chips to `EnhancedMusicDiscovery.jsx` for fast context setting.
+
+- Performance & Automation (2025-08-16):
+  - Added `sonar-project.properties` for baseline static analysis.
+  - Added scripts: `scripts/bench/api-latency.js` and `scripts/ui/bundle-stats.js`.
+  - Next: capture baseline metrics after build and append summary here. 

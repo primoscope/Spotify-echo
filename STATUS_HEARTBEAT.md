@@ -1,9 +1,9 @@
 # Status Heartbeat
 
-Updated: 2025-08-16T06:15:33.437Z
+Updated: 2025-08-16T06:17:03.513Z
 
 - Branch: feature/ui-provider-switch
-- Last commit: bcf5a74 2025-08-16T06:15:12Z Update status heartbeat timestamp and last commit
+- Last commit: 0df3bee 2025-08-16T06:16:57Z feat(ui): LLMContext prefers unified /api/providers with fallback to /api/chat endpoints
 - Roadmap last updated: 2025-08-16T05:23:34.531Z
 - Perplexity canary last run: 2025-08-16T00:21:19.130Z
 

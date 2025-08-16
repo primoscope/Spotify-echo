@@ -28,6 +28,7 @@ import {
   Share as ShareIcon,
   Add as AddIcon,
   Refresh as RefreshIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
 
 /**
@@ -221,6 +222,17 @@ function EnhancedMusicDiscovery() {
     { id: 'happy', label: 'Happy', values: { energy: 65, valence: 85, danceability: 70, acousticness: 40 } },
   ];
   const applyPreset = (preset) => setMoodSettings(preset.values);
+  const describePreset = (preset) => {
+    const v = preset.values;
+    return `energy ${v.energy}, valence ${v.valence}, dance ${v.danceability}, acoustic ${v.acousticness}`;
+  };
+
+  const attributeHelp = {
+    energy: 'Higher energy = more intense, lively tracks',
+    valence: 'Higher valence = happier, more positive mood',
+    danceability: 'Higher danceability = easier to dance to',
+    acousticness: 'Higher acousticness = more acoustic, less electronic',
+  };
 
   // Add track to playlist
   const addToPlaylist = async (track) => {
@@ -345,15 +357,24 @@ function EnhancedMusicDiscovery() {
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
                 {moodPresets.map((p) => (
-                  <Chip key={p.id} size="small" label={p.label} onClick={() => applyPreset(p)} />
+                  <Tooltip key={p.id} title={describePreset(p)}>
+                    <Chip size="small" label={p.label} onClick={() => applyPreset(p)} />
+                  </Tooltip>
                 ))}
               </Box>
               <Grid container spacing={3}>
                 {Object.entries(moodSettings).map(([key, value]) => (
                   <Grid item xs={12} sm={6} key={key}>
-                    <Typography gutterBottom>
-                      {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography gutterBottom>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
+                      </Typography>
+                      <Tooltip title={attributeHelp[key] || ''}>
+                        <IconButton size="small">
+                          <InfoIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                     <Slider
                       value={value}
                       onChange={(_, newValue) => handleMoodChange(key, newValue)}

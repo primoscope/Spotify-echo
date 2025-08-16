@@ -1,17 +1,20 @@
 {
-  "timestamp": "2025-08-16T08:42:08.898Z",
+  "timestamp": "2025-08-16T09:01:04.073Z",
   "results": {
-    "configurationValid": false,
-    "openrouterConnectivity": false,
-    "grokModelAvailable": false,
+    "configurationValid": true,
+    "perplexityConnectivity": true,
+    "grokModelAvailable": true,
+    "sonarModelAvailable": true,
     "repositoryAnalyzerPresent": true,
     "repositoryAnalysisFunctional": true,
-    "deepResearchCapable": false,
-    "overallStatus": "needs_configuration"
+    "deepResearchCapable": true,
+    "webSearchIntegrated": true,
+    "overallStatus": "fully_operational"
   },
   "configuration": {
-    "openrouterKey": null,
-    "grokModel": "x-ai/grok-2-1212",
-    "directGrokKey": false
+    "perplexityKey": "pplx-vll...",
+    "grokModel": "sonar-pro",
+    "sonarModel": "sonar-pro",
+    "webSearchEnabled": true
   }
 }

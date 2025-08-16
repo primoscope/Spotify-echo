@@ -1,25 +1,23 @@
 {
-  "timestamp": "2025-08-16T08:44:24.598Z",
-  "executionTimeMs": 90,
+  "timestamp": "2025-08-16T09:01:23.958Z",
+  "executionTimeMs": 87,
   "overallHealthScore": {
-    "score": 70,
+    "score": 79,
     "status": "fair"
   },
   "results": {
     "mcpServers": {
       "analytics-server": {
-        "status": "incomplete",
+        "status": "operational",
         "hasPackageJson": true,
-        "hasMainFile": false,
+        "hasMainFile": true,
         "dependencies": [
           "@modelcontextprotocol/sdk",
           "mongodb",
           "redis",
           "lodash"
         ],
-        "errors": [
-          "Main file index.js not found"
-        ],
+        "errors": [],
         "mainFile": "index.js"
       },
       "brave-search": {
@@ -32,32 +30,28 @@
         ]
       },
       "browserbase": {
-        "status": "incomplete",
+        "status": "operational",
         "hasPackageJson": true,
-        "hasMainFile": false,
+        "hasMainFile": true,
         "dependencies": [
           "@modelcontextprotocol/sdk",
           "axios",
           "playwright"
         ],
-        "errors": [
-          "Main file index.js not found"
-        ],
+        "errors": [],
         "mainFile": "index.js"
       },
       "code-sandbox": {
-        "status": "incomplete",
+        "status": "operational",
         "hasPackageJson": true,
-        "hasMainFile": false,
+        "hasMainFile": true,
         "dependencies": [
           "@modelcontextprotocol/sdk",
           "vm2",
           "node:child_process",
           "fs-extra"
         ],
-        "errors": [
-          "Main file index.js not found"
-        ],
+        "errors": [],
         "mainFile": "index.js"
       },
       "new-candidates": {
@@ -79,17 +73,15 @@
         ]
       },
       "perplexity-mcp": {
-        "status": "incomplete",
+        "status": "operational",
         "hasPackageJson": true,
-        "hasMainFile": false,
+        "hasMainFile": true,
         "dependencies": [
           "@modelcontextprotocol/sdk",
           "axios",
           "node-fetch"
         ],
-        "errors": [
-          "Main file index.js not found"
-        ],
+        "errors": [],
         "mainFile": "index.js"
       },
       "sentry-mcp": {
@@ -188,7 +180,7 @@
       "replacementsMade": 0
     },
     "overallHealth": {
-      "score": 70,
+      "score": 79,
       "status": "fair"
     }
   }

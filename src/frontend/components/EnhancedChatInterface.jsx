@@ -435,9 +435,7 @@ const EnhancedChatInterface = ({
             AI Music Assistant
           </Typography>
 
-          <Button variant="outlined" size="small" onClick={(e) => setProviderMenu(e.currentTarget)}>
-            {currentProviderLocal}
-          </Button>
+          <ProviderQuickSwitch />
         </Box>
 
         <Typography variant="body2" color="text.secondary">
@@ -635,37 +633,7 @@ const EnhancedChatInterface = ({
         </DialogActions>
       </Dialog>
 
-      {/* Provider Menu */}
-      <Menu
-        anchorEl={providerMenu}
-        open={Boolean(providerMenu)}
-        onClose={() => setProviderMenu(null)}
-      >
-        <MenuItem
-          onClick={() => {
-            setCurrentProviderLocal('mock');
-            setProviderMenu(null);
-          }}
-        >
-          Mock AI (Demo)
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentProviderLocal('gemini');
-            setProviderMenu(null);
-          }}
-        >
-          Google Gemini
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentProviderLocal('openai');
-            setProviderMenu(null);
-          }}
-        >
-          OpenAI GPT
-        </MenuItem>
-      </Menu>
+      {/* Provider Menu handled via ProviderQuickSwitch */}
     </Box>
   );
 };

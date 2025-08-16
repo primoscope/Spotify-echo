@@ -47,8 +47,8 @@ const MCPAutomationStatus = () => {
 
   const fetchAutomationStatus = async () => {
     try {
-      // Check if MCP server is running
-      const mcpResponse = await fetch('/api/health');
+      // Check enhanced MCP health
+      const mcpResponse = await fetch('/api/enhanced-mcp/health');
       const healthData = await mcpResponse.json();
 
       // Mock automation status based on health data

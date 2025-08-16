@@ -10,11 +10,36 @@ function ProviderPanel() {
   const [telemetryData, setTelemetryData] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [refreshingModels, setRefreshingModels] = useState(false);
+  const [mcpStatus, setMcpStatus] = useState('unknown');
 
   useEffect(() => {
     loadAvailableModels();
     loadTelemetryData();
+    checkMcpHealth();
   }, [currentProvider, loadAvailableModels, loadTelemetryData]);
+
+  const checkMcpHealth = useCallback(async () => {
+    try {
+      const res = await fetch('/api/enhanced-mcp/health');
+      if (!res.ok) throw new Error('MCP health failed');
+      const data = await res.json();
+      setMcpStatus(data.status || 'unknown');
+    } catch {
+      setMcpStatus('degraded');
+    }
+  }, []);
+
+  const optimizeMcpModels = async () => {
+    try {
+      await fetch('/api/enhanced-mcp/optimize', { method: 'POST' });
+      await checkMcpHealth();
+    } catch {}
+  };
+
+  useEffect(() => {
+    const id = setInterval(checkMcpHealth, 30000);
+    return () => clearInterval(id);
+  }, [checkMcpHealth]);
 
   const loadAvailableModels = useCallback(async () => {
     if (currentProvider === 'mock') return;
@@ -155,6 +180,10 @@ function ProviderPanel() {
               ))}
           </select>
 
+          <span className="mcp-health" style={{ marginLeft: 8, fontSize: 12 }}>
+            MCP: {mcpStatus}
+          </span>
+
           <button
             className="provider-settings-btn"
             onClick={() => setShowDetails(!showDetails)}
@@ -171,6 +200,16 @@ function ProviderPanel() {
             disabled={loading}
           >
             {loading ? '⟳' : '🔄'}
+          </button>
+
+          <button
+            className="optimize-mcp-btn"
+            onClick={optimizeMcpModels}
+            title="Optimize MCP Model Selection"
+            disabled={loading}
+            style={{ marginLeft: 8 }}
+          >
+            ⚙️ Optimize
           </button>
         </div>
 
@@ -220,8 +259,7 @@ function ProviderPanel() {
         )}
         {telemetryData?.current && (
           <span className="telemetry-info">
-            ({telemetryData.current.requests} requests,{' '}
-            {formatLatency(telemetryData.current.averageLatency)} avg)
+            ({telemetryData.current.requests} requests, {formatLatency(telemetryData.current.averageLatency)} avg)
           </span>
         )}
       </div>
@@ -248,84 +286,16 @@ function ProviderPanel() {
                       <span className="info-value">{model.maxTokens.toLocaleString()}</span>
                     </div>
                     <div className="info-item">
-                      <span className="info-label">Context Window:</span>
-                      <span className="info-value">{model.contextWindow.toLocaleString()}</span>
+                      <span className="info-label">Latency Tier:</span>
+                      <span className="info-value">{model.latencyTier}</span>
                     </div>
                     <div className="info-item">
-                      <span className="info-label">Cost per 1K tokens:</span>
-                      <span className="info-value">
-                        ${model.costPer1kTokens.input} in / ${model.costPer1kTokens.output} out
-                      </span>
+                      <span className="info-label">Quality Tier:</span>
+                      <span className="info-value">{model.qualityTier}</span>
                     </div>
-                    <div className="info-item">
-                      <span className="info-label">Performance:</span>
-                      <span className="info-value">
-                        {model.latencyTier} latency, {model.qualityTier} quality
-                      </span>
-                    </div>
-                    {model.experimental && (
-                      <div className="info-item experimental">
-                        <span className="info-label">⚠️ Status:</span>
-                        <span className="info-value">Experimental</span>
-                      </div>
-                    )}
                   </div>
-                ) : (
-                  <p>Loading model information...</p>
-                );
+                ) : null;
               })()}
-            </div>
-          )}
-
-          {telemetryData?.current && (
-            <div className="telemetry-details">
-              <h4>📊 Performance Metrics</h4>
-              <div className="metrics-grid">
-                <div className="metric-item">
-                  <span className="metric-label">Requests:</span>
-                  <span className="metric-value">{telemetryData.current.requests}</span>
-                </div>
-                <div className="metric-item">
-                  <span className="metric-label">Success Rate:</span>
-                  <span className="metric-value">
-                    {formatPercentage(telemetryData.current.successRate)}
-                  </span>
-                </div>
-                <div className="metric-item">
-                  <span className="metric-label">Avg Latency:</span>
-                  <span className="metric-value">
-                    {formatLatency(telemetryData.current.averageLatency)}
-                  </span>
-                </div>
-                <div className="metric-item">
-                  <span className="metric-label">Retries:</span>
-                  <span className="metric-value">{telemetryData.current.retryAttempts || 0}</span>
-                </div>
-                {telemetryData.current.lastRequestTime && (
-                  <div className="metric-item">
-                    <span className="metric-label">Last Used:</span>
-                    <span className="metric-value">
-                      {new Date(telemetryData.current.lastRequestTime).toLocaleTimeString()}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {telemetryData.current.errors && telemetryData.current.errors.length > 0 && (
-                <div className="error-history">
-                  <h5>Recent Errors:</h5>
-                  <ul className="error-list">
-                    {telemetryData.current.errors.slice(0, 3).map((error, index) => (
-                      <li key={index} className="error-item">
-                        <span className="error-time">
-                          {new Date(error.timestamp).toLocaleTimeString()}:
-                        </span>
-                        <span className="error-message">{error.message}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           )}
         </div>

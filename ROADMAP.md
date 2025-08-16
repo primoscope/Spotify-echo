@@ -36,6 +36,7 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 - [x] Cursor workflows: Browser Research, PR Deep‑Dive
 - [x] CI caches (npm/pip) and nightly canary
 - [x] Auto roadmap refresh (`ROADMAP_AUTO.md`) with Sonar‑Pro + Grok‑4 fallback
+- [x] Cursor Background Agent & MCP env scaffolding (`env.example`, `env.template`, `PROJECT_CONFIG.md`) — owner: agent — 2025‑08‑16
 
 ### M1 — Provider Registry & Switching (WIP)
 - [ ] Backend endpoints: GET /providers, POST /providers/switch, GET /providers/health (latency/error stats)
@@ -72,6 +73,7 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 
 - 2025‑08‑16: Adopt Perplexity Sonar‑Pro for fast synthesis; Grok‑4 deep‑dive with fallback policy (commit a1686eb).
 - 2025‑08‑16: Enable Perplexity debug logging and latency metrics in executor (commit 3837005).
+- 2025‑08‑16: Background agent env standardized; documented in `PROJECT_CONFIG.md` (commit pending).
 
 ---
 

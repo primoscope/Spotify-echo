@@ -1,0 +1,407 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "AI Research Automation Workflows",
+  "description": "Advanced automated research workflows combining Perplexity Sonar Pro and Grok-4",
+  "version": "2.0.0",
+  "workflows": [
+    {
+      "name": "competitive-analysis-workflow",
+      "description": "Automated competitive analysis during development",
+      "trigger": "manual",
+      "steps": [
+        {
+          "tool": "perplexity-ask",
+          "action": "competitive_analysis",
+          "args": {
+            "technology": "${current_technology}",
+            "useCase": "${current_project_context}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "technology_comparison",
+          "args": {
+            "technologies": ["${current_technology}", "${alternatives}"],
+            "use_case": "${current_project_context}",
+            "criteria": ["performance", "scalability", "maintainability", "community"]
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "performance_benchmarks",
+          "args": {
+            "technology": "${current_technology}",
+            "platform": "web"
+          }
+        }
+      ],
+      "output_format": "structured_report",
+      "auto_save": true
+    },
+    {
+      "name": "security-vulnerability-research",
+      "description": "Automated security vulnerability research and patching suggestions",
+      "trigger": "code_analysis",
+      "steps": [
+        {
+          "tool": "perplexity-ask",
+          "action": "security_research",
+          "args": {
+            "framework": "${detected_framework}",
+            "code_snippet": "${selected_code}",
+            "vulnerability_type": "current_threats"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "security_analysis",
+          "args": {
+            "code_snippet": "${selected_code}",
+            "framework": "${detected_framework}",
+            "compliance_requirements": ["GDPR", "OWASP"]
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "fact_check_code_comments",
+          "args": {
+            "comments": "${security_comments}",
+            "technology": "${detected_framework}"
+          }
+        }
+      ],
+      "auto_apply_fixes": false,
+      "generate_report": true
+    },
+    {
+      "name": "api-documentation-sync",
+      "description": "Real-time API documentation fetching for external services",
+      "trigger": "api_call_detected",
+      "steps": [
+        {
+          "tool": "perplexity-ask",
+          "action": "api_documentation_fetch",
+          "args": {
+            "service_name": "${detected_api_service}",
+            "endpoint": "${api_endpoint}",
+            "version": "${api_version}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "analyze_code_with_research",
+          "args": {
+            "code": "${api_integration_code}",
+            "context": "API integration best practices",
+            "focus_areas": ["security", "error_handling", "rate_limiting"]
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "live_documentation_update",
+          "args": {
+            "topic": "${api_service}_integration",
+            "current_content": "${existing_docs}",
+            "format": "markdown"
+          }
+        }
+      ],
+      "update_documentation": true,
+      "cache_duration": "24h"
+    },
+    {
+      "name": "performance-optimization-research",
+      "description": "Context-aware performance optimization with current best practices",
+      "trigger": "performance_issue_detected",
+      "steps": [
+        {
+          "tool": "perplexity-ask",
+          "action": "performance_benchmarks",
+          "args": {
+            "technology": "${current_stack}",
+            "metrics": ["latency", "throughput", "memory_usage"],
+            "platform": "${target_platform}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "performance_optimization",
+          "args": {
+            "code_snippet": "${performance_critical_code}",
+            "performance_metrics": "${current_metrics}",
+            "target_platform": "${target_platform}",
+            "optimization_goals": ["reduce_latency", "improve_throughput"]
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "context_aware_research",
+          "args": {
+            "task_description": "Performance optimization for ${current_feature}",
+            "active_files": "${open_files}",
+            "recent_changes": "${git_diff}"
+          }
+        }
+      ],
+      "benchmark_before_after": true,
+      "generate_metrics_report": true
+    },
+    {
+      "name": "architectural-decision-workflow",
+      "description": "Multi-agent architectural decision making with research",
+      "trigger": "architectural_planning",
+      "steps": [
+        {
+          "tool": "perplexity-ask",
+          "action": "competitive_analysis",
+          "args": {
+            "technology": "${proposed_solution}",
+            "useCase": "${architecture_requirements}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "architectural_planning",
+          "args": {
+            "requirements": "${detailed_requirements}",
+            "constraints": "${project_constraints}",
+            "scale": "${expected_scale}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "multi_agent_reasoning",
+          "args": {
+            "problem": "${architectural_challenge}",
+            "domain": "software_architecture",
+            "stakeholders": ["developers", "operations", "product"],
+            "complexity_level": "${project_complexity}"
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "performance_benchmarks",
+          "args": {
+            "technology": "${recommended_stack}",
+            "platform": "${deployment_platform}"
+          }
+        }
+      ],
+      "use_heavy_tier": true,
+      "generate_adr": true,
+      "include_trade_offs": true
+    },
+    {
+      "name": "debugging-assistance-workflow",
+      "description": "Comprehensive debugging with web research and multi-step analysis",
+      "trigger": "error_encountered",
+      "steps": [
+        {
+          "tool": "perplexity-ask",
+          "action": "perplexity_research",
+          "args": {
+            "query": "${error_message} ${technology_stack}",
+            "focus": "debugging",
+            "context": "${error_context}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "debugging_workflow",
+          "args": {
+            "error": "${error_message}",
+            "code_context": "${surrounding_code}",
+            "technology": "${technology_stack}",
+            "environment": "${current_environment}"
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "security_research",
+          "args": {
+            "framework": "${technology_stack}",
+            "vulnerability_type": "error_related_security_issues"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "code_review_agent",
+          "args": {
+            "code": "${problematic_code}",
+            "review_type": "comprehensive",
+            "target_audience": "senior"
+          }
+        }
+      ],
+      "provide_step_by_step_solution": true,
+      "include_prevention_strategies": true
+    },
+    {
+      "name": "code-quality-enhancement",
+      "description": "Automated code quality improvement with current best practices",
+      "trigger": "code_commit",
+      "steps": [
+        {
+          "tool": "grok4-integration",
+          "action": "code_review_agent",
+          "args": {
+            "code": "${committed_code}",
+            "review_type": "comprehensive",
+            "team_standards": "${team_coding_standards}",
+            "target_audience": "${team_experience_level}"
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "fact_check_code_comments",
+          "args": {
+            "comments": "${code_comments}",
+            "technology": "${primary_language}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "analyze_code_with_research",
+          "args": {
+            "code": "${committed_code}",
+            "context": "Code quality and maintainability review",
+            "focus_areas": ["maintainability", "best_practices", "security"]
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "context_aware_research",
+          "args": {
+            "task_description": "Code quality improvement for ${module_name}",
+            "active_files": "${modified_files}",
+            "recent_changes": "${commit_diff}"
+          }
+        }
+      ],
+      "auto_generate_suggestions": true,
+      "update_team_knowledge_base": true
+    },
+    {
+      "name": "technology-research-workflow",
+      "description": "Comprehensive technology research for decision making",
+      "trigger": "technology_evaluation",
+      "steps": [
+        {
+          "tool": "perplexity-ask",
+          "action": "competitive_analysis",
+          "args": {
+            "technology": "${technology_candidate}",
+            "useCase": "${project_requirements}"
+          }
+        },
+        {
+          "tool": "grok4-integration",
+          "action": "technology_comparison",
+          "args": {
+            "technologies": "${candidate_technologies}",
+            "use_case": "${specific_use_case}",
+            "criteria": "${evaluation_criteria}",
+            "project_constraints": "${project_constraints}"
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "performance_benchmarks",
+          "args": {
+            "technology": "${technology_candidate}",
+            "metrics": "${performance_requirements}",
+            "platform": "${target_platform}"
+          }
+        },
+        {
+          "tool": "perplexity-ask",
+          "action": "security_research",
+          "args": {
+            "framework": "${technology_candidate}",
+            "vulnerability_type": "known_vulnerabilities"
+          }
+        }
+      ],
+      "generate_comparison_matrix": true,
+      "include_migration_strategy": true,
+      "provide_recommendations": true
+    }
+  ],
+  "global_settings": {
+    "max_concurrent_workflows": 3,
+    "cache_research_results": true,
+    "cache_ttl": "24h",
+    "rate_limit_per_minute": 30,
+    "enable_citations": true,
+    "auto_save_results": true,
+    "result_format": "structured_json",
+    "performance_tracking": true,
+    "error_fallback_enabled": true
+  },
+  "integration_settings": {
+    "perplexity": {
+      "max_citations": 10,
+      "preferred_domains": [
+        "stackoverflow.com",
+        "github.com",
+        "developer.mozilla.org",
+        "docs.python.org",
+        "nodejs.org",
+        "reactjs.org"
+      ],
+      "search_focus_areas": [
+        "security",
+        "performance", 
+        "architecture",
+        "debugging",
+        "testing"
+      ]
+    },
+    "grok4": {
+      "use_heavy_tier_for": [
+        "architectural_planning",
+        "multi_agent_reasoning",
+        "technology_comparison"
+      ],
+      "enable_tool_use": true,
+      "available_tools": [
+        "web_search",
+        "perplexity_research",
+        "code_interpreter"
+      ],
+      "max_tokens": 6000,
+      "temperature": 0.7
+    }
+  },
+  "output_templates": {
+    "security_report": {
+      "sections": [
+        "vulnerability_summary",
+        "threat_assessment", 
+        "mitigation_strategies",
+        "compliance_notes",
+        "recommended_tools",
+        "citations"
+      ]
+    },
+    "performance_report": {
+      "sections": [
+        "benchmark_results",
+        "bottleneck_analysis",
+        "optimization_recommendations",
+        "monitoring_suggestions",
+        "before_after_metrics"
+      ]
+    },
+    "architecture_decision_record": {
+      "sections": [
+        "context",
+        "decision",
+        "rationale",
+        "alternatives_considered",
+        "consequences",
+        "research_citations"
+      ]
+    }
+  }
+}

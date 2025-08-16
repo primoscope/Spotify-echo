@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-16T12:30:03.685Z",
+  "timestamp": "2025-08-16T18:24:52.450Z",
   "summary": {
     "total": 8,
-    "passed": 7,
-    "failed": 0,
+    "passed": 6,
+    "failed": 1,
     "skipped": 1,
-    "successRate": 88
+    "successRate": 75
   },
   "servers": [
     {
@@ -54,15 +54,11 @@
     },
     {
       "name": "Sequential Thinking Server",
-      "status": "PASSED",
-      "capabilities": [
-        "reasoning",
-        "problem_solving",
-        "decision_making"
-      ],
+      "status": "FAILED",
+      "capabilities": [],
       "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/sequential-thinking/dist/index.js",
-      "error": null,
-      "message": "Server started successfully (timed out as expected)"
+      "error": "Server file not found",
+      "message": null
     },
     {
       "name": "Perplexity MCP Server",

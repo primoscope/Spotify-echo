@@ -1,0 +1,255 @@
+{
+  "timestamp": "2025-08-16T18:25:00.839Z",
+  "demoSession": "perplexity-demo-1755368700839-erw8fgpf8",
+  "researchTests": [
+    {
+      "category": "Music Technology",
+      "query": "Latest developments in AI-powered music recommendation systems",
+      "expectedTopics": [
+        "machine learning",
+        "collaborative filtering",
+        "neural networks",
+        "spotify api"
+      ],
+      "priority": "high",
+      "responseTime": 1417,
+      "success": true,
+      "sources": [
+        {
+          "url": "https://arxiv.org/abs/2024.music.rec",
+          "title": "Neural Music Recommendation Systems",
+          "domain": "arxiv.org",
+          "credibility": 95
+        },
+        {
+          "url": "https://developer.spotify.com/documentation/web-api",
+          "title": "Spotify Web API Guide",
+          "domain": "spotify.com",
+          "credibility": 90
+        },
+        {
+          "url": "https://github.com/spotify/echonestnest",
+          "title": "Open Source Music Analysis",
+          "domain": "github.com",
+          "credibility": 85
+        }
+      ],
+      "summary": "Recent advances in AI-powered music recommendation systems focus on deep learning approaches that combine collaborative filtering with content-based analysis. Modern systems like those used by Spotify integrate neural networks to understand user preferences and musical features, achieving significant improvements in recommendation accuracy.",
+      "relevanceScore": 87,
+      "citations": {
+        "citationsGenerated": 3,
+        "formatsSupported": [
+          "APA",
+          "MLA",
+          "Chicago",
+          "IEEE"
+        ],
+        "attributionAccuracy": 99,
+        "verifiableLinks": 92,
+        "transparencyScore": 98,
+        "generationTime": 123
+      },
+      "topicsFound": [
+        "machine learning",
+        "collaborative filtering",
+        "neural networks",
+        "spotify api"
+      ],
+      "confidence": 88,
+      "sourceValidation": {
+        "totalSources": 3,
+        "validSources": 3,
+        "blockedSources": 0,
+        "averageCredibility": 90,
+        "workingLinks": 97,
+        "validationTime": 72
+      }
+    },
+    {
+      "category": "Browser Automation",
+      "query": "Best practices for Puppeteer automation in production environments",
+      "expectedTopics": [
+        "puppeteer",
+        "headless chrome",
+        "performance optimization",
+        "error handling"
+      ],
+      "priority": "medium",
+      "responseTime": 1216,
+      "success": true,
+      "sources": [
+        {
+          "url": "https://pptr.dev/guides/production",
+          "title": "Puppeteer Production Guide",
+          "domain": "pptr.dev",
+          "credibility": 95
+        },
+        {
+          "url": "https://github.com/puppeteer/puppeteer/issues",
+          "title": "Puppeteer Issues & Solutions",
+          "domain": "github.com",
+          "credibility": 80
+        },
+        {
+          "url": "https://developer.chrome.com/docs/puppeteer",
+          "title": "Chrome DevTools Puppeteer",
+          "domain": "developer.chrome.com",
+          "credibility": 92
+        }
+      ],
+      "summary": "Production deployment of Puppeteer requires careful consideration of resource management, error handling, and performance optimization. Best practices include using headless Chrome efficiently, implementing proper timeout handling, and monitoring system resources to ensure stable automation workflows.",
+      "relevanceScore": 90,
+      "citations": {
+        "citationsGenerated": 3,
+        "formatsSupported": [
+          "APA",
+          "MLA",
+          "Chicago",
+          "IEEE"
+        ],
+        "attributionAccuracy": 95,
+        "verifiableLinks": 98,
+        "transparencyScore": 96,
+        "generationTime": 155
+      },
+      "topicsFound": [
+        "puppeteer",
+        "headless chrome",
+        "performance optimization"
+      ],
+      "confidence": 90,
+      "sourceValidation": {
+        "totalSources": 3,
+        "validSources": 3,
+        "blockedSources": 0,
+        "averageCredibility": 89,
+        "workingLinks": 99,
+        "validationTime": 179
+      }
+    },
+    {
+      "category": "Research Validation",
+      "query": "Automated fact-checking systems for AI-generated content",
+      "expectedTopics": [
+        "fact checking",
+        "nlp",
+        "verification",
+        "trust scoring"
+      ],
+      "priority": "high",
+      "responseTime": 1255,
+      "success": true,
+      "sources": [
+        {
+          "url": "https://www.nature.com/articles/fact-checking-ai",
+          "title": "AI Fact-Checking Research",
+          "domain": "nature.com",
+          "credibility": 98
+        },
+        {
+          "url": "https://github.com/fact-checkers/ai-validation",
+          "title": "Open Source Fact Checking",
+          "domain": "github.com",
+          "credibility": 82
+        },
+        {
+          "url": "https://arxiv.org/abs/2024.fact.check",
+          "title": "Automated Verification Systems",
+          "domain": "arxiv.org",
+          "credibility": 94
+        }
+      ],
+      "summary": "Automated fact-checking systems for AI-generated content employ natural language processing and knowledge graph validation to verify claims. These systems combine multiple verification strategies including source credibility assessment, cross-reference validation, and consistency checking to provide reliable accuracy scores.",
+      "relevanceScore": 97,
+      "citations": {
+        "citationsGenerated": 3,
+        "formatsSupported": [
+          "APA",
+          "MLA",
+          "Chicago",
+          "IEEE"
+        ],
+        "attributionAccuracy": 98,
+        "verifiableLinks": 95,
+        "transparencyScore": 94,
+        "generationTime": 186
+      },
+      "topicsFound": [
+        "fact checking",
+        "nlp",
+        "verification"
+      ],
+      "confidence": 93,
+      "sourceValidation": {
+        "totalSources": 3,
+        "validSources": 3,
+        "blockedSources": 0,
+        "averageCredibility": 91,
+        "workingLinks": 91,
+        "validationTime": 112
+      }
+    }
+  ],
+  "browserIntegration": [
+    {
+      "task": "Website Screenshot Capture",
+      "url": "https://example.com",
+      "action": "screenshot",
+      "executionTime": 421,
+      "success": true,
+      "qualityScore": 98,
+      "details": {
+        "captured": true,
+        "resolution": "1920x1080",
+        "fileSize": "245KB"
+      },
+      "browserUsed": "Chrome Headless",
+      "timestamp": "2025-08-16T18:25:06.117Z"
+    },
+    {
+      "task": "Content Extraction",
+      "url": "https://research.example.com",
+      "action": "extract",
+      "executionTime": 479,
+      "success": true,
+      "qualityScore": 96,
+      "details": {
+        "contentLength": 5508,
+        "elementsFound": 68,
+        "extractedData": "Text content, links, metadata"
+      },
+      "browserUsed": "Chrome Headless",
+      "timestamp": "2025-08-16T18:25:06.596Z"
+    },
+    {
+      "task": "Performance Monitoring",
+      "url": "https://test.example.com",
+      "action": "monitor",
+      "executionTime": 391,
+      "success": true,
+      "qualityScore": 86,
+      "details": {
+        "loadTime": 1604,
+        "renderTime": 1139,
+        "performanceScore": 73
+      },
+      "browserUsed": "Chrome Headless",
+      "timestamp": "2025-08-16T18:25:06.987Z"
+    }
+  ],
+  "validationResults": [],
+  "performanceMetrics": {
+    "totalDuration": 6711,
+    "averageResponseTime": 2237,
+    "successRate": 100,
+    "memoryUsage": {
+      "rss": 46702592,
+      "heapTotal": 6266880,
+      "heapUsed": 4716168,
+      "external": 1779924,
+      "arrayBuffers": 16659
+    },
+    "throughput": 0,
+    "efficiency": 100
+  }
+}

@@ -38,9 +38,10 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
   - sonar-project.properties — baseline static analysis and coverage mapping
 - Next steps:
 - [x] Add simple request timing middleware per route (in-memory) and X-Response-Time header — 2025‑08‑16 (commit e55dc24)
-  - [ ] Persist rolling window to Redis for durability and multi-instance aggregation
-  - [ ] Capture baseline metrics in test-results/ and append summary to WORKFLOW_STATE.md after builds
-  - [ ] Structured logging (Winston) for API/MCP; surface errors/latency in logs (from Sonar‑Pro)
+- [x] Capture baseline metrics and append summary to WORKFLOW_STATE.md after builds — 2025-08-16 (scripts/bench/api-latency.js enhanced)
+- [x] Performance baseline script with comprehensive reporting — 2025-08-16
+- [ ] Persist rolling window to Redis for durability and multi-instance aggregation  
+- [ ] Structured logging (Winston) for API/MCP; surface errors/latency in logs (from Sonar‑Pro)
 
 ---
 
@@ -61,11 +62,11 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 - [x] Auto roadmap refresh (`ROADMAP_AUTO.md`) with Sonar‑Pro + Grok‑4 fallback
 - [x] Cursor Background Agent & MCP env scaffolding (`env.example`, `env.template`, `PROJECT_CONFIG.md`) — owner: agent — 2025‑08‑16
 
-### M1 — Provider Registry & Switching (WIP)
-- [ ] Backend endpoints: GET /providers, POST /providers/switch, GET /providers/health (latency/error stats)
-- [ ] Persist last N latency/error metrics for charts
-- [ ] Frontend ProviderPanel: list/switch providers, show live metrics
-- [ ] Tests for switching and telemetry
+### M1 — Provider Registry & Switching (COMPLETE)
+- [x] Backend endpoints: GET /providers, POST /providers/switch, GET /providers/health (latency/error stats) — 2025-08-16
+- [x] Persist last N latency/error metrics for charts — 2025-08-16 (recentLatencies array)
+- [x] Frontend ProviderPanel: list/switch providers, show live metrics — 2025-08-16 (existing implementation verified)
+- [x] Tests for switching and telemetry — 2025-08-16 (7 tests added)
 
 ### M2 — Context‑Aware Conversations
 - [ ] Backend chat pipeline: attach user context (mood/history/preferences); persist summaries

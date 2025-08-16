@@ -193,6 +193,7 @@
     "test:gemini-integration": "node scripts/test-gemini-integration.js",
     "test:automation-integration": "node scripts/test-automation-integration.js",
     "test:perplexity-grok4": "npm run test:integration -- --testPathPattern=perplexity-grok4-integration-tests.js",
+    "demo:perplexity-grok4": "node demo-integration.js",
     "demo:automation": "node scripts/demo-automation-workflow.js",
     "status:automation": "node scripts/automation-system-status.js",
     "research:music": "node scripts/music-research-automation.js",

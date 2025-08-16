@@ -47,6 +47,7 @@ const adminRoutes = require('./api/routes/admin'); // MongoDB admin dashboard an
 const enhancedMCPRoutes = require('./api/routes/enhanced-mcp'); // Enhanced MCP and multimodel capabilities
 const researchRoutes = require('./api/routes/research'); // Perplexity AI research capabilities
 const analysisRoutes = require('./api/routes/analysis'); // Grok-4 code analysis capabilities
+const multiAgentWorkflowRoutes = require('./api/routes/multi-agent-workflows'); // Multi-agent orchestration
 const workflowRoutes = require('../agent-workflow/workflow-api'); // Dynamic workflow management
 const {
   extractUser,
@@ -850,6 +851,7 @@ app.use('/api/admin', adminRoutes); // MongoDB admin dashboard and tools
 app.use('/api/enhanced-mcp', enhancedMCPRoutes); // Enhanced MCP and multimodel capabilities
 app.use('/api/research', researchRoutes); // Perplexity AI research capabilities
 app.use('/api/analyze', analysisRoutes); // Grok-4 code analysis capabilities  
+app.use('/api/workflows', multiAgentWorkflowRoutes); // Multi-agent orchestration
 app.use('/api/workflow', workflowRoutes); // Dynamic workflow management
 
 // Deployment API routes

@@ -192,6 +192,10 @@ class LLMProviderManager {
       if (key === 'mock') {
         config.available = true;
         config.status = 'connected';
+      } else if (key === 'grok4') {
+        // Grok-4 can use either xAI direct or OpenRouter
+        config.available = !!(config.apiKey || config.openRouterKey);
+        config.status = config.available ? 'unknown' : 'no_key';
       } else {
         config.available = !!config.apiKey;
         config.status = config.available ? 'unknown' : 'no_key';
@@ -301,9 +305,10 @@ class LLMProviderManager {
       }
 
       // Test with simple message
-      const response = await provider.generateResponse('Hello');
+      const messages = [{ role: 'user', content: 'Hello' }];
+      const response = await provider.generateCompletion(messages, { maxTokens: 5 });
 
-      if (response && typeof response === 'string') {
+      if (response && response.content) {
         config.status = 'connected';
         config.lastTested = new Date().toISOString();
         return true;

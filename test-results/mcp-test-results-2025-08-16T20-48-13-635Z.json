@@ -1,0 +1,228 @@
+{
+  "timestamp": "2025-08-16T20:48:13.635Z",
+  "totalDuration": 258,
+  "testResults": [
+    {
+      "name": "Configuration Validation",
+      "status": "PASSED",
+      "result": {
+        "status": "Configuration valid",
+        "config": {
+          "nodeEnv": "development",
+          "hasPackageJson": true,
+          "hasEnvExample": true,
+          "scriptsDirectory": true,
+          "mcpDirectory": true
+        },
+        "score": 95
+      },
+      "duration": 0,
+      "timestamp": "2025-08-16T20:48:13.381Z"
+    },
+    {
+      "name": "File System Access",
+      "status": "PASSED",
+      "result": {
+        "status": "File system access successful",
+        "operations": [
+          "mkdir",
+          "writeFile",
+          "readFile",
+          "unlink",
+          "rmdir"
+        ],
+        "dataIntegrity": true,
+        "score": 100
+      },
+      "duration": 2,
+      "timestamp": "2025-08-16T20:48:13.383Z"
+    },
+    {
+      "name": "Mock Research Capabilities",
+      "status": "PASSED",
+      "result": {
+        "status": "Mock research capabilities functional",
+        "topicsProcessed": 3,
+        "results": [
+          {
+            "topic": "Node.js performance optimization",
+            "content": "Mock research results for \"Node.js performance optimization\". This includes comprehensive analysis, best practices, and actionable recommendations.",
+            "processingTime": 70,
+            "keyInsights": [
+              "Implementation strategy identified",
+              "Performance improvements possible",
+              "Best practices documented"
+            ],
+            "confidence": 0.85,
+            "sources": 3
+          },
+          {
+            "topic": "MongoDB indexing strategies",
+            "content": "Mock research results for \"MongoDB indexing strategies\". This includes comprehensive analysis, best practices, and actionable recommendations.",
+            "processingTime": 81,
+            "keyInsights": [
+              "Implementation strategy identified",
+              "Performance improvements possible",
+              "Best practices documented"
+            ],
+            "confidence": 0.85,
+            "sources": 3
+          },
+          {
+            "topic": "Docker container optimization",
+            "content": "Mock research results for \"Docker container optimization\". This includes comprehensive analysis, best practices, and actionable recommendations.",
+            "processingTime": 86,
+            "keyInsights": [
+              "Implementation strategy identified",
+              "Performance improvements possible",
+              "Best practices documented"
+            ],
+            "confidence": 0.85,
+            "sources": 3
+          }
+        ],
+        "averageProcessingTime": 79,
+        "score": 90
+      },
+      "duration": 237,
+      "timestamp": "2025-08-16T20:48:13.620Z"
+    },
+    {
+      "name": "Task Generation System",
+      "status": "PASSED",
+      "result": {
+        "status": "Task generation system functional",
+        "inputAnalysis": {
+          "repositoryScore": 78,
+          "performanceIssues": 3,
+          "securityVulnerabilities": 1,
+          "codeQualityIssues": 5
+        },
+        "generatedTasks": 4,
+        "tasks": [
+          {
+            "id": "task_repo_improvement",
+            "title": "Improve Repository Quality Score",
+            "description": "Repository score is 78/100. Focus on code quality and documentation improvements.",
+            "priority": "high",
+            "category": "quality",
+            "estimatedHours": 16,
+            "tags": [
+              "quality",
+              "documentation",
+              "refactoring"
+            ]
+          },
+          {
+            "id": "task_performance_optimization",
+            "title": "Address Performance Issues",
+            "description": "3 performance issues identified. Optimize critical paths and improve response times.",
+            "priority": "high",
+            "category": "performance",
+            "estimatedHours": 12,
+            "tags": [
+              "performance",
+              "optimization",
+              "monitoring"
+            ]
+          },
+          {
+            "id": "task_security_fixes",
+            "title": "Fix Security Vulnerabilities",
+            "description": "1 security vulnerabilities found. Implement fixes and security hardening.",
+            "priority": "critical",
+            "category": "security",
+            "estimatedHours": 8,
+            "tags": [
+              "security",
+              "vulnerability",
+              "compliance"
+            ]
+          },
+          {
+            "id": "task_code_quality",
+            "title": "Improve Code Quality",
+            "description": "5 code quality issues detected. Refactor complex functions and improve maintainability.",
+            "priority": "medium",
+            "category": "refactoring",
+            "estimatedHours": 20,
+            "tags": [
+              "code-quality",
+              "refactoring",
+              "maintainability"
+            ]
+          }
+        ],
+        "priorityDistribution": {
+          "critical": 1,
+          "high": 2,
+          "medium": 1,
+          "low": 0
+        },
+        "estimatedTotalHours": 56,
+        "score": 88
+      },
+      "duration": 0,
+      "timestamp": "2025-08-16T20:48:13.621Z"
+    },
+    {
+      "name": "Performance Metrics",
+      "status": "FAILED",
+      "error": "memoryUsageMB is not defined",
+      "timestamp": "2025-08-16T20:48:13.622Z"
+    },
+    {
+      "name": "Error Handling",
+      "status": "PASSED",
+      "result": {
+        "status": "Error handling tested",
+        "tests": [
+          {
+            "test": "file_not_found",
+            "result": "PASSED",
+            "error": "ENOENT"
+          },
+          {
+            "test": "json_parse",
+            "result": "PASSED",
+            "error": "SyntaxError"
+          },
+          {
+            "test": "async_error",
+            "result": "PASSED",
+            "error": "Simulated async error"
+          }
+        ],
+        "passedTests": 3,
+        "totalTests": 3,
+        "score": 100
+      },
+      "duration": 11,
+      "timestamp": "2025-08-16T20:48:13.633Z"
+    },
+    {
+      "name": "Integration Health",
+      "status": "PASSED",
+      "result": {
+        "status": "Integration health checked",
+        "integrations": {
+          "scriptsDirectory": true,
+          "mcpServerDirectory": true,
+          "nodeModules": true,
+          "packageLock": true
+        },
+        "passedIntegrations": 4,
+        "totalIntegrations": 4,
+        "score": 100,
+        "recommendations": []
+      },
+      "duration": 1,
+      "timestamp": "2025-08-16T20:48:13.634Z"
+    }
+  ],
+  "summary": {
+    "totalTests": 7,
+    "passedTests": 6,
+    "failedTests": 1
+  }
+}

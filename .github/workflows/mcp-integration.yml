@@ -1,15 +1,16 @@
+---
 name: MCP Servers Integration
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - 'mcp-servers/**'
       - 'scripts/mcp-manager.js'
       - 'package.json'
       - '.github/workflows/mcp-integration.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - 'mcp-servers/**'
       - 'scripts/mcp-manager.js'
@@ -30,55 +31,55 @@ jobs:
     strategy:
       matrix:
         server: [sequential-thinking, screenshot-website, browserbase, filesystem]
-        
+
     steps:
-    - name: Checkout repository
+      - name: Checkout repository
       uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y curl jq
-        
-    - name: Install dependencies
-      run: |
-        npm ci
-        pip install -r requirements.txt
-        
-    - name: Setup environment variables
-      run: |
-        cp .env.example .env
-        echo "BROWSERBASE_API_KEY=test_key" >> .env
-        echo "BROWSERBASE_PROJECT_ID=test_project" >> .env
-        echo "MCP_SEQUENTIAL_THINKING_ENABLED=true" >> .env
-        echo "MCP_SCREENSHOT_WEBSITE_ENABLED=true" >> .env
-        echo "MCP_BROWSERBASE_ENABLED=false" >> .env
-        echo "MCP_FILESYSTEM_ENABLED=true" >> .env
-        
-    - name: Install specific MCP server
-      run: |
-        node scripts/mcp-manager.js install ${{ matrix.server }}
-        
-    - name: Health check for ${{ matrix.server }}
-      run: |
-        echo "Running health check for ${{ matrix.server }}"
-        node scripts/mcp-manager.js health | grep "${{ matrix.server }}"
-        
-    - name: Test ${{ matrix.server }} server (if available)
-      continue-on-error: true
-      run: |
-        timeout 10s node scripts/mcp-manager.js test ${{ matrix.server }} || echo "Server test completed"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install -r requirements.txt
+
+      - name: Setup environment variables
+        run: |
+          cp .env.example .env
+          echo "BROWSERBASE_API_KEY=test_key" >> .env
+          echo "BROWSERBASE_PROJECT_ID=test_project" >> .env
+          echo "MCP_SEQUENTIAL_THINKING_ENABLED=true" >> .env
+          echo "MCP_SCREENSHOT_WEBSITE_ENABLED=true" >> .env
+          echo "MCP_BROWSERBASE_ENABLED=false" >> .env
+          echo "MCP_FILESYSTEM_ENABLED=true" >> .env
+
+      - name: Install specific MCP server
+        run: |
+          node scripts/mcp-manager.js install ${{ matrix.server }}
+
+      - name: Health check for ${{ matrix.server }}
+        run: |
+          echo "Running health check for ${{ matrix.server }}"
+          node scripts/mcp-manager.js health | grep "${{ matrix.server }}"
+
+      - name: Test ${{ matrix.server }} server (if available)
+        continue-on-error: true
+        run: |
+          timeout 10s node scripts/mcp-manager.js test ${{ matrix.server }} || \
+            echo "Server test completed"
 
   integration-tests:
     name: MCP Integration Tests

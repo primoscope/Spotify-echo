@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-08-16T09:42:01.630Z",
+  "executionTime": "1490ms",
+  "results": {
+    "workflows": {
+      "total": 13,
+      "passed": 4,
+      "failed": 9,
+      "errors": [
+        {
+          "file": "auto-merge-gate.yml",
+          "error": "::group::.github/workflows/auto-merge-gate.yml\n::error file=.github/workflows/auto-merge-gate.yml,line=17,col=121::17:121 [line-length] line too long (136 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "ci.yml",
+          "error": "::group::.github/workflows/ci.yml\n::error file=.github/workflows/ci.yml,line=92,col=121::92:121 [line-length] line too long (129 > 120 characters)\n::error file=.github/workflows/ci.yml,line=110,col=121::110:121 [line-length] line too long (127 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "copilot-agent-preflight.yml",
+          "error": "::group::.github/workflows/copilot-agent-preflight.yml\n::error file=.github/workflows/copilot-agent-preflight.yml,line=13,col=121::13:121 [line-length] line too long (125 > 120 characters)\n::error file=.github/workflows/copilot-agent-preflight.yml,line=141,col=121::141:121 [line-length] line too long (141 > 120 characters)\n::error file=.github/workflows/copilot-agent-preflight.yml,line=237,col=121::237:121 [line-length] line too long (129 > 120 characters)\n::error file=.github/workflows/copilot-agent-preflight.yml,line=246,col=121::246:121 [line-length] line too long (143 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "copilot-slash-commands.yml",
+          "error": "::group::.github/workflows/copilot-slash-commands.yml\n::error file=.github/workflows/copilot-slash-commands.yml,line=164,col=121::164:121 [line-length] line too long (121 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=267,col=121::267:121 [line-length] line too long (162 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "deploy-digitalocean.yml",
+          "error": "::group::.github/workflows/deploy-digitalocean.yml\n::error file=.github/workflows/deploy-digitalocean.yml,line=383,col=121::383:121 [line-length] line too long (144 > 120 characters)\n::error file=.github/workflows/deploy-digitalocean.yml,line=419,col=121::419:121 [line-length] line too long (151 > 120 characters)\n::error file=.github/workflows/deploy-digitalocean.yml,line=420,col=121::420:121 [line-length] line too long (145 > 120 characters)\n::error file=.github/workflows/deploy-digitalocean.yml,line=421,col=121::421:121 [line-length] line too long (177 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "gpt5-advanced-multimodel.yml",
+          "error": "::group::.github/workflows/gpt5-advanced-multimodel.yml\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=102,col=121::102:121 [line-length] line too long (135 > 120 characters)\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=195,col=121::195:121 [line-length] line too long (126 > 120 characters)\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=455,col=121::455:121 [line-length] line too long (227 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "mcp-integration.yml",
+          "error": "::group::.github/workflows/mcp-integration.yml\n::error file=.github/workflows/mcp-integration.yml,line=37,col=7::37:7 syntax error: expected <block end>, but found '?' (syntax)\n::endgroup::\n\n"
+        },
+        {
+          "file": "mcp-validation.yml",
+          "error": "::group::.github/workflows/mcp-validation.yml\n::error file=.github/workflows/mcp-validation.yml,line=241,col=121::241:121 [line-length] line too long (139 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "security.yml",
+          "error": "::group::.github/workflows/security.yml\n::error file=.github/workflows/security.yml,line=272,col=121::272:121 [line-length] line too long (212 > 120 characters)\n::error file=.github/workflows/security.yml,line=273,col=121::273:121 [line-length] line too long (201 > 120 characters)\n::error file=.github/workflows/security.yml,line=274,col=121::274:121 [line-length] line too long (208 > 120 characters)\n::error file=.github/workflows/security.yml,line=278,col=121::278:121 [line-length] line too long (128 > 120 characters)\n::endgroup::\n\n"
+        }
+      ]
+    },
+    "javascript": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": []
+    },
+    "mcpServers": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "errors": []
+    },
+    "perplexity": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "errors": []
+    },
+    "overall": {
+      "score": 65,
+      "status": "NEEDS_WORK"
+    }
+  }
+}

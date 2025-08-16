@@ -1,3 +1,4 @@
+---
 name: Gemini Code Review (Non-Copilot PRs)
 
 on:
@@ -10,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     # Only run for non-Copilot PRs to avoid conflicts
     if: |
-      github.event.pull_request.user.login != 'Copilot' && 
+      github.event.pull_request.user.login != 'Copilot' &&
       !contains(github.event.pull_request.head.ref, 'copilot/') &&
       !contains(github.event.pull_request.labels.*.name, 'copilot-coding-agent')
-    
+
     steps:
       - uses: actions/checkout@v4
 

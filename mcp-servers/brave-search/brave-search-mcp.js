@@ -5,6 +5,10 @@
 
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+const {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} = require('@modelcontextprotocol/sdk/types.js');
 const axios = require('axios');
 
 class BraveSearchMCPServer {
@@ -22,7 +26,7 @@ class BraveSearchMCPServer {
 
     setupTools() {
         // Web search tool
-        this.server.setRequestHandler('tools/list', async () => {
+        this.server.setRequestHandler(ListToolsRequestSchema, async () => {
             return {
                 tools: [
                     {
@@ -65,7 +69,7 @@ class BraveSearchMCPServer {
         });
 
         // Execute search
-        this.server.setRequestHandler('tools/call', async (request) => {
+        this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
             if (request.params.name !== 'brave_search') {
                 throw new Error(`Unknown tool: ${request.params.name}`);
             }

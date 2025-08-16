@@ -74,10 +74,40 @@ router.get('/health', async (req, res) => {
   try {
     const status = llmProviderManager.getProviderStatus();
     const providers = status.providers;
+    
+    // Get detailed telemetry data
+    const llmTelemetry = require('../../chat/llm-telemetry');
+    const telemetryData = llmTelemetry.getCurrentMetrics();
+    
+    // Enhanced provider health with telemetry
+    const enhancedProviders = {};
+    for (const [providerId, provider] of Object.entries(providers)) {
+      const telemetry = telemetryData.providers[providerId] || {};
+      enhancedProviders[providerId] = {
+        ...provider,
+        telemetry: {
+          averageLatency: telemetry.averageLatency || null,
+          successRate: telemetry.successRate || null,
+          requests: telemetry.totalRequests || 0,
+          errors: telemetry.totalFailures || 0,
+          lastRequestTime: telemetry.lastRequestTime || null,
+          // Include last N latency samples for charting
+          recentLatencies: telemetry.recentLatencies?.slice(-20) || [],
+        }
+      };
+    }
+    
     const connected = Object.values(providers).filter((p) => p.status === 'connected').length;
     const total = Object.keys(providers).length;
     const overall = connected > 0 ? (connected / total >= 0.5 ? 'healthy' : 'degraded') : 'unhealthy';
-    res.json({ success: true, status: overall, providers, timestamp: new Date().toISOString() });
+    
+    res.json({ 
+      success: true, 
+      status: overall, 
+      providers: enhancedProviders,
+      aggregated: telemetryData.aggregated,
+      timestamp: new Date().toISOString() 
+    });
   } catch (error) {
     console.error('Unified providers health failed:', error.message);
     res.status(500).json({ success: false, error: 'Failed to get providers health' });

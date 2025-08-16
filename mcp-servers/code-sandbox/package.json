@@ -1,0 +1,29 @@
+{
+  "name": "code-sandbox-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for secure code execution sandbox",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js --watch",
+    "test": "echo \"Tests not yet implemented\" && exit 0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "vm2": "^3.9.0",
+    "node:child_process": "^1.0.0",
+    "fs-extra": "^11.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "sandbox",
+    "code-execution",
+    "security",
+    "isolation"
+  ],
+  "author": "EchoTune AI",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

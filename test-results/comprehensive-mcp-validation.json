@@ -1,0 +1,187 @@
+{
+  "timestamp": "2025-08-16T09:01:23.958Z",
+  "executionTimeMs": 87,
+  "overallHealthScore": {
+    "score": 79,
+    "status": "fair"
+  },
+  "results": {
+    "mcpServers": {
+      "analytics-server": {
+        "status": "operational",
+        "hasPackageJson": true,
+        "hasMainFile": true,
+        "dependencies": [
+          "@modelcontextprotocol/sdk",
+          "mongodb",
+          "redis",
+          "lodash"
+        ],
+        "errors": [],
+        "mainFile": "index.js"
+      },
+      "brave-search": {
+        "status": "incomplete",
+        "hasPackageJson": false,
+        "hasMainFile": false,
+        "dependencies": [],
+        "errors": [
+          "No valid package.json found"
+        ]
+      },
+      "browserbase": {
+        "status": "operational",
+        "hasPackageJson": true,
+        "hasMainFile": true,
+        "dependencies": [
+          "@modelcontextprotocol/sdk",
+          "axios",
+          "playwright"
+        ],
+        "errors": [],
+        "mainFile": "index.js"
+      },
+      "code-sandbox": {
+        "status": "operational",
+        "hasPackageJson": true,
+        "hasMainFile": true,
+        "dependencies": [
+          "@modelcontextprotocol/sdk",
+          "vm2",
+          "node:child_process",
+          "fs-extra"
+        ],
+        "errors": [],
+        "mainFile": "index.js"
+      },
+      "new-candidates": {
+        "status": "incomplete",
+        "hasPackageJson": false,
+        "hasMainFile": false,
+        "dependencies": [],
+        "errors": [
+          "No valid package.json found"
+        ]
+      },
+      "package-management": {
+        "status": "incomplete",
+        "hasPackageJson": false,
+        "hasMainFile": false,
+        "dependencies": [],
+        "errors": [
+          "No valid package.json found"
+        ]
+      },
+      "perplexity-mcp": {
+        "status": "operational",
+        "hasPackageJson": true,
+        "hasMainFile": true,
+        "dependencies": [
+          "@modelcontextprotocol/sdk",
+          "axios",
+          "node-fetch"
+        ],
+        "errors": [],
+        "mainFile": "index.js"
+      },
+      "sentry-mcp": {
+        "status": "operational",
+        "hasPackageJson": true,
+        "hasMainFile": true,
+        "dependencies": [
+          "@modelcontextprotocol/sdk",
+          "@sentry/node",
+          "axios",
+          "express"
+        ],
+        "errors": [],
+        "mainFile": "sentry-mcp-server.js"
+      },
+      "sequential-thinking": {
+        "status": "incomplete",
+        "hasPackageJson": true,
+        "hasMainFile": false,
+        "dependencies": [
+          "@modelcontextprotocol/sdk",
+          "chalk",
+          "yargs"
+        ],
+        "errors": []
+      },
+      "testing-automation": {
+        "status": "incomplete",
+        "hasPackageJson": false,
+        "hasMainFile": false,
+        "dependencies": [],
+        "errors": [
+          "No valid package.json found"
+        ]
+      },
+      "orchestrator": {
+        "status": "operational",
+        "syntaxValid": true,
+        "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-server/enhanced-mcp-orchestrator.js"
+      }
+    },
+    "perplexityIntegration": {
+      "apiKeyPresent": true,
+      "endpointAccessible": true,
+      "browserResearchWorkflow": true,
+      "configValid": true
+    },
+    "grok4Connectivity": {
+      "configurationPresent": false,
+      "endpointAccessible": false,
+      "repositoryAnalyzerPresent": true,
+      "validationScriptPresent": true
+    },
+    "providerRegistry": {
+      "managerPresent": true,
+      "routesImplemented": true,
+      "telemetryIntegrated": true,
+      "providersConfigured": 0,
+      "healthEndpointWorking": false
+    },
+    "circuitBreaker": {
+      "implementationPresent": true,
+      "stateManagementCorrect": true,
+      "exponentialBackoffImplemented": true,
+      "thresholdsConfigured": true
+    },
+    "documentConsistency": {
+      "roadmapConsistent": true,
+      "workflowStateUpdated": true,
+      "readmeAccurate": true,
+      "apiDocsPresent": true
+    },
+    "placeholderValidation": {
+      "placeholdersFound": [
+        {
+          "file": ".env.example",
+          "matches": [
+            "your_openai_api_key_here",
+            "your_gemini_api_key_here",
+            "your_openrouter_api_key_here",
+            "your_anthropic_api_key_here"
+          ],
+          "count": 4
+        },
+        {
+          "file": ".env.example",
+          "matches": [
+            "your_spotify_client_id_here",
+            "your_spotify_client_id_here"
+          ],
+          "count": 2
+        }
+      ],
+      "filesScanned": 4,
+      "replacementsNeeded": 6,
+      "replacementsMade": 0
+    },
+    "overallHealth": {
+      "score": 79,
+      "status": "fair"
+    }
+  }
+}

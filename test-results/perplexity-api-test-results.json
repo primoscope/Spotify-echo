@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-08-16T08:52:09.772Z",
+  "results": {
+    "configurationValid": true,
+    "apiConnectivity": true,
+    "modelAvailability": true,
+    "browserWorkflowIntegration": true,
+    "costBudgetCompliance": true,
+    "overallStatus": "fully_operational"
+  },
+  "configuration": {
+    "apiKey": "pplx-vll...",
+    "baseUrl": "https://api.perplexity.ai",
+    "model": "sonar-pro"
+  }
+}

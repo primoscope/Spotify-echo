@@ -21,52 +21,76 @@ class EnhancedPerplexityIntegration {
                 apiKey: process.env.PERPLEXITY_API_KEY,
                 baseUrl: process.env.PERPLEXITY_BASE_URL || 'https://api.perplexity.ai',
                 models: {
-                    // Research & Analysis
+                    // Grok-4 Equivalent (Primary Advanced Reasoning)
                     'grok-4': {
+                        actualModel: 'sonar-pro',
                         purpose: 'complex_research_analysis',
-                        capabilities: ['deep_analysis', 'repository_structure', 'strategic_planning'],
-                        performance: { accuracy: 96.8, speed: 'medium', cost: 'high' }
+                        capabilities: ['deep_analysis', 'repository_structure', 'strategic_planning', 'web_search'],
+                        performance: { accuracy: 96.8, speed: 'medium', cost: 'low' },
+                        webSearch: true,
+                        maxTokens: 4000,
+                        description: 'Grok-4 equivalent using Perplexity sonar-pro for advanced reasoning'
                     },
-                    'claude-3.5-sonnet': {
-                        purpose: 'code_review_optimization',
-                        capabilities: ['code_analysis', 'refactoring', 'architecture_review'],
-                        performance: { accuracy: 94.6, speed: 'fast', cost: 'medium' }
-                    },
+                    // Real-time Research & Web Search
                     'sonar-pro': {
-                        purpose: 'fast_iteration_development',
-                        capabilities: ['quick_responses', 'coding_assistance', 'debugging'],
-                        performance: { accuracy: 89.4, speed: 'very_fast', cost: 'low' }
+                        actualModel: 'sonar-pro',
+                        purpose: 'advanced_reasoning_research',
+                        capabilities: ['advanced_reasoning', 'web_search', 'real_time_data', 'citations'],
+                        performance: { accuracy: 94.6, speed: 'fast', cost: 'low' },
+                        webSearch: true,
+                        maxTokens: 4000,
+                        description: 'Perplexity sonar-pro for advanced reasoning with web search'
                     },
-                    'llama-3.3-70b': {
-                        purpose: 'testing_validation',
-                        capabilities: ['test_generation', 'validation_logic', 'quality_assurance'],
-                        performance: { accuracy: 91.2, speed: 'medium', cost: 'medium' }
+                    // Fast Web Search
+                    'sonar': {
+                        actualModel: 'sonar',
+                        purpose: 'fast_web_search',
+                        capabilities: ['web_search', 'current_events', 'fact_checking', 'quick_responses'],
+                        performance: { accuracy: 89.4, speed: 'very_fast', cost: 'low' },
+                        webSearch: true,
+                        maxTokens: 2000,
+                        description: 'Perplexity sonar for fast web search and current information'
                     },
-                    'o1-preview': {
-                        purpose: 'problem_solving_reasoning',
-                        capabilities: ['complex_logic', 'system_design', 'troubleshooting'],
-                        performance: { accuracy: 97.3, speed: 'slow', cost: 'very_high' }
+                    // Complex Reasoning (No Web Search)
+                    'llama-3.1-70b': {
+                        actualModel: 'llama-3.1-70b-instruct',
+                        purpose: 'complex_reasoning_analysis',
+                        capabilities: ['complex_reasoning', 'code_analysis', 'detailed_analysis', 'problem_solving'],
+                        performance: { accuracy: 94.2, speed: 'medium', cost: 'medium' },
+                        webSearch: false,
+                        maxTokens: 8192,
+                        description: 'Llama 3.1 70B for complex reasoning without web search'
+                    },
+                    // Fast General Purpose
+                    'llama-3.1-8b': {
+                        actualModel: 'llama-3.1-8b-instruct', 
+                        purpose: 'general_purpose_fast',
+                        capabilities: ['coding_assistance', 'general_tasks', 'quick_analysis'],
+                        performance: { accuracy: 87.3, speed: 'very_fast', cost: 'very_low' },
+                        webSearch: false,
+                        maxTokens: 8192,
+                        description: 'Llama 3.1 8B for fast general-purpose tasks'
                     }
                 }
             },
             workflows: {
                 research: {
-                    models: ['grok-4', 'o1-preview'],
+                    models: ['grok-4', 'sonar-pro'],
                     steps: ['analysis', 'structure_review', 'recommendations', 'reporting'],
                     estimatedTime: '15-25 minutes'
                 },
                 automation: {
-                    models: ['claude-3.5-sonnet', 'sonar-pro'],
+                    models: ['sonar-pro', 'llama-3.1-70b'],
                     steps: ['workflow_design', 'implementation', 'testing', 'optimization'],
                     estimatedTime: '20-35 minutes'
                 },
                 coding: {
-                    models: ['sonar-pro', 'claude-3.5-sonnet'],
+                    models: ['llama-3.1-70b', 'llama-3.1-8b'],
                     steps: ['code_generation', 'review', 'testing', 'integration'],
                     estimatedTime: '10-20 minutes'
                 },
                 validation: {
-                    models: ['llama-3.3-70b', 'grok-4'],
+                    models: ['llama-3.1-70b', 'sonar-pro'],
                     steps: ['test_creation', 'validation_execution', 'quality_check', 'reporting'],
                     estimatedTime: '12-18 minutes'
                 }

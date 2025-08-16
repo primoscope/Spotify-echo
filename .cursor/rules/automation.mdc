@@ -1,0 +1,190 @@
+---
+description: Advanced Browser Automation with MCP Integration
+globs: ["**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx", "**/automation/**/*", "**/tests/**/*"]
+alwaysApply: true
+priority: high
+---
+
+# Advanced Browser Automation with MCP Integration
+
+## YOLO Mode Configuration
+
+**Automatic Command Execution Enabled for:**
+- `npm test` - Execute test suites without manual approval
+- `npm run build` - Build operations with auto-retry
+- `tsc` - TypeScript compilation with error fixing
+- `mkdir` - Directory creation for automation artifacts
+- `touch` - File creation for test fixtures
+- `npm run lint:fix` - Automatic linting fixes
+- `npm run format` - Code formatting operations
+
+**Auto-fix Build Errors:**
+- Iteratively fix build errors until tests pass
+- Automatically retry failed operations up to 3 times
+- Generate detailed error logs for debugging
+- Implement rollback mechanisms for failed changes
+
+## Browser Automation Workflow
+
+**Implementation Pattern:**
+1. **Analyze** automation requirement and break into atomic subtasks
+2. **Execute** using Browser MCP server with comprehensive error handling
+3. **Validate** results through automated testing and verification
+4. **Report** detailed execution logs and performance metrics
+
+**Error Handling Strategy:**
+- Implement retry logic with exponential backoff (1s, 2s, 4s, 8s)
+- Capture screenshots and logs for debugging
+- Auto-recovery for common failure scenarios
+- Generate debugging artifacts automatically
+
+## Browser Automation Framework Template
+
+```javascript
+class BrowserAutomation {
+  constructor() {
+    this.browserMCP = null;
+    this.retryLimit = 3;
+    this.timeout = 30000;
+    this.screenshotPath = './automation-artifacts/screenshots';
+    this.logPath = './automation-artifacts/logs';
+  }
+
+  async initialize() {
+    // Setup browser session with MCP
+    this.browserMCP = await this.connectToBrowserMCP();
+    await this.ensureArtifactDirectories();
+    this.logInfo('Browser automation initialized');
+  }
+
+  async executeTask(task) {
+    const taskId = this.generateTaskId();
+    this.logInfo(`Starting task: ${task.name}`, { taskId });
+    
+    try {
+      // Pre-execution validation
+      await this.validatePreConditions(task);
+      
+      // Execute with retry mechanism
+      const result = await this.executeWithRetry(task, taskId);
+      
+      // Post-execution validation
+      await this.validateResult(result, task);
+      
+      this.logInfo(`Task completed successfully: ${task.name}`, { taskId, result });
+      return result;
+      
+    } catch (error) {
+      await this.handleTaskError(error, task, taskId);
+      throw error;
+    }
+  }
+
+  async executeWithRetry(task, taskId) {
+    for (let attempt = 1; attempt <= this.retryLimit; attempt++) {
+      try {
+        this.logInfo(`Attempt ${attempt} for task: ${task.name}`, { taskId });
+        
+        const result = await this.performTaskOperation(task);
+        await this.captureSuccessArtifacts(taskId, result);
+        
+        return result;
+        
+      } catch (error) {
+        this.logError(`Attempt ${attempt} failed: ${error.message}`, { taskId, error });
+        await this.captureErrorArtifacts(taskId, error, attempt);
+        
+        if (attempt === this.retryLimit) {
+          throw new Error(`Task failed after ${this.retryLimit} attempts: ${error.message}`);
+        }
+        
+        // Exponential backoff
+        await this.delay(Math.pow(2, attempt) * 1000);
+      }
+    }
+  }
+
+  async validateResult(result) {
+    // Implement comprehensive result validation
+    if (!result || !result.success) {
+      throw new Error('Task execution did not meet success criteria');
+    }
+    
+    // Additional validation logic
+    await this.performQualityChecks(result);
+    await this.validateExpectedOutcomes(result);
+  }
+}
+```
+
+## Task Execution Standards
+
+**Break Complex Operations:**
+- Decompose into atomic, idempotent operations
+- Implement clear dependency management
+- Use task management system for tracking
+- Generate detailed execution reports
+
+**Performance Optimization:**
+- Implement intelligent caching for repeated operations
+- Use parallel execution where possible
+- Monitor resource usage and optimize
+- Generate performance metrics and reports
+
+**Quality Assurance:**
+- Write tests first, then automation code
+- Implement progressive automation levels
+- Add comprehensive error logging
+- Include automated performance monitoring
+
+## Integration Requirements
+
+**GitHub MCP Integration:**
+- Version control operations for automation artifacts
+- Automated commit and PR creation for changes
+- Integration with GitHub workflows and actions
+
+**Browser MCP Integration:**
+- Web automation and interaction
+- Screenshot and artifact capture
+- Performance monitoring and optimization
+
+**File System MCP Integration:**
+- Artifact management and organization
+- Log file creation and management
+- Test fixture generation and cleanup
+
+**Testing Framework Integration:**
+- Automated test execution and reporting
+- Integration with CI/CD pipelines
+- Performance regression detection
+
+## Error Recovery Patterns
+
+**Common Failure Scenarios:**
+- Network timeouts → Retry with increased timeout
+- Element not found → Wait and retry with different selectors
+- Page load failures → Refresh and retry navigation
+- Authentication issues → Re-authenticate and retry
+
+**Debugging Artifact Generation:**
+- Screenshots at failure points
+- DOM snapshots for analysis
+- Network logs and timing
+- Console error messages
+- Performance metrics
+
+## Performance Monitoring
+
+**Key Metrics:**
+- Task execution time
+- Memory usage during automation
+- Network request timing
+- Error rates and recovery success
+- Resource utilization patterns
+
+**Reporting:**
+- Daily automation performance reports
+- Error trend analysis
+- Resource usage optimization suggestions
+- Success rate metrics and improvements

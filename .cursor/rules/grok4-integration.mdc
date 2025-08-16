@@ -1,0 +1,303 @@
+---
+description: Grok-4 Integration via Perplexity API
+globs: ["**/*.js", "**/*.ts", "**/ai-integration/**/*", "**/grok4/**/*"]
+alwaysApply: true
+priority: high
+---
+
+# Grok-4 Integration via Perplexity API
+
+## Configuration Standards
+
+**Grok-4 Model Access:**
+- Access Grok-4 through Perplexity API endpoints
+- Use `llama-3.1-sonar-huge-128k-online` for Grok-4 style reasoning
+- Implement proper authentication and rate limiting
+- Configure timeout and retry mechanisms
+
+**API Configuration:**
+```javascript
+class Grok4Integration {
+  constructor(perplexityClient) {
+    this.client = perplexityClient;
+    this.grokConfig = {
+      model: 'llama-3.1-sonar-huge-128k-online', // Grok-4 equivalent
+      temperature: 0.7,
+      max_tokens: 4096,
+      stream: false,
+      return_citations: true,
+      search_domain_filter: ["github.com", "stackoverflow.com", "docs.python.org"]
+    };
+  }
+
+  async queryGrok4(prompt, context = {}) {
+    const enhancedPrompt = this.enhancePromptForGrok4(prompt, context);
+    
+    return await this.client.search(enhancedPrompt, {
+      model: 'llama-3.1-sonar-huge-128k-online',
+      ...this.grokConfig
+    });
+  }
+
+  enhancePromptForGrok4(prompt, context) {
+    return `
+      Acting as Grok-4 with advanced reasoning capabilities:
+      
+      Context: ${JSON.stringify(context)}
+      
+      Query: ${prompt}
+      
+      Please provide a detailed analysis with:
+      1. Key insights and patterns identified
+      2. Potential implications and consequences
+      3. Specific recommendations for action
+      4. Confidence levels for each point (High/Medium/Low)
+      5. Alternative approaches to consider
+      
+      Use your advanced reasoning to provide nuanced, contextual responses.
+    `;
+  }
+}
+```
+
+## Integration Testing Framework
+
+**Comprehensive Test Suite:**
+```javascript
+describe('Grok-4 Integration via Perplexity', () => {
+  let grok4Client;
+  
+  beforeEach(() => {
+    grok4Client = new Grok4Integration(perplexityClient);
+  });
+
+  test('should handle complex reasoning tasks', async () => {
+    const result = await grok4Client.queryGrok4(
+      'Analyze the following code for potential security vulnerabilities',
+      { 
+        codeBase: sampleCode,
+        framework: 'Node.js Express',
+        securityStandards: ['OWASP Top 10']
+      }
+    );
+    
+    expect(result).toHaveProperty('analysis');
+    expect(result.analysis).toContain('security');
+    expect(result.confidence).toBeDefined();
+  });
+
+  test('should provide contextual responses with citations', async () => {
+    const result = await grok4Client.queryGrok4(
+      'What are the latest best practices for React 19 optimization?',
+      { framework: 'React', version: '19.x' }
+    );
+    
+    expect(result.citations).toBeInstanceOf(Array);
+    expect(result.citations.length).toBeGreaterThan(0);
+    expect(result.recommendations).toBeDefined();
+  });
+
+  test('should handle rate limiting gracefully', async () => {
+    // Test rate limiting behavior
+    const promises = Array(25).fill().map((_, i) => 
+      grok4Client.queryGrok4(`Test query ${i}`)
+    );
+    
+    const results = await Promise.allSettled(promises);
+    const fulfilled = results.filter(r => r.status === 'fulfilled');
+    
+    expect(fulfilled.length).toBeGreaterThan(15); // Should handle some requests
+  });
+
+  test('should implement proper error recovery', async () => {
+    // Mock network failure
+    jest.spyOn(perplexityClient, 'search')
+      .mockRejectedValueOnce(new Error('Network timeout'))
+      .mockResolvedValueOnce({ analysis: 'Success after retry' });
+    
+    const result = await grok4Client.queryGrok4('Test query');
+    expect(result.analysis).toBe('Success after retry');
+  });
+});
+```
+
+## Quality Assurance Features
+
+**Response Validation:**
+- Verify Grok-4 response quality and coherence
+- Validate citation accuracy and relevance
+- Check for hallucination and misinformation
+- Implement confidence scoring for responses
+
+**Context Preservation:**
+- Maintain conversation context across queries
+- Implement session management for complex tasks
+- Track query history and learning patterns
+- Optimize context window usage
+
+**Error Recovery Patterns:**
+```javascript
+class Grok4ErrorHandler {
+  async handleApiError(error, query, context) {
+    switch (error.type) {
+      case 'RateLimitExceeded':
+        return await this.handleRateLimit(error, query, context);
+      
+      case 'AuthenticationFailed':
+        return await this.refreshAuthAndRetry(query, context);
+      
+      case 'ModelUnavailable':
+        return await this.fallbackToAlternativeModel(query, context);
+      
+      case 'NetworkTimeout':
+        return await this.retryWithBackoff(query, context);
+      
+      default:
+        throw new Error(`Unhandled Grok-4 error: ${error.message}`);
+    }
+  }
+
+  async handleRateLimit(error, query, context) {
+    const resetTime = error.resetTime || Date.now() + 60000;
+    const waitTime = resetTime - Date.now();
+    
+    if (waitTime > 0 && waitTime < 300000) { // Max 5 min wait
+      await this.delay(waitTime);
+      return await this.queryGrok4(query, context);
+    }
+    
+    throw new Error('Rate limit exceeded with excessive wait time');
+  }
+}
+```
+
+## Performance Monitoring
+
+**Key Metrics:**
+- Response time and latency measurements
+- Token usage and cost tracking
+- Error rates and recovery success
+- Cache hit rates and optimization
+- User satisfaction scores
+
+**Monitoring Implementation:**
+```javascript
+class Grok4PerformanceMonitor {
+  constructor() {
+    this.metrics = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      avgResponseTime: 0,
+      totalTokensUsed: 0,
+      cacheHitRate: 0
+    };
+  }
+
+  recordRequest(startTime, success, tokens, fromCache) {
+    const endTime = Date.now();
+    const responseTime = endTime - startTime;
+    
+    this.metrics.totalRequests++;
+    
+    if (success) {
+      this.metrics.successfulRequests++;
+      this.updateAvgResponseTime(responseTime);
+      this.metrics.totalTokensUsed += tokens || 0;
+    } else {
+      this.metrics.failedRequests++;
+    }
+    
+    if (fromCache) {
+      this.updateCacheHitRate();
+    }
+  }
+
+  generateReport() {
+    return {
+      ...this.metrics,
+      successRate: this.metrics.successfulRequests / this.metrics.totalRequests,
+      avgCost: this.calculateAverageCost(),
+      efficiency: this.calculateEfficiencyScore()
+    };
+  }
+}
+```
+
+## Automation Integration
+
+**Browser Automation Integration:**
+- Use Grok-4 for complex web automation decision making
+- Implement intelligent element selection based on analysis
+- Optimize automation workflows with Grok-4 insights
+- Generate automation scripts from natural language descriptions
+
+**GitHub MCP Integration:**
+- Automated code review using Grok-4 analysis
+- Generate commit messages and PR descriptions
+- Identify potential issues and improvements
+- Suggest optimization opportunities
+
+**Research Workflow Integration:**
+- Combine Grok-4 reasoning with Perplexity research
+- Cross-validate information from multiple sources
+- Generate comprehensive analysis reports
+- Implement fact-checking and verification workflows
+
+## Advanced Use Cases
+
+**Code Analysis and Optimization:**
+```javascript
+const codeAnalysis = await grok4.queryGrok4(
+  'Analyze this React component for performance optimization opportunities',
+  {
+    code: componentCode,
+    metrics: performanceMetrics,
+    constraints: ['Bundle size < 100KB', 'First paint < 1s']
+  }
+);
+```
+
+**Architecture Decision Support:**
+```javascript
+const architectureAdvice = await grok4.queryGrok4(
+  'Compare microservices vs monolith for our music streaming platform',
+  {
+    requirements: systemRequirements,
+    constraints: scalabilityConstraints,
+    team: teamCapabilities
+  }
+);
+```
+
+**Security Analysis:**
+```javascript
+const securityAssessment = await grok4.queryGrok4(
+  'Identify security vulnerabilities in this authentication system',
+  {
+    code: authenticationCode,
+    standards: ['OWASP Top 10', 'NIST Cybersecurity Framework'],
+    threatModel: currentThreatModel
+  }
+);
+```
+
+## Best Practices
+
+**Prompt Engineering:**
+- Use specific, contextual prompts for better results
+- Include relevant background information and constraints
+- Request structured outputs with confidence levels
+- Implement prompt templates for common use cases
+
+**Cost Optimization:**
+- Implement intelligent caching for similar queries
+- Use token estimation to prevent overuse
+- Batch related queries when possible
+- Monitor usage patterns and optimize accordingly
+
+**Quality Control:**
+- Implement human review for critical decisions
+- Cross-validate important recommendations
+- Track accuracy and usefulness of responses
+- Continuously improve prompts based on feedback

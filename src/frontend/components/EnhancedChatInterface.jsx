@@ -53,6 +53,7 @@ const EnhancedChatInterface = ({
   loading = false,
   disabled = false,
 }) => {
+  const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   const [messages, setMessages] = useState(initialMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [contextChips, setContextChips] = useState({});
@@ -77,6 +78,13 @@ const EnhancedChatInterface = ({
   useEffect(() => {
     setCurrentProviderLocal(currentProvider);
   }, [currentProvider]);
+
+  // Mount-time performance log
+  useEffect(() => {
+    const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const dur = Math.round(end - renderStart);
+    try { console.info(`[perf] EnhancedChatInterface mount render ${dur}ms`); } catch {}
+  }, []);
 
   // Load context chips
   useEffect(() => {

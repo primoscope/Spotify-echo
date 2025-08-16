@@ -54,6 +54,8 @@ function EnhancedAnalyticsDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [realtimeEnabled, setRealtimeEnabled] = useState(false);
   const [selectedMetrics] = useState(['listening', 'recommendations', 'engagement']);
+  const [endpointPerf, setEndpointPerf] = useState({ windowMs: 300000, endpoints: [] });
+  const [endpointPerfError, setEndpointPerfError] = useState(null);
 
   // Time range options
   const timeRanges = {
@@ -178,6 +180,19 @@ function EnhancedAnalyticsDashboard() {
     [timeRange, selectedMetrics]
   );
 
+  // Load API performance percentiles (last 5 minutes)
+  const loadEndpointPerf = useCallback(async () => {
+    try {
+      const res = await fetch('/api/performance/endpoints?windowMs=300000');
+      if (!res.ok) throw new Error(`perf endpoints failed: ${res.status}`);
+      const data = await res.json();
+      setEndpointPerf({ windowMs: data.windowMs || 300000, endpoints: Array.isArray(data.endpoints) ? data.endpoints : [] });
+      setEndpointPerfError(null);
+    } catch (e) {
+      setEndpointPerfError('Failed to load API performance');
+    }
+  }, []);
+
   // Generate mock hourly data
   function generateHourlyData() {
     return Array.from({ length: 24 }, (_, hour) => ({
@@ -222,6 +237,13 @@ function EnhancedAnalyticsDashboard() {
   useEffect(() => {
     loadAnalytics();
   }, [loadAnalytics]);
+
+  // Poll API performance every 30s
+  useEffect(() => {
+    loadEndpointPerf();
+    const id = setInterval(loadEndpointPerf, 30000);
+    return () => clearInterval(id);
+  }, [loadEndpointPerf]);
 
   // Tiny sparkline generator
   const Sparkline = ({ points = [], color = '#8884d8', width = 100, height = 30 }) => {
@@ -562,6 +584,54 @@ function EnhancedAnalyticsDashboard() {
                   {analytics.recommendations.totalRecommendations?.toLocaleString()} recommendations
                   accepted
                 </Typography>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* API Performance (p50/p95, last N minutes) */}
+          {(endpointPerf?.endpoints?.length > 0 || endpointPerfError) && (
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                  <Timeline sx={{ mr: 1 }} />
+                  API Performance
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Window: {Math.round((endpointPerf.windowMs || 300000) / 60000)} min
+                </Typography>
+                <TableContainer sx={{ mt: 1 }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Endpoint</TableCell>
+                        <TableCell align="right">Count</TableCell>
+                        <TableCell align="right">p50 (ms)</TableCell>
+                        <TableCell align="right">p95 (ms)</TableCell>
+                        <TableCell align="right">Min</TableCell>
+                        <TableCell align="right">Max</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {(endpointPerf.endpoints || []).slice(0, 8).map((row, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell sx={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {row.endpoint}
+                          </TableCell>
+                          <TableCell align="right">{row.count}</TableCell>
+                          <TableCell align="right">{row.p50}</TableCell>
+                          <TableCell align="right">{row.p95}</TableCell>
+                          <TableCell align="right">{row.min}</TableCell>
+                          <TableCell align="right">{row.max}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                {endpointPerfError && (
+                  <Alert severity="warning" sx={{ mt: 1 }}>
+                    {endpointPerfError} — showing data when available.
+                  </Alert>
+                )}
               </CardContent>
             </Card>
           )}

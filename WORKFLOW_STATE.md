@@ -56,6 +56,9 @@ Next Actions:
   - Added provider status chip to `EnhancedChatInterface.jsx` header.
   - Added mood preset chips to `EnhancedMusicDiscovery.jsx` for fast context setting.
 
+- UI Construct (2025-08-16, later):
+  - Added API Performance panel to `EnhancedAnalyticsDashboard.jsx`, polling `/api/performance/endpoints` every 30s and rendering p50/p95/min/max for recent endpoints.
+
 - Performance & Automation (2025-08-16):
   - Added `sonar-project.properties` for baseline static analysis.
   - Added scripts: `scripts/bench/api-latency.js` and `scripts/ui/bundle-stats.js`.
@@ -65,6 +68,9 @@ Next Actions:
   - API latency (samples=5, dev env, likely endpoints inactive): chat/providers p95=0ms ok=0%; analytics/dashboard p95=1ms ok=0%; music/discover p95=0ms ok=0%.
   - Bundle stats (post-build): totalBytes=729,731; top JS chunks: mui=350,863, react=182,534, vendor=64,874, main=21,844, mui-icons=14,265.
   - Follow-up: repeat API latency after ensuring server endpoints are live/auth where required; track bundle gzip with target < 500kB.
+
+- Validation Summary (2025-08-16, UI perf panel):
+  - `/api/performance/endpoints` reachable in app context; panel renders fallback notice if unavailable; no build errors observed locally.
 
 - CLI Construct (2025-08-16):
   - Implemented unified `/api/providers` endpoints (list/switch/health) in `src/api/routes/providers.js` with `llm-provider-manager`.

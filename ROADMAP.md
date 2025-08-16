@@ -37,7 +37,8 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
   - scripts/ui/bundle-stats.js — summarize dist bundle sizes
   - sonar-project.properties — baseline static analysis and coverage mapping
 - Next steps:
-  - [ ] Add simple request timing middleware per route and persist rolling window to memory/Redis
+- [x] Add simple request timing middleware per route (in-memory) and X-Response-Time header — 2025‑08‑16 (commit e55dc24)
+  - [ ] Persist rolling window to Redis for durability and multi-instance aggregation
   - [ ] Capture baseline metrics in test-results/ and append summary to WORKFLOW_STATE.md after builds
   - [ ] Structured logging (Winston) for API/MCP; surface errors/latency in logs (from Sonar‑Pro)
 
@@ -78,7 +79,8 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 
 ### M4 — Analytics Dashboard
 - [ ] Backend analytics.js/insights.js endpoints for MongoDB stats, health, engagement KPIs, listening patterns
-- [ ] Frontend EnhancedAnalyticsDashboard: charts and health widgets, MCP automation status
+- [x] Frontend EnhancedAnalyticsDashboard: charts and health widgets, MCP automation status (sparkline widgets added)
+- [x] Frontend EnhancedAnalyticsDashboard: API Performance panel (p50/p95) using `/api/performance/endpoints` — 2025‑08‑16
 
 ### M5 — Advanced Configuration
 - [ ] Backend settings.js/admin.js: validate/apply provider configs and DB ops
@@ -102,6 +104,7 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
   1) EnhancedChatInterface.jsx: add provider quick-switch using `useLLM()`; show current provider chip.
   2) EnhancedMusicDiscovery.jsx: add client-only radar/sparkline for `moodSettings` values.
   3) EnhancedAnalyticsDashboard.jsx: add sparkline components for overview metrics using mock fallback data.
+  4) EnhancedAnalyticsDashboard.jsx: add API Performance panel fed by `/api/performance/endpoints` (DONE)
 
 - Research-derived improvements (Perplexity):
   - Add provider/MCP observability: lightweight structured logging hooks from UI actions to backend logs.

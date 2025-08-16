@@ -15,8 +15,8 @@ npm run generate-cursor-mcp
 3. **Set Environment Variables**
 ```bash
 # Add to your shell profile (.zshrc, .bashrc, etc.)
-export PERPLEXITY_API_KEY="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"
-export CURSOR_API_KEY="key_694009601be9f42adc51e02c9d5a4e27828043679cd397039c7496e07f00b705"
+export PERPLEXITY_API_KEY="<your-pplx-key>"
+export BRAVE_API_KEY="<your-brave-key>"
 ```
 
 4. **Start MCP Servers**
@@ -49,7 +49,7 @@ npm run mcp:enhanced-validation
 ### Research-Driven Development
 ```
 # Research latest music recommendation techniques
-@perplexity research "latest collaborative filtering techniques for music recommendation 2024"
+@perplexity research "latest collaborative filtering techniques for music recommendation 2025"
 
 # Implement findings with filesystem tool
 @filesystem create recommendation-engine.js with researched techniques
@@ -78,6 +78,25 @@ npm run mcp:enhanced-validation
 # Update dependencies
 @package-manager update dependencies with security patches
 ```
+
+## Perplexity Browser Research Workflow (Cursor)
+
+- File: `.cursor/workflows/perplexity-browser-research.json`
+- Steps: filesystem scan → Brave search → Perplexity synthesis
+- Requirements: `PERPLEXITY_API_KEY`, `BRAVE_API_KEY`
+- How to use:
+  1. Open the project in Cursor.
+  2. Ensure MCP servers are running (Perplexity + Brave Search).
+  3. Run the workflow from Cursor’s workflow panel to generate a research summary grounded in repository context and web results.
+
+## PR Deep-Dive Workflow (Cursor)
+
+- Goal: Review a PR by scanning changed files, researching best practices, and producing recommendations.
+- Suggested steps:
+  - filesystem: list changed files in the PR
+  - brave-search: web queries on impacted patterns
+  - perplexity: synthesize findings into actionable recommendations
+- Next steps: create `.cursor/workflows/pr-deep-dive.json` using the pattern above.
 
 ## Performance Monitoring
 

@@ -89,6 +89,9 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 ### M6 — Quality & CI
 - [ ] sonar-project.properties; npm scripts for lint/test/typecheck/scan:sonar
 - [ ] Optional CI Sonar workflow (guarded by SONAR_TOKEN)
+- [ ] Fix roadmap auto-refresh workflow push permissions (CLI Agent): set `permissions: contents: write`, configure `git config user.name "github-actions[bot]"` and `user.email "41898282+github-actions[bot]@users.noreply.github.com"`, and prefer PR via `peter-evans/create-pull-request` when direct push is unavailable
+- [ ] Fix continuous-improvement analyzer path handling (CLI Agent): guard against ENOTDIR by checking `fs.stat().isDirectory()`; analyze `src` dir not `src/server.js`
+- [ ] Use `GITHUB_TOKEN` with proper scopes; avoid using raw bot credentials; ensure default branch protection compatibility (use PR flow)
 
 ---
 

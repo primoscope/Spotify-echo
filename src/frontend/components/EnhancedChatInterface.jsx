@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, memo, Suspense } from 'react';
 import {
   Box,
   Paper,
@@ -39,6 +39,8 @@ import {
   FitnessCenter,
   VolumeUp,
   Info,
+  KeyboardVoice,
+  StopCircle,
 } from '@mui/icons-material';
 import { useLLM } from '../contexts/LLMContext';
 
@@ -70,6 +72,8 @@ const EnhancedChatInterface = ({
   const [currentProviderLocal, setCurrentProviderLocal] = useState('mock');
   const [providersStatus, setProvidersStatus] = useState('unknown');
   const [avgLatencyMs, setAvgLatencyMs] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
 
   const { currentProvider, providers, switchProvider, loading: providerLoading } = useLLM?.()
     || { currentProvider: 'mock', providers: {}, switchProvider: async () => false, loading: false };
@@ -87,6 +91,15 @@ const EnhancedChatInterface = ({
     const dur = Math.round(end - renderStart);
     try { console.info(`[perf] EnhancedChatInterface mount render ${dur}ms`); } catch {}
   }, []);
+  useEffect(() => {
+    return () => {
+      try {
+        if (recognitionRef.current && isListening) {
+          recognitionRef.current.stop();
+        }
+      } catch {}
+    };
+  }, [isListening]);
 
   // Providers health + latency polling
   useEffect(() => {
@@ -194,21 +207,21 @@ const EnhancedChatInterface = ({
     }
   };
 
-  const handleContextChipClick = (category, chip) => {
+  const handleContextChipClick = useCallback((category, chip) => {
     setSelectedContext((prev) => ({
       ...prev,
       [category]: prev[category] === chip.id ? null : chip.id,
     }));
-  };
+  }, []);
 
-  const toggleContextExpansion = (category) => {
+  const toggleContextExpansion = useCallback((category) => {
     setExpandedContexts((prev) => ({
       ...prev,
       [category]: !prev[category],
     }));
-  };
+  }, []);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!inputMessage.trim() || loading || disabled) return;
 
     const newMessage = {
@@ -250,7 +263,37 @@ const EnhancedChatInterface = ({
       };
       setMessages((prev) => [...prev, errorMessage]);
     }
-  };
+  }, [inputMessage, loading, disabled, onSendMessage, selectedContext]);
+
+  const startVoiceInput = useCallback(() => {
+    try {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return;
+      const rec = new SR();
+      rec.lang = 'en-US';
+      rec.interimResults = true;
+      rec.onresult = (e) => {
+        let txt = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          txt += e.results[i][0].transcript;
+        }
+        setInputMessage((prev) => (prev ? prev + ' ' : '') + txt.trim());
+      };
+      rec.onend = () => setIsListening(false);
+      recognitionRef.current = rec;
+      setIsListening(true);
+      rec.start();
+    } catch {}
+  }, []);
+
+  const stopVoiceInput = useCallback(() => {
+    try {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    } catch {}
+    setIsListening(false);
+  }, []);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -399,7 +442,7 @@ const EnhancedChatInterface = ({
     </Box>
   );
 
-  const MessageItem = ({ message }) => {
+  const MessageItem = memo(({ message }) => {
     const isUser = message.role === 'user';
     const hasRecommendations = message.recommendations && message.recommendations.length > 0;
     const hasExplanation = message.explanation;
@@ -502,14 +545,14 @@ const EnhancedChatInterface = ({
           {!isUser && !message.error && (
             <Box sx={{ mt: 1, display: 'flex', gap: 0.5 }}>
               <Tooltip title="Rate this response">
-                <IconButton size="small" onClick={() => setFeedbackDialog({ open: true, message })}>
+                <IconButton size="small" onClick={() => setFeedbackDialog({ open: true, message })} aria-label="Rate this response">
                   <ThumbUp fontSize="small" />
                 </IconButton>
               </Tooltip>
 
               {hasExplanation && !explainInline && (
                 <Tooltip title="View explanation">
-                  <IconButton size="small" color="info" onClick={() => showExplanation(message)}>
+                  <IconButton size="small" color="info" onClick={() => showExplanation(message)} aria-label="View explanation">
                     <Info fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -549,7 +592,7 @@ const EnhancedChatInterface = ({
         </Box>
       </ListItem>
     );
-  };
+  });
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -613,7 +656,17 @@ const EnhancedChatInterface = ({
       <Divider />
 
       {/* Messages */}
-      <Box sx={{ flex: 1, overflow: 'auto', bgcolor: 'grey.50' }}>
+      <Box sx={{ flex: 1, overflow: 'auto', bgcolor: 'grey.50', position: 'relative' }}>
+        <Suspense fallback={(
+          <List sx={{ p: 0 }}>
+            <ListItem sx={{ justifyContent: 'center', py: 2 }}>
+              <CircularProgress size={24} />
+              <Typography variant="body2" sx={{ ml: 2 }}>
+                Loading messages...
+              </Typography>
+            </ListItem>
+          </List>
+        )}>
         {messages.length === 0 ? (
           <Box sx={{ textAlign: 'center', p: 4 }}>
             <SmartToy sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
@@ -639,6 +692,10 @@ const EnhancedChatInterface = ({
             )}
           </List>
         )}
+        </Suspense>
+        <Box sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', clipPath: 'inset(50%)' }} aria-live="polite" aria-atomic="true">
+          {messages.length ? messages[messages.length - 1].content : ''}
+        </Box>
         <div ref={messagesEndRef} />
       </Box>
 
@@ -659,6 +716,7 @@ const EnhancedChatInterface = ({
             disabled={loading || disabled}
             variant="outlined"
             size="small"
+            inputProps={{ 'aria-label': 'Chat message input' }}
           />
 
           <IconButton
@@ -666,8 +724,18 @@ const EnhancedChatInterface = ({
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || loading || disabled}
             sx={{ p: 1 }}
+            aria-label="Send message"
           >
             <Send />
+          </IconButton>
+          <IconButton
+            color={isListening ? 'error' : 'default'}
+            onClick={isListening ? stopVoiceInput : startVoiceInput}
+            disabled={loading || disabled}
+            sx={{ p: 1 }}
+            aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+          >
+            {isListening ? <StopCircle /> : <KeyboardVoice />}
           </IconButton>
         </Box>
 
@@ -717,7 +785,7 @@ const EnhancedChatInterface = ({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFeedbackDialog({ open: false, message: null })}>Cancel</Button>
+          <Button onClick={() => setFeedbackDialog({ open: false, message: null })} autoFocus>Cancel</Button>
           <Button onClick={() => handleFeedback(feedbackDialog.message, 'helpful')}>Helpful</Button>
           <Button onClick={() => handleFeedback(feedbackDialog.message, 'not_helpful')}>
             Not Helpful

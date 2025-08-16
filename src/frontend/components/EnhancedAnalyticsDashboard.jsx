@@ -56,6 +56,12 @@ function EnhancedAnalyticsDashboard() {
   const [selectedMetrics] = useState(['listening', 'recommendations', 'engagement']);
   const [endpointPerf, setEndpointPerf] = useState({ windowMs: 300000, endpoints: [] });
   const [endpointPerfError, setEndpointPerfError] = useState(null);
+  const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  useEffect(() => {
+    const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const dur = Math.round(end - renderStart);
+    try { console.info(`[perf] EnhancedAnalyticsDashboard mount render ${dur}ms`); } catch {}
+  }, []);
 
   // Time range options
   const timeRanges = {

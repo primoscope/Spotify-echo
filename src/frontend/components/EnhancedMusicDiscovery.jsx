@@ -48,6 +48,12 @@ function EnhancedMusicDiscovery() {
   const [error, setError] = useState(null);
   const [trends, setTrends] = useState([]);
   const [socialActivity, setSocialActivity] = useState([]);
+  const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  useEffect(() => {
+    const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const dur = Math.round(end - renderStart);
+    try { console.info(`[perf] EnhancedMusicDiscovery mount render ${dur}ms`); } catch {}
+  }, []);
 
   // Discovery modes configuration
   const discoveryModes = {

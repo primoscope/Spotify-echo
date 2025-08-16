@@ -49,7 +49,7 @@ function App() {
     <ThemeProvider>
       <LLMProvider>
         <Router>
-          <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading…</div}>
+          <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading…</div>}>
           <Routes>
             <Route path="/" element={<MainApplication />} />
             <Route path="/chat" element={<MainApplication initialTab="chat" />} />

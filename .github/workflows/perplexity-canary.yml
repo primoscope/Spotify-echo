@@ -1,0 +1,35 @@
+name: Perplexity Canary
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Canary test
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: |
+          echo "Running Perplexity canary..."
+          node -e "console.log('PERPLEXITY_API_KEY present:', !!process.env.PERPLEXITY_API_KEY)" || true
+          node perplexity-api-comprehensive-tester.js || true
+
+      - name: Upload canary artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: perplexity-canary
+          path: |
+            COMPREHENSIVE_PERPLEXITY_API_TEST_REPORT.md
+            perplexity-api-test-results.json
+          if-no-files-found: ignore

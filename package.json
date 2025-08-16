@@ -178,6 +178,7 @@
     "prompts:list": "node prompts/tools/executor.js list",
     "prompts:fix": "node prompts/tools/validator.js fix",
     "prompts:server": "node prompts/tools/cli.js server",
+    "perplexity:exec": "node prompts/tools/executor.js execute analysis/user-driven-sonar-pro --user_prompt",
     "gemini-test": "node scripts/test-gemini-integration.js",
     "gemini-health": "node scripts/test-gemini-integration.js",
     "test:gemini-integration": "node scripts/test-gemini-integration.js",

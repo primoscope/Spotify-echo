@@ -62,4 +62,9 @@ Next Actions:
 - Validation Summary (2025-08-16):
   - API latency (samples=5, dev env, likely endpoints inactive): chat/providers p95=0ms ok=0%; analytics/dashboard p95=1ms ok=0%; music/discover p95=0ms ok=0%.
   - Bundle stats (post-build): totalBytes=729,731; top JS chunks: mui=350,863, react=182,534, vendor=64,874, main=21,844, mui-icons=14,265.
-  - Follow-up: repeat API latency after ensuring server endpoints are live/auth where required; track bundle gzip with target < 500kB. 
+  - Follow-up: repeat API latency after ensuring server endpoints are live/auth where required; track bundle gzip with target < 500kB.
+
+- CLI Construct (2025-08-16):
+  - Implemented unified `/api/providers` endpoints (list/switch/health) in `src/api/routes/providers.js` with `llm-provider-manager`.
+  - Fixed rate limiter response binding to avoid res context errors.
+  - Note: Local curl validation limited by environment; server logs healthy. Please validate endpoints in normal dev runtime. 

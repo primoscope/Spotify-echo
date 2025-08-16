@@ -68,6 +68,8 @@ const EnhancedChatInterface = ({
   const [explainInline, setExplainInline] = useState(false);
   const [providerMenu, setProviderMenu] = useState(null);
   const [currentProviderLocal, setCurrentProviderLocal] = useState('mock');
+  const [providersStatus, setProvidersStatus] = useState('unknown');
+  const [avgLatencyMs, setAvgLatencyMs] = useState(null);
 
   const { currentProvider, providers, switchProvider, loading: providerLoading } = useLLM?.()
     || { currentProvider: 'mock', providers: {}, switchProvider: async () => false, loading: false };
@@ -85,6 +87,40 @@ const EnhancedChatInterface = ({
     const dur = Math.round(end - renderStart);
     try { console.info(`[perf] EnhancedChatInterface mount render ${dur}ms`); } catch {}
   }, []);
+
+  // Providers health + latency polling
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const [healthRes, telRes] = await Promise.allSettled([
+          fetch('/api/providers/health'),
+          fetch(`/api/settings/llm-providers/telemetry?provider=${currentProvider}`)
+        ]);
+        if (!cancelled) {
+          if (healthRes.status === 'fulfilled' && healthRes.value.ok) {
+            const data = await healthRes.value.json();
+            setProvidersStatus(data.status || 'unknown');
+          }
+          if (telRes.status === 'fulfilled' && telRes.value.ok) {
+            const t = await telRes.value.json();
+            const avg = t?.metrics?.current?.averageLatency;
+            setAvgLatencyMs(typeof avg === 'number' ? Math.round(avg) : null);
+          } else {
+            setAvgLatencyMs(null);
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setProvidersStatus('degraded');
+          setAvgLatencyMs(null);
+        }
+      }
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [currentProvider]);
 
   // Load context chips
   useEffect(() => {
@@ -300,6 +336,14 @@ const EnhancedChatInterface = ({
     );
   };
 
+  const ProvidersHealthChip = () => (
+    <Chip size="small" label={`Providers: ${providersStatus}`} variant="outlined" />
+  );
+
+  const AvgLatencyChip = () => (
+    <Chip size="small" label={`Avg: ${avgLatencyMs != null ? `${avgLatencyMs}ms` : 'N/A'}`} variant="outlined" />
+  );
+
   const ContextChipsSection = ({ category, chips, icon: Icon }) => (
     <Box sx={{ mb: 2 }}>
       <Button
@@ -494,6 +538,8 @@ const EnhancedChatInterface = ({
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <ProviderStatusChip />
+            <ProvidersHealthChip />
+            <AvgLatencyChip />
             <ProviderQuickSwitch />
             <Chip
               size="small"

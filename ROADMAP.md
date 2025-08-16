@@ -104,7 +104,7 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
   1) EnhancedChatInterface.jsx: add provider quick-switch using `useLLM()`; show current provider chip.
   2) EnhancedMusicDiscovery.jsx: add client-only radar/sparkline for `moodSettings` values.
   3) EnhancedAnalyticsDashboard.jsx: add sparkline components for overview metrics using mock fallback data.
-  4) EnhancedAnalyticsDashboard.jsx: add API Performance panel fed by `/api/performance/endpoints` (DONE)
+  5) EnhancedChatInterface.jsx: add Providers health and average latency chips using `/api/providers/health` and `/api/settings/llm-providers/telemetry` (DONE)
 
 - Research-derived improvements (Perplexity):
   - Add provider/MCP observability: lightweight structured logging hooks from UI actions to backend logs.

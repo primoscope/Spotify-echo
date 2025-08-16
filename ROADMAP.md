@@ -24,7 +24,21 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 
 ### 4) Advanced Configuration
 - Enhanced settings UI (glassmorphism)
-- LLM provider manager, DB tools, health thresholds
+- LLM provider manager, DB tools, health monitors
+
+---
+
+## Performance (standing lane)
+- Targets:
+  - API p95: chat/providers < 800ms; analytics/dashboard < 1200ms; music/discover < 1500ms (dev env)
+  - Frontend bundle: total JS < 500kB gzip; top chunk < 120kB gzip
+- Automation:
+  - scripts/bench/api-latency.js — measure p50/p95/min/max per endpoint (local)
+  - scripts/ui/bundle-stats.js — summarize dist bundle sizes
+  - sonar-project.properties — baseline static analysis and coverage mapping
+- Next steps:
+  - [ ] Add simple request timing middleware per route and persist rolling window to memory/Redis
+  - [ ] Capture baseline metrics in test-results/ and append summary to WORKFLOW_STATE.md after builds
 
 ---
 
@@ -65,6 +79,86 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 ### M6 — Quality & CI
 - [ ] sonar-project.properties; npm scripts for lint/test/typecheck/scan:sonar
 - [ ] Optional CI Sonar workflow (guarded by SONAR_TOKEN)
+
+---
+
+## UI Agent
+
+- Current Focus (2025‑08‑16):
+  - Advanced AI Integration: Provider quick-switch in chat, provider badge.
+  - Smart Music Discovery: Mood sliders + mini feature visualization (client-only).
+  - Analytics Dashboard: Compact sparkline widgets for top metrics (client-only).
+  - Advanced Configuration: Minor glass UI polish; no API changes.
+
+- Next UI Tasks:
+  1) EnhancedChatInterface.jsx: add provider quick-switch using `useLLM()`; show current provider chip.
+  2) EnhancedMusicDiscovery.jsx: add client-only radar/sparkline for `moodSettings` values.
+  3) EnhancedAnalyticsDashboard.jsx: add sparkline components for overview metrics using mock fallback data.
+
+- Research-derived improvements (Perplexity):
+  - Add provider/MCP observability: lightweight structured logging hooks from UI actions to backend logs.
+  - Surface MCP health in UI (done in `ProviderPanel.jsx`), and add alerts if status != healthy.
+  - Keep Cursor research/PR workflows discoverable in Settings/Docs panel.
+
+- Coordination to CLI Agent (create endpoints, no UI block):
+  - Unified providers API: GET `/api/providers`, POST `/api/providers/switch`, GET `/api/providers/health` with telemetry persistence.
+
+---
+
+## CLI Agent Tasks (API contracts)
+
+- Providers — list
+  - Method: GET `/api/providers`
+  - Response (200):
+```json
+{
+  "success": true,
+  "providers": [
+    {
+      "id": "gemini",
+      "name": "Google Gemini",
+      "available": true,
+      "status": "connected",
+      "model": "gemini-1.5-flash",
+      "performance": { "averageLatency": 1200, "successRate": 99.1, "requests": 542 }
+    }
+  ],
+  "current": "gemini"
+}
+```
+
+- Providers — switch
+  - Method: POST `/api/providers/switch`
+  - Request:
+```json
+{ "provider": "gemini", "model": "gemini-1.5-flash" }
+```
+  - Response (200):
+```json
+{ "success": true, "current": { "provider": "gemini", "model": "gemini-1.5-flash" } }
+```
+  - Errors: 400 if unknown provider/model; 409 if unavailable.
+
+- Providers — health
+  - Method: GET `/api/providers/health`
+  - Response (200):
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "providers": {
+    "gemini": { "status": "connected", "averageLatency": 1180, "requests": 1203, "successRate": 99.0 },
+    "openai": { "status": "error", "error": "auth_error" },
+    "openrouter": { "status": "no_key" },
+    "mock": { "status": "connected" }
+  },
+  "timestamp": "2025-08-16T05:30:00Z"
+}
+```
+
+Notes:
+- Implemented in branch `feature/ui-provider-switch`; validation from this environment is limited (HTTP access constraints). Please verify endpoints in your dev environment and merge.
+- Persist last N latency/error metrics for charts; shape matches `ProviderPanel.jsx` expectations.
 
 ---
 

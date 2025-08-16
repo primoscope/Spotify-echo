@@ -9,8 +9,80 @@ const {
   COST_LEVELS,
   SPEED_LEVELS,
 } = require('../../config/provider-models');
+const llmProviderManager = require('../../chat/llm-provider-manager');
 
 const router = express.Router();
+
+/**
+ * Unified Providers API
+ * Base path: /api/providers
+ */
+router.get('/', async (req, res) => {
+  try {
+    const status = llmProviderManager.getProviderStatus();
+    const providers = Object.entries(status.providers).map(([id, p]) => ({
+      id,
+      name: p.name,
+      available: p.available,
+      status: p.status,
+      model: p.model,
+      performance: {
+        averageLatency: p.performance?.averageLatency || null,
+        successRate: p.performance?.successRate || null,
+        requests: p.performance?.totalRequests || p.telemetry?.requests || 0,
+      },
+    }));
+    res.json({ success: true, providers, current: status.current });
+  } catch (error) {
+    console.error('Unified providers list failed:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to list providers' });
+  }
+});
+
+router.post('/switch', async (req, res) => {
+  try {
+    const { provider, model } = req.body || {};
+    if (!provider) return res.status(400).json({ success: false, error: 'provider is required' });
+
+    const status = llmProviderManager.getProviderStatus();
+    const target = status.providers[provider];
+    if (!target) return res.status(400).json({ success: false, error: 'unknown provider' });
+    if (!target.available) return res.status(409).json({ success: false, error: 'provider unavailable' });
+
+    // Set desired provider; manager will use it if healthy
+    llmProviderManager.currentProvider = provider;
+    if (model) {
+      const cfg = llmProviderManager.providerConfigs.get(provider);
+      if (cfg) cfg.model = model;
+    }
+
+    // Re-test to ensure connectivity
+    await llmProviderManager.testProvider(provider);
+    const after = llmProviderManager.getProviderStatus();
+    if (after.providers[provider]?.status !== 'connected') {
+      return res.status(409).json({ success: false, error: 'switch failed', details: after.providers[provider] });
+    }
+
+    return res.json({ success: true, current: { provider, model: model || after.providers[provider]?.model } });
+  } catch (error) {
+    console.error('Unified provider switch failed:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to switch provider' });
+  }
+});
+
+router.get('/health', async (req, res) => {
+  try {
+    const status = llmProviderManager.getProviderStatus();
+    const providers = status.providers;
+    const connected = Object.values(providers).filter((p) => p.status === 'connected').length;
+    const total = Object.keys(providers).length;
+    const overall = connected > 0 ? (connected / total >= 0.5 ? 'healthy' : 'degraded') : 'unhealthy';
+    res.json({ success: true, status: overall, providers, timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Unified providers health failed:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to get providers health' });
+  }
+});
 
 /**
  * Get all available providers

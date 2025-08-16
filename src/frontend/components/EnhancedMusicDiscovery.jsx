@@ -171,6 +171,51 @@ function EnhancedMusicDiscovery() {
     }));
   };
 
+  // Inline mini visualization (client-only)
+  const MoodMiniViz = () => {
+    const entries = Object.entries(moodSettings);
+    const width = 200;
+    const height = 60;
+    const barGap = 6;
+    const barWidth = (width - barGap * (entries.length - 1)) / entries.length;
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+          Current Mood Profile
+        </Typography>
+        <svg width={width} height={height} role="img" aria-label="Mood profile spark bars">
+          {entries.map(([k, v], idx) => {
+            const h = Math.max(2, Math.round((v / 100) * (height - 12)));
+            const x = idx * (barWidth + barGap);
+            const y = height - h;
+            return (
+              <g key={k}>
+                <rect x={x} y={y} width={barWidth} height={h} fill="#1976d2" rx={2} />
+                <title>{`${k}: ${v}`}</title>
+              </g>
+            );
+          })}
+        </svg>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+          {entries.map(([k]) => (
+            <Typography key={k} variant="caption" color="text.secondary">
+              {k}
+            </Typography>
+          ))}
+        </Box>
+      </Box>
+    );
+  };
+
+  // Mood preset chips
+  const moodPresets = [
+    { id: 'chill', label: 'Chill', values: { energy: 30, valence: 60, danceability: 40, acousticness: 70 } },
+    { id: 'party', label: 'Party', values: { energy: 80, valence: 75, danceability: 85, acousticness: 20 } },
+    { id: 'focus', label: 'Focus', values: { energy: 35, valence: 40, danceability: 30, acousticness: 60 } },
+    { id: 'happy', label: 'Happy', values: { energy: 65, valence: 85, danceability: 70, acousticness: 40 } },
+  ];
+  const applyPreset = (preset) => setMoodSettings(preset.values);
+
   // Add track to playlist
   const addToPlaylist = async (track) => {
     try {
@@ -292,6 +337,11 @@ function EnhancedMusicDiscovery() {
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Mood Settings
               </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                {moodPresets.map((p) => (
+                  <Chip key={p.id} size="small" label={p.label} onClick={() => applyPreset(p)} />
+                ))}
+              </Box>
               <Grid container spacing={3}>
                 {Object.entries(moodSettings).map(([key, value]) => (
                   <Grid item xs={12} sm={6} key={key}>
@@ -308,6 +358,7 @@ function EnhancedMusicDiscovery() {
                   </Grid>
                 ))}
               </Grid>
+              <MoodMiniViz />
             </Box>
           )}
 

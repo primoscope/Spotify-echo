@@ -15,7 +15,7 @@ const MobileResponsiveManager = lazy(() => import('./components/MobileResponsive
 const EnhancedConfigPanel = lazy(() => import('./components/EnhancedConfigPanel'));
 const GitHubInfo = lazy(() => import('../components/GitHubInfo'));
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
-// import { LLMProvider } from './contexts/LLMContext';
+import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
 import './styles/App.css';
 
@@ -47,8 +47,9 @@ const prefetchers = {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading…</div>}>
+      <LLMProvider>
+        <Router>
+          <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading…</div>}>
           <Routes>
             <Route path="/" element={<MainApplication />} />
             <Route path="/chat" element={<MainApplication initialTab="chat" />} />
@@ -67,6 +68,7 @@ function App() {
           </Routes>
         </Suspense>
       </Router>
+      </LLMProvider>
     </ThemeProvider>
   );
 }

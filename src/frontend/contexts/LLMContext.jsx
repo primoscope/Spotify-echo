@@ -26,39 +26,66 @@ export function LLMProvider({ children }) {
     refreshProviders();
   }, [refreshProviders]); // Add refreshProviders dependency
 
+  const mapProvidersFromUnified = (list) => {
+    const updated = { ...providers };
+    for (const p of list) {
+      const key = p.id;
+      if (!updated[key]) continue;
+      updated[key] = {
+        ...updated[key],
+        name: p.name || updated[key].name,
+        status: p.status || 'unknown',
+        available: !!p.available,
+        model: p.model,
+      };
+    }
+    return updated;
+  };
+
   const refreshProviders = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/chat/providers');
-      const data = await response.json();
+      // Try unified providers endpoint first
+      let updatedProviders = null;
+      try {
+        const res = await fetch('/api/providers');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.providers)) {
+            updatedProviders = mapProvidersFromUnified(data.providers);
+          }
+        }
+      } catch {}
 
-      if (data.success) {
-        const updatedProviders = { ...providers };
-
-        // Update provider status based on response
-        Object.keys(updatedProviders).forEach((key) => {
-          const providerData = data.providers.find((p) => p.id === key);
-          if (providerData) {
-            updatedProviders[key] = {
-              ...updatedProviders[key],
-              status: providerData.status,
-              available: providerData.available,
-              model: providerData.model,
+      if (!updatedProviders) {
+        // Fallback to chat providers endpoint
+        const response = await fetch('/api/chat/providers');
+        const data = await response.json();
+        if (data.success && Array.isArray(data.providers)) {
+          const copy = { ...providers };
+          for (const p of data.providers) {
+            const key = p.id;
+            if (!copy[key]) continue;
+            copy[key] = {
+              ...copy[key],
+              status: p.status,
+              available: p.available,
+              model: p.model,
             };
           }
-        });
+          updatedProviders = copy;
+        }
+      }
 
+      if (updatedProviders) {
         setProviders(updatedProviders);
-
         // Auto-select best available provider - prioritize Gemini first
         const providerPriority = ['gemini', 'openai', 'openrouter', 'mock'];
         let selectedProvider = currentProvider;
 
         if (!updatedProviders[currentProvider]?.available) {
-          selectedProvider =
-            providerPriority.find((key) => updatedProviders[key]?.available) || 'mock';
+          selectedProvider = providerPriority.find((key) => updatedProviders[key]?.available) || 'mock';
         }
-
         setCurrentProvider(selectedProvider);
       }
     } catch (error) {
@@ -78,7 +105,20 @@ export function LLMProvider({ children }) {
 
     setLoading(true);
     try {
-      // Test provider with a simple request
+      // Try unified switch endpoint first
+      const unified = await fetch('/api/providers/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: providerId }),
+      });
+      if (unified.ok) {
+        setCurrentProvider(providerId);
+        return true;
+      }
+    } catch {}
+
+    try {
+      // Fallback: test provider via chat test endpoint
       const response = await fetch('/api/chat/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

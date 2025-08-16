@@ -40,6 +40,7 @@ import {
   VolumeUp,
   Info,
 } from '@mui/icons-material';
+import { useLLM } from '../contexts/LLMContext';
 
 /**
  * Enhanced Chat Interface with Context Chips and Explainable Responses
@@ -63,11 +64,19 @@ const EnhancedChatInterface = ({
     message: null,
     explanation: null,
   });
+  const [explainInline, setExplainInline] = useState(false);
   const [providerMenu, setProviderMenu] = useState(null);
-  const [currentProvider, setCurrentProvider] = useState('mock');
+  const [currentProviderLocal, setCurrentProviderLocal] = useState('mock');
+
+  const { currentProvider, providers, switchProvider, loading: providerLoading } = useLLM?.()
+    || { currentProvider: 'mock', providers: {}, switchProvider: async () => false, loading: false };
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setCurrentProviderLocal(currentProvider);
+  }, [currentProvider]);
 
   // Load context chips
   useEffect(() => {
@@ -225,6 +234,64 @@ const EnhancedChatInterface = ({
     });
   };
 
+  const openProviderMenu = (event) => setProviderMenu(event.currentTarget);
+  const closeProviderMenu = () => setProviderMenu(null);
+
+  const handleProviderSelect = async (providerId) => {
+    closeProviderMenu();
+    if (providerId === currentProvider) return;
+    const ok = await switchProvider(providerId);
+    if (ok) setCurrentProviderLocal(providerId);
+  };
+
+  const ProviderQuickSwitch = () => (
+    <Box display="flex" alignItems="center" gap={1} sx={{ mb: 1 }}>
+      <Chip
+        size="small"
+        color="primary"
+        label={`Provider: ${currentProviderLocal}`}
+        onClick={openProviderMenu}
+        avatar={<SmartToy fontSize="small" />}
+        variant="outlined"
+      />
+      {providerLoading && <CircularProgress size={16} />}
+      <Menu anchorEl={providerMenu} open={Boolean(providerMenu)} onClose={closeProviderMenu}>
+        {Object.entries(providers)
+          .filter(([, p]) => p.available)
+          .map(([id, p]) => (
+            <MenuItem key={id} selected={id === currentProviderLocal} onClick={() => handleProviderSelect(id)}>
+              {p.name} {id === currentProviderLocal ? '✓' : ''}
+            </MenuItem>
+          ))}
+      </Menu>
+    </Box>
+  );
+
+  const statusToColor = (status) => {
+    switch ((status || '').toLowerCase()) {
+      case 'connected':
+        return 'success';
+      case 'error':
+        return 'error';
+      case 'unknown':
+        return 'warning';
+      default:
+        return 'default';
+    }
+  };
+
+  const ProviderStatusChip = () => {
+    const st = providers?.[currentProvider]?.status || 'unknown';
+    return (
+      <Chip
+        size="small"
+        label={`Status: ${st}`}
+        color={statusToColor(st)}
+        variant="outlined"
+      />
+    );
+  };
+
   const ContextChipsSection = ({ category, chips, icon: Icon }) => (
     <Box sx={{ mb: 2 }}>
       <Button
@@ -363,7 +430,7 @@ const EnhancedChatInterface = ({
                 </IconButton>
               </Tooltip>
 
-              {hasExplanation && (
+              {hasExplanation && !explainInline && (
                 <Tooltip title="View explanation">
                   <IconButton size="small" color="info" onClick={() => showExplanation(message)}>
                     <Info fontSize="small" />
@@ -371,6 +438,29 @@ const EnhancedChatInterface = ({
                 </Tooltip>
               )}
             </Box>
+          )}
+
+          {/* Inline Explanation */}
+          {!isUser && hasExplanation && explainInline && (
+            <Card sx={{ mt: 1 }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Why this response
+                </Typography>
+                <Typography variant="body2" paragraph>
+                  {message.explanation.summary}
+                </Typography>
+                {Array.isArray(message.explanation.reasoning) && (
+                  <List dense sx={{ py: 0 }}>
+                    {message.explanation.reasoning.map((r, idx) => (
+                      <ListItem key={idx} sx={{ py: 0 }}>
+                        <Typography variant="body2">• {r}</Typography>
+                      </ListItem>
+                    ))}
+                  </List>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {/* Error indicator */}
@@ -394,9 +484,17 @@ const EnhancedChatInterface = ({
             AI Music Assistant
           </Typography>
 
-          <Button variant="outlined" size="small" onClick={(e) => setProviderMenu(e.currentTarget)}>
-            {currentProvider}
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ProviderStatusChip />
+            <ProviderQuickSwitch />
+            <Chip
+              size="small"
+              label={explainInline ? 'Explain: On' : 'Explain: Off'}
+              color={explainInline ? 'success' : 'default'}
+              onClick={() => setExplainInline((v) => !v)}
+              variant={explainInline ? 'filled' : 'outlined'}
+            />
+          </Box>
         </Box>
 
         <Typography variant="body2" color="text.secondary">
@@ -594,37 +692,7 @@ const EnhancedChatInterface = ({
         </DialogActions>
       </Dialog>
 
-      {/* Provider Menu */}
-      <Menu
-        anchorEl={providerMenu}
-        open={Boolean(providerMenu)}
-        onClose={() => setProviderMenu(null)}
-      >
-        <MenuItem
-          onClick={() => {
-            setCurrentProvider('mock');
-            setProviderMenu(null);
-          }}
-        >
-          Mock AI (Demo)
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentProvider('gemini');
-            setProviderMenu(null);
-          }}
-        >
-          Google Gemini
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentProvider('openai');
-            setProviderMenu(null);
-          }}
-        >
-          OpenAI GPT
-        </MenuItem>
-      </Menu>
+      {/* Provider Menu handled via ProviderQuickSwitch */}
     </Box>
   );
 };

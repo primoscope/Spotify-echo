@@ -2,6 +2,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const modelRegistry = require('./model-registry');
 const llmTelemetry = require('./llm-telemetry');
+const KeyPool = require('./utils/key-pool');
 
 /**
  * Enhanced LLM Provider Manager
@@ -15,6 +16,10 @@ class LLMProviderManager {
     this.fallbackOrder = ['gemini', 'openai', 'openrouter', 'mock']; // Prioritize Gemini first
     this.currentProvider = 'gemini'; // Default to Gemini
     this.initialized = false;
+    this.keyPools = {
+      gemini: new KeyPool((process.env.GEMINI_API_KEYS || '').split(/[\s,]+/).filter(Boolean)),
+      openrouter: new KeyPool((process.env.OPENROUTER_API_KEYS || '').split(/[\s,]+/).filter(Boolean)),
+    };
   }
 
   /**
@@ -65,7 +70,7 @@ class LLMProviderManager {
       },
       gemini: {
         name: 'Google Gemini',
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: process.env.GEMINI_API_KEY || this.keyPools.gemini.getCurrentKey(),
         model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
         endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
         refreshable: true,
@@ -88,7 +93,7 @@ class LLMProviderManager {
       },
       openrouter: {
         name: 'OpenRouter',
-        apiKey: process.env.OPENROUTER_API_KEY,
+        apiKey: process.env.OPENROUTER_API_KEY || this.keyPools.openrouter.getCurrentKey(),
         model: process.env.OPENROUTER_MODEL || 'anthropic/claude-3-haiku',
         endpoint: 'https://openrouter.ai/api/v1/chat/completions',
         refreshable: true,
@@ -147,17 +152,18 @@ class LLMProviderManager {
             break;
           case 'gemini':
             if (config.available) {
-              provider = new GeminiProvider(config.apiKey, { model: config.model });
+              provider = new GeminiProvider({ apiKey: config.apiKey, model: config.model });
             }
             break;
           case 'openai':
             if (config.available) {
-              provider = new OpenAIProvider(config.apiKey, { model: config.model });
+              provider = new OpenAIProvider({ apiKey: config.apiKey, model: config.model });
             }
             break;
           case 'azure':
             if (config.available && config.endpoint && config.deployment) {
-              provider = new OpenAIProvider(config.apiKey, {
+              provider = new OpenAIProvider({
+                apiKey: config.apiKey,
                 baseURL: config.endpoint,
                 defaultQuery: { 'api-version': '2023-12-01-preview' },
               });
@@ -165,7 +171,8 @@ class LLMProviderManager {
             break;
           case 'openrouter':
             if (config.available) {
-              provider = new OpenAIProvider(config.apiKey, {
+              provider = new OpenAIProvider({
+                apiKey: config.apiKey,
                 baseURL: 'https://openrouter.ai/api/v1',
                 model: config.model,
               });
@@ -220,6 +227,33 @@ class LLMProviderManager {
       if (config) {
         config.status = 'error';
         config.error = error.message;
+
+        // If it's an auth or rate error, rotate key using KeyPool
+        const msg = String(error.message || '').toLowerCase();
+        if (providerId === 'gemini' && this.keyPools.gemini) {
+          if (msg.includes('401') || msg.includes('403') || msg.includes('auth') || msg.includes('429') || msg.includes('rate')) {
+            this.keyPools.gemini.reportFailure(config.apiKey, error.message);
+            const next = this.keyPools.gemini.getCurrentKey();
+            if (next && next !== config.apiKey) {
+              console.warn('Rotating Gemini API key');
+              config.apiKey = next;
+              await this.reinitializeProvider(providerId);
+              return await this.testProvider(providerId);
+            }
+          }
+        }
+        if (providerId === 'openrouter' && this.keyPools.openrouter) {
+          if (msg.includes('401') || msg.includes('403') || msg.includes('auth') || msg.includes('429') || msg.includes('rate')) {
+            this.keyPools.openrouter.reportFailure(config.apiKey, error.message);
+            const next = this.keyPools.openrouter.getCurrentKey();
+            if (next && next !== config.apiKey) {
+              console.warn('Rotating OpenRouter API key');
+              config.apiKey = next;
+              await this.reinitializeProvider(providerId);
+              return await this.testProvider(providerId);
+            }
+          }
+        }
 
         // If it's an auth error, try to refresh key
         if (this.isAuthError(error) && config.refreshable) {
@@ -392,19 +426,20 @@ class LLMProviderManager {
     switch (providerId) {
       case 'gemini': {
         const GeminiProvider = require('./llm-providers/gemini-provider');
-        this.providers.set(providerId, new GeminiProvider(config.apiKey, { model: config.model }));
+        this.providers.set(providerId, new GeminiProvider({ apiKey: config.apiKey, model: config.model }));
         break;
       }
       case 'openai': {
         const OpenAIProvider = require('./llm-providers/openai-provider');
-        this.providers.set(providerId, new OpenAIProvider(config.apiKey, { model: config.model }));
+        this.providers.set(providerId, new OpenAIProvider({ apiKey: config.apiKey, model: config.model }));
         break;
       }
       case 'azure': {
         const AzureProvider = require('./llm-providers/openai-provider');
         this.providers.set(
           providerId,
-          new AzureProvider(config.apiKey, {
+          new AzureProvider({
+            apiKey: config.apiKey,
             baseURL: config.endpoint,
             defaultQuery: { 'api-version': '2023-12-01-preview' },
           })
@@ -415,7 +450,8 @@ class LLMProviderManager {
         const OpenRouterProvider = require('./llm-providers/openai-provider');
         this.providers.set(
           providerId,
-          new OpenRouterProvider(config.apiKey, {
+          new OpenRouterProvider({
+            apiKey: config.apiKey,
             baseURL: 'https://openrouter.ai/api/v1',
             model: config.model,
           })

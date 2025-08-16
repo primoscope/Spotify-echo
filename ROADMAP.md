@@ -121,15 +121,9 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
       "status": "connected",
       "model": "gemini-1.5-flash",
       "performance": { "averageLatency": 1200, "successRate": 99.1, "requests": 542 }
-    },
-    {
-      "id": "openrouter",
-      "name": "OpenRouter",
-      "available": false,
-      "status": "no_key"
-    },
-    { "id": "mock", "name": "Demo Mode (Mock)", "available": true, "status": "connected" }
-  ]
+    }
+  ],
+  "current": "gemini"
 }
 ```
 
@@ -163,7 +157,7 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 ```
 
 Notes:
-- Implement in `src/api/routes/llm-providers.js` (new top-level routes `/api/providers*`) delegating to `src/chat/llm-provider-manager.js`.
+- Implemented in branch `feature/ui-provider-switch`; validation from this environment is limited (HTTP access constraints). Please verify endpoints in your dev environment and merge.
 - Persist last N latency/error metrics for charts; shape matches `ProviderPanel.jsx` expectations.
 
 ---

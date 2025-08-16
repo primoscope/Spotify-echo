@@ -87,17 +87,16 @@
       },
       "description": "Advanced Perplexity research with automated workflows and fact-checking"
     },
-    "grok4-integration": {
+    "advanced-ai-integration": {
       "command": "node",
       "args": [
         "./src/api/ai-integration/grok4-mcp-server.js"
       ],
       "env": {
-        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
         "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
         "DEBUG": "false"
       },
-      "description": "Grok-4 Heavy tier integration with native tool use and multi-agent reasoning"
+      "description": "Advanced AI reasoning via Perplexity API with native tool use and multi-agent reasoning"
     }
   }
 }

@@ -1,24 +1,26 @@
 /**
- * Grok-4 Advanced Integration for Cursor AI
+ * Advanced AI Integration for Cursor AI (Grok-style reasoning via Perplexity)
  * 
  * Features:
- * - Grok-4 and Grok-4 Heavy tier access
+ * - Advanced reasoning using Perplexity's most capable models
  * - Native tool use for code interpretation and web browsing
  * - Multi-agent reasoning chains
  * - Automated debugging workflows with web research
  * - Performance optimization recommendations
+ * 
+ * Note: Uses Perplexity API with Llama 3.1 Sonar models for advanced reasoning
  */
 
 const axios = require('axios');
 const { CursorSonarIntegration } = require('./perplexity-sonar-pro');
 const logger = require('../utils/logger');
 
-class GrokClient {
+class AdvancedAIClient {
   constructor(options = {}) {
-    this.apiKey = options.apiKey || process.env.OPENROUTER_API_KEY;
-    this.baseURL = 'https://openrouter.ai/api/v1';
-    this.defaultModel = 'xai/grok-4';
-    this.heavyModel = 'xai/grok-4-heavy';
+    this.apiKey = options.apiKey || process.env.PERPLEXITY_API_KEY;
+    this.baseURL = 'https://api.perplexity.ai';
+    this.defaultModel = 'llama-3.1-sonar-huge-128k-online';
+    this.heavyModel = 'llama-3.1-sonar-huge-128k-online';
     this.maxTokens = options.maxTokens || 4000;
     this.temperature = options.temperature || 0.7;
     
@@ -29,7 +31,7 @@ class GrokClient {
     this.rateLimiter = {
       requests: 0,
       resetTime: Date.now() + 60000,
-      maxRequests: 30 // Per minute
+      maxRequests: 20 // Per minute for Perplexity API
     };
   }
 
@@ -82,14 +84,13 @@ class GrokClient {
         requestBody.tool_choice = 'auto';
       }
 
-      logger.info(`Grok-4 request: Model=${selectedModel}, Tools=${tools.length}`);
+      logger.info(`Advanced AI request: Model=${selectedModel}, Tools=${tools.length}`);
 
       const response = await axios.post(`${this.baseURL}/chat/completions`, requestBody, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://cursor.sh',
-          'X-Title': 'EchoTune AI Cursor Integration'
+          'User-Agent': 'EchoTune-AI-Cursor-Integration/1.0'
         },
         timeout: 60000
       });
@@ -97,17 +98,17 @@ class GrokClient {
       return this.processResponse(response.data, tools);
 
     } catch (error) {
-      logger.error('Grok-4 API error:', error.message);
+      logger.error('Advanced AI API error:', error.message);
       
       if (error.response?.status === 429) {
-        throw new Error('Grok-4 rate limit exceeded. Please wait before retrying.');
+        throw new Error('Perplexity API rate limit exceeded. Please wait before retrying.');
       }
       
       if (error.response?.status === 401) {
-        throw new Error('Invalid OpenRouter API key for Grok-4 access.');
+        throw new Error('Invalid Perplexity API key for advanced AI access.');
       }
       
-      throw new Error(`Grok-4 request failed: ${error.message}`);
+      throw new Error(`Advanced AI request failed: ${error.message}`);
     }
   }
 
@@ -359,17 +360,17 @@ class GrokClient {
   }
 }
 
-/**
- * Cursor-specific Grok-4 integration
- */
-class CursorGrokIntegration extends GrokClient {
-  constructor(openrouterKey, perplexityKey) {
-    super({
-      apiKey: openrouterKey,
-      maxTokens: 4000,
-      temperature: 0.7
-    });
-  }
+  /**
+   * Cursor-specific Advanced AI integration (Grok-style reasoning)
+   */
+  class CursorGrokIntegration extends AdvancedAIClient {
+    constructor(perplexityKey) {
+      super({
+        apiKey: perplexityKey,
+        maxTokens: 4000,
+        temperature: 0.7
+      });
+    }
 
   /**
    * Analyze code with integrated web research
@@ -695,6 +696,6 @@ Provide a unified strategy that addresses all expert concerns.`
 }
 
 module.exports = {
-  GrokClient,
+  AdvancedAIClient,
   CursorGrokIntegration
 };

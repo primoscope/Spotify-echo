@@ -2,7 +2,9 @@
 
 ## 🚀 Overview
 
-This document provides a comprehensive guide to the Phase 2 AI integration setup, featuring advanced Perplexity Sonar Pro and Grok-4 integrations for Cursor AI workflows.
+This document provides a comprehensive guide to the Phase 2 AI integration setup, featuring advanced Perplexity Sonar Pro and Advanced AI reasoning integrations for Cursor AI workflows.
+
+> **Note**: The "Advanced AI Integration" uses Perplexity's API with Llama 3.1 Sonar models to provide sophisticated reasoning capabilities. While originally designed for Grok-4 access, this implementation leverages Perplexity's powerful models for all advanced AI reasoning tasks.
 
 ## 📋 Features Implemented
 
@@ -13,8 +15,8 @@ This document provides a comprehensive guide to the Phase 2 AI integration setup
 - **MCP Server Integration**: Seamless Cursor integration with 8 specialized tools
 - **Automated Workflows**: Fact-checking, competitive analysis, and documentation updates
 
-### ✅ Grok-4 Heavy Tier Integration
-- **Multi-Model Access**: Grok-4 and Grok-4 Heavy tier support
+### ✅ Advanced AI Integration (Perplexity-based)
+- **Advanced Reasoning**: Using Perplexity's most capable Llama 3.1 Sonar models
 - **Native Tool Use**: Code interpretation and web browsing capabilities
 - **Multi-Agent Reasoning**: Expert analysis from multiple perspectives
 - **Performance Optimization**: Automated debugging and optimization recommendations
@@ -34,14 +36,14 @@ This document provides a comprehensive guide to the Phase 2 AI integration setup
 │                    Cursor IDE                                │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐  │
-│  │  Perplexity     │  │    Grok-4       │  │   Research   │  │
+│  │  Perplexity     │  │   Advanced AI   │  │   Research   │  │
 │  │  Ask MCP        │  │  Integration    │  │  Workflows   │  │
 │  │  Server         │  │   MCP Server    │  │              │  │
 │  └─────────────────┘  └─────────────────┘  └──────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐  │
-│  │ Sonar Pro API   │  │ OpenRouter API  │  │    Redis     │  │
-│  │   Client        │  │    Client       │  │   Cache      │  │
+│  │ Sonar Pro API   │  │ Perplexity API  │  │    Redis     │  │
+│  │   Client        │  │ (Llama 3.1)     │  │   Cache      │  │
 │  └─────────────────┘  └─────────────────┘  └──────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
 │                    Integration Layer                         │
@@ -60,8 +62,8 @@ Add to your `.env` file:
 # Perplexity Sonar Pro
 PERPLEXITY_API_KEY=your_perplexity_api_key
 
-# Grok-4 via OpenRouter
-OPENROUTER_API_KEY=your_openrouter_api_key
+# Advanced AI via Perplexity (uses same key as Perplexity research)
+# OPENROUTER_API_KEY not needed - uses Perplexity API for all advanced reasoning
 
 # Optional: Debug mode
 DEBUG=false
@@ -83,15 +85,14 @@ The integration automatically updates your `.cursor/mcp.json`:
       },
       "description": "Advanced Perplexity research with automated workflows"
     },
-    "grok4-integration": {
+    "advanced-ai-integration": {
       "command": "node", 
       "args": ["./src/api/ai-integration/grok4-mcp-server.js"],
       "env": {
-        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
         "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
         "DEBUG": "false"
       },
-      "description": "Grok-4 Heavy tier with multi-agent reasoning"
+      "description": "Advanced AI reasoning via Perplexity with multi-agent reasoning"
     }
   }
 }
@@ -180,7 +181,7 @@ const PERFORMANCE_BUDGETS = {
 }
 ```
 
-### Grok-4 Integration Tools
+### Advanced AI Integration Tools (Perplexity-based)
 
 #### 1. Code Analysis with Research
 ```javascript
@@ -290,7 +291,7 @@ const PERFORMANCE_BUDGETS = {
 ## 📊 Performance Metrics
 
 ### Real-Time Monitoring
-- **Request latency**: p95 ≤ 1500ms (Perplexity), ≤ 2000ms (Grok-4)
+- **Request latency**: p95 ≤ 1500ms (Perplexity), ≤ 2000ms (Advanced AI)
 - **Success rate**: Target >95%
 - **Cache hit rate**: Target >70%
 - **Cost tracking**: Budget limits enforced
@@ -303,8 +304,8 @@ const PERFORMANCE_BUDGETS = {
     "memory": "≤ 256MB", 
     "cost": "≤ $0.50 per session"
   },
-  "grok4": {
-    "latency": "p95 ≤ 2000ms",
+  "advanced-ai": {
+    "latency": "p95 ≤ 2000ms", 
     "memory": "≤ 512MB",
     "tokens": "≤ 6000 per request"
   }
@@ -314,7 +315,7 @@ const PERFORMANCE_BUDGETS = {
 ## 🔒 Security Features
 
 ### API Security
-- **Rate limiting**: 20 req/min (Perplexity), 30 req/min (Grok-4)
+- **Rate limiting**: 20 req/min (Perplexity), 20 req/min (Advanced AI)
 - **API key management**: Environment variables with validation
 - **Error handling**: Graceful fallbacks and sanitized error messages
 - **Request sanitization**: Input validation and output filtering
@@ -332,8 +333,8 @@ const PERFORMANCE_BUDGETS = {
 # Test Perplexity integration
 npm run test:perplexity-integration
 
-# Test Grok-4 integration  
-npm run test:grok4-integration
+# Test Advanced AI integration  
+npm run test:advanced-ai-integration
 
 # Test automated workflows
 npm run test:ai-workflows
@@ -344,7 +345,7 @@ npm run test:ai-performance
 
 ### Manual Testing
 1. **Perplexity Research**: Query current React best practices
-2. **Grok-4 Analysis**: Analyze a code snippet for security
+2. **Advanced AI Analysis**: Analyze a code snippet for security
 3. **Workflow Execution**: Trigger competitive analysis workflow
 4. **Performance Check**: Monitor response times and success rates
 
@@ -358,7 +359,7 @@ npm run test:ai-performance
 
 ### 2. Cost Optimization
 - **Perplexity**: Use focused searches, limit results
-- **Grok-4**: Use regular tier for simple tasks, Heavy for complex
+- **Advanced AI**: Use standard Perplexity models for all reasoning tasks
 - **Caching**: Aggressive caching for repeated queries
 - **Batching**: Combine related requests
 
@@ -376,7 +377,7 @@ npm run test:ai-performance
 ```bash
 # Verify environment variables
 node -e "console.log(process.env.PERPLEXITY_API_KEY ? 'Perplexity: ✓' : 'Perplexity: ✗')"
-node -e "console.log(process.env.OPENROUTER_API_KEY ? 'OpenRouter: ✓' : 'OpenRouter: ✗')"
+# OpenRouter not needed - using only Perplexity API
 ```
 
 #### 2. Rate Limiting
@@ -453,7 +454,7 @@ npm run health:ai-integration
 ## ✅ Implementation Checklist
 
 - [x] Perplexity Sonar Pro API integration
-- [x] Grok-4 Heavy tier access configuration
+- [x] Advanced AI reasoning via Perplexity API configuration
 - [x] MCP server deployment
 - [x] 8 automated research workflows
 - [x] Performance monitoring and budgets

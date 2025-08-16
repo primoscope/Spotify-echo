@@ -1,26 +1,28 @@
 #!/usr/bin/env node
 
 /**
- * Grok-4 MCP Server for Cursor Integration
+ * Advanced AI MCP Server for Cursor Integration (Perplexity-based)
  * 
  * Advanced AI capabilities including:
- * - Grok-4 Heavy tier reasoning
+ * - Advanced reasoning using Perplexity's most capable models
  * - Multi-agent analysis workflows
  * - Automated debugging assistance
  * - Performance optimization recommendations
  * - Security analysis with current threat research
  * - Architectural planning and design
+ * 
+ * Note: Uses Perplexity API for all advanced reasoning capabilities
  */
 
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
 const { CursorGrokIntegration } = require('./grok4-integration');
 
-class Grok4MCPServer {
+class AdvancedAIMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'grok4-integration',
+        name: 'advanced-ai-integration',
         version: '1.0.0'
       },
       {
@@ -31,8 +33,7 @@ class Grok4MCPServer {
       }
     );
 
-    this.grokClient = new CursorGrokIntegration(
-      process.env.OPENROUTER_API_KEY,
+    this.aiClient = new CursorGrokIntegration(
       process.env.PERPLEXITY_API_KEY
     );
 
@@ -124,7 +125,7 @@ class Grok4MCPServer {
       tools: [
         {
           name: 'analyze_code_with_research',
-          description: 'Analyze code with integrated web research using Grok-4',
+          description: 'Analyze code with integrated web research using advanced AI models',
           inputSchema: {
             type: 'object',
             properties: {
@@ -150,7 +151,7 @@ class Grok4MCPServer {
         },
         {
           name: 'architectural_planning',
-          description: 'Plan system architecture using Grok-4 Heavy tier',
+          description: 'Plan system architecture using advanced AI reasoning',
           inputSchema: {
             type: 'object',
             properties: {
@@ -352,19 +353,19 @@ class Grok4MCPServer {
     this.server.setRequestHandler('resources/list', async () => ({
       resources: [
         {
-          uri: 'grok4://analysis-history',
+          uri: 'advanced-ai://analysis-history',
           name: 'Analysis History',
           mimeType: 'application/json',
-          description: 'History of Grok-4 analyses and results'
+          description: 'History of advanced AI analyses and results'
         },
         {
-          uri: 'grok4://performance-metrics',
+          uri: 'advanced-ai://performance-metrics',
           name: 'Performance Metrics',
           mimeType: 'application/json',
-          description: 'Grok-4 server performance metrics'
+          description: 'Advanced AI server performance metrics'
         },
         {
-          uri: 'grok4://active-sessions',
+          uri: 'advanced-ai://active-sessions',
           name: 'Active Sessions',
           mimeType: 'application/json',
           description: 'Currently active analysis sessions'
@@ -376,7 +377,7 @@ class Grok4MCPServer {
       const { uri } = request.params;
 
       switch (uri) {
-        case 'grok4://analysis-history':
+        case 'advanced-ai://analysis-history':
           return {
             contents: [{
               uri,
@@ -385,7 +386,7 @@ class Grok4MCPServer {
             }]
           };
         
-        case 'grok4://performance-metrics':
+        case 'advanced-ai://performance-metrics':
           return {
             contents: [{
               uri,
@@ -394,7 +395,7 @@ class Grok4MCPServer {
             }]
           };
         
-        case 'grok4://active-sessions':
+        case 'advanced-ai://active-sessions':
           return {
             contents: [{
               uri,
@@ -420,8 +421,8 @@ class Grok4MCPServer {
     });
 
     try {
-      const result = await this.grokClient.analyzeWithResearch(code, context);
-      const formattedResult = this.grokClient.formatForCursor(result);
+      const result = await this.aiClient.analyzeWithResearch(code, context);
+      const formattedResult = this.aiClient.formatForCursor(result);
 
       const analysis = {
         session_id: sessionId,
@@ -462,8 +463,8 @@ class Grok4MCPServer {
     });
 
     try {
-      const result = await this.grokClient.architecturalPlanning(requirements, constraints);
-      const formattedResult = this.grokClient.formatForCursor(result);
+      const result = await this.aiClient.architecturalPlanning(requirements, constraints);
+      const formattedResult = this.aiClient.formatForCursor(result);
 
       const architecture = {
         session_id: sessionId,
@@ -508,8 +509,8 @@ class Grok4MCPServer {
     });
 
     try {
-      const result = await this.grokClient.debuggingWorkflow(error, code_context, technology);
-      const formattedResult = this.grokClient.formatForCursor(result);
+      const result = await this.aiClient.debuggingWorkflow(error, code_context, technology);
+      const formattedResult = this.aiClient.formatForCursor(result);
 
       const debugging = {
         session_id: sessionId,
@@ -555,8 +556,8 @@ class Grok4MCPServer {
     });
 
     try {
-      const result = await this.grokClient.optimizePerformance(code_snippet, performance_metrics, target_platform);
-      const formattedResult = this.grokClient.formatForCursor(result);
+      const result = await this.aiClient.optimizePerformance(code_snippet, performance_metrics, target_platform);
+      const formattedResult = this.aiClient.formatForCursor(result);
 
       const optimization = {
         session_id: sessionId,
@@ -602,8 +603,8 @@ class Grok4MCPServer {
     });
 
     try {
-      const result = await this.grokClient.securityAnalysis(code_snippet, framework);
-      const formattedResult = this.grokClient.formatForCursor(result);
+      const result = await this.aiClient.securityAnalysis(code_snippet, framework);
+      const formattedResult = this.aiClient.formatForCursor(result);
 
       const security = {
         session_id: sessionId,
@@ -651,7 +652,7 @@ class Grok4MCPServer {
     });
 
     try {
-      const result = await this.grokClient.multiAgentReasoning(problem, domain);
+      const result = await this.aiClient.multiAgentReasoning(problem, domain);
 
       const reasoning = {
         session_id: sessionId,
@@ -701,14 +702,14 @@ class Grok4MCPServer {
       // Use appropriate analysis method based on review type
       let result;
       if (review_type === 'security') {
-        result = await this.grokClient.securityAnalysis(code, 'general');
+        result = await this.aiClient.securityAnalysis(code, 'general');
       } else if (review_type === 'performance') {
-        result = await this.grokClient.optimizePerformance(code, {}, 'web');
+        result = await this.aiClient.optimizePerformance(code, {}, 'web');
       } else {
-        result = await this.grokClient.analyzeWithResearch(code, `Code review focusing on ${review_type}. Team standards: ${team_standards}`);
+        result = await this.aiClient.analyzeWithResearch(code, `Code review focusing on ${review_type}. Team standards: ${team_standards}`);
       }
 
-      const formattedResult = this.grokClient.formatForCursor(result);
+      const formattedResult = this.aiClient.formatForCursor(result);
 
       const review = {
         session_id: sessionId,
@@ -759,7 +760,7 @@ class Grok4MCPServer {
       const analyses = [];
       
       for (const tech of technologies) {
-        const result = await this.grokClient.analyzeWithResearch(
+        const result = await this.aiClient.analyzeWithResearch(
           `Technology analysis for ${tech}`,
           `Analyzing ${tech} for ${use_case}. Criteria: ${criteria.join(', ')}`
         );
@@ -775,7 +776,7 @@ class Grok4MCPServer {
         Constraints: ${JSON.stringify(project_constraints)}
       `;
 
-      const synthesisResult = await this.grokClient.chat({
+      const synthesisResult = await this.aiClient.chat({
         messages: [
           {
             role: 'system',
@@ -829,7 +830,7 @@ class Grok4MCPServer {
 
   // Helper methods for content extraction and analysis
   generateSessionId() {
-    return `grok4_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `advanced_ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   calculateConfidenceScore(result) {
@@ -1355,7 +1356,7 @@ class Grok4MCPServer {
 
   calculateComparisonConfidence(analyses) {
     const avgScore = analyses.reduce((sum, analysis) => {
-      return sum + this.calculateConfidenceScore(this.grokClient.formatForCursor(analysis.analysis));
+      return sum + this.calculateConfidenceScore(this.aiClient.formatForCursor(analysis.analysis));
     }, 0) / analyses.length;
     
     return Math.round(avgScore);
@@ -1364,14 +1365,14 @@ class Grok4MCPServer {
   async start() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('Grok-4 MCP Server started');
+    console.error('Advanced AI MCP Server started');
   }
 }
 
 // Start the server
 if (require.main === module) {
-  const server = new Grok4MCPServer();
+  const server = new AdvancedAIMCPServer();
   server.start().catch(console.error);
 }
 
-module.exports = Grok4MCPServer;
+module.exports = AdvancedAIMCPServer;

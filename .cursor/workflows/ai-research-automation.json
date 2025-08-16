@@ -18,7 +18,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "technology_comparison",
           "args": {
             "technologies": ["${current_technology}", "${alternatives}"],
@@ -53,7 +53,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "security_analysis",
           "args": {
             "code_snippet": "${selected_code}",
@@ -88,7 +88,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "analyze_code_with_research",
           "args": {
             "code": "${api_integration_code}",
@@ -124,7 +124,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "performance_optimization",
           "args": {
             "code_snippet": "${performance_critical_code}",
@@ -160,7 +160,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "architectural_planning",
           "args": {
             "requirements": "${detailed_requirements}",
@@ -169,7 +169,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "multi_agent_reasoning",
           "args": {
             "problem": "${architectural_challenge}",
@@ -206,7 +206,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "debugging_workflow",
           "args": {
             "error": "${error_message}",
@@ -224,7 +224,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "code_review_agent",
           "args": {
             "code": "${problematic_code}",
@@ -242,7 +242,7 @@
       "trigger": "code_commit",
       "steps": [
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "code_review_agent",
           "args": {
             "code": "${committed_code}",
@@ -260,7 +260,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "analyze_code_with_research",
           "args": {
             "code": "${committed_code}",
@@ -295,7 +295,7 @@
           }
         },
         {
-          "tool": "grok4-integration",
+          "tool": "advanced-ai-integration",
           "action": "technology_comparison",
           "args": {
             "technologies": "${candidate_technologies}",

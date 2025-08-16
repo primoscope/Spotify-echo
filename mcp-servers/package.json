@@ -14,7 +14,10 @@
     "start:github-repos": "node github-repos-manager/index.js", 
     "start:brave-search": "node brave-search/brave-search-mcp.js",
     "start:sequential-thinking": "node sequential-thinking/dist/index.js",
-    "start:all": "concurrently \"npm run start:filesystem\" \"npm run start:memory\" \"npm run start:github-repos\" \"npm run start:brave-search\" \"npm run start:sequential-thinking\"",
+    "start:postgresql": "node postgresql/index.js",
+    "start:sqlite": "node sqlite/index.js", 
+    "start:fetch": "node fetch/index.js",
+    "start:all": "concurrently \"npm run start:filesystem\" \"npm run start:memory\" \"npm run start:github-repos\" \"npm run start:brave-search\" \"npm run start:sequential-thinking\" \"npm run start:postgresql\" \"npm run start:sqlite\" \"npm run start:fetch\"",
     "test": "npm run test:all-servers",
     "test:all-servers": "node scripts/test-mcp-servers.js",
     "validate": "node scripts/validate-mcp-integration.js",
@@ -163,6 +166,45 @@
         "integration-testing",
         "api-testing",
         "ui-testing"
+      ]
+    },
+    "postgresql": {
+      "command": "node",
+      "args": [
+        "mcp-servers/postgresql/index.js"
+      ],
+      "description": "PostgreSQL read-only database access with schema inspection capabilities",
+      "capabilities": [
+        "database-queries",
+        "schema-inspection",
+        "performance-analysis",
+        "business-intelligence"
+      ]
+    },
+    "sqlite": {
+      "command": "node",
+      "args": [
+        "mcp-servers/sqlite/index.js"
+      ],
+      "description": "SQLite database interaction and business intelligence capabilities",
+      "capabilities": [
+        "database-operations",
+        "data-analysis",
+        "export-functionality",
+        "trend-analysis"
+      ]
+    },
+    "fetch": {
+      "command": "node",
+      "args": [
+        "mcp-servers/fetch/index.js"
+      ],
+      "description": "Web content fetching and conversion optimized for LLM usage",
+      "capabilities": [
+        "web-scraping",
+        "content-extraction",
+        "rss-parsing",
+        "search-integration"
       ]
     }
   }

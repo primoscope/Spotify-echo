@@ -274,7 +274,18 @@
     "production-ready": "npm run production-analysis && echo 'Check PRODUCTION_READINESS_EXECUTIVE_SUMMARY.md for results'",
     "mcp:health:n8n": "node scripts/mcp/probes/probe-n8n.js",
     "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js",
-    "mcp:validate-all": "node validate-all-mcp-servers.js"
+    "mcp:validate-all": "node validate-all-mcp-servers.js",
+    "mcp:postgresql": "node mcp-servers/postgresql/index.js",
+    "mcp:sqlite": "node mcp-servers/sqlite/index.js",
+    "mcp:fetch": "node mcp-servers/fetch/index.js",
+    "mcp:start:extended": "cd mcp-servers && npm run start:all",
+    "continuous-analysis": "node scripts/continuous-analysis-system.js",
+    "continuous-analysis:single": "node scripts/continuous-analysis-system.js single",
+    "continuous-analysis:continuous": "node scripts/continuous-analysis-system.js continuous",
+    "analysis:research": "node scripts/continuous-analysis-system.js single",
+    "analysis:report": "echo 'Check automation-outputs/reports/ for latest analysis report'",
+    "perplexity:research": "node -e \"const P = require('./src/chat/llm-providers/perplexity-provider'); const p = new P({apiKey: process.env.PERPLEXITY_API_KEY}); p.initialize().then(() => p.research(process.argv[1])).then(console.log).catch(console.error)\" -- ",
+    "grok4:analyze": "node -e \"const G = require('./src/chat/llm-providers/grok4-provider'); const g = new G({apiKey: process.env.XAI_API_KEY}); g.initialize().then(() => g.analyzeRepository('sample code', 'comprehensive')).then(console.log).catch(console.error)\""
   },
   "keywords": [
     "music-discovery",

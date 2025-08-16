@@ -97,6 +97,26 @@
         "DEBUG": "false"
       },
       "description": "Advanced AI reasoning via Perplexity API with native tool use and multi-agent reasoning"
+    },
+    "browser-automation": {
+      "command": "node",
+      "args": [
+        "./mcp-servers/browser-automation/browser-automation-mcp.js"
+      ],
+      "env": {
+        "DEBUG": "false"
+      },
+      "description": "Advanced browser automation with performance monitoring and error handling"
+    },
+    "github-integration": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub repository management and automation"
     }
   }
 }

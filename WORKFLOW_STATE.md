@@ -37,4 +37,9 @@ Next Actions:
   3) Add compact sparkline widgets for top metrics in `EnhancedAnalyticsDashboard.jsx` using generated mock data when API errors.
 
 - Deferrals to CLI Agent (API contracts):
-  - Unified `/api/providers`, `/api/providers/switch`, `/api/providers/health` with telemetry persistence. 
+  - Unified `/api/providers`, `/api/providers/switch`, `/api/providers/health` with telemetry persistence.
+
+- Perplexity Research Sync (2025-08-16):
+  - Emphasize securing `PERPLEXITY_API_KEY` and monitoring endpoint reliability.
+  - Add observability to MCP endpoints; structured logging and alerting hooks.
+  - Keep Cursor workflows for browser research and PR deep-dive documented and discoverable. 

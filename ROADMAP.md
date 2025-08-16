@@ -81,6 +81,11 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
   2) EnhancedMusicDiscovery.jsx: add client-only radar/sparkline for `moodSettings` values.
   3) EnhancedAnalyticsDashboard.jsx: add sparkline components for overview metrics using mock fallback data.
 
+- Research-derived improvements (Perplexity):
+  - Add provider/MCP observability: lightweight structured logging hooks from UI actions to backend logs.
+  - Surface MCP health in UI (done in `ProviderPanel.jsx`), and add alerts if status != healthy.
+  - Keep Cursor research/PR workflows discoverable in Settings/Docs panel.
+
 - Coordination to CLI Agent (create endpoints, no UI block):
   - Unified providers API: GET `/api/providers`, POST `/api/providers/switch`, GET `/api/providers/health` with telemetry persistence.
 

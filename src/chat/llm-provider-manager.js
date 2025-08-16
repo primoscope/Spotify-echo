@@ -590,6 +590,11 @@ class LLMProviderManager {
     
     console.warn(`🚨 Circuit breaker OPEN for ${providerId}, retry in ${Math.round(backoffMs / 60000)}min`);
   }
+
+  /**
+   * Get the best available provider
+   */
+  async getBestProvider() {
     // Try current provider first
     if (this.providers.has(this.currentProvider)) {
       const config = this.providerConfigs.get(this.currentProvider);

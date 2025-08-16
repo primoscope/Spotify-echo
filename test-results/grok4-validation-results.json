@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-08-16T08:42:08.898Z",
+  "results": {
+    "configurationValid": false,
+    "openrouterConnectivity": false,
+    "grokModelAvailable": false,
+    "repositoryAnalyzerPresent": true,
+    "repositoryAnalysisFunctional": true,
+    "deepResearchCapable": false,
+    "overallStatus": "needs_configuration"
+  },
+  "configuration": {
+    "openrouterKey": null,
+    "grokModel": "x-ai/grok-2-1212",
+    "directGrokKey": false
+  }
+}

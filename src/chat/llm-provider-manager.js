@@ -13,7 +13,7 @@ class LLMProviderManager {
     this.providers = new Map();
     this.providerConfigs = new Map();
     this.keyRefreshHandlers = new Map();
-    this.fallbackOrder = ['gemini', 'openai', 'openrouter', 'mock']; // Prioritize Gemini first
+    this.fallbackOrder = ['gemini', 'perplexity', 'grok4', 'openai', 'openrouter', 'mock']; // Prioritize new providers
     this.currentProvider = 'gemini'; // Default to Gemini
     this.initialized = false;
     const coalesceEnv = (...names) => {
@@ -27,6 +27,8 @@ class LLMProviderManager {
 
       gemini: new KeyPool(coalesceEnv('GEMINI_API_KEYS', 'GEMINI_API', 'GEMINI_API_KEY').split(/[\s,]+/).filter(Boolean)),
       openrouter: new KeyPool(coalesceEnv('OPENROUTER_API_KEYS', 'OPENROUTER_API_KEY', 'OPENROUTER_API').split(/[\s,]+/).filter(Boolean)),
+      perplexity: new KeyPool(coalesceEnv('PERPLEXITY_API_KEYS', 'PERPLEXITY_API_KEY').split(/[\s,]+/).filter(Boolean)),
+      grok4: new KeyPool(coalesceEnv('XAI_API_KEYS', 'XAI_API_KEY').split(/[\s,]+/).filter(Boolean)),
 
     };
 
@@ -148,6 +150,22 @@ class LLMProviderManager {
         refreshable: true,
         refreshEndpoint: 'https://openrouter.ai/api/v1/auth/refresh',
       },
+      perplexity: {
+        name: 'Perplexity AI',
+        apiKey: process.env.PERPLEXITY_API_KEY,
+        model: process.env.PERPLEXITY_MODEL || 'sonar-pro',
+        endpoint: 'https://api.perplexity.ai/v1/chat/completions',
+        refreshable: false, // Perplexity keys don't auto-refresh
+      },
+      grok4: {
+        name: 'Grok-4 xAI',
+        apiKey: process.env.XAI_API_KEY,
+        openRouterKey: process.env.OPENROUTER_API_KEY,
+        model: process.env.GROK4_MODEL || 'grok-4',
+        endpoint: 'https://api.x.ai/v1/chat/completions',
+        useOpenRouter: process.env.GROK4_USE_OPENROUTER === 'true',
+        refreshable: false,
+      },
     };
 
     // Load additional config from file if exists
@@ -190,6 +208,8 @@ class LLMProviderManager {
     const MockProvider = require('./llm-providers/mock-provider');
     const GeminiProvider = require('./llm-providers/gemini-provider');
     const OpenAIProvider = require('./llm-providers/openai-provider');
+    const PerplexityProvider = require('./llm-providers/perplexity-provider');
+    const Grok4Provider = require('./llm-providers/grok4-provider');
 
     for (const [key, config] of this.providerConfigs) {
       try {
@@ -224,6 +244,26 @@ class LLMProviderManager {
                 apiKey: config.apiKey,
                 baseURL: 'https://openrouter.ai/api/v1',
                 model: config.model,
+              });
+            }
+            break;
+          case 'perplexity':
+            if (config.available) {
+              provider = new PerplexityProvider({ 
+                apiKey: config.apiKey, 
+                model: config.model,
+                baseURL: config.endpoint,
+              });
+            }
+            break;
+          case 'grok4':
+            if (config.available || config.openRouterKey) {
+              provider = new Grok4Provider({
+                apiKey: config.apiKey,
+                openRouterKey: config.openRouterKey,
+                model: config.model,
+                useOpenRouter: config.useOpenRouter,
+                baseURL: config.endpoint,
               });
             }
             break;

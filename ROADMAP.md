@@ -68,7 +68,9 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 - [x] Frontend ProviderPanel: list/switch providers, show live metrics — 2025-08-16 (existing implementation verified)
 - [x] Tests for switching and telemetry — 2025-08-16 (7 tests added)
 
-### M2 — Context‑Aware Conversations
+### M2 — Context‑Aware Conversations (Enhanced with Circuit Breaker)
+- [ ] Circuit breaker pattern for provider failover (research-derived from Perplexity sweep 2025-08-16)
+- [ ] Request correlation IDs for end-to-end tracing (research-derived)
 - [ ] Backend chat pipeline: attach user context (mood/history/preferences); persist summaries
 - [ ] Frontend ChatInterface/EnhancedChatInterface: context toggle, explainability view
 - [ ] Verify opt‑out behavior and persistence
@@ -78,7 +80,11 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 - [ ] Use src/spotify/* to compute audio features and store for ranking/visualization
 - [ ] Frontend EnhancedMusicDiscovery: mode selection, feature charts, playlist creation
 
-### M4 — Analytics Dashboard
+### M4 — Analytics Dashboard (Enhanced with Performance Optimization)
+- [ ] MongoDB compound indexes for analytics queries (research-derived from Perplexity sweep 2025-08-16)
+- [ ] TTL indexes for telemetry data rotation (research-derived)
+- [ ] Response streaming for large datasets (research-derived)
+- [ ] Prometheus metrics export for alerting (research-derived)
 - [ ] Backend analytics.js/insights.js endpoints for MongoDB stats, health, engagement KPIs, listening patterns
 - [x] Frontend EnhancedAnalyticsDashboard: charts and health widgets, MCP automation status (sparkline widgets added)
 - [x] Frontend EnhancedAnalyticsDashboard: API Performance panel (p50/p95) using `/api/performance/endpoints` — 2025‑08‑16
@@ -87,7 +93,9 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 - [ ] Backend settings.js/admin.js: validate/apply provider configs and DB ops
 - [ ] Frontend EnhancedAdvancedSettings: provider selection, params, key validation, DB ops, health thresholds
 
-### M6 — Quality & CI
+### M6 — Quality & CI (Enhanced with Observability)
+- [ ] OpenTelemetry distributed tracing integration (research-derived from Perplexity sweep 2025-08-16) 
+- [ ] Memory profiling with clinic.js (research-derived)
 - [ ] sonar-project.properties; npm scripts for lint/test/typecheck/scan:sonar
 - [ ] Optional CI Sonar workflow (guarded by SONAR_TOKEN)
 - [ ] Fix roadmap auto-refresh workflow push permissions (CLI Agent): set `permissions: contents: write`, configure `git config user.name "github-actions[bot]"` and `user.email "41898282+github-actions[bot]@users.noreply.github.com"`, and prefer PR via `peter-evans/create-pull-request` when direct push is unavailable

@@ -100,6 +100,88 @@
 - No regressions detected in existing provider functionality
 - Enhanced telemetry provides actionable metrics for ProviderPanel.jsx
 - Performance monitoring infrastructure ready for production use
+
+### PERPLEXITY SWEEP (2025-08-16) - Research Findings
+
+**Research Topics Analyzed:** Provider switching patterns, MongoDB indexing, Node.js performance tuning, analytics KPI standards
+
+**Key Insights:**
+
+1. **Circuit Breaker Patterns for LLM Providers**
+   - Implement automatic fallback when provider latency > 2x target for 5 consecutive requests
+   - Add exponential backoff for failed providers (1min, 5min, 15min intervals)  
+   - Health check probes every 30s to restore degraded providers
+
+2. **Performance Monitoring Evolution** 
+   - OpenTelemetry integration for distributed tracing across MCP servers
+   - Prometheus metrics export for time-series analysis and alerting
+   - Request correlation IDs for end-to-end tracking
+
+3. **MongoDB Analytics Optimization**
+   - Compound indexes on `{userId, timestamp}` for user analytics queries
+   - TTL indexes on telemetry collections (7 days retention) 
+   - Aggregation pipeline with `$facet` for multi-dimensional analytics
+
+4. **Node.js API Scalability**
+   - Connection pooling with 10-50 connections per MongoDB instance
+   - Response streaming for large analytics datasets (>1MB)  
+   - Memory profiling with clinic.js for leak detection
+
+**Actionable Roadmap Items Created:** 7 new tasks across M2-M4 milestones
+
+### ROADMAP UPDATE Phase (2025-08-16)
+
+**Completed Items:**
+- ✅ M1 - Provider Registry & Switching (2025-08-16) - All 4 tasks complete
+- ✅ Performance baseline capture and reporting (2025-08-16)
+
+**New Items Added (from Research Sweep):**
+
+**M2 - Context‑Aware Conversations (Enhanced)**
+- [ ] Circuit breaker pattern for provider failover (research-derived)
+- [ ] Request correlation IDs for end-to-end tracing
+- [ ] Backend chat pipeline: attach user context (mood/history/preferences); persist summaries
+- [ ] Frontend ChatInterface/EnhancedChatInterface: context toggle, explainability view
+- [ ] Verify opt‑out behavior and persistence
+
+**M4 - Analytics Dashboard (Enhanced)**  
+- [ ] MongoDB compound indexes for analytics queries (research-derived)
+- [ ] TTL indexes for telemetry data rotation (research-derived)
+- [ ] Response streaming for large datasets (research-derived)
+- [ ] Backend analytics.js/insights.js endpoints for MongoDB stats, health, engagement KPIs
+- [ ] Prometheus metrics export for alerting (research-derived)
+
+**M6 - Quality & CI (Enhanced)**
+- [ ] OpenTelemetry distributed tracing integration (research-derived)
+- [ ] Memory profiling with clinic.js (research-derived)
+- [ ] sonar-project.properties; npm scripts for lint/test/typecheck/scan:sonar
+
+**Next Cycle Priority:** M2 Context-Aware Conversations + Circuit Breaker Implementation
+
+---
+
+## CYCLE 2 START - ANALYZE Phase (2025-08-16)
+
+**Selected WIP Set (1-3 items with performance requirement):**
+
+1. **Circuit Breaker Provider Failover** (M2 + Research-Derived)
+   - Implement automatic fallback logic in llm-provider-manager.js
+   - Add health check probes and exponential backoff
+   - Target: Reduce failed request impact by 80% during provider outages
+
+2. **Context-Aware Chat Pipeline** (M2 ROADMAP)  
+   - Backend: persist user mood/history/preferences in MongoDB
+   - Add request correlation IDs for tracing
+   - Target: Enable personalized conversations with context retention
+
+3. **Performance Monitoring Enhancement** (Standing Performance Lane)
+   - Add response streaming for analytics endpoints >1MB
+   - Implement connection pooling optimization
+   - Target: Handle 10x larger analytics queries without memory issues
+
+**Automation Status:** Continuous loop active, research-to-roadmap integration working
+
+**Cycle Complete — Restarting ANALYZE → BLUEPRINT → CONSTRUCT flow**
 - Perplexity: Provider switching best practices include a central registry, metrics collection (p50/p95 latency, error rate), and circuit-breakers. Map UI to GET /providers, POST /providers/switch, GET /providers/health.
 - Grok-4: Repository has `ProviderPanel.jsx` wired to `/api/settings/llm-providers/*`. Backend needs consolidated endpoints under `/api/providers` for switching/health.
 

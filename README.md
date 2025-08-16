@@ -1,455 +1,511 @@
-# 🎵 EchoTune AI - Advanced Music Discovery Platform
+# EchoTune AI - Advanced Music Discovery Platform
 
-[![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy%20to%20DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean&logoColor=white)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
-[![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg?style=for-the-badge)](package.json)
+<div align="center">
 
-> **🎯 AI-Powered Music Discovery Platform** - Transform your music experience with conversational AI, intelligent recommendations, and comprehensive analytics dashboard.
+![EchoTune AI Logo](https://img.shields.io/badge/EchoTune-AI-blueviolet?style=for-the-badge&logo=music&logoColor=white)
 
-## ⭐ Revolutionary Music Features
+[![Version](https://img.shields.io/badge/version-2.1.0-blue?style=flat-square)](https://github.com/dzp5103/Spotify-echo)
+[![Node.js](https://img.shields.io/badge/node.js-20.0.0+-green?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/react-19.1.1-blue?style=flat-square&logo=react)](https://reactjs.org/)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-### 🤖 **Advanced AI Integration**
-- **Multi-Provider LLM Support** - OpenAI GPT-4o, Google Gemini 2.0, OpenRouter Claude 3.5 with real-time provider switching
-- **Intelligent Music Conversations** - Natural language queries like "Find me something like Radiohead but more energetic"
-- **Context-Aware Recommendations** - AI remembers your music history, mood, and preferences
-- **Real-time Provider Testing** - Test and validate AI connections with latency metrics
+**AI-powered music discovery platform with conversational search, intelligent recommendations, and comprehensive analytics**
 
-### 🎵 **Smart Music Discovery**
-- **Spotify Integration** - Full OAuth integration with playlist creation and music streaming
-- **Advanced Discovery Modes** - Smart, mood-based, trending, social, and AI radio discovery
-- **ML-Powered Recommendations** - Collaborative filtering and content-based analysis
-- **Audio Feature Analysis** - Deep analysis of tempo, energy, valence, and musical characteristics
+[🚀 Quick Start](#quick-start) • [📚 Documentation](#documentation) • [🔧 API Reference](#api-documentation) • [🤝 Contributing](#contributing)
 
-### 📊 **Comprehensive Analytics Dashboard**
-- **Live Database Insights** - Real-time MongoDB collection statistics and performance metrics
-- **Listening Pattern Analysis** - Track your music evolution over time with detailed visualizations
-- **Performance Monitoring** - System health with 8-category health checks and resource utilization
-- **User Engagement Metrics** - Track recommendation effectiveness and user interaction patterns
+</div>
 
-### ⚙️ **Advanced Configuration System**
-- **Enhanced Settings Interface** - Modern glassmorphism UI with comprehensive configuration options
-- **LLM Provider Management** - Visual interface for managing AI model parameters and API keys
-- **Database Management Tools** - MongoDB optimization, backup, and collection management
-- **System Health Monitor** - Real-time component status with automated health validation
+## 🎵 Project Overview
+
+EchoTune AI is a sophisticated music discovery platform that combines artificial intelligence, conversational interfaces, and advanced analytics to revolutionize how users discover and interact with music. Built with cutting-edge technologies including React 19, Node.js 20+, and comprehensive Model Context Protocol (MCP) integration.
+
+### ✨ Key Features
+
+- **🤖 Multi-Provider AI Integration**: OpenAI GPT-4o, Google Gemini 2.0, Claude 3.5, and Perplexity API
+- **🎤 Conversational Music Discovery**: Natural language chat interface for music exploration  
+- **🎯 Intelligent Recommendations**: Hybrid collaborative and content-based filtering algorithms
+- **📊 Real-time Analytics**: Comprehensive user behavior and music preference tracking
+- **🔄 Progressive Web App**: Optimized mobile experience with offline capabilities
+- **🔧 MCP Orchestration**: Advanced Model Context Protocol server ecosystem
+- **🎸 Spotify Integration**: Full OAuth integration with audio feature analysis
+- **⚡ Performance Optimized**: Redis caching, compression, and advanced monitoring
 
 ## 🚀 Quick Start
 
-**Get your music platform running in under 5 minutes** - Choose your preferred method:
+### Prerequisites
 
-| Method | Time | Best For |
-|--------|------|----------|
-| [**DigitalOcean**](#-digitalocean-deployment) | 2-3 min | Production with auto-scaling |
-| [**Docker**](#-docker-deployment) | 3-5 min | Any server with containerization |
-| [**Local Dev**](#-local-development) | 2 min | Testing and development |
+- **Node.js** 20.0.0+ and npm 10.0.0+
+- **Python** 3.8+ (for ML components)
+- **MongoDB** 6.18+ or SQLite (fallback)
+- **Redis** 4.7.1+ (caching layer)
 
-### ⚡ DigitalOcean Deployment
-
-**One-Click Production Deployment:**
-
-1. **Fork this repository** to your GitHub account
-
-2. **Configure GitHub Secrets** in your repository:
-   ```bash
-   # Required GitHub Secrets:
-   DIGITALOCEAN_ACCESS_TOKEN=dop_v1_...
-   SPOTIFY_CLIENT_ID=your_spotify_client_id
-   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-   SESSION_SECRET=your_secure_session_secret
-   ```
-
-3. **Deploy automatically** - Push to main branch or click the deploy button:
-
-[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
-
-### 🐳 Docker Deployment
+### 1. Clone & Install
 
 ```bash
 git clone https://github.com/dzp5103/Spotify-echo.git
 cd Spotify-echo
-docker-compose up -d
-# Open http://localhost:3000
+npm install
 ```
 
-### 💻 Local Development
+### 2. Environment Setup
 
 ```bash
-git clone https://github.com/dzp5103/Spotify-echo.git
-cd Spotify-echo
-npm install && npm start
-# Open http://localhost:3000
+cp .env.example .env
+# Configure your API keys and database connections
 ```
 
-## 🏗️ Architecture
+**Required Environment Variables:**
+```env
+# Core Services
+MONGODB_URI=your_mongodb_connection_string
+REDIS_URL=your_redis_connection_string
 
-### Core Technology Stack
-- **Backend**: Node.js, Express.js, Socket.io for real-time features
-- **Frontend**: React, Material-UI for modern user experience
-- **Database**: MongoDB (primary), SQLite (fallback)
-- **AI/ML**: OpenAI GPT, Google Gemini, custom recommendation algorithms
-- **Infrastructure**: Docker, nginx, SSL automation, health monitoring
+# AI Providers
+OPENAI_API_KEY=your_openai_key
+GOOGLE_AI_API_KEY=your_gemini_key
+ANTHROPIC_API_KEY=your_claude_key
+PERPLEXITY_API_KEY=your_perplexity_key
 
-### Application Structure
-```
-src/
-├── frontend/           # React components and UI
-│   ├── components/     # Music UI components
-│   │   ├── EnhancedChatInterface.jsx     # AI music conversations
-│   │   ├── EnhancedMusicDiscovery.jsx    # Smart music discovery
-│   │   ├── ExplainableRecommendations.jsx # AI recommendation explanations
-│   │   ├── PlaylistBuilder.jsx           # Dynamic playlist creation
-│   │   └── EnhancedAnalyticsDashboard.jsx # Music analytics dashboard
-│   └── contexts/       # React context providers
-├── chat/              # AI chat system
-│   ├── chatbot.js           # Main chat orchestrator
-│   ├── model-registry.js    # LLM provider management
-│   └── llm-providers/       # OpenAI, Gemini, and custom providers
-├── spotify/           # Spotify API integration
-│   ├── api-service.js       # Core Spotify API wrapper
-│   └── audio-features.js    # Music feature analysis
-├── api/               # Backend API routes
-│   ├── routes/
-│   │   ├── chat.js           # Chat API endpoints
-│   │   ├── recommendations.js # Music recommendation API
-│   │   ├── spotify.js        # Spotify integration API
-│   │   └── music-discovery.js # Advanced discovery API
-└── ml/                # Machine learning models
-    └── recommendation-engine.js # Core recommendation algorithms
+# Music Services
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+
+# Security
+JWT_SECRET=your_jwt_secret
+SESSION_SECRET=your_session_secret
 ```
 
-## 🤖 AI & Machine Learning Features
+### 3. Database Setup
 
-### Advanced Recommendation Engine
-- **🧠 Collaborative Filtering** - Learn from user behavior patterns across the platform
-- **🎵 Content-Based Filtering** - Audio feature matching with Spotify's comprehensive analysis
-- **🔮 Deep Learning** - Neural network-based recommendation models for complex music taste understanding  
-- **📈 Real-time Learning** - Adaptive preferences with continuous improvement from user feedback
+```bash
+# MongoDB setup
+npm run setup-db
 
-### Intelligent Music Conversations
-- **💬 Natural Language Processing** - Understand music requests in plain English like "something upbeat for a workout"
-- **🎯 Mood Detection** - Context-aware recommendations based on listening patterns and time of day
-- **🔄 Multi-Provider Support** - Switch between OpenAI, Google Gemini, and optimized providers seamlessly
-- **📊 Conversation Analytics** - Learn from chat interactions to improve music understanding
+# Redis configuration
+npm run setup:redis
+```
 
-## 🎵 Music Discovery Modes
+### 4. Launch Application
 
-### Smart Discovery
-- **Algorithmic Recommendations** - AI-powered suggestions based on your complete listening history
-- **Mood-Based Discovery** - Find music that matches your current emotional state
-- **Trending Analysis** - Discover what's popular in your preferred genres and among similar users
-- **Similarity Matching** - "More like this" functionality with advanced audio feature analysis
+```bash
+# Development mode
+npm run dev
 
-### Conversational Discovery
-- **Natural Language Queries** - "Find me indie rock similar to Arctic Monkeys but with more energy"
-- **Follow-up Conversations** - Refine recommendations through back-and-forth with AI
-- **Explanation System** - Understand why songs were recommended with detailed reasoning
-- **Learning Feedback** - Rate recommendations to improve future suggestions
+# Production mode
+npm run build && npm start
 
-## 📊 Analytics & Insights
+# With MCP orchestrator
+npm run mcp:orchestrated-start
+```
 
-### Personal Music Analytics
-- **Listening History Visualization** - Track your music evolution over time with interactive charts
-- **Genre Distribution Analysis** - Understand your musical taste patterns and diversity
-- **Discovery Effectiveness** - Monitor how often you save and replay discovered music
-- **Mood Correlation Tracking** - Analyze relationships between your listening habits and daily patterns
+Visit `http://localhost:3000` to start discovering music!
 
-### Platform Analytics Dashboard
-- **Real-time System Health** - Monitor all platform components and performance metrics
-- **User Engagement Metrics** - Track platform usage, feature adoption, and user satisfaction
-- **Recommendation Effectiveness** - Measure AI recommendation success rates and user feedback
-- **Database Performance** - MongoDB optimization insights and query performance monitoring
+## 🏗️ Technology Stack
 
-## ⚙️ Configuration & Settings
+### Frontend
+- **React 19.1.1** - Latest React with concurrent features
+- **Material-UI 7.3.1** - Modern component library
+- **Vite 7.0.6** - Ultra-fast build tool
+- **Socket.io Client** - Real-time communication
 
-### Advanced Settings Interface
-Navigate to `/settings` for comprehensive platform configuration:
+### Backend
+- **Node.js 20+** - Runtime environment
+- **Express 4.18** - Web framework
+- **Socket.io 4.7** - Real-time features
+- **MongoDB 6.18** - Primary database
+- **Redis 4.7.1** - Caching and session storage
 
-#### **🤖 AI Provider Management**
-- **OpenAI Integration**: GPT-4o, GPT-4 Turbo with temperature and creativity controls
-- **Google Gemini**: Gemini 2.0 Flash and Pro models with parameter tuning
-- **OpenRouter**: Access to Claude 3.5 Sonnet, Llama 3.1, and other cutting-edge models
-- **Real-time Testing**: Validate provider connections with latency and quality metrics
+### AI & ML
+- **OpenAI GPT-4o** - Conversational AI
+- **Google Gemini 2.0** - Advanced reasoning
+- **Claude 3.5** - Natural language processing
+- **Perplexity API** - Real-time research
+- **Custom ML Models** - Recommendation algorithms
 
-#### **🗄️ Database Configuration**  
-- **MongoDB Insights**: Live collection statistics, performance monitoring, and optimization suggestions
-- **Data Management**: Backup scheduling, collection optimization, and storage analytics
-- **Performance Tuning**: Query optimization recommendations and index management
+### Infrastructure
+- **Docker** - Containerization
+- **nginx** - Reverse proxy and SSL
+- **DigitalOcean** - Cloud deployment
+- **GitHub Actions** - CI/CD automation
 
-#### **📊 System Monitoring**
-- **Health Dashboards**: Real-time status monitoring for all platform components
-- **Performance Metrics**: Response times, memory usage, and resource utilization tracking
-- **Alert Configuration**: Custom thresholds and notification preferences
+## 🔧 Architecture
 
-### Music Platform Settings
-- **Discovery Preferences**: Configure recommendation algorithms, discovery modes, and music filtering
-- **Privacy Controls**: Manage data collection, sharing preferences, and privacy settings  
-- **Personalization**: Fine-tune AI behavior, conversation styles, and recommendation sensitivity
-- **Integration Settings**: Spotify account management, API configurations, and third-party connections
+### System Design
 
-## 🚀 API Documentation
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        PWA[Progressive Web App]
+        Mobile[Mobile Interface]
+    end
+    
+    subgraph "API Gateway"
+        Express[Express.js Server]
+        Socket[Socket.io Real-time]
+    end
+    
+    subgraph "AI Orchestration"
+        MCP[MCP Orchestrator]
+        GPT[OpenAI GPT-4o]
+        Gemini[Google Gemini]
+        Claude[Claude 3.5]
+        Perplexity[Perplexity API]
+    end
+    
+    subgraph "Core Services"
+        Auth[Authentication]
+        Recs[Recommendation Engine]
+        Analytics[Analytics Service]
+        Spotify[Spotify Integration]
+    end
+    
+    subgraph "Data Layer"
+        MongoDB[(MongoDB)]
+        Redis[(Redis Cache)]
+        SQLite[(SQLite Fallback)]
+    end
+    
+    PWA --> Express
+    Mobile --> Express
+    Express --> MCP
+    Express --> Auth
+    Express --> Recs
+    Express --> Analytics
+    Express --> Spotify
+    MCP --> GPT
+    MCP --> Gemini
+    MCP --> Claude
+    MCP --> Perplexity
+    Recs --> MongoDB
+    Analytics --> MongoDB
+    Auth --> Redis
+    Express --> Redis
+```
 
-### Core Music Endpoints
+### MCP Server Ecosystem
+
+EchoTune AI leverages an extensive Model Context Protocol server network:
+
+- **Filesystem MCP** - File operations and repository management
+- **Memory MCP** - Conversation context and user preferences
+- **Browser MCP** - Web research and data extraction
+- **Sequential Thinking MCP** - Complex reasoning workflows
+- **Analytics MCP** - Performance monitoring and insights
+- **Testing MCP** - Automated quality assurance
+- **GitHub MCP** - Repository operations and CI/CD
+- **Music Research MCP** - Trend analysis and discovery
+
+## 📚 API Documentation
+
+### Core Endpoints
+
+#### Authentication
+```http
+POST /api/auth/login          # User authentication
+POST /api/auth/register       # User registration
+GET  /api/auth/profile        # User profile
+```
+
+#### Music Discovery
+```http
+GET  /api/music/search        # Search tracks/artists
+POST /api/music/recommendations # Get personalized recommendations
+GET  /api/music/trending      # Current trending music
+```
+
+#### AI Chat
+```http
+POST /api/chat/message        # Send chat message
+GET  /api/chat/history        # Chat history
+POST /api/chat/preferences    # Update music preferences
+```
+
+#### Analytics
+```http
+GET  /api/analytics/dashboard # User analytics dashboard
+POST /api/analytics/track     # Track user interactions
+GET  /api/analytics/insights  # Personalized insights
+```
+
+### Spotify Integration
+
+Full OAuth 2.0 implementation with comprehensive scopes:
+
 ```javascript
-// Get AI-powered music recommendations
-GET /api/recommendations?user_id=123&mood=energetic&limit=20
-
-// Start intelligent music conversation
-POST /api/chat/music
-{
-  "message": "Find me something like Taylor Swift but more indie",
-  "context": { "current_mood": "creative", "time_of_day": "afternoon" }
-}
-
-// Advanced music discovery
-POST /api/music-discovery/explore
-{
-  "preferences": { "genres": ["indie-rock", "alternative"], "energy": "high" },
-  "discovery_mode": "smart_trending"
-}
-
-// Get detailed listening analytics
-GET /api/insights/user/123?timeframe=month&detailed=true
-
-// Create AI-assisted playlist
-POST /api/playlists/create-smart
-{
-  "theme": "workout motivation",
-  "duration": 60,
-  "energy_profile": "building"
-}
+// Required Spotify scopes
+const SPOTIFY_SCOPES = [
+  'user-read-private',
+  'user-read-email', 
+  'playlist-read-private',
+  'playlist-modify-public',
+  'playlist-modify-private',
+  'user-library-read',
+  'user-library-modify',
+  'user-top-read',
+  'user-read-recently-played'
+];
 ```
 
-### Authentication & Spotify Integration
+## 🤖 AI Capabilities
+
+### Multi-Provider Architecture
+
+EchoTune AI implements intelligent routing across multiple AI providers:
+
 ```javascript
-// Spotify OAuth flow
-GET /auth/spotify/login
-GET /auth/spotify/callback?code=...
-
-// User music profile
-GET /api/spotify/profile
-GET /api/spotify/top-tracks?timeframe=long_term
-GET /api/spotify/listening-history?limit=50
+// AI Provider Selection Logic
+const routeQuery = (queryType, complexity) => {
+  const routing = {
+    'music-discovery': complexity > 0.7 ? 'gpt-4o' : 'gemini-2.0',
+    'conversation': 'claude-3.5',
+    'research': 'perplexity-sonar',
+    'analysis': 'gpt-4o',
+    'recommendations': 'gemini-2.0'
+  };
+  
+  return routing[queryType] || 'gpt-4o';
+};
 ```
-
-## 📱 Progressive Web App Features
-
-### Mobile Optimization
-- **Responsive Design** - Optimized experience across phones, tablets, and desktop
-- **Touch Controls** - Gesture navigation and mobile-friendly interfaces  
-- **Offline Capabilities** - Cache recommendations and continue discovery without internet
-- **Performance Modes** - Data saver and battery optimization options
 
 ### Advanced Features
-- **Push Notifications** - New recommendation alerts and discovery updates
-- **Share Integration** - Easy sharing of discovered music and playlists
-- **Voice Commands** - Voice-activated music search and discovery (coming soon)
-- **Smart Widgets** - Home screen widgets for quick music access (coming soon)
 
-## 🔒 Security & Privacy
+- **Context-Aware Conversations** - Maintains music context across chat sessions
+- **Preference Learning** - Adapts to user behavior and feedback
+- **Real-time Research** - Live music trend analysis via Perplexity
+- **Multi-Modal Understanding** - Text, audio features, and user behavior
+- **Collaborative Intelligence** - Multiple AI models for consensus
 
-### Data Protection
-- **OAuth 2.0 Security** - Secure Spotify authentication with encrypted token management
-- **API Security** - Rate limiting, input validation, and comprehensive error handling
-- **Privacy Controls** - Granular control over data collection and usage
-- **Secure Storage** - Encrypted storage of user preferences and listening data
+## ⚡ Performance Features
 
-### Compliance Features
-- **GDPR Compliance** - Data export, deletion, and privacy preference management
-- **Transparent Analytics** - Clear visibility into how your data improves recommendations
-- **Minimal Data Collection** - Only collect data necessary for music discovery features
-- **User Control** - Complete control over data sharing and recommendation personalization
+### Optimization Strategies
 
-## 📈 Performance & Scalability
+- **Redis Caching** - Audio features, recommendations, and session data
+- **Compression** - Gzip/Brotli compression for static assets
+- **CDN Integration** - Global content delivery
+- **Bundle Optimization** - Code splitting and lazy loading
+- **Database Indexing** - Optimized MongoDB queries
+- **Connection Pooling** - Efficient database connections
 
-### Production Features
-- **Auto-Scaling Infrastructure** - Handle traffic spikes and growth seamlessly
-- **Global CDN** - Fast content delivery worldwide for optimal performance
-- **Caching Strategy** - Redis-powered caching for sub-200ms response times
-- **Database Optimization** - MongoDB performance tuning and connection pooling
+### Monitoring & Analytics
 
-### Monitoring & Reliability
-- **Health Monitoring** - Comprehensive system health checks and automated recovery
-- **Performance Metrics** - Real-time monitoring of response times and resource usage
-- **Error Tracking** - Automated error detection and performance regression alerts
-- **Backup Systems** - Automated data backup and disaster recovery procedures
+```bash
+# Performance monitoring commands
+npm run performance:baseline      # Establish performance baseline
+npm run performance:smoke-test    # Quick performance validation
+npm run redis:stats              # Cache performance metrics
+npm run mcp:health-monitor       # MCP server health tracking
+```
 
-## 📚 Documentation & Support
+## 🔐 Security
 
-### Complete Guides
-- **[Quick Start Guide](docs/QUICK_START.md)** - Get running in under 5 minutes
-- **[Configuration Guide](docs/CONFIGURATION.md)** - Complete settings and customization  
-- **[API Reference](docs/API.md)** - Comprehensive API documentation
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
-- **[Mobile Guide](docs/MOBILE.md)** - Mobile app features and optimization
+### Security Measures
 
-### Developer Resources
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to the platform
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical architecture overview
-- **[ML Models Documentation](docs/ML.md)** - Recommendation algorithm details
-- **[Security Guide](docs/SECURITY.md)** - Security features and best practices
+- **Helmet.js** - Security headers and protection
+- **Rate Limiting** - API endpoint protection
+- **JWT Authentication** - Secure token-based auth
+- **Input Sanitization** - XSS and injection prevention
+- **CORS Configuration** - Cross-origin request security
+- **Environment Isolation** - Secure credential management
+
+### Security Commands
+
+```bash
+npm run security:audit           # Security vulnerability scan
+npm run security:check          # Comprehensive security check
+npm run production:validate     # Production security validation
+```
+
+## 🧪 Testing
+
+### Test Suites
+
+```bash
+# Unit testing
+npm run test:unit
+
+# Integration testing  
+npm run test:integration
+
+# End-to-end testing
+npm run test:e2e
+
+# Performance testing
+npm run test:performance
+
+# MCP testing
+npm run test:mcp
+
+# Music-specific testing
+npm run test:music-integration
+```
+
+### Quality Assurance
+
+- **Jest 29.7** - Unit and integration testing
+- **Puppeteer** - E2E browser automation
+- **ESLint** - Code quality and consistency
+- **Prettier** - Code formatting
+- **Comprehensive Coverage** - 90%+ test coverage target
+
+## 🚀 Deployment
+
+### DigitalOcean Deployment
+
+```bash
+# Quick deployment
+npm run deploy:digitalocean
+
+# Production deployment
+npm run production-deploy
+
+# Docker deployment
+npm run deploy:docker
+
+# Ubuntu setup
+npm run deploy:ubuntu
+```
+
+### Production Readiness
+
+```bash
+# Production validation
+npm run production-ready
+
+# Production analysis
+npm run production-analysis
+
+# Deployment validation
+npm run validate:deployment
+```
+
+## 📊 MCP Integration
+
+### Available MCP Servers
+
+| Server | Purpose | Status |
+|--------|---------|--------|
+| `filesystem` | File operations | ✅ Active |
+| `memory` | Context management | ✅ Active |
+| `browser` | Web automation | ✅ Active |
+| `spotify` | Music integration | ✅ Active |
+| `perplexity` | Research capabilities | ✅ Active |
+| `analytics` | Performance monitoring | ✅ Active |
+| `testing` | Quality assurance | ✅ Active |
+
+### MCP Commands
+
+```bash
+# Start all MCP servers
+npm run mcp:start:all
+
+# Health monitoring
+npm run mcp:health:all
+
+# Performance testing
+npm run mcp:test:all
+
+# Enhanced validation
+npm run mcp:enhanced-validation
+```
+
+## 📈 Analytics & Insights
+
+### User Analytics
+- **Listening Behavior** - Track user music consumption patterns
+- **Preference Evolution** - Monitor changing musical tastes
+- **Engagement Metrics** - Chat interaction and feature usage
+- **Recommendation Effectiveness** - Success rate tracking
+
+### System Analytics
+- **Performance Metrics** - Response times and throughput
+- **AI Model Performance** - Accuracy and user satisfaction
+- **Cache Efficiency** - Redis performance optimization
+- **Error Tracking** - Sentry integration for issue monitoring
 
 ## 🤝 Contributing
 
-We welcome contributions to enhance the music discovery experience! Here's how you can help:
-
-### For Music Enthusiasts
-- **Feature Requests** - Suggest new music discovery features and improvements
-- **Beta Testing** - Help test new recommendation algorithms and UI features
-- **Music Data** - Contribute to improving recommendation quality and diversity
-- **User Feedback** - Share your experience and help us improve the platform
-
-### For Developers
-- **Core Features** - Improve recommendation algorithms, UI components, and API endpoints
-- **Integration Development** - Add support for additional music platforms and services
-- **Performance Optimization** - Help optimize database queries and caching strategies
-- **Mobile Development** - Enhance mobile experience and PWA capabilities
-
 ### Development Setup
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Install dependencies: `npm install`
+4. Run tests: `npm test`
+5. Submit a pull request
+
+### Code Standards
+
+- **ESLint Configuration** - Enforce coding standards
+- **Prettier Formatting** - Consistent code style
+- **Conventional Commits** - Structured commit messages
+- **Test Coverage** - Maintain high test coverage
+- **Documentation** - Update docs for new features
+
+### Development Commands
+
 ```bash
-# Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/Spotify-echo.git
-cd Spotify-echo
-
-# Install dependencies
-npm install
-
-# Set up development environment
-cp .env.example .env
-# Add your Spotify API credentials to .env
-
-# Start development server  
+# Development server
 npm run dev
-# App available at http://localhost:3000
 
-# Run tests
-npm test
-npm run lint
+# Linting and formatting
+npm run lint && npm run format
+
+# Comprehensive validation
+npm run validate:comprehensive
+
+# Production readiness check
+npm run production-check
 ```
 
 ## 🗺️ Roadmap
 
-### Phase 1: Enhanced Intelligence ✅ COMPLETED
-- [x] **Advanced ML Models** - Neural networks for complex music taste understanding
-- [x] **Improved AI Conversations** - Context-aware responses and personalized chat styles
-- [x] **Real-time Analytics** - Live performance metrics and user engagement tracking
-- [x] **Mobile Progressive Web App** - Responsive design and offline capabilities
+### Q1 2025 - Foundation Complete ✅
+- [x] Multi-provider AI integration
+- [x] MCP server ecosystem
+- [x] Advanced analytics dashboard
+- [x] Production deployment
 
-### Phase 2: Social & Collaborative Features 🚧 IN PROGRESS
-- [ ] **Social Music Discovery** - Friend recommendations and music taste compatibility
-- [ ] **Collaborative Playlists** - Real-time collaborative playlist editing with friends
-- [ ] **Community Features** - Music discussion forums and genre-based communities  
-- [ ] **Expert Curators** - Professional music curator recommendations and insights
+### Q2 2025 - Enhanced Features 🚧
+- [ ] Enhanced mobile optimization
+- [ ] Voice interaction capabilities
+- [ ] Advanced playlist generation
+- [ ] Social sharing features
 
-### Phase 3: Platform Expansion 📋 PLANNED
-- [ ] **Multi-Platform Support** - Apple Music, YouTube Music, and SoundCloud integration
-- [ ] **Advanced Analytics** - Music industry insights and trend prediction
-- [ ] **Enterprise Features** - White-label solutions and custom branding options
-- [ ] **Global Expansion** - Multi-language support and regional music discovery
+### Q3 2025 - Platform Expansion 📋
+- [ ] Multi-platform music service support
+- [ ] Enterprise features
+- [ ] Advanced social features
+- [ ] Machine learning improvements
 
-### Phase 4: Innovation & Research 💡 VISION
-- [ ] **Advanced AI Models** - Large language model fine-tuning for music understanding
-- [ ] **Multimodal Discovery** - Visual and audio-based music search and recommendations
-- [ ] **VR/AR Integration** - Immersive music discovery experiences
-- [ ] **Music Therapy Applications** - Therapeutic music recommendations and mood enhancement
+### Q4 2025 - Innovation 💡
+- [ ] Next-generation AI models
+- [ ] VR/AR music experiences
+- [ ] Music therapy applications
+- [ ] Global expansion features
 
-## 🔐 Environment Setup
+## 📞 Support
 
-### Required API Keys
-
-**Spotify Integration** (Core functionality):
-```env
-SPOTIFY_CLIENT_ID=your_spotify_client_id
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret  
-SPOTIFY_REDIRECT_URI=https://yourdomain.com/auth/callback
-```
-
-**AI Providers** (Enhanced recommendations):
-```env
-OPENAI_API_KEY=sk-...
-GOOGLE_GEMINI_API_KEY=AIza...
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-**Database** (Production deployment):
-```env
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/echotune
-REDIS_URL=redis://localhost:6379
-```
-
-### Quick Setup
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Edit with your credentials
-nano .env
-
-# Test configuration
-npm run validate:comprehensive
-```
-
-## ❓ Frequently Asked Questions
-
-### Getting Started
-
-**Q: Do I need Spotify Premium to use EchoTune AI?**
-A: No! EchoTune AI works with free Spotify accounts. Premium users get additional features like full-length playback control.
-
-**Q: Can I try the platform without any API keys?**  
-A: Yes! The platform includes demo modes and mock providers so you can explore features before setting up integrations.
-
-**Q: How long does setup take?**
-A: Local development: 2 minutes. Production deployment: 5-10 minutes with our automated deployment workflows.
-
-### Features & Functionality
-
-**Q: How accurate are the AI music recommendations?**
-A: Our multi-algorithm approach achieves 85%+ user satisfaction rates. The system learns from your feedback to continuously improve accuracy.
-
-**Q: Can I use the platform offline?**
-A: Yes! The Progressive Web App supports offline mode for browsing saved recommendations, playlists, and cached music data.
-
-**Q: How does the conversational AI work?**
-A: You can chat naturally about music preferences like "Find me something upbeat for studying" and the AI will understand context, mood, and musical characteristics to provide personalized recommendations.
-
-### Privacy & Data
-
-**Q: What data do you collect?**
-A: We only collect music listening data necessary for recommendations. You maintain full control over data sharing and can export or delete your data anytime.
-
-**Q: Is my Spotify data secure?**
-A: Yes! We use OAuth 2.0 for secure authentication and encrypt all stored data. Your Spotify credentials are never stored on our servers.
-
-**Q: Can I control what data is used for recommendations?**  
-A: Absolutely! The advanced settings panel lets you configure exactly what data is used, shared, or excluded from recommendation algorithms.
+- **Issues**: [GitHub Issues](https://github.com/dzp5103/Spotify-echo/issues)
+- **Documentation**: [Wiki](https://github.com/dzp5103/Spotify-echo/wiki)
+- **Discussions**: [GitHub Discussions](https://github.com/dzp5103/Spotify-echo/discussions)
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Third-Party Integrations
-- **Spotify Web API**: Subject to [Spotify Developer Terms](https://developer.spotify.com/terms)
-- **OpenAI API**: Subject to [OpenAI Usage Policies](https://openai.com/policies/usage-policies)  
-- **Google Gemini**: Subject to [Google AI Terms](https://ai.google.dev/terms)
-
 ## 🙏 Acknowledgments
 
-- **[Spotify](https://developer.spotify.com/)** - Music data and streaming capabilities
-- **[OpenAI](https://openai.com/)** & **[Google](https://ai.google.dev/)** - AI and machine learning capabilities
-- **[React](https://reactjs.org/)** & **[Material-UI](https://mui.com/)** - Modern web interface
-- **[Node.js](https://nodejs.org/)** - Backend application framework
-
-## 🌟 Support the Project
-
-If you love discovering music with EchoTune AI:
-- ⭐ **Star this repository** on GitHub
-- 🎵 **Share your favorite discoveries** with friends
-- 🐛 **Report bugs** and suggest new music features  
-- 💝 **Contribute** to make music discovery even better
+- Spotify Web API for music data
+- OpenAI, Google, and Anthropic for AI capabilities
+- Model Context Protocol community
+- React and Node.js communities
+- All contributors and users
 
 ---
 
-**🎵 Ready to transform your music discovery experience?**
+<div align="center">
 
-[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo/tree/main&refcode=echotuneai)
+**Built with ❤️ for music lovers everywhere**
 
-*EchoTune AI - Where artificial intelligence meets musical discovery* • **Version 2.3.0**
+[⭐ Star this project](https://github.com/dzp5103/Spotify-echo) • [🍴 Fork it](https://github.com/dzp5103/Spotify-echo/fork) • [📝 Report issues](https://github.com/dzp5103/Spotify-echo/issues)
+
+</div>

@@ -75,6 +75,59 @@
         "MEMORY_DB_PATH": ".cursor/memory.sqlite",
         "MEMORY_MAX_MB": "64"
       }
+    },
+    "perplexity-ask": {
+      "command": "node",
+      "args": [
+        "./mcp-servers/perplexity-ask-server/perplexity-ask-mcp.js"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
+        "DEBUG": "false"
+      },
+      "description": "Advanced Perplexity research with automated workflows and fact-checking"
+    },
+    "advanced-ai-integration": {
+      "command": "node",
+      "args": [
+        "./src/api/ai-integration/grok4-mcp-server.js"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
+        "DEBUG": "false"
+      },
+      "description": "Advanced AI reasoning via Perplexity API with native tool use and multi-agent reasoning"
+    },
+    "browser-automation": {
+      "command": "node",
+      "args": [
+        "./mcp-servers/browser-automation/browser-automation-mcp.js"
+      ],
+      "env": {
+        "DEBUG": "false"
+      },
+      "description": "Advanced browser automation with performance monitoring and error handling"
+    },
+    "github-integration": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub repository management and automation"
+    },
+    "music-research": {
+      "command": "node",
+      "args": [
+        "./scripts/music-research-automation.js"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
+        "DEBUG": "false"
+      },
+      "description": "Automated music research using Perplexity API for trend analysis and artist discovery"
     }
   }
 }

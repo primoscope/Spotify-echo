@@ -40,6 +40,7 @@ import {
   VolumeUp,
   Info,
 } from '@mui/icons-material';
+import { useLLM } from '../contexts/LLMContext';
 
 /**
  * Enhanced Chat Interface with Context Chips and Explainable Responses
@@ -64,10 +65,17 @@ const EnhancedChatInterface = ({
     explanation: null,
   });
   const [providerMenu, setProviderMenu] = useState(null);
-  const [currentProvider, setCurrentProvider] = useState('mock');
+  const [currentProviderLocal, setCurrentProviderLocal] = useState('mock');
+
+  const { currentProvider, providers, switchProvider, loading: providerLoading } = useLLM?.()
+    || { currentProvider: 'mock', providers: {}, switchProvider: async () => false, loading: false };
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setCurrentProviderLocal(currentProvider);
+  }, [currentProvider]);
 
   // Load context chips
   useEffect(() => {
@@ -224,6 +232,39 @@ const EnhancedChatInterface = ({
       explanation: message.explanation,
     });
   };
+
+  const openProviderMenu = (event) => setProviderMenu(event.currentTarget);
+  const closeProviderMenu = () => setProviderMenu(null);
+
+  const handleProviderSelect = async (providerId) => {
+    closeProviderMenu();
+    if (providerId === currentProvider) return;
+    const ok = await switchProvider(providerId);
+    if (ok) setCurrentProviderLocal(providerId);
+  };
+
+  const ProviderQuickSwitch = () => (
+    <Box display="flex" alignItems="center" gap={1} sx={{ mb: 1 }}>
+      <Chip
+        size="small"
+        color="primary"
+        label={`Provider: ${currentProviderLocal}`}
+        onClick={openProviderMenu}
+        avatar={<SmartToy fontSize="small" />}
+        variant="outlined"
+      />
+      {providerLoading && <CircularProgress size={16} />}
+      <Menu anchorEl={providerMenu} open={Boolean(providerMenu)} onClose={closeProviderMenu}>
+        {Object.entries(providers)
+          .filter(([, p]) => p.available)
+          .map(([id, p]) => (
+            <MenuItem key={id} selected={id === currentProviderLocal} onClick={() => handleProviderSelect(id)}>
+              {p.name} {id === currentProviderLocal ? '✓' : ''}
+            </MenuItem>
+          ))}
+      </Menu>
+    </Box>
+  );
 
   const ContextChipsSection = ({ category, chips, icon: Icon }) => (
     <Box sx={{ mb: 2 }}>
@@ -395,7 +436,7 @@ const EnhancedChatInterface = ({
           </Typography>
 
           <Button variant="outlined" size="small" onClick={(e) => setProviderMenu(e.currentTarget)}>
-            {currentProvider}
+            {currentProviderLocal}
           </Button>
         </Box>
 
@@ -602,7 +643,7 @@ const EnhancedChatInterface = ({
       >
         <MenuItem
           onClick={() => {
-            setCurrentProvider('mock');
+            setCurrentProviderLocal('mock');
             setProviderMenu(null);
           }}
         >
@@ -610,7 +651,7 @@ const EnhancedChatInterface = ({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            setCurrentProvider('gemini');
+            setCurrentProviderLocal('gemini');
             setProviderMenu(null);
           }}
         >
@@ -618,7 +659,7 @@ const EnhancedChatInterface = ({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            setCurrentProvider('openai');
+            setCurrentProviderLocal('openai');
             setProviderMenu(null);
           }}
         >

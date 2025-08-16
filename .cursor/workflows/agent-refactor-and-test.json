@@ -1,0 +1,35 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "Agent Refactor + Test",
+  "description": "Perform multi-file refactor with automatic unit/integration tests and summary",
+  "yolo": true,
+  "steps": [
+    {
+      "tool": "echotune-filesystem",
+      "action": "scan",
+      "args": { "paths": ["./src", "./server.js"], "maxFiles": 150 }
+    },
+    {
+      "tool": "echotune-perplexity",
+      "action": "research",
+      "args": {
+        "prompt": "Propose a safe, minimal multi-file refactor plan with test impact and rollback strategy."
+      }
+    },
+    {
+      "tool": "echotune-filesystem",
+      "action": "apply_changes",
+      "args": { "planFromStep": 1 }
+    },
+    {
+      "tool": "echotune-filesystem",
+      "action": "run",
+      "args": { "command": "npm run test:unit -- -i" }
+    },
+    {
+      "tool": "echotune-filesystem",
+      "action": "run",
+      "args": { "command": "npm run test:integration -- -i" }
+    }
+  ]
+}

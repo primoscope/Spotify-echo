@@ -112,7 +112,7 @@ function MainApplication({ initialTab = 'chat' }) {
       id: 'track3',
       name: 'As It Was',
       artist: 'Harry Styles',
-      album: { name: "Harry's House" },
+      album: { name: 'Harry\'s House' },
       duration_ms: 167000,
       confidence: 0.76,
       algorithm: 'content_based',
@@ -165,7 +165,7 @@ function MainApplication({ initialTab = 'chat' }) {
 
     // Fallback response
     return {
-      response: "I'd love to help you discover great music! What kind of mood are you in today?",
+      response: 'I\'d love to help you discover great music! What kind of mood are you in today?',
       recommendations: [],
       provider: 'mock',
     };
@@ -204,7 +204,7 @@ function MainApplication({ initialTab = 'chat' }) {
             'Matches the energy level you typically prefer',
             `${track.artist} is in your top listened artists this month`,
             'Upbeat tempo perfect for your current activity',
-            "Similar to other tracks you've liked recently",
+            'Similar to other tracks you\'ve liked recently',
           ],
         },
       };

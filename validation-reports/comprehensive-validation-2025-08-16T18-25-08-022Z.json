@@ -1,0 +1,276 @@
+{
+  "timestamp": "2025-08-16T18:25:00.856Z",
+  "version": "2.0.0",
+  "testSuites": {
+    "apiIntegration": {
+      "name": "API Integration",
+      "tests": [
+        {
+          "name": "API Key Configuration",
+          "passed": false,
+          "details": {
+            "hasApiKey": true,
+            "isValidFormat": false,
+            "success": false
+          }
+        },
+        {
+          "name": "Basic Connectivity",
+          "passed": false,
+          "details": {
+            "success": false,
+            "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+          }
+        },
+        {
+          "name": "Model Availability Check",
+          "passed": false,
+          "details": {
+            "success": false,
+            "availableModels": [],
+            "failedModels": [
+              {
+                "model": "grok-4-equivalent",
+                "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+              },
+              {
+                "model": "sonar-pro",
+                "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+              },
+              {
+                "model": "sonar",
+                "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+              }
+            ]
+          }
+        }
+      ],
+      "score": 0,
+      "maxScore": 3
+    },
+    "grok4Integration": {
+      "name": "Grok-4 Integration",
+      "tests": [
+        {
+          "name": "Grok-4 Equivalent Model Access",
+          "passed": false,
+          "details": {
+            "success": false,
+            "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+          }
+        },
+        {
+          "name": "Enhanced Research Mode",
+          "passed": false,
+          "details": {
+            "success": false,
+            "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+          }
+        },
+        {
+          "name": "Advanced Reasoning Capabilities",
+          "passed": false,
+          "details": {
+            "success": false,
+            "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+          }
+        }
+      ],
+      "score": 0,
+      "maxScore": 3
+    },
+    "mcpServers": {
+      "name": "MCP Servers",
+      "tests": [
+        {
+          "name": "perplexity-mcp Structure",
+          "passed": true,
+          "details": {
+            "hasPackageJson": true,
+            "hasIndexJs": true,
+            "isDirectory": true
+          }
+        },
+        {
+          "name": "analytics-server Structure",
+          "passed": true,
+          "details": {
+            "hasPackageJson": true,
+            "hasIndexJs": true,
+            "isDirectory": true
+          }
+        },
+        {
+          "name": "browserbase Structure",
+          "passed": true,
+          "details": {
+            "hasPackageJson": true,
+            "hasIndexJs": true,
+            "isDirectory": true
+          }
+        },
+        {
+          "name": "code-sandbox Structure",
+          "passed": true,
+          "details": {
+            "hasPackageJson": true,
+            "hasIndexJs": true,
+            "isDirectory": true
+          }
+        }
+      ],
+      "score": 4,
+      "maxScore": 4
+    },
+    "multiModelResearch": {
+      "name": "Multi-Model Research",
+      "tests": [
+        {
+          "name": "Multi-Model Research Synthesis",
+          "passed": false,
+          "details": {
+            "totalModels": 0,
+            "hasResults": true,
+            "hasSynthesis": true
+          }
+        }
+      ],
+      "score": 0,
+      "maxScore": 1
+    },
+    "repositoryAnalysis": {
+      "name": "Repository Analysis",
+      "tests": [
+        {
+          "name": "Comprehensive Repository Analysis",
+          "passed": false,
+          "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+        },
+        {
+          "name": "Security-Focused Analysis",
+          "passed": false,
+          "error": "Enhanced Perplexity request failed: Response parsing failed: Unexpected token '<', \"<html>\r\n<h\"... is not valid JSON. Response: <html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n<hr><center>openresty/1.27.4</center>\r\n<script>(function(){function c(){va..."
+        }
+      ],
+      "score": 0,
+      "maxScore": 2
+    },
+    "documentationCompliance": {
+      "name": "Documentation Compliance",
+      "tests": [
+        {
+          "name": "Perplexity API Documentation Files",
+          "passed": true,
+          "details": {
+            "success": true
+          }
+        },
+        {
+          "name": "Integration Guide Implementation",
+          "passed": true,
+          "details": {
+            "success": true
+          }
+        },
+        {
+          "name": "Grok-4 Equivalent Model Usage",
+          "passed": true,
+          "details": {
+            "success": true,
+            "actualModel": "sonar-pro"
+          }
+        },
+        {
+          "name": "Research Mode Implementation",
+          "passed": true,
+          "details": {
+            "success": true,
+            "modes": [
+              "standard",
+              "comprehensive",
+              "rapid",
+              "academic"
+            ]
+          }
+        }
+      ],
+      "score": 4,
+      "maxScore": 4
+    },
+    "performanceMetrics": {
+      "name": "Performance Metrics",
+      "tests": [
+        {
+          "name": "Performance Analysis",
+          "passed": true,
+          "details": {
+            "totalRequests": 11,
+            "totalErrors": 11,
+            "successRate": "0.00%",
+            "averageResponseTime": "0ms",
+            "errorRate": "100.00%",
+            "modelUsage": {
+              "sonar": 2,
+              "grok-4-equivalent": 7,
+              "sonar-pro": 2
+            },
+            "researchModeUsage": {}
+          }
+        }
+      ],
+      "score": 1,
+      "maxScore": 1
+    }
+  },
+  "overallScore": 50,
+  "recommendations": [
+    {
+      "suite": "apiIntegration",
+      "priority": "high",
+      "recommendation": "Fix 3 failed tests in API Integration",
+      "failedTests": [
+        "API Key Configuration",
+        "Basic Connectivity",
+        "Model Availability Check"
+      ]
+    },
+    {
+      "suite": "grok4Integration",
+      "priority": "high",
+      "recommendation": "Fix 3 failed tests in Grok-4 Integration",
+      "failedTests": [
+        "Grok-4 Equivalent Model Access",
+        "Enhanced Research Mode",
+        "Advanced Reasoning Capabilities"
+      ]
+    },
+    {
+      "suite": "multiModelResearch",
+      "priority": "high",
+      "recommendation": "Fix 1 failed tests in Multi-Model Research",
+      "failedTests": [
+        "Multi-Model Research Synthesis"
+      ]
+    },
+    {
+      "suite": "repositoryAnalysis",
+      "priority": "high",
+      "recommendation": "Fix 2 failed tests in Repository Analysis",
+      "failedTests": [
+        "Comprehensive Repository Analysis",
+        "Security-Focused Analysis"
+      ]
+    },
+    {
+      "priority": "critical",
+      "recommendation": "Ensure PERPLEXITY_API_KEY is configured with Perplexity Pro subscription for Grok-4 access"
+    }
+  ],
+  "compliance": {},
+  "summary": {
+    "totalTests": 18,
+    "passedTests": 9,
+    "overallScore": 50,
+    "status": "FAIR"
+  }
+}

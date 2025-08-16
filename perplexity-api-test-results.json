@@ -1,99 +1,29 @@
 {
-  "timestamp": "2025-08-16T00:21:19.130Z",
+  "timestamp": "2025-08-16T18:25:00.838Z",
   "environment": {
-    "nodeVersion": "v22.16.0",
+    "nodeVersion": "v20.19.4",
     "platform": "linux",
-    "apiKeyPresent": true,
-    "testDuration": 46253
+    "apiKeyPresent": false,
+    "testDuration": 21836
   },
   "connectivity": {
     "name": "API Connectivity",
-    "status": "PASS",
-    "startTime": 1755303679134,
-    "attempts": 1,
+    "status": "SKIPPED",
+    "startTime": 1755368700845,
+    "attempts": 0,
     "maxAttempts": 3,
     "errors": [],
-    "endTime": 1755303682057,
-    "duration": 2923,
-    "response": {
-      "id": "dafff87b-5a1e-499b-ba0e-a6efa2bd870d",
-      "model": "sonar-pro",
-      "created": 1755303682,
-      "usage": {
-        "prompt_tokens": 8,
-        "completion_tokens": 1,
-        "total_tokens": 9,
-        "search_context_size": "low",
-        "cost": {
-          "input_tokens_cost": 0,
-          "output_tokens_cost": 0,
-          "request_cost": 0.006,
-          "total_cost": 0.006
-        }
-      },
-      "citations": [
-        "https://netbeez.net/blog/network-testing-tools/",
-        "https://onomondo.com/blog/test-modem-connectivity-with-at-commands/",
-        "https://www.headspin.io/blog/best-network-testing-tools-an-overview",
-        "https://forums.powershell.org/t/ping-vs-test-connection/24781",
-        "https://www.okta.com/identity-101/ping-trace/"
-      ],
-      "search_results": [
-        {
-          "title": "Network Testing: How to Improve Network Performance",
-          "url": "https://netbeez.net/blog/network-testing-tools/",
-          "date": "2025-06-12",
-          "last_updated": "2025-07-05"
-        },
-        {
-          "title": "How to test modem connectivity using AT commands",
-          "url": "https://onomondo.com/blog/test-modem-connectivity-with-at-commands/",
-          "date": "2025-03-13",
-          "last_updated": "2025-03-28"
-        },
-        {
-          "title": "The Best Network Testing Tools - A Comprehensive Guide",
-          "url": "https://www.headspin.io/blog/best-network-testing-tools-an-overview",
-          "date": "2023-11-03",
-          "last_updated": "2025-08-14"
-        },
-        {
-          "title": "Ping vs Test-Connection",
-          "url": "https://forums.powershell.org/t/ping-vs-test-connection/24781",
-          "date": "2024-09-23",
-          "last_updated": "2025-06-15"
-        },
-        {
-          "title": "Ping Trace Techniques for Network Connectivity ...",
-          "url": "https://www.okta.com/identity-101/ping-trace/",
-          "date": "2024-08-28",
-          "last_updated": "2025-06-16"
-        }
-      ],
-      "object": "chat.completion",
-      "choices": [
-        {
-          "index": 0,
-          "finish_reason": "stop",
-          "message": {
-            "role": "assistant",
-            "content": "OK"
-          },
-          "delta": {
-            "role": "assistant",
-            "content": ""
-          }
-        }
-      ]
-    },
-    "apiEndpoint": "https://api.perplexity.ai"
+    "reason": "No API key provided - using mock responses",
+    "endTime": 1755368700845,
+    "duration": 0,
+    "mockMode": true
   },
   "modelTests": {
     "grok-4": {
       "name": "Model Test: grok-4",
       "model": "grok-4",
       "status": "PASS",
-      "startTime": 1755303682057,
+      "startTime": 1755368700846,
       "testCases": [
         {
           "name": "Basic Response",
@@ -102,7 +32,7 @@
           "maxTokens": 10,
           "status": "PASS",
           "response": "TEST_PASSED - Mock Response",
-          "duration": 76,
+          "duration": 1,
           "passed": true
         },
         {
@@ -112,7 +42,7 @@
           "maxTokens": 100,
           "status": "PASS",
           "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
-          "duration": 47,
+          "duration": 0,
           "passed": true
         },
         {
@@ -122,24 +52,24 @@
           "maxTokens": 50,
           "status": "PASS",
           "response": "{\"status\": \"success\", \"message\": \"working\"}",
-          "duration": 42,
+          "duration": 0,
           "passed": true
         }
       ],
       "performance": {
         "successRate": 100,
-        "averageResponseTime": 55,
+        "averageResponseTime": 0,
         "totalTests": 3,
         "passedTests": 3
       },
-      "endTime": 1755303682222,
-      "duration": 165
+      "endTime": 1755368700847,
+      "duration": 1
     },
     "claude-3.5-sonnet": {
       "name": "Model Test: claude-3.5-sonnet",
       "model": "claude-3.5-sonnet",
       "status": "PASS",
-      "startTime": 1755303682222,
+      "startTime": 1755368700847,
       "testCases": [
         {
           "name": "Basic Response",
@@ -148,7 +78,7 @@
           "maxTokens": 10,
           "status": "PASS",
           "response": "TEST_PASSED - Mock Response",
-          "duration": 33,
+          "duration": 0,
           "passed": true
         },
         {
@@ -158,7 +88,7 @@
           "maxTokens": 100,
           "status": "PASS",
           "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
-          "duration": 35,
+          "duration": 0,
           "passed": true
         },
         {
@@ -168,24 +98,24 @@
           "maxTokens": 50,
           "status": "PASS",
           "response": "{\"status\": \"success\", \"message\": \"working\"}",
-          "duration": 33,
+          "duration": 0,
           "passed": true
         }
       ],
       "performance": {
         "successRate": 100,
-        "averageResponseTime": 34,
+        "averageResponseTime": 0,
         "totalTests": 3,
         "passedTests": 3
       },
-      "endTime": 1755303682323,
-      "duration": 101
+      "endTime": 1755368700847,
+      "duration": 0
     },
     "sonar-pro": {
       "name": "Model Test: sonar-pro",
       "model": "sonar-pro",
-      "status": "PARTIAL",
-      "startTime": 1755303682323,
+      "status": "PASS",
+      "startTime": 1755368700848,
       "testCases": [
         {
           "name": "Basic Response",
@@ -193,8 +123,8 @@
           "expectedPattern": {},
           "maxTokens": 10,
           "status": "PASS",
-          "response": "TEST_PASSED",
-          "duration": 2832,
+          "response": "TEST_PASSED - Mock Response",
+          "duration": 0,
           "passed": true
         },
         {
@@ -203,8 +133,8 @@
           "expectedPattern": {},
           "maxTokens": 100,
           "status": "PASS",
-          "response": "The code `function test() { return \"hello\"; }` defines a simple JavaScript function named **test** that, when called, always returns the string **\"hello\"**—there is no input or internal logic, just the immediate return of a fixed value[3][1][5].\n\n**Assessment and context:**\n\n- This function is correctly structured and uses the standard JavaScript syntax for function declaration and for returning a value via the `return` statement[3][5].\n-",
-          "duration": 2620,
+          "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
+          "duration": 0,
           "passed": true
         },
         {
@@ -212,26 +142,26 @@
           "prompt": "Provide a JSON response with status \"success\" and message \"working\"",
           "expectedPattern": {},
           "maxTokens": 50,
-          "status": "FAIL",
-          "response": "{\n  \"status\": \"success\",\n  \"message\": \"working\"\n}\n\nThis JSON object follows standard JSON response structure, with key-value pairs inside curly braces and string values in double quotes[3]. For signaling a successful operation in many APIs,",
-          "duration": 2442,
-          "passed": false
+          "status": "PASS",
+          "response": "{\"status\": \"success\", \"message\": \"working\"}",
+          "duration": 0,
+          "passed": true
         }
       ],
       "performance": {
-        "successRate": 66.66666666666666,
-        "averageResponseTime": 2631,
+        "successRate": 100,
+        "averageResponseTime": 0,
         "totalTests": 3,
-        "passedTests": 2
+        "passedTests": 3
       },
-      "endTime": 1755303690217,
-      "duration": 7894
+      "endTime": 1755368700848,
+      "duration": 0
     },
     "llama-3.3-70b": {
       "name": "Model Test: llama-3.3-70b",
       "model": "llama-3.3-70b",
       "status": "PASS",
-      "startTime": 1755303690217,
+      "startTime": 1755368700848,
       "testCases": [
         {
           "name": "Basic Response",
@@ -240,7 +170,7 @@
           "maxTokens": 10,
           "status": "PASS",
           "response": "TEST_PASSED - Mock Response",
-          "duration": 33,
+          "duration": 0,
           "passed": true
         },
         {
@@ -250,7 +180,7 @@
           "maxTokens": 100,
           "status": "PASS",
           "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
-          "duration": 54,
+          "duration": 0,
           "passed": true
         },
         {
@@ -260,24 +190,24 @@
           "maxTokens": 50,
           "status": "PASS",
           "response": "{\"status\": \"success\", \"message\": \"working\"}",
-          "duration": 62,
+          "duration": 0,
           "passed": true
         }
       ],
       "performance": {
         "successRate": 100,
-        "averageResponseTime": 50,
+        "averageResponseTime": 0,
         "totalTests": 3,
         "passedTests": 3
       },
-      "endTime": 1755303690366,
-      "duration": 149
+      "endTime": 1755368700848,
+      "duration": 0
     },
     "o1-preview": {
       "name": "Model Test: o1-preview",
       "model": "o1-preview",
       "status": "PASS",
-      "startTime": 1755303690366,
+      "startTime": 1755368700848,
       "testCases": [
         {
           "name": "Basic Response",
@@ -286,7 +216,7 @@
           "maxTokens": 10,
           "status": "PASS",
           "response": "TEST_PASSED - Mock Response",
-          "duration": 46,
+          "duration": 0,
           "passed": true
         },
         {
@@ -296,7 +226,7 @@
           "maxTokens": 100,
           "status": "PASS",
           "response": "This JavaScript function is simple and returns a string literal. Code analysis: basic function structure, good naming.",
-          "duration": 32,
+          "duration": 0,
           "passed": true
         },
         {
@@ -306,18 +236,18 @@
           "maxTokens": 50,
           "status": "PASS",
           "response": "{\"status\": \"success\", \"message\": \"working\"}",
-          "duration": 29,
+          "duration": 0,
           "passed": true
         }
       ],
       "performance": {
         "successRate": 100,
-        "averageResponseTime": 36,
+        "averageResponseTime": 0,
         "totalTests": 3,
         "passedTests": 3
       },
-      "endTime": 1755303690473,
-      "duration": 107
+      "endTime": 1755368700848,
+      "duration": 0
     }
   },
   "workflowTests": {
@@ -325,167 +255,167 @@
       "name": "Workflow Integration: research",
       "workflow": "research",
       "status": "PASS",
-      "startTime": 1755303690473,
+      "startTime": 1755368700849,
       "steps": [
         {
           "stepNumber": 1,
           "name": "Initialize research parameters",
           "status": "COMPLETED",
-          "duration": 932
+          "duration": 1892
         },
         {
           "stepNumber": 2,
           "name": "Execute analysis request",
           "status": "COMPLETED",
-          "duration": 735
+          "duration": 522
         },
         {
           "stepNumber": 3,
           "name": "Process results",
           "status": "COMPLETED",
-          "duration": 2182
+          "duration": 996
         },
         {
           "stepNumber": 4,
           "name": "Generate recommendations",
           "status": "COMPLETED",
-          "duration": 2174
+          "duration": 1046
         }
       ],
       "integration": {
         "completionRate": 100,
         "totalSteps": 4,
         "completedSteps": 4,
-        "averageStepTime": 1505.75
+        "averageStepTime": 1114
       },
-      "endTime": 1755303696496,
-      "duration": 6023
+      "endTime": 1755368705305,
+      "duration": 4456
     },
     "automation": {
       "name": "Workflow Integration: automation",
       "workflow": "automation",
       "status": "PASS",
-      "startTime": 1755303696496,
+      "startTime": 1755368705305,
       "steps": [
         {
           "stepNumber": 1,
           "name": "Configure automation parameters",
           "status": "COMPLETED",
-          "duration": 1601
+          "duration": 1778
         },
         {
           "stepNumber": 2,
           "name": "Execute automation workflow",
           "status": "COMPLETED",
-          "duration": 1990
+          "duration": 1167
         },
         {
           "stepNumber": 3,
           "name": "Monitor execution",
           "status": "COMPLETED",
-          "duration": 1707
+          "duration": 1504
         },
         {
           "stepNumber": 4,
           "name": "Report results",
           "status": "COMPLETED",
-          "duration": 2297
+          "duration": 1349
         }
       ],
       "integration": {
         "completionRate": 100,
         "totalSteps": 4,
         "completedSteps": 4,
-        "averageStepTime": 1898.75
+        "averageStepTime": 1449.5
       },
-      "endTime": 1755303704091,
-      "duration": 7595
+      "endTime": 1755368711103,
+      "duration": 5798
     },
     "coding": {
       "name": "Workflow Integration: coding",
       "workflow": "coding",
       "status": "PASS",
-      "startTime": 1755303704091,
+      "startTime": 1755368711104,
       "steps": [
         {
           "stepNumber": 1,
           "name": "Parse coding request",
           "status": "COMPLETED",
-          "duration": 1282
+          "duration": 2341
         },
         {
           "stepNumber": 2,
           "name": "Generate code solution",
           "status": "COMPLETED",
-          "duration": 957
+          "duration": 1765
         },
         {
           "stepNumber": 3,
           "name": "Review and validate",
           "status": "COMPLETED",
-          "duration": 1095
+          "duration": 577
         },
         {
           "stepNumber": 4,
           "name": "Prepare integration",
           "status": "COMPLETED",
-          "duration": 508
+          "duration": 775
         }
       ],
       "integration": {
         "completionRate": 100,
         "totalSteps": 4,
         "completedSteps": 4,
-        "averageStepTime": 960.5
+        "averageStepTime": 1364.5
       },
-      "endTime": 1755303707934,
-      "duration": 3843
+      "endTime": 1755368716562,
+      "duration": 5458
     },
     "validation": {
       "name": "Workflow Integration: validation",
       "workflow": "validation",
       "status": "PASS",
-      "startTime": 1755303707934,
+      "startTime": 1755368716562,
       "steps": [
         {
           "stepNumber": 1,
           "name": "Setup validation parameters",
           "status": "COMPLETED",
-          "duration": 759
+          "duration": 1834
         },
         {
           "stepNumber": 2,
           "name": "Execute test scenarios",
           "status": "COMPLETED",
-          "duration": 658
+          "duration": 1916
         },
         {
           "stepNumber": 3,
           "name": "Analyze results",
           "status": "COMPLETED",
-          "duration": 1162
+          "duration": 1269
         },
         {
           "stepNumber": 4,
           "name": "Generate report",
           "status": "COMPLETED",
-          "duration": 2173
+          "duration": 1098
         }
       ],
       "integration": {
         "completionRate": 100,
         "totalSteps": 4,
         "completedSteps": 4,
-        "averageStepTime": 1188
+        "averageStepTime": 1529.25
       },
-      "endTime": 1755303712686,
-      "duration": 4752
+      "endTime": 1755368722679,
+      "duration": 6117
     }
   },
   "commandProcessing": {
     "name": "Command Processing",
     "status": "PARTIAL",
-    "startTime": 1755303712686,
+    "startTime": 1755368722680,
     "commands": [
       {
         "originalCommand": "@copilot use perplexity grok-4 and research current state",
@@ -496,7 +426,7 @@
         },
         "status": "PASS",
         "confidence": 1,
-        "duration": 1
+        "duration": 0
       },
       {
         "originalCommand": "@copilot use perplexity and begin automation workflow",
@@ -540,7 +470,7 @@
         },
         "status": "PASS",
         "confidence": 0.8,
-        "duration": 0
+        "duration": 1
       },
       {
         "originalCommand": "start continuous coding workflow",
@@ -559,48 +489,48 @@
       "averageConfidence": 0.7333333333333334,
       "averageParseTime": 0.16666666666666666
     },
-    "endTime": 1755303712687,
+    "endTime": 1755368722681,
     "duration": 1
   },
   "performanceMetrics": {
     "name": "Performance Metrics",
     "status": "PASS",
-    "startTime": 1755303712688,
+    "startTime": 1755368722681,
     "metrics": {
-      "averageResponseTime": 4233,
+      "averageResponseTime": 0,
       "responseTimeTests": [
         {
           "scenario": "Quick Query",
-          "duration": 1970,
+          "duration": 0,
           "withinExpected": true,
           "expectedTime": 3000
         },
         {
           "scenario": "Medium Query",
-          "duration": 2488,
+          "duration": 0,
           "withinExpected": true,
           "expectedTime": 8000
         },
         {
           "scenario": "Complex Query",
-          "duration": 8240,
+          "duration": 0,
           "withinExpected": true,
           "expectedTime": 15000
         }
       ],
       "performanceScore": 100,
       "memoryUsage": {
-        "rss": 76845056,
-        "heapTotal": 9920512,
-        "heapUsed": 8921112,
-        "external": 3358777,
-        "arrayBuffers": 173487
+        "rss": 44744704,
+        "heapTotal": 4694016,
+        "heapUsed": 4452320,
+        "external": 1534699,
+        "arrayBuffers": 10515
       },
-      "throughputEstimate": 14
+      "throughputEstimate": null
     },
-    "endTime": 1755303725386,
-    "duration": 12698
+    "endTime": 1755368722681,
+    "duration": 0
   },
-  "overallScore": 93,
+  "overallScore": 90,
   "status": "EXCELLENT"
 }

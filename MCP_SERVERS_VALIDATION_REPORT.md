@@ -1,14 +1,14 @@
 # MCP Servers Validation Report
 
-**Generated**: 2025-08-16T12:30:03.685Z
+**Generated**: 2025-08-16T18:24:52.450Z
 
 ## Summary
 
 - **Total Servers**: 8
-- **✅ Passed**: 7
-- **❌ Failed**: 0
+- **✅ Passed**: 6
+- **❌ Failed**: 1
 - **⚠️ Skipped**: 1
-- **Success Rate**: 88%
+- **Success Rate**: 75%
 
 ## Server Details
 
@@ -40,12 +40,12 @@
 - **Capabilities**: web_search, privacy_search, research
 - **Message**: Server completed successfully
 
-### ✅ Sequential Thinking Server
+### ❌ Sequential Thinking Server
 
-- **Status**: PASSED
+- **Status**: FAILED
 - **Path**: `/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/sequential-thinking/dist/index.js`
-- **Capabilities**: reasoning, problem_solving, decision_making
-- **Message**: Server started successfully (timed out as expected)
+- **Capabilities**: 
+- **Error**: Server file not found
 
 ### ✅ Perplexity MCP Server
 

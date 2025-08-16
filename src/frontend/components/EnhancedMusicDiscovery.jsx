@@ -171,6 +171,42 @@ function EnhancedMusicDiscovery() {
     }));
   };
 
+  // Inline mini visualization (client-only)
+  const MoodMiniViz = () => {
+    const entries = Object.entries(moodSettings);
+    const width = 200;
+    const height = 60;
+    const barGap = 6;
+    const barWidth = (width - barGap * (entries.length - 1)) / entries.length;
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+          Current Mood Profile
+        </Typography>
+        <svg width={width} height={height} role="img" aria-label="Mood profile spark bars">
+          {entries.map(([k, v], idx) => {
+            const h = Math.max(2, Math.round((v / 100) * (height - 12)));
+            const x = idx * (barWidth + barGap);
+            const y = height - h;
+            return (
+              <g key={k}>
+                <rect x={x} y={y} width={barWidth} height={h} fill="#1976d2" rx={2} />
+                <title>{`${k}: ${v}`}</title>
+              </g>
+            );
+          })}
+        </svg>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+          {entries.map(([k]) => (
+            <Typography key={k} variant="caption" color="text.secondary">
+              {k}
+            </Typography>
+          ))}
+        </Box>
+      </Box>
+    );
+  };
+
   // Add track to playlist
   const addToPlaylist = async (track) => {
     try {
@@ -308,6 +344,7 @@ function EnhancedMusicDiscovery() {
                   </Grid>
                 ))}
               </Grid>
+              <MoodMiniViz />
             </Box>
           )}
 

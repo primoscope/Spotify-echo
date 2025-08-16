@@ -165,27 +165,9 @@ function EnhancedAnalyticsDashboard() {
             retentionRate: 78.6,
           },
           topTracks: [
-            {
-              id: '1',
-              name: 'Blinding Lights',
-              artist: 'The Weeknd',
-              plays: 1247,
-              trend: 'up',
-            },
-            {
-              id: '2',
-              name: 'As It Was',
-              artist: 'Harry Styles',
-              plays: 1108,
-              trend: 'up',
-            },
-            {
-              id: '3',
-              name: 'Anti-Hero',
-              artist: 'Taylor Swift',
-              plays: 987,
-              trend: 'down',
-            },
+            { id: '1', name: 'Blinding Lights', artist: 'The Weeknd', plays: 1247, trend: 'up' },
+            { id: '2', name: 'As It Was', artist: 'Harry Styles', plays: 1108, trend: 'up' },
+            { id: '3', name: 'Anti-Hero', artist: 'Taylor Swift', plays: 987, trend: 'down' },
           ],
         });
       } finally {
@@ -241,24 +223,21 @@ function EnhancedAnalyticsDashboard() {
     loadAnalytics();
   }, [loadAnalytics]);
 
-  // Export analytics data
-  const exportData = async (format = 'csv') => {
-    try {
-      const response = await fetch(`/api/analytics/export?format=${format}&timeRange=${timeRange}`);
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `analytics-${timeRange}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
-    } catch (error) {
-      console.error('Export error:', error);
-    }
+  // Tiny sparkline generator
+  const Sparkline = ({ points = [], color = '#8884d8', width = 100, height = 30 }) => {
+    if (!points || points.length === 0) return null;
+    const max = Math.max(...points);
+    const min = Math.min(...points);
+    const norm = points.map((p, i) => {
+      const x = (i / (points.length - 1)) * (width - 2);
+      const y = height - 2 - (max === min ? 0 : ((p - min) / (max - min)) * (height - 4));
+      return `${x},${y}`;
+    });
+    return (
+      <svg width={width} height={height} aria-label="sparkline">
+        <polyline fill="none" stroke={color} strokeWidth="2" points={norm.join(' ')} />
+      </svg>
+    );
   };
 
   // Render overview cards
@@ -273,6 +252,7 @@ function EnhancedAnalyticsDashboard() {
         change: overview.trendsUp ? '+12.5%' : '-3.2%',
         icon: <PlayArrow />,
         color: '#1db954',
+        series: (analytics.listeningPatterns?.hourlyDistribution || generateHourlyData()).map((d) => d.plays),
       },
       {
         title: 'Active Users',
@@ -280,6 +260,7 @@ function EnhancedAnalyticsDashboard() {
         change: '+8.3%',
         icon: <People />,
         color: '#1976d2',
+        series: (analytics.listeningPatterns?.hourlyDistribution || generateHourlyData()).map((d) => d.users),
       },
       {
         title: 'Avg Session',
@@ -287,6 +268,7 @@ function EnhancedAnalyticsDashboard() {
         change: '+5.7%',
         icon: <Timeline />,
         color: '#ed6c02',
+        series: generateHourlyData().map((d) => d.users / 2),
       },
       {
         title: 'AI Accuracy',
@@ -294,6 +276,7 @@ function EnhancedAnalyticsDashboard() {
         change: '+2.1%',
         icon: <Assessment />,
         color: '#9c27b0',
+        series: generateHourlyData().map((d) => 80 + Math.random() * 10),
       },
     ];
 
@@ -320,7 +303,10 @@ function EnhancedAnalyticsDashboard() {
                       sx={{ mt: 1 }}
                     />
                   </Box>
-                  <Avatar sx={{ bgcolor: card.color, width: 48, height: 48 }}>{card.icon}</Avatar>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: card.color, width: 40, height: 40, mb: 1 }}>{card.icon}</Avatar>
+                    <Sparkline points={card.series} color={card.color} />
+                  </Box>
                 </Box>
               </CardContent>
             </Card>

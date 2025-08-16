@@ -1,10 +1,5 @@
 import { useState, useCallback } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
   List,
   ListItem,
   ListItemText,
@@ -12,20 +7,12 @@ import {
   Avatar,
   IconButton,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  LinearProgress,
   Stack,
   Paper,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   Rating,
-  Alert,
-  CircularProgress,
 } from '@mui/material';
 import {
   ThumbUp,

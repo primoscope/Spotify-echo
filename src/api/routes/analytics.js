@@ -662,7 +662,7 @@ router.post('/events', async (req, res) => {
       userAgent: req.headers['user-agent'] || '',
       ip: req.ip,
       createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days TTL
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days TTL
     };
 
     const db = analytics.dbManager.getDatabase();

@@ -316,7 +316,7 @@ async function getMockDiscoveredTracks(limit, options = {}) {
       id: 'track3',
       name: 'As It Was',
       artist: 'Harry Styles',
-      album: { name: 'Harry\'s House', images: [{ url: '/api/placeholder-album.jpg' }] },
+      album: { name: "Harry's House", images: [{ url: '/api/placeholder-album.jpg' }] },
       duration_ms: 167000,
       confidence: 0.85,
       algorithm: options.type || 'general',

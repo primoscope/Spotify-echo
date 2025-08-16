@@ -18,9 +18,11 @@ class LLMProviderManager {
     this.initialized = false;
     this.keyPools = {
       gemini: new KeyPool((process.env.GEMINI_API_KEYS || '').split(/[\s,]+/).filter(Boolean)),
-      openrouter: new KeyPool((process.env.OPENROUTER_API_KEYS || '').split(/[\s,]+/).filter(Boolean)),
+      openrouter: new KeyPool(
+        (process.env.OPENROUTER_API_KEYS || '').split(/[\s,]+/).filter(Boolean)
+      ),
     };
-    
+
     // Circuit breaker state
     this.circuitBreakers = new Map(); // providerId -> CircuitBreakerState
     this.requestCorrelations = new Map(); // correlationId -> request metadata
@@ -51,7 +53,7 @@ class LLMProviderManager {
 
       this.initialized = true;
       console.log('✅ LLM Provider Manager initialized with enhanced features');
-      
+
       // Initialize circuit breakers for all providers
       this.initializeCircuitBreakers();
     } catch (error) {
@@ -65,7 +67,7 @@ class LLMProviderManager {
    */
   initializeCircuitBreakers() {
     const providerIds = ['gemini', 'openai', 'openrouter', 'mock'];
-    
+
     for (const providerId of providerIds) {
       this.circuitBreakers.set(providerId, {
         state: 'CLOSED', // CLOSED, OPEN, HALF_OPEN
@@ -81,10 +83,10 @@ class LLMProviderManager {
           consecutiveLatencyThreshold: 5, // Open circuit after 5 consecutive high-latency requests
           timeout: 60000, // Stay open for 1 minute initially
           halfOpenMaxRequests: 3, // Allow 3 test requests in half-open state
-        }
+        },
       });
     }
-    
+
     console.log(`🔒 Initialized circuit breakers for ${providerIds.length} providers`);
   }
 
@@ -264,7 +266,13 @@ class LLMProviderManager {
         // If it's an auth or rate error, rotate key using KeyPool
         const msg = String(error.message || '').toLowerCase();
         if (providerId === 'gemini' && this.keyPools.gemini) {
-          if (msg.includes('401') || msg.includes('403') || msg.includes('auth') || msg.includes('429') || msg.includes('rate')) {
+          if (
+            msg.includes('401') ||
+            msg.includes('403') ||
+            msg.includes('auth') ||
+            msg.includes('429') ||
+            msg.includes('rate')
+          ) {
             this.keyPools.gemini.reportFailure(config.apiKey, error.message);
             const next = this.keyPools.gemini.getCurrentKey();
             if (next && next !== config.apiKey) {
@@ -276,7 +284,13 @@ class LLMProviderManager {
           }
         }
         if (providerId === 'openrouter' && this.keyPools.openrouter) {
-          if (msg.includes('401') || msg.includes('403') || msg.includes('auth') || msg.includes('429') || msg.includes('rate')) {
+          if (
+            msg.includes('401') ||
+            msg.includes('403') ||
+            msg.includes('auth') ||
+            msg.includes('429') ||
+            msg.includes('rate')
+          ) {
             this.keyPools.openrouter.reportFailure(config.apiKey, error.message);
             const next = this.keyPools.openrouter.getCurrentKey();
             if (next && next !== config.apiKey) {
@@ -459,12 +473,18 @@ class LLMProviderManager {
     switch (providerId) {
       case 'gemini': {
         const GeminiProvider = require('./llm-providers/gemini-provider');
-        this.providers.set(providerId, new GeminiProvider({ apiKey: config.apiKey, model: config.model }));
+        this.providers.set(
+          providerId,
+          new GeminiProvider({ apiKey: config.apiKey, model: config.model })
+        );
         break;
       }
       case 'openai': {
         const OpenAIProvider = require('./llm-providers/openai-provider');
-        this.providers.set(providerId, new OpenAIProvider({ apiKey: config.apiKey, model: config.model }));
+        this.providers.set(
+          providerId,
+          new OpenAIProvider({ apiKey: config.apiKey, model: config.model })
+        );
         break;
       }
       case 'azure': {
@@ -534,7 +554,7 @@ class LLMProviderManager {
   isProviderAvailable(providerId) {
     const breaker = this.circuitBreakers.get(providerId);
     if (!breaker) return true; // No circuit breaker = available
-    
+
     return breaker.state !== 'OPEN';
   }
 
@@ -544,22 +564,24 @@ class LLMProviderManager {
   recordRequestLatency(providerId, latency, success) {
     const breaker = this.circuitBreakers.get(providerId);
     if (!breaker) return;
-    
+
     // Update recent latencies (keep last 10)
     breaker.recentLatencies.push(latency);
     if (breaker.recentLatencies.length > 10) {
       breaker.recentLatencies.shift();
     }
-    
+
     if (success) {
       breaker.successCount++;
       breaker.failureCount = 0; // Reset failure count on success
-      
-      // Check latency threshold  
+
+      // Check latency threshold
       if (latency > breaker.config.latencyThreshold) {
         breaker.consecutiveLatencyFailures++;
         if (breaker.consecutiveLatencyFailures >= breaker.config.consecutiveLatencyThreshold) {
-          console.warn(`⚠️ Provider ${providerId} consistently slow (${latency}ms > ${breaker.config.latencyThreshold}ms)`);
+          console.warn(
+            `⚠️ Provider ${providerId} consistently slow (${latency}ms > ${breaker.config.latencyThreshold}ms)`
+          );
           this.openCircuit(providerId, breaker);
         }
       } else {
@@ -568,7 +590,7 @@ class LLMProviderManager {
     } else {
       breaker.failureCount++;
       breaker.consecutiveLatencyFailures = 0; // Reset latency count on general failure
-      
+
       if (breaker.failureCount >= breaker.config.failureThreshold) {
         this.openCircuit(providerId, breaker);
       }
@@ -581,14 +603,16 @@ class LLMProviderManager {
   openCircuit(providerId, breaker) {
     breaker.state = 'OPEN';
     breaker.lastFailureTime = Date.now();
-    
+
     // Exponential backoff: 1min, 5min, 15min, then 15min max
     const backoffMultiplier = Math.min(Math.pow(2, breaker.failureCount), 15);
     const backoffMs = Math.min(60000 * backoffMultiplier, 15 * 60000); // Max 15 minutes
-    
+
     breaker.openUntil = Date.now() + backoffMs;
-    
-    console.warn(`🚨 Circuit breaker OPEN for ${providerId}, retry in ${Math.round(backoffMs / 60000)}min`);
+
+    console.warn(
+      `🚨 Circuit breaker OPEN for ${providerId}, retry in ${Math.round(backoffMs / 60000)}min`
+    );
   }
 
   /**
@@ -712,7 +736,7 @@ class LLMProviderManager {
     for (const [providerId, config] of this.providerConfigs) {
       // Get telemetry data if available
       const telemetryData = llmTelemetry.getProviderMetrics(providerId);
-      
+
       // Get circuit breaker status
       const breaker = this.circuitBreakers.get(providerId);
 
@@ -732,20 +756,24 @@ class LLMProviderManager {
           successRate: telemetryData?.current?.successRate || null,
           totalRequests: telemetryData?.current?.requests || 0,
         },
-        circuitBreaker: breaker ? {
-          state: breaker.state,
-          failureCount: breaker.failureCount,
-          successCount: breaker.successCount,
-          consecutiveLatencyFailures: breaker.consecutiveLatencyFailures,
-          openUntil: breaker.openUntil ? new Date(breaker.openUntil).toISOString() : null,
-          lastFailureTime: breaker.lastFailureTime ? new Date(breaker.lastFailureTime).toISOString() : null,
-          recentLatencies: breaker.recentLatencies.slice(-5), // Last 5 latencies
-          thresholds: {
-            latency: breaker.config.latencyThreshold,
-            failures: breaker.config.failureThreshold,
-            consecutiveLatency: breaker.config.consecutiveLatencyThreshold
-          }
-        } : null,
+        circuitBreaker: breaker
+          ? {
+              state: breaker.state,
+              failureCount: breaker.failureCount,
+              successCount: breaker.successCount,
+              consecutiveLatencyFailures: breaker.consecutiveLatencyFailures,
+              openUntil: breaker.openUntil ? new Date(breaker.openUntil).toISOString() : null,
+              lastFailureTime: breaker.lastFailureTime
+                ? new Date(breaker.lastFailureTime).toISOString()
+                : null,
+              recentLatencies: breaker.recentLatencies.slice(-5), // Last 5 latencies
+              thresholds: {
+                latency: breaker.config.latencyThreshold,
+                failures: breaker.config.failureThreshold,
+                consecutiveLatency: breaker.config.consecutiveLatencyThreshold,
+              },
+            }
+          : null,
       };
     }
 

@@ -171,15 +171,18 @@ function ProviderPanel() {
   return (
     <div className="provider-panel">
       {mcpStatus !== 'healthy' && (
-        <div style={{
-          background: '#fff3cd',
-          color: '#856404',
-          border: '1px solid #ffeeba',
-          padding: '8px 12px',
-          borderRadius: 4,
-          marginBottom: 8
-        }}>
-          ⚠️ MCP health is {mcpStatus}. Some automation or model orchestration features may be limited.
+        <div
+          style={{
+            background: '#fff3cd',
+            color: '#856404',
+            border: '1px solid #ffeeba',
+            padding: '8px 12px',
+            borderRadius: 4,
+            marginBottom: 8,
+          }}
+        >
+          ⚠️ MCP health is {mcpStatus}. Some automation or model orchestration features may be
+          limited.
         </div>
       )}
       <div className="provider-controls">
@@ -290,7 +293,8 @@ function ProviderPanel() {
         )}
         {telemetryData?.current && (
           <span className="telemetry-info">
-            ({telemetryData.current.requests} requests, {formatLatency(telemetryData.current.averageLatency)} avg)
+            ({telemetryData.current.requests} requests,{' '}
+            {formatLatency(telemetryData.current.averageLatency)} avg)
           </span>
         )}
       </div>

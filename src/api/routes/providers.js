@@ -47,7 +47,8 @@ router.post('/switch', async (req, res) => {
     const status = llmProviderManager.getProviderStatus();
     const target = status.providers[provider];
     if (!target) return res.status(400).json({ success: false, error: 'unknown provider' });
-    if (!target.available) return res.status(409).json({ success: false, error: 'provider unavailable' });
+    if (!target.available)
+      return res.status(409).json({ success: false, error: 'provider unavailable' });
 
     // Set desired provider; manager will use it if healthy
     llmProviderManager.currentProvider = provider;
@@ -60,10 +61,15 @@ router.post('/switch', async (req, res) => {
     await llmProviderManager.testProvider(provider);
     const after = llmProviderManager.getProviderStatus();
     if (after.providers[provider]?.status !== 'connected') {
-      return res.status(409).json({ success: false, error: 'switch failed', details: after.providers[provider] });
+      return res
+        .status(409)
+        .json({ success: false, error: 'switch failed', details: after.providers[provider] });
     }
 
-    return res.json({ success: true, current: { provider, model: model || after.providers[provider]?.model } });
+    return res.json({
+      success: true,
+      current: { provider, model: model || after.providers[provider]?.model },
+    });
   } catch (error) {
     console.error('Unified provider switch failed:', error.message);
     res.status(500).json({ success: false, error: 'Failed to switch provider' });
@@ -74,11 +80,11 @@ router.get('/health', async (req, res) => {
   try {
     const status = llmProviderManager.getProviderStatus();
     const providers = status.providers;
-    
+
     // Get detailed telemetry data
     const llmTelemetry = require('../../chat/llm-telemetry');
     const telemetryData = llmTelemetry.getCurrentMetrics();
-    
+
     // Enhanced provider health with telemetry
     const enhancedProviders = {};
     for (const [providerId, provider] of Object.entries(providers)) {
@@ -93,20 +99,21 @@ router.get('/health', async (req, res) => {
           lastRequestTime: telemetry.lastRequestTime || null,
           // Include last N latency samples for charting
           recentLatencies: telemetry.recentLatencies?.slice(-20) || [],
-        }
+        },
       };
     }
-    
+
     const connected = Object.values(providers).filter((p) => p.status === 'connected').length;
     const total = Object.keys(providers).length;
-    const overall = connected > 0 ? (connected / total >= 0.5 ? 'healthy' : 'degraded') : 'unhealthy';
-    
-    res.json({ 
-      success: true, 
-      status: overall, 
+    const overall =
+      connected > 0 ? (connected / total >= 0.5 ? 'healthy' : 'degraded') : 'unhealthy';
+
+    res.json({
+      success: true,
+      status: overall,
       providers: enhancedProviders,
       aggregated: telemetryData.aggregated,
-      timestamp: new Date().toISOString() 
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Unified providers health failed:', error.message);

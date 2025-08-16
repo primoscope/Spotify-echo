@@ -1,23 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Chip,
-  LinearProgress,
-  CircularProgress,
-  Alert,
-  Pagination,
-  Tooltip,
-  IconButton,
-  Divider,
-} from '@mui/material';
+import { Pagination, Tooltip, IconButton, Divider } from '@mui/material';
 import { TrendingUp, TrendingDown, Refresh, Download, ClearAll, Cached } from '@mui/icons-material';
 
 /**

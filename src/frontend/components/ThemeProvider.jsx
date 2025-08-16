@@ -329,7 +329,7 @@ const ThemeProvider = ({ children }) => {
  * Theme Toggle Component
  * Provides a UI control for switching between light/dark modes
  */
-import { IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
+import { IconButton, Tooltip, Menu, ListItemIcon, ListItemText } from '@mui/material';
 import { Brightness4, Brightness7, Palette, AutoMode } from '@mui/icons-material';
 
 export const ThemeToggle = ({ showCustomization = false }) => {

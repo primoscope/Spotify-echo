@@ -60,8 +60,8 @@ const DEFAULT_LLM_CONFIG = {
     enabled: true,
     fallback: true,
     responses: [
-      'Here\'s a great music recommendation based on your taste!',
-      'I\'d suggest exploring this genre - it matches your listening patterns.',
+      "Here's a great music recommendation based on your taste!",
+      "I'd suggest exploring this genre - it matches your listening patterns.",
       'Based on your preferences, you might enjoy these tracks.',
       'Let me recommend some music that fits your current mood.',
     ],
@@ -150,7 +150,7 @@ function validateApiKey(provider, apiKey) {
 async function testLLMProvider(provider, config) {
   try {
     let response;
-    const testPrompt = 'Respond with exactly: \'Test successful\'';
+    const testPrompt = "Respond with exactly: 'Test successful'";
 
     switch (provider) {
       case 'openai':
@@ -529,12 +529,12 @@ router.get('/llm-providers/models/:provider', async (req, res) => {
         {
           id: 'google/gemini-pro-1.5',
           name: 'Gemini Pro 1.5 (via OpenRouter)',
-          description: 'Google\'s advanced model',
+          description: "Google's advanced model",
         },
         {
           id: 'meta-llama/llama-3.1-405b-instruct',
           name: 'Llama 3.1 405B',
-          description: 'Meta\'s largest open model',
+          description: "Meta's largest open model",
         },
         {
           id: 'mistralai/mixtral-8x7b-instruct',
@@ -858,9 +858,17 @@ router.post('/perplexity/research', async (req, res) => {
     }
 
     const executor = new PromptExecutor();
-    const result = await executor.execute('analysis/user-driven-sonar-pro', { user_prompt: prompt, context });
+    const result = await executor.execute('analysis/user-driven-sonar-pro', {
+      user_prompt: prompt,
+      context,
+    });
 
-    return res.json({ success: true, content: result.content, usage: result.usage, model: result.model || 'perplexity/sonar-pro' });
+    return res.json({
+      success: true,
+      content: result.content,
+      usage: result.usage,
+      model: result.model || 'perplexity/sonar-pro',
+    });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }

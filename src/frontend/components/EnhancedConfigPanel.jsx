@@ -1,25 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Switch,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Slider,
-  Button,
-  Alert,
-  Grid,
-  Chip,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from '@mui/material';
+import { Switch, Slider } from '@mui/material';
 import {
   Settings,
   MusicNote,

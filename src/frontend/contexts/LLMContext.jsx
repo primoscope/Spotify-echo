@@ -84,7 +84,8 @@ export function LLMProvider({ children }) {
         let selectedProvider = currentProvider;
 
         if (!updatedProviders[currentProvider]?.available) {
-          selectedProvider = providerPriority.find((key) => updatedProviders[key]?.available) || 'mock';
+          selectedProvider =
+            providerPriority.find((key) => updatedProviders[key]?.available) || 'mock';
         }
         setCurrentProvider(selectedProvider);
       }

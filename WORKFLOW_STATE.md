@@ -27,7 +27,7 @@ Next Actions:
 - UI Analyze Summary (2025-08-16):
   - Provider controls: `ProviderPanel.jsx` relies on `/api/chat/providers`, `/api/settings/llm-providers/models`, and `/api/settings/llm-providers/telemetry`. No unified `/api/providers` yet; keep current contracts and add small UX improvements only.
   - Chat UX: `EnhancedChatInterface.jsx` supports context chips and provider tag but lacks a quick provider switch in-chat and an inline explainability panel toggle.
-  - Discovery: `EnhancedMusicDiscovery.jsx` has modes (smart/mood/trending/social/radio) but lacks lightweight audio feature visualizations for mood sliders; API endpoints exist: `/api/music/discover`, `/api/music/trending`, `/api/social/activity`.
+  - Discovery: `EnhancedMusicDiscovery.jsx` has modes (smart/mood/trending/social/AI radio) but lacks lightweight audio feature visualizations for mood sliders; API endpoints exist: `/api/music/discover`, `/api/music/trending`, `/api/social/activity`.
   - Analytics: `EnhancedAnalyticsDashboard.jsx` pulls `/api/analytics/dashboard` and `/api/analytics/realtime` with mock fallbacks; needs small chart components or inline spark bars (client-only) without backend changes.
   - Advanced Config: `EnhancedAdvancedSettings.jsx` uses `/api/settings/*` and `/api/chat/test-provider`; OK to keep and focus on glass UI tweaks.
 
@@ -57,4 +57,9 @@ Next Actions:
 - Performance & Automation (2025-08-16):
   - Added `sonar-project.properties` for baseline static analysis.
   - Added scripts: `scripts/bench/api-latency.js` and `scripts/ui/bundle-stats.js`.
-  - Next: capture baseline metrics after build and append summary here. 
+  - Next: capture baseline metrics after build and append summary here.
+
+- Validation Summary (2025-08-16):
+  - API latency (samples=5, dev env, likely endpoints inactive): chat/providers p95=0ms ok=0%; analytics/dashboard p95=1ms ok=0%; music/discover p95=0ms ok=0%.
+  - Bundle stats (post-build): totalBytes=729,731; top JS chunks: mui=350,863, react=182,534, vendor=64,874, main=21,844, mui-icons=14,265.
+  - Follow-up: repeat API latency after ensuring server endpoints are live/auth where required; track bundle gzip with target < 500kB. 

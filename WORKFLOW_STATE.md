@@ -18,4 +18,23 @@ Risks:
 Next Actions:
 - BLUEPRINT provider registry endpoints and telemetry storage.
 - Extend `src/api/routes/llm-providers.js` with list/switch/health.
-- Update `ProviderPanel.jsx` to display metrics and switch provider. 
+- Update `ProviderPanel.jsx` to display metrics and switch provider.
+
+---
+
+## UI Agent Log
+
+- UI Analyze Summary (2025-08-16):
+  - Provider controls: `ProviderPanel.jsx` relies on `/api/chat/providers`, `/api/settings/llm-providers/models`, and `/api/settings/llm-providers/telemetry`. No unified `/api/providers` yet; keep current contracts and add small UX improvements only.
+  - Chat UX: `EnhancedChatInterface.jsx` supports context chips and provider tag but lacks a quick provider switch in-chat and an inline explainability panel toggle.
+  - Discovery: `EnhancedMusicDiscovery.jsx` has modes (smart/mood/trending/social/radio) but lacks lightweight audio feature visualizations for mood sliders; API endpoints exist: `/api/music/discover`, `/api/music/trending`, `/api/social/activity`.
+  - Analytics: `EnhancedAnalyticsDashboard.jsx` pulls `/api/analytics/dashboard` and `/api/analytics/realtime` with mock fallbacks; needs small chart components or inline spark bars (client-only) without backend changes.
+  - Advanced Config: `EnhancedAdvancedSettings.jsx` uses `/api/settings/*` and `/api/chat/test-provider`; OK to keep and focus on glass UI tweaks.
+
+- Immediate UI Tasks:
+  1) Add inline provider quick-switch in `EnhancedChatInterface.jsx` (uses existing `useLLM().switchProvider`) and show current provider badge.
+  2) Add mini audio feature visualization (client-side only) to `EnhancedMusicDiscovery.jsx` mood sliders (radar/sparkline with existing slider state).
+  3) Add compact sparkline widgets for top metrics in `EnhancedAnalyticsDashboard.jsx` using generated mock data when API errors.
+
+- Deferrals to CLI Agent (API contracts):
+  - Unified `/api/providers`, `/api/providers/switch`, `/api/providers/health` with telemetry persistence. 

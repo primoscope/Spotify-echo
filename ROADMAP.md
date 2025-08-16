@@ -68,6 +68,24 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 
 ---
 
+## UI Agent
+
+- Current Focus (2025‑08‑16):
+  - Advanced AI Integration: Provider quick-switch in chat, provider badge.
+  - Smart Music Discovery: Mood sliders + mini feature visualization (client-only).
+  - Analytics Dashboard: Compact sparkline widgets for top metrics (client-only).
+  - Advanced Configuration: Minor glass UI polish; no API changes.
+
+- Next UI Tasks:
+  1) EnhancedChatInterface.jsx: add provider quick-switch using `useLLM()`; show current provider chip.
+  2) EnhancedMusicDiscovery.jsx: add client-only radar/sparkline for `moodSettings` values.
+  3) EnhancedAnalyticsDashboard.jsx: add sparkline components for overview metrics using mock fallback data.
+
+- Coordination to CLI Agent (create endpoints, no UI block):
+  - Unified providers API: GET `/api/providers`, POST `/api/providers/switch`, GET `/api/providers/health` with telemetry persistence.
+
+---
+
 ## Research & Decisions
 - Auto research (`ROADMAP_AUTO.md`) feeds tasks weekly. Significant decisions are copied here with dates and commit refs.
 

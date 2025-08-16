@@ -1,5 +1,8 @@
 const axios = require('axios');
 const RateLimiter = require('./rate-limiter');
+const { httpClient } = require('../utils/http-client');
+const performanceMonitor = require('../api/monitoring/performance-monitor');
+const { getRedisManager } = require('../utils/redis');
 
 /**
  * Spotify API Service
@@ -9,6 +12,12 @@ class SpotifyAPIService {
   constructor() {
     this.rateLimiter = new RateLimiter();
     this.baseURL = 'https://api.spotify.com/v1';
+    this.redis = null;
+    try {
+      this.redis = getRedisManager();
+    } catch (e) {
+      this.redis = null;
+    }
   }
 
   /**
@@ -21,32 +30,27 @@ class SpotifyAPIService {
       throw new Error('Access token is required for Spotify API calls');
     }
 
+    const url = `${this.baseURL}/search`;
+    const startedAt = Date.now();
     try {
       await this.rateLimiter.checkLimit();
 
-      const response = await axios.get(`${this.baseURL}/search`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params: {
-          q: query,
-          type,
-          limit,
-          offset,
-          market,
-        },
+      const response = await httpClient.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { q: query, type, limit, offset, market },
       });
 
-      return this.normalizeSearchResults(response.data, type);
+      const normalized = this.normalizeSearchResults(response.data, type);
+      performanceMonitor.trackSpotifyAPI('search', Date.now() - startedAt, true);
+      return normalized;
     } catch (error) {
-      console.error('Error searching Spotify:', error.message);
-
-      if (error.response?.status === 429) {
+      const status = error.response?.status;
+      if (status === 429) {
         const retryAfter = error.response.headers['retry-after'] || 1;
         await this.rateLimiter.addDelay(retryAfter * 1000);
         return this.search(query, type, options);
       }
-
+      performanceMonitor.trackSpotifyAPI('search', Date.now() - startedAt, false);
       throw error;
     }
   }
@@ -280,18 +284,33 @@ class SpotifyAPIService {
       throw new Error('Access token is required');
     }
 
+    const cacheKey = 'spotify:genres:available';
+    const startedAt = Date.now();
+
+    // Try cache first
+    if (this.redis) {
+      const cached = await this.redis.get(cacheKey);
+      if (cached) {
+        performanceMonitor.trackSpotifyAPI('genres_cached', 1, true);
+        return cached;
+      }
+    }
+
     try {
       await this.rateLimiter.checkLimit();
 
-      const response = await axios.get(`${this.baseURL}/recommendations/available-genre-seeds`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const response = await httpClient.get(`${this.baseURL}/recommendations/available-genre-seeds`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      return response.data.genres;
+      const genres = response.data.genres;
+      if (this.redis) {
+        await this.redis.set(cacheKey, genres, 6 * 3600); // 6h
+      }
+      performanceMonitor.trackSpotifyAPI('genres', Date.now() - startedAt, true);
+      return genres;
     } catch (error) {
-      console.error('Error getting available genres:', error);
+      performanceMonitor.trackSpotifyAPI('genres', Date.now() - startedAt, false);
       throw error;
     }
   }

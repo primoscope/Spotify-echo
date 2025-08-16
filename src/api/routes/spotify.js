@@ -11,9 +11,22 @@ const {
   sanitizeUserData,
   getSecureCookieOptions,
 } = require('../../utils/auth-helpers');
-const { getRedisManager } = require('../../utils/redis');
+const Redis = require('../../utils/redis');
+const { getRedisManager } = Redis;
+
+// Lightweight cache helper middleware
+async function cacheMiddleware(req, res, next) {
+	try {
+		const mgr = await getRedisManager();
+		req.cache = mgr;
+	} catch (e) {
+		// ignore
+	}
+	next();
+}
 
 const router = express.Router();
+router.use(cacheMiddleware);
 const spotifyService = new SpotifyAudioFeaturesService();
 
 // Spotify OAuth configuration

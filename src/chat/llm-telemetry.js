@@ -189,6 +189,8 @@ class LLMTelemetry {
    * Get aggregated metrics
    */
   getAggregatedMetrics() {
+    // Ensure latest snapshot before returning
+    try { this.collectMetrics(); } catch (e) {}
     return {
       ...this.aggregatedMetrics,
       providersCount: this.providers.size,
@@ -212,6 +214,7 @@ class LLMTelemetry {
    * Get performance insights
    */
   getPerformanceInsights() {
+    try { this.collectMetrics(); } catch (e) {}
     const insights = {
       recommendations: [],
       alerts: [],
@@ -294,7 +297,7 @@ class LLMTelemetry {
     const cutoff = new Date();
     cutoff.setHours(cutoff.getHours() - hours);
 
-    return this.metricsHistory.filter((snapshot) => new Date(snapshot.timestamp) > cutoff);
+    return this.metricsHistory.filter((snapshot) => new Date(snapshot.timestamp) >= cutoff);
   }
 
   /**

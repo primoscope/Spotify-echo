@@ -76,6 +76,8 @@ class ProviderManager {
    * Load provider configurations with fresh API keys
    */
   async loadProviderConfigurations() {
+    const parseKeys = (val) => (val || '').split(/[\s,]+/).filter(Boolean);
+    const env = process.env;
     const configs = {
       mock: {
         name: 'Demo Mode (Mock)',
@@ -84,7 +86,7 @@ class ProviderManager {
         status: 'connected',
         model: 'mock-music-assistant',
         responseTime: 500,
-        priority: 10, // Lowest priority
+        priority: 10,
       },
       gemini: {
         name: 'Google Gemini 1.5 Flash',
@@ -93,7 +95,7 @@ class ProviderManager {
         endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
         timeout: 10000,
         maxRetries: 3,
-        priority: 1, // Highest priority
+        priority: 1,
         features: ['text', 'image', 'audio'],
         costPerToken: 0.000001,
       },
@@ -110,7 +112,14 @@ class ProviderManager {
       },
     };
 
-    // Set current API keys
+    const geminiKeys = parseKeys(env.GEMINI_API_KEYS || env.GEMINI_API_KEY || env.GEMINI_API);
+    const openrouterKeys = parseKeys(env.OPENROUTER_API_KEYS || env.OPENROUTER_API_KEY || env.OPENROUTER_API);
+
+    this.providerPool = {
+      openrouter: openrouterKeys.length ? openrouterKeys : (this.providerPool.openrouter || []),
+      gemini: geminiKeys.length ? geminiKeys : (this.providerPool.gemini || []),
+    };
+
     configs.gemini.apiKey = this.getCurrentKey('gemini');
     configs.openrouter.apiKey = this.getCurrentKey('openrouter');
 
@@ -576,6 +585,45 @@ class ProviderManager {
     return Array.from(this.providerConfigs.values()).filter(
       (config) => config.available && config.status === 'connected'
     ).length;
+  }
+
+  /**
+   * Return providers available based on env
+   */
+  getAvailableProviders() {
+    const providers = [];
+    if (process.env.OPENAI_API_KEY) providers.push('openai');
+    if (process.env.GEMINI_API_KEY || process.env.GEMINI_API || process.env.GEMINI_API_KEYS) providers.push('gemini');
+    if (process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API || process.env.OPENROUTER_API_KEYS) providers.push('openrouter');
+    if (providers.length === 0) providers.push('mock');
+    return providers;
+  }
+
+  /**
+   * Create task-specific prompt templates
+   */
+  createTaskPrompt(task, codeOrText, targetModel) {
+    const lower = String(task || '').toLowerCase();
+    if (lower.includes('code-review')) {
+      return `You are a rigorous code review assistant. Review the following code for correctness, security, and style. Model: ${targetModel}\n\n${codeOrText}`;
+    }
+    if (lower.includes('code-generation')) {
+      return `You are an expert software engineer. Write high-quality, tested code for the following task. Model: ${targetModel}\n\n${codeOrText}`;
+    }
+    return `Analyze the following input and provide a concise, actionable result. Model: ${targetModel}\n\n${codeOrText}`;
+  }
+
+  /**
+   * Select a provider for a given task type
+   */
+  selectProvider(taskType) {
+    const available = this.getAvailableProviders();
+    if (taskType && taskType.toLowerCase().includes('analysis') && available.includes('openrouter')) {
+      return 'openrouter';
+    }
+    if (available.includes('gemini')) return 'gemini';
+    if (available.includes('openai')) return 'openai';
+    return available[0] || 'mock';
   }
 
   /**

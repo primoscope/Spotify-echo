@@ -69,4 +69,9 @@ Next Actions:
 - CLI Construct (2025-08-16):
   - Implemented unified `/api/providers` endpoints (list/switch/health) in `src/api/routes/providers.js` with `llm-provider-manager`.
   - Fixed rate limiter response binding to avoid res context errors.
-  - Note: Local curl validation limited by environment; server logs healthy. Please validate endpoints in normal dev runtime. 
+  - Note: Local curl validation limited by environment; server logs healthy. Please validate endpoints in normal dev runtime.
+
+- Research Sweep Notes (2025-08-16):
+  - Sonar‑Pro prioritizes Perplexity integration hardening and CI optimization (caches, canary, security checks).
+  - Recommends adding advanced logging/monitoring, TypeScript migration, and containerization for reproducibility.
+  - Actionables queued in ROADMAP.md Performance and Quality lanes (logging, tests, containerization tasks). 

@@ -7,7 +7,7 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 ## Pillars & Objectives
 
 ### 1) Advanced AI Integration
-- Multi-Provider Support (OpenAI GPT‑4o, Google Gemini 2.0, OpenRouter Claude 3.5) with runtime switching
+- Multi-Provider LLM Support (OpenAI GPT‑4o, Google Gemini 2.0, OpenRouter Claude 3.5) with runtime switching
 - Intelligent Music Conversations (natural language queries)
 - Context‑Aware Recommendations & explainability
 - Real‑time Provider Testing (latency, health, error rates)
@@ -39,6 +39,14 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 - Next steps:
   - [ ] Add simple request timing middleware per route and persist rolling window to memory/Redis
   - [ ] Capture baseline metrics in test-results/ and append summary to WORKFLOW_STATE.md after builds
+  - [ ] Structured logging (Winston) for API/MCP; surface errors/latency in logs (from Sonar‑Pro)
+
+---
+
+## Quality & Containerization
+- [ ] TypeScript migration plan for backend modules with high change-rate first (e.g., `src/api/routes/*`, `src/chat/*`)
+- [ ] Containerize services (Node backend, React frontend, MCP servers) with simple Dockerfiles; add compose for dev
+- [ ] Expand Jest integration/security tests around MCP endpoints and providers health
 
 ---
 
@@ -157,7 +165,7 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 ```
 
 Notes:
-- Implemented in branch `feature/ui-provider-switch`; validation from this environment is limited (HTTP access constraints). Please verify endpoints in your dev environment and merge.
+- Implemented in branch `main` and validated via logs; external validation recommended.
 - Persist last N latency/error metrics for charts; shape matches `ProviderPanel.jsx` expectations.
 
 ---

@@ -1,0 +1,573 @@
+{
+  "timestamp": "2025-08-16T19:01:50.188Z",
+  "components": [
+    {
+      "name": "VoiceRecording.jsx",
+      "path": "/workspace/src/frontend/components/VoiceRecording.jsx",
+      "size": 2002,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "UserProfile.jsx",
+      "path": "/workspace/src/frontend/components/UserProfile.jsx",
+      "size": 8704,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "ThemeProvider.jsx",
+      "path": "/workspace/src/frontend/components/ThemeProvider.jsx",
+      "size": 10465,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "SongsPage.jsx",
+      "path": "/workspace/src/frontend/components/SongsPage.jsx",
+      "size": 18016,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": true,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "Settings.jsx",
+      "path": "/workspace/src/frontend/components/Settings.jsx",
+      "size": 17170,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "QuickSuggestions.jsx",
+      "path": "/workspace/src/frontend/components/QuickSuggestions.jsx",
+      "size": 1360,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": false,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "ProviderPanel.jsx",
+      "path": "/workspace/src/frontend/components/ProviderPanel.jsx",
+      "size": 14056,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "PlaylistsPage.jsx",
+      "path": "/workspace/src/frontend/components/PlaylistsPage.jsx",
+      "size": 19064,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "PlaylistManager.jsx",
+      "path": "/workspace/src/frontend/components/PlaylistManager.jsx",
+      "size": 16603,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "PlaylistBuilder.jsx",
+      "path": "/workspace/src/frontend/components/PlaylistBuilder.jsx",
+      "size": 12264,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": false,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "MobileResponsiveManager.jsx",
+      "path": "/workspace/src/frontend/components/MobileResponsiveManager.jsx",
+      "size": 18159,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "MessageList.jsx",
+      "path": "/workspace/src/frontend/components/MessageList.jsx",
+      "size": 1667,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": false,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "MCPAutomationStatus.jsx",
+      "path": "/workspace/src/frontend/components/MCPAutomationStatus.jsx",
+      "size": 6399,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "InsightsDashboard.jsx",
+      "path": "/workspace/src/frontend/components/InsightsDashboard.jsx",
+      "size": 17537,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "Header.jsx",
+      "path": "/workspace/src/frontend/components/Header.jsx",
+      "size": 1661,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": false,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "FeedbackSystem.jsx",
+      "path": "/workspace/src/frontend/components/FeedbackSystem.jsx",
+      "size": 14541,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": false,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "ExplainableRecommendations.jsx",
+      "path": "/workspace/src/frontend/components/ExplainableRecommendations.jsx",
+      "size": 17131,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": false,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "EnhancedMusicDiscovery.jsx",
+      "path": "/workspace/src/frontend/components/EnhancedMusicDiscovery.jsx",
+      "size": 19226,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": true,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "EnhancedConfigPanel.jsx",
+      "path": "/workspace/src/frontend/components/EnhancedConfigPanel.jsx",
+      "size": 16405,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "EnhancedChatInterface.jsx",
+      "path": "/workspace/src/frontend/components/EnhancedChatInterface.jsx",
+      "size": 25203,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "EnhancedAnalyticsDashboard.jsx",
+      "path": "/workspace/src/frontend/components/EnhancedAnalyticsDashboard.jsx",
+      "size": 29372,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": true,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "EnhancedAdvancedSettings.jsx",
+      "path": "/workspace/src/frontend/components/EnhancedAdvancedSettings.jsx",
+      "size": 22212,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "Dashboard.jsx",
+      "path": "/workspace/src/frontend/components/Dashboard.jsx",
+      "size": 9807,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "ChatInterface.jsx",
+      "path": "/workspace/src/frontend/components/ChatInterface.jsx",
+      "size": 8304,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "ChatInput.jsx",
+      "path": "/workspace/src/frontend/components/ChatInput.jsx",
+      "size": 1525,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "AuthCallback.jsx",
+      "path": "/workspace/src/frontend/components/AuthCallback.jsx",
+      "size": 1273,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "App.jsx",
+      "path": "/workspace/src/frontend/components/App.jsx",
+      "size": 3083,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "SocketContext.jsx",
+      "path": "/workspace/src/frontend/components/realtime/SocketContext.jsx",
+      "size": 4128,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": false,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "SpotifyPlayerContext.jsx",
+      "path": "/workspace/src/frontend/components/player/SpotifyPlayerContext.jsx",
+      "size": 7788,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "VoiceInterface.jsx",
+      "path": "/workspace/src/frontend/components/chat/VoiceInterface.jsx",
+      "size": 12778,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "ChatInterface.jsx",
+      "path": "/workspace/src/frontend/components/chat/ChatInterface.jsx",
+      "size": 13327,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    },
+    {
+      "name": "AuthContext.jsx",
+      "path": "/workspace/src/frontend/components/auth/AuthContext.jsx",
+      "size": 4738,
+      "metrics": {
+        "hasMemo": false,
+        "hasUseMemo": false,
+        "hasUseCallback": true,
+        "hasUseEffect": true,
+        "hasAria": false,
+        "hasSuspense": false
+      }
+    }
+  ],
+  "research": {
+    "citations": [],
+    "insights": [
+      {
+        "query": "React UI best practices 2025",
+        "content": "Error: Perplexity error 401",
+        "citations": []
+      },
+      {
+        "query": "Material-UI modern patterns",
+        "content": "Error: Perplexity error 401",
+        "citations": []
+      },
+      {
+        "query": "React accessibility improvements",
+        "content": "Error: Perplexity error 401",
+        "citations": []
+      },
+      {
+        "query": "Performance optimization React components",
+        "content": "Error: Perplexity error 401",
+        "citations": []
+      }
+    ]
+  },
+  "plans": [
+    {
+      "component": "EnhancedChatInterface.jsx",
+      "priority": "high",
+      "dependencies": [],
+      "estimatedImpact": 9,
+      "improvements": {
+        "performance": [
+          "Use React.memo for expensive subtrees",
+          "Virtualize long lists (react-window)",
+          "Profile and memoize heavy selectors with useMemo"
+        ],
+        "accessibility": [
+          "Add ARIA roles/labels",
+          "Keyboard navigation and focus traps"
+        ],
+        "userExperience": [
+          "Typing indicators / live status",
+          "Non-blocking loading states"
+        ],
+        "modernization": [
+          "Introduce Suspense for async boundaries",
+          "Integrate React Query for server state"
+        ]
+      }
+    },
+    {
+      "component": "EnhancedMusicDiscovery.jsx",
+      "priority": "high",
+      "dependencies": [],
+      "estimatedImpact": 9,
+      "improvements": {
+        "performance": [
+          "Use React.memo for expensive subtrees",
+          "Virtualize long lists (react-window)",
+          "Profile and memoize heavy selectors with useMemo"
+        ],
+        "accessibility": [
+          "Add ARIA roles/labels",
+          "Keyboard navigation and focus traps"
+        ],
+        "userExperience": [
+          "Typing indicators / live status",
+          "Non-blocking loading states"
+        ],
+        "modernization": [
+          "Introduce Suspense for async boundaries",
+          "Integrate React Query for server state"
+        ]
+      }
+    },
+    {
+      "component": "EnhancedAnalyticsDashboard.jsx",
+      "priority": "high",
+      "dependencies": [],
+      "estimatedImpact": 9,
+      "improvements": {
+        "performance": [
+          "Use React.memo for expensive subtrees",
+          "Virtualize long lists (react-window)",
+          "Profile and memoize heavy selectors with useMemo"
+        ],
+        "accessibility": [
+          "Add ARIA roles/labels",
+          "Keyboard navigation and focus traps"
+        ],
+        "userExperience": [
+          "Typing indicators / live status",
+          "Non-blocking loading states"
+        ],
+        "modernization": [
+          "Introduce Suspense for async boundaries",
+          "Integrate React Query for server state"
+        ]
+      }
+    },
+    {
+      "component": "PlaylistBuilder.jsx",
+      "priority": "high",
+      "dependencies": [],
+      "estimatedImpact": 9,
+      "improvements": {
+        "performance": [
+          "Use React.memo for expensive subtrees",
+          "Virtualize long lists (react-window)",
+          "Profile and memoize heavy selectors with useMemo"
+        ],
+        "accessibility": [
+          "Add ARIA roles/labels",
+          "Keyboard navigation and focus traps"
+        ],
+        "userExperience": [
+          "Typing indicators / live status",
+          "Non-blocking loading states"
+        ],
+        "modernization": [
+          "Introduce Suspense for async boundaries",
+          "Integrate React Query for server state"
+        ]
+      }
+    },
+    {
+      "component": "ExplainableRecommendations.jsx",
+      "priority": "high",
+      "dependencies": [],
+      "estimatedImpact": 9,
+      "improvements": {
+        "performance": [
+          "Use React.memo for expensive subtrees",
+          "Virtualize long lists (react-window)",
+          "Profile and memoize heavy selectors with useMemo"
+        ],
+        "accessibility": [
+          "Add ARIA roles/labels",
+          "Keyboard navigation and focus traps"
+        ],
+        "userExperience": [
+          "Typing indicators / live status",
+          "Non-blocking loading states"
+        ],
+        "modernization": [
+          "Introduce Suspense for async boundaries",
+          "Integrate React Query for server state"
+        ]
+      }
+    }
+  ]
+}

@@ -265,7 +265,12 @@
     "production-ready": "npm run production-analysis && echo 'Check PRODUCTION_READINESS_EXECUTIVE_SUMMARY.md for results'",
     "mcp:health:n8n": "node scripts/mcp/probes/probe-n8n.js",
     "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js",
-    "mcp:validate-all": "node validate-all-mcp-servers.js"
+    "mcp:validate-all": "node validate-all-mcp-servers.js",
+    "ui:research": "node scripts/autonomous-ui-enhancer.js --mode=research",
+    "ui:enhance": "node scripts/autonomous-ui-enhancer.js --mode=enhance --target=all",
+    "ui:test": "npm run test:unit -- -i",
+    "ui:lighthouse": "node scripts/autonomous-ui-enhancer.js --mode=lighthouse",
+    "roadmap:update": "node scripts/autonomous-ui-enhancer.js --mode=roadmap"
   },
   "keywords": [
     "music-discovery",

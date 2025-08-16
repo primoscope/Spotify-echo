@@ -204,7 +204,7 @@ function MainApplication({ initialTab = 'chat' }) {
             'Matches the energy level you typically prefer',
             `${track.artist} is in your top listened artists this month`,
             'Upbeat tempo perfect for your current activity',
-            "Similar to other tracks you've liked recently",
+            'Similar to other tracks you\'ve liked recently',
           ],
         },
       };

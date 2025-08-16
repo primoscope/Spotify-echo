@@ -52,6 +52,23 @@ try {
 // Set test environment
 process.env.NODE_ENV = 'test';
 
+// Load .env if present (do not commit secrets)
+try { require('dotenv').config(); } catch (e) {}
+
+// Map alternate env names to expected ones for tests
+if (process.env.GEMINI_API && !process.env.GEMINI_API_KEY) {
+	process.env.GEMINI_API_KEY = process.env.GEMINI_API;
+}
+if (process.env.GEMINI_API_KEYS && !process.env.GEMINI_API_KEY) {
+	process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEYS.split(/[\s,]+/)[0];
+}
+if (process.env.OPENROUTER_API && !process.env.OPENROUTER_API_KEY) {
+	process.env.OPENROUTER_API_KEY = process.env.OPENROUTER_API;
+}
+if (process.env.OPENROUTER_API_KEYS && !process.env.OPENROUTER_API_KEY) {
+	process.env.OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEYS.split(/[\s,]+/)[0];
+}
+
 // Mock environment variables for testing
 process.env.SPOTIFY_CLIENT_ID = 'test_client_id';
 process.env.SPOTIFY_CLIENT_SECRET = 'test_client_secret';
@@ -233,6 +250,11 @@ if (process.env.NODE_ENV === 'test') {
       info: jest.fn(),
     };
   }
+}
+
+// Provide vi alias for Jest compatibility in some tests
+if (!global.vi) {
+	global.vi = { fn: jest.fn, spyOn: jest.spyOn };
 }
 
 // Increase test timeout for integration tests

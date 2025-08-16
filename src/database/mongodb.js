@@ -59,6 +59,13 @@ class MongoDBManager {
   }
 
   /**
+   * Simple boolean for tests
+   */
+  isConnected() {
+    return !!this.client && !!this.db && this.isConnected === true;
+  }
+
+  /**
    * Get collection
    */
   getCollection(name) {

@@ -382,3 +382,19 @@ class ContentBasedFilter {
 }
 
 module.exports = ContentBasedFilter;
+
+module.exports.recommendSimilarTracks = function recommendSimilarTracks(seedTrack, allTracks, { limit = 3 } = {}) {
+	if (!seedTrack || !Array.isArray(allTracks)) return [];
+	const dot = (a,b) => a.reduce((s, v, i) => s + v * (b[i] || 0), 0);
+	const norm = (a) => Math.sqrt(a.reduce((s, v) => s + v*v, 0));
+	const seedVec = seedTrack.vectors || [];
+	const seedNorm = norm(seedVec) || 1;
+	const scored = [];
+	for (const t of allTracks) {
+		if (!t || !t.id || t.id === seedTrack.id) continue;
+		const v = t.vectors || [];
+		const sim = (dot(seedVec, v) / (seedNorm * (norm(v) || 1))) || 0;
+		scored.push({ id: t.id, score: sim });
+	}
+	return scored.sort((a,b) => b.score - a.score).slice(0, limit);
+};

@@ -479,3 +479,22 @@ class CollaborativeFilter {
 }
 
 module.exports = CollaborativeFilter;
+
+module.exports.generateRecommendations = function generateRecommendations(userId, users, { limit = 5 } = {}) {
+	const target = users.find(u => u.id === userId);
+	if (!target) return [];
+	const liked = new Set(target.likes || []);
+	const scores = new Map();
+	for (const u of users) {
+		if (u.id === userId) continue;
+		for (const t of u.likes || []) {
+			if (!liked.has(t)) {
+				scores.set(t, (scores.get(t) || 0) + 1);
+			}
+		}
+	}
+	return Array.from(scores.entries())
+		.sort((a,b) => b[1]-a[1])
+		.slice(0, limit)
+		.map(([id, score]) => ({ id, score }));
+};

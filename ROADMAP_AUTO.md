@@ -1,6 +1,6 @@
 # EchoTune AI — Auto-Refreshed Roadmap
 
-Generated: 2025-08-16T03:53:17.276Z
+Generated: 2025-08-16T03:59:19.674Z
 
 ## How to use this document
 - This roadmap is auto-updated using Perplexity Sonar‑Pro and Grok‑4.
@@ -9,103 +9,121 @@ Generated: 2025-08-16T03:53:17.276Z
 
 ## Executive Summary (Sonar‑Pro)
 
-EchoTune AI should prioritize the following roadmap steps, focusing on Perplexity integration, CI, Cursor workflows, and security, given your current state (main branch stable, Perplexity endpoint live, CI caches/canary, Cursor workflows ready):
+EchoTune AI should prioritize the following roadmap steps to maximize Perplexity integration, CI reliability, Cursor workflows, and security:
 
-**1. Finalize and Harden Perplexity Integration**
-- Validate the live Perplexity endpoint with production-level queries and edge cases to ensure reliability and relevance of responses[1][3][5].
-- Implement robust error handling and fallback logic for Perplexity API failures.
-- Monitor and log Perplexity usage for analytics and debugging.
+**1. Perplexity Integration**
+- Ensure **endpoint stability and monitoring** for the live Perplexity API connection[5].
+- Implement **MCP server integration** for real-time, web-wide research via Sonar API, following open standards for seamless AI tool connectivity[3].
+- Set up **API key management** and secure environment variables for both Perplexity and any observability platforms (e.g., Helicone)[5].
 
-**2. Enhance CI/CD with Security and Observability**
-- Expand CI canary tests to cover Perplexity integration scenarios, including authentication failures and rate limiting[3].
-- Integrate security scanning (e.g., SAST/DAST) into CI to catch vulnerabilities early.
-- Ensure secrets (API keys, tokens) are managed securely in CI pipelines (e.g., environment variables, vaults)[3].
+**2. CI (Continuous Integration)**
+- Maintain and optimize **CI caching** to speed up builds and reduce redundant work.
+- Expand **canary deployments** for early detection of integration issues with Perplexity endpoints.
+- Automate **test coverage** for Perplexity-related features to ensure reliability after each commit.
 
-**3. Optimize Cursor Workflows**
-- Leverage Cursor’s new Perplexity integration to automate research and code review tasks directly within development workflows[2][4].
-- Use Cursor’s task management to coordinate multi-agent development and automated code reviews, ensuring all Perplexity-powered features are covered[4].
-- Document and share best practices for using Perplexity within Cursor to maximize developer productivity.
+**3. Cursor Workflows**
+- Leverage **Cursor’s automation capabilities** to run Perplexity-powered agents for code search, documentation retrieval, and workflow orchestration[2][4].
+- Use **task lists within Cursor** to drive implementation phases and automate code reviews for Perplexity-integrated features[4].
+- Enable **parallel development** (front-end/back-end) with Cursor agents, followed by integration and validation steps[4].
 
-**4. Security Hardening and Compliance**
-- Audit all Perplexity and Cursor integrations for least-privilege API access and proper authentication/authorization[3].
-- Regularly review and rotate API keys; implement monitoring for suspicious access patterns.
-- Ensure compliance with data privacy and retention policies for all third-party integrations.
+**4. Security**
+- Enforce **API key rotation** and restrict access to sensitive credentials.
+- Audit **authentication headers** and ensure all requests to Perplexity endpoints use secure tokens[5].
+- Regularly review **access logs** and monitor for unauthorized usage or anomalies.
 
-**5. Continuous Feedback and Iteration**
-- Collect feedback from users and developers on Perplexity-powered features and Cursor workflows.
-- Iterate on integration points, CI coverage, and security posture based on real-world usage and incident reports.
+**Prioritization Table**
 
-This roadmap ensures EchoTune AI’s Perplexity integration is robust, secure, and fully leveraged within modern CI and Cursor-driven workflows, while maintaining a strong security and compliance foundation.
+| Priority | Area                | Key Actions                                                      |
+|----------|---------------------|------------------------------------------------------------------|
+| 1        | Perplexity Integration | Endpoint stability, MCP server setup, API key management         |
+| 2        | CI                  | Caching, canary deployments, automated testing                   |
+| 3        | Cursor Workflows    | Agent automation, task-driven phases, code review automation     |
+| 4        | Security            | Key rotation, secure headers, access monitoring                  |
+
+Focus first on robust Perplexity integration and endpoint reliability, then reinforce CI and automation, streamline Cursor workflows, and continually strengthen security controls.
 
 ## Architectural Deep‑Dive (Grok‑4)
 
-EchoTune AI’s architecture is modular, leveraging **Node.js**, **React**, **MCP servers**, **Redis**, and **MongoDB** to support AI-driven workflows, persistent context, and scalable integrations. The structure is robust but can be further strengthened for maintainability, scalability, and security.
+EchoTune AI’s architecture leverages **Node.js, React, MCP servers, Vite, Jest, Redis, and MongoDB**, with a modular directory structure supporting both AI workflows and scalable web features. Below is a deep assessment and targeted recommendations for improvement.
 
-**Key Architectural Assessment**
+---
 
-- **Separation of Concerns:**  
-  The codebase is organized into clear domains: API, authentication, backend, chat, components, database, middleware, ML, security, and utilities. This modularity aligns with best practices for maintainability and extensibility[2][5].
+**Architectural Assessment**
 
-- **MCP Server Integration:**  
-  The use of MCP servers (e.g., Perplexity, Filesystem, Brave Search) enables persistent, contextual AI interactions and tool orchestration. Each server appears to be encapsulated, supporting protocol-based communication and modular tool integration[1][2][5].
+- **Modularity & Separation of Concerns**
+  - The `src` directory is well-organized, separating API, auth, backend, chat, components, database, middleware, ML, mobile, security, and utility logic.
+  - MCP servers are isolated in their own directory, supporting extensibility and independent development[1][3].
 
-- **Frontend/Backend Decoupling:**  
-  React (frontend) and Node.js (backend) are separated, facilitating independent development and deployment. Vite accelerates frontend builds.
+- **MCP Integration**
+  - MCP servers (e.g., Perplexity, brave-search) are implemented as independent services, enabling persistent, contextual AI interactions beyond simple API calls[1][3].
+  - Workflows and prompt catalogs facilitate advanced research and ADR (Architecture Decision Record) automation.
 
-- **Data Layer:**  
-  MongoDB (for persistent storage) and Redis (for caching and fast access) are industry-standard choices, supporting both scalability and performance[1][4].
+- **Tech Stack**
+  - **Node.js** powers backend and MCP servers, with **React** for frontend.
+  - **Redis** is likely used for caching/session management, and **MongoDB** for persistent storage.
+  - **Vite** enables fast frontend builds; **Jest** supports robust testing.
 
-- **Testing & Automation:**  
-  Jest is used for testing, and a rich set of scripts supports automation, validation, and CI/CD.
+- **Automation & Scripts**
+  - Extensive automation scripts in `/scripts` for data analysis, validation, CI, and integration testing indicate mature DevOps practices.
 
-**Strengths**
+- **Security & Best Practices**
+  - Security modules exist, but best practices (e.g., secrets management, request validation, token rotation) should be verified for MCP and API endpoints[4].
 
-- **Modular MCP Architecture:**  
-  Each MCP server is isolated, supporting independent scaling and updates. The protocol-based approach enables flexible integration with AI models and external tools[1][2][5].
+- **Scalability**
+  - Microservices pattern is suggested by the separation of MCP servers and backend modules, supporting independent scaling and deployment[5].
 
-- **Security Awareness:**  
-  Dedicated directories for authentication and security indicate a focus on best practices, though implementation details should be reviewed for hardcoded secrets, token management, and input validation[4].
+---
 
-- **Extensive Automation:**  
-  The scripts directory covers advanced automation, data analysis, and validation, supporting robust development workflows.
+**Recommendations**
 
-**Areas for Improvement & Recommendations**
+- **Adopt Clean Architecture for MCP Servers**
+  - Ensure MCP servers follow SOLID principles and clean separation between transport, business logic, and data access layers[1].
+  - Use schemas (e.g., Zod) for strict request validation[3].
 
-- **Adopt Clean Architecture Principles:**  
-  Further enforce separation between business logic, protocol handling, and infrastructure. For MCP servers, ensure that communication handlers, tool modules, and integration points are strictly decoupled for easier maintenance and testing[1][2].
+- **Containerization & Orchestration**
+  - Package MCP servers and core services as Docker containers for consistent deployment and scalability[2][5].
+  - Consider Kubernetes for orchestrating containers in production.
 
-- **Type Safety & Validation:**  
-  Use TypeScript across the backend (if not already) for type safety. Employ schema validation libraries (e.g., Zod) for all MCP request/response payloads to prevent malformed data and injection attacks[3][4].
+- **Security Enhancements**
+  - Store secrets in environment variables or a secrets manager; never hardcode credentials[4].
+  - Implement request validation and error handling for all API/MCP endpoints.
+  - Add rate limiting and timeout handling to prevent abuse and ensure reliability[4].
 
-- **Centralized Configuration & Secrets Management:**  
-  Store all credentials and configuration in environment variables or a secrets manager. Avoid hardcoding sensitive data in the codebase[4].
+- **Performance Optimization**
+  - Use Redis for caching frequently accessed data and connection pooling for MongoDB/API calls[4].
+  - Optimize response payloads by filtering unnecessary fields.
 
-- **Enhanced Logging & Monitoring:**  
-  Integrate structured logging (e.g., Winston) and set up health checks, error monitoring, and alerting for all MCP servers and core services[4].
+- **Monitoring & Logging**
+  - Integrate structured logging (e.g., Winston) and health checks for all services[4].
+  - Set up monitoring and alerting for error rates, response times, and critical failures.
 
-- **Performance Optimization:**  
-  Implement caching (Redis) for frequently accessed data, connection pooling for databases, and rate limiting on API endpoints to prevent abuse and ensure responsiveness[4].
+- **Testing & CI/CD**
+  - Expand Jest test coverage for both backend and MCP workflows.
+  - Automate integration and end-to-end tests for MCP workflows in CI pipelines.
 
-- **Testing Coverage:**  
-  Expand Jest test coverage to include integration and end-to-end tests for MCP workflows, not just unit tests.
+- **Frontend Improvements**
+  - Consider server-side rendering (SSR) or static site generation (SSG) for React (using Next.js) to improve performance and SEO[5].
 
-- **Documentation & Onboarding:**  
-  Ensure that README files in each major directory (especially MCP servers and scripts) are up to date, with clear setup, usage, and extension instructions.
+- **Documentation & ADRs**
+  - Maintain up-to-date documentation for MCP workflows, API contracts, and architectural decisions (ADRs).
+  - Use the prompt catalog to standardize research and decision-making templates.
 
-**Summary Table: Architectural Focus Areas**
+---
 
-| Area                       | Current State                        | Recommendations                                   |
-|----------------------------|--------------------------------------|---------------------------------------------------|
-| Modularity                 | Strong, clear separation             | Enforce clean architecture, decouple further      |
-| MCP Integration            | Multiple servers, protocol-based     | Use schema validation, expand tool modularity     |
-| Security                   | Dedicated dirs, likely best practices| Centralize secrets, audit for vulnerabilities     |
-| Data Layer                 | MongoDB, Redis                       | Optimize queries, add connection pooling          |
-| Testing & Automation       | Jest, rich scripts                   | Expand to integration/E2E, automate more flows    |
-| Observability              | Not specified                        | Add structured logging, monitoring, health checks |
-| Documentation              | Present in key dirs                  | Keep updated, add onboarding and extension guides |
+**Summary Table**
 
-**Conclusion:**  
-EchoTune AI’s architecture is well-structured and modern, but should further emphasize clean separation, type safety, security, and observability to ensure long-term scalability and reliability[1][2][3][4][5].
+| Area                | Assessment                                   | Recommendation                                 |
+|---------------------|----------------------------------------------|------------------------------------------------|
+| MCP Servers         | Modular, contextual AI integration           | Clean architecture, Docker, request validation  |
+| Security            | Security modules present                     | Secrets management, rate limiting, validation   |
+| Scalability         | Microservices, Redis, MongoDB                | Containerization, orchestration (K8s)          |
+| Performance         | Redis caching, modular scripts               | Optimize payloads, connection pooling           |
+| Monitoring          | Logging and health checks needed             | Structured logging, monitoring, alerting        |
+| Frontend            | React + Vite, modular                        | SSR/SSG with Next.js for SEO/performance        |
+| Testing             | Jest, automation scripts                     | Expand coverage, automate E2E tests             |
+| Documentation       | Prompt catalog, ADR templates                | Maintain and standardize ADRs/docs              |
+
+This approach will maximize EchoTune AI’s reliability, scalability, and maintainability while supporting advanced AI workflows.
 
 ## Project Pillars (Scope Reference)
 

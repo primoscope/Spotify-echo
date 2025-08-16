@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-16T10:44:40.732Z",
+  "timestamp": "2025-08-16T12:30:03.685Z",
   "summary": {
     "total": 8,
-    "passed": 5,
+    "passed": 7,
     "failed": 0,
-    "skipped": 3,
-    "successRate": 63
+    "skipped": 1,
+    "successRate": 88
   },
   "servers": [
     {
@@ -42,11 +42,15 @@
     },
     {
       "name": "Brave Search MCP",
-      "status": "SKIPPED",
-      "capabilities": [],
+      "status": "PASSED",
+      "capabilities": [
+        "web_search",
+        "privacy_search",
+        "research"
+      ],
       "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/brave-search/brave-search-mcp.js",
-      "error": "Missing authentication: BRAVE_API_KEY",
-      "message": null
+      "error": null,
+      "message": "Server completed successfully"
     },
     {
       "name": "Sequential Thinking Server",
@@ -62,11 +66,15 @@
     },
     {
       "name": "Perplexity MCP Server",
-      "status": "SKIPPED",
-      "capabilities": [],
+      "status": "PASSED",
+      "capabilities": [
+        "ai_research",
+        "web_search",
+        "deep_analysis"
+      ],
       "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/index.js",
-      "error": "Missing authentication: PERPLEXITY_API_KEY",
-      "message": null
+      "error": null,
+      "message": "Server started successfully (timed out as expected)"
     },
     {
       "name": "Analytics Server",

@@ -4,6 +4,7 @@
  * Tests all installed MCP servers for functionality and connectivity
  */
 
+require('dotenv').config();
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');

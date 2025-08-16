@@ -1,0 +1,87 @@
+{
+  "timestamp": "2025-08-16T12:31:32.456Z",
+  "perplexityApi": {
+    "status": "OPERATIONAL",
+    "keyFormat": "pplx-vll...HiOo",
+    "responseTime": 2573,
+    "testResponse": "To test API connectivity and respond with the message **\"API_KEY_WORKING\"**, you typically need to s",
+    "models": [
+      "grok-4-equivalent",
+      "sonar-pro",
+      "sonar",
+      "llama-3.1-70b",
+      "llama-3.1-8b"
+    ]
+  },
+  "grok4Integration": {
+    "status": "OPERATIONAL",
+    "model": "sonar-pro",
+    "responseTime": 9251,
+    "capabilities": [
+      "deep_analysis",
+      "repository_structure",
+      "strategic_planning",
+      "web_search",
+      "current_events",
+      "multi_step_reasoning"
+    ],
+    "webSearch": true,
+    "responseLength": 3589,
+    "grokEquivalent": true
+  },
+  "mcpServers": {
+    "total": 7,
+    "operational": 6,
+    "successRate": 86,
+    "servers": {
+      "Filesystem": "OPERATIONAL",
+      "Memory": "OPERATIONAL",
+      "Sequential Thinking": "OPERATIONAL",
+      "Perplexity": "OPERATIONAL",
+      "Brave Search": "NOT_FOUND",
+      "Analytics": "OPERATIONAL",
+      "Code Sandbox": "OPERATIONAL"
+    }
+  },
+  "deepResearch": {
+    "status": "OPERATIONAL",
+    "researchMode": "comprehensive",
+    "responseTime": 24010,
+    "citations": 5,
+    "relatedQuestions": 5,
+    "capabilities": [
+      "deep_analysis",
+      "multi_step_reasoning",
+      "web_search",
+      "current_events",
+      "repository_analysis",
+      "strategic_planning",
+      "research_synthesis",
+      "citation_verification",
+      "cross_validation"
+    ]
+  },
+  "browserIntegration": {},
+  "repositoryAnalysis": {
+    "status": "OPERATIONAL",
+    "totalFiles": 77550,
+    "directories": 6946,
+    "frameworks": [
+      "GitHub Actions",
+      "Docker",
+      "Node.js/JavaScript",
+      "Docker Compose",
+      "API-based architecture",
+      "MCP (Model Context Protocol)",
+      "TypeScript",
+      "Webpack",
+      "Python",
+      "Component-based architecture",
+      "Vite"
+    ],
+    "recommendations": 10,
+    "analysisLength": 11396
+  },
+  "overallHealth": 96,
+  "healthLevel": "EXCELLENT"
+}

@@ -7,6 +7,7 @@
  * web search, and advanced AI analysis.
  */
 
+require('dotenv').config();
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
 const {

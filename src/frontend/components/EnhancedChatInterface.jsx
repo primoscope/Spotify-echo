@@ -337,11 +337,36 @@ const EnhancedChatInterface = ({
   };
 
   const ProvidersHealthChip = () => (
-    <Chip size="small" label={`Providers: ${providersStatus}`} variant="outlined" />
+    <Tooltip title="Overall providers health from /api/providers/health">
+      <Chip
+        size="small"
+        label={`Providers: ${providersStatus}`}
+        color={(() => {
+          const s = (providersStatus || '').toLowerCase();
+          if (s === 'healthy' || s === 'connected') return 'success';
+          if (s === 'degraded' || s === 'unknown') return 'warning';
+          if (s === 'error') return 'error';
+          return 'default';
+        })()}
+        variant="outlined"
+      />
+    </Tooltip>
   );
 
   const AvgLatencyChip = () => (
-    <Chip size="small" label={`Avg: ${avgLatencyMs != null ? `${avgLatencyMs}ms` : 'N/A'}`} variant="outlined" />
+    <Tooltip title="Average latency from provider telemetry">
+      <Chip
+        size="small"
+        label={`Avg: ${avgLatencyMs != null ? `${avgLatencyMs}ms` : 'N/A'}`}
+        color={(() => {
+          if (avgLatencyMs == null) return 'default';
+          if (avgLatencyMs <= 800) return 'success';
+          if (avgLatencyMs <= 1500) return 'warning';
+          return 'error';
+        })()}
+        variant="outlined"
+      />
+    </Tooltip>
   );
 
   const ContextChipsSection = ({ category, chips, icon: Icon }) => (

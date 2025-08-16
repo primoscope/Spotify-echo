@@ -736,12 +736,34 @@ function EnhancedAnalyticsDashboard() {
                   Providers Snapshot
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <Chip size="small" label={`Overall: ${providersHealth?.status || 'unknown'}`} />
-                  {providersHealth?.providers && (
+                  <Tooltip title="Overall providers health">
                     <Chip
                       size="small"
-                      label={`Connected: ${Object.values(providersHealth.providers).filter((p) => (p?.status || '').toLowerCase() === 'connected').length}/${Object.keys(providersHealth.providers).length}`}
+                      label={`Overall: ${providersHealth?.status || 'unknown'}`}
+                      color={(() => {
+                        const s = (providersHealth?.status || '').toLowerCase();
+                        if (s === 'healthy' || s === 'connected') return 'success';
+                        if (s === 'degraded' || s === 'unknown') return 'warning';
+                        if (s === 'error') return 'error';
+                        return 'default';
+                      })()}
                     />
+                  </Tooltip>
+                  {providersHealth?.providers && (
+                    <Tooltip title="Number of providers currently connected">
+                      <Chip
+                        size="small"
+                        label={`Connected: ${Object.values(providersHealth.providers).filter((p) => (p?.status || '').toLowerCase() === 'connected').length}/${Object.keys(providersHealth.providers).length}`}
+                        color={(() => {
+                          const total = Object.keys(providersHealth.providers).length || 1;
+                          const connected = Object.values(providersHealth.providers).filter((p) => (p?.status || '').toLowerCase() === 'connected').length;
+                          const ratio = connected / total;
+                          if (ratio >= 0.8) return 'success';
+                          if (ratio >= 0.5) return 'warning';
+                          return 'error';
+                        })()}
+                      />
+                    </Tooltip>
                   )}
                 </Box>
                 {providersHealth?.providers && (
@@ -749,13 +771,15 @@ function EnhancedAnalyticsDashboard() {
                     {Object.entries(providersHealth.providers)
                       .slice(0, 6)
                       .map(([id, p]) => (
-                        <Chip
+                        <Tooltip title={`Avg latency: ${p.averageLatency ? Math.round(p.averageLatency) + 'ms' : 'N/A'}`}>
+                          <Chip
                           key={id}
                           size="small"
                           variant="outlined"
                           label={`${id}: ${p.status}${p.averageLatency ? ` (${Math.round(p.averageLatency)}ms)` : ''}`}
                           color={((p.status || '').toLowerCase() === 'connected') ? 'success' : ((p.status || '').toLowerCase() === 'error') ? 'error' : 'default'}
-                        />
+                          />
+                        </Tooltip>
                       ))}
                   </Box>
                 )}

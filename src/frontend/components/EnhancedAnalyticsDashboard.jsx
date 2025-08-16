@@ -58,6 +58,8 @@ function EnhancedAnalyticsDashboard() {
   const [endpointPerfError, setEndpointPerfError] = useState(null);
   const [perfReport, setPerfReport] = useState(null);
   const [perfError, setPerfError] = useState(null);
+  const [providersHealth, setProvidersHealth] = useState(null);
+  const [providersHealthError, setProvidersHealthError] = useState(null);
   const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   useEffect(() => {
     const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -268,6 +270,24 @@ function EnhancedAnalyticsDashboard() {
     };
     loadPerf();
     const id = setInterval(loadPerf, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  // Poll Providers health every 30s
+  useEffect(() => {
+    let cancelled = false;
+    const loadProvidersHealth = async () => {
+      try {
+        const res = await fetch('/api/providers/health');
+        if (!res.ok) throw new Error(`providers health failed: ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) { setProvidersHealth(data); setProvidersHealthError(null); }
+      } catch (e) {
+        if (!cancelled) { setProvidersHealthError('Failed to load providers health'); }
+      }
+    };
+    loadProvidersHealth();
+    const id = setInterval(loadProvidersHealth, 30000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
@@ -701,6 +721,47 @@ function EnhancedAnalyticsDashboard() {
                 {perfError && (
                   <Alert severity="warning" sx={{ mt: 1 }}>
                     {perfError}
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Providers Snapshot */}
+          {(providersHealth || providersHealthError) && (
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                  <Assessment sx={{ mr: 1 }} />
+                  Providers Snapshot
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Chip size="small" label={`Overall: ${providersHealth?.status || 'unknown'}`} />
+                  {providersHealth?.providers && (
+                    <Chip
+                      size="small"
+                      label={`Connected: ${Object.values(providersHealth.providers).filter((p) => (p?.status || '').toLowerCase() === 'connected').length}/${Object.keys(providersHealth.providers).length}`}
+                    />
+                  )}
+                </Box>
+                {providersHealth?.providers && (
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {Object.entries(providersHealth.providers)
+                      .slice(0, 6)
+                      .map(([id, p]) => (
+                        <Chip
+                          key={id}
+                          size="small"
+                          variant="outlined"
+                          label={`${id}: ${p.status}${p.averageLatency ? ` (${Math.round(p.averageLatency)}ms)` : ''}`}
+                          color={((p.status || '').toLowerCase() === 'connected') ? 'success' : ((p.status || '').toLowerCase() === 'error') ? 'error' : 'default'}
+                        />
+                      ))}
+                  </Box>
+                )}
+                {providersHealthError && (
+                  <Alert severity="warning" sx={{ mt: 1 }}>
+                    {providersHealthError}
                   </Alert>
                 )}
               </CardContent>

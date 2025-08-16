@@ -1,0 +1,67 @@
+Project: EchoTune AI — Cursor Rules
+
+Tech Stack Profile
+- Frontend: React 19 + Vite
+- Backend: Node 20 + Express
+- Testing: Jest (unit/integration), optional E2E via Playwright MCP
+- Data/ML: Python (FastAPI optional), scripts in `scripts/` and `ml_datasets/`
+- MCP: Filesystem, Perplexity (research), Brave Search, Testing, Analytics, optional Playwright/Browserbase
+
+General Operating Rules
+- Prefer absolute paths when running commands. Avoid interactive prompts; always supply non-interactive flags.
+- Keep edits small and atomic. After substantial edits, run lint and unit tests.
+- Never modify credentials or deployment scripts automatically.
+- Respect file boundaries: React code in `src/`, server entrypoints in `server.js`/`server-phase3.js`, MCP under `mcp*` dirs.
+
+Code Style & Quality
+- Use ESLint + Prettier conventions already in repo. Run: `npm run lint` and `npm run format:check`.
+- JS/TS naming: descriptive, full words; avoid 1–2 char names. Prefer early returns and shallow nesting.
+- Tests must be colocated in `tests/` hierarchy and runnable with Jest config at `tests/jest.config.js`.
+
+Testing Flow
+- Unit: `npm run test:unit -- -i` (run in-band for stability)
+- Integration: `npm run test:integration -- -i`
+- E2E (optional): Use Playwright MCP workflow (see `.cursor/workflows/ui-playwright.json`). Skip if browsers not installed.
+
+Model Selection & Routing
+- Small refactors, quick code generation: GPT-4-mini or Llama 3.1 8B (fast, low cost)
+- Complex code reasoning or multi-file analysis: GPT-4 or Claude 3.7
+- Research or best-practice cross-check with web: Grok-4 equivalent via Perplexity `sonar-pro`
+- Heuristics:
+  - If prompt mentions “web”, “latest”, “2025”, “docs”: use Perplexity `sonar-pro`
+  - If task >= 3 files or requires architecture changes: use GPT-4 or Claude 3.7
+  - If speed prioritized: Llama 3.1 8B
+
+YOLO Mode (Guarded Automation)
+- Disabled by default. Enable only when explicitly requested or when a workflow step declares `yolo: true`.
+- Allowlist of commands when YOLO is enabled:
+  - Read-only: `git status`, `git diff`, `ls`, `cat`, `jq`, `grep`, `rg`
+  - Quality gates: `npm run lint`, `npm run test:unit`, `npm run test:integration`
+  - Build: `npm run build` (no deploy)
+- Blocklist (never run automatically): `rm -rf`, `curl | sh`, `docker *`, `deploy*`, database mutations, secrets rotation
+- Resource limits: max 10 minutes per job, 1 GB RAM target. Prefer `--runInBand` for tests.
+
+Context Management
+- Default max files: 120; prefer high-signal files. Use `@Recommended` tags:
+  - @Recommended: `package.json`, `vite.config.js`, `tests/jest.config.js`, `server.js`, key components in `src/`, `.cursor/mcp.json`
+- Avoid large/derived files. See `.cursorignore` for excludes.
+
+MCP Usage
+- Filesystem: quick repo scans and targeted file reads.
+- Perplexity: research with citations; summarize findings and map to actionable edits.
+- Brave Search: complementary search when Perplexity is unavailable.
+- Playwright/Browserbase (optional): scripted UI checks; skip in headless CI lacking browsers.
+
+Error Handling Playbook
+- On test failures: collect failing tests, search error signature, propose fix plan; if needed, call research workflow.
+- On linter failures: auto-fix where safe; otherwise propose minimal edits.
+
+Documentation & Roadmap
+- Auto-generate docs to `docs/generated/` via `scripts/generate-docs.js`.
+- Update `docs/ROADMAP.md` via CI workflow prompt (`.cursor/workflows/ci-roadmap-update.json`).
+
+Security & Secrets
+- Never print or commit secrets. Use `${VAR}` placeholders in configs. Validate presence with dry-run checks only.
+
+Performance
+- Prefer incremental reads over full-repo loads. Exclude heavy artifacts. Defer non-essential tasks.

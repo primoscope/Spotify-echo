@@ -1,0 +1,19 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "CI Roadmap Update",
+  "description": "After CI tests pass, summarize changes and update docs/ROADMAP.md",
+  "steps": [
+    {
+      "tool": "echotune-filesystem",
+      "action": "scan",
+      "args": { "paths": ["./src", "./server.js", "./tests"], "maxFiles": 120 }
+    },
+    {
+      "tool": "echotune-perplexity",
+      "action": "research",
+      "args": {
+        "prompt": "From the current repo state and test outputs, propose a succinct roadmap delta (what changed, what's next). Keep to bullet points."
+      }
+    }
+  ]
+}

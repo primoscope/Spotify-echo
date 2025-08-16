@@ -360,6 +360,37 @@ class PerformanceMonitor {
     }
 
     /**
+     * Compute p50/p95 per endpoint for the last windowMs (default 5 minutes)
+     */
+    getEndpointPercentiles(windowMs = 5 * 60 * 1000) {
+        const now = Date.now();
+        const recent = this.metrics.requests.response_times.filter(r => r.timestamp > now - windowMs);
+        const byEndpoint = new Map();
+        for (const r of recent) {
+            if (!byEndpoint.has(r.endpoint)) byEndpoint.set(r.endpoint, []);
+            byEndpoint.get(r.endpoint).push(r.duration);
+        }
+        const pct = (arr, p) => {
+            if (!arr.length) return 0;
+            const sorted = [...arr].sort((a, b) => a - b);
+            const idx = Math.ceil((p / 100) * sorted.length) - 1;
+            return sorted[Math.max(0, Math.min(sorted.length - 1, idx))];
+        };
+        const result = [];
+        for (const [endpoint, durations] of byEndpoint.entries()) {
+            result.push({
+                endpoint,
+                count: durations.length,
+                p50: Math.round(pct(durations, 50)),
+                p95: Math.round(pct(durations, 95)),
+                min: Math.round(Math.min(...durations)),
+                max: Math.round(Math.max(...durations)),
+            });
+        }
+        return result.sort((a, b) => b.count - a.count);
+    }
+
+    /**
      * Get custom metrics summary
      */
     getCustomMetricsSummary() {

@@ -325,6 +325,17 @@ app.get('/api/performance', async (req, res) => {
   }
 });
 
+// Endpoint percentiles (last 5 minutes)
+app.get('/api/performance/endpoints', (req, res) => {
+  try {
+    const windowMs = req.query.windowMs ? parseInt(req.query.windowMs, 10) : undefined;
+    const pct = performanceMonitor.getEndpointPercentiles(windowMs);
+    res.json({ success: true, windowMs: windowMs || 5 * 60 * 1000, endpoints: pct });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to get endpoint percentiles' });
+  }
+});
+
 // Rate limiter statistics route
 app.get('/api/rate-limit/stats', (req, res) => {
   try {

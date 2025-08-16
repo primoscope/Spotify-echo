@@ -1,9 +1,9 @@
 # Status Heartbeat
 
-Updated: 2025-08-16T07:34:34.857Z
+Updated: 2025-08-16T07:36:04.858Z
 
 - Branch: main
-- Last commit: 1bcef0a 2025-08-16T07:34:30Z feat(analytics): add System Health card (poll /api/performance) with requests/min, error rate, avg latency, memory, load
+- Last commit: cb1326a 2025-08-16T07:36:00Z feat(analytics): add Providers Snapshot card (poll /api/providers/health) for dashboard parity
 - Roadmap last updated: 2025-08-16T07:23:44.437Z
 - Perplexity canary last run: 2025-08-16T00:21:19.130Z
 

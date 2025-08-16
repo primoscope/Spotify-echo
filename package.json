@@ -30,6 +30,13 @@
     "mcp:github-repos": "node mcp-servers/github-repos-manager/index.js",
     "mcp:brave-search": "node mcp-servers/brave-search/brave-search-mcp.js",
     "mcp:sequential-thinking": "node mcp-servers/sequential-thinking/dist/index.js",
+    "mcp:browserbase": "node mcp-servers/browserbase/browserbase-mcp.js",
+    "mcp:start:all": "cd mcp-servers && npm run start:all",
+    "mcp:test:all": "npm run mcp:test:comprehensive && npm run mcp:test:live-servers && npm run mcp:test:automation",
+    "mcp:validate:all": "node mcp-comprehensive-server-test.js --validate-only",
+    "mcp:health:all": "curl -s http://localhost:3002/health | jq '.' || echo 'Orchestrator not running'",
+    "mcp:orchestrated-start": "node mcp-server/enhanced-mcp-orchestrator.js --start-all",
+    "mcp:orchestrator-health": "curl -s http://localhost:3002/servers | jq '.' || echo 'Orchestrator not available'",
     "mcp:discover": "node scripts/discover-new-mcp-servers.js",
     "mcp:auto-docs": "node scripts/mcp-documentation-automator.js",
     "mcp:full-automation": "npm run mcp:discover && npm run mcp:auto-docs",
@@ -41,7 +48,6 @@
     "mcp:test:comprehensive": "node scripts/mcp/comprehensive-test-suite.js",
     "mcp:test:live-servers": "node scripts/mcp/live-server-test.js",
     "mcp:test:automation": "node scripts/mcp/automation-progress-test.js",
-    "mcp:test:all": "npm run mcp:test:comprehensive && npm run mcp:test:live-servers && npm run mcp:test:automation",
     "mcp:orchestrator-status": "node mcp-server/enhanced-registry-orchestrator.js status",
     "mcp:orchestrator-start": "node mcp-server/enhanced-registry-orchestrator.js start",
     "mcp:health-monitor": "node mcp-server/enhanced-health-monitor.js",
@@ -259,8 +265,7 @@
     "production-ready": "npm run production-analysis && echo 'Check PRODUCTION_READINESS_EXECUTIVE_SUMMARY.md for results'",
     "mcp:health:n8n": "node scripts/mcp/probes/probe-n8n.js",
     "mcp:health:mongodb": "node scripts/mcp/probes/probe-mongodb.js",
-    "mcp:validate-all": "node validate-all-mcp-servers.js",
-    "mcp:start:all": "cd mcp-servers && npm run start:all"
+    "mcp:validate-all": "node validate-all-mcp-servers.js"
   },
   "keywords": [
     "music-discovery",

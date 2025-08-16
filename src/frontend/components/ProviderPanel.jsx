@@ -11,11 +11,13 @@ function ProviderPanel() {
   const [showDetails, setShowDetails] = useState(false);
   const [refreshingModels, setRefreshingModels] = useState(false);
   const [mcpStatus, setMcpStatus] = useState('unknown');
+  const [providersStatus, setProvidersStatus] = useState('unknown');
 
   useEffect(() => {
     loadAvailableModels();
     loadTelemetryData();
     checkMcpHealth();
+    checkProvidersHealth();
   }, [currentProvider, loadAvailableModels, loadTelemetryData]);
 
   const checkMcpHealth = useCallback(async () => {
@@ -29,6 +31,17 @@ function ProviderPanel() {
     }
   }, []);
 
+  const checkProvidersHealth = useCallback(async () => {
+    try {
+      const res = await fetch('/api/providers/health');
+      if (!res.ok) throw new Error('Providers health failed');
+      const data = await res.json();
+      setProvidersStatus(data.status || 'unknown');
+    } catch {
+      setProvidersStatus('degraded');
+    }
+  }, []);
+
   const optimizeMcpModels = async () => {
     try {
       await fetch('/api/enhanced-mcp/optimize', { method: 'POST' });
@@ -37,9 +50,12 @@ function ProviderPanel() {
   };
 
   useEffect(() => {
-    const id = setInterval(checkMcpHealth, 30000);
+    const id = setInterval(() => {
+      checkMcpHealth();
+      checkProvidersHealth();
+    }, 30000);
     return () => clearInterval(id);
-  }, [checkMcpHealth]);
+  }, [checkMcpHealth, checkProvidersHealth]);
 
   const loadAvailableModels = useCallback(async () => {
     if (currentProvider === 'mock') return;
@@ -194,6 +210,9 @@ function ProviderPanel() {
 
           <span className="mcp-health" style={{ marginLeft: 8, fontSize: 12 }}>
             MCP: {mcpStatus}
+          </span>
+          <span className="providers-health" style={{ marginLeft: 8, fontSize: 12 }}>
+            Providers: {providersStatus}
           </span>
 
           <button

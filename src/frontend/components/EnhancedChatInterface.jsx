@@ -64,6 +64,7 @@ const EnhancedChatInterface = ({
     message: null,
     explanation: null,
   });
+  const [explainInline, setExplainInline] = useState(false);
   const [providerMenu, setProviderMenu] = useState(null);
   const [currentProviderLocal, setCurrentProviderLocal] = useState('mock');
 
@@ -429,7 +430,7 @@ const EnhancedChatInterface = ({
                 </IconButton>
               </Tooltip>
 
-              {hasExplanation && (
+              {hasExplanation && !explainInline && (
                 <Tooltip title="View explanation">
                   <IconButton size="small" color="info" onClick={() => showExplanation(message)}>
                     <Info fontSize="small" />
@@ -437,6 +438,29 @@ const EnhancedChatInterface = ({
                 </Tooltip>
               )}
             </Box>
+          )}
+
+          {/* Inline Explanation */}
+          {!isUser && hasExplanation && explainInline && (
+            <Card sx={{ mt: 1 }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Why this response
+                </Typography>
+                <Typography variant="body2" paragraph>
+                  {message.explanation.summary}
+                </Typography>
+                {Array.isArray(message.explanation.reasoning) && (
+                  <List dense sx={{ py: 0 }}>
+                    {message.explanation.reasoning.map((r, idx) => (
+                      <ListItem key={idx} sx={{ py: 0 }}>
+                        <Typography variant="body2">• {r}</Typography>
+                      </ListItem>
+                    ))}
+                  </List>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {/* Error indicator */}
@@ -463,6 +487,13 @@ const EnhancedChatInterface = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <ProviderStatusChip />
             <ProviderQuickSwitch />
+            <Chip
+              size="small"
+              label={explainInline ? 'Explain: On' : 'Explain: Off'}
+              color={explainInline ? 'success' : 'default'}
+              onClick={() => setExplainInline((v) => !v)}
+              variant={explainInline ? 'filled' : 'outlined'}
+            />
           </Box>
         </Box>
 

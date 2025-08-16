@@ -303,7 +303,8 @@ class PromptExecutor {
         'llama-3.3-70b': 'sonar-pro',
         'o1-preview': 'sonar-pro'
       };
-     const apiModel = aliasMap[prompt.model] || prompt.model;
+      const forceExactModel = process.env.PERPLEXITY_FORCE_MODEL === '1';
+      const apiModel = forceExactModel ? prompt.model : (aliasMap[prompt.model] || prompt.model);
 
      const requestData = {
        model: apiModel,

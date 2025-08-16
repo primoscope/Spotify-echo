@@ -1,0 +1,19 @@
+# Automation Rules
+
+## Browser Automation
+- Use Page Object Model for browser tests
+- Implement wait strategies for dynamic content
+- Add screenshot capture for test failures
+- Use data attributes for reliable element selection
+
+## API Integration
+- Implement retry mechanisms with exponential backoff
+- Add comprehensive error handling
+- Use circuit breaker pattern for external services
+- Implement request/response logging
+
+## Testing Automation
+- Write integration tests for critical paths
+- Use mocking for external dependencies
+- Implement test data factories
+- Add performance testing for key operations

@@ -32,3 +32,24 @@ ml_datasets/
 
 # Generated docs
 docs/generated/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+npm-debug.log*
+
+# Additional package manager artifacts
+.yarn/
+.pnp.*
+
+# Additional build outputs
+out/
+.next/
+.nuxt/
+
+tmp/
+.temp/

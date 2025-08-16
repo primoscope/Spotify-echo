@@ -1,0 +1,25 @@
+# Core Development Standards
+
+## Code Quality
+- Write comprehensive tests for all new features
+- Implement error handling with specific error types
+- Use TypeScript where possible for type safety in new modules
+- Follow SOLID principles and clean architecture
+
+## Performance Optimization
+- Implement lazy loading where appropriate
+- Use efficient algorithms and data structures
+- Minimize API calls through caching and batching
+- Monitor and profile performance regularly
+
+## Security Best Practices
+- Validate all inputs and sanitize outputs
+- Use environment variables for secrets
+- Implement proper authentication and authorization
+- Follow security best practices for data handling
+
+## Documentation Standards
+- Write clear, concise documentation
+- Include code comments for complex logic
+- Maintain up-to-date README files
+- Document API endpoints and interfaces

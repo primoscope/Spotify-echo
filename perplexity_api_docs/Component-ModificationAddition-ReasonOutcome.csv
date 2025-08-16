@@ -1,0 +1,7 @@
+"Component","Modification/Addition","Reason/Outcome"
+"src/chat/model-registry.js","Register ‘perplexity’ and ‘grok4’ providers","Enables requests to both APIs"
+"src/chat/llm-providers/","New modules:perplexity.js,grok4.js(per patterns above)","Encapsulate each provider’s logic"
+"/api/research.js(backend)","New API endpoint to process agent research requests, abstracting away direct MCP calls","UI and feature isolation"
+"/settingspanel","UI inputs for Perplexity and Grok-4 API keys (server-side only)","Ease provider setup, avoid code changes"
+"/contexts/,/hooks/(React)","Add research/analysis context hooks, option to enable “deep search” in conversation/music","Easy UI expansion for power users"
+"README.md","Document new provider and research/analysis agent usage","Contributor ease, correct usage"

@@ -56,6 +56,8 @@ function EnhancedAnalyticsDashboard() {
   const [selectedMetrics] = useState(['listening', 'recommendations', 'engagement']);
   const [endpointPerf, setEndpointPerf] = useState({ windowMs: 300000, endpoints: [] });
   const [endpointPerfError, setEndpointPerfError] = useState(null);
+  const [perfReport, setPerfReport] = useState(null);
+  const [perfError, setPerfError] = useState(null);
   const renderStart = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   useEffect(() => {
     const end = (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -250,6 +252,24 @@ function EnhancedAnalyticsDashboard() {
     const id = setInterval(loadEndpointPerf, 30000);
     return () => clearInterval(id);
   }, [loadEndpointPerf]);
+
+  // Poll System Performance report every 30s
+  useEffect(() => {
+    let cancelled = false;
+    const loadPerf = async () => {
+      try {
+        const res = await fetch('/api/performance');
+        if (!res.ok) throw new Error(`perf failed: ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) { setPerfReport(data); setPerfError(null); }
+      } catch (e) {
+        if (!cancelled) { setPerfError('Failed to load system performance'); }
+      }
+    };
+    loadPerf();
+    const id = setInterval(loadPerf, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
 
   // Tiny sparkline generator
   const Sparkline = ({ points = [], color = '#8884d8', width = 100, height = 30 }) => {
@@ -636,6 +656,51 @@ function EnhancedAnalyticsDashboard() {
                 {endpointPerfError && (
                   <Alert severity="warning" sx={{ mt: 1 }}>
                     {endpointPerfError} — showing data when available.
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* System Health */}
+          {(perfReport || perfError) && (
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                  <Assessment sx={{ mr: 1 }} />
+                  System Health
+                </Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Req/min: <strong>{perfReport?.requests?.requests_per_minute ?? 'N/A'}</strong>
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Error rate: <strong>{perfReport?.requests?.error_rate_percent != null ? `${perfReport.requests.error_rate_percent}%` : 'N/A'}</strong>
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Avg latency: <strong>{perfReport?.requests?.avg_response_time_ms != null ? `${Math.round(perfReport.requests.avg_response_time_ms)}ms` : 'N/A'}</strong>
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Uptime: <strong>{perfReport?.uptime_human ?? 'N/A'}</strong>
+                  </Typography>
+                </Box>
+                {perfReport?.system?.memory && (
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Memory — heap used: {perfReport.system.memory.heap_used_mb}MB, rss: {perfReport.system.memory.rss_mb}MB, system used: {perfReport.system.memory.system_used_percent}%
+                    </Typography>
+                  </Box>
+                )}
+                {perfReport?.system?.load && (
+                  <Box sx={{ mt: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Load — 1m: {perfReport.system.load.load_1m}, 5m: {perfReport.system.load.load_5m}, 15m: {perfReport.system.load.load_15m}
+                    </Typography>
+                  </Box>
+                )}
+                {perfError && (
+                  <Alert severity="warning" sx={{ mt: 1 }}>
+                    {perfError}
                   </Alert>
                 )}
               </CardContent>

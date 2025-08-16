@@ -6,7 +6,7 @@ const KeyPool = require('./utils/key-pool');
 
 /**
  * Enhanced LLM Provider Manager
- * Implements automatic API key refresh and provider failover
+ * Implements automatic API key refresh, provider failover, and circuit breaker patterns
  */
 class LLMProviderManager {
   constructor() {
@@ -20,6 +20,10 @@ class LLMProviderManager {
       gemini: new KeyPool((process.env.GEMINI_API_KEYS || '').split(/[\s,]+/).filter(Boolean)),
       openrouter: new KeyPool((process.env.OPENROUTER_API_KEYS || '').split(/[\s,]+/).filter(Boolean)),
     };
+    
+    // Circuit breaker state
+    this.circuitBreakers = new Map(); // providerId -> CircuitBreakerState
+    this.requestCorrelations = new Map(); // correlationId -> request metadata
   }
 
   /**
@@ -47,12 +51,41 @@ class LLMProviderManager {
 
       this.initialized = true;
       console.log('✅ LLM Provider Manager initialized with enhanced features');
-
-      return true;
+      
+      // Initialize circuit breakers for all providers
+      this.initializeCircuitBreakers();
     } catch (error) {
-      console.error('LLM Provider Manager initialization failed:', error);
-      return false;
+      console.error('❌ Failed to initialize LLM Provider Manager:', error);
+      throw error;
     }
+  }
+
+  /**
+   * Initialize circuit breakers for all providers
+   */
+  initializeCircuitBreakers() {
+    const providerIds = ['gemini', 'openai', 'openrouter', 'mock'];
+    
+    for (const providerId of providerIds) {
+      this.circuitBreakers.set(providerId, {
+        state: 'CLOSED', // CLOSED, OPEN, HALF_OPEN
+        failureCount: 0,
+        successCount: 0,
+        lastFailureTime: null,
+        openUntil: null,
+        consecutiveLatencyFailures: 0,
+        recentLatencies: [], // Last 10 request latencies
+        config: {
+          failureThreshold: 5, // Open circuit after 5 failures
+          latencyThreshold: 2000, // 2x of 800ms target = 1600ms, using 2000ms for safety
+          consecutiveLatencyThreshold: 5, // Open circuit after 5 consecutive high-latency requests
+          timeout: 60000, // Stay open for 1 minute initially
+          halfOpenMaxRequests: 3, // Allow 3 test requests in half-open state
+        }
+      });
+    }
+    
+    console.log(`🔒 Initialized circuit breakers for ${providerIds.length} providers`);
   }
 
   /**
@@ -487,9 +520,76 @@ class LLMProviderManager {
   }
 
   /**
-   * Get best available provider with automatic fallback
+   * Generate correlation ID for request tracking
    */
-  async getBestProvider() {
+  generateCorrelationId() {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 5);
+    return `llm_${timestamp}_${random}`;
+  }
+
+  /**
+   * Check if provider is available (circuit breaker check)
+   */
+  isProviderAvailable(providerId) {
+    const breaker = this.circuitBreakers.get(providerId);
+    if (!breaker) return true; // No circuit breaker = available
+    
+    return breaker.state !== 'OPEN';
+  }
+
+  /**
+   * Record request latency and check for circuit breaker conditions
+   */
+  recordRequestLatency(providerId, latency, success) {
+    const breaker = this.circuitBreakers.get(providerId);
+    if (!breaker) return;
+    
+    // Update recent latencies (keep last 10)
+    breaker.recentLatencies.push(latency);
+    if (breaker.recentLatencies.length > 10) {
+      breaker.recentLatencies.shift();
+    }
+    
+    if (success) {
+      breaker.successCount++;
+      breaker.failureCount = 0; // Reset failure count on success
+      
+      // Check latency threshold  
+      if (latency > breaker.config.latencyThreshold) {
+        breaker.consecutiveLatencyFailures++;
+        if (breaker.consecutiveLatencyFailures >= breaker.config.consecutiveLatencyThreshold) {
+          console.warn(`⚠️ Provider ${providerId} consistently slow (${latency}ms > ${breaker.config.latencyThreshold}ms)`);
+          this.openCircuit(providerId, breaker);
+        }
+      } else {
+        breaker.consecutiveLatencyFailures = 0; // Reset on good latency
+      }
+    } else {
+      breaker.failureCount++;
+      breaker.consecutiveLatencyFailures = 0; // Reset latency count on general failure
+      
+      if (breaker.failureCount >= breaker.config.failureThreshold) {
+        this.openCircuit(providerId, breaker);
+      }
+    }
+  }
+
+  /**
+   * Open circuit breaker with exponential backoff
+   */
+  openCircuit(providerId, breaker) {
+    breaker.state = 'OPEN';
+    breaker.lastFailureTime = Date.now();
+    
+    // Exponential backoff: 1min, 5min, 15min, then 15min max
+    const backoffMultiplier = Math.min(Math.pow(2, breaker.failureCount), 15);
+    const backoffMs = Math.min(60000 * backoffMultiplier, 15 * 60000); // Max 15 minutes
+    
+    breaker.openUntil = Date.now() + backoffMs;
+    
+    console.warn(`🚨 Circuit breaker OPEN for ${providerId}, retry in ${Math.round(backoffMs / 60000)}min`);
+  }
     // Try current provider first
     if (this.providers.has(this.currentProvider)) {
       const config = this.providerConfigs.get(this.currentProvider);
@@ -607,6 +707,9 @@ class LLMProviderManager {
     for (const [providerId, config] of this.providerConfigs) {
       // Get telemetry data if available
       const telemetryData = llmTelemetry.getProviderMetrics(providerId);
+      
+      // Get circuit breaker status
+      const breaker = this.circuitBreakers.get(providerId);
 
       status[providerId] = {
         name: config.name,
@@ -624,6 +727,20 @@ class LLMProviderManager {
           successRate: telemetryData?.current?.successRate || null,
           totalRequests: telemetryData?.current?.requests || 0,
         },
+        circuitBreaker: breaker ? {
+          state: breaker.state,
+          failureCount: breaker.failureCount,
+          successCount: breaker.successCount,
+          consecutiveLatencyFailures: breaker.consecutiveLatencyFailures,
+          openUntil: breaker.openUntil ? new Date(breaker.openUntil).toISOString() : null,
+          lastFailureTime: breaker.lastFailureTime ? new Date(breaker.lastFailureTime).toISOString() : null,
+          recentLatencies: breaker.recentLatencies.slice(-5), // Last 5 latencies
+          thresholds: {
+            latency: breaker.config.latencyThreshold,
+            failures: breaker.config.failureThreshold,
+            consecutiveLatency: breaker.config.consecutiveLatencyThreshold
+          }
+        } : null,
       };
     }
 

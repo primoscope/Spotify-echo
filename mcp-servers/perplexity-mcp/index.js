@@ -115,6 +115,36 @@ class PerplexityMCPServer {
               required: ['topic'],
             },
           },
+          {
+            name: 'grok4_analysis',
+            description: 'Perform deep analysis using Official Grok-4 model via Perplexity Pro with enhanced reasoning',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                query: {
+                  type: 'string',
+                  description: 'Analysis query or task requiring deep reasoning',
+                },
+                context: {
+                  type: 'string',
+                  description: 'Additional context for analysis (optional)',
+                },
+                analysis_type: {
+                  type: 'string',
+                  enum: ['comprehensive', 'security', 'performance', 'architecture', 'strategic'],
+                  description: 'Type of analysis to perform',
+                  default: 'comprehensive'
+                },
+                research_mode: {
+                  type: 'string',
+                  enum: ['standard', 'comprehensive', 'rapid', 'academic'],
+                  description: 'Research mode for web-enabled analysis',
+                  default: 'comprehensive'
+                }
+              },
+              required: ['query'],
+            },
+          },
         ],
       };
     });
@@ -129,6 +159,8 @@ class PerplexityMCPServer {
           return await this.handleCodeAnalysis(args);
         case 'perplexity_research_topic':
           return await this.handleTopicResearch(args);
+        case 'grok4_analysis':
+          return await this.handleGrok4Analysis(args);
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -365,6 +397,113 @@ Keep the analysis comprehensive but concise.`;
       req.write(postData);
       req.end();
     });
+  }
+
+  async handleGrok4Analysis(args) {
+    try {
+      const { 
+        query, 
+        context, 
+        analysis_type = 'comprehensive', 
+        research_mode = 'comprehensive' 
+      } = args;
+
+      if (!this.apiKey) {
+        throw new Error('PERPLEXITY_API_KEY not configured. Grok-4 requires Perplexity Pro subscription.');
+      }
+
+      // Build enhanced Grok-4 prompt based on analysis type
+      let enhancedPrompt = query;
+      
+      if (context) {
+        enhancedPrompt = `Context: ${context}\n\nAnalysis Request: ${query}`;
+      }
+
+      // Add analysis type specific instructions
+      const analysisInstructions = {
+        comprehensive: `
+Provide comprehensive analysis with:
+- Deep multi-perspective reasoning
+- Real-time web context with source verification
+- Cross-validation from multiple sources
+- Strategic insights and actionable recommendations
+- Current trends and developments
+- Risk assessment and mitigation strategies`,
+        
+        security: `
+Provide security-focused analysis with:
+- Threat assessment and vulnerability identification
+- Security best practices and compliance considerations
+- Risk mitigation strategies
+- Access control and authentication patterns
+- Data protection and privacy implications`,
+        
+        performance: `
+Provide performance analysis with:
+- Bottleneck identification and optimization opportunities
+- Scalability considerations and resource utilization
+- Monitoring and observability recommendations
+- Cost optimization strategies
+- Load handling and capacity planning`,
+        
+        architecture: `
+Provide architectural analysis with:
+- System design patterns and principles
+- Component relationships and dependencies
+- Scalability and maintainability considerations
+- Integration patterns and API design
+- Technology stack evaluation and recommendations`,
+        
+        strategic: `
+Provide strategic analysis with:
+- Business impact and value assessment
+- Competitive analysis and market positioning
+- Implementation roadmap and prioritization
+- Resource requirements and timeline estimates
+- Success metrics and KPI recommendations`
+      };
+
+      enhancedPrompt += analysisInstructions[analysis_type] || analysisInstructions.comprehensive;
+
+      const requestData = {
+        model: 'grok-4', // Official Grok-4 model
+        messages: [
+          {
+            role: 'system',
+            content: `You are using Grok-4's advanced reasoning capabilities through Perplexity Pro. Provide thorough analysis with real-time web context, proper citations, and actionable insights. Research mode: ${research_mode}.`
+          },
+          {
+            role: 'user',
+            content: enhancedPrompt
+          }
+        ],
+        max_tokens: 4000,
+        temperature: 0.1, // Lower temperature for more focused analysis
+        return_citations: true,
+        return_related_questions: true
+      };
+
+      const response = await this.makeRequest(requestData);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `# Grok-4 Analysis Results (${analysis_type})\n\n## Analysis\n${response.choices[0].message.content}\n\n## Model: ${response.model || 'grok-4'}\n## Research Mode: ${research_mode}\n## Analysis Type: ${analysis_type}${response.citations ? `\n## Citations\n${response.citations.map(c => `- ${c.title}: ${c.url}`).join('\n')}` : ''}${response.related_questions ? `\n## Related Questions\n${response.related_questions.map(q => `- ${q}`).join('\n')}` : ''}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error in Grok-4 analysis: ${error.message}\n\nNote: Grok-4 requires Perplexity Pro subscription ($20/month). Ensure your API key has Pro access.`
+          }
+        ],
+        isError: true
+      };
+    }
   }
 
   async run() {

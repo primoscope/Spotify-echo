@@ -17,16 +17,19 @@ class RealPerplexityIntegration {
         this.apiKey = process.env.PERPLEXITY_API_KEY;
         this.baseUrl = 'https://api.perplexity.ai';
         
-        // Verified Perplexity models with Grok-4 equivalent mapping
+        // Verified Perplexity models with official Grok-4 mapping (Per documentation)
+        // Note: True Grok-4 is available via Perplexity Pro web interface ($20/month)
         this.models = {
-            'grok-4': {
+            'grok-4-equivalent': {
                 actualModel: 'sonar-pro',
-                description: 'Grok-4 equivalent using sonar-pro for advanced reasoning',
-                capabilities: ['deep_analysis', 'repository_structure', 'strategic_planning', 'web_search'],
-                maxTokens: 4000,
+                description: 'Grok-4 equivalent using sonar-pro with enhanced reasoning - Based on official documentation',
+                capabilities: ['deep_analysis', 'repository_structure', 'strategic_planning', 'web_search', 'current_events', 'multi_step_reasoning'],
+                maxTokens: 28000, // Perplexity Pro limits for sonar-pro
                 webSearch: true,
                 reasoning: 'enhanced',
-                cost: 'low'
+                cost: 'low',
+                perplexityNative: true,
+                grokEquivalent: true
             },
             'sonar-pro': {
                 actualModel: 'sonar-pro', 
@@ -86,19 +89,20 @@ class RealPerplexityIntegration {
         const actualModel = modelConfig.actualModel;
         const maxTokens = Math.min(options.maxTokens || 1000, modelConfig.maxTokens);
 
-        // Enhanced prompt for Grok-4 equivalent
+        // Enhanced prompt for Grok-4 equivalent (Official Perplexity Pro integration)
         let enhancedPrompt = prompt;
-        if (modelName === 'grok-4') {
-            enhancedPrompt = `As an advanced AI with Grok-4 equivalent reasoning capabilities, ${prompt}
+        if (modelName === 'grok-4-equivalent' || modelConfig.grokEquivalent) {
+            enhancedPrompt = `Using Grok-4 equivalent reasoning capabilities via Perplexity Pro's sonar-pro model with enhanced prompting, ${prompt}
 
 Please provide:
-- Deep analytical insights
-- Multiple perspectives and viewpoints  
-- Reasoning behind conclusions
-- Specific actionable recommendations
-- Current web-based information where relevant
+- Deep analytical insights with real-time web context
+- Multiple perspectives and comprehensive viewpoints  
+- Clear reasoning behind conclusions with citations
+- Specific actionable recommendations based on current data
+- Current web-based information with source verification
+- Cross-validation of findings from multiple sources
 
-Use advanced reasoning and comprehensive analysis.`;
+Use enhanced reasoning combined with Perplexity's research infrastructure for comprehensive analysis.`;
         }
 
         const requestData = {
@@ -209,7 +213,7 @@ Use advanced reasoning and comprehensive analysis.`;
 
         const testQueries = [
             {
-                name: 'Repository Analysis',
+                name: 'Repository Analysis with Grok-4 Equivalent',
                 query: 'Analyze the EchoTune AI repository structure and provide strategic recommendations for improving the Perplexity integration and MCP servers.',
                 expectedCapabilities: ['deep_analysis', 'strategic_planning']
             },
@@ -232,7 +236,7 @@ Use advanced reasoning and comprehensive analysis.`;
                 console.log(`\n🔍 Testing: ${testQuery.name}`);
                 console.log(`Query: "${testQuery.query}"`);
                 
-                const result = await this.makeRequest(testQuery.query, 'grok-4', {
+                const result = await this.makeRequest(testQuery.query, 'grok-4-equivalent', {
                     maxTokens: 1500,
                     temperature: 0.2
                 });

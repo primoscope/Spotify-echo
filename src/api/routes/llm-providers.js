@@ -4,6 +4,7 @@ const path = require('path');
 const modelRegistry = require('../../chat/model-registry');
 const llmTelemetry = require('../../chat/llm-telemetry');
 const router = express.Router();
+const PromptExecutor = require('../../../prompts/tools/executor');
 
 /**
  * Enhanced LLM Provider Management API
@@ -842,6 +843,26 @@ router.get('/llm-providers/telemetry/export', async (req, res) => {
       error: 'Failed to export telemetry data',
       details: error.message,
     });
+  }
+});
+
+/**
+ * @route POST /api/settings/llm-providers/perplexity/research
+ * @desc Run a research prompt using the Perplexity Sonar-Pro model
+ */
+router.post('/perplexity/research', async (req, res) => {
+  try {
+    const { prompt, context = '' } = req.body || {};
+    if (!prompt) {
+      return res.status(400).json({ success: false, error: 'prompt is required' });
+    }
+
+    const executor = new PromptExecutor();
+    const result = await executor.execute('analysis/user-driven-sonar-pro', { user_prompt: prompt, context });
+
+    return res.json({ success: true, content: result.content, usage: result.usage, model: result.model || 'perplexity/sonar-pro' });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 

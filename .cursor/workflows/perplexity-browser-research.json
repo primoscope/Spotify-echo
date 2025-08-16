@@ -1,0 +1,30 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "Perplexity Browser Research",
+  "description": "Use filesystem + browser + Perplexity to research and summarize with citations",
+  "steps": [
+    {
+      "tool": "echotune-filesystem",
+      "action": "scan",
+      "args": {
+        "paths": ["./src", "./scripts", "./mcp-servers"],
+        "maxFiles": 100
+      }
+    },
+    {
+      "tool": "brave-search",
+      "action": "search",
+      "args": {
+        "query": "latest MCP integration best practices 2025",
+        "count": 5
+      }
+    },
+    {
+      "tool": "echotune-perplexity",
+      "action": "research",
+      "args": {
+        "prompt": "Summarize repository context and external findings; produce recommendations with short citations."
+      }
+    }
+  ]
+}

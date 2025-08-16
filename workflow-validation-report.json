@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-08-09T12:37:53.729Z",
+  "timestamp": "2025-08-16T01:01:06.861Z",
   "summary": {
-    "total": 28,
-    "valid": 28,
-    "warnings": 10,
+    "total": 47,
+    "valid": 47,
+    "warnings": 28,
     "errors": 0,
     "optimizations": [
       {
-        "file": "#mcp-integration.yml",
+        "file": "mcp-integration.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
       },
@@ -22,12 +22,27 @@
         "suggestion": "Consider adding pip cache for faster builds"
       },
       {
+        "file": "copilot-agent-preflight.yml",
+        "type": "caching",
+        "suggestion": "Consider adding npm cache for faster builds"
+      },
+      {
         "file": "deploy-one-click.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
       },
       {
         "file": "digitalocean-deploy.yml",
+        "type": "caching",
+        "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
+        "file": "enhanced-copilot-agent-integration.yml",
+        "type": "caching",
+        "suggestion": "Consider adding npm cache for faster builds"
+      },
+      {
+        "file": "epic-mvp-integration.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
       },
@@ -43,6 +58,21 @@
       },
       {
         "file": "mcp-validation-gateway.yml",
+        "type": "caching",
+        "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
+        "file": "mcp-validation.yml",
+        "type": "caching",
+        "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
+        "file": "music-pipeline.yml",
+        "type": "caching",
+        "suggestion": "Consider adding npm cache for faster builds"
+      },
+      {
+        "file": "music-pipeline.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
       },

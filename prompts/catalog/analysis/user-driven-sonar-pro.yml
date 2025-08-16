@@ -1,0 +1,51 @@
+filename: user-driven-sonar-pro
+description: Execute a user-provided prompt quickly using Perplexity sonar-pro
+version: "1.0.0"
+category: analysis
+model: sonar-pro
+modelParameters:
+  temperature: 0.2
+  max_tokens: 1500
+  top_p: 0.9
+
+variables:
+  user_prompt:
+    type: string
+    description: Task or question
+    required: true
+  context:
+    type: string
+    description: Optional context
+    required: false
+    default: ""
+
+messages:
+  - role: system
+    content: |
+      <goal> Provide a concise and correct response. </goal>
+      <format_rules>
+      - Start with a short summary
+      - Use concise bullets or a short table
+      </format_rules>
+
+  - role: user
+    content: |
+      Task:
+      {{user_prompt}}
+
+      Context:
+      {{context}}
+
+testData:
+  - variables:
+      user_prompt: "Summarize MCP benefits"
+    expected: "Summary"
+
+evaluators:
+  - name: Has content
+    string:
+      length_min: 80
+
+metadata:
+  author: "Team"
+  created: "${new Date().toISOString()}"

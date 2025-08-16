@@ -310,7 +310,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: security-summary-report
-          path: reports/security-summary.md
+          path: |
+            reports/security-summary.md
+            reports/gitleaks.json
           retention-days: 90
-          path: reports/gitleaks.json
           if-no-files-found: ignore

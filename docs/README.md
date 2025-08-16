@@ -8,7 +8,6 @@
 |---------------|-------------|----------|
 | **[README.md](../README.md)** | Project overview & quick setup | Everyone |
 | **[API Documentation](../API_DOCUMENTATION.md)** | Complete API reference | Developers |
-| **[Contributing](../CONTRIBUTING.md)** | Contribution guidelines | Contributors |
 
 ## 🏗️ Architecture & Design
 
@@ -33,8 +32,9 @@
 |-------|-------------|
 | **[Coding Standards](guides/coding-standards.md)** | Development guidelines and best practices |
 | **[GitHub Automation](guides/github-automation.md)** | CI/CD setup and automation |
-| **[Database Management](guides/MONGODB_SETUP.md)** | Database setup and maintenance |
 | **[Agent System](guides/AGENTS.md)** | AI agent workflow and configuration |
+| **[Cursor + Perplexity Integration](../CURSOR_IDE_SETUP.md)** | Cursor MCP config, Perplexity server, browser research workflow |
+| **[Prompt System Guide](guides/PROMPT_SYSTEM_GUIDE.md)** | Prompt catalog usage and Perplexity models |
 
 ## 🔌 API Reference
 
@@ -135,6 +135,8 @@ docs/
 | Deployment help | [deployment/](deployment/) |
 | Development guide | [guides/coding-standards.md](guides/coding-standards.md) |
 | System overview | [architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md) |
+| Agent + Perplexity | [Cursor IDE Setup](../CURSOR_IDE_SETUP.md) |
+| Prompts catalog | [Prompt System Guide](guides/PROMPT_SYSTEM_GUIDE.md) |
 | Troubleshooting | [deployment/troubleshooting.md](deployment/troubleshooting.md) |
 
 ### Search Tips
@@ -156,8 +158,8 @@ docs/
 
 ---
 
-**Documentation Version**: 2.1.0  
-**Last Updated**: January 2024  
+**Documentation Version**: 2.2.0  
+**Last Updated**: $(date +%Y-%m-%d)  
 **Maintainer**: EchoTune AI Team
 
 > 💡 **Tip**: This documentation is version controlled. Check the git history for changes and updates.

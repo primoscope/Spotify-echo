@@ -48,4 +48,8 @@ Next Actions:
   - EnhancedChatInterface: provider quick-switch renders and updates provider label; relies on `LLMProvider` context, no backend changes.
   - EnhancedMusicDiscovery: mood mini-visualization displays bar spark profile reflecting slider values; client-only.
   - EnhancedAnalyticsDashboard: overview cards display tiny sparklines; uses mock hourly data if API unavailable.
-  - ProviderPanel: MCP health badge and Optimize action wired to `/api/enhanced-mcp/*`; no blocking errors observed. 
+  - ProviderPanel: MCP health badge and Optimize action wired to `/api/enhanced-mcp/*`; no blocking errors observed.
+
+- UI Construct (2025-08-16):
+  - Added provider status chip to `EnhancedChatInterface.jsx` header.
+  - Added mood preset chips to `EnhancedMusicDiscovery.jsx` for fast context setting. 

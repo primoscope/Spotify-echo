@@ -207,6 +207,15 @@ function EnhancedMusicDiscovery() {
     );
   };
 
+  // Mood preset chips
+  const moodPresets = [
+    { id: 'chill', label: 'Chill', values: { energy: 30, valence: 60, danceability: 40, acousticness: 70 } },
+    { id: 'party', label: 'Party', values: { energy: 80, valence: 75, danceability: 85, acousticness: 20 } },
+    { id: 'focus', label: 'Focus', values: { energy: 35, valence: 40, danceability: 30, acousticness: 60 } },
+    { id: 'happy', label: 'Happy', values: { energy: 65, valence: 85, danceability: 70, acousticness: 40 } },
+  ];
+  const applyPreset = (preset) => setMoodSettings(preset.values);
+
   // Add track to playlist
   const addToPlaylist = async (track) => {
     try {
@@ -328,6 +337,11 @@ function EnhancedMusicDiscovery() {
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Mood Settings
               </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                {moodPresets.map((p) => (
+                  <Chip key={p.id} size="small" label={p.label} onClick={() => applyPreset(p)} />
+                ))}
+              </Box>
               <Grid container spacing={3}>
                 {Object.entries(moodSettings).map(([key, value]) => (
                   <Grid item xs={12} sm={6} key={key}>

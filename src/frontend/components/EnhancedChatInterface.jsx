@@ -266,6 +266,31 @@ const EnhancedChatInterface = ({
     </Box>
   );
 
+  const statusToColor = (status) => {
+    switch ((status || '').toLowerCase()) {
+      case 'connected':
+        return 'success';
+      case 'error':
+        return 'error';
+      case 'unknown':
+        return 'warning';
+      default:
+        return 'default';
+    }
+  };
+
+  const ProviderStatusChip = () => {
+    const st = providers?.[currentProvider]?.status || 'unknown';
+    return (
+      <Chip
+        size="small"
+        label={`Status: ${st}`}
+        color={statusToColor(st)}
+        variant="outlined"
+      />
+    );
+  };
+
   const ContextChipsSection = ({ category, chips, icon: Icon }) => (
     <Box sx={{ mb: 2 }}>
       <Button
@@ -435,7 +460,10 @@ const EnhancedChatInterface = ({
             AI Music Assistant
           </Typography>
 
-          <ProviderQuickSwitch />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ProviderStatusChip />
+            <ProviderQuickSwitch />
+          </Box>
         </Box>
 
         <Typography variant="body2" color="text.secondary">

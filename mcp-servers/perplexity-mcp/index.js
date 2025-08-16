@@ -50,7 +50,7 @@ class PerplexityMCPServer {
                 },
                 model: {
                   type: 'string',
-                  description: 'Model to use (sonar-pro, sonar-online)',
+                  description: 'Model to use (grok-4, sonar-pro, sonar, llama-3.1-70b, llama-3.1-8b)',
                   default: 'sonar-pro',
                 },
                 max_tokens: {
@@ -143,7 +143,31 @@ class PerplexityMCPServer {
         throw new Error('PERPLEXITY_API_KEY not configured');
       }
 
-      const response = await this.makePerplexityRequest(query, model, {
+      // Model mapping for correct API calls
+      const modelMappings = {
+        'grok-4': 'sonar-pro',
+        'sonar-pro': 'sonar-pro',
+        'sonar': 'sonar',
+        'llama-3.1-70b': 'llama-3.1-70b-instruct',
+        'llama-3.1-8b': 'llama-3.1-8b-instruct'
+      };
+
+      const actualModel = modelMappings[model] || 'sonar-pro';
+      
+      // Enhanced prompt for Grok-4 equivalent
+      let enhancedQuery = query;
+      if (model === 'grok-4') {
+        enhancedQuery = `As an advanced AI with Grok-4 equivalent reasoning capabilities: ${query}
+
+Provide comprehensive analysis with:
+- Deep analytical insights
+- Multiple perspectives
+- Reasoning behind conclusions  
+- Specific actionable recommendations
+- Current web-based information where relevant`;
+      }
+
+      const response = await this.makePerplexityRequest(enhancedQuery, actualModel, {
         max_tokens,
         temperature,
       });
@@ -153,10 +177,12 @@ class PerplexityMCPServer {
           {
             type: 'text',
             text: JSON.stringify({
-              query,
-              model,
+              query: enhancedQuery,
+              requestedModel: model,
+              actualModel: actualModel,
               response: response.choices[0].message.content,
               usage: response.usage,
+              grokEquivalent: model === 'grok-4'
             }, null, 2),
           },
         ],

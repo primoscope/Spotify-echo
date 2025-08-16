@@ -29,6 +29,11 @@ class LLMTelemetry {
     this.startCollection(collectionIntervalMs);
     this.startHistoryCleanup(historyRetentionHours);
 
+    // In test environment, run one immediate collection to seed metrics
+    if (process.env.NODE_ENV === 'test') {
+      try { this.collectMetrics(); } catch (e) {}
+    }
+
     console.log('📊 LLM Telemetry system initialized');
   }
 
@@ -173,6 +178,10 @@ class LLMTelemetry {
    * Get current metrics snapshot
    */
   getCurrentMetrics() {
+    return this.collectMetrics();
+  }
+
+  forceCollect() {
     return this.collectMetrics();
   }
 

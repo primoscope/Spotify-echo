@@ -624,5 +624,6 @@ class ProviderManager {
   }
 }
 
-// Export singleton instance
-module.exports = new ProviderManager();
+// Export both constructor and singleton for tests and runtime
+module.exports = ProviderManager;
+module.exports.instance = new ProviderManager();

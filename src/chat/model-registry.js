@@ -418,7 +418,7 @@ class ModelRegistry {
       let score = 0;
 
       // Quality scoring
-      const qualityScores = { testing: 1, good: 2, high: 3, highest: 4, experimental: 2 };
+      const qualityScores = { testing: 1, good: 2, high: 3, highest: 4, experimental: 3 };
       score += qualityScores[model.qualityTier] || 0;
 
       // Latency scoring

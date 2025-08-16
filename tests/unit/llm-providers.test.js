@@ -1,4 +1,4 @@
-const { describe, it, expect, beforeEach, jest } = require('@jest/globals');
+const { describe, it, expect, beforeEach } = require('@jest/globals');
 const ProviderManager = require('../../src/api/providers/ProviderManager');
 
 // Minimal mock for fetch where needed

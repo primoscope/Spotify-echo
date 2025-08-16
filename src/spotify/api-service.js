@@ -506,3 +506,18 @@ class SpotifyAPIService {
 }
 
 module.exports = SpotifyAPIService;
+
+// Test-friendly functional facade
+module.exports.getUserProfile = async function getUserProfile(accessToken) {
+	const svc = new SpotifyAPIService();
+	// Minimal implementation using Web API /me endpoint
+	const axios = require('axios');
+	const res = await axios.get(`${svc.baseURL}/me`, { headers: { Authorization: `Bearer ${accessToken}` } });
+	return res.data;
+};
+
+module.exports.searchTracks = async function searchTracks(query, accessToken) {
+	const svc = new SpotifyAPIService();
+	const result = await svc.search(query, 'track', { limit: 20, accessToken });
+	return result.tracks;
+};

@@ -44,6 +44,9 @@ class LLMProviderManager {
       // Initialize providers
       await this.initializeProviders();
 
+      // Initialize circuit breakers early so tests can use them immediately
+      this.initializeCircuitBreakers();
+
       // Setup key refresh monitoring
       this.setupKeyRefreshMonitoring();
 
@@ -58,9 +61,6 @@ class LLMProviderManager {
 
       this.initialized = true;
       console.log('✅ LLM Provider Manager initialized with enhanced features');
-      
-      // Initialize circuit breakers for all providers
-      this.initializeCircuitBreakers();
     } catch (error) {
       console.error('❌ Failed to initialize LLM Provider Manager:', error);
       throw error;
@@ -71,7 +71,8 @@ class LLMProviderManager {
    * Initialize circuit breakers for all providers
    */
   initializeCircuitBreakers() {
-    const providerIds = ['gemini', 'openai', 'openrouter', 'mock'];
+    const dynamicIds = Array.from(this.providerConfigs.keys());
+    const providerIds = Array.from(new Set([...dynamicIds, 'gemini', 'openai', 'openrouter', 'mock']));
     
     for (const providerId of providerIds) {
       this.circuitBreakers.set(providerId, {

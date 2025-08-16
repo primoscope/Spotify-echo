@@ -1,4 +1,4 @@
-const { describe, it, expect, beforeEach, jest } = require('@jest/globals');
+const { describe, it, expect, beforeEach } = require('@jest/globals');
 const spotifyApi = require('../../src/spotify/api-service');
 
 // Mock global fetch used by api-service

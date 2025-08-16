@@ -195,6 +195,8 @@
     "test:perplexity-grok4": "npm run test:integration -- --testPathPattern=perplexity-grok4-integration-tests.js",
     "demo:automation": "node scripts/demo-automation-workflow.js",
     "status:automation": "node scripts/automation-system-status.js",
+    "research:music": "node scripts/music-research-automation.js",
+    "test:music-integration": "npm run test:integration -- --testPathPattern=music.*test",
     "production-check": "node scripts/production-readiness-orchestrator.js --production-check",
     "production-deploy": "./scripts/deploy-digitalocean.sh",
     "workflow:analyze": "node scripts/workflow-optimizer.js analyze",

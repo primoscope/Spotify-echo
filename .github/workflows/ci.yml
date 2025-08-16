@@ -84,6 +84,7 @@ jobs:
           echo "✅ Enhanced Copilot Agent Integration test completed"
 
       - name: MCP Enhanced Validation
+        run: |
           echo "🔍 Running Enhanced MCP Validation..."
           npm run mcp:enhanced-validation || echo "⚠️ MCP validation completed with warnings"
           

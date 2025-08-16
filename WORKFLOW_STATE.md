@@ -42,4 +42,10 @@ Next Actions:
 - Perplexity Research Sync (2025-08-16):
   - Emphasize securing `PERPLEXITY_API_KEY` and monitoring endpoint reliability.
   - Add observability to MCP endpoints; structured logging and alerting hooks.
-  - Keep Cursor workflows for browser research and PR deep-dive documented and discoverable. 
+  - Keep Cursor workflows for browser research and PR deep-dive documented and discoverable.
+
+- UI Validation (2025-08-16):
+  - EnhancedChatInterface: provider quick-switch renders and updates provider label; relies on `LLMProvider` context, no backend changes.
+  - EnhancedMusicDiscovery: mood mini-visualization displays bar spark profile reflecting slider values; client-only.
+  - EnhancedAnalyticsDashboard: overview cards display tiny sparklines; uses mock hourly data if API unavailable.
+  - ProviderPanel: MCP health badge and Optimize action wired to `/api/enhanced-mcp/*`; no blocking errors observed. 

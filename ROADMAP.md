@@ -91,6 +91,69 @@ See also: `WORKFLOW_STATE.md` for ongoing work logs and validations.
 
 ---
 
+## CLI Agent Tasks (API contracts)
+
+- Providers — list
+  - Method: GET `/api/providers`
+  - Response (200):
+```json
+{
+  "success": true,
+  "providers": [
+    {
+      "id": "gemini",
+      "name": "Google Gemini",
+      "available": true,
+      "status": "connected",
+      "model": "gemini-1.5-flash",
+      "performance": { "averageLatency": 1200, "successRate": 99.1, "requests": 542 }
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "available": false,
+      "status": "no_key"
+    },
+    { "id": "mock", "name": "Demo Mode (Mock)", "available": true, "status": "connected" }
+  ]
+}
+```
+
+- Providers — switch
+  - Method: POST `/api/providers/switch`
+  - Request:
+```json
+{ "provider": "gemini", "model": "gemini-1.5-flash" }
+```
+  - Response (200):
+```json
+{ "success": true, "current": { "provider": "gemini", "model": "gemini-1.5-flash" } }
+```
+  - Errors: 400 if unknown provider/model; 409 if unavailable.
+
+- Providers — health
+  - Method: GET `/api/providers/health`
+  - Response (200):
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "providers": {
+    "gemini": { "status": "connected", "averageLatency": 1180, "requests": 1203, "successRate": 99.0 },
+    "openai": { "status": "error", "error": "auth_error" },
+    "openrouter": { "status": "no_key" },
+    "mock": { "status": "connected" }
+  },
+  "timestamp": "2025-08-16T05:30:00Z"
+}
+```
+
+Notes:
+- Implement in `src/api/routes/llm-providers.js` (new top-level routes `/api/providers*`) delegating to `src/chat/llm-provider-manager.js`.
+- Persist last N latency/error metrics for charts; shape matches `ProviderPanel.jsx` expectations.
+
+---
+
 ## Research & Decisions
 - Auto research (`ROADMAP_AUTO.md`) feeds tasks weekly. Significant decisions are copied here with dates and commit refs.
 

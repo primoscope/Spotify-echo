@@ -32,3 +32,54 @@ describe('LLM ProviderManager', () => {
     expect(typeof provider).toBe('string');
   });
 });
+
+describe('Perplexity executor', () => {
+  const path = require('path');
+  const fs = require('fs');
+  const axios = require('axios');
+  jest.mock('axios');
+
+  const Executor = require(path.join(__dirname, '../../prompts/tools/executor.js'));
+
+  beforeAll(() => {
+    process.env.PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY || 'pplx-test-key';
+  });
+
+  afterAll(() => {
+    delete process.env.PERPLEXITY_API_KEY;
+    jest.resetAllMocks();
+  });
+
+  test('retries on 429 then succeeds', async () => {
+    const executor = new Executor();
+    const promptPath = 'analysis/user-driven-sonar-pro';
+
+    axios.post
+      .mockRejectedValueOnce({ response: { status: 429 }, message: 'rate limit' })
+      .mockResolvedValueOnce({ data: { choices: [{ message: { content: 'ok' } }], usage: {} } });
+
+    const result = await executor.execute(promptPath, { user_prompt: 'hello' });
+    expect(result.content).toMatch(/ok/i);
+    expect(axios.post).toHaveBeenCalledTimes(2);
+  });
+
+  test('maps 401/403 to auth error', async () => {
+    const executor = new Executor();
+    const promptPath = 'analysis/user-driven-sonar-pro';
+
+    axios.post.mockRejectedValueOnce({ response: { status: 401 }, message: 'unauthorized' });
+
+    await expect(executor.execute(promptPath, { user_prompt: 'hi' }))
+      .rejects.toThrow(/authentication failed/i);
+  });
+
+  test('maps 400 to payload error', async () => {
+    const executor = new Executor();
+    const promptPath = 'analysis/user-driven-sonar-pro';
+
+    axios.post.mockRejectedValueOnce({ response: { status: 400 }, message: 'bad request' });
+
+    await expect(executor.execute(promptPath, { user_prompt: 'hi' }))
+      .rejects.toThrow(/rejected the request \(400\)/i);
+  });
+});

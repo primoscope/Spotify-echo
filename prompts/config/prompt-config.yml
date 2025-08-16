@@ -56,6 +56,38 @@ models:
       max_tokens: 2000
       temperature: 0.3
 
+  perplexity:
+    grok-4:
+      provider: "perplexity"
+      api_key_env: "PERPLEXITY_API_KEY"
+      max_tokens: 4000
+      temperature: 0.2
+      top_p: 0.9
+    claude-3.5-sonnet:
+      provider: "perplexity"
+      api_key_env: "PERPLEXITY_API_KEY"
+      max_tokens: 4000
+      temperature: 0.2
+      top_p: 0.9
+    sonar-pro:
+      provider: "perplexity"
+      api_key_env: "PERPLEXITY_API_KEY"
+      max_tokens: 4000
+      temperature: 0.3
+      top_p: 0.9
+    llama-3.3-70b:
+      provider: "perplexity"
+      api_key_env: "PERPLEXITY_API_KEY"
+      max_tokens: 4000
+      temperature: 0.3
+      top_p: 0.9
+    o1-preview:
+      provider: "perplexity"
+      api_key_env: "PERPLEXITY_API_KEY"
+      max_tokens: 4000
+      temperature: 0.2
+      top_p: 0.9
+
 # Provider Configurations
 providers:
   openai:
@@ -72,6 +104,12 @@ providers:
 
   google:
     base_url: "https://generativelanguage.googleapis.com"
+    retry_attempts: 3
+    retry_delay: 1000
+    timeout: 30000
+
+  perplexity:
+    base_url: "https://api.perplexity.ai"
     retry_attempts: 3
     retry_delay: 1000
     timeout: 30000

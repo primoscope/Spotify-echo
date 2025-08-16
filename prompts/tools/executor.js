@@ -270,6 +270,51 @@ class PromptExecutor {
   }
 
   /**
+   * Execute prompt with Perplexity
+   */
+  async executePerplexity(prompt, messages, options = {}) {
+    const apiKey = process.env.PERPLEXITY_API_KEY;
+    if (!apiKey) {
+      throw new Error('Perplexity API key not found in environment');
+    }
+
+    const providerConfig = this.config.providers?.perplexity || {};
+
+    const modelParams = {
+      ...(this.config.models?.perplexity?.[prompt.model] || {}),
+      ...prompt.modelParameters,
+      ...options
+    };
+
+    const requestData = {
+      model: prompt.model,
+      messages: messages,
+      temperature: modelParams.temperature ?? 0.3,
+      max_tokens: modelParams.max_tokens ?? 2000,
+      top_p: modelParams.top_p ?? 0.9
+    };
+
+    const response = await axios.post(
+      `${providerConfig.base_url || 'https://api.perplexity.ai'}/chat/completions`,
+      requestData,
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: providerConfig.timeout || 30000
+      }
+    );
+
+    return {
+      content: response.data.choices?.[0]?.message?.content || response.data.content || '',
+      usage: response.data.usage,
+      model: prompt.model,
+      provider: 'perplexity'
+    };
+  }
+
+  /**
    * Get provider for a model
    */
   getProvider(model) {
@@ -281,6 +326,10 @@ class PromptExecutor {
     }
     if (model.startsWith('gemini-') || model.includes('google/')) {
       return 'google';
+    }
+    // Perplexity models
+    if (/^(grok-4|sonar|llama-3\.3-70b|o1-preview)/i.test(model)) {
+      return 'perplexity';
     }
     return 'openai'; // Default fallback
   }
@@ -329,6 +378,9 @@ class PromptExecutor {
           break;
         case 'anthropic':
           result = await this.executeAnthropic(prompt, messages, options);
+          break;
+        case 'perplexity':
+          result = await this.executePerplexity(prompt, messages, options);
           break;
         default:
           throw new Error(`Unsupported provider: ${provider}`);

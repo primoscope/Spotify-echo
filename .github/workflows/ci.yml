@@ -25,6 +25,14 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install Node deps (if package.json exists)
         run: |
           if [ -f package.json ]; then
@@ -32,6 +40,14 @@ jobs:
           else
             echo "No package.json, skipping npm ci"
           fi
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install Python deps (if requirements.txt exists)
         run: |

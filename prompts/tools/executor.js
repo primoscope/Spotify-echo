@@ -313,24 +313,62 @@ class PromptExecutor {
        top_p: modelParams.top_p ?? 0.9
      };
 
-    const response = await axios.post(
-      `${providerConfig.base_url || 'https://api.perplexity.ai'}/chat/completions`,
-      requestData,
-      {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: providerConfig.timeout || 30000
-      }
-    );
+    const baseUrl = providerConfig.base_url || 'https://api.perplexity.ai';
+    const timeoutMs = providerConfig.timeout || 30000;
+    const maxAttempts = providerConfig.retry_attempts || 3;
+    const retryDelayMs = providerConfig.retry_delay || 1000;
 
-    return {
-      content: response.data.choices?.[0]?.message?.content || response.data.content || '',
-      usage: response.data.usage,
-      model: prompt.model,
-      provider: 'perplexity'
-    };
+    let lastError;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const response = await axios.post(
+          `${baseUrl}/chat/completions`,
+          requestData,
+          {
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: timeoutMs
+          }
+        );
+
+        return {
+          content: response.data.choices?.[0]?.message?.content || response.data.content || '',
+          usage: response.data.usage,
+          model: prompt.model,
+          provider: 'perplexity'
+        };
+      } catch (error) {
+        lastError = error;
+        const status = error?.response?.status;
+        const isRetryable = (
+          error?.code === 'ECONNABORTED' || // timeout
+          status === 429 || // rate limit
+          (status >= 500 && status < 600) // server errors
+        );
+        if (attempt < maxAttempts && isRetryable) {
+          const delay = retryDelayMs * attempt;
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+
+        // Map common errors to clearer messages
+        if (status === 401 || status === 403) {
+          throw new Error('Perplexity authentication failed (check PERPLEXITY_API_KEY and permissions)');
+        }
+        if (status === 400) {
+          throw new Error(`Perplexity rejected the request (400). Check model, messages, or payload format.`);
+        }
+        if (status === 429) {
+          throw new Error('Perplexity rate limit reached (429). Try again later or reduce request frequency.');
+        }
+
+        throw new Error(`Perplexity request failed${status ? ' (' + status + ')' : ''}: ${error.message}`);
+      }
+    }
+
+    throw lastError || new Error('Perplexity request failed');
   }
 
   /**

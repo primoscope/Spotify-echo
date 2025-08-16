@@ -67,6 +67,7 @@ const healthRoutes = require('./api/health/health-routes');
 const cacheManager = require('./api/cache/cache-manager');
 const SecurityManager = require('./api/security/security-manager');
 const performanceMonitor = require('./api/monitoring/performance-monitor');
+const logger = require('./api/utils/logger');
 
 // Import Redis-backed rate limiting and performance monitoring
 const { rateLimiters } = require('./middleware/redis-rate-limiter');
@@ -189,6 +190,18 @@ app.use(rateLimiters.global);
 
 // Request logging and monitoring
 app.use(requestLogger);
+
+// Lightweight request timing: add X-Response-Time and log JSON
+app.use((req, res, next) => {
+  const start = process.hrtime.bigint();
+  res.on('finish', () => {
+    const end = process.hrtime.bigint();
+    const ms = Number(end - start) / 1e6;
+    try { res.setHeader('X-Response-Time', `${ms.toFixed(0)}ms`); } catch {}
+    logger.info('request', { method: req.method, path: req.path, status: res.statusCode, ms: Math.round(ms) });
+  });
+  next();
+});
 
 // CORS with production configuration
 app.use(corsMiddleware);

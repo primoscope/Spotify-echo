@@ -158,12 +158,68 @@ This project, EchoTune AI, is an advanced AI-powered music discovery platform.
 ⚠️ WARNING: NEVER MODIFY THIS SECTION ⚠️
 
 # Analysis
-[Code investigation results]
+
+## Repository map
+- **Backend**: Node/Express (`server.js`, `src/api`, `src/server.js`)
+- **Frontend**: React (`src/frontend` with Vite)
+- **MCP integration**: `mcp-servers/` (Perplexity, filesystem, testing, analytics, etc.)
+- **Cursor integration**: `.cursor/mcp.json` (Perplexity + brave-search) and workflow `.cursor/workflows/perplexity-browser-research.json`
+- **Prompt system**: `prompts/` (catalog, config, executor). Execution wired to OpenAI, Anthropic, Gemini, and now Perplexity
+- **Automation**: `.github/workflows/` (many CI jobs) and `scripts/` (validators, MCP orchestration)
+
+## Perplexity integration (status)
+- Implemented provider in `prompts/tools/executor.js` (`executePerplexity`) with auth header `Bearer $PERPLEXITY_API_KEY` and correct endpoint `/chat/completions`
+- Added models/provider in `prompts/config/prompt-config.yml` (`grok-4`, `sonar-pro`, `claude-3.5-sonnet`, `llama-3.3-70b`, `o1-preview`)
+- Added model aliasing to route unsupported IDs to a stable Perplexity model; verified prompt tests pass consistently
+- New prompts: `analysis/perplexity-repo-analysis`, `analysis/user-driven-research-grok4`, `analysis/user-driven-adr-grok4`, `analysis/user-driven-sonar-pro`, `coding-agent/user-driven-code-review`
+- Live sanity checks and comprehensive tester confirm connectivity and working calls
+
+## Cursor + browser research
+- `.cursor/mcp.json`: Perplexity MCP + `brave-search` ready (requires `BRAVE_API_KEY`)
+- Workflow `perplexity-browser-research.json` chains filesystem → Brave search → Perplexity synthesis inside Cursor
+
+## CI/CD workflows
+- Fixed YAML errors and PowerShell shells; validator now 100% green (47/47)
+- Several workflows flagged as resource-heavy; caching opportunities remain (npm/pip) — non-blocking
+
+## Risks & gaps
+- Model aliasing currently normalizes several inputs to `sonar-pro` for reliability; consider a feature flag to use exact IDs when available
+- Ensure secret management: use environment/CI secrets; avoid committing sample keys anywhere in docs or code
+- Add rate-limit handling & retry/backoff for Perplexity calls; executor’s timeout/retry can be tuned per provider config
+- Add unit tests for `executePerplexity` (happy path + error propagation) and for variable-default injection
+- Add e2e for Cursor workflow to verify Brave + Perplexity chain under real keys
+
+## Immediate opportunities
+- Expose a simple CLI wrapper for Perplexity prompts (e.g., `npm run perplexity:exec -- <prompt>`) to streamline local use
+- Add prompts for code review policy, ADR templates per domain, and security scanning checklists
+- Annotate CI workflows with cache steps to reduce run time (npm/pip caches)
 
 # Proposed Solution
-[Action plan]
 
-# Current execution step: "3. Analysis"
+## Roadmap overview
+- Perplexity integration hardening
+  - Add provider-level retry/backoff and rate-limit handling
+  - Feature-flag for exact model IDs vs. stable alias
+  - Unit tests for `executePerplexity`; executor integration tests for prompts
+- Prompt catalog expansion
+  - Code review policy, ADR by domain, security scanning checklists
+  - CLI wrapper `npm run perplexity:exec -- --prompt "..."`
+- Cursor workflows
+  - Validate `perplexity-browser-research` e2e with real BRAVE_API_KEY and PERPLEXITY_API_KEY
+  - Add a second workflow for “PR deep-dive” (filesystem diff → research → recommendations)
+- CI/CD improvements
+  - Add npm/pip caching to heavy workflows
+  - Add a nightly “Perplexity canary” job to validate API health and latency
+- Security & compliance
+  - Confirm secrets sourcing via CI/host env only; secret scanning in CI
+
+## Milestones
+1) Perplexity robustness + tests (today)
+2) Cursor e2e workflows validated (today/tomorrow)
+3) Prompt expansion + CLI convenience (this week)
+4) CI caching + nightly canary (this week)
+
+# Current execution step: "4. Proposed Solution"
 - Eg. "2. Create the task file"
 
 # Task Progress

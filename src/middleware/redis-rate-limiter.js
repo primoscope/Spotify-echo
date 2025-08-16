@@ -155,18 +155,19 @@ class RedisRateLimiter {
 
         // Skip counting for certain responses if configured
         const originalSend = res.send;
+        const limiterRef = this;
         res.send = function (body) {
           const shouldSkip =
-            (this.skipSuccessfulRequests && res.statusCode < 400) ||
-            (this.skipFailedRequests && res.statusCode >= 400);
+            (limiterRef.skipSuccessfulRequests && res.statusCode < 400) ||
+            (limiterRef.skipFailedRequests && res.statusCode >= 400);
 
           if (shouldSkip) {
             // Decrement the counter since we don't want to count this request
-            this.redisClient?.decr(key).catch(() => {}); // Ignore errors
+            limiterRef.redisClient?.decr(key).catch(() => {}); // Ignore errors
           }
 
           return originalSend.call(this, body);
-        }.bind(this);
+        };
 
         next();
       } catch (error) {

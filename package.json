@@ -271,7 +271,8 @@
     "ui:test": "npm run test:unit -- -i",
     "ui:lighthouse": "node scripts/autonomous-ui-enhancer.js --mode=lighthouse",
     "roadmap:update": "node scripts/autonomous-ui-enhancer.js --mode=roadmap",
-    "music:agent": "node scripts/music-ui-agent.js"
+    "music:agent": "node scripts/music-ui-agent.js",
+    "repo:analyze": "node scripts/repo-analyzer.js"
   },
   "keywords": [
     "music-discovery",

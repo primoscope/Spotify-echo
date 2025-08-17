@@ -1,0 +1,4 @@
+Repository analysis complete.
+Components scanned: 32
+MCP servers detected: echotune-perplexity, echotune-filesystem, package-manager, analytics, testing, brave-search, browserbase, memory, browser, mongodb
+Research topics: 3

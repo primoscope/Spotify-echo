@@ -452,6 +452,20 @@
           "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}"
         }
       },
+      "n8n-mcp": {
+        "command": "npx",
+        "args": [
+          "n8n-mcp"
+        ],
+        "env": {
+          "MCP_MODE": "stdio",
+          "LOG_LEVEL": "info",
+          "DISABLE_CONSOLE_OUTPUT": "false",
+          "N8N_API_URL": "${N8N_API_URL}",
+          "N8N_API_KEY": "${N8N_API_KEY}"
+        },
+        "description": "n8n workflow automation and management through MCP"
+      },
       "sequential-thinking": {
         "command": "node",
         "args": [

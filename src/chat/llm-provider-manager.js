@@ -13,7 +13,7 @@ class LLMProviderManager {
     this.providers = new Map();
     this.providerConfigs = new Map();
     this.keyRefreshHandlers = new Map();
-    this.fallbackOrder = ['gemini', 'openai', 'openrouter', 'mock']; // Prioritize Gemini first
+    this.fallbackOrder = ['gemini', 'perplexity', 'grok4', 'openai', 'openrouter', 'mock']; // Prioritize new providers
     this.currentProvider = 'gemini'; // Default to Gemini
     this.initialized = false;
     const coalesceEnv = (...names) => {
@@ -27,6 +27,8 @@ class LLMProviderManager {
 
       gemini: new KeyPool(coalesceEnv('GEMINI_API_KEYS', 'GEMINI_API', 'GEMINI_API_KEY').split(/[\s,]+/).filter(Boolean)),
       openrouter: new KeyPool(coalesceEnv('OPENROUTER_API_KEYS', 'OPENROUTER_API_KEY', 'OPENROUTER_API').split(/[\s,]+/).filter(Boolean)),
+      perplexity: new KeyPool(coalesceEnv('PERPLEXITY_API_KEYS', 'PERPLEXITY_API_KEY').split(/[\s,]+/).filter(Boolean)),
+      grok4: new KeyPool(coalesceEnv('XAI_API_KEYS', 'XAI_API_KEY').split(/[\s,]+/).filter(Boolean)),
 
     };
 
@@ -148,6 +150,22 @@ class LLMProviderManager {
         refreshable: true,
         refreshEndpoint: 'https://openrouter.ai/api/v1/auth/refresh',
       },
+      perplexity: {
+        name: 'Perplexity AI',
+        apiKey: process.env.PERPLEXITY_API_KEY,
+        model: process.env.PERPLEXITY_MODEL || 'sonar-pro',
+        endpoint: 'https://api.perplexity.ai/v1/chat/completions',
+        refreshable: false, // Perplexity keys don't auto-refresh
+      },
+      grok4: {
+        name: 'Grok-4 xAI',
+        apiKey: process.env.XAI_API_KEY,
+        openRouterKey: process.env.OPENROUTER_API_KEY,
+        model: process.env.GROK4_MODEL || 'grok-4',
+        endpoint: 'https://api.x.ai/v1/chat/completions',
+        useOpenRouter: process.env.GROK4_USE_OPENROUTER === 'true',
+        refreshable: false,
+      },
     };
 
     // Load additional config from file if exists
@@ -174,6 +192,10 @@ class LLMProviderManager {
       if (key === 'mock') {
         config.available = true;
         config.status = 'connected';
+      } else if (key === 'grok4') {
+        // Grok-4 can use either xAI direct or OpenRouter
+        config.available = !!(config.apiKey || config.openRouterKey);
+        config.status = config.available ? 'unknown' : 'no_key';
       } else {
         config.available = !!config.apiKey;
         config.status = config.available ? 'unknown' : 'no_key';
@@ -190,6 +212,8 @@ class LLMProviderManager {
     const MockProvider = require('./llm-providers/mock-provider');
     const GeminiProvider = require('./llm-providers/gemini-provider');
     const OpenAIProvider = require('./llm-providers/openai-provider');
+    const PerplexityProvider = require('./llm-providers/perplexity-provider');
+    const Grok4Provider = require('./llm-providers/grok4-provider');
 
     for (const [key, config] of this.providerConfigs) {
       try {
@@ -227,6 +251,26 @@ class LLMProviderManager {
               });
             }
             break;
+          case 'perplexity':
+            if (config.available) {
+              provider = new PerplexityProvider({ 
+                apiKey: config.apiKey, 
+                model: config.model,
+                baseURL: config.endpoint,
+              });
+            }
+            break;
+          case 'grok4':
+            if (config.available || config.openRouterKey) {
+              provider = new Grok4Provider({
+                apiKey: config.apiKey,
+                openRouterKey: config.openRouterKey,
+                model: config.model,
+                useOpenRouter: config.useOpenRouter,
+                baseURL: config.endpoint,
+              });
+            }
+            break;
         }
 
         if (provider) {
@@ -261,9 +305,10 @@ class LLMProviderManager {
       }
 
       // Test with simple message
-      const response = await provider.generateResponse('Hello');
+      const messages = [{ role: 'user', content: 'Hello' }];
+      const response = await provider.generateCompletion(messages, { maxTokens: 5 });
 
-      if (response && typeof response === 'string') {
+      if (response && response.content) {
         config.status = 'connected';
         config.lastTested = new Date().toISOString();
         return true;

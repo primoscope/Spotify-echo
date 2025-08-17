@@ -147,6 +147,85 @@ class ModelRegistry {
         },
       },
 
+      // Perplexity AI Models (Research and Citation-grounded responses)
+      perplexity: {
+        'sonar-small': {
+          name: 'Sonar Small',
+          description: 'Fast model with web search and citations',
+          capabilities: ['text', 'web-search', 'citations'],
+          maxTokens: 4000,
+          contextWindow: 4000,
+          costPer1kTokens: { input: 0.0005, output: 0.002 },
+          latencyTier: 'fast',
+          qualityTier: 'good',
+        },
+        'sonar-medium': {
+          name: 'Sonar Medium',  
+          description: 'Balanced performance with web search capabilities',
+          capabilities: ['text', 'web-search', 'citations'],
+          maxTokens: 8000,
+          contextWindow: 8000,
+          costPer1kTokens: { input: 0.001, output: 0.003 },
+          latencyTier: 'medium',
+          qualityTier: 'high',
+        },
+        'sonar-large': {
+          name: 'Sonar Large',
+          description: 'High-quality research with comprehensive citations',
+          capabilities: ['text', 'web-search', 'citations', 'deep-research'],
+          maxTokens: 16000,
+          contextWindow: 16000,
+          costPer1kTokens: { input: 0.002, output: 0.006 },
+          latencyTier: 'medium',
+          qualityTier: 'high',
+        },
+        'sonar-pro': {
+          name: 'Sonar Pro',
+          description: 'Premium research model with advanced capabilities',
+          capabilities: ['text', 'web-search', 'citations', 'deep-research', 'real-time-data'],
+          maxTokens: 32000,
+          contextWindow: 32000,
+          costPer1kTokens: { input: 0.003, output: 0.009 },
+          latencyTier: 'medium',
+          qualityTier: 'highest',
+        },
+      },
+
+      // Grok-4 xAI Models (Advanced reasoning and code analysis)
+      grok4: {
+        'grok-4': {
+          name: 'Grok-4',
+          description: 'Advanced reasoning with large context window',
+          capabilities: ['text', 'code-analysis', 'reasoning', 'function-calling', 'tool-calling'],
+          maxTokens: 256000,
+          contextWindow: 256000,
+          costPer1kTokens: { input: 0.005, output: 0.015 },
+          latencyTier: 'medium',
+          qualityTier: 'highest',
+        },
+        'grok-4-heavy': {
+          name: 'Grok-4 Heavy',
+          description: 'Multi-agent mode for complex analysis and reasoning',
+          capabilities: ['text', 'code-analysis', 'reasoning', 'function-calling', 'tool-calling', 'multi-agent'],
+          maxTokens: 256000,
+          contextWindow: 256000,
+          costPer1kTokens: { input: 0.01, output: 0.03 },
+          latencyTier: 'slow',
+          qualityTier: 'highest',
+        },
+        'grok-beta': {
+          name: 'Grok Beta',
+          description: 'Latest experimental features and capabilities',
+          capabilities: ['text', 'code-analysis', 'reasoning', 'function-calling'],
+          maxTokens: 128000,
+          contextWindow: 128000,
+          costPer1kTokens: { input: 0.003, output: 0.009 },
+          latencyTier: 'medium',
+          qualityTier: 'experimental',
+          experimental: true,
+        },
+      },
+
       // Mock provider for testing
       mock: {
         'mock-fast': {
@@ -223,6 +302,14 @@ class ModelRegistry {
 
     if (process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
       availableProviders.push('azure');
+    }
+
+    if (process.env.PERPLEXITY_API_KEY) {
+      availableProviders.push('perplexity');
+    }
+
+    if (process.env.XAI_API_KEY || process.env.OPENROUTER_API_KEY) {
+      availableProviders.push('grok4');
     }
 
     return availableProviders;

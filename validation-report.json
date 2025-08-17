@@ -1,0 +1,107 @@
+{
+  "timestamp": "2025-08-16T20:03:41.180Z",
+  "summary": {
+    "mcpServers": "0/5 valid",
+    "dependencies": "0/4 available",
+    "analysisSystem": "failed",
+    "integration": "tested",
+    "overallStatus": "❌ Needs Work"
+  },
+  "details": {
+    "mcpServers": {
+      "postgresql": {
+        "status": "import_failed",
+        "hasFile": true,
+        "hasPackage": true,
+        "canImport": false,
+        "error": "Cannot find module '@modelcontextprotocol/sdk/server'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/postgresql/index.js\n- /home/runner/work/Spotify-echo/Spotify-echo/scripts/validate-enhanced-system.js"
+      },
+      "sqlite": {
+        "status": "import_failed",
+        "hasFile": true,
+        "hasPackage": true,
+        "canImport": false,
+        "error": "Cannot find module '@modelcontextprotocol/sdk/server'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/sqlite/index.js\n- /home/runner/work/Spotify-echo/Spotify-echo/scripts/validate-enhanced-system.js"
+      },
+      "fetch": {
+        "status": "import_failed",
+        "hasFile": true,
+        "hasPackage": true,
+        "canImport": false,
+        "error": "Cannot find module '@modelcontextprotocol/sdk/server'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/fetch/index.js\n- /home/runner/work/Spotify-echo/Spotify-echo/scripts/validate-enhanced-system.js"
+      },
+      "filesystem": {
+        "status": "import_failed",
+        "hasFile": true,
+        "hasPackage": true,
+        "canImport": false,
+        "error": "Cannot find module '@modelcontextprotocol/sdk/server/index.js'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/filesystem/index.js\n- /home/runner/work/Spotify-echo/Spotify-echo/scripts/validate-enhanced-system.js"
+      },
+      "memory": {
+        "status": "import_failed",
+        "hasFile": true,
+        "hasPackage": true,
+        "canImport": false,
+        "error": "Cannot find module '@modelcontextprotocol/sdk/server/index.js'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/memory/index.js\n- /home/runner/work/Spotify-echo/Spotify-echo/scripts/validate-enhanced-system.js"
+      }
+    },
+    "analysisSystem": {
+      "status": "failed",
+      "error": "Cannot find module './scripts/continuous-analysis-system.js'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/scripts/validate-enhanced-system.js"
+    },
+    "integration": {
+      "scripts": {
+        "expected": 6,
+        "found": 6,
+        "status": "complete"
+      },
+      "environment": {
+        "expected": 5,
+        "found": 5,
+        "status": "complete"
+      }
+    },
+    "dependencies": {
+      "@modelcontextprotocol/sdk": {
+        "status": "missing",
+        "required": true
+      },
+      "pg": {
+        "status": "missing",
+        "required": false,
+        "description": "PostgreSQL support"
+      },
+      "sqlite3": {
+        "status": "missing",
+        "required": false,
+        "description": "SQLite support"
+      },
+      "node-fetch": {
+        "status": "missing",
+        "required": false,
+        "description": "Fetch functionality"
+      }
+    },
+    "fileStructure": {
+      "mcp-servers/postgresql/index.js": true,
+      "mcp-servers/postgresql/package.json": true,
+      "mcp-servers/sqlite/index.js": true,
+      "mcp-servers/sqlite/package.json": true,
+      "mcp-servers/fetch/index.js": true,
+      "mcp-servers/fetch/package.json": true,
+      "scripts/continuous-analysis-system.js": true,
+      "mcp-server/enhanced-mcp-orchestrator-v2.js": true,
+      "src/chat/llm-providers/perplexity-provider.js": true,
+      "src/chat/llm-providers/grok4-provider.js": true
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "medium",
+      "category": "configuration",
+      "title": "Configure API keys",
+      "description": "Set up Perplexity and Grok-4 API keys for full analysis functionality",
+      "action": "Copy .env.example to .env and configure API keys"
+    }
+  ]
+}

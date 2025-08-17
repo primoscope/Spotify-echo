@@ -1,0 +1,65 @@
+name: Enhanced Perplexity Browser Research Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to analyze"
+        required: false
+        type: string
+      enable_browser:
+        description: "Enable browser research capabilities"
+        required: false
+        type: boolean
+        default: true
+  pull_request:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  run:
+    if: >-
+      (
+        ${{ github.event_name == 'workflow_dispatch' }}
+        || (
+          ${{ github.event_name == 'issue_comment' && github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/run-perplexity-research') }}
+          && (
+            ${{ github.event.comment.author_association == 'OWNER' }}
+            || ${{ github.event.comment.author_association == 'COLLABORATOR' }}
+            || ${{ github.event.comment.author_association == 'MEMBER' }}
+          )
+        )
+        || ${{ github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'run-perplexity-research' }}
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm i
+
+      - name: Run Enhanced Perplexity Browser Research
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+          PERPLEXITY_MODEL: ${{ vars.PERPLEXITY_MODEL }}
+          ENABLE_BROWSER_RESEARCH: ${{ github.event.inputs.enable_browser || 'true' }}
+        run: |
+          echo "🚀 Starting Enhanced Perplexity Browser Research..."
+          echo "Browser Research: $ENABLE_BROWSER_RESEARCH"
+          echo "Model: ${PERPLEXITY_MODEL:-sonar-pro}"
+          node scripts/research/perplexity-report.js

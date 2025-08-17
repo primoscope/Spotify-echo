@@ -28,6 +28,7 @@ try {
 
 const config = getEnvironmentConfig();
 
+const response-time-optimization = require('./api/middleware/response-time-optimization.js');
 // Import API routes and middleware
 const chatRoutes = require('./api/routes/chat');
 const recommendationRoutes = require('./api/routes/recommendations');

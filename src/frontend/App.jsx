@@ -1,3 +1,4 @@
+import OptimizedMusicComponent from './components/OptimizedMusicComponent.jsx';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AppBar, Toolbar, Container, Tabs, Tab } from '@mui/material';
 import React, { useState, Suspense, lazy } from 'react';

@@ -1,3 +1,38 @@
+# === PERFORMANCE OPTIMIZATION ADDITIONS ===
+# Large data files that impact VS Code performance
+data/Streaming_History_Audio_*.json
+data/merged_data_*.csv
+data/*_combined.csv
+
+# VS Code specific performance optimizations
+.vscode/workspace-state.vscode-workspace
+.vscode/.browse.VC.db*
+.vscode/extensions.json.bak
+
+# Large validation and test result files
+*validation-report*.json
+*test-results*.json
+mcp-*-report*.json
+comprehensive-*.json
+enhanced-*-results.json
+automation-artifacts/*.json
+search-results/*.json
+validation-reports/*.json
+test-results/*.json
+
+# Temporary performance files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# === ORIGINAL GITIGNORE CONTENT ===
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

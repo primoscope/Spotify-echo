@@ -8,8 +8,22 @@ const crypto = require('crypto');
 const { URLSearchParams } = require('url');
 const compression = require('compression');
 
+// AgentOps integration
+const agentops = require('agentops');
+
 // Load environment variables
 dotenv.config();
+
+// Initialize AgentOps
+if (process.env.AGENTOPS_API_KEY) {
+  agentops.init(process.env.AGENTOPS_API_KEY, {
+    auto_start_session: false,
+    tags: ['spotify-echo', 'music-ai', 'llm-provider']
+  });
+  console.log('🔍 AgentOps initialized');
+} else {
+  console.warn('⚠️ AGENTOPS_API_KEY not found, AgentOps disabled');
+}
 
 // Import Redis and session management
 const session = require('express-session');

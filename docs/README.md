@@ -156,8 +156,16 @@ docs/
 - **Feature Requests**: Follow the contribution guidelines
 - **General Questions**: Check existing documentation first
 
----
+## 🗺️ Plans & Agent Instructions
 
+| Document | Description |
+|----------|-------------|
+| [App Improvement Plan](./APP_IMPROVEMENT_PLAN.md) | End-to-end plan across frontend, backend, LLM chat, MongoDB, Docker, CI |
+| [GitHub Coding Agent Instructions](./AGENT_INSTRUCTIONS_GITHUB_CODING_AGENT.md) | Implementation steps for GitHub Coding Agent |
+| [Cursor Editor Instructions](./AGENT_INSTRUCTIONS_CURSOR.md) | Ordered editor tasks for Cursor |
+
+---
+ 
 **Documentation Version**: 2.2.0  
 **Last Updated**: $(date +%Y-%m-%d)  
 **Maintainer**: EchoTune AI Team

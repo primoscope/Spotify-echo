@@ -1,0 +1,40 @@
+{
+  "lastUpdated": "2025-08-17T17:38:50.966Z",
+  "totalTasks": 2,
+  "completedTasks": 0,
+  "inProgressTasks": 0,
+  "backlogTasks": 2,
+  "totalEstimatedHours": 8,
+  "totalTimeSpent": 0,
+  "completionRate": 0,
+  "nextMilestone": "Complete core features",
+  "priorities": {
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "low": 0
+  },
+  "types": {
+    "feature": 0,
+    "bugfix": 0,
+    "optimization": 2,
+    "testing": 0,
+    "documentation": 0,
+    "refactoring": 0,
+    "integration": 0,
+    "deployment": 0
+  },
+  "areas": {
+    "frontend": 1,
+    "backend": 0,
+    "integration": 1,
+    "testing": 0,
+    "deployment": 0
+  },
+  "tags": {
+    "frontend": 1,
+    "performance": 1,
+    "mcp": 1
+  },
+  "mcpServers": {}
+}

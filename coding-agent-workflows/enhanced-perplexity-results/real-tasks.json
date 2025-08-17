@@ -1,0 +1,50 @@
+{
+  "tasks": [
+    {
+      "id": "task-1755452330961-7w2bxzcy9",
+      "title": "React 19 introduces concurrent features, use() hook, and improved performance patterns",
+      "description": "React 19 introduces concurrent features, use() hook, and improved performance patterns",
+      "type": "optimization",
+      "area": "frontend",
+      "priority": "medium",
+      "status": "backlog",
+      "source": "Implement React 19 music player with Material-UI and real-time features using MCP servers",
+      "createdAt": "2025-08-17T17:38:50.961Z",
+      "estimatedHours": 4,
+      "assignee": null,
+      "tags": [
+        "frontend",
+        "performance"
+      ],
+      "dependencies": [],
+      "progress": 0,
+      "timeSpent": 0,
+      "timeRemaining": 0,
+      "mcpServers": [],
+      "sprintId": "sprint-1755452330964"
+    },
+    {
+      "id": "task-1755452330963-02csu0qgf",
+      "title": "Integrate with MCP servers for enhanced functionality",
+      "description": "Integrate with MCP servers for enhanced functionality",
+      "type": "optimization",
+      "area": "integration",
+      "priority": "medium",
+      "status": "backlog",
+      "source": "Implement React 19 music player with Material-UI and real-time features using MCP servers",
+      "createdAt": "2025-08-17T17:38:50.962Z",
+      "estimatedHours": 4,
+      "assignee": null,
+      "tags": [
+        "mcp"
+      ],
+      "dependencies": [],
+      "progress": 0,
+      "timeSpent": 0,
+      "timeRemaining": 0,
+      "mcpServers": [],
+      "sprintId": "sprint-1755452330964"
+    }
+  ],
+  "lastUpdated": "2025-08-17T17:38:50.966Z"
+}

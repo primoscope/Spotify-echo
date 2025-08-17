@@ -66,15 +66,33 @@
         "BROWSERBASE_SESSION_ID": "${BROWSERBASE_SESSION_ID}"
       }
     },
-    "memory": {
-      "command": "npx",
-      "args": [
-        "@modelcontextprotocol/server-memory"
-      ],
-      "env": {
-        "MEMORY_DB_PATH": ".cursor/memory.sqlite",
-        "MEMORY_MAX_MB": "64"
+          "memory": {
+        "command": "npx",
+        "args": [
+          "@modelcontextprotocol/server-memory"
+        ],
+        "env": {
+          "MEMORY_DB_PATH": ".cursor/memory.sqlite",
+          "MEMORY_MAX_MB": "64"
+        }
+      },
+      "browser": {
+        "command": "npx",
+        "args": [
+          "@modelcontextprotocol/server-puppeteer"
+        ],
+        "env": {
+          "PUPPETEER_HEADLESS": "true"
+        }
+      },
+      "mongodb": {
+        "command": "npx",
+        "args": [
+          "mongodb-mcp-server"
+        ],
+        "env": {
+          "MONGODB_URI": "${MONGODB_URI}"
+        }
       }
     }
   }
-}

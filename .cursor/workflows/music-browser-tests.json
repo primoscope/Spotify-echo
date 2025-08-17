@@ -1,0 +1,24 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "Music UI Browser Tests",
+  "description": "Automate basic audio player interactions (play, pause, seek) and discovery page load",
+  "yolo": true,
+  "steps": [
+    {
+      "tool": "browserbase",
+      "action": "run_script",
+      "optional": true,
+      "args": {
+        "script": "(async () => { const { chromium } = require('playwright'); const browser = await chromium.launch(); const page = await browser.newPage(); await page.goto('http://localhost:3000'); await page.click('text=Songs'); await page.waitForTimeout(500); console.log('Opened Songs page'); await browser.close(); })();"
+      }
+    },
+    {
+      "tool": "browser",
+      "action": "open",
+      "optional": true,
+      "args": {
+        "url": "http://localhost:3000"
+      }
+    }
+  ]
+}

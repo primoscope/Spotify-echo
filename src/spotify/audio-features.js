@@ -1,6 +1,8 @@
 const axios = require('axios');
 const RateLimiter = require('./rate-limiter');
 const mongoManager = require('../database/mongodb');
+const performanceMonitor = require('../api/monitoring/performance-monitor');
+const { getRedisManager } = require('../utils/redis');
 
 /**
  * Spotify Audio Features Service
@@ -11,6 +13,8 @@ class SpotifyAudioFeaturesService {
     this.rateLimiter = new RateLimiter();
     this.baseURL = 'https://api.spotify.com/v1';
     this.cache = new Map(); // In-memory cache for session
+    this.redis = null;
+    try { this.redis = getRedisManager(); } catch {}
   }
 
   /**
@@ -18,9 +22,20 @@ class SpotifyAudioFeaturesService {
    */
   async getAudioFeatures(trackId, accessToken) {
     try {
+      const startedAt = Date.now();
       // Check cache first
       if (this.cache.has(trackId)) {
         return this.cache.get(trackId);
+      }
+
+      // Redis cache
+      if (this.redis) {
+        const cached = await this.redis.get(`spotify:audio_features:${trackId}`);
+        if (cached) {
+          this.cache.set(trackId, cached);
+          performanceMonitor.trackSpotifyAPI('audio_features_cached', 1, true);
+          return cached;
+        }
       }
 
       // Check database cache
@@ -30,6 +45,7 @@ class SpotifyAudioFeaturesService {
       const cachedFeatures = await audioFeaturesCollection.findOne({ track_id: trackId });
       if (cachedFeatures) {
         this.cache.set(trackId, cachedFeatures);
+        if (this.redis) { await this.redis.set(`spotify:audio_features:${trackId}`, cachedFeatures, 6 * 3600); }
         return cachedFeatures;
       }
 
@@ -48,6 +64,8 @@ class SpotifyAudioFeaturesService {
       // Cache in memory and database
       this.cache.set(trackId, audioFeatures);
       await this.cacheInDatabase(audioFeatures);
+      if (this.redis) { await this.redis.set(`spotify:audio_features:${trackId}`, audioFeatures, 12 * 3600); }
+      performanceMonitor.trackSpotifyAPI('audio_features', Date.now() - startedAt, true);
 
       return audioFeatures;
     } catch (error) {
@@ -60,6 +78,7 @@ class SpotifyAudioFeaturesService {
         return this.getAudioFeatures(trackId, accessToken);
       }
 
+      performanceMonitor.trackSpotifyAPI('audio_features', 0, false);
       throw error;
     }
   }
@@ -78,6 +97,7 @@ class SpotifyAudioFeaturesService {
 
       try {
         await this.rateLimiter.checkLimit();
+        const startedAt = Date.now();
 
         const response = await axios.get(`${this.baseURL}/audio-features`, {
           headers: {
@@ -96,6 +116,7 @@ class SpotifyAudioFeaturesService {
         for (const features of batchFeatures) {
           this.cache.set(features.track_id, features);
           await this.cacheInDatabase(features);
+          if (this.redis) { await this.redis.set(`spotify:audio_features:${features.track_id}`, features, 12 * 3600); }
         }
 
         results.push(...batchFeatures);
@@ -110,6 +131,7 @@ class SpotifyAudioFeaturesService {
 
         // Small delay between batches
         await new Promise((resolve) => setTimeout(resolve, 100));
+        performanceMonitor.trackSpotifyAPI('audio_features_batch', Date.now() - startedAt, true);
       } catch (error) {
         console.error(`Error processing batch ${i}-${i + batchSize}:`, error.message);
 
@@ -124,6 +146,7 @@ class SpotifyAudioFeaturesService {
           batch: batch,
           error: error.message,
         });
+        performanceMonitor.trackSpotifyAPI('audio_features_batch', 0, false);
       }
     }
 

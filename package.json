@@ -270,7 +270,8 @@
     "ui:enhance": "node scripts/autonomous-ui-enhancer.js --mode=enhance --target=all",
     "ui:test": "npm run test:unit -- -i",
     "ui:lighthouse": "node scripts/autonomous-ui-enhancer.js --mode=lighthouse",
-    "roadmap:update": "node scripts/autonomous-ui-enhancer.js --mode=roadmap"
+    "roadmap:update": "node scripts/autonomous-ui-enhancer.js --mode=roadmap",
+    "music:agent": "node scripts/music-ui-agent.js"
   },
   "keywords": [
     "music-discovery",

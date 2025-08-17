@@ -1,6 +1,9 @@
 const OpenAI = require('openai');
 const BaseLLMProvider = require('./base-provider');
 
+// AgentOps integration
+const { traceManager } = require('../../utils/agentops-trace-manager');
+
 /**
  * OpenAI LLM Provider
  * Supports GPT-3.5, GPT-4, and other OpenAI models with enhanced error handling
@@ -100,57 +103,63 @@ class OpenAIProvider extends BaseLLMProvider {
 
   async generateCompletion(messages, options = {}) {
     this.requestCount++;
+    const model = options.model || this.defaultModel;
 
-    try {
-      if (!this.isAvailable()) {
-        throw new Error('OpenAI provider not initialized or configured');
+    return await traceManager.traceLLMOperation(
+      'openai-completion',
+      `openai-${model}`,
+      async () => {
+        try {
+          if (!this.isAvailable()) {
+            throw new Error('OpenAI provider not initialized or configured');
+          }
+
+          const maxTokens = options.maxTokens || 2000;
+          const temperature = options.temperature ?? 0.7;
+
+          const requestData = {
+            model,
+            messages: this.formatMessages(messages),
+            max_tokens: Math.min(maxTokens, this.getMaxTokensForModel(model) - 1000), // Reserve tokens for response
+            temperature,
+            top_p: options.topP ?? 1,
+            frequency_penalty: options.frequencyPenalty ?? 0,
+            presence_penalty: options.presencePenalty ?? 0,
+          };
+
+          // Add function/tool calling support
+          if (options.functions) {
+            requestData.functions = options.functions;
+            requestData.function_call = options.functionCall || 'auto';
+          }
+
+          if (options.tools) {
+            requestData.tools = options.tools;
+            requestData.tool_choice = options.toolChoice || 'auto';
+          }
+
+          const response = await this.retryRequest(async () => {
+            return await this.client.chat.completions.create(requestData);
+          });
+
+          // Reset error count on successful request
+          this.errorCount = 0;
+
+          return this.parseResponse({
+            content: response.choices[0].message.content,
+            role: response.choices[0].message.role,
+            model: response.model,
+            usage: response.usage,
+            functionCall: response.choices[0].message.function_call,
+            toolCalls: response.choices[0].message.tool_calls,
+            finishReason: response.choices[0].finish_reason,
+          });
+        } catch (error) {
+          this.errorCount++;
+          throw error;
+        }
       }
-
-      const model = options.model || this.defaultModel;
-      const maxTokens = options.maxTokens || 2000;
-      const temperature = options.temperature ?? 0.7;
-
-      const requestData = {
-        model,
-        messages: this.formatMessages(messages),
-        max_tokens: Math.min(maxTokens, this.getMaxTokensForModel(model) - 1000), // Reserve tokens for response
-        temperature,
-        top_p: options.topP ?? 1,
-        frequency_penalty: options.frequencyPenalty ?? 0,
-        presence_penalty: options.presencePenalty ?? 0,
-      };
-
-      // Add function/tool calling support
-      if (options.functions) {
-        requestData.functions = options.functions;
-        requestData.function_call = options.functionCall || 'auto';
-      }
-
-      if (options.tools) {
-        requestData.tools = options.tools;
-        requestData.tool_choice = options.toolChoice || 'auto';
-      }
-
-      const response = await this.retryRequest(async () => {
-        return await this.client.chat.completions.create(requestData);
-      });
-
-      // Reset error count on successful request
-      this.errorCount = 0;
-
-      return this.parseResponse({
-        content: response.choices[0].message.content,
-        role: response.choices[0].message.role,
-        model: response.model,
-        usage: response.usage,
-        functionCall: response.choices[0].message.function_call,
-        toolCalls: response.choices[0].message.tool_calls,
-        finishReason: response.choices[0].finish_reason,
-      });
-    } catch (error) {
-      this.errorCount++;
-      return this.handleError(error);
-    }
+    );
   }
 
   async *generateStreamingCompletion(messages, options = {}) {

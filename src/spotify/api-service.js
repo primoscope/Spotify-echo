@@ -1,6 +1,9 @@
 const axios = require('axios');
 const RateLimiter = require('./rate-limiter');
 
+// AgentOps integration
+const { traceManager } = require('../utils/agentops-trace-manager');
+
 /**
  * Spotify API Service
  * Handles general Spotify API operations like search, playlists, etc.
@@ -15,40 +18,45 @@ class SpotifyAPIService {
    * Search for tracks, artists, albums, or playlists
    */
   async search(query, type = 'track', options = {}) {
-    const { limit = 20, offset = 0, market = 'US', accessToken } = options;
+    return await traceManager.traceSpotifyOperation(
+      'search',
+      async () => {
+        const { limit = 20, offset = 0, market = 'US', accessToken } = options;
 
-    if (!accessToken) {
-      throw new Error('Access token is required for Spotify API calls');
-    }
+        if (!accessToken) {
+          throw new Error('Access token is required for Spotify API calls');
+        }
 
-    try {
-      await this.rateLimiter.checkLimit();
+        try {
+          await this.rateLimiter.checkLimit();
 
-      const response = await axios.get(`${this.baseURL}/search`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params: {
-          q: query,
-          type,
-          limit,
-          offset,
-          market,
-        },
-      });
+          const response = await axios.get(`${this.baseURL}/search`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            params: {
+              q: query,
+              type,
+              limit,
+              offset,
+              market,
+            },
+          });
 
-      return this.normalizeSearchResults(response.data, type);
-    } catch (error) {
-      console.error('Error searching Spotify:', error.message);
+          return this.normalizeSearchResults(response.data, type);
+        } catch (error) {
+          console.error('Error searching Spotify:', error.message);
 
-      if (error.response?.status === 429) {
-        const retryAfter = error.response.headers['retry-after'] || 1;
-        await this.rateLimiter.addDelay(retryAfter * 1000);
-        return this.search(query, type, options);
+          if (error.response?.status === 429) {
+            const retryAfter = error.response.headers['retry-after'] || 1;
+            await this.rateLimiter.addDelay(retryAfter * 1000);
+            return this.search(query, type, options);
+          }
+
+          throw error;
+        }
       }
-
-      throw error;
-    }
+    );
   }
 
   /**

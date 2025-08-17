@@ -7,6 +7,9 @@ const recommendationEngine = require('../ml/recommendation-engine'); // Import t
 const SpotifyAudioFeaturesService = require('../spotify/audio-features');
 const SpotifyAPIService = require('../spotify/api-service');
 
+// AgentOps integration
+const { traceManager } = require('../utils/agentops-trace-manager');
+
 /**
  * Main Chatbot Class for EchoTune AI
  * Coordinates LLM providers, conversation management, and music functionality
@@ -164,35 +167,42 @@ class EchoTuneChatbot {
    */
   async sendMessage(sessionId, message, options = {}) {
     const startTime = Date.now();
+    const providerName = options.provider || this.config.defaultProvider;
 
-    try {
-      const session = await this._validateSession(sessionId);
-      const provider = await this._setupProvider(options);
+    return await traceManager.traceLLMOperation(
+      'sendMessage',
+      providerName,
+      async () => {
+        try {
+          const session = await this._validateSession(sessionId);
+          const provider = await this._setupProvider(options);
 
-      await this._addUserMessage(sessionId, message);
+          await this._addUserMessage(sessionId, message);
 
-      const commandResponse = await this._handleSpecialCommands(
-        message,
-        session,
-        options,
-        startTime
-      );
-      if (commandResponse) {
-        return commandResponse;
+          const commandResponse = await this._handleSpecialCommands(
+            message,
+            session,
+            options,
+            startTime
+          );
+          if (commandResponse) {
+            return commandResponse;
+          }
+
+          const llmResponse = await this._generateLLMResponse(sessionId, session, provider, options);
+          const finalResponse = await this._processFunctionCalls(
+            llmResponse,
+            session,
+            provider,
+            options
+          );
+
+          return await this._finalizeResponse(sessionId, finalResponse, llmResponse, startTime);
+        } catch (error) {
+          return await this._handleSendMessageError(error, sessionId, startTime);
+        }
       }
-
-      const llmResponse = await this._generateLLMResponse(sessionId, session, provider, options);
-      const finalResponse = await this._processFunctionCalls(
-        llmResponse,
-        session,
-        provider,
-        options
-      );
-
-      return await this._finalizeResponse(sessionId, finalResponse, llmResponse, startTime);
-    } catch (error) {
-      return await this._handleSendMessageError(error, sessionId, startTime);
-    }
+    );
   }
 
   /**

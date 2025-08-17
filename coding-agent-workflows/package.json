@@ -1,91 +1,50 @@
 {
-  "name": "perplexity-coding-agent-workflows",
+  "name": "echotune-ai-orchestrator",
   "version": "1.0.0",
-  "description": "Advanced trigger-based automation and workflow optimization for Perplexity MCP integration with coding agents",
-  "main": "automation/trigger-processor.js",
+  "description": "Autonomous Music App Orchestration System with Perplexity Research and Browser Automation",
+  "main": "launch-orchestrator.js",
   "scripts": {
-    "test:trigger": "node automation/trigger-processor.js",
-    "test:optimizer": "node automation/workflow-optimizer.js",
-    "test:integration": "npm run test:trigger && npm run test:optimizer",
-    "demo:github-copilot": "node automation/trigger-processor.js \"@copilot use perplexity grok-4 to debug this React performance issue\"",
-    "demo:cursor": "node automation/trigger-processor.js \"Generate authentication component. Use perplexity sonar-pro for research.\"",
-    "demo:optimization": "node automation/workflow-optimizer.js '{\"task\": \"code review enterprise application\", \"complexity\": \"enterprise\", \"urgency\": \"high\"}'",
-    "validate:all": "npm run validate:trigger && npm run validate:optimizer && npm run validate:templates",
-    "validate:trigger": "node -e \"const TriggerProcessor = require('./automation/trigger-processor'); const processor = new TriggerProcessor(); console.log('✅ TriggerProcessor loaded successfully');\"",
-    "validate:optimizer": "node -e \"const WorkflowOptimizer = require('./automation/workflow-optimizer'); const optimizer = new WorkflowOptimizer(); console.log('✅ WorkflowOptimizer loaded successfully');\"",
-    "validate:templates": "node -e \"const fs = require('fs'); const templates = ['github-copilot', 'cursor-ide']; templates.forEach(t => { if (fs.existsSync('./templates/' + t)) console.log('✅ Template', t, 'exists'); else console.error('❌ Template', t, 'missing'); });\"",
-    "benchmark": "node -e \"console.log('🚀 Running performance benchmarks...'); require('./automation/trigger-processor').cli()\"",
-    "install:copilot": "echo 'Copy templates/github-copilot/copilot-settings.json to your VS Code settings'",
-    "install:cursor": "echo 'Copy templates/cursor-ide/* to your .cursor/ directory'",
-    "docs:generate": "echo 'Documentation available in README.md and *.md files'",
-    "stats": "node -e \"const fs = require('fs'); const files = fs.readdirSync('.', {recursive: true}).filter(f => f.endsWith('.md')); console.log('📊 Documentation files:', files.length); console.log('📁 Total size:', files.reduce((acc, f) => acc + fs.statSync(f).size, 0), 'bytes');\""
+    "start": "node launch-orchestrator.js launch",
+    "single": "node launch-orchestrator.js single",
+    "status": "node launch-orchestrator.js status",
+    "stop": "node launch-orchestrator.js stop",
+    "orchestrator": "node autonomous-music-orchestrator.js",
+    "research": "node music-perplexity-research.js",
+    "browser": "node music-browser-automation.js",
+    "cursor": "node cursor-agent-integration.js",
+    "cursor-browser": "node cursor-browser-research.js",
+    "test": "node -e \"console.log('Testing orchestrator components...'); require('./autonomous-music-orchestrator.js'); require('./music-perplexity-research.js'); require('./music-browser-automation.js'); require('./cursor-agent-integration.js'); require('./cursor-browser-research.js'); console.log('✅ All components loaded successfully');\"",
+    "validate": "node -e \"const fs = require('fs'); const files = ['autonomous-music-orchestrator.js', 'music-perplexity-research.js', 'music-browser-automation.js', 'cursor-agent-integration.js', 'cursor-browser-research.js', 'launch-orchestrator.js']; files.forEach(f => { if (fs.existsSync(f)) console.log('✅ ' + f); else console.log('❌ ' + f); });\"",
+    "setup": "mkdir -p ../enhanced-perplexity-results ../test-results ../testing_screenshots ../enhanced-perplexity-results/cursor-agents",
+    "clean": "rm -rf ../enhanced-perplexity-results/* ../test-results/* ../testing_screenshots/*",
+    "monitor": "node -e \"setInterval(() => { const fs = require('fs'); try { const status = JSON.parse(fs.readFileSync('../test-results/orchestration-report-latest.json', 'utf8')); console.log('📊 Status:', status); } catch(e) { console.log('⏳ Waiting for status...'); } }, 30000);\"",
+    "demo": "node -e \"console.log('🎵 EchoTune AI Autonomous Orchestrator Demo'); console.log('=' .repeat(50)); console.log('Available commands:'); console.log('  npm start     - Launch continuous orchestration'); console.log('  npm run single - Run single orchestration cycle'); console.log('  npm run status - Show orchestrator status'); console.log('  npm run cursor - Cursor agent integration'); console.log('  npm run cursor-browser - Cursor browser research'); console.log('  npm run test   - Validate all components'); console.log('  npm run setup  - Create required directories'); console.log('  npm run monitor - Monitor orchestrator status');\""
   },
   "keywords": [
+    "music",
+    "ai",
+    "orchestrator",
     "perplexity",
-    "mcp",
-    "github-copilot", 
-    "cursor-ide",
-    "coding-agent",
-    "workflow-optimization",
-    "ai-integration",
-    "development-automation",
-    "trigger-processing",
-    "performance-optimization"
+    "browser-automation",
+    "research",
+    "continuous-improvement",
+    "echotune"
   ],
   "author": "EchoTune AI Development Team",
   "license": "MIT",
-  "engines": {
-    "node": ">=16.0.0"
-  },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.4.0",
-    "node-fetch": "^3.0.0"
+    "dotenv": "^16.3.1"
   },
-  "devDependencies": {
-    "jest": "^29.0.0",
-    "@types/node": "^20.0.0"
+  "engines": {
+    "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dzp5103/Spotify-echo.git",
+    "url": "https://github.com/your-username/echotune-ai.git",
     "directory": "coding-agent-workflows"
   },
   "bugs": {
-    "url": "https://github.com/dzp5103/Spotify-echo/issues"
+    "url": "https://github.com/your-username/echotune-ai/issues"
   },
-  "homepage": "https://github.com/dzp5103/Spotify-echo#coding-agent-workflows",
-  "config": {
-    "performance_targets": {
-      "trigger_processing": "<10ms",
-      "workflow_optimization": "<100ms", 
-      "model_selection_accuracy": ">95%",
-      "cost_optimization": ">60%"
-    },
-    "supported_editors": [
-      "vscode",
-      "cursor",
-      "github-copilot",
-      "cli"
-    ],
-    "supported_models": [
-      "grok-4",
-      "sonar-pro", 
-      "GPT-5",
-      "sonar-reasoning-pro",
-      "sonar-small"
-    ]
-  },
-  "files": [
-    "automation/",
-    "templates/",
-    "benchmarks/", 
-    "*.md",
-    "package.json"
-  ],
-  "directories": {
-    "lib": "./automation",
-    "doc": "./",
-    "example": "./templates",
-    "test": "./benchmarks"
-  }
+  "homepage": "https://github.com/your-username/echotune-ai#readme"
 }

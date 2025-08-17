@@ -1,0 +1,13 @@
+{
+  "lastUpdated": "2025-08-17T18:05:40.202Z",
+  "dockerValidation": {
+    "dockerAvailable": false,
+    "buildSuccessful": false,
+    "containerTested": false,
+    "overallStatus": "failed",
+    "error": "Command failed: docker --version\n/bin/sh: 1: docker: not found\n"
+  },
+  "totalTasks": 0,
+  "completedTasks": 0,
+  "nextMilestone": "No tasks defined"
+}

@@ -520,7 +520,7 @@ const EnhancedChatInterface = ({
                   selected={id === currentProviderLocal}
                   onClick={() => handleProviderSelect(id)}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap={1, width: '100%' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                     <span>{p.name}</span>
                     {health && (
                       <Chip

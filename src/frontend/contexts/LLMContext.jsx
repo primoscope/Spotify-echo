@@ -143,6 +143,218 @@ export function LLMProvider({ children }) {
     }
   };
 
+  // Enhanced provider health tracking
+  const [providerHealth, setProviderHealth] = useState({});
+  const [streamingState, setStreamingState] = useState({
+    isStreaming: false,
+    currentMessage: '',
+    canAbort: false,
+    controller: null
+  });
+
+  // Poll provider health periodically
+  useEffect(() => {
+    const pollHealth = async () => {
+      try {
+        const response = await fetch('/api/chat/providers/health');
+        if (response.ok) {
+          const data = await response.json();
+          setProviderHealth(data.providers || {});
+        }
+      } catch (error) {
+        console.error('Failed to poll provider health:', error);
+      }
+    };
+
+    pollHealth(); // Initial poll
+    const interval = setInterval(pollHealth, 30000); // Poll every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const sendStreamingMessage = async (message, context = {}, onDelta, onComplete) => {
+    if (!message.trim()) return null;
+
+    const sessionId = context.sessionId || 'default';
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Create AbortController for cancellation
+    const controller = new AbortController();
+    setStreamingState({
+      isStreaming: true,
+      currentMessage: '',
+      canAbort: true,
+      controller
+    });
+
+    try {
+      const queryParams = new URLSearchParams({
+        sessionId,
+        message: message.trim(),
+        provider: currentProvider,
+        model: context.model || ''
+      });
+
+      const eventSource = new EventSource(`/api/chat/stream?${queryParams}`);
+      
+      let streamedContent = '';
+      let startTime = Date.now();
+
+      eventSource.addEventListener('connected', (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Connected to stream:', data.requestId);
+      });
+
+      eventSource.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        streamedContent += data.delta || '';
+        
+        setStreamingState(prev => ({
+          ...prev,
+          currentMessage: streamedContent
+        }));
+
+        if (onDelta) {
+          onDelta(data.delta, streamedContent, data.isPartial);
+        }
+      });
+
+      eventSource.addEventListener('complete', (event) => {
+        const data = JSON.parse(event.data);
+        const totalTime = Date.now() - startTime;
+        
+        setStreamingState({
+          isStreaming: false,
+          currentMessage: '',
+          canAbort: false,
+          controller: null
+        });
+
+        eventSource.close();
+        
+        if (onComplete) {
+          onComplete({
+            success: true,
+            response: streamedContent,
+            provider: data.provider || currentProvider,
+            requestId: data.requestId,
+            totalTime: data.totalTime || totalTime
+          });
+        }
+      });
+
+      eventSource.addEventListener('error', (event) => {
+        const data = JSON.parse(event.data);
+        console.error('Stream error:', data.error);
+        
+        setStreamingState({
+          isStreaming: false,
+          currentMessage: '',
+          canAbort: false,
+          controller: null
+        });
+
+        eventSource.close();
+        
+        if (onComplete) {
+          onComplete({
+            success: false,
+            error: data.error,
+            final: data.final
+          });
+        }
+      });
+
+      eventSource.addEventListener('retry', (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Retrying...', data);
+        // Visual feedback for retry could be added here
+      });
+
+      eventSource.addEventListener('heartbeat', (event) => {
+        // Keep connection alive, could update UI with last heartbeat
+      });
+
+      // Handle manual abort
+      controller.signal.addEventListener('abort', () => {
+        eventSource.close();
+        setStreamingState({
+          isStreaming: false,
+          currentMessage: '',
+          canAbort: false,
+          controller: null
+        });
+        
+        if (onComplete) {
+          onComplete({
+            success: false,
+            error: 'Stream cancelled by user'
+          });
+        }
+      });
+
+      return { success: true, streaming: true, requestId };
+
+    } catch (error) {
+      console.error('Streaming error:', error);
+      setStreamingState({
+        isStreaming: false,
+        currentMessage: '',
+        canAbort: false,
+        controller: null
+      });
+      
+      return {
+        success: false,
+        error: 'Failed to start streaming'
+      };
+    }
+  };
+
+  const abortStream = () => {
+    if (streamingState.controller) {
+      streamingState.controller.abort();
+    }
+  };
+
+  const switchProviderEnhanced = async (providerId, model = null) => {
+    if (!providers[providerId]?.available) {
+      throw new Error(`Provider ${providerId} is not available`);
+    }
+
+    try {
+      const response = await fetch('/api/chat/providers/switch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ provider: providerId, model }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentProvider(providerId);
+        
+        // Update provider model if specified
+        if (model) {
+          setProviders(prev => ({
+            ...prev,
+            [providerId]: {
+              ...prev[providerId],
+              model
+            }
+          }));
+        }
+
+        return data;
+      } else {
+        throw new Error('Failed to switch provider');
+      }
+    } catch (error) {
+      console.error('Provider switch error:', error);
+      throw error;
+    }
+  };
+
   const sendMessage = async (message, context = {}) => {
     if (!message.trim()) return null;
 
@@ -223,10 +435,15 @@ export function LLMProvider({ children }) {
   const value = {
     currentProvider,
     providers,
+    providerHealth,
+    streamingState,
     loading,
     refreshProviders,
     switchProvider,
+    switchProviderEnhanced,
     sendMessage,
+    sendStreamingMessage,
+    abortStream,
     getProviderStatus,
     isProviderAvailable,
   };

@@ -4,10 +4,11 @@
  * N8N Template Analyzer and Workflow Configurator
  * 
  * This script:
- * 1. Connects to self-hosted n8n server at http://46.101.106.220
+ * 1. Connects to self-hosted n8n server at https://primosphere.ninja
  * 2. Analyzes suitable templates for EchoTune AI
  * 3. Configures workflows from GitHub, MCP servers, and other tools
  * 4. Generates comprehensive implementation and error report
+ * 5. Leverages new community nodes: SuperCode, DeepSeek, MCP Client
  */
 
 require('dotenv').config();
@@ -17,9 +18,9 @@ const path = require('path');
 
 class N8nTemplateAnalyzerAndConfigurator {
     constructor() {
-        this.n8nUrl = 'http://46.101.106.220';
-        // Fix the API key from .env - use the first valid one
-        this.apiKey = process.env.N8N_API_KEY?.split('\n')[0] || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNjg4N2M4Yy0wMmNhLTQ1ZGMtOGJiYy00OGQ2OTZiOTA2M2EiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NDA0NzE4fQ.6qHdCB7KuA3xpOhuccOMggJOnG2mXpbXg7wFHHVQn_Q';
+        this.n8nUrl = 'https://primosphere.ninja';
+        // Updated API key from primosphere.ninja server
+        this.apiKey = process.env.N8N_API_KEY?.split('\n')[0] || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNjg4N2M4Yy0wMmNhLTQ1ZGMtOGJiYy00OGQ2OTZiOTA2M2EiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NDgzMDM3LCJleHAiOjE3NTc5OTUyMDB9.YB3-9YlDP4fOgspsenl0wEAUvSYBg8YyLeCUx09AC8w';
         this.username = 'willexmen8@gmail.com';
         this.password = 'DapperMan77$$';
         

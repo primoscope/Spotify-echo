@@ -14,7 +14,7 @@ const path = require('path');
 
 class N8nFinalImplementationAndTesting {
     constructor() {
-        this.n8nUrl = 'http://46.101.106.220';
+        this.n8nUrl = 'https://primosphere.ninja';
         this.apiKey = process.env.N8N_API_KEY?.split('\n')[0];
         
         this.testResults = {

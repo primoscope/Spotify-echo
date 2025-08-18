@@ -14,7 +14,7 @@ const path = require('path');
 
 class N8nImplementationSummary {
     constructor() {
-        this.n8nUrl = 'http://46.101.106.220';
+        this.n8nUrl = 'https://primosphere.ninja';
         this.credentials = {
             url: this.n8nUrl,
             email: 'willexmen8@gmail.com',

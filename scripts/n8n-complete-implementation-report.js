@@ -15,8 +15,8 @@ const path = require('path');
 
 class N8nCompleteImplementationReport {
     constructor() {
-        this.n8nUrl = 'http://46.101.106.220';
-        this.apiKey = process.env.N8N_API_KEY?.split('\n')[0] || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNjg4N2M4Yy0wMmNhLTQ1ZGMtOGJiYy00OGQ2OTZiOTA2M2EiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NDA0NzE4fQ.6qHdCB7KuA3xpOhuccOMggJOnG2mXpbXg7wFHHVQn_Q';
+        this.n8nUrl = 'https://primosphere.ninja';
+        this.apiKey = process.env.N8N_API_KEY?.split('\n')[0] || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNjg4N2M4Yy0wMmNhLTQ1ZGMtOGJiYy00OGQ2OTZiOTA2M2EiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NDgzMDM3LCJleHAiOjE3NTc5OTUyMDB9.YB3-9YlDP4fOgspsenl0wEAUvSYBg8YyLeCUx09AC8w';
         this.username = 'willexmen8@gmail.com';
         this.password = 'DapperMan77$$';
         

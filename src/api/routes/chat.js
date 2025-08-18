@@ -220,7 +220,7 @@ router.get('/stream', requireAuth, chatRateLimit, async (req, res) => {
     // Send initial connection event
     res.write('event: connected\n');
     res.write(`data: ${JSON.stringify({ 
-      message: "Connected to chat stream", 
+      message: 'Connected to chat stream', 
       requestId,
       timestamp: new Date().toISOString()
     })}\n\n`);
@@ -380,7 +380,7 @@ router.post('/stream', requireAuth, chatRateLimit, async (req, res) => {
     // Send initial connection event
     res.write('event: connected\n');
     res.write(`data: ${JSON.stringify({ 
-      message: "Connected to chat stream", 
+      message: 'Connected to chat stream', 
       requestId,
       timestamp: new Date().toISOString()
     })}\n\n`);

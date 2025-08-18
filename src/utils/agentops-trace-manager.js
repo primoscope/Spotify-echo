@@ -63,7 +63,7 @@ class AgentOpsTraceManager {
    * Implementation of the manual trace management example from the documentation
    */
   async executeManualWorkflow(taskDescription) {
-    const trace = this.startTrace("MyManualWorkflow", ["manual-flow"]);
+    const trace = this.startTrace('MyManualWorkflow', ['manual-flow']);
     
     try {
       // Simulate the main agent workflow
@@ -72,7 +72,7 @@ class AgentOpsTraceManager {
       // Simulate tool usage
       const toolResult = await this.webSearch(`info for ${result}`);
       
-      this.endTrace(trace, "Success", { 
+      this.endTrace(trace, 'Success', { 
         task: taskDescription,
         result,
         toolResult 
@@ -81,7 +81,7 @@ class AgentOpsTraceManager {
       return { result, toolResult };
     } catch (error) {
       if (trace) {
-        this.endTrace(trace, "Fail", { 
+        this.endTrace(trace, 'Fail', { 
           error: error.message,
           task: taskDescription 
         });
@@ -129,7 +129,7 @@ class AgentOpsTraceManager {
     try {
       const result = await operation();
       
-      this.endTrace(trace, "Success", {
+      this.endTrace(trace, 'Success', {
         provider: providerName,
         operation: operationName,
         timestamp: new Date().toISOString()
@@ -138,7 +138,7 @@ class AgentOpsTraceManager {
       return result;
     } catch (error) {
       if (trace) {
-        this.endTrace(trace, "Fail", {
+        this.endTrace(trace, 'Fail', {
           provider: providerName,
           operation: operationName,
           error: error.message,
@@ -162,7 +162,7 @@ class AgentOpsTraceManager {
     try {
       const result = await operation();
       
-      this.endTrace(trace, "Success", {
+      this.endTrace(trace, 'Success', {
         api: 'spotify',
         operation: operationName,
         timestamp: new Date().toISOString()
@@ -171,7 +171,7 @@ class AgentOpsTraceManager {
       return result;
     } catch (error) {
       if (trace) {
-        this.endTrace(trace, "Fail", {
+        this.endTrace(trace, 'Fail', {
           api: 'spotify',
           operation: operationName,
           error: error.message,
@@ -194,8 +194,8 @@ class AgentOpsTraceManager {
    */
   cleanupActiveTraces() {
     for (const [key, trace] of this.activeTraces.entries()) {
-      this.endTrace(trace, "Interrupted", { 
-        reason: "Application shutdown" 
+      this.endTrace(trace, 'Interrupted', { 
+        reason: 'Application shutdown' 
       });
     }
     this.activeTraces.clear();

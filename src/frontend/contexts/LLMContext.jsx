@@ -21,6 +21,8 @@ export function LLMProvider({ children }) {
     openrouter: { name: 'OpenRouter', status: 'unknown', available: false },
   });
   const [loading, setLoading] = useState(false);
+  const [providerHealth, setProviderHealth] = useState({});
+  const [healthLoading, setHealthLoading] = useState(false);
 
   useEffect(() => {
     refreshProviders();
@@ -97,6 +99,30 @@ export function LLMProvider({ children }) {
       setLoading(false);
     }
   }, [providers, currentProvider]);
+
+  const refreshProviderHealth = useCallback(async () => {
+    setHealthLoading(true);
+    try {
+      const response = await fetch('/api/providers/health');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setProviderHealth(data);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh provider health:', error);
+    } finally {
+      setHealthLoading(false);
+    }
+  }, []);
+
+  // Poll provider health every 30 seconds
+  useEffect(() => {
+    refreshProviderHealth();
+    const interval = setInterval(refreshProviderHealth, 30000);
+    return () => clearInterval(interval);
+  }, [refreshProviderHealth]);
 
   const switchProvider = async (providerId) => {
     if (!providers[providerId]?.available) {
@@ -229,6 +255,9 @@ export function LLMProvider({ children }) {
     sendMessage,
     getProviderStatus,
     isProviderAvailable,
+    providerHealth,
+    healthLoading,
+    refreshProviderHealth,
   };
 
   return <LLMContext.Provider value={value}>{children}</LLMContext.Provider>;

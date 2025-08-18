@@ -1,459 +1,285 @@
-import { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
   IconButton,
-  Tooltip,
+  Collapse,
   Stack,
-  Paper,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Rating,
+  Divider,
+  Tooltip,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
-  ThumbUp,
-  ThumbDown,
-  Info,
   ExpandMore,
+  ExpandLess,
+  ContentCopy,
   Psychology,
-  TrendingUp,
-  MusicNote,
-  Group,
   SmartToy,
-  Schedule,
+  Speed,
+  TrendingUp,
+  Info,
 } from '@mui/icons-material';
 
 /**
  * ExplainableRecommendations Component
- * Shows AI-powered music recommendations with human-readable explanations
+ * Shows AI model metadata, reasoning, and key features for recommendations
  */
-const ExplainableRecommendations = ({
-  recommendations = [],
-  onGetExplanation,
-  onProvideFeedback,
-  loading = false,
+const ExplainableRecommendations = ({ 
+  recommendations, 
+  explanation, 
+  provider, 
+  model, 
+  metadata = {},
+  showPanel = false,
+  onTogglePanel 
 }) => {
-  const [explanationDialog, setExplanationDialog] = useState({
-    open: false,
-    track: null,
-    explanation: null,
-  });
-  const [feedbackStates, setFeedbackStates] = useState({});
-  const [loadingExplanation, setLoadingExplanation] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
-  const handleGetExplanation = useCallback(
-    async (track) => {
-      setLoadingExplanation(true);
-      setExplanationDialog({ open: true, track, explanation: null });
+  if (!recommendations || recommendations.length === 0) {
+    return null;
+  }
 
-      try {
-        if (onGetExplanation) {
-          const explanation = await onGetExplanation(track.recommendationId, track.id);
-          setExplanationDialog((prev) => ({ ...prev, explanation }));
-        }
-      } catch (error) {
-        console.error('Error getting explanation:', error);
-        setExplanationDialog((prev) => ({
-          ...prev,
-          explanation: {
-            error: 'Failed to load explanation',
-            summary: 'Unable to generate explanation at this time.',
-          },
-        }));
-      } finally {
-        setLoadingExplanation(false);
-      }
-    },
-    [onGetExplanation]
-  );
+  const handleCopyReasoning = async () => {
+    try {
+      const reasoningText = `
+AI Music Recommendations - ${provider} (${model})
 
-  const handleFeedback = useCallback(
-    (track, feedback, rating = null) => {
-      setFeedbackStates((prev) => ({
-        ...prev,
-        [track.id]: { feedback, rating, timestamp: Date.now() },
-      }));
+Reasoning Summary:
+${explanation?.summary || 'No summary available'}
 
-      if (onProvideFeedback) {
-        onProvideFeedback(track, feedback, rating);
-      }
-    },
-    [onProvideFeedback]
-  );
+Key Factors:
+${explanation?.reasoning?.map(r => `• ${r}`).join('\n') || 'No reasoning available'}
 
-  const getAlgorithmIcon = (algorithm) => {
-    switch (algorithm) {
-      case 'content_based':
-        return <MusicNote color="primary" />;
-      case 'collaborative':
-        return <Group color="secondary" />;
-      case 'hybrid':
-        return <SmartToy color="success" />;
-      default:
-        return <Psychology color="info" />;
+Context Factors:
+${explanation?.contextFactors?.map(f => `• ${f.factor}: ${f.value} (influence: ${f.influence})`).join('\n') || 'No context factors'}
+
+Conversation Flow:
+${explanation?.conversationFlow || 'No conversation flow data'}
+
+Generated at: ${new Date().toLocaleString()}
+      `.trim();
+
+      await navigator.clipboard.writeText(reasoningText);
+      setCopySuccess(true);
+    } catch (error) {
+      console.error('Failed to copy reasoning:', error);
     }
   };
 
-  const _getAlgorithmDescription = (algorithm) => {
-    switch (algorithm) {
-      case 'content_based':
-        return 'Based on musical features and audio analysis';
-      case 'collaborative':
-        return 'Based on users with similar taste';
-      case 'hybrid':
-        return 'Combines multiple AI algorithms for best results';
-      default:
-        return 'AI-powered recommendation';
-    }
+  const getProviderIcon = (providerName) => {
+    const lowerProvider = providerName?.toLowerCase() || '';
+    if (lowerProvider.includes('gemini')) return <SmartToy />;
+    if (lowerProvider.includes('openai')) return <Psychology />;
+    if (lowerProvider.includes('mock')) return <Info />;
+    return <SmartToy />;
   };
 
   const getConfidenceColor = (confidence) => {
-    if (confidence >= 0.8) return 'success';
-    if (confidence >= 0.6) return 'primary';
-    if (confidence >= 0.4) return 'warning';
-    return 'error';
+    if (confidence === 'high') return 'success';
+    if (confidence === 'medium') return 'warning';
+    if (confidence === 'low') return 'error';
+    return 'default';
   };
-
-  const formatDuration = (ms) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-        <Typography variant="body2" sx={{ ml: 2 }}>
-          Getting personalized recommendations...
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (recommendations.length === 0) {
-    return (
-      <Paper sx={{ p: 4, textAlign: 'center' }}>
-        <Psychology sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-        <Typography variant="h6" gutterBottom>
-          No Recommendations Yet
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Generate some personalized music recommendations to see explainable AI insights
-        </Typography>
-      </Paper>
-    );
-  }
 
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <SmartToy color="primary" />
-        Explainable Recommendations
-      </Typography>
+    <>
+      {/* Toggle Button */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+        <IconButton
+          onClick={onTogglePanel}
+          color="primary"
+          size="small"
+          sx={{ 
+            border: '1px solid',
+            borderColor: 'primary.main',
+            borderRadius: 2,
+            px: 2,
+            py: 1
+          }}
+        >
+          <Psychology sx={{ mr: 1 }} />
+          <Typography variant="body2">
+            {showPanel ? 'Hide' : 'Show'} AI Explanation
+          </Typography>
+        </IconButton>
+      </Box>
 
-      <Typography variant="body2" color="text.secondary" paragraph>
-        AI-curated music with transparent reasoning behind each recommendation
-      </Typography>
+      {/* Explainability Panel */}
+      <Collapse in={showPanel}>
+        <Card sx={{ mb: 2, bgcolor: 'background.default' }}>
+          <CardContent>
+            {/* Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {getProviderIcon(provider)}
+                <Typography variant="h6" component="h3">
+                  AI Explanation
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Chip
+                  size="small"
+                  label={provider || 'Unknown'}
+                  color="primary"
+                  variant="outlined"
+                />
+                <Chip
+                  size="small"
+                  label={model || 'Unknown Model'}
+                  color="secondary"
+                  variant="outlined"
+                />
+              </Box>
+            </Box>
 
-      <List sx={{ p: 0 }}>
-        {recommendations.map((track, _index) => {
-          const trackFeedback = feedbackStates[track.id];
+            <Divider sx={{ mb: 2 }} />
 
-          return (
-            <Card key={track.id} sx={{ mb: 2 }}>
-              <CardContent>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemAvatar>
-                    <Avatar src={track.album?.images?.[0]?.url} sx={{ width: 56, height: 56 }}>
-                      <MusicNote />
-                    </Avatar>
-                  </ListItemAvatar>
-
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="h6" component="span">
-                          {track.name}
-                        </Typography>
-                        {track.explicit && <Chip label="E" size="small" variant="outlined" />}
-                      </Box>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {track.artists?.map((a) => a.name).join(', ') || track.artist} •{' '}
-                          {track.album?.name || 'Unknown Album'}
-                        </Typography>
-
-                        <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
-                          <Chip
-                            icon={getAlgorithmIcon(track.algorithm)}
-                            label={track.algorithm || 'AI'}
-                            size="small"
-                            variant="outlined"
-                          />
-
-                          {track.confidence && (
-                            <Chip
-                              icon={<TrendingUp />}
-                              label={`${Math.round(track.confidence * 100)}% match`}
-                              size="small"
-                              color={getConfidenceColor(track.confidence)}
-                              variant="outlined"
-                            />
-                          )}
-
-                          <Chip
-                            icon={<Schedule />}
-                            label={formatDuration(track.duration_ms || 200000)}
-                            size="small"
-                            variant="outlined"
-                          />
-
-                          {track.popularity && (
-                            <Chip
-                              label={`${track.popularity}% popular`}
-                              size="small"
-                              variant="outlined"
-                            />
-                          )}
-                        </Stack>
-                      </Box>
-                    }
-                  />
-                </ListItem>
-
-                {/* AI Confidence Bar */}
-                {track.confidence && (
-                  <Box sx={{ mb: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        AI Confidence Score
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {Math.round(track.confidence * 100)}%
-                      </Typography>
-                    </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={track.confidence * 100}
-                      color={getConfidenceColor(track.confidence)}
-                      sx={{ height: 6, borderRadius: 3 }}
-                    />
-                  </Box>
-                )}
-
-                {/* Quick Explanation Preview */}
-                {track.quickReason && (
-                  <Alert
-                    icon={<Psychology />}
-                    severity="info"
-                    sx={{ mb: 2, bgcolor: 'rgba(25, 118, 210, 0.04)' }}
-                  >
-                    <Typography variant="body2">{track.quickReason}</Typography>
-                  </Alert>
-                )}
-
-                {/* Action Buttons */}
-                <Box
-                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <Stack direction="row" spacing={1}>
-                    <Tooltip title="Why was this recommended?">
-                      <IconButton color="info" onClick={() => handleGetExplanation(track)}>
-                        <Info />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Like this recommendation">
-                      <IconButton
-                        color={trackFeedback?.feedback === 'like' ? 'success' : 'default'}
-                        onClick={() => handleFeedback(track, 'like')}
-                      >
-                        <ThumbUp />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Not interested">
-                      <IconButton
-                        color={trackFeedback?.feedback === 'dislike' ? 'error' : 'default'}
-                        onClick={() => handleFeedback(track, 'dislike')}
-                      >
-                        <ThumbDown />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-
-                  {trackFeedback && (
+            {/* Model Metadata */}
+            {metadata && Object.keys(metadata).length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Info fontSize="small" />
+                  Model Metadata
+                </Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+                  {Object.entries(metadata).map(([key, value]) => (
                     <Chip
-                      label={`Feedback: ${trackFeedback.feedback}`}
+                      key={key}
                       size="small"
-                      color={trackFeedback.feedback === 'like' ? 'success' : 'error'}
+                      label={`${key}: ${value}`}
                       variant="outlined"
+                      sx={{ fontSize: '0.7rem' }}
                     />
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </List>
+                  ))}
+                </Stack>
+              </Box>
+            )}
 
-      {/* Explanation Dialog */}
-      <Dialog
-        open={explanationDialog.open}
-        onClose={() => setExplanationDialog({ open: false, track: null, explanation: null })}
-        maxWidth="md"
-        fullWidth
+            {/* Reasoning Summary */}
+            {explanation?.summary && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Psychology fontSize="small" />
+                  Reasoning Summary
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {explanation.summary}
+                </Typography>
+              </Box>
+            )}
+
+            {/* Key Factors */}
+            {explanation?.reasoning && explanation.reasoning.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <TrendingUp fontSize="small" />
+                  Key Factors
+                </Typography>
+                <Stack spacing={1}>
+                  {explanation.reasoning.map((reason, index) => (
+                    <Chip
+                      key={index}
+                      size="small"
+                      label={reason}
+                      variant="filled"
+                      color="primary"
+                      sx={{ fontSize: '0.8rem', alignSelf: 'flex-start' }}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {/* Context Factors */}
+            {explanation?.contextFactors && explanation.contextFactors.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Speed fontSize="small" />
+                  Context Factors
+                </Typography>
+                <Stack spacing={1}>
+                  {explanation.contextFactors.map((factor, index) => (
+                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip
+                        size="small"
+                        label={factor.factor}
+                        variant="outlined"
+                        color="secondary"
+                        sx={{ fontSize: '0.7rem' }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {factor.value}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={factor.influence}
+                        color={getConfidenceColor(factor.influence)}
+                        variant="filled"
+                        sx={{ fontSize: '0.6rem' }}
+                      />
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {/* Conversation Flow */}
+            {explanation?.conversationFlow && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Psychology fontSize="small" />
+                  Conversation Flow
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {explanation.conversationFlow}
+                </Typography>
+              </Box>
+            )}
+
+            {/* Copy Button */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <Tooltip title="Copy reasoning to clipboard">
+                <IconButton
+                  onClick={handleCopyReasoning}
+                  color="primary"
+                  size="small"
+                  sx={{ 
+                    border: '1px solid',
+                    borderColor: 'primary.main',
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1
+                  }}
+                >
+                  <ContentCopy sx={{ mr: 1 }} />
+                  <Typography variant="body2">
+                    Copy Reasoning
+                  </Typography>
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </CardContent>
+        </Card>
+      </Collapse>
+
+      {/* Success Notification */}
+      <Snackbar
+        open={copySuccess}
+        autoHideDuration={3000}
+        onClose={() => setCopySuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Psychology color="primary" />
-          Why &quot;{explanationDialog.track?.name}&quot; was recommended
-        </DialogTitle>
-
-        <DialogContent>
-          {loadingExplanation ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', p: 4 }}>
-              <CircularProgress size={24} sx={{ mr: 2 }} />
-              <Typography>Generating explanation...</Typography>
-            </Box>
-          ) : explanationDialog.explanation ? (
-            <Box>
-              {explanationDialog.explanation.error ? (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {explanationDialog.explanation.error}
-                </Alert>
-              ) : (
-                <>
-                  {/* Summary */}
-                  <Paper sx={{ p: 2, mb: 3, bgcolor: 'rgba(25, 118, 210, 0.04)' }}>
-                    <Typography variant="body1" paragraph>
-                      <strong>Summary:</strong> {explanationDialog.explanation.summary}
-                    </Typography>
-
-                    <Stack direction="row" spacing={1} flexWrap="wrap">
-                      <Chip
-                        icon={getAlgorithmIcon(explanationDialog.explanation.algorithm)}
-                        label={`Algorithm: ${explanationDialog.explanation.algorithm}`}
-                        variant="outlined"
-                      />
-                      <Chip
-                        icon={<TrendingUp />}
-                        label={`${Math.round((explanationDialog.explanation.confidence || 0.7) * 100)}% confidence`}
-                        color={getConfidenceColor(explanationDialog.explanation.confidence || 0.7)}
-                        variant="outlined"
-                      />
-                    </Stack>
-                  </Paper>
-
-                  {/* Detailed Reasons */}
-                  {explanationDialog.explanation.reasons && (
-                    <Accordion defaultExpanded>
-                      <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography variant="h6">Reasoning Factors</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <List>
-                          {explanationDialog.explanation.reasons.map((reason, idx) => (
-                            <ListItem key={idx} sx={{ pl: 0 }}>
-                              <ListItemText
-                                primary={reason}
-                                sx={{ '& .MuiListItemText-primary': { fontSize: '0.95rem' } }}
-                              />
-                            </ListItem>
-                          ))}
-                        </List>
-                      </AccordionDetails>
-                    </Accordion>
-                  )}
-
-                  {/* Algorithm Factors */}
-                  {explanationDialog.explanation.factors && (
-                    <Accordion>
-                      <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography variant="h6">Algorithm Breakdown</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Stack spacing={2}>
-                          {explanationDialog.explanation.factors.map((factor, idx) => (
-                            <Box key={idx}>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="body2" fontWeight="medium">
-                                  {factor.description}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  {Math.round(factor.weight * 100)}% weight
-                                </Typography>
-                              </Box>
-                              <LinearProgress
-                                variant="determinate"
-                                value={factor.weight * 100}
-                                sx={{ height: 4, borderRadius: 2 }}
-                              />
-                            </Box>
-                          ))}
-                        </Stack>
-                      </AccordionDetails>
-                    </Accordion>
-                  )}
-
-                  {/* Track-Specific Explanation */}
-                  {explanationDialog.explanation.trackSpecific && (
-                    <Accordion>
-                      <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography variant="h6">Track Analysis</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography variant="body2" color="text.secondary" paragraph>
-                          Specific reasons for &quot;
-                          {explanationDialog.explanation.trackSpecific.name}&quot;:
-                        </Typography>
-                        <List>
-                          {explanationDialog.explanation.trackSpecific.reasons.map(
-                            (reason, idx) => (
-                              <ListItem key={idx} sx={{ pl: 0 }}>
-                                <ListItemText
-                                  primary={reason}
-                                  sx={{ '& .MuiListItemText-primary': { fontSize: '0.9rem' } }}
-                                />
-                              </ListItem>
-                            )
-                          )}
-                        </List>
-                      </AccordionDetails>
-                    </Accordion>
-                  )}
-                </>
-              )}
-            </Box>
-          ) : (
-            <Typography>No explanation available</Typography>
-          )}
-        </DialogContent>
-
-        <DialogActions>
-          <Rating
-            value={explanationDialog.explanation?.userRating || 0}
-            onChange={(_, value) => {
-              if (explanationDialog.track && value) {
-                handleFeedback(explanationDialog.track, 'rate_explanation', value);
-              }
-            }}
-            sx={{ mr: 'auto' }}
-          />
-          <Button
-            onClick={() => setExplanationDialog({ open: false, track: null, explanation: null })}
-          >
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        <Alert onClose={() => setCopySuccess(false)} severity="success" sx={{ width: '100%' }}>
+          Reasoning copied to clipboard!
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

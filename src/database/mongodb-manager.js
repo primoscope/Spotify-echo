@@ -150,6 +150,34 @@ class MongoDBManager {
             { key: { startTime: 1 }, options: { expireAfterSeconds: 30 * 24 * 60 * 60 } }, // Auto-expire after 30 days
           ],
         },
+        {
+          name: `${prefix}provider_telemetry`,
+          indexes: [
+            { key: { provider: 1, timestamp: -1 } },
+            { key: { timestamp: 1 }, options: { expireAfterSeconds: 24 * 60 * 60 } }, // Auto-expire after 24 hours
+            { key: { provider: 1, model: 1, timestamp: -1 } },
+            { key: { success: 1, timestamp: -1 } },
+            { key: { requestId: 1 }, options: { unique: true, sparse: true } },
+          ],
+        },
+        {
+          name: `${prefix}conversations`,
+          indexes: [
+            { key: { session_id: 1 }, options: { unique: true } },
+            { key: { user_id: 1, updated_at: -1 } },
+            { key: { llm_provider: 1, updated_at: -1 } },
+            { key: { updated_at: 1 }, options: { expireAfterSeconds: 90 * 24 * 60 * 60 } }, // Auto-expire after 90 days
+          ],
+        },
+        {
+          name: `${prefix}insights`,
+          indexes: [
+            { key: { user_id: 1, type: 1, generated_at: -1 } },
+            { key: { type: 1, generated_at: -1 } },
+            { key: { generated_at: 1 }, options: { expireAfterSeconds: 365 * 24 * 60 * 60 } }, // Auto-expire after 1 year
+            { key: { expires_at: 1 }, options: { expireAfterSeconds: 0 } }, // TTL on expires_at field
+          ],
+        },
       ];
 
       // Create collections and indexes

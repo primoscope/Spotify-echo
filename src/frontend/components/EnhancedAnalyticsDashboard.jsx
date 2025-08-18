@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { IconButton, Tooltip, Avatar, Paper, Switch, FormControlLabel } from '@mui/material';
+import { IconButton, Tooltip, Avatar, Paper, Switch, FormControlLabel, Chip } from '@mui/material';
 import {
   TrendingUp,
   TrendingDown,
@@ -34,6 +34,8 @@ function EnhancedAnalyticsDashboard() {
   const [perfError, setPerfError] = useState(null);
   const [providersHealth, setProvidersHealth] = useState(null);
   const [providersHealthError, setProvidersHealthError] = useState(null);
+  const [providerTelemetry, setProviderTelemetry] = useState(null);
+  const [telemetryError, setTelemetryError] = useState(null);
   const renderStart = typeof performance !== 'undefined' ? performance.now() : Date.now();
   useEffect(() => {
     const end = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -280,6 +282,32 @@ function EnhancedAnalyticsDashboard() {
     };
     loadProvidersHealth();
     const id = setInterval(loadProvidersHealth, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
+  // Poll Provider telemetry every 60s
+  useEffect(() => {
+    let cancelled = false;
+    const loadProviderTelemetry = async () => {
+      try {
+        const res = await fetch('/api/analytics/providers');
+        if (!res.ok) throw new Error(`provider telemetry failed: ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) {
+          setProviderTelemetry(data);
+          setTelemetryError(null);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setTelemetryError('Failed to load provider telemetry');
+        }
+      }
+    };
+    loadProviderTelemetry();
+    const id = setInterval(loadProviderTelemetry, 60000);
     return () => {
       cancelled = true;
       clearInterval(id);
@@ -569,6 +597,65 @@ function EnhancedAnalyticsDashboard() {
 
       {/* Overview Cards */}
       {renderOverviewCards()}
+
+      {/* Provider Health Chips */}
+      {providersHealth && (
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <Assessment sx={{ mr: 1 }} />
+              Provider Health & Performance
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {providersHealth.providers?.map((provider) => (
+                <Chip
+                  key={provider.id}
+                  label={`${provider.name}: ${provider.health}`}
+                  color={provider.health === 'healthy' ? 'success' : 'error'}
+                  variant="outlined"
+                  size="small"
+                  sx={{ 
+                    borderWidth: 2,
+                    '& .MuiChip-label': { fontWeight: 500 }
+                  }}
+                />
+              ))}
+              {providerTelemetry && (
+                <Chip
+                  label={`Overall Success: ${Math.round(providerTelemetry.metadata?.overallSuccessRate || 0)}%`}
+                  color="info"
+                  variant="filled"
+                  size="small"
+                />
+              )}
+            </Box>
+            
+            {/* Performance Metrics */}
+            {providerTelemetry && (
+              <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Chip
+                  label={`Avg Latency: ${Math.round(providerTelemetry.metadata?.avgLatency || 0)}ms`}
+                  color="primary"
+                  variant="outlined"
+                  size="small"
+                />
+                <Chip
+                  label={`Total Requests: ${providerTelemetry.metadata?.totalRequests?.toLocaleString() || 0}`}
+                  color="secondary"
+                  variant="outlined"
+                  size="small"
+                />
+                <Chip
+                  label={`Active Providers: ${providersHealth.providers?.filter(p => p.health === 'healthy').length || 0}`}
+                  color="success"
+                  variant="outlined"
+                  size="small"
+                />
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Analytics Grid */}
       <Grid container spacing={3}>

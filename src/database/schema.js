@@ -173,6 +173,56 @@ const PlaylistsSchema = {
 };
 
 /**
+ * Provider Telemetry Schema
+ */
+const ProviderTelemetrySchema = {
+  provider: { type: 'string', required: true },
+  model: { type: 'string', required: true },
+  latencyMs: { type: 'number', required: true },
+  success: { type: 'boolean', required: true },
+  errorCode: { type: 'string' },
+  requestId: { type: 'string' },
+  userId: { type: 'string' },
+  sessionId: { type: 'string' },
+  timestamp: { type: 'date', required: true },
+  metadata: {
+    userAgent: { type: 'string' },
+    ipAddress: { type: 'string' },
+    endpoint: { type: 'string' },
+    requestSize: { type: 'number' },
+    responseSize: { type: 'number' },
+  },
+};
+
+/**
+ * Conversations Schema
+ */
+const ConversationsSchema = {
+  session_id: { type: 'string', required: true, unique: true },
+  user_id: { type: 'string', required: true },
+  llm_provider: { type: 'string', required: true },
+  model: { type: 'string' },
+  context: { type: 'object' },
+  summary: { type: 'string' },
+  message_count: { type: 'number', default: 0 },
+  created_at: { type: 'date', default: () => new Date() },
+  updated_at: { type: 'date', default: () => new Date() },
+  last_message_at: { type: 'date' },
+};
+
+/**
+ * Insights Schema
+ */
+const InsightsSchema = {
+  user_id: { type: 'string', required: true },
+  type: { type: 'string', required: true }, // 'engagement', 'listening_patterns', 'preferences'
+  data: { type: 'object', required: true },
+  generated_at: { type: 'date', default: () => new Date() },
+  expires_at: { type: 'date' },
+  metadata: { type: 'object' },
+};
+
+/**
  * Schema validation helper functions
  */
 class SchemaValidator {
@@ -202,6 +252,18 @@ class SchemaValidator {
 
   static validatePlaylist(data) {
     return this.validate(data, PlaylistsSchema);
+  }
+
+  static validateProviderTelemetry(data) {
+    return this.validate(data, ProviderTelemetrySchema);
+  }
+
+  static validateConversation(data) {
+    return this.validate(data, ConversationsSchema);
+  }
+
+  static validateInsight(data) {
+    return this.validate(data, InsightsSchema);
   }
 
   static validate(data, schema) {
@@ -271,5 +333,8 @@ module.exports = {
   RecommendationsSchema,
   ChatHistorySchema,
   PlaylistsSchema,
+  ProviderTelemetrySchema,
+  ConversationsSchema,
+  InsightsSchema,
   SchemaValidator,
 };

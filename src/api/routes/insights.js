@@ -1,589 +1,407 @@
 const express = require('express');
+const { requireAuth } = require('../middleware');
+
 const router = express.Router();
-const NodeCache = require('node-cache');
-const { requireAuth, createRateLimit } = require('../middleware');
-
-// Enhanced cache for insights with longer TTL
-const insightsCache = new NodeCache({
-  stdTTL: 300, // 5 minutes cache for insights
-  checkperiod: 60,
-});
-
-// Rate limiting specifically for insights endpoints
-const insightsRateLimit = createRateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Lower limit for complex analytics
-  message: 'Too many insights requests, please try again later',
-});
 
 /**
- * Enhanced Spotify Insights API
- * Provides comprehensive music analytics with caching and pagination
+ * Get engagement insights and KPIs
+ * GET /api/insights/engagement
  */
-class SpotifyInsightsService {
-  constructor() {
-    this.dbManager = require('../../database/mongodb-manager');
-  }
-
-  /**
-   * Get paginated listening history with audio features trends
-   */
-  async getListeningTrends(options = {}) {
-    const cacheKey = `listening_trends_${JSON.stringify(options)}`;
-    const cached = insightsCache.get(cacheKey);
-    if (cached) {
-      return { ...cached, cached: true };
-    }
-
-    try {
-      const {
-        page = 1,
-        limit = 50,
-        timeRange = '30d',
-        userId,
-        features = ['energy', 'valence', 'danceability'],
-      } = options;
-
-      const offset = (page - 1) * limit;
-      const timeFilter = this.getTimeFilter(timeRange);
-
-      let query = { playedAt: { $gte: timeFilter } };
-      if (userId) {
-        query.userId = userId;
-      }
-
-      if (!this.dbManager.isConnected()) {
-        return this.getFallbackTrends(options);
-      }
-
-      const db = this.dbManager.getDatabase();
-      const collection = db.collection('listening_history');
-
-      // Get paginated results with audio features
-      const results = await collection
-        .aggregate([
-          { $match: query },
-          {
-            $lookup: {
-              from: 'audio_features',
-              localField: 'trackId',
-              foreignField: 'trackId',
-              as: 'audioFeatures',
-            },
-          },
-          {
-            $addFields: {
-              audioFeatures: { $arrayElemAt: ['$audioFeatures', 0] },
-            },
-          },
-          { $sort: { playedAt: -1 } },
-          { $skip: offset },
-          { $limit: limit },
-        ])
-        .toArray();
-
-      // Get total count for pagination
-      const totalCount = await collection.countDocuments(query);
-
-      // Calculate trend analysis
-      const trendAnalysis = this.calculateAudioFeatureTrends(results, features);
-
-      const response = {
-        data: results,
-        pagination: {
-          page,
-          limit,
-          totalCount,
-          totalPages: Math.ceil(totalCount / limit),
-          hasNext: page * limit < totalCount,
-          hasPrev: page > 1,
-        },
-        trends: trendAnalysis,
-        features,
-        timeRange,
-        generatedAt: new Date().toISOString(),
-      };
-
-      insightsCache.set(cacheKey, response);
-      return response;
-    } catch (error) {
-      console.error('Error getting listening trends:', error);
-      throw new Error(`Failed to get listening trends: ${error.message}`);
-    }
-  }
-
-  /**
-   * Get comprehensive song analytics with audio features
-   */
-  async getSongInsights(trackId, options = {}) {
-    const cacheKey = `song_insights_${trackId}_${JSON.stringify(options)}`;
-    const cached = insightsCache.get(cacheKey);
-    if (cached) {
-      return { ...cached, cached: true };
-    }
-
-    try {
-      if (!this.dbManager.isConnected()) {
-        return this.getFallbackSongInsights(trackId);
-      }
-
-      const db = this.dbManager.getDatabase();
-
-      // Get audio features and listening data
-      const [audioFeatures, listeningData, similarTracks] = await Promise.all([
-        db.collection('audio_features').findOne({ trackId }),
-        this.getSongListeningData(trackId, options),
-        this.getSimilarTracks(trackId, options.limit || 10),
-      ]);
-
-      const insights = {
-        trackId,
-        audioFeatures,
-        listening: listeningData,
-        similarTracks,
-        analysis: this.analyzeTrackFeatures(audioFeatures),
-        generatedAt: new Date().toISOString(),
-      };
-
-      insightsCache.set(cacheKey, insights);
-      return insights;
-    } catch (error) {
-      console.error('Error getting song insights:', error);
-      throw new Error(`Failed to get song insights: ${error.message}`);
-    }
-  }
-
-  /**
-   * Get playlist analytics and trends
-   */
-  async getPlaylistInsights(playlistId, options = {}) {
-    const cacheKey = `playlist_insights_${playlistId}_${JSON.stringify(options)}`;
-    const cached = insightsCache.get(cacheKey);
-    if (cached) {
-      return { ...cached, cached: true };
-    }
-
-    try {
-      const { includeAudioFeatures = true, analyzeTrends = true } = options;
-
-      if (!this.dbManager.isConnected()) {
-        return this.getFallbackPlaylistInsights(playlistId);
-      }
-
-      const db = this.dbManager.getDatabase();
-
-      // Get playlist data
-      const playlist = await db.collection('playlists').findOne({ id: playlistId });
-      if (!playlist) {
-        throw new Error('Playlist not found');
-      }
-
-      let insights = {
-        playlistId,
-        name: playlist.name,
-        trackCount: playlist.tracks?.length || 0,
-        generatedAt: new Date().toISOString(),
-      };
-
-      if (includeAudioFeatures && playlist.tracks) {
-        const trackIds = playlist.tracks.map((t) => t.id || t.trackId);
-        const audioFeatures = await db
-          .collection('audio_features')
-          .find({ trackId: { $in: trackIds } })
-          .toArray();
-
-        insights.audioFeatures = this.analyzePlaylistAudioFeatures(audioFeatures);
-      }
-
-      if (analyzeTrends) {
-        insights.trends = await this.analyzePlaylistTrends(playlistId);
-      }
-
-      insightsCache.set(cacheKey, insights);
-      return insights;
-    } catch (error) {
-      console.error('Error getting playlist insights:', error);
-      throw new Error(`Failed to get playlist insights: ${error.message}`);
-    }
-  }
-
-  // Helper methods
-  getTimeFilter(timeRange) {
-    const now = new Date();
-    switch (timeRange) {
-      case '24h':
-        return new Date(now - 24 * 60 * 60 * 1000);
-      case '7d':
-        return new Date(now - 7 * 24 * 60 * 60 * 1000);
-      case '30d':
-        return new Date(now - 30 * 24 * 60 * 60 * 1000);
-      case '90d':
-        return new Date(now - 90 * 24 * 60 * 60 * 1000);
-      case '1y':
-        return new Date(now - 365 * 24 * 60 * 60 * 1000);
-      default:
-        return new Date(now - 30 * 24 * 60 * 60 * 1000);
-    }
-  }
-
-  calculateAudioFeatureTrends(data, features) {
-    if (!data || data.length === 0) return {};
-
-    const trends = {};
-    features.forEach((feature) => {
-      const values = data
-        .filter((item) => item.audioFeatures && item.audioFeatures[feature] !== undefined)
-        .map((item) => item.audioFeatures[feature]);
-
-      if (values.length > 0) {
-        trends[feature] = {
-          average: values.reduce((a, b) => a + b, 0) / values.length,
-          min: Math.min(...values),
-          max: Math.max(...values),
-          trend: this.calculateTrend(values),
-          dataPoints: values.length,
-        };
-      }
-    });
-
-    return trends;
-  }
-
-  calculateTrend(values) {
-    if (values.length < 2) return 'stable';
-
-    const firstHalf = values.slice(0, Math.floor(values.length / 2));
-    const secondHalf = values.slice(Math.floor(values.length / 2));
-
-    const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
-    const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-
-    const diff = secondAvg - firstAvg;
-    if (Math.abs(diff) < 0.05) return 'stable';
-    return diff > 0 ? 'increasing' : 'decreasing';
-  }
-
-  analyzeTrackFeatures(audioFeatures) {
-    if (!audioFeatures) return null;
-
-    const analysis = {
-      energy_level: this.categorizeValue(audioFeatures.energy, 'energy'),
-      mood: this.categorizeValue(audioFeatures.valence, 'mood'),
-      danceability_level: this.categorizeValue(audioFeatures.danceability, 'danceability'),
-      tempo_category: this.categorizeValue(audioFeatures.tempo, 'tempo'),
-      key_signature: audioFeatures.key,
-      time_signature: audioFeatures.time_signature,
-    };
-
-    return analysis;
-  }
-
-  categorizeValue(value, type) {
-    switch (type) {
-      case 'energy':
-        if (value < 0.3) return 'low';
-        if (value < 0.7) return 'medium';
-        return 'high';
-      case 'mood':
-        if (value < 0.3) return 'sad';
-        if (value < 0.7) return 'neutral';
-        return 'happy';
-      case 'danceability':
-        if (value < 0.3) return 'low';
-        if (value < 0.7) return 'medium';
-        return 'high';
-      case 'tempo':
-        if (value < 90) return 'slow';
-        if (value < 120) return 'moderate';
-        if (value < 140) return 'fast';
-        return 'very_fast';
-      default:
-        return 'unknown';
-    }
-  }
-
-  async getSongListeningData(trackId, _options) {
-    const db = this.dbManager.getDatabase();
-    const collection = db.collection('listening_history');
-
-    const data = await collection
-      .aggregate([
-        { $match: { trackId } },
-        {
-          $group: {
-            _id: null,
-            totalPlays: { $sum: 1 },
-            uniqueListeners: { $addToSet: '$userId' },
-            firstPlayed: { $min: '$playedAt' },
-            lastPlayed: { $max: '$playedAt' },
-          },
-        },
-      ])
-      .toArray();
-
-    return data[0] || { totalPlays: 0, uniqueListeners: [], firstPlayed: null, lastPlayed: null };
-  }
-
-  async getSimilarTracks(trackId, limit = 10) {
-    // Simplified similar tracks based on audio features
-    const db = this.dbManager.getDatabase();
-    const targetFeatures = await db.collection('audio_features').findOne({ trackId });
-
-    if (!targetFeatures) return [];
-
-    const similar = await db
-      .collection('audio_features')
-      .find({
-        trackId: { $ne: trackId },
-        energy: { $gte: targetFeatures.energy - 0.1, $lte: targetFeatures.energy + 0.1 },
-        valence: { $gte: targetFeatures.valence - 0.1, $lte: targetFeatures.valence + 0.1 },
-      })
-      .limit(limit)
-      .toArray();
-
-    return similar;
-  }
-
-  analyzePlaylistAudioFeatures(audioFeatures) {
-    if (!audioFeatures || audioFeatures.length === 0) return null;
-
-    const features = ['energy', 'valence', 'danceability', 'acousticness', 'instrumentalness'];
-    const analysis = {};
-
-    features.forEach((feature) => {
-      const values = audioFeatures.map((f) => f[feature]).filter((v) => v !== undefined);
-      if (values.length > 0) {
-        analysis[feature] = {
-          average: values.reduce((a, b) => a + b, 0) / values.length,
-          min: Math.min(...values),
-          max: Math.max(...values),
-          distribution: this.calculateDistribution(values),
-        };
-      }
-    });
-
-    return analysis;
-  }
-
-  calculateDistribution(values) {
-    const bins = [0, 0.2, 0.4, 0.6, 0.8, 1.0];
-    const distribution = bins.map(() => 0);
-
-    values.forEach((value) => {
-      const binIndex = Math.min(Math.floor(value * 5), 4);
-      distribution[binIndex]++;
-    });
-
-    return distribution.map((count) => count / values.length);
-  }
-
-  async analyzePlaylistTrends(playlistId) {
-    // Analyze how playlist composition has changed over time
-    const db = this.dbManager.getDatabase();
-    const collection = db.collection('playlist_history');
-
-    const history = await collection.find({ playlistId }).sort({ timestamp: 1 }).toArray();
-
-    return {
-      totalChanges: history.length,
-      lastModified: history[history.length - 1]?.timestamp,
-      changeFrequency: this.calculateChangeFrequency(history),
-    };
-  }
-
-  calculateChangeFrequency(history) {
-    if (history.length < 2) return 'static';
-
-    const timeSpan =
-      new Date(history[history.length - 1].timestamp) - new Date(history[0].timestamp);
-    const daysSpan = timeSpan / (1000 * 60 * 60 * 24);
-    const changesPerDay = history.length / daysSpan;
-
-    if (changesPerDay > 1) return 'very_active';
-    if (changesPerDay > 0.5) return 'active';
-    if (changesPerDay > 0.1) return 'moderate';
-    return 'low';
-  }
-
-  // Fallback methods for when MongoDB is not connected
-  getFallbackTrends(options) {
-    return {
-      data: [],
-      pagination: {
-        page: 1,
-        limit: options.limit || 50,
-        totalCount: 0,
-        totalPages: 0,
-        hasNext: false,
-        hasPrev: false,
+router.get('/engagement', requireAuth, async (req, res) => {
+  try {
+    const { startDate, endDate, userId, limit = 50 } = req.query;
+    
+    // Parse date range
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
+    const end = endDate ? new Date(endDate) : new Date();
+    
+    const db = require('../../database/mongodb').getDb();
+    const prefix = process.env.MONGODB_COLLECTIONS_PREFIX || 'echotune_';
+    
+    // Get engagement insights
+    const engagementPipeline = [
+      {
+        $match: {
+          timestamp: { $gte: start, $lte: end },
+          ...(userId && { user_id: userId })
+        }
       },
-      trends: {},
-      features: options.features || [],
-      fallback: true,
-      message: 'Using fallback data - MongoDB not connected',
-    };
-  }
-
-  getFallbackSongInsights(trackId) {
-    return {
-      trackId,
-      audioFeatures: null,
-      listening: { totalPlays: 0, uniqueListeners: [] },
-      similarTracks: [],
-      analysis: null,
-      fallback: true,
-      message: 'Using fallback data - MongoDB not connected',
-    };
-  }
-
-  getFallbackPlaylistInsights(playlistId) {
-    return {
-      playlistId,
-      name: 'Unknown Playlist',
-      trackCount: 0,
-      fallback: true,
-      message: 'Using fallback data - MongoDB not connected',
-    };
-  }
-}
-
-const insightsService = new SpotifyInsightsService();
-
-/**
- * GET /api/insights/listening-trends
- * Get paginated listening history with audio features trends
- */
-router.get('/listening-trends', requireAuth, insightsRateLimit, async (req, res) => {
-  try {
-    const options = {
-      page: parseInt(req.query.page) || 1,
-      limit: Math.min(parseInt(req.query.limit) || 50, 100), // Max 100 items per page
-      timeRange: req.query.timeRange || '30d',
-      userId: req.query.userId,
-      features: req.query.features
-        ? req.query.features.split(',')
-        : ['energy', 'valence', 'danceability'],
-    };
-
-    const result = await insightsService.getListeningTrends(options);
-
-    res.json({
-      success: true,
-      ...result,
-    });
-  } catch (error) {
-    console.error('Error getting listening trends:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get listening trends',
-      message: error.message,
-    });
-  }
-});
-
-/**
- * GET /api/insights/song/:trackId
- * Get comprehensive song analytics with audio features
- */
-router.get('/song/:trackId', requireAuth, insightsRateLimit, async (req, res) => {
-  try {
-    const { trackId } = req.params;
-    const options = {
-      limit: parseInt(req.query.limit) || 10,
-    };
-
-    const result = await insightsService.getSongInsights(trackId, options);
-
-    res.json({
-      success: true,
-      ...result,
-    });
-  } catch (error) {
-    console.error('Error getting song insights:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get song insights',
-      message: error.message,
-    });
-  }
-});
-
-/**
- * GET /api/insights/playlist/:playlistId
- * Get playlist analytics and trends
- */
-router.get('/playlist/:playlistId', requireAuth, insightsRateLimit, async (req, res) => {
-  try {
-    const { playlistId } = req.params;
-    const options = {
-      includeAudioFeatures: req.query.includeAudioFeatures !== 'false',
-      analyzeTrends: req.query.analyzeTrends !== 'false',
-    };
-
-    const result = await insightsService.getPlaylistInsights(playlistId, options);
-
-    res.json({
-      success: true,
-      ...result,
-    });
-  } catch (error) {
-    console.error('Error getting playlist insights:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get playlist insights',
-      message: error.message,
-    });
-  }
-});
-
-/**
- * POST /api/insights/cache/clear
- * Clear insights cache (admin only)
- */
-router.post('/cache/clear', requireAuth, async (req, res) => {
-  try {
-    insightsCache.flushAll();
-
-    res.json({
-      success: true,
-      message: 'Insights cache cleared successfully',
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error('Error clearing cache:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to clear cache',
-      message: error.message,
-    });
-  }
-});
-
-/**
- * GET /api/insights/cache/stats
- * Get cache statistics
- */
-router.get('/cache/stats', requireAuth, async (req, res) => {
-  try {
-    const stats = insightsCache.getStats();
-
-    res.json({
-      success: true,
-      cache: {
-        keys: stats.keys,
-        hits: stats.hits,
-        misses: stats.misses,
-        hitRate: stats.hits / (stats.hits + stats.misses) || 0,
-        ksize: stats.ksize,
-        vsize: stats.vsize,
+      {
+        $group: {
+          _id: {
+            user_id: '$user_id',
+            event_type: '$event_type',
+            date: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } }
+          },
+          count: { $sum: 1 },
+          lastEvent: { $max: '$timestamp' }
+        }
       },
-      timestamp: new Date().toISOString(),
+      {
+        $group: {
+          _id: '$_id.user_id',
+          events: {
+            $push: {
+              event_type: '$_id.event_type',
+              date: '$_id.date',
+              count: '$count',
+              lastEvent: '$lastEvent'
+            }
+          },
+          totalEvents: { $sum: '$count' },
+          uniqueEventTypes: { $addToSet: '$_id.event_type' },
+          lastActivity: { $max: '$lastEvent' }
+        }
+      },
+      {
+        $project: {
+          user_id: '$_id',
+          events: 1,
+          totalEvents: 1,
+          uniqueEventTypes: { $size: '$uniqueEventTypes' },
+          lastActivity: 1,
+          engagementScore: {
+            $add: [
+              { $multiply: ['$totalEvents', 0.4] },
+              { $multiply: [{ $size: '$uniqueEventTypes' }, 0.3] },
+              { $multiply: [
+                { $divide: [
+                  { $subtract: [new Date(), '$lastActivity'] },
+                  1000 * 60 * 60 * 24
+                ] },
+                -0.3
+              ] }
+            ]
+          }
+        }
+      },
+      {
+        $sort: { engagementScore: -1 }
+      },
+      {
+        $limit: parseInt(limit)
+      }
+    ];
+    
+    const analyticsCollection = db.collection(`${prefix}analytics_events`);
+    const results = await analyticsCollection.aggregate(engagementPipeline).toArray();
+    
+    // Calculate KPIs
+    const kpis = {
+      totalUsers: results.length,
+      avgEventsPerUser: results.length > 0 ? 
+        results.reduce((sum, r) => sum + r.totalEvents, 0) / results.length : 0,
+      avgEngagementScore: results.length > 0 ? 
+        results.reduce((sum, r) => sum + r.engagementScore, 0) / results.length : 0,
+      mostEngagedUser: results[0] || null,
+      leastEngagedUser: results[results.length - 1] || null,
+      activeUsers: results.filter(r => r.lastActivity > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
+      retentionRate: results.length > 0 ? 
+        (results.filter(r => r.lastActivity > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length / results.length) * 100 : 0
+    };
+    
+    res.json({
+      success: true,
+      data: results,
+      kpis,
+      metadata: {
+        startDate: start,
+        endDate: end,
+        totalRecords: results.length,
+        timeRange: `${Math.round((end - start) / (1000 * 60 * 60 * 24))} days`
+      }
     });
+    
   } catch (error) {
-    console.error('Error getting cache stats:', error);
+    console.error('Error getting engagement insights:', error);
     res.status(500).json({
-      success: false,
-      error: 'Failed to get cache stats',
+      error: 'Failed to get engagement insights',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Get top artists insights
+ * GET /api/insights/top-artists
+ */
+router.get('/top-artists', requireAuth, async (req, res) => {
+  try {
+    const { startDate, endDate, userId, limit = 20 } = req.query;
+    
+    // Parse date range
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
+    const end = endDate ? new Date(endDate) : new Date();
+    
+    const db = require('../../database/mongodb').getDb();
+    const prefix = process.env.MONGODB_COLLECTIONS_PREFIX || 'echotune_';
+    const historyCollection = db.collection(`${prefix}listening_history`);
+    
+    // Build aggregation pipeline for top artists
+    const pipeline = [
+      {
+        $match: {
+          played_at: { $gte: start, $lte: end },
+          ...(userId && { user_id: userId })
+        }
+      },
+      {
+        $group: {
+          _id: {
+            artist_name: '$artist_name',
+            artist_id: '$artist_id'
+          },
+          totalPlays: { $sum: 1 },
+          uniqueTracks: { $addToSet: '$track_id' },
+          totalDuration: { $sum: '$duration_ms' },
+          uniqueUsers: { $addToSet: '$user_id' },
+          lastPlayed: { $max: '$played_at' }
+        }
+      },
+      {
+        $project: {
+          artist_name: '$_id.artist_name',
+          artist_id: '$_id.artist_id',
+          totalPlays: 1,
+          uniqueTracks: { $size: '$uniqueTracks' },
+          totalDuration: 1,
+          uniqueUsers: { $size: '$uniqueUsers' },
+          lastPlayed: 1,
+          avgTrackDuration: { $divide: ['$totalDuration', '$totalPlays'] },
+          playFrequency: { $divide: ['$totalPlays', { $size: '$uniqueTracks' }] }
+        }
+      },
+      {
+        $sort: { totalPlays: -1 }
+      },
+      {
+        $limit: parseInt(limit)
+      }
+    ];
+    
+    const results = await historyCollection.aggregate(pipeline).toArray();
+    
+    // Calculate summary statistics
+    const summary = {
+      totalArtists: results.length,
+      totalPlays: results.reduce((sum, r) => sum + r.totalPlays, 0),
+      avgPlaysPerArtist: results.length > 0 ? 
+        results.reduce((sum, r) => sum + r.totalPlays, 0) / results.length : 0,
+      topArtist: results[0] || null,
+      mostDiverseArtist: results.reduce((max, r) => 
+        r.uniqueTracks > max.uniqueTracks ? r : max, { uniqueTracks: 0 }
+      )
+    };
+    
+    res.json({
+      success: true,
+      data: results,
+      summary,
+      metadata: {
+        startDate: start,
+        endDate: end,
+        totalRecords: results.length,
+        timeRange: `${Math.round((end - start) / (1000 * 60 * 60 * 24))} days`
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting top artists insights:', error);
+    res.status(500).json({
+      error: 'Failed to get top artists insights',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Get top genres insights
+ * GET /api/insights/top-genres
+ */
+router.get('/top-genres', requireAuth, async (req, res) => {
+  try {
+    const { startDate, endDate, userId, limit = 15 } = req.query;
+    
+    // Parse date range
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
+    const end = endDate ? new Date(endDate) : new Date();
+    
+    const db = require('../../database/mongodb').getDb();
+    const prefix = process.env.MONGODB_COLLECTIONS_PREFIX || 'echotune_';
+    const historyCollection = db.collection(`${prefix}listening_history`);
+    
+    // Build aggregation pipeline for top genres
+    const pipeline = [
+      {
+        $match: {
+          played_at: { $gte: start, $lte: end },
+          ...(userId && { user_id: userId }),
+          genres: { $exists: true, $ne: [] }
+        }
+      },
+      {
+        $unwind: '$genres'
+      },
+      {
+        $group: {
+          _id: '$genres',
+          totalPlays: { $sum: 1 },
+          uniqueTracks: { $addToSet: '$track_id' },
+          uniqueArtists: { $addToSet: '$artist_name' },
+          totalDuration: { $sum: '$duration_ms' },
+          uniqueUsers: { $addToSet: '$user_id' }
+        }
+      },
+      {
+        $project: {
+          genre: '$_id',
+          totalPlays: 1,
+          uniqueTracks: { $size: '$uniqueTracks' },
+          uniqueArtists: { $size: '$uniqueArtists' },
+          totalDuration: 1,
+          uniqueUsers: { $size: '$uniqueUsers' },
+          avgTrackDuration: { $divide: ['$totalDuration', '$totalPlays'] },
+          diversityScore: {
+            $divide: [
+              { $add: [{ $size: '$uniqueTracks' }, { $size: '$uniqueArtists' }] },
+              2
+            ]
+          }
+        }
+      },
+      {
+        $sort: { totalPlays: -1 }
+      },
+      {
+        $limit: parseInt(limit)
+      }
+    ];
+    
+    const results = await historyCollection.aggregate(pipeline).toArray();
+    
+    // Calculate summary statistics
+    const summary = {
+      totalGenres: results.length,
+      totalPlays: results.reduce((sum, r) => sum + r.totalPlays, 0),
+      avgPlaysPerGenre: results.length > 0 ? 
+        results.reduce((sum, r) => sum + r.totalPlays, 0) / results.length : 0,
+      topGenre: results[0] || null,
+      mostDiverseGenre: results.reduce((max, r) => 
+        r.diversityScore > max.diversityScore ? r : max, { diversityScore: 0 }
+      )
+    };
+    
+    res.json({
+      success: true,
+      data: results,
+      summary,
+      metadata: {
+        startDate: start,
+        endDate: end,
+        totalRecords: results.length,
+        timeRange: `${Math.round((end - start) / (1000 * 60 * 60 * 24))} days`
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting top genres insights:', error);
+    res.status(500).json({
+      error: 'Failed to get top genres insights',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Get listening time insights
+ * GET /api/insights/listening-time
+ */
+router.get('/listening-time', requireAuth, async (req, res) => {
+  try {
+    const { startDate, endDate, userId, groupBy = 'day' } = req.query;
+    
+    // Parse date range
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
+    const end = endDate ? new Date(endDate) : new Date();
+    
+    const db = require('../../database/mongodb').getDb();
+    const prefix = process.env.MONGODB_COLLECTIONS_PREFIX || 'echotune_';
+    const historyCollection = db.collection(`${prefix}listening_history`);
+    
+    // Build aggregation pipeline for listening time
+    const pipeline = [
+      {
+        $match: {
+          played_at: { $gte: start, $lte: end },
+          ...(userId && { user_id: userId })
+        }
+      },
+      {
+        $group: {
+          _id: {
+            date: groupBy === 'hour' ? 
+              { $dateToString: { format: '%Y-%m-%d %H:00', date: '$played_at' } } :
+              { $dateToString: { format: '%Y-%m-%d', date: '$played_at' } },
+            hour: groupBy === 'hour' ? { $hour: '$played_at' } : null,
+            dayOfWeek: groupBy === 'day' ? { $dayOfWeek: '$played_at' } : null
+          },
+          totalPlays: { $sum: 1 },
+          totalDuration: { $sum: '$duration_ms' },
+          uniqueTracks: { $addToSet: '$track_id' },
+          uniqueUsers: { $addToSet: '$user_id' }
+        }
+      },
+      {
+        $project: {
+          date: '$_id.date',
+          hour: '$_id.hour',
+          dayOfWeek: '$_id.dayOfWeek',
+          totalPlays: 1,
+          totalDuration: 1,
+          totalDurationHours: { $divide: ['$totalDuration', 1000 * 60 * 60] },
+          uniqueTracks: { $size: '$uniqueTracks' },
+          uniqueUsers: { $size: '$uniqueUsers' },
+          avgSessionLength: { $divide: ['$totalDuration', '$totalPlays'] }
+        }
+      },
+      {
+        $sort: { date: 1 }
+      }
+    ];
+    
+    const results = await historyCollection.aggregate(pipeline).toArray();
+    
+    // Calculate summary statistics
+    const summary = {
+      totalPlays: results.reduce((sum, r) => sum + r.totalPlays, 0),
+      totalDuration: results.reduce((sum, r) => sum + r.totalDuration, 0),
+      totalDurationHours: results.reduce((sum, r) => sum + r.totalDurationHours, 0),
+      avgSessionLength: results.length > 0 ? 
+        results.reduce((sum, r) => sum + r.avgSessionLength, 0) / results.length : 0,
+      peakListeningTime: results.reduce((max, r) => 
+        r.totalDuration > max.totalDuration ? r : max, { totalDuration: 0 }
+      ),
+      avgPlaysPerPeriod: results.length > 0 ? 
+        results.reduce((sum, r) => sum + r.totalPlays, 0) / results.length : 0
+    };
+    
+    res.json({
+      success: true,
+      data: results,
+      summary,
+      metadata: {
+        startDate: start,
+        endDate: end,
+        totalRecords: results.length,
+        groupBy,
+        timeRange: `${Math.round((end - start) / (1000 * 60 * 60 * 24))} days`
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting listening time insights:', error);
+    res.status(500).json({
+      error: 'Failed to get listening time insights',
       message: error.message,
     });
   }

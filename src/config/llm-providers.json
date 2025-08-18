@@ -1,4 +1,19 @@
 {
+  "global": {
+    "context": {
+      "enabled": true,
+      "maxContextSize": 10,
+      "includeConversationSummary": true,
+      "includeUserPreferences": true,
+      "includeRecentListening": true,
+      "includeHistoricalTopics": true
+    },
+    "telemetry": {
+      "enabled": true,
+      "persistToDatabase": true,
+      "ttlHours": 24
+    }
+  },
   "openai": {
     "enabled": false,
     "apiKey": "",

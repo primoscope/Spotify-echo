@@ -200,6 +200,48 @@ class LLMTelemetry {
   }
 
   /**
+   * Get metrics for all providers
+   */
+  getProviderMetrics() {
+    const allMetrics = {};
+    
+    for (const [providerId, providerInfo] of this.providers) {
+      if (providerInfo.lastSnapshot) {
+        allMetrics[providerId] = {
+          totalRequests: providerInfo.lastSnapshot.requests || 0,
+          successfulRequests: providerInfo.lastSnapshot.successes || 0,
+          failedRequests: providerInfo.lastSnapshot.failures || 0,
+          successRate: providerInfo.lastSnapshot.successRate || 0,
+          avgLatency: providerInfo.lastSnapshot.averageLatency || 0,
+          p50Latency: this.calculatePercentile(providerInfo.metrics, 'averageLatency', 50),
+          p95Latency: this.calculatePercentile(providerInfo.metrics, 'averageLatency', 95),
+          retryAttempts: providerInfo.lastSnapshot.retryAttempts || 0,
+          lastRequest: providerInfo.lastSnapshot.timestamp,
+        };
+      }
+    }
+    
+    return allMetrics;
+  }
+
+  /**
+   * Calculate percentile from metrics array
+   */
+  calculatePercentile(metrics, field, percentile) {
+    if (!metrics || metrics.length === 0) return 0;
+    
+    const values = metrics
+      .map(m => m[field])
+      .filter(v => typeof v === 'number' && !isNaN(v))
+      .sort((a, b) => a - b);
+    
+    if (values.length === 0) return 0;
+    
+    const index = Math.ceil((percentile / 100) * values.length) - 1;
+    return values[Math.max(0, index)];
+  }
+
+  /**
    * Get performance insights
    */
   getPerformanceInsights() {

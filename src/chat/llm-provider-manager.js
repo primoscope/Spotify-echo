@@ -959,6 +959,145 @@ class LLMProviderManager {
 
     return Math.max(0, Math.min(100, score));
   }
+
+  /**
+   * Get circuit breaker states for all providers
+   */
+  async getCircuitBreakerStates() {
+    const states = {};
+    
+    for (const [providerId, circuitBreaker] of this.circuitBreakers) {
+      states[providerId] = {
+        state: circuitBreaker.state,
+        failureCount: circuitBreaker.failureCount,
+        successCount: circuitBreaker.successCount,
+        lastFailureTime: circuitBreaker.lastFailureTime,
+        openUntil: circuitBreaker.openUntil,
+        consecutiveLatencyFailures: circuitBreaker.consecutiveLatencyFailures,
+        recentLatencies: circuitBreaker.recentLatencies.slice(-5), // Last 5 latencies
+        config: circuitBreaker.config,
+      };
+    }
+    
+    return states;
+  }
+
+  /**
+   * Get provider telemetry data
+   */
+  async getProviderTelemetry() {
+    try {
+      const telemetry = await llmTelemetry.getProviderMetrics();
+      return {
+        providers: telemetry,
+        timestamp: new Date().toISOString(),
+        summary: {
+          totalRequests: Object.values(telemetry).reduce((sum, p) => sum + (p.totalRequests || 0), 0),
+          successfulRequests: Object.values(telemetry).reduce((sum, p) => sum + (p.successfulRequests || 0), 0),
+          failedRequests: Object.values(telemetry).reduce((sum, p) => sum + (p.failedRequests || 0), 0),
+          avgLatency: Object.values(telemetry).reduce((sum, p) => sum + (p.avgLatency || 0), 0) / Math.max(Object.keys(telemetry).length, 1),
+        }
+      };
+    } catch (error) {
+      console.error('Error getting provider telemetry:', error);
+      return {
+        providers: {},
+        timestamp: new Date().toISOString(),
+        summary: {
+          totalRequests: 0,
+          successfulRequests: 0,
+          failedRequests: 0,
+          avgLatency: 0,
+        }
+      };
+    }
+  }
+
+  /**
+   * Emit telemetry hook for latency, errors, counts
+   */
+  emitTelemetryHook(providerId, metrics) {
+    try {
+      const { latency, success, errorCode, requestId } = metrics;
+      
+      // Update circuit breaker state
+      this.updateCircuitBreakerState(providerId, success, latency);
+      
+      // Emit telemetry event
+      if (llmTelemetry && llmTelemetry.recordRequest) {
+        llmTelemetry.recordRequest(providerId, {
+          latency,
+          success,
+          errorCode,
+          requestId,
+          timestamp: new Date(),
+        });
+      }
+      
+      // Log for debugging
+      console.log(`Telemetry: ${providerId} - ${success ? 'SUCCESS' : 'FAILURE'} - ${latency}ms${errorCode ? ` - ${errorCode}` : ''}`);
+      
+    } catch (error) {
+      console.error('Error emitting telemetry hook:', error);
+    }
+  }
+
+  /**
+   * Update circuit breaker state based on request result
+   */
+  updateCircuitBreakerState(providerId, success, latency) {
+    const circuitBreaker = this.circuitBreakers.get(providerId);
+    if (!circuitBreaker) return;
+    
+    if (success) {
+      circuitBreaker.successCount++;
+      circuitBreaker.failureCount = 0;
+      circuitBreaker.consecutiveLatencyFailures = 0;
+      
+      // Add latency to recent latencies
+      circuitBreaker.recentLatencies.push(latency);
+      if (circuitBreaker.recentLatencies.length > 10) {
+        circuitBreaker.recentLatencies.shift();
+      }
+      
+      // Check if we should close the circuit
+      if (circuitBreaker.state === 'HALF_OPEN' && circuitBreaker.successCount >= circuitBreaker.config.halfOpenMaxRequests) {
+        circuitBreaker.state = 'CLOSED';
+        circuitBreaker.successCount = 0;
+        console.log(`Circuit breaker for ${providerId} closed - service recovered`);
+      }
+    } else {
+      circuitBreaker.failureCount++;
+      circuitBreaker.lastFailureTime = new Date();
+      
+      // Check latency threshold
+      if (latency > circuitBreaker.config.latencyThreshold) {
+        circuitBreaker.consecutiveLatencyFailures++;
+      } else {
+        circuitBreaker.consecutiveLatencyFailures = 0;
+      }
+      
+      // Open circuit if thresholds exceeded
+      if (circuitBreaker.failureCount >= circuitBreaker.config.failureThreshold || 
+          circuitBreaker.consecutiveLatencyFailures >= circuitBreaker.config.consecutiveLatencyThreshold) {
+        circuitBreaker.state = 'OPEN';
+        circuitBreaker.openUntil = new Date(Date.now() + circuitBreaker.config.timeout);
+        console.log(`Circuit breaker for ${providerId} opened - too many failures`);
+      }
+    }
+  }
+
+  /**
+   * Propagate X-Request-Id through provider calls
+   */
+  propagateRequestId(requestId, options = {}) {
+    if (requestId) {
+      options.requestId = requestId;
+      options.headers = options.headers || {};
+      options.headers['X-Request-ID'] = requestId;
+    }
+    return options;
+  }
 }
 
 // Singleton instance

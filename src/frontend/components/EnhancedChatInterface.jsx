@@ -26,8 +26,10 @@ import {
   FitnessCenter,
   VolumeUp,
   Info,
+  Stop,
 } from '@mui/icons-material';
 import { useLLM } from '../contexts/LLMContext';
+import ExplainableRecommendations from './ExplainableRecommendations';
 
 /**
  * Enhanced Chat Interface with Context Chips and Explainable Responses
@@ -53,6 +55,7 @@ const EnhancedChatInterface = ({
     explanation: null,
   });
   const [explainInline, setExplainInline] = useState(false);
+  const [showExplainabilityPanel, setShowExplainabilityPanel] = useState(false);
   const [providerMenu, setProviderMenu] = useState(null);
   const [currentProviderLocal, setCurrentProviderLocal] = useState('mock');
   const [providersStatus, setProvidersStatus] = useState('unknown');
@@ -63,11 +66,15 @@ const EnhancedChatInterface = ({
     providers,
     switchProvider,
     loading: providerLoading,
+    providerHealth,
+    healthLoading,
   } = useLLM?.() || {
     currentProvider: 'mock',
     providers: {},
     switchProvider: async () => false,
     loading: false,
+    providerHealth: {},
+    healthLoading: false,
   };
 
   const messagesEndRef = useRef(null);
@@ -223,33 +230,188 @@ const EnhancedChatInterface = ({
     setMessages((prev) => [...prev, newMessage]);
     setInputMessage('');
 
+    // Create assistant message placeholder for streaming
+    const assistantMessageId = Date.now() + 1;
+    const assistantMessage = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      context: selectedContext,
+      recommendations: [],
+      explanation: null,
+      provider: currentProviderLocal,
+      timestamp: new Date(),
+      streaming: true,
+    };
+
+    setMessages((prev) => [...prev, assistantMessage]);
+
     try {
-      if (onSendMessage) {
-        const response = await onSendMessage(inputMessage, selectedContext);
+      // Use streaming endpoint
+      const streamUrl = `/api/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}&provider=${currentProviderLocal}`;
+      
+      const eventSource = new EventSource(streamUrl, {
+        headers: {
+          'X-Request-ID': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        },
+      });
 
-        const assistantMessage = {
-          id: Date.now() + 1,
-          role: 'assistant',
-          content: response.response,
-          context: selectedContext,
-          recommendations: response.recommendations,
-          explanation: response.explanation,
-          provider: response.provider,
-          timestamp: new Date(),
-        };
+      let fullContent = '';
+      let isComplete = false;
 
-        setMessages((prev) => [...prev, assistantMessage]);
-      }
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.delta) {
+            fullContent += data.delta;
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessageId
+                  ? { ...msg, content: fullContent, isPartial: data.isPartial }
+                  : msg
+              )
+            );
+          }
+        } catch (error) {
+          console.error('Error parsing stream data:', error);
+        }
+      };
+
+      eventSource.addEventListener('complete', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          isComplete = true;
+          
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { 
+                    ...msg, 
+                    content: fullContent, 
+                    streaming: false, 
+                    isPartial: false,
+                    totalTime: data.totalTime 
+                  }
+                : msg
+            )
+          );
+          
+          eventSource.close();
+        } catch (error) {
+          console.error('Error parsing complete event:', error);
+        }
+      });
+
+      eventSource.addEventListener('error', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.error('Stream error:', data.error);
+          
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { 
+                    ...msg, 
+                    content: fullContent || 'Sorry, I encountered an error. Please try again.',
+                    streaming: false, 
+                    error: true 
+                  }
+                : msg
+            )
+          );
+          
+          eventSource.close();
+        } catch (error) {
+          console.error('Error parsing error event:', error);
+        }
+      });
+
+      eventSource.addEventListener('retry', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Stream retry:', data.message);
+          // Could show retry notification to user
+        } catch (error) {
+          console.error('Error parsing retry event:', error);
+        }
+      });
+
+      // Handle connection errors
+      eventSource.onerror = (error) => {
+        console.error('EventSource error:', error);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { 
+                  ...msg, 
+                  content: fullContent || 'Connection error. Please try again.',
+                  streaming: false, 
+                  error: true 
+                }
+              : msg
+          )
+        );
+        eventSource.close();
+      };
+
+      // Fallback to non-streaming if EventSource fails
+      setTimeout(() => {
+        if (!isComplete && eventSource.readyState === EventSource.CONNECTING) {
+          console.log('EventSource failed, falling back to regular request');
+          eventSource.close();
+          
+          // Fallback to regular request
+          if (onSendMessage) {
+            onSendMessage(inputMessage, selectedContext).then((response) => {
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMessageId
+                    ? { 
+                        ...msg, 
+                        content: response.response || response.content,
+                        recommendations: response.recommendations || [],
+                        explanation: response.explanation,
+                        provider: response.provider,
+                        streaming: false,
+                        error: false
+                      }
+                    : msg
+                )
+              );
+            }).catch((error) => {
+              console.error('Fallback request failed:', error);
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMessageId
+                    ? { 
+                        ...msg, 
+                        content: 'Sorry, I encountered an error. Please try again.',
+                        streaming: false, 
+                        error: true 
+                      }
+                    : msg
+                )
+              );
+            });
+          }
+        }
+      }, 5000);
+
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorMessage = {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: 'Sorry, I encountered an error processing your message. Please try again.',
-        error: true,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? { 
+                ...msg, 
+                content: 'Sorry, I encountered an error processing your message. Please try again.',
+                streaming: false, 
+                error: true 
+              }
+            : msg
+        )
+      );
     }
   };
 
@@ -289,32 +451,94 @@ const EnhancedChatInterface = ({
     if (ok) setCurrentProviderLocal(providerId);
   };
 
-  const ProviderQuickSwitch = () => (
-    <Box display="flex" alignItems="center" gap={1} sx={{ mb: 1 }}>
-      <Chip
-        size="small"
-        color="primary"
-        label={`Provider: ${currentProviderLocal}`}
-        onClick={openProviderMenu}
-        avatar={<SmartToy fontSize="small" />}
-        variant="outlined"
-      />
-      {providerLoading && <CircularProgress size={16} />}
-      <Menu anchorEl={providerMenu} open={Boolean(providerMenu)} onClose={closeProviderMenu}>
-        {Object.entries(providers)
-          .filter(([, p]) => p.available)
-          .map(([id, p]) => (
-            <MenuItem
-              key={id}
-              selected={id === currentProviderLocal}
-              onClick={() => handleProviderSelect(id)}
-            >
-              {p.name} {id === currentProviderLocal ? '✓' : ''}
-            </MenuItem>
-          ))}
-      </Menu>
-    </Box>
-  );
+  const handleAbortStream = (messageId) => {
+    // Find the streaming message and stop it
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? { 
+              ...msg, 
+              streaming: false, 
+              content: msg.content + ' [Streaming stopped]',
+              error: true 
+            }
+          : msg
+      )
+    );
+    
+    // Could also implement actual stream abort via AbortController
+    console.log('Stream aborted for message:', messageId);
+  };
+
+  const ProviderQuickSwitch = () => {
+    const currentHealth = providerHealth.providers?.find(p => p.id === currentProviderLocal);
+    const healthColor = currentHealth?.health === 'healthy' ? 'success' : 
+                       currentHealth?.health === 'unhealthy' ? 'error' : 'default';
+    
+    return (
+      <Box display="flex" alignItems="center" gap={1} sx={{ mb: 1 }}>
+        <Chip
+          size="small"
+          color={healthColor}
+          label={`Provider: ${currentProviderLocal}`}
+          onClick={openProviderMenu}
+          avatar={<SmartToy fontSize="small" />}
+          variant="outlined"
+        />
+        {providerLoading && <CircularProgress size={16} />}
+        
+        {/* Health Status Chip */}
+        {currentHealth && (
+          <Chip
+            size="small"
+            color={healthColor}
+            label={currentHealth.health}
+            variant="filled"
+            sx={{ fontSize: '0.7rem' }}
+          />
+        )}
+        
+        {/* Latency Chip */}
+        {currentHealth?.telemetry?.avgLatency && (
+          <Chip
+            size="small"
+            color="info"
+            label={`${Math.round(currentHealth.telemetry.avgLatency)}ms`}
+            variant="outlined"
+            sx={{ fontSize: '0.7rem' }}
+          />
+        )}
+        
+        <Menu anchorEl={providerMenu} open={Boolean(providerMenu)} onClose={closeProviderMenu}>
+          {Object.entries(providers)
+            .filter(([, p]) => p.available)
+            .map(([id, p]) => {
+              const health = providerHealth.providers?.find(ph => ph.id === id);
+              return (
+                <MenuItem
+                  key={id}
+                  selected={id === currentProviderLocal}
+                  onClick={() => handleProviderSelect(id)}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap={1, width: '100%' }}>
+                    <span>{p.name}</span>
+                    {health && (
+                      <Chip
+                        size="small"
+                        color={health.health === 'healthy' ? 'success' : 'error'}
+                        label={health.health}
+                        variant="filled"
+                        sx={{ ml: 'auto', fontSize: '0.6rem' }}
+                      />
+                    )}
+                  </Box>
+                </MenuItem>
+              );
+            })}
+        </Menu>
+      </Box>
+    );
+  };
 
   const statusToColor = (status) => {
     switch ((status || '').toLowerCase()) {
@@ -441,11 +665,37 @@ const EnhancedChatInterface = ({
               borderRadius: 2,
               borderTopRightRadius: isUser ? 0 : 2,
               borderTopLeftRadius: isUser ? 2 : 0,
+              position: 'relative',
             }}
           >
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
               {message.content}
+              {message.streaming && (
+                <Box component="span" sx={{ display: 'inline-block', ml: 1 }}>
+                  <CircularProgress size={12} />
+                </Box>
+              )}
             </Typography>
+
+            {/* Streaming Controls */}
+            {message.streaming && (
+              <Box sx={{ 
+                position: 'absolute', 
+                top: 8, 
+                right: 8,
+                display: 'flex',
+                gap: 1
+              }}>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleAbortStream(message.id)}
+                  sx={{ p: 0.5 }}
+                >
+                  <Stop fontSize="small" />
+                </IconButton>
+              </Box>
+            )}
 
             {/* Context Display */}
             {message.context && Object.keys(message.context).length > 0 && (
@@ -573,6 +823,15 @@ const EnhancedChatInterface = ({
               onClick={() => setExplainInline((v) => !v)}
               variant={explainInline ? 'filled' : 'outlined'}
             />
+            
+            {/* Explainability Panel Toggle */}
+            <Chip
+              size="small"
+              label={showExplainabilityPanel ? 'Hide AI Details' : 'Show AI Details'}
+              color={showExplainabilityPanel ? 'info' : 'default'}
+              onClick={() => setShowExplainabilityPanel((v) => !v)}
+              variant={showExplainabilityPanel ? 'filled' : 'outlined'}
+            />
           </Box>
         </Box>
 
@@ -609,6 +868,28 @@ const EnhancedChatInterface = ({
           )}
         </Stack>
       </Paper>
+
+      {/* Explainability Panel */}
+      {showExplainabilityPanel && (
+        <ExplainableRecommendations
+          recommendations={messages
+            .filter(m => m.role === 'assistant' && m.recommendations?.length > 0)
+            .flatMap(m => m.recommendations)}
+          explanation={messages
+            .filter(m => m.role === 'assistant' && m.explanation)
+            .slice(-1)[0]?.explanation}
+          provider={currentProviderLocal}
+          model={providers[currentProviderLocal]?.model || 'Unknown'}
+          metadata={{
+            sessionId,
+            messageCount: messages.length,
+            contextSize: Object.keys(selectedContext).length,
+            provider: currentProviderLocal,
+          }}
+          showPanel={showExplainabilityPanel}
+          onTogglePanel={() => setShowExplainabilityPanel(false)}
+        />
+      )}
 
       <Divider />
 

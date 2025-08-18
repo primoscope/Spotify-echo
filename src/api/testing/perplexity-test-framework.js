@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 /**
  * Comprehensive Perplexity API Testing Framework
  * Full TypeScript implementation with rate limiting, caching, and performance monitoring
  */
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.Grok4Integration = exports.PerplexityTestClient = void 0;
-const events_1 = require("events");
-const NodeCache = require("node-cache");
-const promises_1 = require("timers/promises");
+const events_1 = require('events');
+const NodeCache = require('node-cache');
+const promises_1 = require('timers/promises');
 // Rate limiter implementation
 class RateLimiter {
     constructor(requestsPerMinute, burstLimit) {
@@ -347,13 +347,13 @@ class Grok4Integration extends PerplexityTestClient {
             prompt += `Context: ${context}\n\n`;
         }
         prompt += `Question: ${query}\n\n`;
-        prompt += `Please provide a comprehensive answer that:\n`;
-        prompt += `1. Analyzes the question from multiple angles\n`;
-        prompt += `2. Provides step-by-step reasoning\n`;
-        prompt += `3. Includes relevant examples and evidence\n`;
-        prompt += `4. Considers potential counterarguments\n`;
-        prompt += `5. Maintains your characteristic wit and insight\n\n`;
-        prompt += `Answer:`;
+        prompt += 'Please provide a comprehensive answer that:\n';
+        prompt += '1. Analyzes the question from multiple angles\n';
+        prompt += '2. Provides step-by-step reasoning\n';
+        prompt += '3. Includes relevant examples and evidence\n';
+        prompt += '4. Considers potential counterarguments\n';
+        prompt += '5. Maintains your characteristic wit and insight\n\n';
+        prompt += 'Answer:';
         return prompt;
     }
     // Advanced code analysis with Grok-4 style reasoning

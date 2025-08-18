@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import {
+  Card,
+  CardContent,
   List,
   ListItem,
   ListItemText,
@@ -12,30 +14,45 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Typography,
+  Button,
+  Chip,
+  Box,
   Rating,
+  Collapse,
 } from '@mui/material';
 import {
   ThumbUp,
   ThumbDown,
   Info,
   ExpandMore,
+  ExpandLess,
   Psychology,
   TrendingUp,
   MusicNote,
   Group,
   SmartToy,
   Schedule,
+  ContentCopy,
+  Visibility,
+  VisibilityOff,
 } from '@mui/icons-material';
 
 /**
- * ExplainableRecommendations Component
+ * Enhanced ExplainableRecommendations Component
  * Shows AI-powered music recommendations with human-readable explanations
+ * and integrated streaming chat reasoning
  */
 const ExplainableRecommendations = ({
   recommendations = [],
   onGetExplanation,
   onProvideFeedback,
   loading = false,
+  // New props for streaming integration
+  explainabilityData = null,
+  visible = false,
+  onToggleVisibility,
+  onCopyToClipboard,
 }) => {
   const [explanationDialog, setExplanationDialog] = useState({
     open: false,
@@ -44,6 +61,11 @@ const ExplainableRecommendations = ({
   });
   const [feedbackStates, setFeedbackStates] = useState({});
   const [loadingExplanation, setLoadingExplanation] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    reasoning: true,
+    features: false,
+    confidence: false
+  });
 
   const handleGetExplanation = useCallback(
     async (track) => {
@@ -154,11 +176,136 @@ const ExplainableRecommendations = ({
       <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <SmartToy color="primary" />
         Explainable Recommendations
+        {explainabilityData && (
+          <Tooltip title={visible ? 'Hide explainability panel' : 'Show explainability panel'}>
+            <IconButton onClick={onToggleVisibility} size="small">
+              {visible ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </Tooltip>
+        )}
       </Typography>
 
       <Typography variant="body2" color="text.secondary" paragraph>
         AI-curated music with transparent reasoning behind each recommendation
       </Typography>
+
+      {/* Streaming Chat Explainability Panel */}
+      {explainabilityData && (
+        <Collapse in={visible}>
+          <Card sx={{ mb: 3, border: 2, borderColor: 'primary.main' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Psychology color="primary" />
+                  AI Reasoning
+                </Typography>
+                <Button
+                  size="small"
+                  startIcon={<ContentCopy />}
+                  onClick={() => onCopyToClipboard && onCopyToClipboard(JSON.stringify(explainabilityData, null, 2))}
+                >
+                  Copy Debug Info
+                </Button>
+              </Box>
+
+              <Accordion 
+                expanded={expandedSections.reasoning}
+                onChange={() => setExpandedSections(prev => ({ ...prev, reasoning: !prev.reasoning }))}
+              >
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Typography variant="subtitle1">Model & Reasoning</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Stack spacing={2}>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Model:</strong> {explainabilityData.model}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Prompt Summary:</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1 }}>
+                        {explainabilityData.prompt}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Reasoning Process:</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {explainabilityData.reasoning}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </AccordionDetails>
+              </Accordion>
+
+              <Accordion 
+                expanded={expandedSections.confidence}
+                onChange={() => setExpandedSections(prev => ({ ...prev, confidence: !prev.confidence }))}
+              >
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Typography variant="subtitle1">
+                    Confidence Score: {(explainabilityData.confidence * 100).toFixed(1)}%
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                    <Rating
+                      value={explainabilityData.confidence * 5}
+                      readOnly
+                      precision={0.1}
+                      max={5}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      ({(explainabilityData.confidence * 100).toFixed(1)}% confident)
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    This score indicates how confident the AI model is in its response based on available data and context.
+                  </Typography>
+                </AccordionDetails>
+              </Accordion>
+
+              <Accordion 
+                expanded={expandedSections.features}
+                onChange={() => setExpandedSections(prev => ({ ...prev, features: !prev.features }))}
+              >
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Typography variant="subtitle1">Key Features Used</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Stack direction="row" spacing={1} flexWrap="wrap">
+                    {explainabilityData.features?.map((feature) => (
+                      <Chip 
+                        key={feature} 
+                        label={feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} 
+                        size="small" 
+                        variant="outlined"
+                        color="primary"
+                      />
+                    ))}
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                    These data points were most influential in generating the response.
+                  </Typography>
+                </AccordionDetails>
+              </Accordion>
+
+              {explainabilityData.metadata && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    <strong>Request ID:</strong> {explainabilityData.metadata.requestId} • 
+                    <strong> Response Time:</strong> {explainabilityData.metadata.totalTime}ms
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Collapse>
+      )}
 
       <List sx={{ p: 0 }}>
         {recommendations.map((track, _index) => {

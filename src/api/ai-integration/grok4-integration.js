@@ -379,7 +379,7 @@ class AdvancedAIClient {
     const messages = [
       {
         role: 'system',
-        content: `You are an expert software architect and code reviewer. Analyze the provided code and use your tools to research current best practices, security considerations, and performance optimizations. Provide specific, actionable recommendations with citations.`
+        content: 'You are an expert software architect and code reviewer. Analyze the provided code and use your tools to research current best practices, security considerations, and performance optimizations. Provide specific, actionable recommendations with citations.'
       },
       {
         role: 'user',
@@ -415,7 +415,7 @@ Please:
     const messages = [
       {
         role: 'system',
-        content: `You are a senior software architect. Design comprehensive system architecture based on requirements. Use web research to find current architectural patterns, technologies, and best practices for 2025.`
+        content: 'You are a senior software architect. Design comprehensive system architecture based on requirements. Use web research to find current architectural patterns, technologies, and best practices for 2025.'
       },
       {
         role: 'user',
@@ -450,7 +450,7 @@ Use your research tools to find current best practices and provide citations.`
     const messages = [
       {
         role: 'system',
-        content: `You are an expert debugger. Help identify and resolve the error using systematic debugging approaches. Research current solutions and common fixes for this type of error.`
+        content: 'You are an expert debugger. Help identify and resolve the error using systematic debugging approaches. Research current solutions and common fixes for this type of error.'
       },
       {
         role: 'user',
@@ -483,7 +483,7 @@ Please:
     const messages = [
       {
         role: 'system',
-        content: `You are a performance optimization expert. Analyze code and metrics to provide specific performance improvements. Research current optimization techniques and benchmarking standards.`
+        content: 'You are a performance optimization expert. Analyze code and metrics to provide specific performance improvements. Research current optimization techniques and benchmarking standards.'
       },
       {
         role: 'user',
@@ -520,7 +520,7 @@ Please:
     const messages = [
       {
         role: 'system',
-        content: `You are a cybersecurity expert specializing in application security. Analyze code for vulnerabilities and research current security threats and best practices.`
+        content: 'You are a cybersecurity expert specializing in application security. Analyze code for vulnerabilities and research current security threats and best practices.'
       },
       {
         role: 'user',
@@ -598,7 +598,7 @@ Please:
     const synthesisMessages = [
       {
         role: 'system',
-        content: `You are a senior technical lead. Synthesize the expert analyses below into a comprehensive recommendation.`
+        content: 'You are a senior technical lead. Synthesize the expert analyses below into a comprehensive recommendation.'
       },
       {
         role: 'user',

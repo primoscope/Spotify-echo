@@ -386,6 +386,112 @@ class LLMTelemetry {
     // Clear history
     this.metricsHistory = [];
   }
+
+  /**
+   * Record a request with telemetry data
+   */
+  recordRequest(providerId, data) {
+    const { latency, success, requestId, timestamp } = data;
+    
+    // Store in memory for immediate access
+    const providerInfo = this.providers.get(providerId);
+    if (providerInfo) {
+      providerInfo.metrics.push({
+        timestamp: new Date(timestamp).toISOString(),
+        latency,
+        success,
+        requestId
+      });
+
+      // Keep only last 1000 requests per provider
+      if (providerInfo.metrics.length > 1000) {
+        providerInfo.metrics.shift();
+      }
+    }
+
+    // If we have database connection, persist to MongoDB
+    this.persistTelemetryRecord(providerId, {
+      provider: providerId,
+      model: null, // TODO: get from request context
+      latencyMs: latency,
+      success,
+      errorCode: success ? null : 'unknown',
+      ts: new Date(timestamp),
+      requestId
+    });
+  }
+
+  /**
+   * Record circuit breaker events
+   */
+  recordCircuitBreakerEvent(providerId, state, metadata = {}) {
+    console.log(`📊 Circuit breaker ${state} for ${providerId}`, metadata);
+    
+    // Store event data
+    const event = {
+      providerId,
+      state,
+      timestamp: new Date().toISOString(),
+      ...metadata
+    };
+
+    // Add to provider info if exists
+    const providerInfo = this.providers.get(providerId);
+    if (providerInfo) {
+      if (!providerInfo.circuitBreakerEvents) {
+        providerInfo.circuitBreakerEvents = [];
+      }
+      providerInfo.circuitBreakerEvents.push(event);
+
+      // Keep only last 100 events
+      if (providerInfo.circuitBreakerEvents.length > 100) {
+        providerInfo.circuitBreakerEvents.shift();
+      }
+    }
+  }
+
+  /**
+   * Get provider metrics with calculated statistics
+   */
+  async getProviderMetrics(providerId) {
+    const providerInfo = this.providers.get(providerId);
+    if (!providerInfo || !providerInfo.metrics.length) {
+      return {
+        avgLatency: 0,
+        p50Latency: 0,
+        p95Latency: 0,
+        successRate: 0,
+        requestCount: 0
+      };
+    }
+
+    const metrics = providerInfo.metrics.slice(-100); // Last 100 requests
+    const latencies = metrics.map(m => m.latency).sort((a, b) => a - b);
+    const successes = metrics.filter(m => m.success).length;
+
+    return {
+      avgLatency: latencies.reduce((sum, l) => sum + l, 0) / latencies.length,
+      p50Latency: latencies[Math.floor(latencies.length * 0.5)] || 0,
+      p95Latency: latencies[Math.floor(latencies.length * 0.95)] || 0,
+      successRate: (successes / metrics.length) * 100,
+      requestCount: metrics.length
+    };
+  }
+
+  /**
+   * Persist telemetry record to database
+   */
+  async persistTelemetryRecord(providerId, record) {
+    try {
+      // This will be implemented when we have database connection
+      // For now, just log for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`📊 Telemetry: ${providerId} - ${record.latencyMs}ms (${record.success ? 'success' : 'failure'})`);
+      }
+    } catch (error) {
+      console.error('Failed to persist telemetry:', error);
+    }
+  }
 }
 
 // Singleton instance

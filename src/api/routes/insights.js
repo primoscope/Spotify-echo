@@ -445,6 +445,139 @@ class SpotifyInsightsService {
       message: 'Using fallback data - MongoDB not connected',
     };
   }
+
+  /**
+   * Get engagement insights (KPIs, top artists/genres)
+   */
+  async getEngagementInsights(options = {}) {
+    const { timeRange = '7d', userId } = options;
+    const cacheKey = `engagement_${timeRange}_${userId || 'all'}`;
+    
+    try {
+      if (!this.dbManager.isConnected()) {
+        return this.getFallbackEngagementInsights();
+      }
+
+      const db = this.dbManager.getDatabase();
+      const timeFilter = this.getTimeFilter(timeRange);
+      let matchQuery = { played_at: { $gte: timeFilter } };
+      
+      if (userId) {
+        matchQuery.user_id = userId;
+      }
+
+      // Get engagement KPIs
+      const engagementStats = await db.collection('listening_history').aggregate([
+        { $match: matchQuery },
+        {
+          $group: {
+            _id: null,
+            totalPlays: { $sum: 1 },
+            uniqueUsers: { $addToSet: '$user_id' },
+            uniqueTracks: { $addToSet: '$track_id' },
+            uniqueArtists: { $addToSet: '$artist_name' },
+            totalDuration: { $sum: '$duration_ms' },
+            avgDuration: { $avg: '$duration_ms' },
+            skipCount: { $sum: '$skip_count' },
+            repeatCount: { $sum: '$repeat_count' }
+          }
+        }
+      ]).toArray();
+
+      // Get top artists
+      const topArtists = await db.collection('listening_history').aggregate([
+        { $match: matchQuery },
+        {
+          $group: {
+            _id: '$artist_name',
+            playCount: { $sum: 1 },
+            uniqueTracks: { $addToSet: '$track_id' },
+            totalDuration: { $sum: '$duration_ms' }
+          }
+        },
+        { $sort: { playCount: -1 } },
+        { $limit: 10 }
+      ]).toArray();
+
+      // Get top genres (if available)
+      const topGenres = await db.collection('listening_history').aggregate([
+        { $match: { ...matchQuery, genre: { $exists: true, $ne: null } } },
+        {
+          $group: {
+            _id: '$genre',
+            playCount: { $sum: 1 },
+            uniqueTracks: { $addToSet: '$track_id' }
+          }
+        },
+        { $sort: { playCount: -1 } },
+        { $limit: 10 }
+      ]).toArray();
+
+      const stats = engagementStats[0] || {};
+      const totalPlays = stats.totalPlays || 0;
+
+      return {
+        success: true,
+        timeRange,
+        kpis: {
+          totalPlays,
+          uniqueUsers: stats.uniqueUsers?.length || 0,
+          uniqueTracks: stats.uniqueTracks?.length || 0,
+          uniqueArtists: stats.uniqueArtists?.length || 0,
+          avgSessionDuration: Math.round((stats.avgDuration || 0) / 1000 / 60), // minutes
+          totalListeningTime: Math.round((stats.totalDuration || 0) / 1000 / 60 / 60), // hours
+          skipRate: totalPlays > 0 ? ((stats.skipCount || 0) / totalPlays * 100).toFixed(2) : 0,
+          repeatRate: totalPlays > 0 ? ((stats.repeatCount || 0) / totalPlays * 100).toFixed(2) : 0
+        },
+        topArtists: topArtists.map(artist => ({
+          name: artist._id,
+          playCount: artist.playCount,
+          uniqueTracks: artist.uniqueTracks.length,
+          totalHours: Math.round(artist.totalDuration / 1000 / 60 / 60)
+        })),
+        topGenres: topGenres.map(genre => ({
+          name: genre._id,
+          playCount: genre.playCount,
+          uniqueTracks: genre.uniqueTracks.length,
+          percentage: totalPlays > 0 ? ((genre.playCount / totalPlays) * 100).toFixed(1) : 0
+        })),
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      console.error('Error getting engagement insights:', error);
+      return this.getFallbackEngagementInsights();
+    }
+  }
+
+  getFallbackEngagementInsights() {
+    return {
+      success: true,
+      fallback: true,
+      message: 'Using fallback data - MongoDB not connected',
+      kpis: {
+        totalPlays: 15420,
+        uniqueUsers: 342,
+        uniqueTracks: 5678,
+        uniqueArtists: 1234,
+        avgSessionDuration: 45, // minutes
+        totalListeningTime: 2345, // hours
+        skipRate: 12.5,
+        repeatRate: 8.7
+      },
+      topArtists: [
+        { name: 'Taylor Swift', playCount: 156, uniqueTracks: 23, totalHours: 12 },
+        { name: 'The Beatles', playCount: 134, uniqueTracks: 45, totalHours: 18 },
+        { name: 'Drake', playCount: 98, uniqueTracks: 19, totalHours: 8 }
+      ],
+      topGenres: [
+        { name: 'pop', playCount: 3456, uniqueTracks: 1234, percentage: 22.4 },
+        { name: 'rock', playCount: 2789, uniqueTracks: 987, percentage: 18.1 },
+        { name: 'hip-hop', playCount: 2345, uniqueTracks: 678, percentage: 15.2 }
+      ],
+      timestamp: new Date().toISOString()
+    };
+  }
 }
 
 const insightsService = new SpotifyInsightsService();
@@ -584,6 +717,36 @@ router.get('/cache/stats', requireAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get cache stats',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Engagement insights endpoint
+ * GET /api/insights/engagement
+ */
+router.get('/engagement', requireAuth, insightsRateLimit, async (req, res) => {
+  try {
+    const { timeRange = '7d', userId } = req.query;
+    const cacheKey = `engagement_insights_${timeRange}_${userId || 'all'}`;
+    const cached = insightsCache.get(cacheKey);
+    
+    if (cached) {
+      return res.json({ ...cached, cached: true });
+    }
+
+    const insights = await insightsService.getEngagementInsights({ timeRange, userId });
+    
+    // Cache for 5 minutes
+    insightsCache.set(cacheKey, insights);
+    
+    res.json(insights);
+  } catch (error) {
+    console.error('Error getting engagement insights:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get engagement insights',
       message: error.message,
     });
   }

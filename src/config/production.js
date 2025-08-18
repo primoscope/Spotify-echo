@@ -48,16 +48,16 @@ const productionConfig = {
     helmet: {
       contentSecurityPolicy: {
         directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-          scriptSrc: ["'self'", "'unsafe-inline'", 'https://apis.google.com'],
-          connectSrc: ["'self'", 'https://api.spotify.com', 'wss://api.spotify.com'],
-          imgSrc: ["'self'", 'data:', 'https:', 'http:'],
-          objectSrc: ["'none'"],
-          baseUri: ["'self'"],
-          formAction: ["'self'"],
-          frameAncestors: ["'none'"],
+          defaultSrc: ['\'self\''],
+          styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
+          fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
+          scriptSrc: ['\'self\'', '\'unsafe-inline\'', 'https://apis.google.com'],
+          connectSrc: ['\'self\'', 'https://api.spotify.com', 'wss://api.spotify.com'],
+          imgSrc: ['\'self\'', 'data:', 'https:', 'http:'],
+          objectSrc: ['\'none\''],
+          baseUri: ['\'self\''],
+          formAction: ['\'self\''],
+          frameAncestors: ['\'none\''],
         },
       },
       hsts: {

@@ -1,8 +1,6 @@
-import OptimizedMusicComponent from './components/OptimizedMusicComponent.jsx';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AppBar, Toolbar, Container, Tabs, Tab } from '@mui/material';
 import React, { useState, Suspense, lazy } from 'react';
-import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
+import ThemeProvider from './components/ThemeProvider';
 // Convert heavy components to lazy-loaded chunks for better initial bundle size
 const PlaylistBuilder = lazy(() => import('./components/PlaylistBuilder'));
 const PlaylistsPage = lazy(() => import('./components/PlaylistsPage'));

@@ -233,7 +233,7 @@ class SonarProClient {
    * Get system prompt based on mode and focus
    */
   getSystemPrompt(mode, focus) {
-    const basePrompt = `You are an expert software development assistant. Provide accurate, up-to-date information with proper citations.`;
+    const basePrompt = 'You are an expert software development assistant. Provide accurate, up-to-date information with proper citations.';
     
     const modePrompts = {
       json: `${basePrompt} Format your response as structured JSON with clear sections for recommendations, code examples, and citations.`,

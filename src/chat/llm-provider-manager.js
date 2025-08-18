@@ -626,9 +626,17 @@ class LLMProviderManager {
   /**
    * Record request latency and check for circuit breaker conditions
    */
-  recordRequestLatency(providerId, latency, success) {
+  recordRequestLatency(providerId, latency, success, requestId = null) {
     const breaker = this.circuitBreakers.get(providerId);
     if (!breaker) return;
+
+    // Emit telemetry event
+    llmTelemetry.recordRequest(providerId, {
+      latency,
+      success,
+      requestId,
+      timestamp: Date.now()
+    });
 
     // Update recent latencies (keep last 10)
     breaker.recentLatencies.push(latency);
@@ -638,11 +646,15 @@ class LLMProviderManager {
 
     if (success) {
       breaker.successCount++;
-      breaker.failureCount = 0; // Reset failure count on success
+      breaker.failureCount = Math.max(0, breaker.failureCount - 1); // Gradually recover
 
       // Check latency threshold
       if (latency > breaker.config.latencyThreshold) {
         breaker.consecutiveLatencyFailures++;
+        console.warn(
+          `⚠️ Provider ${providerId} slow response (${latency}ms > ${breaker.config.latencyThreshold}ms)`
+        );
+
         if (breaker.consecutiveLatencyFailures >= breaker.config.consecutiveLatencyThreshold) {
           console.warn(
             `⚠️ Provider ${providerId} consistently slow (${latency}ms > ${breaker.config.latencyThreshold}ms)`
@@ -678,6 +690,23 @@ class LLMProviderManager {
     console.warn(
       `🚨 Circuit breaker OPEN for ${providerId}, retry in ${Math.round(backoffMs / 60000)}min`
     );
+
+    // Emit circuit breaker event
+    llmTelemetry.recordCircuitBreakerEvent(providerId, 'OPEN', {
+      failureCount: breaker.failureCount,
+      backoffMs
+    });
+
+    // Auto-transition to half-open after timeout
+    setTimeout(() => {
+      if (breaker.state === 'OPEN' && Date.now() >= breaker.openUntil) {
+        breaker.state = 'HALF_OPEN';
+        breaker.successCount = 0;
+        console.log(`🟡 Circuit breaker HALF_OPEN for ${providerId}`);
+        
+        llmTelemetry.recordCircuitBreakerEvent(providerId, 'HALF_OPEN');
+      }
+    }, backoffMs);
   }
 
   /**
@@ -959,6 +988,41 @@ class LLMProviderManager {
 
     return Math.max(0, Math.min(100, score));
   }
+
+  /**
+   * Get telemetry data for a provider
+   */
+  async getTelemetryData(providerId) {
+    return await llmTelemetry.getProviderMetrics(providerId);
+  }
+
+  /**
+   * Switch to a specific provider
+   */
+  async switchProvider(providerId, model = null) {
+    if (!this.providers.has(providerId)) {
+      throw new Error(`Provider ${providerId} not available`);
+    }
+
+    const breaker = this.circuitBreakers.get(providerId);
+    if (breaker && breaker.state === 'OPEN') {
+      throw new Error(`Provider ${providerId} circuit breaker is open`);
+    }
+
+    this.currentProvider = providerId;
+    const provider = this.providers.get(providerId);
+    
+    if (model && provider.setModel) {
+      provider.setModel(model);
+    }
+
+    console.log(`🔄 Switched to provider: ${providerId}${model ? ` (model: ${model})` : ''}`);
+    
+    return {
+      provider: providerId,
+      model: model || provider.model || provider.defaultModel
+    };
+  }
 }
 
 // Singleton instance
@@ -969,7 +1033,7 @@ function LLMProviderManagerExport(...args) {
   return new LLMProviderManager(...args);
 }
 // Delegate commonly used members to the singleton for app runtime
-['getProviderStatus', 'testProvider', 'initialize', 'initializeCircuitBreakers', 'sendMessage', 'getBestProvider'].forEach((method) => {
+['getProviderStatus', 'testProvider', 'initialize', 'initializeCircuitBreakers', 'sendMessage', 'getBestProvider', 'getTelemetryData', 'switchProvider', 'recordRequestLatency'].forEach((method) => {
   LLMProviderManagerExport[method] = (...args) => llmProviderManager[method](...args);
 });
 Object.defineProperty(LLMProviderManagerExport, 'currentProvider', {

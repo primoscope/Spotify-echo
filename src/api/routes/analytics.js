@@ -867,4 +867,176 @@ function generateCSV(data) {
   return [headers, ...rows].map((row) => row.join(',')).join('\n');
 }
 
+/**
+ * Provider analytics endpoint
+ * GET /api/analytics/providers
+ */
+router.get('/providers', async (req, res) => {
+  try {
+    const { timeRange = '24h' } = req.query;
+    
+    // Get provider telemetry data from MongoDB
+    if (!analytics.dbManager.isConnected()) {
+      return res.json({
+        fallback: true,
+        message: 'Provider analytics require MongoDB connection',
+        mockData: {
+          providers: {
+            gemini: { avgLatency: 450, successRate: 98.5, requestCount: 1250 },
+            openai: { avgLatency: 650, successRate: 97.2, requestCount: 890 },
+            openrouter: { avgLatency: 780, successRate: 95.8, requestCount: 456 },
+            mock: { avgLatency: 50, successRate: 100, requestCount: 2340 }
+          },
+          aggregated: {
+            totalRequests: 4936,
+            avgLatency: 482,
+            overallSuccessRate: 97.9
+          }
+        }
+      });
+    }
+
+    const db = analytics.dbManager.getDatabase();
+    const telemetryCollection = db.collection('provider_telemetry');
+    
+    // Calculate time range
+    const now = new Date();
+    const timeRanges = {
+      '1h': new Date(now.getTime() - 60 * 60 * 1000),
+      '24h': new Date(now.getTime() - 24 * 60 * 60 * 1000),
+      '7d': new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+      '30d': new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    };
+    
+    const startTime = timeRanges[timeRange] || timeRanges['24h'];
+    
+    // Aggregate provider metrics
+    const providerMetrics = await telemetryCollection.aggregate([
+      { $match: { ts: { $gte: startTime } } },
+      {
+        $group: {
+          _id: '$provider',
+          avgLatency: { $avg: '$latencyMs' },
+          p50Latency: { $percentile: { input: '$latencyMs', p: [0.5], method: 'approximate' } },
+          p95Latency: { $percentile: { input: '$latencyMs', p: [0.95], method: 'approximate' } },
+          successRate: { $avg: { $cond: ['$success', 100, 0] } },
+          requestCount: { $sum: 1 },
+          errorCount: { $sum: { $cond: ['$success', 0, 1] } }
+        }
+      }
+    ]).toArray();
+
+    // Format response
+    const providers = {};
+    let totalRequests = 0;
+    let totalLatency = 0;
+    let totalSuccesses = 0;
+
+    for (const metric of providerMetrics) {
+      providers[metric._id] = {
+        avgLatency: Math.round(metric.avgLatency || 0),
+        p50Latency: Math.round(metric.p50Latency?.[0] || 0),
+        p95Latency: Math.round(metric.p95Latency?.[0] || 0),
+        successRate: parseFloat((metric.successRate || 0).toFixed(2)),
+        requestCount: metric.requestCount,
+        errorCount: metric.errorCount
+      };
+      
+      totalRequests += metric.requestCount;
+      totalLatency += (metric.avgLatency || 0) * metric.requestCount;
+      totalSuccesses += metric.requestCount - metric.errorCount;
+    }
+
+    res.json({
+      success: true,
+      timeRange,
+      providers,
+      aggregated: {
+        totalRequests,
+        avgLatency: totalRequests > 0 ? Math.round(totalLatency / totalRequests) : 0,
+        overallSuccessRate: totalRequests > 0 ? parseFloat(((totalSuccesses / totalRequests) * 100).toFixed(2)) : 0
+      },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Provider analytics error:', error);
+    res.status(500).json({
+      error: 'Failed to get provider analytics',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Listening patterns analytics endpoint
+ * GET /api/analytics/listening-patterns
+ */
+router.get('/listening-patterns', async (req, res) => {
+  try {
+    const { timeRange = '7d', granularity = 'hour' } = req.query;
+    
+    if (!analytics.dbManager.isConnected()) {
+      return res.json({
+        fallback: true,
+        message: 'Listening patterns analytics require MongoDB connection',
+        mockData: {
+          hourlyDistribution: Array.from({ length: 24 }, (_, i) => ({
+            hour: i,
+            playCount: Math.floor(Math.random() * 100) + 20
+          })),
+          topGenres: [
+            { genre: 'pop', playCount: 1234, percentage: 28.5 },
+            { genre: 'rock', playCount: 987, percentage: 22.8 },
+            { genre: 'hip-hop', playCount: 756, percentage: 17.4 }
+          ]
+        }
+      });
+    }
+
+    const db = analytics.dbManager.getDatabase();
+    const listeningCollection = db.collection('listening_history');
+    
+    // Time series aggregation based on granularity
+    const groupByFormat = {
+      hour: { $dateToString: { format: '%Y-%m-%d %H:00', date: '$played_at' } },
+      day: { $dateToString: { format: '%Y-%m-%d', date: '$played_at' } },
+      week: { $dateToString: { format: '%Y-W%V', date: '$played_at' } }
+    };
+
+    const timeSeriesData = await listeningCollection.aggregate([
+      { $match: { played_at: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } },
+      {
+        $group: {
+          _id: groupByFormat[granularity] || groupByFormat.hour,
+          playCount: { $sum: 1 },
+          uniqueTracks: { $addToSet: '$track_id' },
+          avgDuration: { $avg: '$duration_ms' }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]).toArray();
+
+    res.json({
+      success: true,
+      timeRange,
+      granularity,
+      timeSeries: timeSeriesData.map(item => ({
+        period: item._id,
+        playCount: item.playCount,
+        uniqueTracks: item.uniqueTracks.length,
+        avgDuration: Math.round(item.avgDuration || 0)
+      })),
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Listening patterns analytics error:', error);
+    res.status(500).json({
+      error: 'Failed to get listening patterns analytics',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

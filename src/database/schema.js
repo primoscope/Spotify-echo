@@ -173,6 +173,45 @@ const PlaylistsSchema = {
 };
 
 /**
+ * Provider Telemetry Schema
+ */
+const ProviderTelemetrySchema = {
+  provider: { type: 'string', required: true },
+  model: { type: 'string' },
+  latencyMs: { type: 'number', required: true, min: 0 },
+  success: { type: 'boolean', required: true },
+  errorCode: { type: 'string' },
+  requestId: { type: 'string' },
+  ts: { type: 'date', required: true },
+  metadata: { type: 'object' },
+};
+
+/**
+ * Conversations Schema (for context-aware conversations)
+ */
+const ConversationsSchema = {
+  sessionId: { type: 'string', required: true },
+  userId: { type: 'objectId', required: true },
+  summary: { type: 'string' },
+  context: { type: 'object' },
+  messageCount: { type: 'number', default: 0 },
+  lastActivity: { type: 'date', default: () => new Date() },
+  created_at: { type: 'date', default: () => new Date() },
+  updated_at: { type: 'date', default: () => new Date() },
+};
+
+/**
+ * Insights Schema
+ */
+const InsightsSchema = {
+  type: { type: 'string', required: true }, // engagement, listening_patterns, providers
+  data: { type: 'object', required: true },
+  aggregationPeriod: { type: 'string', required: true }, // daily, weekly, monthly
+  timestamp: { type: 'date', required: true },
+  created_at: { type: 'date', default: () => new Date() },
+};
+
+/**
  * Schema validation helper functions
  */
 class SchemaValidator {
@@ -202,6 +241,18 @@ class SchemaValidator {
 
   static validatePlaylist(data) {
     return this.validate(data, PlaylistsSchema);
+  }
+
+  static validateProviderTelemetry(data) {
+    return this.validate(data, ProviderTelemetrySchema);
+  }
+
+  static validateConversation(data) {
+    return this.validate(data, ConversationsSchema);
+  }
+
+  static validateInsights(data) {
+    return this.validate(data, InsightsSchema);
   }
 
   static validate(data, schema) {
@@ -271,5 +322,8 @@ module.exports = {
   RecommendationsSchema,
   ChatHistorySchema,
   PlaylistsSchema,
+  ProviderTelemetrySchema,
+  ConversationsSchema,
+  InsightsSchema,
   SchemaValidator,
 };

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  * Browser Research Automation with Evidence Collection
  * Comprehensive testing suite with performance monitoring and multi-source verification
@@ -6,7 +6,7 @@
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
       desc = { enumerable: true, get: function() { return m[k]; } };
     }
     Object.defineProperty(o, k2, desc);
@@ -15,9 +15,9 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     o[k2] = m[k];
 }));
 var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
+    Object.defineProperty(o, 'default', { enumerable: true, value: v });
 }) : function(o, v) {
-    o["default"] = v;
+    o['default'] = v;
 });
 var __importStar = (this && this.__importStar) || (function () {
     var ownKeys = function(o) {
@@ -31,18 +31,18 @@ var __importStar = (this && this.__importStar) || (function () {
     return function (mod) {
         if (mod && mod.__esModule) return mod;
         var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== 'default') __createBinding(result, mod, k[i]);
         __setModuleDefault(result, mod);
         return result;
     };
 })();
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.BrowserResearchClient = void 0;
-const events_1 = require("events");
-const fs_1 = require("fs");
-const path = __importStar(require("path"));
-const crypto = __importStar(require("crypto"));
-const perplexity_test_framework_1 = require("./perplexity-test-framework");
+const events_1 = require('events');
+const fs_1 = require('fs');
+const path = __importStar(require('path'));
+const crypto = __importStar(require('crypto'));
+const perplexity_test_framework_1 = require('./perplexity-test-framework');
 // Browser automation client
 class BrowserResearchClient extends events_1.EventEmitter {
     constructor(perplexityConfig, browserConfig) {

@@ -190,7 +190,175 @@ router.post('/message', requireAuth, chatRateLimit, async (req, res) => {
 });
 
 /**
- * Stream a conversation (Server-Sent Events)
+ * Stream a conversation (Server-Sent Events) - GET endpoint with query params
+ * GET /api/chat/stream
+ */
+router.get('/stream', requireAuth, chatRateLimit, async (req, res) => {
+  const requestId = req.headers['x-request-id'] || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  let heartbeatInterval;
+  let streamCancelled = false;
+
+  try {
+    const chatbotInstance = await initializeChatbot();
+    const { sessionId, message, provider, model } = req.query;
+
+    if (!sessionId || !message) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        message: 'sessionId and message are required',
+      });
+    }
+
+    // Set up Server-Sent Events with proper headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': req.headers.origin || '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'X-Request-ID': requestId,
+    });
+
+    // Handle client disconnect/abort
+    req.on('close', () => {
+      streamCancelled = true;
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      console.log(`Stream cancelled for request ${requestId}`);
+    });
+
+    req.on('aborted', () => {
+      streamCancelled = true;
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      console.log(`Stream aborted for request ${requestId}`);
+    });
+
+    // Send initial connection event
+    res.write('event: connected\n');
+    res.write(`data: ${JSON.stringify({ message: 'Connected to chat stream', requestId })}\n\n`);
+
+    // Set up heartbeat every 20 seconds
+    heartbeatInterval = setInterval(() => {
+      if (!streamCancelled && !res.destroyed) {
+        res.write('event: heartbeat\n');
+        res.write(`data: ${JSON.stringify({ timestamp: Date.now() })}\n\n`);
+      }
+    }, 20000);
+
+    try {
+      const streamOptions = {
+        provider,
+        model,
+        requestId,
+        onCancel: () => streamCancelled
+      };
+
+      let retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount <= maxRetries && !streamCancelled) {
+        try {
+          for await (const chunk of chatbotInstance.streamMessage(sessionId, message, streamOptions)) {
+            if (streamCancelled) break;
+
+            if (chunk.error) {
+              // Handle 429 with backoff
+              if (chunk.error.includes('429') && retryCount < maxRetries) {
+                const backoffMs = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                res.write('event: retry\n');
+                res.write(`data: ${JSON.stringify({ 
+                  message: `Rate limited, retrying in ${backoffMs}ms`,
+                  retryCount: retryCount + 1,
+                  backoffMs 
+                })}\n\n`);
+                
+                await new Promise(resolve => setTimeout(resolve, backoffMs));
+                retryCount++;
+                break; // Break inner loop to retry
+              } else {
+                res.write('event: error\n');
+                res.write(`data: ${JSON.stringify({ error: chunk.error, requestId })}\n\n`);
+                break;
+              }
+            } else if (chunk.type === 'chunk') {
+              res.write('event: message\n');
+              res.write(`data: ${JSON.stringify({ 
+                delta: chunk.content, 
+                isPartial: chunk.isPartial,
+                requestId 
+              })}\n\n`);
+            } else if (chunk.type === 'complete') {
+              res.write('event: complete\n');
+              res.write(`data: ${JSON.stringify({ 
+                totalTime: chunk.totalTime,
+                requestId,
+                provider: chunk.provider || provider
+              })}\n\n`);
+              retryCount = maxRetries + 1; // Exit retry loop
+              break;
+            }
+          }
+          
+          if (retryCount <= maxRetries) {
+            break; // Successfully completed, exit retry loop
+          }
+        } catch (innerError) {
+          if (innerError.message.includes('429') && retryCount < maxRetries) {
+            const backoffMs = Math.min(1000 * Math.pow(2, retryCount), 10000);
+            res.write('event: retry\n');
+            res.write(`data: ${JSON.stringify({ 
+              message: `Provider error, retrying in ${backoffMs}ms`,
+              retryCount: retryCount + 1,
+              backoffMs,
+              error: innerError.message
+            })}\n\n`);
+            
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
+            retryCount++;
+          } else {
+            throw innerError;
+          }
+        }
+      }
+
+      if (retryCount > maxRetries && !streamCancelled) {
+        res.write('event: error\n');
+        res.write(`data: ${JSON.stringify({ 
+          error: 'Max retries exceeded',
+          requestId,
+          final: true
+        })}\n\n`);
+      }
+
+    } catch (streamError) {
+      if (!streamCancelled) {
+        res.write('event: error\n');
+        res.write(`data: ${JSON.stringify({ 
+          error: streamError.message,
+          requestId,
+          final: true
+        })}\n\n`);
+      }
+    }
+
+    if (heartbeatInterval) clearInterval(heartbeatInterval);
+    if (!streamCancelled) res.end();
+    
+  } catch (error) {
+    console.error('Error in stream endpoint:', error);
+    if (heartbeatInterval) clearInterval(heartbeatInterval);
+    
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'Failed to initialize stream',
+        message: error.message,
+        requestId,
+      });
+    }
+  }
+});
+
+/**
+ * Stream a conversation (Server-Sent Events) - POST endpoint (legacy)
  * POST /api/chat/stream
  */
 router.post('/stream', requireAuth, chatRateLimit, async (req, res) => {
@@ -257,6 +425,83 @@ router.post('/stream', requireAuth, chatRateLimit, async (req, res) => {
  * Get conversation history
  * GET /api/chat/history/:sessionId
  */
+/**
+ * Get provider health and telemetry
+ * GET /api/chat/providers/health
+ */
+router.get('/providers/health', requireAuth, async (req, res) => {
+  try {
+    const chatbotInstance = await initializeChatbot();
+    const providerManager = chatbotInstance.providerManager;
+    
+    // Get circuit breaker states and telemetry
+    const providers = {};
+    
+    for (const [providerId, breaker] of providerManager.circuitBreakers) {
+      const telemetryData = await providerManager.getTelemetryData(providerId);
+      
+      providers[providerId] = {
+        state: breaker.state,
+        health: breaker.state === 'CLOSED' ? 'healthy' : 
+                breaker.state === 'OPEN' ? 'unhealthy' : 'recovering',
+        failureCount: breaker.failureCount,
+        successCount: breaker.successCount,
+        lastFailureTime: breaker.lastFailureTime,
+        avgLatency: telemetryData?.avgLatency || 0,
+        p50Latency: telemetryData?.p50Latency || 0,
+        p95Latency: telemetryData?.p95Latency || 0,
+        successRate: telemetryData?.successRate || 0,
+        requestCount: telemetryData?.requestCount || 0,
+        lastUpdate: Date.now()
+      };
+    }
+
+    res.json({
+      success: true,
+      providers,
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    console.error('Error getting provider health:', error);
+    res.status(500).json({
+      error: 'Failed to get provider health',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Switch active provider
+ * POST /api/chat/providers/switch
+ */
+router.post('/providers/switch', requireAuth, async (req, res) => {
+  try {
+    const chatbotInstance = await initializeChatbot();
+    const { provider, model } = req.body;
+    
+    if (!provider) {
+      return res.status(400).json({
+        error: 'Provider is required'
+      });
+    }
+
+    const result = await chatbotInstance.providerManager.switchProvider(provider, model);
+    
+    res.json({
+      success: true,
+      provider: result.provider,
+      model: result.model,
+      message: `Switched to ${result.provider}${result.model ? ` with model ${result.model}` : ''}`
+    });
+  } catch (error) {
+    console.error('Error switching provider:', error);
+    res.status(500).json({
+      error: 'Failed to switch provider',
+      message: error.message,
+    });
+  }
+});
+
 router.get('/history/:sessionId', requireAuth, async (req, res) => {
   try {
     const chatbotInstance = await initializeChatbot();

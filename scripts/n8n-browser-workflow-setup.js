@@ -12,7 +12,7 @@ const path = require('path');
 
 class N8nBrowserWorkflowSetup {
     constructor() {
-        this.n8nUrl = process.env.N8N_API_URL || 'http://46.101.106.220';
+        this.n8nUrl = process.env.N8N_API_URL || 'https://primosphere.ninja';
         this.username = process.env.N8N_USERNAME || 'willexmen8@gmail.com';
         this.password = process.env.N8N_PASSWORD || 'DapperMan77$$';
         
@@ -24,6 +24,7 @@ class N8nBrowserWorkflowSetup {
             n8nUrl: this.n8nUrl,
             loginSuccess: false,
             workflowsCreated: [],
+            communityNodesDiscovered: [],
             errors: [],
             screenshots: []
         };

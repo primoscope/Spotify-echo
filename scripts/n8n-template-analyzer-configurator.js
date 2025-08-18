@@ -13,10 +13,29 @@ const axios = require('axios');
 
 class N8nTemplateAnalyzerConfigurator {
     constructor() {
-        this.apiUrl = process.env.N8N_API_URL || 'http://46.101.106.220';
+        this.apiUrl = process.env.N8N_API_URL || 'https://primosphere.ninja';
         this.apiKey = process.env.N8N_API_KEY;
         this.username = process.env.N8N_USERNAME;
         this.password = process.env.N8N_PASSWORD;
+        
+        // Community nodes configuration
+        this.communityNodes = {
+            supercode: {
+                enabled: process.env.N8N_SUPERCODE_ENABLED === 'true',
+                version: 'v1.0.83',
+                nodes: ['Super Code', 'Super Code Tool']
+            },
+            deepseek: {
+                enabled: process.env.N8N_DEEPSEEK_ENABLED === 'true',
+                version: 'v1.0.6', 
+                nodes: ['DeepSeek']
+            },
+            mcp: {
+                enabled: process.env.N8N_MCP_CLIENT_ENABLED === 'true',
+                nodes: ['MCP Client'],
+                docs: 'https://modelcontextprotocol.io/docs/getting-started/intro'
+            }
+        };
         
         this.report = {
             timestamp: new Date().toISOString(),
@@ -40,6 +59,7 @@ class N8nTemplateAnalyzerConfigurator {
                 mcpServers: [],
                 otherTools: []
             },
+            communityNodes: this.communityNodes,
             recommendations: [],
             errorReport: []
         };
@@ -178,9 +198,7 @@ class N8nTemplateAnalyzerConfigurator {
     async analyzeAvailableTemplates() {
         console.log('\n🎯 Analyzing available workflow templates...');
         
-        // Since we can't access n8n.io directly, let's create comprehensive templates
-        // based on the EchoTune AI ecosystem and common n8n patterns
-        
+        // Enhanced templates leveraging community nodes and comprehensive integrations
         const templates = [
             {
                 id: 'github-webhook-integration',
@@ -188,9 +206,11 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Process GitHub webhooks for commits, PRs, and issues',
                 category: 'development',
                 nodes: ['Webhook', 'IF', 'HTTP Request', 'Code'],
+                communityNodes: ['Super Code'],
                 useCase: 'Automate responses to GitHub events',
                 priority: 'high',
-                suitability: 'excellent'
+                suitability: 'excellent',
+                enhancements: this.communityNodes.supercode.enabled ? ['Advanced code execution with Super Code'] : []
             },
             {
                 id: 'mcp-server-health-monitor',
@@ -198,9 +218,11 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Monitor health of all MCP servers and alert on failures',
                 category: 'monitoring',
                 nodes: ['Schedule Trigger', 'HTTP Request', 'IF', 'Email', 'Slack'],
+                communityNodes: ['MCP Client'],
                 useCase: 'Ensure MCP ecosystem reliability',
                 priority: 'high',
-                suitability: 'excellent'
+                suitability: 'excellent',
+                enhancements: this.communityNodes.mcp.enabled ? ['Direct MCP protocol integration'] : []
             },
             {
                 id: 'spotify-data-processor',
@@ -208,9 +230,46 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Process and analyze Spotify listening data',
                 category: 'data-processing',
                 nodes: ['Webhook', 'Code', 'MongoDB', 'HTTP Request'],
+                communityNodes: ['Super Code', 'DeepSeek'],
                 useCase: 'Handle incoming Spotify data for recommendations',
                 priority: 'high',
-                suitability: 'excellent'
+                suitability: 'excellent',
+                enhancements: [
+                    ...(this.communityNodes.supercode.enabled ? ['Enhanced data processing with Super Code'] : []),
+                    ...(this.communityNodes.deepseek.enabled ? ['AI-powered data analysis with DeepSeek'] : [])
+                ]
+            },
+            {
+                id: 'ai-code-analysis-workflow',
+                name: 'AI Code Analysis Workflow',
+                description: 'Automated code review and analysis using AI',
+                category: 'ai-development',
+                nodes: ['Webhook', 'IF', 'HTTP Request'],
+                communityNodes: ['DeepSeek', 'Super Code'],
+                useCase: 'AI-powered code quality analysis and suggestions',
+                priority: 'high',
+                suitability: 'excellent',
+                enhancements: [
+                    ...(this.communityNodes.deepseek.enabled ? ['DeepSeek AI code analysis'] : []),
+                    ...(this.communityNodes.supercode.enabled ? ['Advanced code execution'] : [])
+                ],
+                available: this.communityNodes.deepseek.enabled
+            },
+            {
+                id: 'mcp-orchestration-workflow',
+                name: 'MCP Server Orchestration',
+                description: 'Coordinate multiple MCP servers for complex tasks',
+                category: 'automation',
+                nodes: ['Webhook', 'IF', 'HTTP Request'],
+                communityNodes: ['MCP Client', 'Super Code'],
+                useCase: 'Multi-server task coordination and execution',
+                priority: 'high',
+                suitability: 'excellent',
+                enhancements: [
+                    ...(this.communityNodes.mcp.enabled ? ['Native MCP protocol support'] : []),
+                    ...(this.communityNodes.supercode.enabled ? ['Advanced coordination logic'] : [])
+                ],
+                available: this.communityNodes.mcp.enabled
             },
             {
                 id: 'daily-analytics-reporter',
@@ -218,9 +277,14 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Generate daily analytics reports',
                 category: 'analytics',
                 nodes: ['Schedule Trigger', 'MongoDB', 'Code', 'Email', 'Slack'],
+                communityNodes: ['Super Code', 'DeepSeek'],
                 useCase: 'Automated reporting and insights',
                 priority: 'medium',
-                suitability: 'good'
+                suitability: 'good',
+                enhancements: [
+                    ...(this.communityNodes.supercode.enabled ? ['Enhanced data analysis with Super Code'] : []),
+                    ...(this.communityNodes.deepseek.enabled ? ['AI-powered insights with DeepSeek'] : [])
+                ]
             },
             {
                 id: 'user-recommendation-engine',
@@ -228,9 +292,14 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Generate personalized music recommendations',
                 category: 'ai-ml',
                 nodes: ['Webhook', 'Code', 'HTTP Request', 'OpenAI', 'MongoDB'],
+                communityNodes: ['DeepSeek', 'Super Code'],
                 useCase: 'Real-time recommendation generation',
                 priority: 'high',
-                suitability: 'excellent'
+                suitability: 'excellent',
+                enhancements: [
+                    ...(this.communityNodes.deepseek.enabled ? ['Enhanced AI recommendations with DeepSeek'] : []),
+                    ...(this.communityNodes.supercode.enabled ? ['Advanced processing logic'] : [])
+                ]
             },
             {
                 id: 'error-notification-system',
@@ -238,9 +307,11 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Centralized error handling and notifications',
                 category: 'monitoring',
                 nodes: ['Webhook', 'IF', 'Email', 'Slack', 'HTTP Request'],
+                communityNodes: ['Super Code'],
                 useCase: 'Proactive error monitoring and alerting',
                 priority: 'high',
-                suitability: 'excellent'
+                suitability: 'excellent',
+                enhancements: this.communityNodes.supercode.enabled ? ['Advanced error processing'] : []
             },
             {
                 id: 'api-rate-limit-monitor',
@@ -248,9 +319,11 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Monitor API usage and prevent rate limiting',
                 category: 'monitoring',
                 nodes: ['Schedule Trigger', 'HTTP Request', 'IF', 'Set'],
+                communityNodes: [],
                 useCase: 'Prevent API rate limit issues',
                 priority: 'medium',
-                suitability: 'good'
+                suitability: 'good',
+                enhancements: []
             },
             {
                 id: 'backup-automation',
@@ -258,9 +331,11 @@ class N8nTemplateAnalyzerConfigurator {
                 description: 'Automated backup of databases and configurations',
                 category: 'maintenance',
                 nodes: ['Schedule Trigger', 'Code', 'MongoDB', 'HTTP Request', 'FTP'],
+                communityNodes: ['Super Code'],
                 useCase: 'Data protection and disaster recovery',
                 priority: 'medium',
-                suitability: 'good'
+                suitability: 'good',
+                enhancements: this.communityNodes.supercode.enabled ? ['Enhanced backup logic'] : []
             }
         ];
 

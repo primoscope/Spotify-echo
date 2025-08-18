@@ -12,7 +12,7 @@ const path = require('path');
 
 class N8nWebhookValidator {
     constructor() {
-        this.n8nUrl = process.env.N8N_API_URL || 'http://46.101.106.220';
+        this.n8nUrl = process.env.N8N_API_URL || 'https://primosphere.ninja';
         this.testResults = {
             timestamp: new Date().toISOString(),
             n8nInstance: this.n8nUrl,
@@ -20,6 +20,11 @@ class N8nWebhookValidator {
             testsPass: 0,
             testsFail: 0,
             endpoints: [],
+            communityNodesAvailable: {
+                supercode: process.env.N8N_SUPERCODE_ENABLED === 'true',
+                deepseek: process.env.N8N_DEEPSEEK_ENABLED === 'true',
+                mcp: process.env.N8N_MCP_CLIENT_ENABLED === 'true'
+            },
             errors: []
         };
     }

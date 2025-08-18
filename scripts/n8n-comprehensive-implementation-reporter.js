@@ -12,7 +12,7 @@ const axios = require('axios');
 
 class N8nImplementationReporter {
     constructor() {
-        this.n8nUrl = process.env.N8N_API_URL || 'http://46.101.106.220';
+        this.n8nUrl = process.env.N8N_API_URL || 'https://primosphere.ninja';
         this.reportsDir = path.join(process.cwd(), 'reports');
         
         this.consolidatedReport = {
@@ -41,6 +41,26 @@ class N8nImplementationReporter {
                 github: { status: 'pending', reason: 'missing_token' },
                 mcpServers: [],
                 tools: []
+            },
+            communityNodes: {
+                supercode: {
+                    enabled: process.env.N8N_SUPERCODE_ENABLED === 'true',
+                    version: 'v1.0.83',
+                    nodes: ['Super Code', 'Super Code Tool'],
+                    capabilities: ['Enhanced JavaScript/TypeScript execution', 'Advanced code processing']
+                },
+                deepseek: {
+                    enabled: process.env.N8N_DEEPSEEK_ENABLED === 'true', 
+                    version: 'v1.0.6',
+                    nodes: ['DeepSeek'],
+                    capabilities: ['AI code generation', 'Code completion', 'Code analysis']
+                },
+                mcp: {
+                    enabled: process.env.N8N_MCP_CLIENT_ENABLED === 'true',
+                    nodes: ['MCP Client'],
+                    capabilities: ['Model Context Protocol integration', 'Multi-server coordination'],
+                    docs: 'https://modelcontextprotocol.io/docs/getting-started/intro'
+                }
             },
             endpoints: [],
             errors: [],

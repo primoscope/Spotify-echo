@@ -206,6 +206,18 @@ const sessionConfig = {
 // Note: Redis session store will be configured during initialization
 app.use(session(sessionConfig));
 
+// Simple health check before rate limiting
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    service: 'EchoTune AI',
+    version: process.env.npm_package_version || '2.1.0',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Enhanced security headers (replaces basic securityHeaders)
 app.use(securityHeaders);
 
@@ -504,7 +516,7 @@ const base64encode = (str) => {
 const HealthCheckSystem = require('./utils/health-check');
 const healthChecker = new HealthCheckSystem();
 
-// Comprehensive health check endpoint
+// Comprehensive health check endpoint (bypass rate limiting)
 app.get('/health', async (req, res) => {
   try {
     const healthReport = await healthChecker.runAllChecks();

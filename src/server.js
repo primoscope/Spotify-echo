@@ -9,13 +9,19 @@ const { URLSearchParams } = require('url');
 const compression = require('compression');
 
 // AgentOps integration
-const agentops = require('agentops');
+// Optional agentops integration
+let agentops = null;
+try {
+  agentops = require('agentops');
+} catch (error) {
+  console.log('📊 AgentOps not installed in src/server, skipping telemetry integration');
+}
 
 // Load environment variables
 dotenv.config();
 
 // Initialize AgentOps
-if (process.env.AGENTOPS_API_KEY) {
+if (process.env.AGENTOPS_API_KEY && agentops) {
   agentops.init(process.env.AGENTOPS_API_KEY, {
     auto_start_session: false,
     tags: ['spotify-echo', 'music-ai', 'llm-provider']
@@ -814,7 +820,7 @@ app.post('/api/chat', async (req, res) => {
 
     if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
       response =
-        "I'd love to recommend some music for you! What mood are you in? Or what genre would you like to explore?";
+        'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
       action = 'recommend';
     } else if (lowerMessage.includes('playlist')) {
       response =
@@ -826,10 +832,10 @@ app.post('/api/chat', async (req, res) => {
       action = 'mood_analysis';
     } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
       response =
-        "Hello! I'm your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?";
+        'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
     } else {
       response =
-        "I'm here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.";
+        'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
     }
 
     res.json({

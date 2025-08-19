@@ -12,8 +12,14 @@
 require('dotenv').config();
 
 // Initialize AgentOps
-const agentops = require('agentops');
-if (process.env.AGENTOPS_API_KEY) {
+// Optional agentops integration
+let agentops = null;
+try {
+  agentops = require('agentops');
+} catch (error) {
+  console.log('📊 AgentOps not installed, skipping telemetry integration');
+}
+if (process.env.AGENTOPS_API_KEY && agentops) {
   agentops.init(process.env.AGENTOPS_API_KEY, {
     auto_start_session: false,
     tags: ['spotify-echo', 'server-entry', 'deployment']

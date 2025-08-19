@@ -12,6 +12,11 @@ import {
   Rating,
   Menu,
   Collapse,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Dialog,
+  Button,
 } from '@mui/material';
 import {
   Send,
@@ -28,6 +33,7 @@ import {
   Info,
 } from '@mui/icons-material';
 import { useLLM } from '../contexts/LLMContext';
+import ExplainableRecommendations from './ExplainableRecommendations';
 
 /**
  * Enhanced Chat Interface with Context Chips and Explainable Responses
@@ -53,6 +59,7 @@ const EnhancedChatInterface = ({
     explanation: null,
   });
   const [explainInline, setExplainInline] = useState(false);
+  const [showExplainability, setShowExplainability] = useState(false);
   const [providerMenu, setProviderMenu] = useState(null);
   const [currentProviderLocal, setCurrentProviderLocal] = useState('mock');
   const [providersStatus, setProvidersStatus] = useState('unknown');
@@ -573,6 +580,15 @@ const EnhancedChatInterface = ({
               onClick={() => setExplainInline((v) => !v)}
               variant={explainInline ? 'filled' : 'outlined'}
             />
+            <Tooltip title="Toggle Explainability Panel">
+              <IconButton
+                size="small"
+                color={showExplainability ? 'primary' : 'default'}
+                onClick={() => setShowExplainability(!showExplainability)}
+              >
+                <Psychology />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
 
@@ -724,6 +740,34 @@ const EnhancedChatInterface = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Explainable Recommendations Panel */}
+      {showExplainability && (
+        <Collapse in={showExplainability}>
+          <Paper sx={{ mx: 1, mb: 1, p: 2 }}>
+            <ExplainableRecommendations
+              recommendations={messages
+                .filter(msg => msg.recommendations && msg.recommendations.length > 0)
+                .slice(-1)[0]?.recommendations || []}
+              onGetExplanation={(recommendationId) => {
+                // Find the message with this recommendation
+                const msgWithRec = messages.find(msg => 
+                  msg.recommendations?.some(rec => rec.id === recommendationId)
+                );
+                if (msgWithRec && msgWithRec.explanation) {
+                  setExplanationDialog({
+                    open: true,
+                    message: msgWithRec,
+                    explanation: msgWithRec.explanation
+                  });
+                }
+              }}
+              onProvideFeedback={onProvideFeedback}
+              loading={loading}
+            />
+          </Paper>
+        </Collapse>
+      )}
 
       {/* Explanation Dialog */}
       <Dialog

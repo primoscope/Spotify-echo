@@ -1,0 +1,230 @@
+name: Nightly App Baseline Performance
+
+on:
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL for performance testing'
+        required: false
+        default: 'https://echotune-ai.vercel.app'
+      duration:
+        description: 'Test duration in seconds'
+        required: false
+        default: '300'
+        
+jobs:
+  nightly-baseline:
+    name: Nightly Performance Baseline
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Setup test environment
+        run: |
+          echo "NODE_ENV=production" >> .env
+          echo "DEFAULT_LLM_PROVIDER=mock" >> .env
+          echo "SESSION_SECRET=nightly-test-session-secret" >> .env
+          echo "JWT_SECRET=nightly-test-jwt-secret" >> .env
+          
+      - name: Run performance baseline
+        id: baseline
+        run: |
+          TARGET_URL="${{ github.event.inputs.target_url || 'http://localhost:3000' }}"
+          DURATION="${{ github.event.inputs.duration || '300' }}"
+          
+          if [[ "$TARGET_URL" == "http://localhost:3000" ]]; then
+            echo "Starting local server for testing..."
+            npm start &
+            SERVER_PID=$!
+            
+            # Wait for server to start
+            for i in {1..60}; do
+              if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+                echo "Server is ready"
+                break
+              fi
+              sleep 2
+            done
+          fi
+          
+          # Create performance test directory
+          mkdir -p reports/performance
+          
+          # Run performance baseline
+          npm run performance:baseline -- --baseURL="$TARGET_URL" --duration="$DURATION" --output="reports/performance/nightly-baseline-$(date +%Y%m%d).json"
+          
+          # Cleanup local server if started
+          if [[ -n "$SERVER_PID" ]]; then
+            kill $SERVER_PID 2>/dev/null || true
+          fi
+          
+      - name: Generate performance report
+        run: |
+          # Create a summary report
+          cat << 'EOF' > reports/performance/summary.md
+          # Nightly Performance Baseline Report
+          
+          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Target:** ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
+          **Duration:** ${{ github.event.inputs.duration || '300' }} seconds
+          
+          ## Key Metrics
+          
+          - Response Time P50: $(jq -r '.metrics.responseTime.p50 // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)ms
+          - Response Time P95: $(jq -r '.metrics.responseTime.p95 // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)ms
+          - Error Rate: $(jq -r '.metrics.errorRate // "0"' reports/performance/nightly-baseline-*.json | tail -1)%
+          - Throughput: $(jq -r '.metrics.throughput // "N/A"' reports/performance/nightly-baseline-*.json | tail -1) req/sec
+          
+          ## Endpoint Performance
+          
+          ### Health Check
+          - Average: $(jq -r '.endpoints["/health"].averageTime // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)ms
+          - Success Rate: $(jq -r '.endpoints["/health"].successRate // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)%
+          
+          ### API Providers
+          - Average: $(jq -r '.endpoints["/api/providers"].averageTime // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)ms
+          - Success Rate: $(jq -r '.endpoints["/api/providers"].successRate // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)%
+          
+          ### Chat Streaming
+          - Connection Time: $(jq -r '.endpoints["/api/chat/stream"].averageTime // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)ms
+          - Success Rate: $(jq -r '.endpoints["/api/chat/stream"].successRate // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)%
+          
+          ## System Resources
+          
+          - Peak Memory: $(jq -r '.system.peakMemory // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)MB
+          - CPU Usage: $(jq -r '.system.avgCpuUsage // "N/A"' reports/performance/nightly-baseline-*.json | tail -1)%
+          
+          EOF
+          
+          # Process the template
+          envsubst < reports/performance/summary.md > reports/performance/processed-summary.md
+          mv reports/performance/processed-summary.md reports/performance/summary.md
+          
+      - name: Upload performance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-performance-baseline-${{ github.run_number }}
+          path: |
+            reports/performance/
+          retention-days: 90
+          
+      - name: Compare with previous baseline
+        id: compare
+        run: |
+          # Download previous baseline if available
+          PREVIOUS_ARTIFACT="nightly-performance-baseline-$((github.run_number - 1))"
+          
+          # Create comparison report
+          mkdir -p reports/comparison
+          
+          echo "# Performance Comparison" > reports/comparison/diff.md
+          echo "" >> reports/comparison/diff.md
+          echo "**Current Run:** ${{ github.run_number }}" >> reports/comparison/diff.md
+          echo "**Previous Run:** $((github.run_number - 1))" >> reports/comparison/diff.md
+          echo "" >> reports/comparison/diff.md
+          
+          # Basic comparison (this would be enhanced with actual previous data)
+          CURRENT_P95=$(jq -r '.metrics.responseTime.p95 // "0"' reports/performance/nightly-baseline-*.json | tail -1)
+          echo "**Current P95 Response Time:** ${CURRENT_P95}ms" >> reports/comparison/diff.md
+          
+          # Set threshold for alerts (1000ms P95)
+          if (( $(echo "$CURRENT_P95 > 1000" | bc -l) )); then
+            echo "⚠️ **ALERT:** P95 response time exceeds 1000ms threshold!" >> reports/comparison/diff.md
+            echo "alert=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Performance within acceptable thresholds" >> reports/comparison/diff.md
+            echo "alert=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Create issue for performance degradation
+        if: steps.compare.outputs.alert == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('reports/performance/summary.md', 'utf8');
+            const comparison = fs.readFileSync('reports/comparison/diff.md', 'utf8');
+            
+            const title = `🚨 Performance Alert: Baseline degradation detected (Run #${{ github.run_number }})`;
+            
+            const body = `
+            ## Performance Baseline Alert
+            
+            The nightly performance baseline has detected performance degradation.
+            
+            **Run Number:** ${{ github.run_number }}
+            **Date:** ${new Date().toISOString()}
+            **Workflow:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            ### Performance Summary
+            ${summary}
+            
+            ### Comparison
+            ${comparison}
+            
+            **Action Required:** Please investigate the performance degradation and optimize as needed.
+            
+            **Auto-generated by nightly performance monitoring**
+            `;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['performance', 'alert', 'automated']
+            });
+            
+      - name: Update performance dashboard
+        run: |
+          # Create/update performance dashboard data
+          mkdir -p docs/performance
+          
+          # Generate dashboard JSON
+          cat << EOF > docs/performance/dashboard.json
+          {
+            "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "runNumber": ${{ github.run_number }},
+            "summary": $(cat reports/performance/nightly-baseline-*.json | tail -1 | jq -c '.metrics // {}'),
+            "endpoints": $(cat reports/performance/nightly-baseline-*.json | tail -1 | jq -c '.endpoints // {}'),
+            "system": $(cat reports/performance/nightly-baseline-*.json | tail -1 | jq -c '.system // {}'),
+            "status": "${{ steps.compare.outputs.alert == 'true' && 'degraded' || 'healthy' }}"
+          }
+          EOF
+          
+      - name: Commit performance data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/performance/ || true
+          git commit -m "chore: update nightly performance baseline (run #${{ github.run_number }})" || echo "No changes to commit"
+          git push || echo "No changes to push"
+          
+      - name: Send notification
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const alert = '${{ steps.compare.outputs.alert }}';
+            
+            console.log(`Nightly baseline completed: ${status}`);
+            if (alert === 'true') {
+              console.log('⚠️ Performance alert triggered - issue created');
+            } else {
+              console.log('✅ Performance within acceptable thresholds');
+            }

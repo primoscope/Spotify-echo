@@ -66,6 +66,7 @@ const advancedSettingsRoutes = require('./api/advanced-settings'); // Advanced S
 const docsRoutes = require('./api/routes/docs'); // API documentation
 const adminRoutes = require('./api/routes/admin'); // MongoDB admin dashboard and tools
 const enhancedMCPRoutes = require('./api/routes/enhanced-mcp'); // Enhanced MCP and multimodel capabilities
+const autonomousDevelopmentRoutes = require('./api/routes/autonomous-development'); // Autonomous development with Perplexity research
 const researchRoutes = require('./api/routes/research'); // Perplexity AI research capabilities
 const analysisRoutes = require('./api/routes/analysis'); // Grok-4 code analysis capabilities
 const multiAgentWorkflowRoutes = require('./api/routes/multi-agent-workflows'); // Multi-agent orchestration
@@ -886,6 +887,7 @@ app.use('/api/research', researchRoutes); // Perplexity AI research capabilities
 app.use('/api/analyze', analysisRoutes); // Grok-4 code analysis capabilities  
 app.use('/api/workflows', multiAgentWorkflowRoutes); // Multi-agent orchestration
 app.use('/api/workflow', workflowRoutes); // Dynamic workflow management
+app.use('/api/autonomous', autonomousDevelopmentRoutes); // Autonomous development agents with Perplexity research
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

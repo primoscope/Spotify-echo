@@ -1,6 +1,6 @@
 import OptimizedMusicComponent from './components/OptimizedMusicComponent.jsx';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AppBar, Toolbar, Container, Tabs, Tab } from '@mui/material';
+import { AppBar, Toolbar, Container, Tabs, Tab, Box, Typography } from '@mui/material';
 import React, { useState, Suspense, lazy } from 'react';
 import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
 // Convert heavy components to lazy-loaded chunks for better initial bundle size
@@ -14,6 +14,7 @@ const InsightsDashboard = lazy(() => import('./components/InsightsDashboard'));
 const SongsPage = lazy(() => import('./components/SongsPage'));
 const MobileResponsiveManager = lazy(() => import('./components/MobileResponsiveManager'));
 const EnhancedConfigPanel = lazy(() => import('./components/EnhancedConfigPanel'));
+const AutonomousUIAgent = lazy(() => import('./components/AutonomousUIAgent'));
 const GitHubInfo = lazy(() => import('../components/GitHubInfo'));
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LLMProvider } from './contexts/LLMContext';
@@ -30,6 +31,7 @@ const prefetchers = {
   discovery: () => import('./components/EnhancedMusicDiscovery'),
   analytics: () => import('./components/EnhancedAnalyticsDashboard'),
   insights: () => import('./components/InsightsDashboard'),
+  autonomous: () => import('./components/AutonomousUIAgent'),
   settings: () =>
     Promise.all([
       import('./components/EnhancedConfigPanel'),
@@ -65,6 +67,7 @@ function App() {
               <Route path="/discovery" element={<MainApplication initialTab="discovery" />} />
               <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
               <Route path="/insights" element={<MainApplication initialTab="insights" />} />
+              <Route path="/autonomous" element={<MainApplication initialTab="autonomous" />} />
               <Route path="/settings" element={<MainApplication initialTab="settings" />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
@@ -339,6 +342,11 @@ function MainApplication({ initialTab = 'chat' }) {
               onMouseEnter={() => handlePrefetch('insights')}
             />
             <Tab
+              label="🤖 Autonomous"
+              value="autonomous"
+              onMouseEnter={() => handlePrefetch('autonomous')}
+            />
+            <Tab
               label="⚙️ Settings"
               value="settings"
               onMouseEnter={() => handlePrefetch('settings')}
@@ -414,6 +422,17 @@ function MainApplication({ initialTab = 'chat' }) {
           {currentTab === 'insights' && (
             <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
               <InsightsDashboard />
+            </Container>
+          )}
+
+          {currentTab === 'autonomous' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <AutonomousUIAgent 
+                onEnhancementApply={(plan) => {
+                  console.log('Applying enhancement plan:', plan);
+                  // Handle enhancement application
+                }}
+              />
             </Container>
           )}
 

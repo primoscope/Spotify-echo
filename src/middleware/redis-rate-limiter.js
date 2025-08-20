@@ -17,9 +17,13 @@ class RedisRateLimiter {
     this.onLimitReached = options.onLimitReached || (() => {});
 
     // Redis configuration
+    this.useRedis = true; // Will be set to false if Redis is not available
     this.redisClient = null;
     this.redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
     this.keyPrefix = options.keyPrefix || 'rl:';
+
+    // In-memory fallback storage
+    this.memoryStore = new Map();
 
     // Performance tracking
     this.stats = {
@@ -33,6 +37,13 @@ class RedisRateLimiter {
    * Initialize Redis connection
    */
   async initialize() {
+    // Skip Redis initialization if URL looks like a placeholder
+    if (this.redisUrl.includes('username:password@host:port')) {
+      console.log('⚠️ Redis URL is a placeholder, using in-memory rate limiting');
+      this.useRedis = false;
+      return;
+    }
+
     try {
       this.redisClient = Redis.createClient({
         url: this.redisUrl,
@@ -82,8 +93,24 @@ class RedisRateLimiter {
    */
   async incrementCount(key) {
     try {
-      if (!this.redisClient || !this.redisClient.isOpen) {
-        throw new Error('Redis client not available');
+      if (!this.useRedis || !this.redisClient || !this.redisClient.isOpen) {
+        // Use in-memory fallback
+        const now = Date.now();
+        const windowStart = now - this.windowMs;
+        
+        if (!this.memoryStore.has(key)) {
+          this.memoryStore.set(key, []);
+        }
+        
+        const timestamps = this.memoryStore.get(key);
+        // Clean old timestamps
+        const validTimestamps = timestamps.filter(ts => ts > windowStart);
+        
+        // Add current timestamp
+        validTimestamps.push(now);
+        this.memoryStore.set(key, validTimestamps);
+        
+        return validTimestamps.length;
       }
 
       const count = await this.redisClient.incr(key);
@@ -106,8 +133,9 @@ class RedisRateLimiter {
    */
   async getTTL(key) {
     try {
-      if (!this.redisClient || !this.redisClient.isOpen) {
-        throw new Error('Redis client not available');
+      if (!this.useRedis || !this.redisClient || !this.redisClient.isOpen) {
+        // For in-memory, return remaining time in window
+        return Math.max(0, this.windowMs - 1000); // Return 1 second less than window
       }
 
       const ttl = await this.redisClient.pTTL(key);
@@ -144,30 +172,40 @@ class RedisRateLimiter {
           this.onLimitReached(req, res);
 
           // Set Retry-After header
-          res.set('Retry-After', Math.ceil(ttl / 1000));
-
-          return res.status(this.statusCode).json({
-            error: 'Too Many Requests',
-            message: this.message,
-            retryAfter: Math.ceil(ttl / 1000),
-          });
+          if (!res.headersSent) {
+            res.set('Retry-After', Math.ceil(ttl / 1000));
+            
+            return res.status(this.statusCode).json({
+              error: 'Too Many Requests',
+              message: this.message,
+              retryAfter: Math.ceil(ttl / 1000),
+            });
+          }
+          return; // Headers already sent, can't respond
         }
 
-        // Skip counting for certain responses if configured
-        const originalSend = res.send;
-        const limiterRef = this;
-        res.send = function (body) {
-          const shouldSkip =
-            (limiterRef.skipSuccessfulRequests && res.statusCode < 400) ||
-            (limiterRef.skipFailedRequests && res.statusCode >= 400);
+        // Skip response interception if using memory-based rate limiting
+        // (The skipSuccessfulRequests/skipFailedRequests features only work with Redis)
+        if (this.useRedis && this.redisClient) {
+          // Skip counting for certain responses if configured
+          const originalSend = res.send;
+          const limiterRef = this;
+          res.send = function (body) {
+            // Only modify behavior if headers haven't been sent yet
+            if (!res.headersSent) {
+              const shouldSkip =
+                (limiterRef.skipSuccessfulRequests && res.statusCode < 400) ||
+                (limiterRef.skipFailedRequests && res.statusCode >= 400);
 
-          if (shouldSkip) {
-            // Decrement the counter since we don't want to count this request
-            limiterRef.redisClient?.decr(key).catch(() => {}); // Ignore errors
-          }
+              if (shouldSkip) {
+                // Decrement the counter since we don't want to count this request
+                limiterRef.redisClient?.decr(key).catch(() => {}); // Ignore errors
+              }
+            }
 
-          return originalSend.call(this, body);
-        };
+            return originalSend.call(this, body);
+          };
+        }
 
         next();
       } catch (error) {

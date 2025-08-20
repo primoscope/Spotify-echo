@@ -1,4 +1,10 @@
-const agentops = require('agentops');
+// Optional agentops integration
+let agentops = null;
+try {
+  agentops = require('agentops');
+} catch (error) {
+  // AgentOps not available, use mock implementation
+}
 
 /**
  * AgentOps Manual Trace Management Example
@@ -7,14 +13,18 @@ const agentops = require('agentops');
 class AgentOpsTraceManager {
   constructor() {
     this.activeTraces = new Map();
+    this.enabled = !!agentops;
+    
+    if (!this.enabled) {
+      console.log('📊 AgentOps tracing disabled - using mock implementation');
+    }
   }
 
   /**
    * Start a manual trace with custom configuration
    */
   startTrace(name, tags = []) {
-    if (!process.env.AGENTOPS_API_KEY) {
-      console.warn('AgentOps API key not available, skipping trace');
+    if (!this.enabled || !process.env.AGENTOPS_API_KEY) {
       return null;
     }
 
@@ -37,7 +47,7 @@ class AgentOpsTraceManager {
    * End a trace with success or failure state
    */
   endTrace(trace, endState = 'Success', metadata = {}) {
-    if (!trace || !process.env.AGENTOPS_API_KEY) {
+    if (!trace || !this.enabled || !process.env.AGENTOPS_API_KEY) {
       return;
     }
 

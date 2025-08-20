@@ -498,3 +498,45 @@ class PerformanceBaseline {
 module.exports = {
   PerformanceBaseline,
 };
+
+// CLI usage
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  const options = {};
+  
+  for (let i = 0; i < args.length; i += 2) {
+    const key = args[i].replace(/^--/, '');
+    const value = args[i + 1];
+    if (key === 'duration') {
+      options.testDuration = parseInt(value) * 1000; // Convert seconds to ms
+    } else if (key === 'output') {
+      options.outputFile = value;
+    } else if (key === 'baseURL') {
+      options.baseURL = value;
+    } else {
+      options[key] = value;
+    }
+  }
+  
+  const baseline = new PerformanceBaseline(options);
+  
+  baseline.runBaseline()
+    .then((results) => {
+      console.log('\n✅ Baseline completed successfully');
+      if (options.outputFile) {
+        const fs = require('fs');
+        const path = require('path');
+        const outputDir = path.dirname(options.outputFile);
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        fs.writeFileSync(options.outputFile, JSON.stringify(results, null, 2));
+        console.log(`📊 Results saved to: ${options.outputFile}`);
+      }
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('\n❌ Baseline failed:', error.message);
+      process.exit(1);
+    });
+}

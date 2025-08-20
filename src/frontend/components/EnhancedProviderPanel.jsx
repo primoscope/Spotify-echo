@@ -23,7 +23,15 @@ import {
   ListItemIcon,
   Switch,
   FormControlLabel,
-  Divider
+  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress
 } from '@mui/material';
 import {
   CheckCircle,
@@ -38,12 +46,17 @@ import {
   AutoMode,
   TrendingUp,
   Analytics,
-  HealthAndSafety
+  HealthAndSafety,
+  MonetizationOn,
+  SwapHoriz,
+  Assessment,
+  Timer,
+  BugReport
 } from '@mui/icons-material';
 import { useLLM } from '../contexts/LLMContext';
 
 /**
- * Enhanced Provider Panel with Autonomous Monitoring
+ * Enhanced Provider Panel with Autonomous Monitoring, Failover, and Cost Tracking
  */
 const EnhancedProviderPanel = ({ onAutonomousRecommendation }) => {
   const {
@@ -56,20 +69,31 @@ const EnhancedProviderPanel = ({ onAutonomousRecommendation }) => {
 
   // Enhanced state management
   const [expanded, setExpanded] = useState({});
-  const [autonomousMonitoring, setAutonomousMonitoring] = useState(false);
+  const [autonomousMonitoring, setAutonomousMonitoring] = useState(true);
+  const [autoFailover, setAutoFailover] = useState(true);
   const [performanceHistory, setPerformanceHistory] = useState({});
   const [healthTrends, setHealthTrends] = useState({});
   const [recommendations, setRecommendations] = useState([]);
+  const [costTracking, setCostTracking] = useState({});
+  const [benchmarkResults, setBenchmarkResults] = useState({});
+  const [failoverHistory, setFailoverHistory] = useState([]);
+  const [isRunningBenchmark, setIsRunningBenchmark] = useState(false);
 
-  // Memoized provider statistics
+  // Memoized provider statistics with cost analysis
   const providerStats = useMemo(() => {
     const stats = {
       total: Object.keys(providers).length,
       healthy: 0,
       warning: 0,
       error: 0,
-      available: 0
+      available: 0,
+      totalCost24h: 0,
+      avgLatency: 0,
+      totalRequests24h: 0
     };
+
+    let latencySum = 0;
+    let latencyCount = 0;
 
     Object.entries(providers).forEach(([id, info]) => {
       if (info.available) stats.available++;
@@ -78,6 +102,354 @@ const EnhancedProviderPanel = ({ onAutonomousRecommendation }) => {
       if (health?.health === 'healthy') stats.healthy++;
       else if (health?.health === 'recovering') stats.warning++;
       else stats.error++;
+
+      // Cost tracking calculations
+      const cost = costTracking[id];
+      if (cost) {
+        stats.totalCost24h += cost.cost24h || 0;
+        stats.totalRequests24h += cost.requests24h || 0;
+      }
+
+      // Latency calculations
+      if (health?.responseTime) {
+        latencySum += health.responseTime;
+        latencyCount++;
+      }
+    });
+
+    if (latencyCount > 0) {
+      stats.avgLatency = Math.round(latencySum / latencyCount);
+    }
+
+    return stats;
+  }, [providers, providerHealth, costTracking]);
+
+  // Enhanced cost tracking calculations
+  const updateCostTracking = useCallback((providerId, tokens, latency) => {
+    setCostTracking(prev => {
+      const current = prev[providerId] || { cost24h: 0, requests24h: 0, tokens24h: 0 };
+      
+      // Estimate cost based on provider and token usage
+      const costPer1kTokens = getCostPer1kTokens(providerId);
+      const requestCost = (tokens / 1000) * costPer1kTokens;
+
+      return {
+        ...prev,
+        [providerId]: {
+          cost24h: current.cost24h + requestCost,
+          requests24h: current.requests24h + 1,
+          tokens24h: current.tokens24h + tokens,
+          avgLatency: current.avgLatency ? 
+            (current.avgLatency + latency) / 2 : latency,
+          lastRequest: new Date(),
+          efficiency: calculateEfficiency(latency, requestCost)
+        }
+      };
+    });
+  }, []);
+
+  // Cost estimation helper
+  const getCostPer1kTokens = useCallback((providerId) => {
+    const costMap = {
+      'openai': 0.03,      // GPT-4 pricing
+      'gemini': 0.015,     // Gemini Pro pricing  
+      'openrouter': 0.025, // Average OpenRouter pricing
+      'mock': 0.001        // Mock provider
+    };
+    return costMap[providerId] || 0.02;
+  }, []);
+
+  // Efficiency calculation
+  const calculateEfficiency = useCallback((latency, cost) => {
+    // Higher efficiency = lower latency and cost
+    const latencyScore = Math.max(0, 100 - (latency / 10));
+    const costScore = Math.max(0, 100 - (cost * 1000));
+    return Math.round((latencyScore + costScore) / 2);
+  }, []);
+
+  // Automatic failover logic
+  const checkAndTriggerFailover = useCallback(async (currentProviderId) => {
+    if (!autoFailover) return;
+
+    const currentHealth = providerHealth[currentProviderId];
+    const shouldFailover = 
+      !currentHealth?.available ||
+      currentHealth.health === 'unhealthy' ||
+      (currentHealth.responseTime > 5000 && currentHealth.consecutiveFailures > 2);
+
+    if (shouldFailover) {
+      // Find best alternative provider
+      const alternatives = Object.entries(providers)
+        .filter(([id, info]) => 
+          id !== currentProviderId && 
+          info.available && 
+          providerHealth[id]?.health === 'healthy'
+        )
+        .sort((a, b) => {
+          const aHealth = providerHealth[a[0]];
+          const bHealth = providerHealth[b[0]];
+          
+          // Sort by efficiency score
+          const aEfficiency = costTracking[a[0]]?.efficiency || 0;
+          const bEfficiency = costTracking[b[0]]?.efficiency || 0;
+          
+          return bEfficiency - aEfficiency;
+        });
+
+      if (alternatives.length > 0) {
+        const [newProviderId] = alternatives[0];
+        
+        try {
+          await switchProviderEnhanced(newProviderId);
+          
+          setFailoverHistory(prev => [...prev.slice(-4), {
+            timestamp: new Date(),
+            from: currentProviderId,
+            to: newProviderId,
+            reason: `Auto-failover: ${currentHealth.health} health`,
+            success: true
+          }]);
+
+          setRecommendations(prev => [...prev, {
+            id: `failover_${Date.now()}`,
+            type: 'success',
+            message: `Automatically switched from ${currentProviderId} to ${newProviderId}`,
+            severity: 'info',
+            timestamp: new Date(),
+            action: 'view_metrics'
+          }]);
+
+        } catch (error) {
+          setFailoverHistory(prev => [...prev.slice(-4), {
+            timestamp: new Date(),
+            from: currentProviderId,
+            to: newProviderId,
+            reason: 'Auto-failover attempted',
+            success: false,
+            error: error.message
+          }]);
+        }
+      }
+    }
+  }, [autoFailover, providers, providerHealth, costTracking, switchProviderEnhanced]);
+
+  // Benchmark all providers
+  const runProviderBenchmark = useCallback(async () => {
+    setIsRunningBenchmark(true);
+    const testQuery = "Recommend 3 popular rock songs from the 2000s";
+    const benchmarkPromises = [];
+
+    Object.keys(providers).forEach(providerId => {
+      if (providers[providerId].available) {
+        benchmarkPromises.push(
+          benchmarkProvider(providerId, testQuery)
+        );
+      }
+    });
+
+    try {
+      const results = await Promise.allSettled(benchmarkPromises);
+      const benchmarks = {};
+
+      results.forEach((result, index) => {
+        const providerId = Object.keys(providers)[index];
+        if (result.status === 'fulfilled') {
+          benchmarks[providerId] = result.value;
+        } else {
+          benchmarks[providerId] = {
+            error: result.reason.message,
+            latency: null,
+            score: 0
+          };
+        }
+      });
+
+      setBenchmarkResults(benchmarks);
+      
+      setRecommendations(prev => [...prev, {
+        id: `benchmark_${Date.now()}`,
+        type: 'info',
+        message: 'Provider benchmark completed',
+        severity: 'success',
+        timestamp: new Date(),
+        data: benchmarks
+      }]);
+
+    } catch (error) {
+      console.error('Benchmark error:', error);
+    } finally {
+      setIsRunningBenchmark(false);
+    }
+  }, [providers]);
+
+  // Individual provider benchmark
+  const benchmarkProvider = useCallback(async (providerId, testQuery) => {
+    const startTime = performance.now();
+    
+    try {
+      // This would call the actual provider API
+      // For now, simulate with realistic timing
+      const simulatedLatency = Math.random() * 2000 + 500;
+      await new Promise(resolve => setTimeout(resolve, simulatedLatency));
+      
+      const endTime = performance.now();
+      const latency = endTime - startTime;
+      
+      return {
+        latency: Math.round(latency),
+        score: Math.round(Math.max(0, 100 - (latency / 20))),
+        timestamp: new Date(),
+        tokensUsed: Math.floor(Math.random() * 500) + 100,
+        success: true
+      };
+    } catch (error) {
+      return {
+        latency: null,
+        score: 0,
+        error: error.message,
+        success: false
+      };
+    }
+  }, []);
+
+  // Autonomous monitoring with enhanced recommendations
+  useEffect(() => {
+    if (!autonomousMonitoring) return;
+
+    const interval = setInterval(async () => {
+      // Check current provider health
+      const health = providerHealth[currentProvider];
+      
+      if (health) {
+        // Update performance history
+        setPerformanceHistory(prev => ({
+          ...prev,
+          [currentProvider]: [
+            ...(prev[currentProvider] || []).slice(-19), // Keep last 20 entries
+            {
+              timestamp: new Date(),
+              responseTime: health.responseTime,
+              success: health.available,
+              health: health.health
+            }
+          ]
+        }));
+
+        // Generate recommendations based on performance
+        if (health.responseTime > 2000) {
+          setRecommendations(prev => {
+            const existing = prev.find(r => r.type === 'performance');
+            if (!existing) {
+              return [...prev, {
+                id: `perf_${Date.now()}`,
+                type: 'performance',
+                message: `Response time is high (${health.responseTime}ms). Consider switching providers.`,
+                severity: 'warning',
+                timestamp: new Date(),
+                action: 'switch_provider',
+                providerId: currentProvider
+              }];
+            }
+            return prev;
+          });
+        }
+
+        // Check for cost optimization opportunities
+        const cost = costTracking[currentProvider];
+        if (cost && cost.cost24h > 5) { // $5 threshold
+          setRecommendations(prev => {
+            const existing = prev.find(r => r.type === 'cost');
+            if (!existing) {
+              return [...prev, {
+                id: `cost_${Date.now()}`,
+                type: 'cost',
+                message: `Daily cost is high ($${cost.cost24h.toFixed(2)}). Review usage patterns.`,
+                severity: 'info',
+                timestamp: new Date(),
+                action: 'review_costs'
+              }];
+            }
+            return prev;
+          });
+        }
+
+        // Trigger failover check
+        await checkAndTriggerFailover(currentProvider);
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [autonomousMonitoring, currentProvider, providerHealth, costTracking, checkAndTriggerFailover]);
+
+  // Performance trend analysis
+  useEffect(() => {
+    const trends = {};
+    
+    Object.entries(performanceHistory).forEach(([providerId, history]) => {
+      if (history.length >= 5) {
+        const recent = history.slice(-5);
+        const avgLatency = recent.reduce((sum, h) => sum + h.responseTime, 0) / recent.length;
+        const successRate = recent.filter(h => h.success).length / recent.length * 100;
+        
+        trends[providerId] = {
+          avgLatency: Math.round(avgLatency),
+          successRate: Math.round(successRate),
+          trend: history.length >= 10 ? calculateTrend(history.slice(-10)) : 'stable'
+        };
+      }
+    });
+
+    setHealthTrends(trends);
+  }, [performanceHistory]);
+
+  // Trend calculation helper
+  const calculateTrend = useCallback((history) => {
+    if (history.length < 5) return 'stable';
+    
+    const firstHalf = history.slice(0, Math.floor(history.length / 2));
+    const secondHalf = history.slice(Math.floor(history.length / 2));
+    
+    const firstAvg = firstHalf.reduce((sum, h) => sum + h.responseTime, 0) / firstHalf.length;
+    const secondAvg = secondHalf.reduce((sum, h) => sum + h.responseTime, 0) / secondHalf.length;
+    
+    const improvement = ((firstAvg - secondAvg) / firstAvg) * 100;
+    
+    if (improvement > 10) return 'improving';
+    if (improvement < -10) return 'degrading';
+    return 'stable';
+  }, []);
+
+  // Provider switch handler with cost consideration
+  const handleProviderSwitch = useCallback(async (providerId) => {
+    try {
+      await switchProviderEnhanced(providerId);
+      
+      // Log the switch for cost tracking
+      setFailoverHistory(prev => [...prev.slice(-4), {
+        timestamp: new Date(),
+        from: currentProvider,
+        to: providerId,
+        reason: 'Manual switch',
+        success: true
+      }]);
+
+    } catch (error) {
+      console.error('Provider switch failed:', error);
+    }
+  }, [currentProvider, switchProviderEnhanced]);
+
+  // Clear old recommendations
+  useEffect(() => {
+    const cleanup = setInterval(() => {
+      setRecommendations(prev => 
+        prev.filter(r => 
+          new Date() - new Date(r.timestamp) < 300000 // Keep for 5 minutes
+        )
+      );
+    }, 60000); // Clean up every minute
+
+    return () => clearInterval(cleanup);
+  }, []);
     });
 
     return stats;

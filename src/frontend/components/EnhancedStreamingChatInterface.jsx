@@ -392,20 +392,6 @@ const EnhancedStreamingChatInterface = ({ sessionId = 'default', onAutonomousEnh
       }
     };
   }, []);
-        renderStartTime.current = now;
-      }
-      
-      return updated;
-    });
-
-    // Auto-scroll with performance considerations
-    if (messagesEndRef.current && !streamingState.isAborted) {
-      messagesEndRef.current.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'end'
-      });
-    }
-  }, [streamingState.isAborted]);
 
   // Enhanced stream completion handler
   const handleStreamComplete = useCallback((result) => {
@@ -496,44 +482,6 @@ const EnhancedStreamingChatInterface = ({ sessionId = 'default', onAutonomousEnh
       });
     }
   }, [currentMessage, streamingState.isStreaming, sessionId, sendStreamingMessage, handleStreamDelta, handleStreamComplete]);
-
-  // Enhanced provider switching with autonomous recommendations
-  const handleProviderSwitch = useCallback(async (providerId) => {
-    if (providerId === currentProvider || streamingState.isStreaming) return;
-
-    setProviderSwitching(true);
-    const switchStartTime = performance.now();
-    
-    try {
-      await switchProviderEnhanced(providerId);
-      const switchTime = performance.now() - switchStartTime;
-      
-      setSnackbar({
-        open: true,
-        message: `Switched to ${providers[providerId]?.name} in ${Math.round(switchTime)}ms`,
-        severity: 'success'
-      });
-
-      // Autonomous enhancement for provider performance
-      if (autonomousMode && onAutonomousEnhancement) {
-        onAutonomousEnhancement({
-          type: 'provider_switch',
-          providerId,
-          switchTime,
-          suggestion: switchTime > 1000 ? 'Consider implementing provider pre-warming' : null
-        });
-      }
-      
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: `Failed to switch provider: ${error.message}`,
-        severity: 'error'
-      });
-    } finally {
-      setProviderSwitching(false);
-    }
-  }, [currentProvider, streamingState.isStreaming, switchProviderEnhanced, providers, autonomousMode, onAutonomousEnhancement]);
 
   // Autonomous mode toggle
   const toggleAutonomousMode = useCallback(() => {

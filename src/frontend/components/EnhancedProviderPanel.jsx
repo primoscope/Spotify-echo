@@ -450,9 +450,20 @@ const EnhancedProviderPanel = ({ onAutonomousRecommendation }) => {
 
     return () => clearInterval(cleanup);
   }, []);
-    });
 
-    return stats;
+  const stats = useMemo(() => {
+    const totalProviders = providers?.length || 0;
+    const healthyProviders = Object.values(providerHealth).filter(h => h?.status === 'healthy').length;
+    const averageResponseTime = Object.values(providerHealth)
+      .filter(h => h?.responseTime)
+      .reduce((sum, h) => sum + h.responseTime, 0) / Math.max(1, Object.values(providerHealth).filter(h => h?.responseTime).length);
+
+    return {
+      totalProviders,
+      healthyProviders,
+      averageResponseTime: Math.round(averageResponseTime),
+      healthPercentage: totalProviders > 0 ? Math.round((healthyProviders / totalProviders) * 100) : 0
+    };
   }, [providers, providerHealth]);
 
   // Performance monitoring effect
@@ -518,52 +529,6 @@ const EnhancedProviderPanel = ({ onAutonomousRecommendation }) => {
       onAutonomousRecommendation(newRecommendation);
     }
   }, [onAutonomousRecommendation]);
-
-  // Provider switching with autonomous optimization
-  const handleProviderSwitch = useCallback(async (providerId) => {
-    const startTime = performance.now();
-    
-    try {
-      await switchProviderEnhanced(providerId);
-      const switchTime = performance.now() - startTime;
-      
-      // Record switch performance
-      setPerformanceHistory(prev => ({
-        ...prev,
-        [`switch_${providerId}`]: [
-          ...(prev[`switch_${providerId}`] || []).slice(-9), // Keep last 10 switches
-          {
-            timestamp: Date.now(),
-            switchTime,
-            success: true
-          }
-        ]
-      }));
-
-      if (autonomousMonitoring && switchTime > 1000) {
-        addRecommendation({
-          type: 'switch_performance',
-          providerId,
-          message: `Provider switching took ${Math.round(switchTime)}ms. Consider implementing connection pre-warming.`,
-          severity: 'info',
-          action: 'optimize_switching'
-        });
-      }
-
-    } catch (error) {
-      console.error('Provider switch failed:', error);
-      
-      if (autonomousMonitoring) {
-        addRecommendation({
-          type: 'switch_failure',
-          providerId,
-          message: `Failed to switch to ${providers[providerId]?.name}. Error: ${error.message}`,
-          severity: 'error',
-          action: 'check_configuration'
-        });
-      }
-    }
-  }, [switchProviderEnhanced, providers, autonomousMonitoring, addRecommendation]);
 
   // Toggle provider details
   const toggleExpanded = useCallback((providerId) => {

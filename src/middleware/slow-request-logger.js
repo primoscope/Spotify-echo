@@ -194,9 +194,11 @@ class SlowRequestLogger {
    * Update all metrics for a request
    */
   updateMetrics(req, res, duration, preciseMs) {
-    const { method, originalUrl, route, ip, get } = req;
+    const { method, originalUrl, route, ip } = req;
     const { statusCode } = res;
-    const userAgent = get('user-agent') || 'Unknown';
+    
+    // Safely get user agent with fallback
+    const userAgent = (req && req.headers && req.headers['user-agent']) || 'Unknown';
     const routePath = route?.path || originalUrl || 'unknown';
 
     // Update global metrics

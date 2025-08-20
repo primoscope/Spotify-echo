@@ -1,6 +1,6 @@
 import OptimizedMusicComponent from './components/OptimizedMusicComponent.jsx';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AppBar, Toolbar, Container, Tabs, Tab, Box, Typography } from '@mui/material';
+import { AppBar, Toolbar, Container, Tabs, Tab, Box, Typography, Paper } from '@mui/material';
 import React, { useState, Suspense, lazy } from 'react';
 import ThemeProvider, { ThemeToggle } from './components/ThemeProvider';
 // Convert heavy components to lazy-loaded chunks for better initial bundle size
@@ -15,6 +15,8 @@ const SongsPage = lazy(() => import('./components/SongsPage'));
 const MobileResponsiveManager = lazy(() => import('./components/MobileResponsiveManager'));
 const EnhancedConfigPanel = lazy(() => import('./components/EnhancedConfigPanel'));
 const AutonomousUIAgent = lazy(() => import('./components/AutonomousUIAgent'));
+const EnhancedStreamingChatInterface = lazy(() => import('./components/EnhancedStreamingChatInterface'));
+const EnhancedProviderPanel = lazy(() => import('./components/EnhancedProviderPanel'));
 const GitHubInfo = lazy(() => import('../components/GitHubInfo'));
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LLMProvider } from './contexts/LLMContext';
@@ -32,6 +34,8 @@ const prefetchers = {
   analytics: () => import('./components/EnhancedAnalyticsDashboard'),
   insights: () => import('./components/InsightsDashboard'),
   autonomous: () => import('./components/AutonomousUIAgent'),
+  enhancedStreaming: () => import('./components/EnhancedStreamingChatInterface'),
+  providerPanel: () => import('./components/EnhancedProviderPanel'),
   settings: () =>
     Promise.all([
       import('./components/EnhancedConfigPanel'),
@@ -427,12 +431,44 @@ function MainApplication({ initialTab = 'chat' }) {
 
           {currentTab === 'autonomous' && (
             <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
-              <AutonomousUIAgent 
-                onEnhancementApply={(plan) => {
-                  console.log('Applying enhancement plan:', plan);
-                  // Handle enhancement application
-                }}
-              />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography variant="h4" gutterBottom>
+                  🤖 Autonomous Development Dashboard
+                </Typography>
+                
+                {/* Enhanced Streaming Chat Interface */}
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Enhanced Streaming Chat with Performance Monitoring
+                  </Typography>
+                  <EnhancedStreamingChatInterface 
+                    sessionId={`autonomous_${sessionId}`}
+                    onAutonomousEnhancement={(enhancement) => {
+                      console.log('Autonomous enhancement suggested:', enhancement);
+                    }}
+                  />
+                </Paper>
+                
+                {/* Provider Panel */}
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Autonomous Provider Management
+                  </Typography>
+                  <EnhancedProviderPanel
+                    onAutonomousRecommendation={(recommendation) => {
+                      console.log('Provider recommendation:', recommendation);
+                    }}
+                  />
+                </Paper>
+                
+                {/* UI Development Agent */}
+                <AutonomousUIAgent 
+                  onEnhancementApply={(plan) => {
+                    console.log('Applying enhancement plan:', plan);
+                    // Handle enhancement application
+                  }}
+                />
+              </Box>
             </Container>
           )}
 

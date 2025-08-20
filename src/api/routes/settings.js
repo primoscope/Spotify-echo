@@ -1,5 +1,6 @@
-// Enhanced Settings API - Dynamic Configuration Management
+// Enhanced Settings API - Comprehensive Configuration Management
 // Handles both frontend and backend settings with real-time updates
+// Added comprehensive LLM provider configuration, Spotify integration, and database management
 
 const express = require('express');
 const router = express.Router();
@@ -349,29 +350,118 @@ class SettingsManager {
 
   async testProviderConnection(provider, settings) {
     try {
-      const ProviderManager = require('../providers/provider-manager');
-      const providerManager = new ProviderManager();
-
-      // Temporarily use the new settings for testing
-      const originalEnv = process.env;
-      Object.entries(settings).forEach(([key, value]) => {
-        process.env[key] = value;
-      });
-
-      const result = await providerManager.testProvider(provider);
-
-      // Restore original environment
-      Object.keys(settings).forEach((key) => {
-        if (originalEnv[key] !== undefined) {
-          process.env[key] = originalEnv[key];
-        } else {
-          delete process.env[key];
-        }
-      });
-
-      return result;
+      // Test different providers
+      switch (provider) {
+        case 'openai':
+          return await this.testOpenAI(settings);
+        case 'gemini':
+          return await this.testGemini(settings);
+        case 'openrouter':
+          return await this.testOpenRouter(settings);
+        case 'anthropic':
+          return await this.testAnthropic(settings);
+        default:
+          return { success: false, error: `Unknown provider: ${provider}` };
+      }
     } catch (error) {
       return { success: false, error: error.message };
+    }
+  }
+
+  async testOpenAI(settings) {
+    const apiKey = settings.OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: 'OpenAI API key is required' };
+    }
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/models', {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      });
+      
+      if (response.ok) {
+        return { success: true, message: 'OpenAI connection successful' };
+      } else {
+        const error = await response.text();
+        return { success: false, error: `OpenAI API error: ${error}` };
+      }
+    } catch (error) {
+      return { success: false, error: `Connection failed: ${error.message}` };
+    }
+  }
+
+  async testGemini(settings) {
+    const apiKey = settings.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: 'Gemini API key is required' };
+    }
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models?key=${apiKey}`);
+      
+      if (response.ok) {
+        return { success: true, message: 'Gemini connection successful' };
+      } else {
+        const error = await response.text();
+        return { success: false, error: `Gemini API error: ${error}` };
+      }
+    } catch (error) {
+      return { success: false, error: `Connection failed: ${error.message}` };
+    }
+  }
+
+  async testOpenRouter(settings) {
+    const apiKey = settings.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: 'OpenRouter API key is required' };
+    }
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/models', {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      });
+      
+      if (response.ok) {
+        return { success: true, message: 'OpenRouter connection successful' };
+      } else {
+        const error = await response.text();
+        return { success: false, error: `OpenRouter API error: ${error}` };
+      }
+    } catch (error) {
+      return { success: false, error: `Connection failed: ${error.message}` };
+    }
+  }
+
+  async testAnthropic(settings) {
+    const apiKey = settings.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: 'Anthropic API key is required' };
+    }
+
+    // Anthropic doesn't have a simple models endpoint, so we test with a basic request
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-sonnet-20240229',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hello' }]
+        })
+      });
+      
+      if (response.ok || response.status === 400) { // 400 is ok for auth test
+        return { success: true, message: 'Anthropic connection successful' };
+      } else {
+        const error = await response.text();
+        return { success: false, error: `Anthropic API error: ${error}` };
+      }
+    } catch (error) {
+      return { success: false, error: `Connection failed: ${error.message}` };
     }
   }
 }
@@ -724,6 +814,343 @@ router.get('/generate-secret', (req, res) => {
   const crypto = require('crypto');
   const secret = crypto.randomBytes(32).toString('hex');
   res.json({ success: true, secret });
+});
+
+// Comprehensive LLM Provider Configuration Routes
+// GET /api/settings/llm-providers - Get LLM provider configurations
+router.get('/llm-providers', async (req, res) => {
+  try {
+    const providers = {
+      openai: {
+        name: 'OpenAI',
+        enabled: !!process.env.OPENAI_API_KEY,
+        apiKey: process.env.OPENAI_API_KEY ? '***hidden***' : '',
+        baseURL: 'https://api.openai.com/v1',
+        models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo'],
+        defaultModel: process.env.OPENAI_MODEL || 'gpt-4o',
+        parameters: {
+          temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
+          maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 4096,
+          topP: parseFloat(process.env.OPENAI_TOP_P) || 1.0,
+          frequencyPenalty: parseFloat(process.env.OPENAI_FREQUENCY_PENALTY) || 0.0,
+          presencePenalty: parseFloat(process.env.OPENAI_PRESENCE_PENALTY) || 0.0,
+        },
+      },
+      gemini: {
+        name: 'Google Gemini',
+        enabled: !!process.env.GEMINI_API_KEY,
+        apiKey: process.env.GEMINI_API_KEY ? '***hidden***' : '',
+        baseURL: 'https://generativelanguage.googleapis.com/v1',
+        models: ['gemini-2.0-flash-exp', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+        defaultModel: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+        parameters: {
+          temperature: parseFloat(process.env.GEMINI_TEMPERATURE) || 0.7,
+          maxTokens: parseInt(process.env.GEMINI_MAX_TOKENS) || 4096,
+          topK: parseInt(process.env.GEMINI_TOP_K) || 40,
+          topP: parseFloat(process.env.GEMINI_TOP_P) || 0.95,
+        },
+      },
+      openrouter: {
+        name: 'OpenRouter',
+        enabled: !!process.env.OPENROUTER_API_KEY,
+        apiKey: process.env.OPENROUTER_API_KEY ? '***hidden***' : '',
+        baseURL: 'https://openrouter.ai/api/v1',
+        models: [
+          'anthropic/claude-3.5-sonnet',
+          'anthropic/claude-3-opus',
+          'openai/gpt-4o',
+          'google/gemini-pro-1.5',
+          'meta-llama/llama-3.1-405b-instruct',
+        ],
+        defaultModel: process.env.OPENROUTER_MODEL || 'anthropic/claude-3.5-sonnet',
+        parameters: {
+          temperature: parseFloat(process.env.OPENROUTER_TEMPERATURE) || 0.7,
+          maxTokens: parseInt(process.env.OPENROUTER_MAX_TOKENS) || 4096,
+          topP: parseFloat(process.env.OPENROUTER_TOP_P) || 1.0,
+        },
+        siteURL: process.env.OPENROUTER_SITE_URL || '',
+        appName: process.env.OPENROUTER_APP_NAME || 'EchoTune AI',
+      },
+    };
+
+    res.json({
+      success: true,
+      providers,
+      currentProvider: process.env.DEFAULT_LLM_PROVIDER || 'gemini',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/settings/llm-providers - Update LLM provider configurations
+router.put('/llm-providers', async (req, res) => {
+  try {
+    const { providers } = req.body;
+
+    if (!providers) {
+      return res.status(400).json({ success: false, error: 'Providers configuration required' });
+    }
+
+    // Build environment variable updates
+    const envUpdates = {};
+
+    Object.entries(providers).forEach(([providerId, config]) => {
+      const prefix = providerId.toUpperCase();
+      
+      if (config.apiKey && config.apiKey !== '***hidden***') {
+        envUpdates[`${prefix}_API_KEY`] = config.apiKey;
+      }
+      
+      if (config.defaultModel) {
+        envUpdates[`${prefix}_MODEL`] = config.defaultModel;
+      }
+
+      if (config.parameters) {
+        Object.entries(config.parameters).forEach(([param, value]) => {
+          const envKey = `${prefix}_${param.toUpperCase().replace(/([A-Z])/g, '_$1')}`;
+          envUpdates[envKey] = value.toString();
+        });
+      }
+
+      if (config.siteURL) {
+        envUpdates[`${prefix}_SITE_URL`] = config.siteURL;
+      }
+
+      if (config.appName) {
+        envUpdates[`${prefix}_APP_NAME`] = config.appName;
+      }
+    });
+
+    // Update settings
+    const result = await settingsManager.updateSettings(envUpdates);
+
+    if (result.success) {
+      // Also update process.env for immediate effect
+      Object.entries(envUpdates).forEach(([key, value]) => {
+        process.env[key] = value;
+      });
+
+      res.json({
+        success: true,
+        message: 'LLM provider settings updated successfully',
+      });
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/settings/test-llm-provider - Test specific LLM provider
+router.post('/test-llm-provider', async (req, res) => {
+  try {
+    const { provider, config } = req.body;
+
+    if (!provider) {
+      return res.status(400).json({ success: false, error: 'Provider is required' });
+    }
+
+    const testResult = await settingsManager.testProviderConnection(provider, config);
+    res.json(testResult);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Spotify Integration Configuration Routes
+// GET /api/settings/spotify - Get Spotify configuration
+router.get('/spotify', (req, res) => {
+  try {
+    const config = {
+      clientId: process.env.SPOTIFY_CLIENT_ID || '',
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET ? '***hidden***' : '',
+      redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/auth/callback',
+      scopes: (process.env.SPOTIFY_SCOPES || 'user-read-private,user-read-email,user-read-recently-played,user-read-playback-state,user-modify-playback-state,playlist-read-private,playlist-modify-public,playlist-modify-private').split(','),
+      market: process.env.SPOTIFY_MARKET || 'US',
+      limit: parseInt(process.env.SPOTIFY_LIMIT) || 50,
+      timeRange: process.env.SPOTIFY_TIME_RANGE || 'medium_term',
+    };
+
+    res.json({ success: true, config });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/settings/spotify - Update Spotify configuration
+router.put('/spotify', async (req, res) => {
+  try {
+    const { config } = req.body;
+
+    if (!config) {
+      return res.status(400).json({ success: false, error: 'Spotify configuration required' });
+    }
+
+    const envUpdates = {};
+
+    if (config.clientId) envUpdates.SPOTIFY_CLIENT_ID = config.clientId;
+    if (config.clientSecret && config.clientSecret !== '***hidden***') {
+      envUpdates.SPOTIFY_CLIENT_SECRET = config.clientSecret;
+    }
+    if (config.redirectUri) envUpdates.SPOTIFY_REDIRECT_URI = config.redirectUri;
+    if (config.scopes && Array.isArray(config.scopes)) {
+      envUpdates.SPOTIFY_SCOPES = config.scopes.join(',');
+    }
+    if (config.market) envUpdates.SPOTIFY_MARKET = config.market;
+    if (config.limit) envUpdates.SPOTIFY_LIMIT = config.limit.toString();
+    if (config.timeRange) envUpdates.SPOTIFY_TIME_RANGE = config.timeRange;
+
+    const result = await settingsManager.updateSettings(envUpdates);
+
+    if (result.success) {
+      Object.entries(envUpdates).forEach(([key, value]) => {
+        process.env[key] = value;
+      });
+
+      res.json({
+        success: true,
+        message: 'Spotify configuration updated successfully',
+      });
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/settings/test-spotify - Test Spotify connection
+router.post('/test-spotify', async (req, res) => {
+  try {
+    const { clientId, clientSecret } = req.body;
+
+    if (!clientId || !clientSecret) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Client ID and Client Secret are required' 
+      });
+    }
+
+    const startTime = Date.now();
+
+    // Test connection by getting client credentials token
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+      },
+      body: 'grant_type=client_credentials',
+    });
+
+    const latency = Date.now() - startTime;
+
+    if (response.ok) {
+      res.json({
+        success: true,
+        message: 'Spotify connection test successful',
+        latency: `${latency}ms`,
+      });
+    } else {
+      const errorData = await response.text();
+      res.json({
+        success: false,
+        error: `Spotify API error: ${errorData}`,
+        latency: `${latency}ms`,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// Database Configuration Routes
+// GET /api/settings/database - Get database configuration
+router.get('/database', (req, res) => {
+  try {
+    const config = {
+      mongodb: {
+        uri: process.env.MONGODB_URI ? '***hidden***' : '',
+        database: process.env.MONGODB_DB_NAME || 'echotune',
+        connected: !!process.env.MONGODB_URI,
+      },
+      sqlite: {
+        enabled: process.env.ENABLE_SQLITE !== 'false',
+        file: process.env.SQLITE_FILE || './data/echotune.db',
+        fallback: process.env.SQLITE_FALLBACK !== 'false',
+      },
+      redis: {
+        enabled: !!process.env.REDIS_URL,
+        url: process.env.REDIS_URL ? '***hidden***' : '',
+        password: process.env.REDIS_PASSWORD ? '***hidden***' : '',
+      },
+    };
+
+    res.json({ success: true, config });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/settings/database - Update database configuration
+router.put('/database', async (req, res) => {
+  try {
+    const { config } = req.body;
+
+    if (!config) {
+      return res.status(400).json({ success: false, error: 'Database configuration required' });
+    }
+
+    const envUpdates = {};
+
+    if (config.mongodb) {
+      if (config.mongodb.uri && config.mongodb.uri !== '***hidden***') {
+        envUpdates.MONGODB_URI = config.mongodb.uri;
+      }
+      if (config.mongodb.database) {
+        envUpdates.MONGODB_DB_NAME = config.mongodb.database;
+      }
+    }
+
+    if (config.sqlite) {
+      envUpdates.ENABLE_SQLITE = config.sqlite.enabled.toString();
+      envUpdates.SQLITE_FALLBACK = config.sqlite.fallback.toString();
+      if (config.sqlite.file) {
+        envUpdates.SQLITE_FILE = config.sqlite.file;
+      }
+    }
+
+    if (config.redis) {
+      if (config.redis.url && config.redis.url !== '***hidden***') {
+        envUpdates.REDIS_URL = config.redis.url;
+      }
+      if (config.redis.password && config.redis.password !== '***hidden***') {
+        envUpdates.REDIS_PASSWORD = config.redis.password;
+      }
+    }
+
+    const result = await settingsManager.updateSettings(envUpdates);
+
+    if (result.success) {
+      Object.entries(envUpdates).forEach(([key, value]) => {
+        process.env[key] = value;
+      });
+
+      res.json({
+        success: true,
+        message: 'Database configuration updated successfully',
+      });
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 module.exports = router;

@@ -1,6 +1,6 @@
 {
   "testSuite": "Enhanced Perplexity MCP Server",
-  "timestamp": "2025-08-16T09:47:05.947Z",
+  "timestamp": "2025-08-20T20:56:30.358Z",
   "summary": {
     "totalTests": 2,
     "passed": 0,
@@ -15,12 +15,12 @@
       {
         "test": "server_health",
         "error": "Cannot find module '@modelcontextprotocol/sdk/server/index.js'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/perplexity-mcp-server.js\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/test-enhanced-perplexity.js",
-        "timestamp": "2025-08-16T09:47:05.946Z"
+        "timestamp": "2025-08-20T20:56:30.356Z"
       },
       {
         "test": "model_configurations",
         "error": "Cannot find module '@modelcontextprotocol/sdk/server/index.js'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/perplexity-mcp-server.js\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/test-enhanced-perplexity.js",
-        "timestamp": "2025-08-16T09:47:05.947Z"
+        "timestamp": "2025-08-20T20:56:30.358Z"
       }
     ],
     "summary": {

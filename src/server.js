@@ -57,6 +57,7 @@ const providersRoutes = require('./api/routes/providers');
 const databaseRoutes = require('./api/routes/database');
 const playlistRoutes = require('./api/routes/playlists');
 const settingsRoutes = require('./api/routes/settings');
+const systemRoutes = require('./api/routes/system');
 const analyticsRoutes = require('./api/routes/analytics');
 const insightsRoutes = require('./api/routes/insights'); // Enhanced Spotify insights with caching and pagination
 const feedbackRoutes = require('./api/routes/feedback'); // New feedback system
@@ -66,6 +67,7 @@ const advancedSettingsRoutes = require('./api/advanced-settings'); // Advanced S
 const docsRoutes = require('./api/routes/docs'); // API documentation
 const adminRoutes = require('./api/routes/admin'); // MongoDB admin dashboard and tools
 const enhancedMCPRoutes = require('./api/routes/enhanced-mcp'); // Enhanced MCP and multimodel capabilities
+const autonomousDevelopmentRoutes = require('./api/routes/autonomous-development'); // Autonomous development with Perplexity research
 const researchRoutes = require('./api/routes/research'); // Perplexity AI research capabilities
 const analysisRoutes = require('./api/routes/analysis'); // Grok-4 code analysis capabilities
 const multiAgentWorkflowRoutes = require('./api/routes/multi-agent-workflows'); // Multi-agent orchestration
@@ -874,6 +876,7 @@ app.use('/api/providers', providersRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/system', systemRoutes);
 app.use('/api/settings', llmProvidersRoutes); // Enhanced LLM provider management
 app.use('/api/settings', advancedSettingsRoutes); // Advanced Settings UI API
 app.use('/api/analytics', analyticsRoutes);
@@ -886,6 +889,7 @@ app.use('/api/research', researchRoutes); // Perplexity AI research capabilities
 app.use('/api/analyze', analysisRoutes); // Grok-4 code analysis capabilities  
 app.use('/api/workflows', multiAgentWorkflowRoutes); // Multi-agent orchestration
 app.use('/api/workflow', workflowRoutes); // Dynamic workflow management
+app.use('/api/autonomous', autonomousDevelopmentRoutes); // Autonomous development agents with Perplexity research
 
 // Deployment API routes
 const deployRoutes = require('./api/routes/deploy');

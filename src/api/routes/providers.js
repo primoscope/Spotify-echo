@@ -108,16 +108,20 @@ router.get('/health', async (req, res) => {
     const overall =
       connected > 0 ? (connected / total >= 0.5 ? 'healthy' : 'degraded') : 'unhealthy';
 
-    res.json({
-      success: true,
-      status: overall,
-      providers: enhancedProviders,
-      aggregated: telemetryData.aggregated,
-      timestamp: new Date().toISOString(),
-    });
+    if (!res.headersSent) {
+      res.json({
+        success: true,
+        status: overall,
+        providers: enhancedProviders,
+        aggregated: telemetryData.aggregated,
+        timestamp: new Date().toISOString(),
+      });
+    }
   } catch (error) {
     console.error('Unified providers health failed:', error.message);
-    res.status(500).json({ success: false, error: 'Failed to get providers health' });
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: 'Failed to get providers health' });
+    }
   }
 });
 

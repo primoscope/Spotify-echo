@@ -10,6 +10,8 @@ import PlaylistManager from './playlists/PlaylistManager';
 import UserProfile from './profile/UserProfile';
 import LandingPage from './pages/LandingPage';
 import EnhancedAdvancedSettings from './EnhancedAdvancedSettings';
+import ComprehensiveSettingsPanel from './ComprehensiveSettingsPanel';
+import EnhancedSpotifyChatInterface from './EnhancedSpotifyChatInterface';
 import './App.css';
 
 /**
@@ -83,11 +85,13 @@ function App() {
               <main className="main-content">
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
-                  <Route path="/chat" element={<ChatInterface />} />
+                  <Route path="/chat" element={<EnhancedSpotifyChatInterface />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/playlists" element={<PlaylistManager />} />
                   <Route path="/profile" element={<UserProfile />} />
-                  <Route path="/settings" element={<EnhancedAdvancedSettings />} />
+                  <Route path="/settings" element={<ComprehensiveSettingsPanel />} />
+                  <Route path="/settings/advanced" element={<EnhancedAdvancedSettings />} />
+                  <Route path="/chat/basic" element={<ChatInterface />} />
                 </Routes>
               </main>
             </div>

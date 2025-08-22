@@ -483,13 +483,30 @@ class LLMTelemetry {
    */
   async persistTelemetryRecord(providerId, record) {
     try {
-      // This will be implemented when we have database connection
-      // For now, just log for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📊 Telemetry: ${providerId} - ${record.latencyMs}ms (${record.success ? 'success' : 'failure'})`);
+      // Try MongoDB first, fallback to logging
+      const dbManager = require('../database/mongodb-manager');
+      
+      if (dbManager && dbManager.isConnected()) {
+        const db = dbManager.getDatabase();
+        const collection = db.collection('provider_telemetry');
+        
+        await collection.insertOne({
+          ...record,
+          metadata: { persistedAt: new Date() }
+        });
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`📊 Telemetry persisted: ${providerId} - ${record.latencyMs}ms (${record.success ? 'success' : 'failure'})`);
+        }
+      } else {
+        // Fallback to logging when MongoDB not available
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`📊 Telemetry (in-memory): ${providerId} - ${record.latencyMs}ms (${record.success ? 'success' : 'failure'})`);
+        }
       }
     } catch (error) {
       console.error('Failed to persist telemetry:', error);
+      // Continue execution - telemetry shouldn't break the app
     }
   }
 }

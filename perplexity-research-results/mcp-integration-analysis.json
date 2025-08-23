@@ -1,0 +1,21 @@
+{
+  "query": "Model Context Protocol (MCP) integration patterns and latest developments",
+  "model": "sonar-pro",
+  "response": "# Research Results for: Model Context Protocol (MCP) integration patterns and latest developments\n\n## Overview\nThis research query relates to music technology, Node.js development, and platform optimization. The analysis covers current best practices and emerging trends.\n\n## Key Findings\n1. **Performance**: Modern approaches emphasize streaming, caching, and efficient resource utilization\n2. **Security**: Multi-layered security with authentication, validation, and monitoring\n3. **Scalability**: Microservices architecture with container orchestration\n4. **User Experience**: Real-time features and personalized recommendations\n\n## Implementation Recommendations\n- Focus on user-centered design principles\n- Implement comprehensive monitoring and analytics\n- Use modern development frameworks and tools\n- Ensure robust error handling and fallback mechanisms\n\n## Next Steps\nConsider implementing these findings in your EchoTune AI platform development roadmap.",
+  "citations": [
+    {
+      "title": "Node.js Official Documentation",
+      "url": "https://nodejs.org/docs/"
+    },
+    {
+      "title": "Express.js Best Practices",
+      "url": "https://expressjs.com/en/advanced/best-practice-security.html"
+    },
+    {
+      "title": "Spotify Web API Reference",
+      "url": "https://developer.spotify.com/documentation/web-api/"
+    }
+  ],
+  "timestamp": "2025-08-23T20:47:01.581Z",
+  "source": "mock_response"
+}

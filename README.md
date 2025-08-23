@@ -98,6 +98,11 @@ npm run build && npm start
 
 # With MCP orchestrator
 npm run mcp:orchestrated-start
+
+# Perplexity Browser Research
+npm run perplexity:help              # Show research capabilities
+npm run perplexity:research "query"  # Research specific topics
+npm run perplexity:repo-analysis     # Full repository analysis
 ```
 
 Visit `http://localhost:3000` to start discovering music!
@@ -129,6 +134,13 @@ Visit `http://localhost:3000` to start discovering music!
 - **Smart Caching**: 14-day cache TTL reduces duplicate API calls
 - **Dynamic Pricing**: Automatic model selection based on complexity
 - **Usage Analytics**: Real-time cost tracking and optimization alerts
+
+### 🔍 Perplexity Browser Research
+- **Intelligent Research**: Advanced research automation with Perplexity API
+- **Repository Analysis**: Comprehensive codebase and architecture analysis
+- **Mock Mode**: Works without API key for development and testing
+- **Browser Automation**: Source verification and evidence collection
+- **Cost Management**: Budget controls and automatic fallbacks
 
 ### Infrastructure
 - **Docker** - Containerization

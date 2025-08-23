@@ -56,6 +56,9 @@
     "testperplexity": "node -e \"const server = require('./mcp-servers/perplexity-mcp/perplexity-mcp-server.js'); console.log('Perplexity MCP server test passed');\"",
     "test:perplexity-enhanced": "node mcp-servers/perplexity-mcp/test-enhanced-perplexity.js",
     "validate:perplexity-enhanced": "./mcp-servers/perplexity-mcp/validate-enhanced-perplexity.sh",
+    "perplexity:research": "node scripts/perplexity-browser-research.js",
+    "perplexity:repo-analysis": "node scripts/perplexity-browser-research.js --repo-analysis",
+    "perplexity:help": "node scripts/perplexity-browser-research.js --help",
     "generate-cursor-mcp": "node scripts/generate-cursor-mcp-enhanced.js",
     "dev": "nodemon src/index.js",
     "dev:frontend": "vite",
@@ -289,7 +292,6 @@
     "continuous-analysis:continuous": "node scripts/continuous-analysis-system.js continuous",
     "analysis:research": "node scripts/continuous-analysis-system.js single",
     "analysis:report": "echo 'Check automation-outputs/reports/ for latest analysis report'",
-    "perplexity:research": "node -e \"const P = require('./src/chat/llm-providers/perplexity-provider'); const p = new P({apiKey: process.env.PERPLEXITY_API_KEY}); p.initialize().then(() => p.research(process.argv[1])).then(console.log).catch(console.error)\" -- ",
     "grok4:analyze": "node -e \"const G = require('./src/chat/llm-providers/grok4-provider'); const g = new G({apiKey: process.env.XAI_API_KEY}); g.initialize().then(() => g.analyzeRepository('sample code', 'comprehensive')).then(console.log).catch(console.error)\""
   },
   "keywords": [

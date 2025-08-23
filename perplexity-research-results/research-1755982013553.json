@@ -1,0 +1,21 @@
+{
+  "query": "Node.js music streaming architecture",
+  "model": "sonar-pro",
+  "response": "# Node.js Best Practices for Music Streaming Platforms\n\n## Performance Optimization\n- **Streaming Architecture**: Use Node.js streams for efficient audio data handling\n- **Clustering**: Implement Node.js cluster module for multi-core utilization  \n- **Memory Management**: Monitor heap usage and implement proper garbage collection\n- **Caching**: Redis for session data, CDN for static assets\n\n## Security Considerations\n- **Authentication**: JWT tokens with refresh mechanism\n- **Rate Limiting**: Implement per-user and per-endpoint rate limits\n- **Input Validation**: Sanitize all user inputs and API parameters\n- **HTTPS**: Always use SSL/TLS in production\n\n## Music-Specific Optimizations\n- **Audio Transcoding**: Use FFmpeg with Node.js bindings for format conversion\n- **Real-time Features**: WebSocket connections for live music sharing\n- **Database Design**: Optimize for music metadata queries and user preferences\n\n## Monitoring & Analytics\n- **Performance Metrics**: Track response times, memory usage, error rates\n- **User Analytics**: Music listening patterns, preference evolution\n- **System Health**: Automated alerts for service degradation",
+  "citations": [
+    {
+      "title": "Node.js Official Documentation",
+      "url": "https://nodejs.org/docs/"
+    },
+    {
+      "title": "Express.js Best Practices",
+      "url": "https://expressjs.com/en/advanced/best-practice-security.html"
+    },
+    {
+      "title": "Spotify Web API Reference",
+      "url": "https://developer.spotify.com/documentation/web-api/"
+    }
+  ],
+  "timestamp": "2025-08-23T20:46:53.553Z",
+  "source": "mock_response"
+}

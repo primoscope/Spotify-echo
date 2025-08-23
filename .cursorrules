@@ -36,14 +36,26 @@ Tech Stack: React 19 + Vite + Node.js 20 + Express + MongoDB + Redis + Python ML
 
 ## 🤖 Enhanced AI Model Selection & Orchestration with Perplexity Integration
 
-### Primary Model Routing
+### Optimized Model Routing (Post-Integration Testing)
 ```
 Task Classification → Model Selection:
 
-ARCHITECTURE & PLANNING:
-- Use: Advanced AI Integration (Perplexity-based Llama 3.1 Sonar)
-- When: System design, database schema, API architecture, scalability planning
-- Context: Include current architecture diagrams, performance requirements
+REAL-TIME RESEARCH & ANALYSIS:
+- Use: Perplexity Sonar Pro ($0.006/1k tokens) 
+- When: Complex technical analysis, security research, performance optimization
+- Budget: $3.00/week with 80% alert threshold
+- Context: Automatic complexity scoring (1-10) with model selection
+- Cache: 14-day TTL with MD5 deduplication (80%+ hit rate)
+
+RAPID DEVELOPMENT ASSISTANCE:  
+- Use: Perplexity Sonar Reasoning ($0.003/1k tokens)
+- When: Medium complexity tasks, API integration, database queries
+- Triggers: Complexity score 6-7, technical documentation needs
+
+QUICK TASKS & SYNTAX:
+- Use: Perplexity Sonar ($0.001/1k tokens) 
+- When: Simple analysis, code review, basic implementation
+- Triggers: Complexity score < 6, routine development tasks
 
 CODE GENERATION & REFACTORING:
 - Use: Claude 3.5 Sonnet (preferred) or GPT-4
@@ -108,27 +120,34 @@ Automatic Perplexity Research:
 
 ### Smart File Inclusion with Perplexity Integration
 ```
-@Recommended High Priority:
-- package.json, vite.config.js, server.js, server-phase3.js
-- .cursor/mcp.json, .cursor/workflows/*.json
-- src/server.js, src/api/ai-integration/*.js
-- Key React components: src/frontend/App.jsx
-- Database models: src/database/*.js
-- Test configurations: tests/jest.config.js
+@Highest Priority (Always Include):
+- package.json, vite.config.js, server.js, server-phase3.js  
 - scripts/perplexity_client.py, scripts/issue_analyzer.py
-- .github/workflows/ai-*.yml (AI-related workflows)
+- .perplexity/usage_ledger.json (budget status - non-sensitive)
+- src/server.js, src/api/ai-integration/*.js
+- src/middleware/timing.js (performance monitoring)
+- .github/workflows/ai-*.yml (Perplexity workflows)
+
+@High Priority (Context-Aware):
+- .cursor/mcp.json, .cursor/workflows/*.json
+- Key React components: src/frontend/App.jsx
+- Database models: src/database/*.js  
+- Test configurations: tests/jest.config.js
+- ROADMAP.md (for context on current development goals)
 
 Dynamic Context (based on current task):
 - API Work: Include src/api/*, middleware patterns, error handling
 - Frontend Work: Include src/frontend/*, component patterns, styling
 - ML Work: Include scripts/*, ml_datasets/, Python requirements
 - MCP Work: Include mcp-servers/*, integration patterns
-- Perplexity Work: Include scripts/perplexity_client.py, budget status, usage patterns
+- Perplexity Work: Include budget status, complexity scoring, cache analytics
 
-Excluded Files:
-- .perplexity/cache/*, .perplexity/usage_ledger.json (sensitive data)
+Excluded Files (Security & Performance):
+- .perplexity/cache/* (cached API responses - privacy)
+- .env* files (secrets and API keys)
 - *validation-report*.json, *test-results*.json (large files)
-- build artifacts, logs, and generated documentation
+- node_modules/*, build/*, dist/*, logs/*
+- perplexity_test/* (test artifacts)
 ```
 
 ### Progressive Context Building

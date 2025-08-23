@@ -1,7 +1,41 @@
 {
   "2025-W34": {
-    "total_cost": 0.0,
-    "request_count": 0,
-    "requests": []
+    "total_cost": 0.137306,
+    "request_count": 3,
+    "requests": [
+      {
+        "timestamp": "2025-08-23 23:26:02.093104",
+        "model": "sonar-pro",
+        "input_tokens": 216,
+        "output_tokens": 524,
+        "searches_performed": 5,
+        "estimated_cost": 0.063296,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-23 23:26:12.715855",
+        "model": "sonar-pro",
+        "input_tokens": 139,
+        "output_tokens": 1293,
+        "searches_performed": 4,
+        "estimated_cost": 0.052834,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 8
+      },
+      {
+        "timestamp": "2025-08-23 23:26:28.615684",
+        "model": "sonar",
+        "input_tokens": 176,
+        "output_tokens": 1212,
+        "searches_performed": 4,
+        "estimated_cost": 0.021176,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 8
+      }
+    ]
   }
 }

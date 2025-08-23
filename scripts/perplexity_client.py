@@ -474,6 +474,117 @@ class PerplexityClient:
         # This should never be reached, but just in case
         raise Exception(f"Unexpected error after {max_retries} retries")
     
+    def research(self, prompt: str, model: str = None, enable_web_search: bool = True, 
+                max_tokens: int = None, temperature: float = None, 
+                dry_run: bool = False) -> Dict:
+        """Perform research with Perplexity API - primary research method"""
+        
+        # Calculate complexity and select model if not specified
+        complexity_score = self.calculate_complexity_score("Research Query", prompt)
+        if model is None:
+            model = self.select_model(complexity_score, research=enable_web_search)
+        
+        logger.info(f"Research query: complexity={complexity_score}, model={model}, web_search={enable_web_search}")
+        
+        # Check cache first using prompt as both title and body
+        cached_response = self.cache_manager.get_cached_response(prompt[:100], prompt, model)
+        if cached_response:
+            return {
+                'success': True,
+                'content': cached_response['content'],
+                'citations': cached_response.get('citations', []),
+                'model': model,
+                'complexity_score': complexity_score,
+                'cache_hit': True,
+                'cost_estimate': 0.0,
+                'budget_status': self.budget_manager.check_budget()
+            }
+        
+        # Check budget before making API call
+        budget_status = self.budget_manager.check_budget()
+        if not budget_status['allow_requests'] and not dry_run:
+            logger.warning("Budget exceeded - skipping API call")
+            return {
+                'success': False,
+                'error': 'Budget exceeded',
+                'budget_status': budget_status,
+                'cache_hit': False
+            }
+        
+        # Estimate tokens (rough estimation)
+        input_tokens = len(prompt) // 4  # Rough token estimation
+        output_tokens = self.models[model].max_tokens // 2  # Assume half output
+        searches = min(complexity_score // 2, 5) if enable_web_search else 0
+        
+        estimated_cost = self.estimate_cost(input_tokens, output_tokens, searches, model)
+        
+        if dry_run:
+            logger.info(f"DRY_RUN: Would make API call with cost ${estimated_cost:.4f}")
+            return {
+                'success': True,
+                'dry_run': True,
+                'content': f"[DRY_RUN] Research would be performed with {model} model",
+                'model': model,
+                'complexity_score': complexity_score,
+                'cost_estimate': estimated_cost,
+                'budget_status': budget_status,
+                'cache_hit': False
+            }
+        
+        try:
+            # Make API request
+            api_response = self._make_api_request(prompt, model, max_tokens, temperature)
+            
+            # Extract content
+            content = api_response.get('choices', [{}])[0].get('message', {}).get('content', '')
+            citations = api_response.get('citations', [])
+            
+            response_data = {
+                'content': content,
+                'citations': citations,
+                'model': model,
+                'complexity_score': complexity_score
+            }
+            
+            # Cache the response
+            self.cache_manager.cache_response(prompt[:100], prompt, model, response_data)
+            
+            # Record usage
+            request_meta = RequestMetadata(
+                timestamp=datetime.now(),
+                model=model,
+                input_tokens=input_tokens,
+                output_tokens=len(content) // 4,  # Rough estimation
+                searches_performed=searches,
+                estimated_cost=estimated_cost,
+                complexity_score=complexity_score,
+                cache_hit=False
+            )
+            
+            self.budget_manager.record_usage(request_meta)
+            
+            return {
+                'success': True,
+                'content': content,
+                'citations': citations,
+                'model': model,
+                'complexity_score': complexity_score,
+                'cost_estimate': estimated_cost,
+                'cache_hit': False,
+                'budget_status': self.budget_manager.check_budget()
+            }
+        
+        except Exception as e:
+            logger.error(f"API request failed: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'model': model,
+                'complexity_score': complexity_score,
+                'cost_estimate': estimated_cost,
+                'cache_hit': False
+            }
+
     def analyze_issue(self, title: str, body: str, issue_number: int = None, 
                      dry_run: bool = False) -> Dict:
         """Analyze an issue with caching and budget control"""

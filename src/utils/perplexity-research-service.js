@@ -5,12 +5,19 @@
 
 class PerplexityResearchService {
   constructor() {
-    this.apiKey = process.env.PERPLEXITY_API_KEY;
+    this.apiKey = process.env.PERPLEXITY_API_KEY || process.env.PPLX_API_KEY;
     this.baseURL = 'https://api.perplexity.ai';
     this.defaultModel = 'sonar-pro';
     this.cache = new Map();
     this.rateLimitDelay = 1000; // 1 second between requests
     this.lastRequestTime = 0;
+    
+    // Debug API key detection
+    if (this.apiKey) {
+      console.log(`✅ Perplexity API key detected: ${this.apiKey.substring(0, 8)}...`);
+    } else {
+      console.log('⚠️ No Perplexity API key found in environment variables (PERPLEXITY_API_KEY, PPLX_API_KEY)');
+    }
   }
 
   /**
@@ -36,8 +43,10 @@ class PerplexityResearchService {
     }
 
     // Check if API key is available
-    if (!this.apiKey || this.apiKey === 'demo_mode') {
+    if (!this.apiKey || this.apiKey === 'demo_mode' || this.apiKey === 'your_api_key_here') {
       console.log('⚠️ Using mock Perplexity response (no API key configured)');
+      console.log(`   API key status: ${!this.apiKey ? 'missing' : 'invalid/placeholder'}`);
+      console.log(`   Expected format: pplx-...`);
       return this.getMockResearchData(query);
     }
 

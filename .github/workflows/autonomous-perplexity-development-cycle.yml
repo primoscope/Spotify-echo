@@ -164,6 +164,50 @@ jobs:
           
           echo "✅ Session initialized: $SESSION_ID"
 
+      - name: Validate API Configuration
+        id: validate-api
+        run: |
+          echo "🔍 Validating API configuration..."
+          echo "PERPLEXITY_API_KEY present: $([[ -n "$PERPLEXITY_API_KEY" ]] && echo "YES" || echo "NO")"
+          echo "API key preview: ${PERPLEXITY_API_KEY:0:8}..."
+          
+          # Test the API key directly
+          python3 << 'EOF'
+          import os
+          import requests
+          
+          api_key = os.getenv('PERPLEXITY_API_KEY')
+          print(f"Python sees API key: {'YES' if api_key else 'NO'}")
+          
+          if api_key:
+              print(f"API key format check: {'OK' if api_key.startswith('pplx-') else 'INVALID FORMAT'}")
+              
+              # Quick API test
+              try:
+                  response = requests.post(
+                      'https://api.perplexity.ai/chat/completions',
+                      headers={
+                          'Authorization': f'Bearer {api_key}',
+                          'Content-Type': 'application/json'
+                      },
+                      json={
+                          'model': 'sonar',
+                          'messages': [{'role': 'user', 'content': 'Test'}],
+                          'max_tokens': 10
+                      },
+                      timeout=10
+                  )
+                  print(f"API test status: {response.status_code}")
+                  if response.status_code == 200:
+                      print("✅ API key is working!")
+                  elif response.status_code == 401:
+                      print("❌ API key is invalid!")
+                  else:
+                      print(f"⚠️ API returned: {response.status_code}")
+              except Exception as e:
+                  print(f"API test failed: {e}")
+          EOF
+
       - name: Analyze Current Roadmap
         id: analyze-roadmap
         run: |

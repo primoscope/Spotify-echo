@@ -12,6 +12,7 @@ const yaml = require('js-yaml');
 class PerplexityCommandTester {
     constructor() {
         this.newCommands = [
+            'perplexity',
             'perplexity-analyze',
             'analyze-perplexity', 
             'perplexity-research',

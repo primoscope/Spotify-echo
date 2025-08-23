@@ -197,6 +197,232 @@ jobs:
             docs-command-results.log
           retention-days: 30
 
+      - name: Execute Perplexity Help Command
+        if: |
+          steps.parse.outputs.command == 'perplexity' && 
+          (steps.parse.outputs.params == 'help' || steps.parse.outputs.params == '')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            
+            const helpMessage = `## 🤖 Complete Perplexity AI Commands Guide
+            
+            **Welcome to the EchoTune AI Perplexity Integration!** 
+            
+            All Perplexity commands use advanced AI models with automatic budget management and cost optimization.
+            
+            ## 📋 Available Perplexity Commands
+            
+            ### 🔍 Analysis Commands
+            
+            \`\`\`
+            /perplexity-analyze [scope]
+            /analyze-perplexity [scope]
+            \`\`\`
+            **Purpose**: Comprehensive analysis using Perplexity AI with targeted scope  
+            **Examples**:
+            - \`/perplexity-analyze frontend\` - Analyze frontend components and architecture
+            - \`/analyze-perplexity scripts/\` - Analyze specific directory structure
+            - \`/perplexity-analyze api integration\` - Focus on API integration patterns
+            
+            **Features**:
+            - 🎯 Targeted technical analysis with actionable insights
+            - 📊 Complexity-based model selection for optimal cost/quality balance
+            - 📈 Detailed analysis reports with implementation recommendations
+            - ⚡ 2-iteration limit for focused processing
+            
+            ---
+            
+            ### 🔬 Research Commands
+            
+            \`\`\`
+            /perplexity-research [topic]
+            /research-perplexity [topic]
+            \`\`\`
+            **Purpose**: Focused research on specific topics using Perplexity browser search  
+            **Examples**:
+            - \`/perplexity-research "latest React patterns"\` - Research current best practices
+            - \`/research-perplexity "music recommendation algorithms"\` - Industry insights
+            - \`/perplexity-research "Node.js performance optimization"\` - Technical research
+            
+            **Features**:
+            - 🌐 Latest trends, best practices, and technologies via browser search
+            - 🔄 Research results integrated into development roadmap
+            - 💾 14-day caching to optimize costs and performance
+            - ⚡ 1-iteration limit for efficient processing
+            
+            ---
+            
+            ### 🤖 Autonomous Coding & Research Integration **[NEW]**
+            
+            \`\`\`
+            /autonomous-coding-cycle
+            /start-coding-cycle
+            @copilot autonomous coding
+            @copilot autonomous coding threshold [number]
+            @copilot autonomous coding cycles [number]
+            \`\`\`
+            **Purpose**: Complete integrated autonomous development with coding tasks and research feedback loop  
+            **Examples**:
+            - \`@copilot autonomous coding\` - Start autonomous coding with default settings (3 tasks/cycle, 5 max cycles)
+            - \`@copilot autonomous coding threshold 5\` - Custom task threshold before research trigger
+            - \`@copilot autonomous coding cycles 3\` - Limit to 3 complete coding/research cycles
+            - \`/autonomous-coding-cycle\` - Direct workflow trigger
+            
+            **Features**:
+            - 🛠️ **GitHub Copilot Integration**: Executes development tasks from roadmap automatically
+            - 🔍 **Research-Triggered Updates**: Perplexity research analyzes repository when task thresholds are met
+            - 📋 **Continuous Roadmap Updates**: Research findings feed back into development priorities
+            - 🔄 **Self-Improving Loop**: Coding → Research → Roadmap Update → More Coding → Repeat
+            - ⚡ **Threshold-Based**: Research only triggers after specified number of tasks completed (default: 3)
+            - 💰 **Budget Conscious**: Optimized for cost efficiency with smart model selection
+            
+            **Integration Flow**:
+            1. **Phase 1**: GitHub Copilot executes coding tasks from roadmap files
+            2. **Phase 2**: When threshold reached, Perplexity conducts comprehensive repository analysis
+            3. **Phase 3**: Research insights automatically integrated into roadmap for next cycle
+            4. **Phase 4**: Updated roadmap triggers new coding tasks, cycle continues
+            
+            ---
+            
+            ### 📋 Roadmap Commands
+            
+            \`\`\`
+            /perplexity-roadmap-update
+            \`\`\`
+            **Purpose**: Update roadmap with latest Perplexity research insights  
+            **Features**:
+            - 📈 Latest research findings integrated into development roadmap
+            - 🎯 Tasks reprioritized based on current industry trends
+            - 📋 Updated implementation strategies and approaches
+            - ⏰ Realistic timeline adjustments based on complexity analysis
+            
+            ---
+            
+            ### 💰 Budget & Cost Management Commands
+            
+            \`\`\`
+            /perplexity-budget-check
+            \`\`\`
+            **Purpose**: Check Perplexity usage and budget status  
+            **Features**:
+            - 💳 Real-time usage monitoring: \$3.00 weekly budget limit
+            - 📊 Usage percentage with detailed breakdown
+            - ⚠️ Automated warnings at 80% usage
+            - 🔒 Automatic enforcement at 100% usage
+            - 📅 Weekly reset schedule (Monday mornings)
+            
+            \`\`\`
+            /perplexity-optimize-costs
+            \`\`\`
+            **Purpose**: Analyze and optimize Perplexity usage patterns  
+            **Features**:
+            - 📈 Review current API usage patterns and efficiency
+            - 🎯 Optimize model selection for cost/performance balance
+            - 💾 Improve cache hit rates and TTL settings
+            - 💡 Weekly budget optimization recommendations
+            
+            ---
+            
+            ## 💡 Usage Tips & Best Practices
+            
+            ### ⚡ Quick Commands
+            - \`/perplexity-budget-check\` - Always check budget first
+            - \`@copilot autonomous coding\` - **NEW**: Start integrated coding/research cycle
+            - \`/perplexity-analyze\` - General repository analysis
+            - \`/perplexity-research "topic"\` - Focused research on any topic
+            
+            ### 🎯 Scope Parameters
+            Most commands accept optional scope parameters:
+            - **Directories**: \`scripts/\`, \`src/\`, \`docs/\`
+            - **Components**: \`frontend\`, \`backend\`, \`api\`, \`database\`
+            - **Topics**: \`"authentication"\`, \`"performance optimization"\`
+            
+            ### 🔄 Command Combinations & Workflows
+            
+            **Traditional Workflow**:
+            1. Start with budget check: \`/perplexity-budget-check\`
+            2. Research topic: \`/perplexity-research "your topic"\`
+            3. Analyze specific area: \`/perplexity-analyze scope\`
+            4. Update roadmap: \`/perplexity-roadmap-update\`
+            
+            **NEW Autonomous Workflow** 🆕:
+            1. \`@copilot autonomous coding\` - Starts complete integrated cycle
+            2. System automatically executes coding tasks from roadmap
+            3. When threshold reached, triggers Perplexity research
+            4. Research findings update roadmap automatically
+            5. Cycle continues with new tasks - fully autonomous!
+            
+            ## 🛡️ Budget Management Features
+            
+            - **Weekly Budget**: \$3.00 USD with automatic enforcement
+            - **Smart Model Selection**: 
+              - 🟢 **Sonar**: Simple queries (lowest cost)
+              - 🟡 **Sonar-Reasoning**: Complex analysis (medium cost)  
+              - 🔴 **Sonar-Pro**: Advanced research (highest cost)
+            - **Cache System**: 14-day TTL reduces repeat costs by 70%+
+            - **Usage Alerts**: Proactive warnings at 80% usage
+            - **Automatic Locks**: Hard stops at 100% usage to prevent overages
+            - **Threshold Controls**: Autonomous coding respects budget limits automatically
+            
+            ## 📊 Command Status & Confirmation
+            
+            Each command provides:
+            - ✅ **Immediate Confirmation**: Command received and validated
+            - 🔄 **Progress Tracking**: Live workflow links and status updates
+            - 📈 **Expected Outcomes**: Clear descriptions of what will be delivered
+            - ⏱️ **Estimated Duration**: Realistic time expectations
+            - 📋 **Follow-up Actions**: Suggested next steps and related commands
+            
+            ## 🔗 Monitoring & Results
+            
+            **Track Your Commands**:
+            - 📊 [View Active Workflows](${{ github.server_url }}/${{ github.repository }}/actions)
+            - 📁 Session artifacts available after completion
+            - 📈 Detailed reports with actionable insights
+            - 🔄 Automatic updates to roadmap and documentation
+            
+            **Results Location**:
+            - Updated files: \`ROADMAP.md\`, \`AUTONOMOUS_DEVELOPMENT_ROADMAP.md\`
+            - Analysis reports: Available as workflow artifacts
+            - Budget status: Real-time updates in this repository
+            - Coding artifacts: Implementation files and session logs
+            
+            ## 🆘 Need Help?
+            
+            - **Quick Budget Check**: \`/perplexity-budget-check\`  
+            - **Start Autonomous Coding**: \`@copilot autonomous coding\` 🆕
+            - **General Analysis**: \`/perplexity-analyze\`
+            - **Research Help**: \`/perplexity-research "help with [topic]"\`
+            - **This Help**: \`/perplexity help\`
+            
+            ---
+            
+            ## 🚀 **Ready to Start?**
+            
+            **🆕 Try the new Autonomous Coding Integration**:
+            - \`@copilot autonomous coding\` - Start complete integrated development cycle
+            - \`@copilot autonomous coding threshold 5\` - Custom research trigger threshold
+            - \`@copilot autonomous coding cycles 3\` - Limit cycles for focused development
+            
+            **Traditional Commands**:
+            - \`/perplexity-budget-check\` - See your current budget status
+            - \`/perplexity-analyze "recommendation system"\` - Get insights on our music engine
+            - \`/perplexity-research "latest AI music trends"\` - Research industry developments
+            
+            *All Perplexity commands are optimized for cost efficiency with automatic budget management, intelligent model selection, and now integrated autonomous coding capabilities.*
+            
+            ---
+            *Enhanced Copilot Slash Commands with Perplexity AI Integration & Autonomous Coding System*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: helpMessage
+            });
+
       - name: Execute Specific Perplexity Commands
         if: |
           steps.parse.outputs.command == 'perplexity-analyze' ||
@@ -228,19 +454,9 @@ jobs:
               MAX_ITERATIONS=1
               ;;
             "perplexity-budget-check")
-              # Handle budget check directly without workflow
-              python3 -c "
-          import sys
-          sys.path.append('scripts')
-          from perplexity_client import PerplexityClient
-          client = PerplexityClient()
-          status = client.budget_manager.check_budget()
-          print(f'💰 Budget Status: {status[\"status\"]}')
-          print(f'💳 Used: \$${status[\"total_cost\"]:.4f} / \$${status[\"weekly_budget\"]:.2f}')  
-          print(f'📊 Usage: {status[\"budget_used_pct\"]:.1f}%')
-          print(f'📞 Requests: {status[\"request_count\"]}')
-          print(f'📅 Week: {status[\"week_key\"]}')
-              " > perplexity-budget-status.txt
+              # Handle budget check using dedicated script
+              echo "🔍 Executing budget check using dedicated script..."
+              python3 scripts/budget_status_simple.py > perplexity-budget-status.txt 2>&1
               echo "budget_check_only=true" >> $GITHUB_ENV
               exit 0
               ;;
@@ -264,13 +480,49 @@ jobs:
             
           echo "✅ Perplexity command workflow triggered"
 
+      - name: Execute Autonomous Coding Cycle Command
+        if: |
+          steps.parse.outputs.command == 'autonomous-coding-cycle' ||
+          steps.parse.outputs.command == 'start-coding-cycle' ||
+          contains(steps.parse.outputs.comment_body, '@copilot autonomous coding') ||
+          contains(steps.parse.outputs.comment_body, 'perplexity autonomous coding')
+        run: |
+          echo "🤖 Executing Autonomous Coding and Perplexity Research Cycle..."
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          COMMENT_BODY="${{ steps.parse.outputs.comment_body }}"
+          
+          # Extract parameters from comment if provided
+          TASK_THRESHOLD="3"
+          MAX_CYCLES="5"
+          
+          # Check for custom parameters in comment
+          if echo "$COMMENT_BODY" | grep -E "threshold[[:space:]]*[0-9]+"; then
+            TASK_THRESHOLD=$(echo "$COMMENT_BODY" | grep -oE "threshold[[:space:]]*[0-9]+" | grep -oE "[0-9]+")
+          fi
+          
+          if echo "$COMMENT_BODY" | grep -E "cycles[[:space:]]*[0-9]+"; then
+            MAX_CYCLES=$(echo "$COMMENT_BODY" | grep -oE "cycles[[:space:]]*[0-9]+" | grep -oE "[0-9]+")
+          fi
+          
+          # Trigger autonomous coding and research cycle workflow
+          gh workflow run autonomous-coding-perplexity-cycle.yml \
+            --field force_start=true \
+            --field task_threshold="$TASK_THRESHOLD" \
+            --field max_cycles="$MAX_CYCLES"
+            
+          echo "✅ Autonomous Coding and Perplexity Research Cycle triggered"
+          echo "   - Task Threshold: $TASK_THRESHOLD"
+          echo "   - Max Cycles: $MAX_CYCLES"
+
       - name: Execute General Perplexity Research Command
         if: |
           (contains(steps.parse.outputs.command, 'perplexity') && 
            !contains(steps.parse.outputs.command, 'perplexity-')) ||
           steps.parse.outputs.command == 'start-autonomous-development' ||
           contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
-          contains(steps.parse.outputs.comment_body, 'autonomous development')
+          (contains(steps.parse.outputs.comment_body, 'autonomous development') && 
+           !contains(steps.parse.outputs.comment_body, 'autonomous coding'))
         run: |
           echo "🔍 Executing General Perplexity/Autonomous Development command..."
           
@@ -443,13 +695,112 @@ jobs:
               body: responseMessage
             });
 
+      - name: Post Autonomous Coding Cycle Response
+        if: |
+          steps.parse.outputs.command == 'autonomous-coding-cycle' ||
+          steps.parse.outputs.command == 'start-coding-cycle' ||
+          contains(steps.parse.outputs.comment_body, '@copilot autonomous coding') ||
+          contains(steps.parse.outputs.comment_body, 'perplexity autonomous coding')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const commentBody = '${{ steps.parse.outputs.comment_body }}';
+            
+            // Extract any parameters from comment
+            const taskThresholdMatch = commentBody.match(/threshold\s*(\d+)/i);
+            const maxCyclesMatch = commentBody.match(/cycles\s*(\d+)/i);
+            
+            const taskThreshold = taskThresholdMatch ? taskThresholdMatch[1] : '3';
+            const maxCycles = maxCyclesMatch ? maxCyclesMatch[1] : '5';
+            
+            const responseMessage = `## 🤖 Autonomous Coding & Perplexity Research Cycle Initiated
+            
+            **Request**: Integrated autonomous coding with Perplexity browser research
+            **Status**: ✅ Workflow triggered successfully
+            **Task Threshold**: ${taskThreshold} tasks per cycle before research trigger
+            **Max Cycles**: ${maxCycles} complete coding/research cycles
+            **Estimated Duration**: 10-15 minutes for complete integrated cycle
+            
+            ## 🔄 Integrated Development Loop
+            
+            This creates a comprehensive autonomous development system that integrates:
+            
+            ### 🛠️ Phase 1: GitHub Copilot Coding Tasks
+            1. **Roadmap Analysis**: Analyze roadmap and app development files for actionable tasks
+            2. **Task Execution**: GitHub coding agent implements identified tasks automatically
+            3. **Progress Tracking**: Monitor task completion against threshold (${taskThreshold} tasks)
+            4. **Code Quality**: Ensure production-ready implementations with proper testing
+            
+            ### 🔍 Phase 2: Perplexity Browser Research (Triggered After ${taskThreshold} Tasks)
+            1. **Repository Analysis**: Comprehensive analysis of current codebase and architecture
+            2. **Industry Research**: Latest trends, best practices, and emerging technologies
+            3. **Opportunity Identification**: New features, improvements, and optimizations
+            4. **Strategic Insights**: Research-driven recommendations for next development phase
+            
+            ### 📋 Phase 3: Roadmap Updates & Next Cycle Preparation
+            1. **Research Integration**: Findings automatically integrated into roadmap files
+            2. **Task Generation**: New development tasks created from research insights
+            3. **Priority Updates**: Task priorities adjusted based on current trends and needs
+            4. **Cycle Continuation**: Updated roadmap triggers next autonomous coding cycle
+            
+            ## 🎯 Key Features of This Integration:
+            
+            - **Threshold-Based Research**: Perplexity research triggered automatically after ${taskThreshold} completed tasks
+            - **Continuous Loop**: Research feeds back into roadmap → triggers more coding → research → repeat
+            - **Smart Model Selection**: Complexity-based Perplexity model routing for cost optimization
+            - **Budget Management**: $3/week Perplexity budget with automatic enforcement
+            - **Quality Assurance**: Production-ready code with comprehensive error handling
+            - **Progress Tracking**: Detailed session reports and artifact generation
+            
+            ## 📊 Expected Outcomes:
+            
+            - **${maxCycles} Complete Cycles**: Each cycle includes coding tasks + research (if threshold met)
+            - **Comprehensive Development**: Both immediate implementation and strategic planning
+            - **Research-Driven Updates**: Roadmap continuously updated with latest insights
+            - **Autonomous Operation**: Self-sustaining development loop requiring minimal manual intervention
+            - **Cost-Optimized Research**: Intelligent caching and model selection to stay within budget
+            
+            ## 🔗 Monitor Progress:
+            
+            - **Live Workflow**: [View progress](${{ github.server_url }}/${{ github.repository }}/actions)
+            - **Session Artifacts**: Detailed logs, research results, and cycle reports available after completion
+            - **Updated Files**: ROADMAP.md, AUTONOMOUS_DEVELOPMENT_ROADMAP.md, and implementation files
+            
+            ## 🔄 Continuous Operation:
+            
+            This system creates a self-improving development environment:
+            - **Automatic Triggers**: Every 4 hours via scheduled execution
+            - **Manual Triggers**: \`@copilot autonomous coding\` or \`/autonomous-coding-cycle\`
+            - **Research Integration**: Findings automatically influence next development priorities
+            - **Adaptive Thresholds**: System learns and optimizes based on task complexity and research quality
+            
+            ### 🚀 Command Variations:
+            - \`@copilot autonomous coding\` - Start with default settings
+            - \`@copilot autonomous coding threshold 5\` - Custom task threshold
+            - \`@copilot autonomous coding cycles 3\` - Limit to 3 cycles
+            - \`/autonomous-coding-cycle\` - Direct workflow trigger
+            
+            **The integrated autonomous coding and research system is now active and will provide continuous, research-driven development improvements to EchoTune AI.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Autonomous Coding & Perplexity Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
       - name: Post General Perplexity Command Response
         if: |
           ((contains(steps.parse.outputs.command, 'perplexity') && 
             !contains(steps.parse.outputs.command, 'perplexity-')) ||
            steps.parse.outputs.command == 'start-autonomous-development' ||
            contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
-           contains(steps.parse.outputs.comment_body, 'autonomous development')) &&
+           (contains(steps.parse.outputs.comment_body, 'autonomous development') && 
+            !contains(steps.parse.outputs.comment_body, 'autonomous coding'))) &&
           env.budget_check_only != 'true'
         uses: actions/github-script@v7
         with:
@@ -513,8 +864,11 @@ jobs:
       - name: Handle Other Commands
         if: |
           steps.parse.outputs.command != 'review-docs' &&
-          !contains(steps.parse.outputs.command, 'perplexity') && 
-          !contains(steps.parse.outputs.command, 'start-autonomous-development') &&
+          steps.parse.outputs.command != 'perplexity' &&
+          !contains(steps.parse.outputs.command, 'perplexity-') && 
+          steps.parse.outputs.command != 'analyze-perplexity' &&
+          steps.parse.outputs.command != 'research-perplexity' &&
+          steps.parse.outputs.command != 'start-autonomous-development' &&
           !contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') &&
           !contains(steps.parse.outputs.comment_body, 'autonomous development') &&
           steps.parse.outputs.command != ''
@@ -533,6 +887,9 @@ jobs:
               'run-mcp-all',
               'mcp-health-check',
               'start-autonomous-development',
+              'autonomous-coding-cycle',
+              'start-coding-cycle',
+              'perplexity',
               'perplexity-research',
               'perplexity-analyze',
               'perplexity-roadmap-update', 
@@ -591,8 +948,12 @@ jobs:
               #### 🤖 Autonomous Development Commands
               - \`/start-autonomous-development\` - Begin autonomous development cycle
               - \`@copilot use perplexity browser research\` - Trigger research-driven development
+              - \`/autonomous-coding-cycle\` - **NEW**: Start integrated coding and research cycle
+              - \`/start-coding-cycle\` - **NEW**: Alternative trigger for autonomous coding
+              - \`@copilot autonomous coding\` - **NEW**: Natural language trigger for autonomous coding
               
-              #### 🔍 Specific Perplexity Commands (NEW!)
+              #### 🔍 Specific Perplexity Commands
+              - \`/perplexity help\` - 📚 Complete guide with examples and usage tips
               - \`/perplexity-analyze <scope>\` - Targeted analysis with Perplexity AI
               - \`/analyze-perplexity <scope>\` - Alternative phrasing for analysis
               - \`/perplexity-research <topic>\` - Focused research on specific topics
@@ -604,17 +965,23 @@ jobs:
               ### 🔍 Autonomous Development Triggers:
               - \`@copilot use perplexity browser research\` - Full autonomous cycle with roadmap updates
               - \`@copilot autonomous development\` - Alternative natural language trigger
+              - \`@copilot autonomous coding\` - **NEW**: Integrated coding and research cycle
               - \`/start-autonomous-development\` - Direct autonomous development trigger
+              - \`/autonomous-coding-cycle\` - **NEW**: Direct autonomous coding cycle trigger
               - Comments containing "autonomous development" - Natural language triggers
+              - Comments containing "autonomous coding" - **NEW**: Coding-focused natural language triggers
               
               ### 📚 Usage Examples:
               - \`/review-docs\` - Analyze all documentation
               - \`/review-docs api\` - Focus on API documentation
               - \`/gpt5 analyze scripts/\` - Analyze specific directory
+              - \`/perplexity help\` - **📚 Complete Perplexity commands guide**
               - \`/perplexity-analyze frontend\` - Analyze frontend with Perplexity
               - \`/perplexity-research "latest React patterns"\` - Research specific topic
               - \`/perplexity-budget-check\` - Check current usage and budget
               - \`@copilot use perplexity browser research\` - Start comprehensive development cycle
+              - \`@copilot autonomous coding\` - **NEW**: Start integrated coding and research cycle
+              - \`/autonomous-coding-cycle\` - **NEW**: Direct autonomous coding cycle trigger
               
               ### 💡 Command Tips:
               - **Scope Parameters**: Most commands accept optional scope (e.g., \`scripts/\`, \`frontend\`, \`api\`)

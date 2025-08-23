@@ -2,17 +2,11 @@ name: AI Budget Monitor
 
 on:
   schedule:
-    # Run every 6 hours to monitor budget
-    - cron: '0 */6 * * *'
+    - cron: '0 */6 * * *'  # Every 6 hours
   workflow_dispatch:
     inputs:
       force_check:
-        description: 'Force budget check regardless of status'
-        required: false
-        type: boolean
-        default: false
-      reset_budget:
-        description: 'Reset weekly budget (DANGEROUS - requires confirmation in repo settings)'
+        description: 'Force budget check'
         required: false
         type: boolean
         default: false
@@ -47,291 +41,84 @@ jobs:
         run: |
           echo "💰 Monitoring Perplexity API budget..."
           
-          # Run cost monitor
-          python scripts/cost_monitor.py \
-            --check-budget \
-            --output-file budget_status.json \
-            --comment
+          python scripts/cost_monitor.py --check-budget --output-file budget_status.json
           
-          # Extract status for workflow decisions
-          budget_status=$(python -c "
-          import json
-          with open('budget_status.json', 'r') as f:
-              data = json.load(f)
-          print(data['budget_status'])
-          ")
-          
-          budget_used_pct=$(python -c "
-          import json
-          with open('budget_status.json', 'r') as f:
-              data = json.load(f)
-          print(f\"{data['budget_used_pct']:.1f}\")
-          ")
-          
-          current_cost=$(python -c "
-          import json
-          with open('budget_status.json', 'r') as f:
-              data = json.load(f)
-          print(f\"{data['current_cost']:.4f}\")
-          ")
+          # Extract values for workflow decisions
+          budget_status=$(python -c "import json; data=json.load(open('budget_status.json')); print(data['budget_status'])")
+          budget_used_pct=$(python -c "import json; data=json.load(open('budget_status.json')); print(f'{data[\"budget_used_pct\"]:.1f}')")
+          current_cost=$(python -c "import json; data=json.load(open('budget_status.json')); print(f'{data[\"current_cost\"]:.4f}')")
           
           echo "budget_status=$budget_status" >> $GITHUB_OUTPUT
           echo "budget_used_pct=$budget_used_pct" >> $GITHUB_OUTPUT
           echo "current_cost=$current_cost" >> $GITHUB_OUTPUT
           
-          # Set alert level for downstream jobs
+          # Set alert level
           if (( $(echo "$budget_used_pct >= 100" | bc -l) )); then
             echo "alert_level=CRITICAL" >> $GITHUB_OUTPUT
           elif (( $(echo "$budget_used_pct >= 80" | bc -l) )); then
             echo "alert_level=WARNING" >> $GITHUB_OUTPUT
-          elif (( $(echo "$budget_used_pct >= 50" | bc -l) )); then
-            echo "alert_level=INFO" >> $GITHUB_OUTPUT
           else
             echo "alert_level=OK" >> $GITHUB_OUTPUT
           fi
           
           echo "📊 Budget Status: $budget_status ($budget_used_pct% used)"
-          echo "💸 Current Cost: \$$current_cost"
       
-      - name: Generate budget report
-        if: github.event_name == 'workflow_dispatch' || steps.monitor.outputs.alert_level != 'OK'
-        run: |
-          echo "📋 Generating detailed budget report..."
-          python scripts/cost_monitor.py --report --weeks 4 --output-file budget_report.json
-      
-      - name: Create budget alert issue (Critical)
+      - name: Create critical alert issue
         if: steps.monitor.outputs.alert_level == 'CRITICAL'
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
+            const title = 'CRITICAL: Perplexity API Budget Exceeded';
+            const body = `## 🚨 Perplexity API Budget Exceeded
             
-            // Generate monitoring comment
-            const { execSync } = require('child_process');
-            const monitoringComment = execSync(
-              'python scripts/cost_monitor.py --check-budget --comment',
-              { encoding: 'utf8' }
-            );
+            **Status**: CRITICAL - All API requests blocked
+            **Usage**: ${{ steps.monitor.outputs.budget_used_pct }}%
+            **Cost**: \$${{ steps.monitor.outputs.current_cost }}
             
-            const commentStart = monitoringComment.indexOf('## 🚨 Perplexity API Budget Monitor');
-            const finalComment = commentStart >= 0 ? monitoringComment.substring(commentStart) : monitoringComment;
+            ## Actions Required
+            1. All API requests are blocked until next week
+            2. Budget resets automatically Monday 00:00 UTC
+            3. Consider increasing PPLX_WEEKLY_BUDGET if needed
+            4. Manual reset: python scripts/cost_monitor.py --reset-budget --confirm
             
-            const title = `🚨 CRITICAL: Perplexity API Budget Exceeded - ${new Date().toISOString().slice(0, 10)}`;
+            ## Prevention
+            - Enable aggressive caching
+            - Use batch processing
+            - Prioritize high-impact issues`;
             
-            // Create critical budget alert issue
-            const issue = await github.rest.issues.create({
+            await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: title,
-              body: `${finalComment}
-              
-## 🚨 Immediate Actions Required
-
-1. **All Perplexity API requests are now blocked** until next week
-2. **Review usage patterns** to optimize future spending
-3. **Consider increasing weekly budget** if needed
-4. **Budget will reset automatically** next Monday
-
-## Options to Resolve
-
-### Option 1: Wait for Weekly Reset
-- Budget resets every Monday at 00:00 UTC
-- No action required, just wait
-
-### Option 2: Increase Weekly Budget
-- Update repository variable \`PPLX_WEEKLY_BUDGET\` 
-- Current: $3.00 → Suggested: $5.00 or $10.00
-
-### Option 3: Emergency Budget Reset (Use with caution)
-- Manually run: \`python scripts/cost_monitor.py --reset-budget --confirm\`
-- This will clear current week's usage data
-
-## Prevention for Next Week
-- Enable more aggressive caching
-- Use batch processing for multiple issues
-- Prioritize high-impact analysis
-- Consider using lower-cost models for simple issues`,
-              labels: ['bug', 'urgent', 'automated-alert', 'budget-exceeded']
+              body: body,
+              labels: ['bug', 'urgent', 'budget-exceeded']
             });
-            
-            console.log(`🚨 Created critical budget alert issue #${issue.data.number}`);
       
-      - name: Create budget warning issue
-        if: steps.monitor.outputs.alert_level == 'WARNING' && !contains(github.event.action, 'scheduled')
+      - name: Create warning issue  
+        if: steps.monitor.outputs.alert_level == 'WARNING'
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
+            const title = 'Budget Warning: Perplexity API Usage at 80%+';
+            const body = `## ⚠️ Budget Warning
             
-            // Generate monitoring comment
-            const { execSync } = require('child_process');
-            const monitoringComment = execSync(
-              'python scripts/cost_monitor.py --check-budget --comment',
-              { encoding: 'utf8' }
-            );
+            **Usage**: ${{ steps.monitor.outputs.budget_used_pct }}%
+            **Cost**: \$${{ steps.monitor.outputs.current_cost }}
             
-            const commentStart = monitoringComment.indexOf('## ⚠️ Perplexity API Budget Monitor');
-            const finalComment = commentStart >= 0 ? monitoringComment.substring(commentStart) : monitoringComment;
+            Consider optimizing usage to avoid hitting the limit.`;
             
-            // Check if warning issue already exists this week
-            const { data: existingIssues } = await github.rest.issues.listForRepo({
+            await github.rest.issues.create({
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'budget-warning',
-              per_page: 10
+              repo: context.repo.repo, 
+              title: title,
+              body: body,
+              labels: ['enhancement', 'budget-warning']
             });
-            
-            const currentWeek = new Date().toISOString().slice(0, 10);
-            const existingWarning = existingIssues.find(issue => 
-              issue.title.includes(currentWeek) && issue.title.includes('Budget Warning')
-            );
-            
-            if (!existingWarning) {
-              const title = `⚠️ Budget Warning: Perplexity API Usage at 80%+ - ${currentWeek}`;
-              
-              const issue = await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: title,
-                body: `${finalComment}
-                
-## ⚠️ Budget Warning - Action Recommended
-
-Current usage has exceeded 80% of the weekly budget. Consider taking action to avoid hitting the limit.
-
-## Recommended Actions
-
-1. **Prioritize high-impact issues** for remaining budget
-2. **Use batch processing** to group similar issues
-3. **Enable aggressive caching** to reuse previous analyses
-4. **Monitor daily usage** more closely
-
-## Budget Details
-- **Current Usage**: $${steps.monitor.outputs.current_cost} 
-- **Budget Used**: ${steps.monitor.outputs.budget_used_pct}%
-- **Status**: ${steps.monitor.outputs.budget_status}
-
-Budget automatically resets every Monday at 00:00 UTC.`,
-                labels: ['enhancement', 'automated-alert', 'budget-warning']
-              });
-              
-              console.log(`⚠️ Created budget warning issue #${issue.data.number}`);
-            } else {
-              console.log(`ℹ️ Budget warning issue already exists for this week: #${existingWarning.number}`);
-            }
       
-      - name: Update workflow summary
+      - name: Update summary
         run: |
           echo "## 💰 Budget Monitor Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Budget Status**: ${{ steps.monitor.outputs.budget_status }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Budget Used**: ${{ steps.monitor.outputs.budget_used_pct }}%" >> $GITHUB_STEP_SUMMARY  
-          echo "- **Current Cost**: \$${{ steps.monitor.outputs.current_cost }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Alert Level**: ${{ steps.monitor.outputs.alert_level }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-      
-      - name: Upload budget artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: budget-monitoring-${{ github.run_id }}
-          path: |
-            budget_status.json
-            budget_report.json
-          retention-days: 30
-      
-  budget-reset:
-    name: Emergency Budget Reset
-    runs-on: ubuntu-latest
-    needs: budget-monitor
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.reset_budget == 'true'
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          pip install requests python-dotenv
-      
-      - name: Confirm reset operation
-        run: |
-          echo "🚨 WARNING: Budget reset operation requested"
-          echo "This will clear all usage data for the current week"
-          echo "Repository maintainers should approve this action"
-      
-      - name: Reset weekly budget
-        env:
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-          PPLX_WEEKLY_BUDGET: ${{ vars.PPLX_WEEKLY_BUDGET || '3.0' }}
-        run: |
-          echo "♻️ Resetting weekly budget..."
-          python scripts/cost_monitor.py --reset-budget --confirm --output-file reset_result.json
-          
-          # Log reset results
-          echo "Budget reset completed - check reset_result.json for details"
-      
-      - name: Create reset notification issue
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            
-            let resetData = {};
-            try {
-              const resetFile = fs.readFileSync('reset_result.json', 'utf8');
-              resetData = JSON.parse(resetFile);
-            } catch (error) {
-              console.error('Failed to read reset results:', error);
-            }
-            
-            const title = `♻️ Emergency Budget Reset Performed - ${new Date().toISOString().slice(0, 10)}`;
-            
-            const issue = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: title,
-              body: `## ♻️ Weekly Budget Has Been Reset
-
-**Triggered by**: Workflow dispatch (manual action)  
-**Performed at**: ${new Date().toISOString()}  
-**Reset successful**: ${resetData.success || 'unknown'}
-
-### Reset Details
-- **Week affected**: ${resetData.reset_data?.week_key || 'current week'}
-- **Cleared data**: Usage ledger and budget locks
-- **Backup created**: ${resetData.backup_file || 'unknown'}
-
-### What This Means
-✅ **API requests are now unblocked**  
-✅ **Budget counter reset to $0.00**  
-✅ **Weekly limit restored to $3.00**  
-
-### Important Notes
-- This operation cleared usage tracking data
-- Original data has been backed up for audit purposes  
-- Budget will still reset normally next Monday
-- Consider reviewing usage patterns to prevent future overages
-
-### Prevention Recommendations
-1. Enable more aggressive caching
-2. Use batch processing for multiple issues
-3. Monitor usage more frequently
-4. Consider increasing weekly budget if needed regularly`,
-              labels: ['maintenance', 'automated-action', 'budget-reset']
-            });
-            
-            console.log(`♻️ Created budget reset notification issue #${issue.data.number}`);
-      
-      - name: Upload reset artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: budget-reset-${{ github.run_id }}
-          path: |
-            reset_result.json
-          retention-days: 90
+          echo "- **Status**: ${{ steps.monitor.outputs.budget_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Usage**: ${{ steps.monitor.outputs.budget_used_pct }}%" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cost**: \$${{ steps.monitor.outputs.current_cost }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Alert**: ${{ steps.monitor.outputs.alert_level }}" >> $GITHUB_STEP_SUMMARY

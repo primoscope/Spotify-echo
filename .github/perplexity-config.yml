@@ -1,0 +1,119 @@
+# Perplexity API Budget and Configuration Management
+# Centralized configuration for cost control, model selection, and performance budgets
+
+weekly_budget_usd: 3.00
+warn_threshold_pct: 70
+hard_stop_threshold_pct: 100
+default_model: sonar
+
+# Model pricing and usage policies (costs per million tokens)
+model_policies:
+  - name: sonar
+    use_for: [simple]
+    input_cost_per_million: 1.00
+    output_cost_per_million: 1.00
+    description: "Basic search model for simple queries and lightweight analysis"
+    max_tokens: 4096
+    
+  - name: sonar-reasoning
+    use_for: [moderate]
+    input_cost_per_million: 1.00
+    output_cost_per_million: 5.00
+    description: "Enhanced reasoning model for moderate complexity tasks"
+    max_tokens: 8192
+    
+  - name: sonar-pro
+    use_for: [complex]
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    description: "Premium model for complex analysis and comprehensive research"
+    max_tokens: 16384
+
+# Search query cost (per thousand search queries)
+search_query_cost_per_thousand: 5.00
+
+# Caching configuration
+caching:
+  enabled: true
+  dir: .perplexity/cache
+  max_age_days: 14
+  cleanup_interval_hours: 24
+  max_cache_size_mb: 100
+  compression: true
+
+# Batching configuration
+batching:
+  max_issues_per_run: 5
+  similarity_batch: true
+  similarity_threshold: 0.7
+  batch_delay_seconds: 2
+  max_concurrent_requests: 3
+
+# Budget enforcement settings
+budget_enforcement:
+  enabled: true
+  defer_label: analysis-deferred-budget
+  disable_label: ai-analysis-disabled
+  override_label: override-budget-guard
+  maintenance_issue_title: "Perplexity Budget Status"
+  
+# Performance budgets
+performance_budgets:
+  max_latency_ms: 1500
+  max_memory_mb: 256
+  max_cpu_cores: 0.5
+  timeout_seconds: 30
+
+# Security settings
+security:
+  api_key_validation: true
+  rate_limiting:
+    requests_per_minute: 30
+    burst_allowance: 10
+  retry_policy:
+    max_retries: 3
+    backoff_multiplier: 2
+    max_backoff_seconds: 60
+
+# Logging and observability
+logging:
+  usage_log_file: .perplexity/usage.json
+  enable_debug: false
+  log_api_responses: false
+  cost_reporting: true
+  weekly_summary: true
+
+# Complexity scoring rules for model selection
+complexity_scoring:
+  simple_threshold: 20
+  complex_threshold: 80
+  
+  # Keyword weights for complexity calculation
+  keywords:
+    error_indicators: ["error", "exception", "stack trace", "crash", "bug"] # +15
+    architecture_terms: ["architecture", "design", "refactor", "scalability"] # +25
+    performance_terms: ["performance", "optimization", "bottleneck", "latency"] # +20
+    security_terms: ["security", "vulnerability", "authentication", "encryption"] # +25
+    complex_concepts: ["algorithm", "machine learning", "database schema", "api design"] # +30
+    
+  # Content length scoring
+  length_scoring:
+    base_score: 10
+    per_100_chars: 1
+    per_code_block: 10
+    max_length_score: 40
+
+# Automated maintenance
+maintenance:
+  auto_cleanup_cache: true
+  auto_rotate_logs: true
+  log_retention_days: 30
+  usage_data_retention_weeks: 12
+
+# Integration settings
+integrations:
+  github_actions: true
+  issue_comments: true
+  pr_comments: true
+  slack_notifications: false
+  email_reports: false

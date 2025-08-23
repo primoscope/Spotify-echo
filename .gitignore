@@ -27,6 +27,11 @@ enhanced-*-results.json
 automation-artifacts/*.json
 search-results/*.json
 validation-reports/*.json
+
+# Perplexity budget system runtime files
+.perplexity/
+budget-summary.json
+analysis-result.json
 test-results/*.json
 
 # Temporary performance files

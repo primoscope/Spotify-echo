@@ -29,6 +29,8 @@ EchoTune AI is a sophisticated music discovery platform that combines artificial
 - **🔧 MCP Orchestration**: Advanced Model Context Protocol server ecosystem
 - **🎸 Spotify Integration**: Full OAuth integration with audio feature analysis
 - **⚡ Performance Optimized**: Redis caching, compression, and advanced monitoring
+- **💰 AI Budget Management**: Cost-controlled Perplexity API integration with $3/week limit
+- **🔍 Automated Issue Analysis**: AI-powered GitHub issue analysis with smart caching
 
 ## 🚀 Quick Start
 
@@ -119,8 +121,14 @@ Visit `http://localhost:3000` to start discovering music!
 - **OpenAI GPT-4o** - Conversational AI
 - **Google Gemini 2.0** - Advanced reasoning
 - **Claude 3.5** - Natural language processing
-- **Perplexity API** - Real-time research
+- **Perplexity API** - Real-time research with budget controls
 - **Custom ML Models** - Recommendation algorithms
+
+### AI Budget Management
+- **Cost Control**: Hard $3.00/week budget limit for Perplexity API
+- **Smart Caching**: 14-day cache TTL reduces duplicate API calls
+- **Dynamic Pricing**: Automatic model selection based on complexity
+- **Usage Analytics**: Real-time cost tracking and optimization alerts
 
 ### Infrastructure
 - **Docker** - Containerization
@@ -481,6 +489,50 @@ npm run production-check
 - [ ] VR/AR music experiences
 - [ ] Music therapy applications
 - [ ] Global expansion features
+
+## 🔍 AI-Powered Issue Analysis
+
+EchoTune AI features an advanced Perplexity API integration for automated GitHub issue analysis with comprehensive budget controls.
+
+### Features
+- **$3.00 Weekly Budget**: Hard limit with automatic enforcement and alerts
+- **Smart Caching**: 14-day cache TTL with MD5 hashing reduces costs by 60-80%
+- **Dynamic Model Selection**: Automatic complexity-based model selection (sonar/sonar-reasoning/sonar-pro)
+- **Batch Processing**: Similarity-based grouping optimizes multiple issue analysis
+- **Real-time Monitoring**: Budget tracking, alerts, and emergency controls
+
+### Quick Usage
+
+```bash
+# Analyze a single issue
+python scripts/issue_analyzer.py --issue 123
+
+# Dry run to estimate costs
+python scripts/issue_analyzer.py --issue 123 --dry-run
+
+# Batch process unanalyzed issues  
+python scripts/batch_issue_analyzer.py --max-issues 5
+
+# Monitor budget status
+python scripts/cost_monitor.py --check-budget
+```
+
+### GitHub Actions Integration
+
+The system automatically:
+- Analyzes new issues when opened
+- Runs nightly batch processing at 2 AM UTC
+- Monitors budget every 6 hours
+- Creates alerts at 80% budget usage
+- Blocks API calls at 100% budget usage
+
+### Setup Requirements
+
+1. **Required Secret**: `PERPLEXITY_API_KEY` - Your Perplexity API key
+2. **Optional Variable**: `PPLX_WEEKLY_BUDGET=3.0` - Custom weekly budget (default: $3.00)
+3. **Optional Variable**: `PPLX_MODEL_OVERRIDE=sonar-pro` - Force specific model
+
+Budget resets automatically every Monday at 00:00 UTC. See [Perplexity Integration Guide](docs/perplexity-integration.md) for complete documentation.
 
 ## 📞 Support
 

@@ -1,0 +1,124 @@
+name: AI Budget Monitor
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      force_check:
+        description: 'Force budget check'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  budget-monitor:
+    name: Budget Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv
+      
+      - name: Monitor budget status
+        id: monitor
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          PPLX_WEEKLY_BUDGET: ${{ vars.PPLX_WEEKLY_BUDGET || '3.0' }}
+        run: |
+          echo "💰 Monitoring Perplexity API budget..."
+          
+          python scripts/cost_monitor.py --check-budget --output-file budget_status.json
+          
+          # Extract values for workflow decisions
+          budget_status=$(python -c "import json; data=json.load(open('budget_status.json')); print(data['budget_status'])")
+          budget_used_pct=$(python -c "import json; data=json.load(open('budget_status.json')); print(f'{data[\"budget_used_pct\"]:.1f}')")
+          current_cost=$(python -c "import json; data=json.load(open('budget_status.json')); print(f'{data[\"current_cost\"]:.4f}')")
+          
+          echo "budget_status=$budget_status" >> $GITHUB_OUTPUT
+          echo "budget_used_pct=$budget_used_pct" >> $GITHUB_OUTPUT
+          echo "current_cost=$current_cost" >> $GITHUB_OUTPUT
+          
+          # Set alert level
+          if (( $(echo "$budget_used_pct >= 100" | bc -l) )); then
+            echo "alert_level=CRITICAL" >> $GITHUB_OUTPUT
+          elif (( $(echo "$budget_used_pct >= 80" | bc -l) )); then
+            echo "alert_level=WARNING" >> $GITHUB_OUTPUT
+          else
+            echo "alert_level=OK" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "📊 Budget Status: $budget_status ($budget_used_pct% used)"
+      
+      - name: Create critical alert issue
+        if: steps.monitor.outputs.alert_level == 'CRITICAL'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'CRITICAL: Perplexity API Budget Exceeded';
+            const body = `## 🚨 Perplexity API Budget Exceeded
+            
+            **Status**: CRITICAL - All API requests blocked
+            **Usage**: ${{ steps.monitor.outputs.budget_used_pct }}%
+            **Cost**: \$${{ steps.monitor.outputs.current_cost }}
+            
+            ## Actions Required
+            1. All API requests are blocked until next week
+            2. Budget resets automatically Monday 00:00 UTC
+            3. Consider increasing PPLX_WEEKLY_BUDGET if needed
+            4. Manual reset: python scripts/cost_monitor.py --reset-budget --confirm
+            
+            ## Prevention
+            - Enable aggressive caching
+            - Use batch processing
+            - Prioritize high-impact issues`;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['bug', 'urgent', 'budget-exceeded']
+            });
+      
+      - name: Create warning issue  
+        if: steps.monitor.outputs.alert_level == 'WARNING'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Budget Warning: Perplexity API Usage at 80%+';
+            const body = `## ⚠️ Budget Warning
+            
+            **Usage**: ${{ steps.monitor.outputs.budget_used_pct }}%
+            **Cost**: \$${{ steps.monitor.outputs.current_cost }}
+            
+            Consider optimizing usage to avoid hitting the limit.`;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo, 
+              title: title,
+              body: body,
+              labels: ['enhancement', 'budget-warning']
+            });
+      
+      - name: Update summary
+        run: |
+          echo "## 💰 Budget Monitor Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ steps.monitor.outputs.budget_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Usage**: ${{ steps.monitor.outputs.budget_used_pct }}%" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cost**: \$${{ steps.monitor.outputs.current_cost }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Alert**: ${{ steps.monitor.outputs.alert_level }}" >> $GITHUB_STEP_SUMMARY

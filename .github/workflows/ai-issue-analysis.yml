@@ -1,0 +1,345 @@
+name: AI Issue Analysis with Budget Control
+
+on:
+  issues:
+    types: [opened]
+  schedule:
+    # Run nightly batch analysis at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to analyze'
+        required: false
+        type: number
+      force_analysis:
+        description: 'Force analysis even if cached'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+# Ensure only one analysis workflow runs at a time
+concurrency:
+  group: ai-issue-analysis
+  cancel-in-progress: false
+
+jobs:
+  budget-check:
+    name: Budget Check
+    runs-on: ubuntu-latest
+    outputs:
+      budget_lock: ${{ steps.check.outputs.budget_lock }}
+      budget_status: ${{ steps.check.outputs.budget_status }}
+      allow_requests: ${{ steps.check.outputs.allow_requests }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv
+      
+      - name: Check budget status
+        id: check
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          PPLX_WEEKLY_BUDGET: ${{ vars.PPLX_WEEKLY_BUDGET || '3.0' }}
+        run: |
+          echo "🔍 Checking Perplexity API budget..."
+          
+          # Run cost monitor in dry-run mode to check status
+          python scripts/cost_monitor.py --check-budget --dry-run --output-file budget_status.json
+          
+          # Extract key values for workflow decisions
+          budget_status=$(python -c "
+          import json
+          with open('budget_status.json', 'r') as f:
+              data = json.load(f)
+          print(data['budget_status'])
+          ")
+          
+          allow_requests=$(python -c "
+          import json
+          with open('budget_status.json', 'r') as f:
+              data = json.load(f)
+          print('true' if data['allow_requests'] else 'false')
+          ")
+          
+          budget_lock=$(python -c "
+          import json
+          with open('budget_status.json', 'r') as f:
+              data = json.load(f)
+          print('true' if data['budget_lock_exists'] else 'false')
+          ")
+          
+          echo "budget_status=$budget_status" >> $GITHUB_OUTPUT
+          echo "allow_requests=$allow_requests" >> $GITHUB_OUTPUT  
+          echo "budget_lock=$budget_lock" >> $GITHUB_OUTPUT
+          
+          echo "📊 Budget Status: $budget_status"
+          echo "🔓 Allow Requests: $allow_requests"
+          echo "🔒 Budget Lock: $budget_lock"
+
+  single-issue-analysis:
+    name: Single Issue Analysis
+    runs-on: ubuntu-latest
+    needs: budget-check
+    if: github.event_name == 'issues' || (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number)
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv
+      
+      - name: Check budget before analysis
+        if: needs.budget-check.outputs.budget_lock == 'true'
+        run: |
+          echo "🚨 Budget lock active - skipping analysis"
+          echo "Budget lock active" >> $GITHUB_STEP_SUMMARY
+          exit 0
+      
+      - name: Determine issue number
+        id: issue
+        run: |
+          if [ "${{ github.event_name }}" == "issues" ]; then
+            issue_number=${{ github.event.issue.number }}
+          else
+            issue_number=${{ github.event.inputs.issue_number }}
+          fi
+          echo "issue_number=$issue_number" >> $GITHUB_OUTPUT
+          echo "🔍 Analyzing issue #$issue_number"
+      
+      - name: Analyze issue
+        id: analyze
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          PPLX_WEEKLY_BUDGET: ${{ vars.PPLX_WEEKLY_BUDGET || '3.0' }}
+          PPLX_MODEL_OVERRIDE: ${{ vars.PPLX_MODEL_OVERRIDE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🤖 Running AI analysis for issue #${{ steps.issue.outputs.issue_number }}"
+          
+          # Determine if this should be a dry run
+          if [ "${{ needs.budget-check.outputs.allow_requests }}" != "true" ]; then
+            dry_run_flag="--dry-run"
+            echo "⚠️ Running in dry-run mode due to budget constraints"
+          else
+            dry_run_flag=""
+          fi
+          
+          # Run analysis with comment generation
+          python scripts/issue_analyzer.py \
+            --issue ${{ steps.issue.outputs.issue_number }} \
+            $dry_run_flag \
+            --output-comment \
+            --output-file analysis_result.json
+          
+          # Check if analysis was successful
+          if [ $? -eq 0 ]; then
+            echo "analysis_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "analysis_success=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Post analysis comment
+        if: steps.analyze.outputs.analysis_success == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read analysis results
+            let analysisData;
+            try {
+              const analysisFile = fs.readFileSync('analysis_result.json', 'utf8');
+              analysisData = JSON.parse(analysisFile);
+            } catch (error) {
+              console.error('Failed to read analysis results:', error);
+              return;
+            }
+            
+            // Generate comment from Python script
+            const { execSync } = require('child_process');
+            const commentText = execSync(
+              `python scripts/issue_analyzer.py --issue ${{ steps.issue.outputs.issue_number }} --dry-run --output-comment`,
+              { encoding: 'utf8' }
+            );
+            
+            // Extract just the comment part (after the delimiter)
+            const commentStart = commentText.indexOf('## 🔍 AI Issue Analysis');
+            const finalComment = commentStart >= 0 ? commentText.substring(commentStart) : commentText;
+            
+            // Post comment to issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.issue.outputs.issue_number }},
+              body: finalComment
+            });
+            
+            console.log('✅ Posted AI analysis comment to issue #${{ steps.issue.outputs.issue_number }}');
+      
+      - name: Update workflow summary
+        run: |
+          echo "## 🤖 AI Issue Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Issue**: #${{ steps.issue.outputs.issue_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Budget Status**: ${{ needs.budget-check.outputs.budget_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Analysis Success**: ${{ steps.analyze.outputs.analysis_success }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Budget Lock**: ${{ needs.budget-check.outputs.budget_lock }}" >> $GITHUB_STEP_SUMMARY
+
+  batch-analysis:
+    name: Batch Issue Analysis
+    runs-on: ubuntu-latest
+    needs: budget-check
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !github.event.inputs.issue_number)
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv
+      
+      - name: Check budget before batch analysis
+        if: needs.budget-check.outputs.budget_lock == 'true'
+        run: |
+          echo "🚨 Budget lock active - skipping batch analysis"
+          echo "Budget lock active - batch analysis skipped" >> $GITHUB_STEP_SUMMARY
+          exit 0
+      
+      - name: Run batch analysis
+        id: batch
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          PPLX_WEEKLY_BUDGET: ${{ vars.PPLX_WEEKLY_BUDGET || '3.0' }}
+          PPLX_MODEL_OVERRIDE: ${{ vars.PPLX_MODEL_OVERRIDE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔄 Running batch issue analysis..."
+          
+          # Determine max issues based on budget status
+          if [ "${{ needs.budget-check.outputs.budget_status }}" == "BUDGET_WARNING" ]; then
+            max_issues=2
+            echo "⚠️ Budget warning - limiting to 2 issues"
+          else
+            max_issues=5
+            echo "✅ Budget healthy - processing up to 5 issues"
+          fi
+          
+          # Run batch analysis
+          python scripts/batch_issue_analyzer.py \
+            --max-issues $max_issues \
+            --similarity-grouping \
+            --output-file batch_results.json \
+            --summary-comment
+          
+          # Check if batch analysis was successful
+          if [ $? -eq 0 ]; then
+            echo "batch_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "batch_success=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create batch summary issue
+        if: steps.batch.outputs.batch_success == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read batch results
+            let batchData;
+            try {
+              const batchFile = fs.readFileSync('batch_results.json', 'utf8');
+              batchData = JSON.parse(batchFile);
+            } catch (error) {
+              console.error('Failed to read batch results:', error);
+              return;
+            }
+            
+            // Generate summary comment
+            const { execSync } = require('child_process');
+            const summaryText = execSync(
+              'python scripts/batch_issue_analyzer.py --max-issues 5 --dry-run --summary-comment',
+              { encoding: 'utf8' }
+            );
+            
+            // Extract the comment part
+            const commentStart = summaryText.indexOf('## 🔄 Batch Issue Analysis Summary');
+            const finalSummary = commentStart >= 0 ? summaryText.substring(commentStart) : summaryText;
+            
+            // Create or update a batch analysis issue
+            const title = `🤖 Weekly Batch Analysis Summary - ${new Date().toISOString().slice(0, 10)}`;
+            
+            // Search for existing batch summary issue
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'automated-analysis',
+              per_page: 5
+            });
+            
+            const existingBatchIssue = existingIssues.find(issue => 
+              issue.title.includes('Weekly Batch Analysis Summary')
+            );
+            
+            if (existingBatchIssue) {
+              // Update existing issue with new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingBatchIssue.number,
+                body: finalSummary
+              });
+              console.log(`✅ Updated batch summary in issue #${existingBatchIssue.number}`);
+            } else {
+              // Create new batch summary issue
+              const newIssue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: finalSummary,
+                labels: ['automated-analysis', 'batch-summary']
+              });
+              console.log(`✅ Created new batch summary issue #${newIssue.data.number}`);
+            }
+      
+      - name: Update workflow summary
+        run: |
+          echo "## 🔄 Batch Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Budget Status**: ${{ needs.budget-check.outputs.budget_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Batch Success**: ${{ steps.batch.outputs.batch_success }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Budget Lock**: ${{ needs.budget-check.outputs.budget_lock }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f batch_results.json ]; then
+            echo "- **Issues Processed**: $(python -c "import json; data=json.load(open('batch_results.json')); print(data.get('batch_summary', {}).get('total_issues_processed', 0))")" >> $GITHUB_STEP_SUMMARY
+            echo "- **Total Cost**: \$$(python -c "import json; data=json.load(open('batch_results.json')); print(f\"{data.get('batch_summary', {}).get('total_estimated_cost', 0):.4f}\")")" >> $GITHUB_STEP_SUMMARY
+          fi

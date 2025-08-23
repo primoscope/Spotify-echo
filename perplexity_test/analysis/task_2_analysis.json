@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "error": "PERPLEXITY_API_KEY not configured",
+  "model": "sonar-reasoning",
+  "complexity_score": 6,
+  "cost_estimate": 0.021078,
+  "cache_hit": false
+}

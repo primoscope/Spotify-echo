@@ -1,0 +1,659 @@
+---
+name: Continuous Roadmap Research & Development
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'ROADMAP.md'
+      - 'AUTONOMOUS_DEVELOPMENT_ROADMAP.md'
+      - 'src/**'
+      - 'scripts/**'
+  schedule:
+    # Run daily at 2 AM UTC for overnight development analysis
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      research_depth:
+        description: 'Research depth (light/medium/comprehensive)'
+        required: false
+        default: 'comprehensive'
+        type: choice
+        options:
+          - light
+          - medium  
+          - comprehensive
+      focus_areas:
+        description: 'Comma-separated focus areas'
+        required: false
+        type: string
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+  BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+  PERPLEXITY_MODEL: ${{ vars.PERPLEXITY_MODEL || 'sonar-pro' }}
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  roadmap-research-analysis:
+    name: Comprehensive Roadmap Research
+    runs-on: ubuntu-latest
+    
+    outputs:
+      research_summary: ${{ steps.research.outputs.summary }}
+      actionable_tasks: ${{ steps.research.outputs.task_count }}
+      update_needed: ${{ steps.research.outputs.update_needed }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Comprehensive Repository Analysis
+        id: analyze
+        run: |
+          echo "🔍 Analyzing repository state for research context..."
+          
+          # Create analysis directory
+          mkdir -p .roadmap-research
+          
+          python3 << 'EOF'
+          import os
+          import json
+          from pathlib import Path
+          import subprocess
+          
+          def analyze_repo_state():
+              """Analyze current repository state for context"""
+              analysis = {
+                  "timestamp": subprocess.check_output(['date', '-u', '+%Y-%m-%d %H:%M:%S UTC']).decode().strip(),
+                  "git_stats": {},
+                  "code_stats": {},
+                  "roadmap_status": {},
+                  "recent_changes": []
+              }
+              
+              try:
+                  # Git statistics
+                  total_commits = subprocess.check_output(['git', 'rev-list', '--all', '--count']).decode().strip()
+                  recent_commits = subprocess.check_output(['git', 'log', '--oneline', '-n', '10']).decode().strip().split('\n')
+                  
+                  analysis['git_stats'] = {
+                      "total_commits": int(total_commits),
+                      "recent_commits": len([c for c in recent_commits if c.strip()]),
+                      "current_branch": subprocess.check_output(['git', 'branch', '--show-current']).decode().strip()
+                  }
+                  
+                  # Code statistics  
+                  js_files = len(list(Path('.').glob('**/*.js')))
+                  py_files = len(list(Path('.').glob('**/*.py'))) 
+                  jsx_files = len(list(Path('.').glob('**/*.jsx')))
+                  yml_files = len(list(Path('.').glob('**/*.yml')))
+                  
+                  analysis['code_stats'] = {
+                      "javascript_files": js_files,
+                      "python_files": py_files, 
+                      "react_files": jsx_files,
+                      "workflow_files": yml_files,
+                      "total_source_files": js_files + py_files + jsx_files
+                  }
+                  
+                  # Roadmap analysis
+                  if os.path.exists('ROADMAP.md'):
+                      with open('ROADMAP.md', 'r') as f:
+                          roadmap_content = f.read()
+                      
+                      # Count incomplete tasks
+                      incomplete_tasks = roadmap_content.count('- [ ]')
+                      complete_tasks = roadmap_content.count('- [x]')
+                      total_tasks = incomplete_tasks + complete_tasks
+                      
+                      analysis['roadmap_status'] = {
+                          "total_tasks": total_tasks,
+                          "completed_tasks": complete_tasks, 
+                          "incomplete_tasks": incomplete_tasks,
+                          "completion_percentage": round((complete_tasks / total_tasks * 100) if total_tasks > 0 else 0, 1),
+                          "last_modified": os.path.getmtime('ROADMAP.md')
+                      }
+                  
+                  # Save analysis
+                  with open('.roadmap-research/repo_analysis.json', 'w') as f:
+                      json.dump(analysis, f, indent=2)
+                  
+                  print(f"✅ Repository analysis complete:")
+                  print(f"   - Total commits: {analysis['git_stats']['total_commits']}")
+                  print(f"   - Source files: {analysis['code_stats']['total_source_files']}")
+                  print(f"   - Roadmap completion: {analysis['roadmap_status'].get('completion_percentage', 0)}%")
+                  
+              except Exception as e:
+                  print(f"❌ Analysis error: {e}")
+                  analysis['error'] = str(e)
+                  
+          analyze_repo_state()
+          EOF
+
+      - name: Perplexity Research & Analysis
+        id: research
+        run: |
+          echo "🧠 Conducting comprehensive Perplexity research..."
+          
+          RESEARCH_DEPTH="${{ github.event.inputs.research_depth || 'comprehensive' }}"
+          FOCUS_AREAS="${{ github.event.inputs.focus_areas || '' }}"
+          
+          python3 << 'EOF'
+          import sys
+          sys.path.append('scripts')
+          from perplexity_client import PerplexityClient
+          import json
+          import os
+          from datetime import datetime, timedelta
+          
+          try:
+              client = PerplexityClient()
+              
+              # Load repository analysis
+              with open('.roadmap-research/repo_analysis.json', 'r') as f:
+                  repo_analysis = json.load(f)
+              
+              # Read current roadmaps
+              with open('ROADMAP.md', 'r') as f:
+                  main_roadmap = f.read()
+              
+              autonomous_roadmap = ""
+              if os.path.exists('AUTONOMOUS_DEVELOPMENT_ROADMAP.md'):
+                  with open('AUTONOMOUS_DEVELOPMENT_ROADMAP.md', 'r') as f:
+                      autonomous_roadmap = f.read()
+              
+              # Determine research intensity
+              research_depth = os.environ.get('RESEARCH_DEPTH', 'comprehensive')
+              focus_areas = os.environ.get('FOCUS_AREAS', '').split(',') if os.environ.get('FOCUS_AREAS') else []
+              
+              # Build comprehensive research prompt
+              research_prompt = f"""
+              Conduct {research_depth} browser research to analyze and enhance the EchoTune AI music platform development roadmap.
+              
+              ## Current Repository State Analysis:
+              - Total Commits: {repo_analysis.get('git_stats', {}).get('total_commits', 'Unknown')}
+              - Source Files: {repo_analysis.get('code_stats', {}).get('total_source_files', 'Unknown')}
+              - Roadmap Completion: {repo_analysis.get('roadmap_status', {}).get('completion_percentage', 0)}%
+              - Incomplete Tasks: {repo_analysis.get('roadmap_status', {}).get('incomplete_tasks', 0)}
+              
+              ## Current Main Roadmap:
+              {main_roadmap[:15000]}
+              
+              ## Current Autonomous Development Roadmap:
+              {autonomous_roadmap[:5000] if autonomous_roadmap else "Not yet created"}
+              
+              ## Research Requirements:
+              
+              ### Technology Research Focus:
+              1. **Music AI/ML Latest Trends 2024-2025**:
+                 - Latest music recommendation algorithms
+                 - Audio analysis and feature extraction advances
+                 - Real-time music processing technologies
+                 - AI-powered playlist generation techniques
+              
+              2. **Spotify Integration Best Practices**:
+                 - New Spotify Web API features and capabilities
+                 - Authentication and security improvements
+                 - Rate limiting and optimization strategies
+                 - Web Playback SDK enhancements
+              
+              3. **Modern Frontend Development**:
+                 - React 19 features and migration strategies
+                 - Performance optimization techniques
+                 - Real-time UI updates for music streaming
+                 - Progressive Web App (PWA) capabilities for music apps
+              
+              4. **Backend Architecture & Performance**:
+                 - Node.js performance optimization for streaming
+                 - MongoDB optimization for music data
+                 - Redis caching strategies for music platforms
+                 - Microservices architecture for scalability
+              
+              5. **AI Development Workflows**:
+                 - GitHub Copilot and AI coding best practices
+                 - MCP (Model Context Protocol) integration opportunities
+                 - Autonomous development pipeline improvements
+                 - AI-assisted code review and testing
+              
+              6. **Security & Compliance**:
+                 - Music platform security best practices
+                 - User data protection for music services
+                 - API security and rate limiting
+                 - Authentication improvements
+              
+              ### Focus Areas (if specified):
+              {f"Special attention to: {', '.join(focus_areas)}" if focus_areas and focus_areas != [''] else "Full spectrum analysis"}
+              
+              ## Output Requirements:
+              
+              Based on your research, provide:
+              
+              1. **New High-Priority Tasks**: Specific, actionable development tasks identified through research
+              2. **Technology Updates**: Recommended technology upgrades or integrations
+              3. **Performance Improvements**: Optimization opportunities based on latest best practices
+              4. **Security Enhancements**: Security improvements based on current standards
+              5. **Development Process Improvements**: Workflow and process enhancements
+              6. **Implementation Roadmap**: Updated development priorities with complexity estimates
+              
+              Format response as structured markdown that can be integrated into roadmaps.
+              Include specific implementation steps and estimated complexity (1-10 scale).
+              Prioritize tasks that provide immediate value while building toward long-term goals.
+              """
+              
+              print(f"🔍 Starting {research_depth} research with {client.get_model_name()} model...")
+              result = client.research(research_prompt, enable_web_search=True)
+              
+              # Process and structure the research results
+              research_data = {
+                  "timestamp": datetime.now().isoformat(),
+                  "model_used": result.get('model', 'sonar-pro'),
+                  "research_depth": research_depth,
+                  "focus_areas": focus_areas,
+                  "content": result['content'],
+                  "cost_estimate": result.get('cost', 0),
+                  "sources_used": result.get('sources', [])
+              }
+              
+              # Save detailed research results
+              with open('.roadmap-research/perplexity_research.json', 'w') as f:
+                  json.dump(research_data, f, indent=2)
+              
+              # Create markdown research report
+              with open('.roadmap-research/research_report.md', 'w') as f:
+                  f.write(f"""# 🔍 Perplexity Roadmap Research Report
+              
+              **Generated**: {research_data['timestamp']}  
+              **Model**: {research_data['model_used']}  
+              **Depth**: {research_depth}  
+              **Focus Areas**: {', '.join(focus_areas) if focus_areas and focus_areas != [''] else 'Comprehensive'}  
+              
+              ## Research Results
+              
+              {result['content']}
+              
+              ## Metadata
+              
+              - **Cost Estimate**: ${research_data.get('cost_estimate', 0):.4f}
+              - **Sources**: {len(research_data.get('sources_used', []))} web sources analyzed
+              - **Repository State**: {repo_analysis.get('roadmap_status', {}).get('completion_percentage', 0)}% complete
+              """)
+              
+              # Extract actionable tasks (attempt to parse structured content)
+              import re
+              task_pattern = re.findall(r'(?:^|\n)(?:\d+\.\s*)?[\-\*]?\s*\*?\*?([^:\n]*(?:implement|create|add|update|optimize|enhance|develop|build)[^:\n]*)\*?\*?:?\s*([^\n]*)', result['content'], re.IGNORECASE | re.MULTILINE)
+              
+              actionable_tasks = []
+              for i, (title, description) in enumerate(task_pattern[:10]):  # Limit to top 10
+                  actionable_tasks.append({
+                      "id": f"research_task_{i+1}",
+                      "title": title.strip().title(),
+                      "description": description.strip(),
+                      "source": "perplexity_research",
+                      "priority": "high" if i < 3 else "medium" if i < 7 else "low"
+                  })
+              
+              task_summary = {
+                  "actionable_tasks": actionable_tasks,
+                  "total_identified": len(actionable_tasks),
+                  "research_quality": "high" if len(result['content']) > 5000 else "medium"
+              }
+              
+              with open('.roadmap-research/actionable_tasks.json', 'w') as f:
+                  json.dump(task_summary, f, indent=2)
+              
+              # Output for GitHub Actions
+              print(f"summary=Research completed with {len(actionable_tasks)} actionable tasks identified")
+              print(f"task_count={len(actionable_tasks)}")
+              print(f"update_needed={'true' if len(actionable_tasks) > 0 else 'false'}")
+              
+              # Write outputs to files for step communication  
+              with open('/tmp/research_summary.txt', 'w') as f:
+                  f.write(f"Research completed with {len(actionable_tasks)} actionable tasks identified")
+              with open('/tmp/task_count.txt', 'w') as f:
+                  f.write(str(len(actionable_tasks)))
+              with open('/tmp/update_needed.txt', 'w') as f:
+                  f.write('true' if len(actionable_tasks) > 0 else 'false')
+              
+              print("✅ Perplexity research analysis complete")
+              
+          except Exception as e:
+              print(f"❌ Research failed: {e}")
+              # Create error outputs
+              with open('/tmp/research_summary.txt', 'w') as f:
+                  f.write(f"Research failed: {str(e)}")
+              with open('/tmp/task_count.txt', 'w') as f:
+                  f.write("0")
+              with open('/tmp/update_needed.txt', 'w') as f:
+                  f.write('false')
+          EOF
+          
+          # Set step outputs
+          if [ -f "/tmp/research_summary.txt" ]; then
+            echo "summary=$(cat /tmp/research_summary.txt)" >> $GITHUB_OUTPUT
+          fi
+          if [ -f "/tmp/task_count.txt" ]; then
+            echo "task_count=$(cat /tmp/task_count.txt)" >> $GITHUB_OUTPUT
+          fi
+          if [ -f "/tmp/update_needed.txt" ]; then
+            echo "update_needed=$(cat /tmp/update_needed.txt)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update Development Roadmaps
+        id: update-roadmaps
+        if: steps.research.outputs.update_needed == 'true'
+        run: |
+          echo "📝 Updating development roadmaps with research insights..."
+          
+          python3 << 'EOF'
+          import json
+          import os
+          from datetime import datetime
+          import re
+          
+          try:
+              # Load research results
+              if not os.path.exists('.roadmap-research/actionable_tasks.json'):
+                  print("❌ No research results found")
+                  exit(1)
+                  
+              with open('.roadmap-research/actionable_tasks.json', 'r') as f:
+                  task_data = json.load(f)
+                  
+              with open('.roadmap-research/research_report.md', 'r') as f:
+                  research_content = f.read()
+              
+              actionable_tasks = task_data.get('actionable_tasks', [])
+              
+              # Create autonomous development roadmap update
+              autonomous_update = f"""
+              ## 🔍 Latest Research-Driven Development Opportunities
+              **Updated**: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}  
+              **Research Source**: Perplexity {os.environ.get('PERPLEXITY_MODEL', 'sonar-pro')} with browser research
+              
+              ### 🎯 High-Priority Research-Identified Tasks:
+              
+              """
+              
+              for i, task in enumerate(actionable_tasks[:5], 1):
+                  autonomous_update += f"""
+              #### {i}. {task['title']}
+              
+              **Priority**: {task['priority'].title()}  
+              **Source**: {task['source']}  
+              **Description**: {task['description']}
+              
+              **Implementation Status**: [ ] Not Started
+              **Complexity Estimate**: TBD (requires detailed analysis)
+              **Dependencies**: TBD
+              
+              """
+              
+              autonomous_update += f"""
+              ### 📊 Research Summary:
+              - **Total Tasks Identified**: {len(actionable_tasks)}
+              - **Research Quality**: {task_data.get('research_quality', 'high')}
+              - **Next Research Cycle**: Scheduled in 24 hours
+              
+              ### 🔗 Full Research Report:
+              See `.roadmap-research/research_report.md` for comprehensive analysis.
+              
+              ---
+              """
+              
+              # Update or create AUTONOMOUS_DEVELOPMENT_ROADMAP.md
+              autonomous_roadmap_path = 'AUTONOMOUS_DEVELOPMENT_ROADMAP.md'
+              
+              if os.path.exists(autonomous_roadmap_path):
+                  with open(autonomous_roadmap_path, 'r') as f:
+                      current_autonomous = f.read()
+                  
+                  # Remove previous research updates to avoid duplication
+                  current_autonomous = re.sub(
+                      r'\n## 🔍 Latest Research-Driven Development Opportunities.*?(?=\n## |\Z)', 
+                      '', 
+                      current_autonomous, 
+                      flags=re.DOTALL
+                  )
+              else:
+                  current_autonomous = f"""# 🤖 Autonomous Development Roadmap
+              
+              This roadmap is automatically maintained through Perplexity browser research and analysis.
+              
+              **Last Updated**: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}  
+              **Research Model**: {os.environ.get('PERPLEXITY_MODEL', 'sonar-pro')}  
+              **Update Frequency**: Daily with comprehensive analysis  
+              
+              ---
+              """
+              
+              # Combine content
+              updated_autonomous = current_autonomous + autonomous_update
+              
+              # Write updated autonomous roadmap
+              with open(autonomous_roadmap_path, 'w') as f:
+                  f.write(updated_autonomous)
+              
+              # Update main ROADMAP.md with reference to research
+              main_roadmap_update = f"""
+              
+              ## 🔗 Research-Driven Development
+              
+              **Latest Research Update**: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}
+              
+              📋 **{len(actionable_tasks)} new development opportunities** identified through comprehensive Perplexity browser research.  
+              📖 **Detailed Analysis**: See `AUTONOMOUS_DEVELOPMENT_ROADMAP.md` for full research-driven task breakdown.  
+              🔄 **Auto-Updates**: This section updates daily with latest research insights.  
+              
+              ### Top 3 Research-Identified Priorities:
+              """
+              
+              for i, task in enumerate(actionable_tasks[:3], 1):
+                  main_roadmap_update += f"\n{i}. **{task['title']}** - {task['description'][:100]}{'...' if len(task['description']) > 100 else ''}"
+              
+              main_roadmap_update += "\n\n---\n"
+              
+              # Update main roadmap
+              with open('ROADMAP.md', 'r') as f:
+                  current_main = f.read()
+              
+              # Remove previous research section to avoid duplication
+              current_main = re.sub(
+                  r'\n## 🔗 Research-Driven Development.*?(?=\n## |\Z)', 
+                  '', 
+                  current_main, 
+                  flags=re.DOTALL
+              )
+              
+              # Append new research section
+              updated_main = current_main + main_roadmap_update
+              
+              with open('ROADMAP.md', 'w') as f:
+                  f.write(updated_main)
+              
+              print("✅ Roadmaps updated with latest research insights")
+              print(f"   - Autonomous roadmap: {len(actionable_tasks)} new tasks")
+              print(f"   - Main roadmap: Research summary added")
+              
+          except Exception as e:
+              print(f"❌ Roadmap update failed: {e}")
+          EOF
+
+      - name: Commit Roadmap Updates
+        if: steps.research.outputs.update_needed == 'true'
+        run: |
+          echo "💾 Committing roadmap updates..."
+          
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add ROADMAP.md AUTONOMOUS_DEVELOPMENT_ROADMAP.md .roadmap-research/
+          
+          if ! git diff --staged --quiet; then
+            TASK_COUNT="${{ steps.research.outputs.task_count }}"
+            
+            git commit -m "🔍 Automated roadmap research update
+
+            - Conducted comprehensive Perplexity browser research  
+            - Identified $TASK_COUNT new development opportunities
+            - Updated AUTONOMOUS_DEVELOPMENT_ROADMAP.md with detailed analysis
+            - Added research summary to main ROADMAP.md
+            - Model: $PERPLEXITY_MODEL with browser research enabled
+            
+            This update was generated by the continuous roadmap research workflow."
+            
+            git push origin HEAD
+            echo "✅ Roadmap updates committed and pushed"
+          else
+            echo "ℹ️ No changes to commit"
+          fi
+
+      - name: Upload Research Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-research-${{ github.run_id }}
+          path: |
+            .roadmap-research/
+          retention-days: 30
+
+  trigger-autonomous-development:
+    name: Trigger Autonomous Development
+    runs-on: ubuntu-latest
+    needs: roadmap-research-analysis
+    if: needs.roadmap-research-analysis.outputs.update_needed == 'true' && needs.roadmap-research-analysis.outputs.actionable_tasks > '2'
+    
+    steps:
+      - name: Trigger Autonomous Development Workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const taskCount = parseInt('${{ needs.roadmap-research-analysis.outputs.actionable_tasks }}');
+            
+            if (taskCount > 2) {
+              console.log(`🚀 Triggering autonomous development workflow with ${taskCount} tasks`);
+              
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'autonomous-perplexity-development-cycle.yml',
+                ref: 'main',
+                inputs: {
+                  force_start: 'true',
+                  max_iterations: '3',
+                  focus_area: 'research-identified tasks'
+                }
+              });
+              
+              console.log('✅ Autonomous development workflow triggered');
+            } else {
+              console.log(`ℹ️ Not enough tasks (${taskCount}) to trigger autonomous development`);
+            }
+
+  generate-development-report:
+    name: Generate Development Report  
+    runs-on: ubuntu-latest
+    needs: [roadmap-research-analysis]
+    if: always()
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate Comprehensive Report
+        run: |
+          echo "📊 Generating comprehensive development report..."
+          
+          cat > CONTINUOUS_DEVELOPMENT_REPORT.md << EOF
+          # 📈 Continuous Development Report
+          
+          **Generated**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')  
+          **Workflow**: Continuous Roadmap Research & Development  
+          **Trigger**: ${{ github.event_name }}  
+          
+          ## 🔍 Research Analysis Results
+          
+          - **Research Summary**: ${{ needs.roadmap-research-analysis.outputs.research_summary }}
+          - **Actionable Tasks Identified**: ${{ needs.roadmap-research-analysis.outputs.actionable_tasks }}  
+          - **Update Required**: ${{ needs.roadmap-research-analysis.outputs.update_needed }}
+          - **Model Used**: $PERPLEXITY_MODEL
+          
+          ## 🚀 Development Status
+          
+          ### Roadmap Analysis:
+          - Main roadmap updated with research insights
+          - Autonomous roadmap populated with actionable tasks  
+          - Development cycle triggered: ${{ needs.roadmap-research-analysis.outputs.update_needed == 'true' && needs.roadmap-research-analysis.outputs.actionable_tasks > '2' }}
+          
+          ### Next Steps:
+          1. **Autonomous Development**: ${{ needs.roadmap-research-analysis.outputs.actionable_tasks > '2' && 'Will execute identified tasks automatically' || 'Insufficient tasks for autonomous execution' }}
+          2. **Next Research Cycle**: Scheduled in 24 hours  
+          3. **Manual Override**: Use \`@copilot use perplexity browser research\` for immediate cycle
+          
+          ## 📁 Artifacts
+          
+          - **Research Report**: \`.roadmap-research/research_report.md\`
+          - **Actionable Tasks**: \`.roadmap-research/actionable_tasks.json\`
+          - **Repository Analysis**: \`.roadmap-research/repo_analysis.json\`
+          
+          ## 🔄 Continuous Development Status
+          
+          The continuous development system is active and monitoring:
+          - **Roadmap Changes**: Auto-research on roadmap modifications
+          - **Daily Research**: Comprehensive analysis at 2 AM UTC  
+          - **Comment Triggers**: \`@copilot use perplexity browser research\`
+          - **Autonomous Execution**: When 3+ actionable tasks identified
+          
+          ---
+          *Report generated by Continuous Roadmap Research & Development workflow*
+          EOF
+          
+          echo "✅ Development report generated"
+
+      - name: Upload Development Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuous-development-report-${{ github.run_id }}
+          path: |
+            CONTINUOUS_DEVELOPMENT_REPORT.md
+          retention-days: 30
+
+      - name: Update GitHub Step Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          # 📈 Continuous Development Summary
+          
+          ## 🔍 Research Results
+          - **Tasks Identified**: ${{ needs.roadmap-research-analysis.outputs.actionable_tasks }}
+          - **Research Quality**: ${{ needs.roadmap-research-analysis.outputs.research_summary }}
+          - **Roadmap Updated**: ${{ needs.roadmap-research-analysis.outputs.update_needed }}
+          
+          ## 🚀 Development Actions
+          - **Autonomous Development Triggered**: ${{ needs.roadmap-research-analysis.outputs.update_needed == 'true' && needs.roadmap-research-analysis.outputs.actionable_tasks > '2' }}
+          - **Next Research**: Scheduled in 24 hours
+          - **Model Used**: $PERPLEXITY_MODEL
+          
+          ## 📋 Available Commands
+          - \`@copilot use perplexity browser research\` - Trigger immediate research cycle
+          - \`/start-autonomous-development\` - Force start development workflow  
+          
+          ---
+          *Continuous development system active and monitoring*
+          EOF

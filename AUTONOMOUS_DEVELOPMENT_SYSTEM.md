@@ -176,6 +176,8 @@ MAX_TASKS_PER_ITERATION=3
 ```
 
 ### Slash Commands
+
+#### 🤖 General Autonomous Development
 ```
 /start-autonomous-development
 /analyze-roadmap
@@ -184,8 +186,46 @@ MAX_TASKS_PER_ITERATION=3
 /optimize-costs
 ```
 
+#### 🔍 Specific Perplexity Commands (Enhanced)
+```
+/perplexity-analyze <scope>          # Targeted analysis with Perplexity AI
+/analyze-perplexity <scope>          # Alternative phrasing for analysis
+/perplexity-research <topic>         # Focused research on specific topics  
+/research-perplexity <topic>         # Alternative phrasing for research
+/perplexity-roadmap-update           # Update roadmap with latest research
+/perplexity-budget-check             # Check Perplexity usage and budget
+/perplexity-optimize-costs           # Optimize Perplexity usage patterns
+```
+
+#### 📊 Usage Examples
+```bash
+# Targeted Analysis Commands
+/perplexity-analyze frontend         # Analyze frontend components
+/perplexity-analyze "API security"   # Analyze API security patterns
+/analyze-perplexity scripts/         # Alternative syntax for script analysis
+
+# Research Commands  
+/perplexity-research "React 19 features"        # Research latest React features
+/research-perplexity "music AI trends"          # Research music AI developments
+/perplexity-research "Spotify API best practices" # Research API patterns
+
+# Maintenance Commands
+/perplexity-roadmap-update           # Update roadmap with research insights
+/perplexity-budget-check             # Check current usage and budget status
+/perplexity-optimize-costs           # Analyze and optimize API usage
+
+# Natural Language Triggers
+@copilot use perplexity browser research        # Full autonomous cycle
+@copilot analyze this with perplexity          # Natural language analysis
+```
+
 ### Natural Language Processing
-The system recognizes development requests in natural language and automatically routes them to appropriate AI models and workflows.
+The system recognizes development requests in natural language and automatically routes them to appropriate AI models and workflows. Enhanced recognition patterns include:
+
+- **Analysis Requests**: "analyze with perplexity", "perplexity analysis of..."
+- **Research Requests**: "research using perplexity", "perplexity research on..."
+- **Budget Inquiries**: "check perplexity budget", "perplexity usage status"
+- **Optimization Requests**: "optimize perplexity costs", "reduce perplexity spending"
 
 ## 🎵 Music AI Domain Expertise
 

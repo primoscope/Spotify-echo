@@ -197,14 +197,82 @@ jobs:
             docs-command-results.log
           retention-days: 30
 
-      - name: Execute Perplexity Research Command
+      - name: Execute Specific Perplexity Commands
         if: |
-          contains(steps.parse.outputs.command, 'perplexity') || 
-          contains(steps.parse.outputs.command, 'start-autonomous-development') ||
+          steps.parse.outputs.command == 'perplexity-analyze' ||
+          steps.parse.outputs.command == 'perplexity-research' ||
+          steps.parse.outputs.command == 'perplexity-roadmap-update' ||
+          steps.parse.outputs.command == 'perplexity-budget-check' ||
+          steps.parse.outputs.command == 'perplexity-optimize-costs' ||
+          steps.parse.outputs.command == 'analyze-perplexity' ||
+          steps.parse.outputs.command == 'research-perplexity'
+        run: |
+          echo "🔍 Executing specific Perplexity command: ${{ steps.parse.outputs.command }}"
+          
+          COMMAND="${{ steps.parse.outputs.command }}"
+          PARAMS="${{ steps.parse.outputs.params }}"
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          # Set specific parameters based on command
+          case "$COMMAND" in
+            "perplexity-analyze" | "analyze-perplexity")
+              FOCUS_AREA="analysis:$PARAMS"
+              MAX_ITERATIONS=2
+              ;;
+            "perplexity-research" | "research-perplexity")  
+              FOCUS_AREA="research:$PARAMS"
+              MAX_ITERATIONS=1
+              ;;
+            "perplexity-roadmap-update")
+              FOCUS_AREA="roadmap-update"
+              MAX_ITERATIONS=1
+              ;;
+            "perplexity-budget-check")
+              # Handle budget check directly without workflow
+              python3 -c "
+          import sys
+          sys.path.append('scripts')
+          from perplexity_client import PerplexityClient
+          client = PerplexityClient()
+          status = client.budget_manager.check_budget()
+          print(f'💰 Budget Status: {status[\"status\"]}')
+          print(f'💳 Used: \$${status[\"total_cost\"]:.4f} / \$${status[\"weekly_budget\"]:.2f}')  
+          print(f'📊 Usage: {status[\"budget_used_pct\"]:.1f}%')
+          print(f'📞 Requests: {status[\"request_count\"]}')
+          print(f'📅 Week: {status[\"week_key\"]}')
+              " > perplexity-budget-status.txt
+              echo "budget_check_only=true" >> $GITHUB_ENV
+              exit 0
+              ;;
+            "perplexity-optimize-costs")
+              FOCUS_AREA="cost-optimization"
+              MAX_ITERATIONS=1
+              ;;
+            *)
+              FOCUS_AREA="general"
+              MAX_ITERATIONS=2
+              ;;
+          esac
+          
+          echo "🚀 Triggering autonomous development with focus: $FOCUS_AREA"
+          
+          # Trigger autonomous development workflow with specific parameters
+          gh workflow run autonomous-perplexity-development-cycle.yml \
+            --field force_start=true \
+            --field max_iterations="$MAX_ITERATIONS" \
+            --field focus_area="$FOCUS_AREA"
+            
+          echo "✅ Perplexity command workflow triggered"
+
+      - name: Execute General Perplexity Research Command
+        if: |
+          (contains(steps.parse.outputs.command, 'perplexity') && 
+           !contains(steps.parse.outputs.command, 'perplexity-')) ||
+          steps.parse.outputs.command == 'start-autonomous-development' ||
           contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
           contains(steps.parse.outputs.comment_body, 'autonomous development')
         run: |
-          echo "🔍 Executing Perplexity/Autonomous Development command..."
+          echo "🔍 Executing General Perplexity/Autonomous Development command..."
           
           CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
           COMMENT_BODY="${{ steps.parse.outputs.comment_body }}"
@@ -217,12 +285,172 @@ jobs:
             
           echo "✅ Autonomous development workflow triggered"
 
-      - name: Post Perplexity Command Response
+      - name: Post Perplexity Budget Check Response
+        if: env.budget_check_only == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            
+            let budgetStatus = '';
+            try {
+              budgetStatus = fs.readFileSync('perplexity-budget-status.txt', 'utf8');
+            } catch (error) {
+              budgetStatus = '❌ Could not read budget status';
+            }
+            
+            const responseMessage = `## 💰 Perplexity Budget Status
+            
+            **Command**: \`/${{ steps.parse.outputs.command }}\`
+            **Executed by**: @${{ github.actor }}
+            
+            \`\`\`
+            ${budgetStatus}
+            \`\`\`
+            
+            ### 📊 Budget Management Features:
+            
+            - **Weekly Budget**: $3.00 USD limit with automatic enforcement
+            - **Cost Tracking**: Real-time usage monitoring and alerts
+            - **Budget Alerts**: 80% usage warnings, 100% usage locks
+            - **Cache System**: 14-day TTL to reduce API costs
+            - **Model Selection**: Complexity-based routing to optimize costs
+            
+            ### 🔄 Related Commands:
+            
+            - \`/perplexity-optimize-costs\` - Analyze and optimize Perplexity usage
+            - \`/perplexity-analyze <scope>\` - Targeted analysis with cost control
+            - \`/perplexity-research <topic>\` - Focused research with budget awareness
+            
+            ---
+            *Budget check executed by Enhanced Copilot Slash Commands*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Post Specific Perplexity Command Response
         if: |
-          contains(steps.parse.outputs.command, 'perplexity') || 
-          contains(steps.parse.outputs.command, 'start-autonomous-development') ||
-          contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
-          contains(steps.parse.outputs.comment_body, 'autonomous development')
+          (steps.parse.outputs.command == 'perplexity-analyze' ||
+           steps.parse.outputs.command == 'perplexity-research' ||
+           steps.parse.outputs.command == 'perplexity-roadmap-update' ||
+           steps.parse.outputs.command == 'perplexity-optimize-costs' ||
+           steps.parse.outputs.command == 'analyze-perplexity' ||
+           steps.parse.outputs.command == 'research-perplexity') &&
+          env.budget_check_only != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const command = '${{ steps.parse.outputs.command }}';
+            const params = '${{ steps.parse.outputs.params }}';
+            
+            const commandDescriptions = {
+              'perplexity-analyze': 'Comprehensive analysis using Perplexity AI with targeted scope',
+              'analyze-perplexity': 'Comprehensive analysis using Perplexity AI with targeted scope',
+              'perplexity-research': 'Focused research on specific topics using Perplexity browser search',
+              'research-perplexity': 'Focused research on specific topics using Perplexity browser search',
+              'perplexity-roadmap-update': 'Update roadmap with latest Perplexity research insights',
+              'perplexity-optimize-costs': 'Analyze and optimize Perplexity API usage patterns'
+            };
+            
+            const commandFocus = {
+              'perplexity-analyze': 'analysis',
+              'analyze-perplexity': 'analysis', 
+              'perplexity-research': 'research',
+              'research-perplexity': 'research',
+              'perplexity-roadmap-update': 'roadmap updates',
+              'perplexity-optimize-costs': 'cost optimization'
+            };
+            
+            const description = commandDescriptions[command] || 'Perplexity AI processing';
+            const focus = commandFocus[command] || 'general processing';
+            
+            const responseMessage = `## 🤖 Specific Perplexity Command Initiated
+            
+            **Command**: \`/${command} ${params}\`
+            **Description**: ${description}
+            **Focus Area**: ${focus}
+            **Status**: ✅ Autonomous workflow triggered successfully
+            
+            ## 🔄 What's Happening:
+            
+            1. **🎯 Focused Processing**: ${description}
+            2. **🔍 Targeted Research**: Optimized for ${focus} with reduced iteration count
+            3. **💰 Budget Awareness**: Cost-optimized execution with complexity-based model selection
+            4. **📊 Specific Outcomes**: Results tailored to your specific request
+            
+            ## 🎯 Command-Specific Features:
+            
+            ${command.includes('analyze') ? `
+            ### 📊 Analysis Focus:
+            - **Scope**: ${params || 'Full repository analysis'}
+            - **Depth**: Comprehensive technical analysis with actionable insights
+            - **Model Selection**: Complexity-based routing for optimal cost/quality balance
+            - **Output**: Detailed analysis report with implementation recommendations
+            ` : ''}
+            
+            ${command.includes('research') ? `
+            ### 🔍 Research Focus:
+            - **Topic**: ${params || 'General EchoTune development research'}
+            - **Browser Search**: Latest trends, best practices, and technologies
+            - **Integration**: Research results integrated into development roadmap
+            - **Caching**: 14-day cache to optimize costs and performance
+            ` : ''}
+            
+            ${command.includes('roadmap') ? `
+            ### 📋 Roadmap Update Focus:
+            - **Research Integration**: Latest findings integrated into roadmap
+            - **Priority Updates**: Tasks reprioritized based on current trends
+            - **Implementation Plans**: Updated strategies and approaches
+            - **Timeline Adjustments**: Realistic scheduling based on complexity
+            ` : ''}
+            
+            ${command.includes('optimize') ? `
+            ### 💰 Cost Optimization Focus:
+            - **Usage Analysis**: Review current Perplexity API usage patterns
+            - **Model Efficiency**: Optimize model selection for cost/performance
+            - **Caching Strategy**: Improve cache hit rates and TTL settings
+            - **Budget Management**: Weekly budget optimization recommendations
+            ` : ''}
+            
+            ## 📈 Expected Outcomes:
+            
+            - **Faster Execution**: Reduced iterations for focused processing
+            - **Targeted Results**: Specific outputs aligned with your command
+            - **Cost Efficient**: Optimized for budget-conscious operation
+            - **Actionable Insights**: Clear next steps and recommendations
+            
+            ## 🔗 Monitor Progress:
+            
+            - **Workflow Run**: [View live progress](${{ github.server_url }}/${{ github.repository }}/actions)
+            - **Session Artifacts**: Available after completion with detailed logs
+            - **Estimated Duration**: 3-5 minutes for focused processing
+            
+            **The specific Perplexity command is now active and will provide targeted results based on your request.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Specific Perplexity Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Post General Perplexity Command Response
+        if: |
+          ((contains(steps.parse.outputs.command, 'perplexity') && 
+            !contains(steps.parse.outputs.command, 'perplexity-')) ||
+           steps.parse.outputs.command == 'start-autonomous-development' ||
+           contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
+           contains(steps.parse.outputs.comment_body, 'autonomous development')) &&
+          env.budget_check_only != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -305,7 +533,13 @@ jobs:
               'run-mcp-all',
               'mcp-health-check',
               'start-autonomous-development',
-              'perplexity-research'
+              'perplexity-research',
+              'perplexity-analyze',
+              'perplexity-roadmap-update', 
+              'perplexity-budget-check',
+              'perplexity-optimize-costs',
+              'analyze-perplexity',
+              'research-perplexity'
             ];
             
             let responseMessage = '';
@@ -342,18 +576,34 @@ jobs:
               **Status**: Not supported by this workflow
               
               ### ✅ Supported Commands:
-              - \`/review-docs\` - Comprehensive documentation analysis
-              - \`/gpt5 analyze\` - Trigger GPT-5 repository analysis  
-              - \`/analyze-gpt5\` - Same as above
-              - \`/review-gpt5\` - GPT-5 code review focus
-              - \`/optimize-gpt5\` - GPT-5 optimization analysis
+              
+              #### 📚 Documentation & Analysis
+              - \`/review-docs [scope]\` - Comprehensive documentation analysis
+              - \`/gpt5 analyze [scope]\` - Trigger GPT-5 repository analysis  
+              - \`/analyze-gpt5 [scope]\` - Same as above
+              - \`/review-gpt5 [scope]\` - GPT-5 code review focus
+              - \`/optimize-gpt5 [scope]\` - GPT-5 optimization analysis
+              
+              #### 🔧 MCP & System Commands  
               - \`/run-mcp-all\` - Comprehensive MCP validation
               - \`/mcp-health-check\` - Quick MCP health check
+              
+              #### 🤖 Autonomous Development Commands
               - \`/start-autonomous-development\` - Begin autonomous development cycle
               - \`@copilot use perplexity browser research\` - Trigger research-driven development
               
-              ### 🔍 Autonomous Development:
+              #### 🔍 Specific Perplexity Commands (NEW!)
+              - \`/perplexity-analyze <scope>\` - Targeted analysis with Perplexity AI
+              - \`/analyze-perplexity <scope>\` - Alternative phrasing for analysis
+              - \`/perplexity-research <topic>\` - Focused research on specific topics
+              - \`/research-perplexity <topic>\` - Alternative phrasing for research
+              - \`/perplexity-roadmap-update\` - Update roadmap with latest research
+              - \`/perplexity-budget-check\` - Check Perplexity usage and budget
+              - \`/perplexity-optimize-costs\` - Optimize Perplexity usage patterns
+              
+              ### 🔍 Autonomous Development Triggers:
               - \`@copilot use perplexity browser research\` - Full autonomous cycle with roadmap updates
+              - \`@copilot autonomous development\` - Alternative natural language trigger
               - \`/start-autonomous-development\` - Direct autonomous development trigger
               - Comments containing "autonomous development" - Natural language triggers
               
@@ -361,7 +611,16 @@ jobs:
               - \`/review-docs\` - Analyze all documentation
               - \`/review-docs api\` - Focus on API documentation
               - \`/gpt5 analyze scripts/\` - Analyze specific directory
+              - \`/perplexity-analyze frontend\` - Analyze frontend with Perplexity
+              - \`/perplexity-research "latest React patterns"\` - Research specific topic
+              - \`/perplexity-budget-check\` - Check current usage and budget
               - \`@copilot use perplexity browser research\` - Start comprehensive development cycle
+              
+              ### 💡 Command Tips:
+              - **Scope Parameters**: Most commands accept optional scope (e.g., \`scripts/\`, \`frontend\`, \`api\`)
+              - **Natural Language**: Use \`@copilot\` prefix for natural language triggers
+              - **Cost Awareness**: Perplexity commands automatically optimize for budget efficiency
+              - **Progress Tracking**: All workflows provide live progress links and detailed reports
               
               **Need Help?** Check the [workflow documentation](${{ github.server_url }}/${{ github.repository }}/tree/main/.github/workflows) for more details.`;
             }

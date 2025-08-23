@@ -17,6 +17,7 @@ import json
 import hashlib
 import time
 import logging
+import random
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Tuple, Any
@@ -119,13 +120,24 @@ class BudgetManager:
             return {}
     
     def _save_ledger(self, ledger: Dict) -> None:
-        """Save usage ledger to JSON file"""
+        """Save usage ledger to JSON file atomically"""
         try:
             self.perplexity_dir.mkdir(exist_ok=True)
-            with open(self.ledger_path, 'w') as f:
+            
+            # Write to temporary file first for atomic operation
+            temp_path = self.ledger_path.with_suffix('.tmp')
+            with open(temp_path, 'w') as f:
                 json.dump(ledger, f, indent=2, default=str)
+            
+            # Atomic rename (POSIX systems guarantee atomicity)
+            temp_path.replace(self.ledger_path)
+            
         except Exception as e:
             logger.error(f"Failed to save ledger: {e}")
+            # Clean up temp file on error
+            temp_path = self.ledger_path.with_suffix('.tmp')
+            if temp_path.exists():
+                temp_path.unlink()
     
     def record_usage(self, request_meta: RequestMetadata) -> None:
         """Record API usage in ledger"""
@@ -176,8 +188,13 @@ class BudgetManager:
         if budget_used_pct >= 100:
             status['status'] = 'BUDGET_EXCEEDED'
             status['allow_requests'] = False
-            # Create budget lock file
-            self.budget_lock_path.touch()
+            # Create budget lock file atomically
+            try:
+                temp_lock_path = self.budget_lock_path.with_suffix('.tmp')
+                temp_lock_path.write_text(f"Budget exceeded at {datetime.now().isoformat()}")
+                temp_lock_path.replace(self.budget_lock_path)
+            except Exception as e:
+                logger.error(f"Failed to create budget lock: {e}")
         elif budget_used_pct >= 80:
             status['status'] = 'BUDGET_WARNING'
             status['allow_requests'] = True
@@ -247,12 +264,21 @@ class CacheManager:
                 'response': response
             }
             
-            with open(cache_path, 'w') as f:
+            # Write to temporary file first for atomic operation
+            temp_cache_path = cache_path.with_suffix('.tmp')
+            with open(temp_cache_path, 'w') as f:
                 json.dump(cache_data, f, indent=2)
+            
+            # Atomic rename
+            temp_cache_path.replace(cache_path)
             
             logger.info(f"CACHE_STORED: {cache_key[:8]}...")
         except Exception as e:
             logger.error(f"Cache write error: {e}")
+            # Clean up temp file on error
+            temp_cache_path = cache_path.with_suffix('.tmp')
+            if temp_cache_path.exists():
+                temp_cache_path.unlink()
 
 class PerplexityClient:
     """Centralized Perplexity API client with cost control and budget management"""
@@ -350,8 +376,8 @@ class PerplexityClient:
         return total_cost
     
     def _make_api_request(self, prompt: str, model: str, max_tokens: int = None, 
-                         temperature: float = None) -> Dict:
-        """Make actual API request to Perplexity"""
+                         temperature: float = None, max_retries: int = 3) -> Dict:
+        """Make actual API request to Perplexity with exponential backoff"""
         if not self.api_key:
             raise ValueError("PERPLEXITY_API_KEY not configured")
         
@@ -365,7 +391,8 @@ class PerplexityClient:
         
         headers = {
             'Authorization': f'Bearer {self.api_key}',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'User-Agent': 'EchoTune-AI/1.0'
         }
         
         data = {
@@ -381,19 +408,71 @@ class PerplexityClient:
         
         logger.info(f"Making API request: model={model}, max_tokens={max_tokens}")
         
-        response = requests.post(
-            'https://api.perplexity.ai/chat/completions',
-            headers=headers,
-            json=data,
-            timeout=60
-        )
+        # Exponential backoff with jitter
+        for attempt in range(max_retries + 1):
+            try:
+                response = requests.post(
+                    'https://api.perplexity.ai/chat/completions',
+                    headers=headers,
+                    json=data,
+                    timeout=60
+                )
+                
+                if response.status_code == 200:
+                    return response.json()
+                
+                # Handle rate limiting with Retry-After header
+                elif response.status_code == 429:
+                    retry_after = response.headers.get('Retry-After', '60')
+                    wait_time = min(int(retry_after), 300)  # Cap at 5 minutes
+                    
+                    if attempt < max_retries:
+                        logger.warning(f"Rate limited. Waiting {wait_time}s before retry {attempt + 1}/{max_retries}")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        raise Exception(f"Rate limited after {max_retries} retries")
+                
+                # Handle other client/server errors
+                elif response.status_code >= 500:
+                    if attempt < max_retries:
+                        # Exponential backoff with jitter for server errors
+                        base_wait = 2 ** attempt
+                        jitter = random.uniform(0.1, 0.5)
+                        wait_time = min(base_wait + jitter, 60)
+                        
+                        logger.warning(f"Server error {response.status_code}. Retrying in {wait_time:.1f}s (attempt {attempt + 1}/{max_retries + 1})")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        raise Exception(f"Server error {response.status_code} after {max_retries} retries: {response.text}")
+                
+                # Client errors (4xx) - don't retry
+                else:
+                    error_msg = f"API request failed: {response.status_code} - {response.text}"
+                    logger.error(error_msg)
+                    raise Exception(error_msg)
+                    
+            except requests.exceptions.Timeout:
+                if attempt < max_retries:
+                    wait_time = min(2 ** attempt + random.uniform(0.1, 0.5), 60)
+                    logger.warning(f"Request timeout. Retrying in {wait_time:.1f}s (attempt {attempt + 1}/{max_retries + 1})")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    raise Exception(f"Request timeout after {max_retries} retries")
+                    
+            except requests.exceptions.ConnectionError as e:
+                if attempt < max_retries:
+                    wait_time = min(2 ** attempt + random.uniform(0.1, 0.5), 60)
+                    logger.warning(f"Connection error: {e}. Retrying in {wait_time:.1f}s (attempt {attempt + 1}/{max_retries + 1})")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    raise Exception(f"Connection error after {max_retries} retries: {e}")
         
-        if response.status_code != 200:
-            error_msg = f"API request failed: {response.status_code} - {response.text}"
-            logger.error(error_msg)
-            raise Exception(error_msg)
-        
-        return response.json()
+        # This should never be reached, but just in case
+        raise Exception(f"Unexpected error after {max_retries} retries")
     
     def analyze_issue(self, title: str, body: str, issue_number: int = None, 
                      dry_run: bool = False) -> Dict:

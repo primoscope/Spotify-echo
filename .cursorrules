@@ -34,7 +34,7 @@ Tech Stack: React 19 + Vite + Node.js 20 + Express + MongoDB + Redis + Python ML
 - Mock external dependencies (Spotify API, OpenAI, etc.) in tests
 - Performance tests for critical user flows
 
-## 🤖 Advanced AI Model Selection & Orchestration
+## 🤖 Enhanced AI Model Selection & Orchestration with Perplexity Integration
 
 ### Primary Model Routing
 ```
@@ -50,6 +50,12 @@ CODE GENERATION & REFACTORING:
 - When: Complex business logic, React components, API endpoints
 - Context: Include existing patterns, style guides, test requirements
 
+ISSUE ANALYSIS & RESEARCH:
+- Use: Perplexity Sonar Pro (for complex issues) or Perplexity Sonar (for simple)
+- When: Analyzing GitHub issues, researching best practices, security analysis
+- Context: Issue title, body, complexity score, repository context
+- Budget: Automatic budget management with $3/week limit
+
 QUICK FIXES & SIMPLE TASKS:
 - Use: GPT-4-mini or Llama 3.1 8B
 - When: Bug fixes, simple utilities, documentation updates
@@ -60,6 +66,26 @@ RESEARCH & BEST PRACTICES:
 - When: Technology decisions, security research, performance optimization
 - Trigger Words: "latest", "best practice", "security", "performance", "2024", "2025"
 - Always include: current tech stack context, specific requirements
+```
+
+### Perplexity API Integration Rules
+```
+Budget Management:
+- Weekly budget: $3.00 USD (configurable via PPLX_WEEKLY_BUDGET)
+- Automatic model selection based on issue complexity (1-10 scale)
+- Smart caching with 14-day TTL to minimize costs
+- Batch processing for similar issues to optimize API usage
+
+Model Selection Logic:
+- Complexity >= 8: sonar-pro ($0.006/1k tokens)
+- Complexity >= 6: sonar-reasoning ($0.003/1k tokens)  
+- Complexity < 6: sonar ($0.001/1k tokens)
+
+Cost Optimization:
+- Cache-first approach for repeated analyses
+- Similarity-based grouping for batch processing
+- Budget alerts at 80% usage, hard lock at 100%
+- Automatic weekly reset on Mondays
 ```
 
 ### Multi-Model Orchestration
@@ -80,7 +106,7 @@ Automatic Perplexity Research:
 
 ## 🚀 Enhanced Context Management
 
-### Smart File Inclusion
+### Smart File Inclusion with Perplexity Integration
 ```
 @Recommended High Priority:
 - package.json, vite.config.js, server.js, server-phase3.js
@@ -89,12 +115,20 @@ Automatic Perplexity Research:
 - Key React components: src/frontend/App.jsx
 - Database models: src/database/*.js
 - Test configurations: tests/jest.config.js
+- scripts/perplexity_client.py, scripts/issue_analyzer.py
+- .github/workflows/ai-*.yml (AI-related workflows)
 
 Dynamic Context (based on current task):
 - API Work: Include src/api/*, middleware patterns, error handling
 - Frontend Work: Include src/frontend/*, component patterns, styling
 - ML Work: Include scripts/*, ml_datasets/, Python requirements
 - MCP Work: Include mcp-servers/*, integration patterns
+- Perplexity Work: Include scripts/perplexity_client.py, budget status, usage patterns
+
+Excluded Files:
+- .perplexity/cache/*, .perplexity/usage_ledger.json (sensitive data)
+- *validation-report*.json, *test-results*.json (large files)
+- build artifacts, logs, and generated documentation
 ```
 
 ### Progressive Context Building
@@ -110,32 +144,37 @@ Dynamic Context (based on current task):
 - Cache frequently accessed patterns and configurations
 - Limit concurrent API calls to prevent rate limiting
 
-## 🔄 Automated Workflow Integration
+## 🔄 Automated Workflow Integration with Perplexity
 
-### Pre-Development Research
+### Pre-Development Research with AI
 ```
 Before starting any feature:
-1. Research current best practices for the technology stack
-2. Check for security vulnerabilities in planned approach
+1. Research current best practices using Perplexity Sonar Pro for the technology stack
+2. Check for security vulnerabilities in planned approach with browser research
 3. Validate against existing architecture patterns
 4. Identify reusable components or utilities
+5. Analyze issue complexity and select appropriate Perplexity model (sonar/sonar-reasoning/sonar-pro)
+6. Check budget status and cache availability
 ```
 
-### Code Quality Gates
+### Code Quality Gates with AI Analysis
 ```
 After any substantial changes:
 1. Run ESLint and Prettier validation
 2. Execute relevant test suites
-3. Check for security anti-patterns
+3. Check for security anti-patterns using Perplexity research
 4. Validate performance impact
 5. Update documentation if needed
+6. Analyze issue complexity for future AI model selection
 ```
 
-### Continuous Learning Triggers
-- Research new patterns when generating novel solutions
+### Perplexity-Enhanced Continuous Learning Triggers
+- Research new patterns when generating novel solutions using Perplexity Sonar
 - Update knowledge base with successful implementation patterns
-- Track and suggest refactoring opportunities
-- Monitor for deprecated dependencies or patterns
+- Track and suggest refactoring opportunities with AI analysis  
+- Monitor for deprecated dependencies or patterns using browser research
+- Automatic issue analysis with budget-aware model selection
+- Cache successful analysis results to minimize API costs
 
 ## 🎵 Domain-Specific Rules (Music AI Platform)
 

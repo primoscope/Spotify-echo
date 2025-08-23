@@ -228,19 +228,9 @@ jobs:
               MAX_ITERATIONS=1
               ;;
             "perplexity-budget-check")
-              # Handle budget check directly without workflow
-              python3 -c "
-          import sys
-          sys.path.append('scripts')
-          from perplexity_client import PerplexityClient
-          client = PerplexityClient()
-          status = client.budget_manager.check_budget()
-          print(f'💰 Budget Status: {status[\"status\"]}')
-          print(f'💳 Used: \$${status[\"total_cost\"]:.4f} / \$${status[\"weekly_budget\"]:.2f}')  
-          print(f'📊 Usage: {status[\"budget_used_pct\"]:.1f}%')
-          print(f'📞 Requests: {status[\"request_count\"]}')
-          print(f'📅 Week: {status[\"week_key\"]}')
-              " > perplexity-budget-status.txt
+              # Handle budget check using dedicated script
+              echo "🔍 Executing budget check using dedicated script..."
+              python3 scripts/budget_status_simple.py > perplexity-budget-status.txt 2>&1
               echo "budget_check_only=true" >> $GITHUB_ENV
               exit 0
               ;;

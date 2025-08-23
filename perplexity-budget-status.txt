@@ -1,0 +1,58 @@
+✅ Comprehensive Budget Analysis
+==================================================
+✅ Budget summary saved to budget-summary.json
+✅ Budget guard: PROCEED (OK, 0.0% used)
+
+=== Budget Summary ===
+{
+  "timestamp": "2025-08-23T21:22:50.477219+00:00",
+  "budget_status": {
+    "iso_week": "2025-W34",
+    "state": "OK",
+    "can_proceed": true,
+    "weekly_budget_usd": 3.0,
+    "used_amount_usd": 0.0,
+    "remaining_amount_usd": 3.0,
+    "usage_percentage": 0.0,
+    "warn_threshold_usd": 2.1,
+    "hard_threshold_usd": 3.0
+  },
+  "usage_statistics": {
+    "total_requests": 0,
+    "cached_requests": 0,
+    "cache_hit_rate": 0.0,
+    "models_used": {}
+  },
+  "repository_status": {
+    "labels_found": [],
+    "defer_label": "analysis-deferred-budget",
+    "disable_label": "ai-analysis-disabled",
+    "override_label": "override-budget-guard"
+  },
+  "recommendations": [
+    "Budget healthy - all operations permitted"
+  ],
+  "next_reset": "2025-08-25T00:00:00+00:00",
+  "config_summary": {
+    "weekly_budget": 3.0,
+    "warn_threshold_pct": 70,
+    "hard_stop_threshold_pct": 100,
+    "models_available": [
+      "sonar",
+      "sonar-reasoning",
+      "sonar-pro"
+    ]
+  }
+}
+
+
+==================================================
+✅ Budget guard script executed successfully
+
+📊 Quick Status Summary:
+------------------------------
+💰 Budget Status: OK
+💳 Used: $0.0 / $3.0
+📊 Usage: 0.0%
+🗓️ Week: 2025-W34
+⏰ Status: ✅ All operations permitted

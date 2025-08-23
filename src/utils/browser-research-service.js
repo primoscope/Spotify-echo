@@ -413,18 +413,95 @@ class BrowserResearchService {
   }
   
   getMockPerplexityResponse(topic, error = null) {
+    let specificContent = '';
+    const topicLower = topic.toLowerCase();
+    
+    if (topicLower.includes('performance')) {
+      specificContent = `Performance optimization strategies for music applications:
+      
+      1. **Audio Processing Optimizations**:
+         - Implement Web Audio API for real-time audio processing
+         - Use audio buffering strategies to prevent playback interruptions
+         - Optimize Spotify Web Playback SDK integration
+         
+      2. **Frontend Performance**:
+         - Implement virtual scrolling for large playlists
+         - Use React.memo() for track list components
+         - Optimize bundle size with dynamic imports
+         
+      3. **Backend Optimizations**:
+         - Implement Redis caching for frequently accessed tracks
+         - Optimize MongoDB aggregation pipelines for recommendations
+         - Use database indexing for music metadata queries`;
+         
+    } else if (topicLower.includes('security')) {
+      specificContent = `Security best practices for music streaming applications:
+      
+      1. **Authentication & Authorization**:
+         - Implement OAuth 2.0 with Spotify integration
+         - Use JWT tokens with proper expiration
+         - Implement refresh token rotation
+         
+      2. **API Security**:
+         - Rate limiting for music API endpoints
+         - Input validation for playlist and track data
+         - HTTPS enforcement for all communications
+         
+      3. **Data Protection**:
+         - Encrypt sensitive user listening data
+         - Implement GDPR compliance for EU users
+         - Secure handling of Spotify API credentials`;
+         
+    } else if (topicLower.includes('roadmap')) {
+      specificContent = `Development roadmap analysis for EchoTune AI:
+      
+      1. **High Priority Tasks**:
+         - Enhance music recommendation algorithm accuracy
+         - Implement real-time collaborative playlist features
+         - Add advanced audio analysis capabilities
+         
+      2. **Medium Priority Features**:
+         - Social sharing and music discovery features
+         - Mobile app development and optimization
+         - Integration with additional music services
+         
+      3. **Technical Improvements**:
+         - Performance monitoring and optimization
+         - Enhanced error handling and logging
+         - Automated testing and CI/CD improvements`;
+         
+    } else {
+      specificContent = `Comprehensive analysis for: "${topic}"
+      
+      1. **Current Best Practices**:
+         - Follow modern development standards
+         - Implement responsive and accessible design
+         - Use automated testing and quality assurance
+         
+      2. **Implementation Recommendations**:
+         - Adopt microservices architecture for scalability
+         - Use containerization for deployment consistency
+         - Implement monitoring and alerting systems
+         
+      3. **Future Considerations**:
+         - Plan for mobile-first development
+         - Consider progressive web app features
+         - Implement analytics and user behavior tracking`;
+    }
+
     return {
-      content: `Mock research response for: "${topic}"\n\nKey findings:\n1. Latest best practices recommend...\n2. Performance optimizations include...\n3. Security considerations involve...\n4. Implementation patterns suggest...\n5. Future trends indicate...\n\n${error ? `Note: Using mock data due to API error: ${error}` : 'Note: Using mock data for demonstration.'}`,
+      content: `${specificContent}\n\n${error ? `Note: Using mock data due to API error: ${error}` : 'Note: Using mock data for demonstration - results would be enhanced with actual Perplexity API.'}`,
       citations: [
-        { url: 'https://github.com/example/repo', snippet: 'Example implementation details...' },
-        { url: 'https://developer.mozilla.org/example', snippet: 'Documentation reference...' },
-        { url: 'https://stackoverflow.com/example', snippet: 'Community discussion...' }
+        { url: 'https://github.com/dzp5103/Spotify-echo', snippet: 'EchoTune AI repository with implementation examples...' },
+        { url: 'https://developer.spotify.com/documentation/', snippet: 'Spotify Web API documentation and best practices...' },
+        { url: 'https://web.dev/articles/audio', snippet: 'Web audio and streaming optimization techniques...' }
       ],
       model: 'mock-sonar-pro',
       query: topic,
       timestamp: Date.now(),
       success: !error,
-      mockData: true
+      mockData: true,
+      ...(error && { error: error })
     };
   }
   

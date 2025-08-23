@@ -35,6 +35,12 @@ class PerplexityResearchService {
       }
     }
 
+    // Check if API key is available
+    if (!this.apiKey || this.apiKey === 'demo_mode') {
+      console.log('⚠️ Using mock Perplexity response (no API key configured)');
+      return this.getMockResearchData(query);
+    }
+
     // Rate limiting
     await this.enforceRateLimit();
 
@@ -66,7 +72,8 @@ class PerplexityResearchService {
       });
 
       if (!response.ok) {
-        throw new Error(`Perplexity API error: ${response.status} ${response.statusText}`);
+        console.warn(`Perplexity API error: ${response.status} ${response.statusText} - falling back to mock data`);
+        return this.getMockResearchData(query, response.status);
       }
 
       const data = await response.json();
@@ -89,10 +96,10 @@ class PerplexityResearchService {
       return result;
 
     } catch (error) {
-      console.error('Perplexity research failed:', error);
+      console.warn('Perplexity research failed:', error.message, '- falling back to mock data');
       
       // Return fallback mock data for demo purposes
-      return this.getMockResearchData(query);
+      return this.getMockResearchData(query, error.message);
     }
   }
 
@@ -353,17 +360,60 @@ class PerplexityResearchService {
   /**
    * Provide mock research data when API is unavailable
    */
-  getMockResearchData(query) {
+  getMockResearchData(query, error = null) {
+    const topics = query.toLowerCase();
+    let specificContent = '';
+    
+    if (topics.includes('performance')) {
+      specificContent = `Performance optimization strategies for ${query}:
+      - Implement lazy loading for components and routes
+      - Use React.memo() for expensive component re-renders
+      - Optimize bundle size with code splitting and tree shaking
+      - Implement proper caching strategies with Service Workers
+      - Use Web Workers for heavy computational tasks
+      - Optimize database queries with proper indexing
+      - Implement CDN for static assets`;
+    } else if (topics.includes('security')) {
+      specificContent = `Security best practices for ${query}:
+      - Implement proper authentication and authorization
+      - Use HTTPS for all communications
+      - Sanitize all user inputs to prevent XSS attacks
+      - Implement CSRF protection tokens
+      - Use secure headers (HSTS, CSP, etc.)
+      - Regular security audits and dependency updates
+      - Implement rate limiting to prevent abuse`;
+    } else if (topics.includes('optimization')) {
+      specificContent = `Optimization techniques for ${query}:
+      - Database query optimization with proper indexing
+      - Implement caching at multiple levels (Redis, browser, CDN)
+      - Use compression for API responses
+      - Optimize images and media assets
+      - Implement lazy loading and pagination
+      - Monitor performance with tools like Lighthouse
+      - Use modern JavaScript features for better performance`;
+    } else {
+      specificContent = `Research insights for ${query}:
+      - Follow current industry best practices and standards
+      - Implement modern development patterns and architectures
+      - Focus on user experience and accessibility
+      - Use automated testing and continuous integration
+      - Monitor and optimize application performance
+      - Maintain code quality with linting and reviews
+      - Stay updated with latest framework versions and features`;
+    }
+    
     return {
-      content: `Mock research result for: ${query}\n\nBased on current industry best practices:\n- Implement component memoization for performance\n- Use proper accessibility attributes\n- Follow React 18+ patterns for concurrent features\n- Optimize bundle size with code splitting\n- Implement proper error boundaries`,
+      content: `${specificContent}\n\n${error ? `Note: Using mock data due to API error: ${error}` : 'Note: Using mock data for demonstration - results would be enhanced with actual Perplexity API.'}`,
       citations: [
-        { url: 'https://react.dev/learn', title: 'React Documentation' },
-        { url: 'https://web.dev', title: 'Web.dev Performance Guide' }
+        { url: 'https://github.com/dzp5103/Spotify-echo', snippet: 'Repository-specific implementation examples...' },
+        { url: 'https://developer.mozilla.org/en-US/docs/Web', snippet: 'Web development best practices documentation...' },
+        { url: 'https://stackoverflow.com/questions/tagged/javascript', snippet: 'Community-driven solutions and discussions...' }
       ],
-      model: 'mock',
+      model: 'mock-' + this.defaultModel,
       query: query,
       timestamp: Date.now(),
-      mock: true
+      mock: true,
+      ...(error && { error: error })
     };
   }
 

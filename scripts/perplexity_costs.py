@@ -16,7 +16,7 @@ Key Features:
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 import yaml
@@ -180,6 +180,7 @@ class PerplexityCostManager:
                     'total_cost': 0.0,
                     'total_requests': 0,
                     'cached_requests': 0,
+                    'cache_hit_rate': 0.0,
                     'models_used': {},
                     'entries': []
                 }
@@ -216,7 +217,16 @@ class PerplexityCostManager:
             
         except Exception as e:
             print(f"❌ Error getting weekly usage: {e}", file=sys.stderr)
-            return {'iso_week': iso_week, 'total_cost': 0.0, 'error': str(e)}
+            return {
+                'iso_week': iso_week, 
+                'total_cost': 0.0, 
+                'total_requests': 0,
+                'cached_requests': 0,
+                'cache_hit_rate': 0.0,
+                'models_used': {},
+                'entries': [],
+                'error': str(e)
+            }
     
     def remaining_budget(self, iso_week: Optional[str] = None) -> Dict:
         """

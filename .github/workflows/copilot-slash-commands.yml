@@ -197,6 +197,182 @@ jobs:
             docs-command-results.log
           retention-days: 30
 
+      - name: Execute Perplexity Help Command
+        if: |
+          steps.parse.outputs.command == 'perplexity' && 
+          (steps.parse.outputs.params == 'help' || steps.parse.outputs.params == '')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            
+            const helpMessage = `## 🤖 Complete Perplexity AI Commands Guide
+            
+            **Welcome to the EchoTune AI Perplexity Integration!** 
+            
+            All Perplexity commands use advanced AI models with automatic budget management and cost optimization.
+            
+            ## 📋 Available Perplexity Commands
+            
+            ### 🔍 Analysis Commands
+            
+            \`\`\`
+            /perplexity-analyze [scope]
+            /analyze-perplexity [scope]
+            \`\`\`
+            **Purpose**: Comprehensive analysis using Perplexity AI with targeted scope  
+            **Examples**:
+            - \`/perplexity-analyze frontend\` - Analyze frontend components and architecture
+            - \`/analyze-perplexity scripts/\` - Analyze specific directory structure
+            - \`/perplexity-analyze api integration\` - Focus on API integration patterns
+            
+            **Features**:
+            - 🎯 Targeted technical analysis with actionable insights
+            - 📊 Complexity-based model selection for optimal cost/quality balance
+            - 📈 Detailed analysis reports with implementation recommendations
+            - ⚡ 2-iteration limit for focused processing
+            
+            ---
+            
+            ### 🔬 Research Commands
+            
+            \`\`\`
+            /perplexity-research [topic]
+            /research-perplexity [topic]
+            \`\`\`
+            **Purpose**: Focused research on specific topics using Perplexity browser search  
+            **Examples**:
+            - \`/perplexity-research "latest React patterns"\` - Research current best practices
+            - \`/research-perplexity "music recommendation algorithms"\` - Industry insights
+            - \`/perplexity-research "Node.js performance optimization"\` - Technical research
+            
+            **Features**:
+            - 🌐 Latest trends, best practices, and technologies via browser search
+            - 🔄 Research results integrated into development roadmap
+            - 💾 14-day caching to optimize costs and performance
+            - ⚡ 1-iteration limit for efficient processing
+            
+            ---
+            
+            ### 📋 Roadmap Commands
+            
+            \`\`\`
+            /perplexity-roadmap-update
+            \`\`\`
+            **Purpose**: Update roadmap with latest Perplexity research insights  
+            **Features**:
+            - 📈 Latest research findings integrated into development roadmap
+            - 🎯 Tasks reprioritized based on current industry trends
+            - 📋 Updated implementation strategies and approaches
+            - ⏰ Realistic timeline adjustments based on complexity analysis
+            
+            ---
+            
+            ### 💰 Budget & Cost Management Commands
+            
+            \`\`\`
+            /perplexity-budget-check
+            \`\`\`
+            **Purpose**: Check Perplexity usage and budget status  
+            **Features**:
+            - 💳 Real-time usage monitoring: \$3.00 weekly budget limit
+            - 📊 Usage percentage with detailed breakdown
+            - ⚠️ Automated warnings at 80% usage
+            - 🔒 Automatic enforcement at 100% usage
+            - 📅 Weekly reset schedule (Monday mornings)
+            
+            \`\`\`
+            /perplexity-optimize-costs
+            \`\`\`
+            **Purpose**: Analyze and optimize Perplexity usage patterns  
+            **Features**:
+            - 📈 Review current API usage patterns and efficiency
+            - 🎯 Optimize model selection for cost/performance balance
+            - 💾 Improve cache hit rates and TTL settings
+            - 💡 Weekly budget optimization recommendations
+            
+            ---
+            
+            ## 💡 Usage Tips & Best Practices
+            
+            ### ⚡ Quick Commands
+            - \`/perplexity-budget-check\` - Always check budget first
+            - \`/perplexity-analyze\` - General repository analysis
+            - \`/perplexity-research "topic"\` - Focused research on any topic
+            
+            ### 🎯 Scope Parameters
+            Most commands accept optional scope parameters:
+            - **Directories**: \`scripts/\`, \`src/\`, \`docs/\`
+            - **Components**: \`frontend\`, \`backend\`, \`api\`, \`database\`
+            - **Topics**: \`"authentication"\`, \`"performance optimization"\`
+            
+            ### 🔄 Command Combinations
+            1. Start with budget check: \`/perplexity-budget-check\`
+            2. Research topic: \`/perplexity-research "your topic"\`
+            3. Analyze specific area: \`/perplexity-analyze scope\`
+            4. Update roadmap: \`/perplexity-roadmap-update\`
+            
+            ## 🛡️ Budget Management Features
+            
+            - **Weekly Budget**: \$3.00 USD with automatic enforcement
+            - **Smart Model Selection**: 
+              - 🟢 **Sonar**: Simple queries (lowest cost)
+              - 🟡 **Sonar-Reasoning**: Complex analysis (medium cost)  
+              - 🔴 **Sonar-Pro**: Advanced research (highest cost)
+            - **Cache System**: 14-day TTL reduces repeat costs by 70%+
+            - **Usage Alerts**: Proactive warnings at 80% usage
+            - **Automatic Locks**: Hard stops at 100% usage to prevent overages
+            
+            ## 📊 Command Status & Confirmation
+            
+            Each command provides:
+            - ✅ **Immediate Confirmation**: Command received and validated
+            - 🔄 **Progress Tracking**: Live workflow links and status updates
+            - 📈 **Expected Outcomes**: Clear descriptions of what will be delivered
+            - ⏱️ **Estimated Duration**: Realistic time expectations
+            - 📋 **Follow-up Actions**: Suggested next steps and related commands
+            
+            ## 🔗 Monitoring & Results
+            
+            **Track Your Commands**:
+            - 📊 [View Active Workflows](${{ github.server_url }}/${{ github.repository }}/actions)
+            - 📁 Session artifacts available after completion
+            - 📈 Detailed reports with actionable insights
+            - 🔄 Automatic updates to roadmap and documentation
+            
+            **Results Location**:
+            - Updated files: \`ROADMAP.md\`, \`AUTONOMOUS_DEVELOPMENT_ROADMAP.md\`
+            - Analysis reports: Available as workflow artifacts
+            - Budget status: Real-time updates in this repository
+            
+            ## 🆘 Need Help?
+            
+            - **Quick Budget Check**: \`/perplexity-budget-check\`  
+            - **General Analysis**: \`/perplexity-analyze\`
+            - **Research Help**: \`/perplexity-research "help with [topic]"\`
+            - **This Help**: \`/perplexity help\`
+            
+            ---
+            
+            ## 🚀 **Ready to Start?**
+            
+            **Try these commands now**:
+            - \`/perplexity-budget-check\` - See your current budget status
+            - \`/perplexity-analyze "recommendation system"\` - Get insights on our music engine
+            - \`/perplexity-research "latest AI music trends"\` - Research industry developments
+            
+            *All Perplexity commands are optimized for cost efficiency with automatic budget management and intelligent model selection.*
+            
+            ---
+            *Enhanced Copilot Slash Commands with Perplexity AI Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: helpMessage
+            });
+
       - name: Execute Specific Perplexity Commands
         if: |
           steps.parse.outputs.command == 'perplexity-analyze' ||
@@ -503,8 +679,11 @@ jobs:
       - name: Handle Other Commands
         if: |
           steps.parse.outputs.command != 'review-docs' &&
-          !contains(steps.parse.outputs.command, 'perplexity') && 
-          !contains(steps.parse.outputs.command, 'start-autonomous-development') &&
+          steps.parse.outputs.command != 'perplexity' &&
+          !contains(steps.parse.outputs.command, 'perplexity-') && 
+          steps.parse.outputs.command != 'analyze-perplexity' &&
+          steps.parse.outputs.command != 'research-perplexity' &&
+          steps.parse.outputs.command != 'start-autonomous-development' &&
           !contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') &&
           !contains(steps.parse.outputs.comment_body, 'autonomous development') &&
           steps.parse.outputs.command != ''
@@ -523,6 +702,7 @@ jobs:
               'run-mcp-all',
               'mcp-health-check',
               'start-autonomous-development',
+              'perplexity',
               'perplexity-research',
               'perplexity-analyze',
               'perplexity-roadmap-update', 
@@ -582,7 +762,8 @@ jobs:
               - \`/start-autonomous-development\` - Begin autonomous development cycle
               - \`@copilot use perplexity browser research\` - Trigger research-driven development
               
-              #### 🔍 Specific Perplexity Commands (NEW!)
+              #### 🔍 Specific Perplexity Commands
+              - \`/perplexity help\` - 📚 Complete guide with examples and usage tips
               - \`/perplexity-analyze <scope>\` - Targeted analysis with Perplexity AI
               - \`/analyze-perplexity <scope>\` - Alternative phrasing for analysis
               - \`/perplexity-research <topic>\` - Focused research on specific topics
@@ -601,6 +782,7 @@ jobs:
               - \`/review-docs\` - Analyze all documentation
               - \`/review-docs api\` - Focus on API documentation
               - \`/gpt5 analyze scripts/\` - Analyze specific directory
+              - \`/perplexity help\` - **📚 Complete Perplexity commands guide**
               - \`/perplexity-analyze frontend\` - Analyze frontend with Perplexity
               - \`/perplexity-research "latest React patterns"\` - Research specific topic
               - \`/perplexity-budget-check\` - Check current usage and budget

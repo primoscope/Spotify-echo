@@ -1,0 +1,262 @@
+{
+  "cursorRules": {
+    "projectType": "EchoTune AI - Music Platform with Enhanced Perplexity Integration",
+    "techStack": "React 19 + Node.js 20 + MongoDB + Redis + Python ML + Perplexity AI",
+    "version": "3.0 - Autonomous Development Enhanced",
+    
+    "aiModelSelection": {
+      "architecture": {
+        "primary": "Perplexity Sonar Pro",
+        "usage": "Complex analysis, research, architecture decisions",
+        "complexity_threshold": 8,
+        "cost_per_1k_tokens": 0.006
+      },
+      
+      "development": {
+        "primary": "Perplexity Sonar Reasoning", 
+        "usage": "Medium complexity development tasks, API integration",
+        "complexity_threshold": 6,
+        "cost_per_1k_tokens": 0.003
+      },
+      
+      "quickTasks": {
+        "primary": "Perplexity Sonar",
+        "usage": "Simple analysis, code review, routine tasks", 
+        "complexity_threshold": 5,
+        "cost_per_1k_tokens": 0.001
+      },
+      
+      "codeGeneration": {
+        "primary": "Claude 3.5 Sonnet",
+        "fallback": "GPT-4o",
+        "usage": "Complex business logic, React components, API endpoints"
+      },
+      
+      "research": {
+        "primary": "Perplexity Sonar Pro",
+        "usage": "Latest best practices, security research, performance optimization",
+        "browser_research": true,
+        "cache_duration": "14 days"
+      }
+    },
+    
+    "budgetManagement": {
+      "perplexity_weekly_budget": 3.00,
+      "alert_threshold": 0.80,
+      "automatic_lockdown": true,
+      "cost_optimization": {
+        "cache_first": true,
+        "batch_processing": true,
+        "similarity_grouping": true,
+        "complexity_scoring": true
+      }
+    },
+    
+    "contextAwareness": {
+      "highPriority": [
+        "package.json",
+        "server.js", 
+        "ROADMAP.md",
+        "AUTONOMOUS_DEVELOPMENT_ROADMAP.md",
+        "scripts/perplexity_client.py",
+        "scripts/autonomous_development_orchestrator.py",
+        ".cursorrules",
+        ".github/workflows/autonomous-*.yml",
+        ".github/workflows/continuous-*.yml"
+      ],
+      
+      "dynamicContext": {
+        "api_development": [
+          "src/api/**/*",
+          "src/middleware/**/*",
+          "tests/api/**/*"
+        ],
+        "frontend_development": [
+          "src/frontend/**/*", 
+          "static/**/*",
+          "tests/frontend/**/*"
+        ],
+        "ml_development": [
+          "scripts/**/*.py",
+          "ml_datasets/**/*",
+          "requirements.txt"
+        ],
+        "autonomous_development": [
+          ".autonomous-session/**/*",
+          ".roadmap-research/**/*",
+          "perplexity_test/**/*"
+        ]
+      },
+      
+      "exclusions": [
+        ".perplexity/cache/*",
+        ".env*",
+        "node_modules/*",
+        "build/*",
+        "dist/*",
+        "*-report*.json",
+        "validation-report*.json"
+      ]
+    },
+    
+    "researchTriggers": {
+      "automatic": [
+        "new npm packages or Python libraries",
+        "security-related changes",
+        "performance issues >1s response time", 
+        "API integration patterns not in codebase",
+        "architecture decisions",
+        "latest best practices research"
+      ],
+      
+      "keywords": [
+        "latest", "best practice", "security", "performance",
+        "2024", "2025", "industry standard", "optimization"
+      ],
+      
+      "complexity_based": {
+        "8_10": "Use Perplexity Sonar Pro with comprehensive research",
+        "6_7": "Use Perplexity Sonar Reasoning with targeted research", 
+        "1_5": "Use Perplexity Sonar with basic validation"
+      }
+    },
+    
+    "autonomousDevelopment": {
+      "workflows": {
+        "continuous_research": {
+          "schedule": "daily at 2 AM UTC",
+          "trigger": "roadmap changes, manual commands",
+          "scope": "comprehensive roadmap analysis and updates"
+        },
+        
+        "development_cycles": {
+          "trigger": "@copilot use perplexity browser research",
+          "max_iterations": 5,
+          "task_complexity_limit": 8,
+          "budget_aware": true
+        },
+        
+        "research_and_update": {
+          "frequency": "every 6 hours",
+          "focus_areas": [
+            "music AI/ML trends",
+            "Spotify API updates", 
+            "React 19 patterns",
+            "Node.js optimization",
+            "MongoDB performance",
+            "security improvements"
+          ]
+        }
+      },
+      
+      "taskManagement": {
+        "complexity_scoring": "1-10 scale automatic",
+        "priority_matrix": "high/medium/low with impact assessment",
+        "implementation_tracking": "session-based with progress reports",
+        "quality_gates": "automated testing and validation"
+      }
+    },
+    
+    "developmentStandards": {
+      "codeQuality": {
+        "javascript": "ES2024+, async/await, comprehensive error handling",
+        "react": "React 19 concurrent features, hooks, composition patterns", 
+        "node": "ES modules, middleware patterns, RESTful APIs",
+        "python": "Type hints, comprehensive logging, error handling"
+      },
+      
+      "testing": {
+        "coverage": ">80% for business logic",
+        "integration": "all API endpoints with error scenarios",
+        "performance": "critical user flows with metrics",
+        "ai_assisted": "automated test generation and validation"
+      },
+      
+      "documentation": {
+        "code": "JSDoc for all functions and components",
+        "api": "OpenAPI/Swagger specifications", 
+        "architecture": "ADRs for major decisions",
+        "ai_generated": "automated documentation updates"
+      }
+    },
+    
+    "securityCompliance": {
+      "apiSecurity": [
+        "input validation with schema",
+        "rate limiting on public endpoints",
+        "proper CORS configuration",
+        "encryption in transit and at rest"
+      ],
+      
+      "musicIndustry": [
+        "proper music attribution",
+        "user privacy in preferences",
+        "licensing compliance",
+        "DMCA guidelines"
+      ],
+      
+      "aiIntegration": [
+        "no API keys in logs",
+        "secure model selection",
+        "cost monitoring and alerts",
+        "research result validation"
+      ]
+    }
+  },
+  
+  "workflowIntegration": {
+    "slashCommands": [
+      "/start-autonomous-development - Begin autonomous development cycle",
+      "/run-perplexity-research - Trigger comprehensive research",
+      "/analyze-roadmap - Deep roadmap analysis with task identification", 
+      "/update-roadmap - Research-driven roadmap updates",
+      "/check-perplexity-budget - Current budget status and usage",
+      "/optimize-costs - Analyze and optimize AI usage costs"
+    ],
+    
+    "automatedTriggers": [
+      "Daily roadmap research at 2 AM UTC",
+      "Post-commit analysis for code changes",
+      "Issue comment analysis for development requests",
+      "Performance monitoring with AI insights",
+      "Security scanning with research validation"
+    ],
+    
+    "continuousImprovement": {
+      "research_feedback_loop": "Research → Analysis → Implementation → Update → Research",
+      "cost_optimization": "Automatic caching, batch processing, smart model selection",
+      "quality_monitoring": "AI-powered code review, performance analysis, security scanning",
+      "roadmap_maintenance": "Continuous updates based on research insights and development progress"
+    }
+  },
+  
+  "performanceTargets": {
+    "api": {
+      "simple_queries": "<500ms p95",
+      "complex_queries": "<2s p95", 
+      "ai_research": "<10s for comprehensive analysis"
+    },
+    
+    "frontend": {
+      "first_contentful_paint": "<1.5s",
+      "largest_contentful_paint": "<2.5s",
+      "cumulative_layout_shift": "<0.1"
+    },
+    
+    "aiIntegration": {
+      "perplexity_response": "<10s for research",
+      "model_selection": "<1s for complexity scoring",
+      "cache_hit_rate": ">80% for repeated queries",
+      "budget_utilization": "<100% weekly with alerts at 80%"
+    }
+  },
+  
+  "recommendations": [
+    "Use complexity-based model selection for optimal cost/performance",
+    "Leverage Perplexity browser research for cutting-edge practices",
+    "Implement autonomous development cycles for continuous improvement", 
+    "Monitor AI usage costs and optimize through caching and batching",
+    "Maintain research-driven roadmap updates for strategic development",
+    "Use MCP integration for enhanced development workflow automation"
+  ]
+}

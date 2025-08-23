@@ -1,0 +1,116 @@
+{
+  "perplexityIntegration": {
+    "version": "2.0.0",
+    "description": "Enhanced Perplexity API integration for EchoTune AI with GitHub Coding Agent optimization",
+    
+    "models": {
+      "sonar": {
+        "cost_per_1k_tokens": 0.001,
+        "cost_per_search": 0.005,
+        "use_cases": ["simple_analysis", "quick_fixes", "basic_research"]
+      },
+      "sonar-reasoning": {
+        "cost_per_1k_tokens": 0.003,
+        "cost_per_search": 0.005,
+        "use_cases": ["complex_analysis", "reasoning", "research"]
+      },
+      "sonar-pro": {
+        "cost_per_1k_tokens": 0.006,
+        "cost_per_search": 0.01,
+        "use_cases": ["complex_reasoning", "detailed_analysis", "research"]
+      }
+    },
+    
+    "budgetManagement": {
+      "weeklyBudget": 3.0,
+      "alertThresholds": {
+        "warning": 0.8,
+        "critical": 1.0
+      },
+      "cacheTTL": "14 days",
+      "resetSchedule": "Monday 00:00 UTC"
+    },
+    
+    "automationTriggers": {
+      "github": {
+        "issues_opened": {
+          "enabled": true,
+          "model_selection": "auto_complexity",
+          "budget_check": true
+        },
+        "nightly_batch": {
+          "enabled": true,
+          "max_issues": 5,
+          "similarity_grouping": true
+        },
+        "budget_monitor": {
+          "enabled": true,
+          "frequency": "every_6_hours"
+        }
+      },
+      
+      "cursor": {
+        "slash_commands": [
+          "/perplexity-analyze",
+          "/perplexity-research",
+          "/budget-status",
+          "/issue-complexity"
+        ],
+        "context_awareness": {
+          "include_budget_status": true,
+          "include_model_selection_logic": true,
+          "exclude_sensitive_data": true
+        }
+      }
+    },
+    
+    "mcpIntegration": {
+      "servers": [
+        {
+          "name": "perplexity-research",
+          "port": 3002,
+          "capabilities": ["issue_analysis", "budget_monitoring", "batch_processing"]
+        }
+      ],
+      "tools": [
+        "analyze_issue",
+        "check_budget",
+        "batch_analyze",
+        "get_complexity_score"
+      ]
+    },
+    
+    "securityConfig": {
+      "api_key_storage": "environment_variable",
+      "sensitive_file_exclusions": [
+        ".perplexity/usage_ledger.json",
+        ".perplexity/cache/",
+        ".perplexity/alerts/",
+        ".perplexity/BUDGET_LOCK"
+      ],
+      "audit_requirements": [
+        "no_hardcoded_keys",
+        "atomic_file_operations",
+        "secure_error_handling"
+      ]
+    },
+    
+    "optimizations": {
+      "caching": {
+        "enabled": true,
+        "strategy": "md5_hash_based",
+        "ttl_days": 14
+      },
+      "batch_processing": {
+        "enabled": true,
+        "similarity_threshold": 0.3,
+        "max_group_size": 5
+      },
+      "cost_control": {
+        "complexity_scoring": true,
+        "dynamic_model_selection": true,
+        "budget_enforcement": true
+      }
+    }
+  }
+}

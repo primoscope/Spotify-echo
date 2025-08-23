@@ -1,3 +1,12 @@
+# === PERPLEXITY API INTEGRATION FILES ===
+# Exclude all Perplexity cache, ledger, and sensitive files
+.perplexity/usage_ledger.json
+.perplexity/cache/
+.perplexity/alerts/
+.perplexity/backups/
+.perplexity/BUDGET_LOCK
+.perplexity/*.tmp
+
 # === PERFORMANCE OPTIMIZATION ADDITIONS ===
 # Large data files that impact VS Code performance
 data/Streaming_History_Audio_*.json
@@ -60,6 +69,21 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Perplexity API Integration - Sensitive data patterns
+*.key
+*_api_key*
+*api-key*
+perplexity_key*
+pplx_key*
+
+# Perplexity API Integration - Usage data (keep ledger for tracking)
+.perplexity/cache/
+.perplexity/alerts/
+.perplexity/backups/
+.perplexity/BUDGET_LOCK
+.perplexity/*.tmp
+.perplexity/*.log
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

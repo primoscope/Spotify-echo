@@ -197,9 +197,98 @@ jobs:
             docs-command-results.log
           retention-days: 30
 
-      - name: Handle Unsupported Commands
+      - name: Execute Perplexity Research Command
+        if: |
+          contains(steps.parse.outputs.command, 'perplexity') || 
+          contains(steps.parse.outputs.command, 'start-autonomous-development') ||
+          contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
+          contains(steps.parse.outputs.comment_body, 'autonomous development')
+        run: |
+          echo "🔍 Executing Perplexity/Autonomous Development command..."
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          COMMENT_BODY="${{ steps.parse.outputs.comment_body }}"
+          
+          # Trigger autonomous development workflow
+          gh workflow run autonomous-perplexity-development-cycle.yml \
+            --field force_start=true \
+            --field max_iterations=3 \
+            --field focus_area="user-requested autonomous development"
+            
+          echo "✅ Autonomous development workflow triggered"
+
+      - name: Post Perplexity Command Response
+        if: |
+          contains(steps.parse.outputs.command, 'perplexity') || 
+          contains(steps.parse.outputs.command, 'start-autonomous-development') ||
+          contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
+          contains(steps.parse.outputs.comment_body, 'autonomous development')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const commentBody = '${{ steps.parse.outputs.comment_body }}';
+            
+            const responseMessage = `## 🤖 Autonomous Development Cycle Initiated
+            
+            **Request**: Perplexity browser research and autonomous development
+            **Status**: ✅ Workflow triggered successfully
+            **Estimated Duration**: 5-10 minutes for complete cycle
+            
+            ## 🔄 What's Happening:
+            
+            1. **📋 Roadmap Analysis**: Using Perplexity AI to analyze current roadmap and identify actionable tasks
+            2. **🔧 Task Execution**: Implementing identified development tasks with appropriate AI model selection
+            3. **🔍 Research & Update**: Conducting comprehensive browser research to update roadmap with latest insights
+            4. **📊 Progress Tracking**: Generating detailed reports and updating development documentation
+            
+            ## 🎯 Autonomous Development Features:
+            
+            - **Smart Model Selection**: Complexity-based routing (Sonar/Sonar-Reasoning/Sonar-Pro)
+            - **Budget Management**: $3/week Perplexity budget with 80% usage alerts
+            - **Research Caching**: 14-day TTL to optimize costs and performance
+            - **Continuous Learning**: Research insights feed back into development priorities
+            
+            ## 📈 Expected Outcomes:
+            
+            - **Updated Roadmap**: Enhanced with latest research insights and priorities
+            - **Code Implementations**: Production-ready code for identified tasks  
+            - **Documentation Updates**: Comprehensive session reports and progress tracking
+            - **Next Steps**: Automated identification of follow-up development opportunities
+            
+            ## 🔗 Monitor Progress:
+            
+            - **Workflow Run**: [View live progress](${{ github.server_url }}/${{ github.repository }}/actions)
+            - **Session Artifacts**: Will be available after completion
+            - **Updated Files**: ROADMAP.md, AUTONOMOUS_DEVELOPMENT_ROADMAP.md, and implementation files
+            
+            ## 🔄 Continuous Development:
+            
+            This autonomous development cycle will:
+            - Continue automatically based on research findings
+            - Schedule follow-up analysis every 6 hours  
+            - Trigger on future roadmap updates
+            - Respond to additional \`@copilot use perplexity browser research\` requests
+            
+            **The autonomous development system is now active and will provide continuous improvements to the EchoTune AI platform.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Perplexity Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Handle Other Commands
         if: |
           steps.parse.outputs.command != 'review-docs' &&
+          !contains(steps.parse.outputs.command, 'perplexity') && 
+          !contains(steps.parse.outputs.command, 'start-autonomous-development') &&
+          !contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') &&
+          !contains(steps.parse.outputs.comment_body, 'autonomous development') &&
           steps.parse.outputs.command != ''
         uses: actions/github-script@v7
         with:
@@ -214,7 +303,9 @@ jobs:
               'review-gpt5', 
               'optimize-gpt5',
               'run-mcp-all',
-              'mcp-health-check'
+              'mcp-health-check',
+              'start-autonomous-development',
+              'perplexity-research'
             ];
             
             let responseMessage = '';
@@ -258,11 +349,19 @@ jobs:
               - \`/optimize-gpt5\` - GPT-5 optimization analysis
               - \`/run-mcp-all\` - Comprehensive MCP validation
               - \`/mcp-health-check\` - Quick MCP health check
+              - \`/start-autonomous-development\` - Begin autonomous development cycle
+              - \`@copilot use perplexity browser research\` - Trigger research-driven development
+              
+              ### 🔍 Autonomous Development:
+              - \`@copilot use perplexity browser research\` - Full autonomous cycle with roadmap updates
+              - \`/start-autonomous-development\` - Direct autonomous development trigger
+              - Comments containing "autonomous development" - Natural language triggers
               
               ### 📚 Usage Examples:
               - \`/review-docs\` - Analyze all documentation
               - \`/review-docs api\` - Focus on API documentation
               - \`/gpt5 analyze scripts/\` - Analyze specific directory
+              - \`@copilot use perplexity browser research\` - Start comprehensive development cycle
               
               **Need Help?** Check the [workflow documentation](${{ github.server_url }}/${{ github.repository }}/tree/main/.github/workflows) for more details.`;
             }

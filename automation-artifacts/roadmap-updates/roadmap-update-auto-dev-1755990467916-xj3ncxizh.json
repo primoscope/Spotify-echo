@@ -1,0 +1,116 @@
+{
+  "newTasks": [
+    {
+      "id": "research-20",
+      "title": "Monitor and optimize application performance",
+      "source": "perplexity_research",
+      "topic": "Real-time music recommendation algorithms",
+      "complexity": 7,
+      "priority": 9,
+      "priorityScore": 7.199999999999999
+    },
+    {
+      "id": "research-11",
+      "title": "Regular security audits and dependency updates",
+      "source": "perplexity_research",
+      "topic": "Express.js security best practices",
+      "complexity": 8,
+      "priority": 9,
+      "priorityScore": 6.8999999999999995
+    },
+    {
+      "id": "research-14",
+      "title": "Monitor and optimize application performance",
+      "source": "perplexity_research",
+      "topic": "AI API integration patterns",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-17",
+      "title": "Monitor and optimize application performance",
+      "source": "perplexity_research",
+      "topic": "Spotify API rate limiting strategies",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-21",
+      "title": "Stay updated with latest framework versions and features",
+      "source": "perplexity_research",
+      "topic": "Real-time music recommendation algorithms",
+      "complexity": 5,
+      "priority": 7,
+      "priorityScore": 6.3999999999999995
+    },
+    {
+      "id": "research-15",
+      "title": "Stay updated with latest framework versions and features",
+      "source": "perplexity_research",
+      "topic": "AI API integration patterns",
+      "complexity": 5,
+      "priority": 6,
+      "priorityScore": 5.699999999999999
+    },
+    {
+      "id": "research-18",
+      "title": "Stay updated with latest framework versions and features",
+      "source": "perplexity_research",
+      "topic": "Spotify API rate limiting strategies",
+      "complexity": 5,
+      "priority": 6,
+      "priorityScore": 5.699999999999999
+    },
+    {
+      "id": "research-19",
+      "title": "Implement modern development patterns and architectures",
+      "source": "perplexity_research",
+      "topic": "Real-time music recommendation algorithms",
+      "complexity": 6,
+      "priority": 6,
+      "priorityScore": 5.3999999999999995
+    },
+    {
+      "id": "codebase-23",
+      "title": "API routes could benefit from additional organization and middleware",
+      "source": "codebase_analysis",
+      "complexity": 6,
+      "priority": 6,
+      "priorityScore": 5.3999999999999995
+    },
+    {
+      "id": "research-1",
+      "title": "Implement lazy loading for components and routes",
+      "source": "perplexity_research",
+      "topic": "Node.js performance optimization 2025",
+      "complexity": 6,
+      "priority": 5,
+      "priorityScore": 4.7
+    }
+  ],
+  "timelineEstimate": {
+    "totalDays": 47,
+    "weeks": 7,
+    "estimatedCompletion": "2025-10-09"
+  },
+  "resourceRequirements": {
+    "developmentHours": 124,
+    "testingHours": 5,
+    "reviewHours": 3,
+    "requiredSkills": [
+      "Optimization",
+      "Caching",
+      "Monitoring",
+      "Security",
+      "Authentication",
+      "Encryption",
+      "General Development"
+    ]
+  },
+  "riskAssessment": [
+    "Security-related tasks require thorough testing and review"
+  ],
+  "generatedAt": "2025-08-23T23:07:56.940Z"
+}

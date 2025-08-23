@@ -1,0 +1,184 @@
+name: Perplexity Budget Guard and Monitoring
+
+on:
+  schedule:
+    # Run every 4 hours to monitor budget status
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    inputs:
+      force_check:
+        description: 'Force budget check even if disabled'
+        required: false
+        type: boolean
+        default: false
+      
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+env:
+  CONFIG_FILE: .github/perplexity-config.yml
+
+jobs:
+  budget-monitor:
+    runs-on: ubuntu-latest
+    outputs:
+      can_proceed: ${{ steps.guard.outputs.can_proceed }}
+      state: ${{ steps.guard.outputs.state }}
+      remaining_usd: ${{ steps.guard.outputs.remaining_usd }}
+      usage_percentage: ${{ steps.guard.outputs.usage_percentage }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Python Dependencies
+        run: |
+          pip install pyyaml requests
+          
+      - name: Check Repository Labels
+        id: check_labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if AI analysis is disabled
+          if gh label list --search "ai-analysis-disabled" --limit 1 | grep -q "ai-analysis-disabled"; then
+            echo "disabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "disabled=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if override is active
+          if gh label list --search "override-budget-guard" --limit 1 | grep -q "override-budget-guard"; then
+            echo "override=true" >> $GITHUB_OUTPUT
+          else
+            echo "override=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Budget Guard Check
+        id: guard
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Running budget guard check..."
+          python3 scripts/budget_guard.py --output-file budget-summary.json --verbose
+          
+          echo "📊 Budget check completed"
+
+      - name: Upload Budget Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: budget-summary-${{ github.run_number }}
+          path: budget-summary.json
+          retention-days: 30
+
+      - name: Manage Repository Labels
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STATE="${{ steps.guard.outputs.state }}"
+          USAGE_PCT="${{ steps.guard.outputs.usage_percentage }}"
+          
+          echo "Budget state: $STATE (${USAGE_PCT}% used)"
+          
+          # Ensure required labels exist
+          gh label create "analysis-deferred-budget" --description "Issue analysis deferred due to budget limits" --color "yellow" || true
+          gh label create "ai-analysis-disabled" --description "AI analysis completely disabled" --color "red" || true
+          gh label create "override-budget-guard" --description "Override budget guard restrictions" --color "blue" || true
+          
+          # Manage labels based on budget state
+          if [ "$STATE" = "HARD_STOP" ]; then
+            echo "💰 Budget exhausted - adding disable label"
+            gh label create "ai-analysis-disabled" --description "AI analysis disabled due to budget exhaustion" --color "red" || true
+          else
+            echo "💰 Budget available - ensuring disable label is removed"
+            gh label delete "ai-analysis-disabled" || true
+          fi
+
+      - name: Create or Update Budget Status Issue
+        if: steps.guard.outputs.state == 'WARNING' || steps.guard.outputs.state == 'HARD_STOP'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STATE="${{ steps.guard.outputs.state }}"
+          USAGE_PCT="${{ steps.guard.outputs.usage_percentage }}"
+          REMAINING="${{ steps.guard.outputs.remaining_usd }}"
+          ISO_WEEK="${{ steps.guard.outputs.iso_week }}"
+          
+          # Create status update
+          if [ "$STATE" = "HARD_STOP" ]; then
+            EMOJI="🔴"
+            TITLE="Perplexity Budget Exhausted"
+            STATUS="**HARD STOP**: Weekly budget has been exhausted"
+          else
+            EMOJI="🟡"
+            TITLE="Perplexity Budget Warning"
+            STATUS="**WARNING**: Approaching weekly budget limit"
+          fi
+          
+          BODY="# ${EMOJI} ${TITLE}
+          
+          ${STATUS}
+          
+          ## Current Status
+          - **Week**: ${ISO_WEEK}
+          - **Usage**: ${USAGE_PCT}%
+          - **Remaining**: \$${REMAINING}
+          
+          ## Actions Taken
+          - Automatic budget monitoring active
+          - Issue analysis may be limited or deferred
+          - Budget resets weekly on Monday
+          
+          ## Manual Override
+          If urgent analysis is needed, add the \`override-budget-guard\` label to the repository.
+          
+          ---
+          *This issue is automatically managed by the Perplexity Budget Guard system.*"
+          
+          # Look for existing budget status issue
+          EXISTING_ISSUE=$(gh issue list --search "Perplexity Budget Status in:title" --state open --limit 1 --json number --jq '.[0].number // empty')
+          
+          if [ -n "$EXISTING_ISSUE" ]; then
+            echo "Updating existing issue #$EXISTING_ISSUE"
+            echo "$BODY" | gh issue edit "$EXISTING_ISSUE" --title "$TITLE" --body-file -
+          else
+            echo "Creating new budget status issue"
+            echo "$BODY" | gh issue create --title "$TITLE" --body-file - --label "budget-status,automated"
+          fi
+
+  cleanup-cache:
+    runs-on: ubuntu-latest
+    needs: budget-monitor
+    if: always()
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Python Dependencies
+        run: |
+          pip install pyyaml
+          
+      - name: Clean Up Old Cache Files
+        run: |
+          echo "🧹 Cleaning up old cache files..."
+          python3 scripts/perplexity_cache.py cleanup
+          
+      - name: Clean Up Old Usage Logs
+        run: |
+          echo "🧹 Cleaning up old usage logs..."
+          python3 scripts/perplexity_costs.py cleanup --retention-weeks 12

@@ -18,36 +18,97 @@ Simply type a slash command in any issue or PR comment, and the system will auto
 
 ### 📚 Documentation Commands
 
+## 📋 Available Commands
+
+### 📚 Documentation & Analysis Commands
 | Command | Description | Output |
 |---------|-------------|---------|
-| `/review-docs` | Analyze current documentation and suggest improvements | Comprehensive review with recommendations |
-| `/review-docs [area]` | Focus review on specific area (api, architecture, contributing) | Targeted analysis and suggestions |
+| `/review-docs [scope]` | Analyze current documentation and suggest improvements | Comprehensive review with recommendations |
 | `/create-api-docs` | Generate complete API documentation | `API_DOCUMENTATION.md` with full endpoint reference |
 | `/create-architecture` | Generate system architecture documentation | `ARCHITECTURE.md` with diagrams and design docs |
 | `/create-contributing` | Generate contributing guidelines | `CONTRIBUTING.md` with development workflow |
-| `/help` | Show all available commands and usage | Complete command reference |
+| `/gpt5 analyze [scope]` | Trigger GPT-5 repository analysis | Comprehensive analysis report |
+| `/analyze-gpt5 [scope]` | Alternative phrasing for GPT-5 analysis | Same as above |
+| `/review-gpt5 [scope]` | GPT-5 focused code review | Code review report |
+| `/optimize-gpt5 [scope]` | GPT-5 optimization analysis | Performance optimization report |
+
+### 🔧 System & MCP Commands
+| Command | Description | Output |
+|---------|-------------|---------|
+| `/run-mcp-all` | Comprehensive MCP validation | MCP validation report |
+| `/mcp-health-check` | Quick MCP health check | Health status report |
+
+### 🤖 Autonomous Development Commands
+| Command | Description | Output |
+|---------|-------------|---------|
+| `/start-autonomous-development` | Begin autonomous development cycle | Session reports and updated files |
+| `@copilot use perplexity browser research` | Full autonomous cycle with roadmap updates | Roadmap updates and implementation files |
+| `@copilot autonomous development` | Alternative natural language trigger | Same as above |
+
+### 🔍 Specific Perplexity Commands (NEW!)
+| Command | Description | Output |
+|---------|-------------|---------|
+| `/perplexity-analyze <scope>` | Targeted analysis with Perplexity AI | Analysis report for specified scope |
+| `/analyze-perplexity <scope>` | Alternative phrasing for analysis | Same as above |
+| `/perplexity-research <topic>` | Focused research on specific topics | Research report and insights |
+| `/research-perplexity <topic>` | Alternative phrasing for research | Same as above |
+| `/perplexity-roadmap-update` | Update roadmap with latest research | Updated roadmap with research insights |
+| `/perplexity-budget-check` | Check Perplexity usage and budget | Budget status report |
+| `/perplexity-optimize-costs` | Optimize Perplexity usage patterns | Cost optimization recommendations |
 
 ### 🎯 Usage Examples
 
+```bash
+# Documentation Commands
+/review-docs                    # Review all documentation
+/review-docs api               # Focus on API documentation
+/create-api-docs               # Generate comprehensive API docs
+
+# Analysis Commands
+/gpt5 analyze scripts/         # Analyze specific directory with GPT-5
+/perplexity-analyze frontend   # Analyze frontend with Perplexity
+/perplexity-analyze "API security"  # Analyze specific topic
+
+# Research Commands  
+/perplexity-research "React 19 features"        # Research latest React
+/research-perplexity "music AI trends"          # Research domain-specific topics
+/perplexity-research "Spotify API best practices" # Research API patterns
+
+# Autonomous Development
+@copilot use perplexity browser research        # Full autonomous cycle
+/start-autonomous-development                   # Direct trigger
+/perplexity-roadmap-update                     # Update roadmap with research
+
+# Budget & Optimization
+/perplexity-budget-check                       # Check usage and budget
+/perplexity-optimize-costs                     # Optimize API usage patterns
+
+# System Commands
+/run-mcp-all                   # Comprehensive MCP validation
+/mcp-health-check              # Quick health check
 ```
-# Review all documentation
-/review-docs
 
-# Focus on API documentation
-/review-docs api
+### 💡 Command Features
 
-# Generate comprehensive API docs
-/create-api-docs
+#### 🎯 Scope Parameters
+Most commands accept optional scope parameters to focus analysis:
+- **Directory Scope**: `/perplexity-analyze scripts/` - Focus on specific directories
+- **Component Scope**: `/perplexity-analyze frontend` - Focus on frontend components  
+- **Topic Scope**: `/perplexity-research "API security"` - Focus on specific topics
 
-# Create architecture diagrams and documentation
-/create-architecture
+#### 💰 Budget Awareness
+Perplexity commands automatically optimize for cost efficiency:
+- **Smart Model Selection**: Complexity-based routing (sonar → sonar-reasoning → sonar-pro)
+- **Cache Utilization**: 14-day TTL reduces duplicate API calls
+- **Budget Monitoring**: Real-time usage tracking with weekly $3.00 limit
+- **Cost Optimization**: Automatic recommendations to reduce spending
 
-# Set up contributing guidelines for developers
-/create-contributing
-
-# Get help and see all commands
-/help
-```
+#### 🔄 Natural Language Processing
+Enhanced recognition for natural language commands:
+- **Analysis Triggers**: "@copilot analyze this with perplexity"
+- **Research Triggers**: "@copilot research using perplexity"
+- **Budget Inquiries**: "check my perplexity budget"
+- **General Development**: "@copilot use perplexity browser research"
 
 ## Authorization
 

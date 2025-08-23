@@ -1,0 +1,156 @@
+{
+  "sessionId": "integrated-research-1755989740881-ntjok7dub",
+  "startTime": "2025-08-23T22:55:40.881Z",
+  "phase": "recommendations",
+  "browserResearch": {
+    "research": {
+      "id": "research-1755989740887",
+      "topic": "testing integration",
+      "startTime": 26.371093,
+      "perplexityResults": {
+        "content": "Mock research response for: \"testing integration\"\n\nKey findings:\n1. Latest best practices recommend...\n2. Performance optimizations include...\n3. Security considerations involve...\n4. Implementation patterns suggest...\n5. Future trends indicate...\n\nNote: Using mock data for demonstration.",
+        "citations": [
+          {
+            "url": "https://github.com/example/repo",
+            "snippet": "Example implementation details..."
+          },
+          {
+            "url": "https://developer.mozilla.org/example",
+            "snippet": "Documentation reference..."
+          },
+          {
+            "url": "https://stackoverflow.com/example",
+            "snippet": "Community discussion..."
+          }
+        ],
+        "model": "mock-sonar-pro",
+        "query": "testing integration",
+        "timestamp": 1755989740888,
+        "success": true,
+        "mockData": true
+      },
+      "browserVerification": null,
+      "evidence": [],
+      "validatedSources": [],
+      "confidence": 0.8,
+      "endTime": 29.020391,
+      "duration": "0.00"
+    },
+    "session": {
+      "sessionId": "browser-research-1755989740887-4gikdq5bm",
+      "startTime": "2025-08-23T22:55:40.886Z",
+      "endTime": "2025-08-23T22:55:40.890Z",
+      "duration": 0,
+      "totalResearch": 1,
+      "successfulResearch": 1,
+      "averageConfidence": 0.8,
+      "browserAutomationUsed": false,
+      "evidenceCollected": 0,
+      "config": {
+        "maxSources": 5,
+        "headless": true
+      },
+      "research": [
+        {
+          "id": "research-1755989740887",
+          "topic": "testing integration",
+          "startTime": 26.371093,
+          "perplexityResults": {
+            "content": "Mock research response for: \"testing integration\"\n\nKey findings:\n1. Latest best practices recommend...\n2. Performance optimizations include...\n3. Security considerations involve...\n4. Implementation patterns suggest...\n5. Future trends indicate...\n\nNote: Using mock data for demonstration.",
+            "citations": [
+              {
+                "url": "https://github.com/example/repo",
+                "snippet": "Example implementation details..."
+              },
+              {
+                "url": "https://developer.mozilla.org/example",
+                "snippet": "Documentation reference..."
+              },
+              {
+                "url": "https://stackoverflow.com/example",
+                "snippet": "Community discussion..."
+              }
+            ],
+            "model": "mock-sonar-pro",
+            "query": "testing integration",
+            "timestamp": 1755989740888,
+            "success": true,
+            "mockData": true
+          },
+          "browserVerification": null,
+          "evidence": [],
+          "validatedSources": [],
+          "confidence": 0.8,
+          "endTime": 29.020391,
+          "duration": "0.00"
+        }
+      ]
+    },
+    "artifacts": []
+  },
+  "autonomousDevelopment": null,
+  "integratedAnalysis": {
+    "timestamp": "2025-08-23T22:55:40.891Z",
+    "correlations": [],
+    "validatedFindings": [],
+    "conflictingEvidence": [],
+    "synthesizedInsights": [],
+    "overallConfidence": 0.8200000000000001
+  },
+  "recommendations": [
+    {
+      "id": "browser_research-3",
+      "title": ". Security considerations involve...",
+      "source": "browser_research",
+      "priority": 8,
+      "complexity": 7,
+      "category": "security",
+      "actionable": true,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "browser_research-2",
+      "title": ". Performance optimizations include...",
+      "source": "browser_research",
+      "priority": 7,
+      "complexity": 5,
+      "category": "performance",
+      "actionable": true,
+      "priorityScore": 6.3999999999999995
+    },
+    {
+      "id": "browser_research-1",
+      "title": ". Latest best practices recommend...",
+      "source": "browser_research",
+      "priority": 5,
+      "complexity": 5,
+      "category": "testing",
+      "actionable": true,
+      "priorityScore": 5
+    },
+    {
+      "id": "browser_research-5",
+      "title": ". Future trends indicate...",
+      "source": "browser_research",
+      "priority": 5,
+      "complexity": 5,
+      "category": "general",
+      "actionable": true,
+      "priorityScore": 5
+    },
+    {
+      "id": "browser_research-4",
+      "title": ". Implementation patterns suggest...",
+      "source": "browser_research",
+      "priority": 5,
+      "complexity": 7,
+      "category": "general",
+      "actionable": true,
+      "priorityScore": 4.4
+    }
+  ],
+  "artifacts": [],
+  "endTime": "2025-08-23T22:55:40.893Z",
+  "durationSeconds": 0.01,
+  "status": "completed"
+}

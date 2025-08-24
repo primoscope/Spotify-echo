@@ -1,0 +1,51 @@
+{
+  "sessionId": "browser-research-1755989317592-umufyoa9u",
+  "startTime": "2025-08-23T22:48:37.591Z",
+  "endTime": "2025-08-23T22:48:37.724Z",
+  "duration": 0.13,
+  "totalResearch": 1,
+  "successfulResearch": 1,
+  "averageConfidence": 0.8,
+  "browserAutomationUsed": true,
+  "evidenceCollected": 0,
+  "config": {
+    "browserType": "puppeteer",
+    "maxSources": 5,
+    "headless": true
+  },
+  "research": [
+    {
+      "id": "research-1755989317721",
+      "topic": "Node.js performance optimization techniques",
+      "startTime": 146.997161,
+      "perplexityResults": {
+        "content": "Mock research response for: \"Node.js performance optimization techniques\"\n\nKey findings:\n1. Latest best practices recommend...\n2. Performance optimizations include...\n3. Security considerations involve...\n4. Implementation patterns suggest...\n5. Future trends indicate...\n\nNote: Using mock data for demonstration.",
+        "citations": [
+          {
+            "url": "https://github.com/example/repo",
+            "snippet": "Example implementation details..."
+          },
+          {
+            "url": "https://developer.mozilla.org/example",
+            "snippet": "Documentation reference..."
+          },
+          {
+            "url": "https://stackoverflow.com/example",
+            "snippet": "Community discussion..."
+          }
+        ],
+        "model": "mock-sonar-pro",
+        "query": "Node.js performance optimization techniques",
+        "timestamp": 1755989317721,
+        "success": true,
+        "mockData": true
+      },
+      "browserVerification": null,
+      "evidence": [],
+      "validatedSources": [],
+      "confidence": 0.8,
+      "endTime": 149.858768,
+      "duration": "0.00"
+    }
+  ]
+}

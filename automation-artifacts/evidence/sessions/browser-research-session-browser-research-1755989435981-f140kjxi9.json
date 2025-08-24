@@ -1,0 +1,77 @@
+{
+  "sessionId": "browser-research-1755989435981-f140kjxi9",
+  "startTime": "2025-08-23T22:50:35.980Z",
+  "endTime": "2025-08-23T22:50:45.918Z",
+  "duration": 9.94,
+  "totalResearch": 1,
+  "successfulResearch": 1,
+  "averageConfidence": 0.8,
+  "browserAutomationUsed": true,
+  "evidenceCollected": 0,
+  "config": {
+    "browserType": "puppeteer",
+    "maxSources": 5,
+    "headless": true
+  },
+  "research": [
+    {
+      "id": "research-1755989436102",
+      "topic": "Spotify API integration optimization",
+      "startTime": 146.257543,
+      "perplexityResults": {
+        "content": "Mock research response for: \"Spotify API integration optimization\"\n\nKey findings:\n1. Latest best practices recommend...\n2. Performance optimizations include...\n3. Security considerations involve...\n4. Implementation patterns suggest...\n5. Future trends indicate...\n\nNote: Using mock data for demonstration.",
+        "citations": [
+          {
+            "url": "https://github.com/example/repo",
+            "snippet": "Example implementation details..."
+          },
+          {
+            "url": "https://developer.mozilla.org/example",
+            "snippet": "Documentation reference..."
+          },
+          {
+            "url": "https://stackoverflow.com/example",
+            "snippet": "Community discussion..."
+          }
+        ],
+        "model": "mock-sonar-pro",
+        "query": "Spotify API integration optimization",
+        "timestamp": 1755989436102,
+        "success": true,
+        "mockData": true
+      },
+      "browserVerification": {
+        "totalSources": 3,
+        "verifiedSources": 0,
+        "failedSources": 3,
+        "evidence": [
+          {
+            "url": "https://github.com/example/repo",
+            "verified": false,
+            "confidence": 0,
+            "screenshot": "automation-artifacts/evidence/screenshots/screenshot-1755989437871-9rgzlnwii.png",
+            "extractedContent": "Skip to content\nNavigation Menu\nSign in\nFind code, projects, and people on GitHub:\nSearch\nContact Support — GitHub Status — @githubstatus\nSite-wide Links\nSubscribe to our developer newsletter\n\nGet tips, technical guides, and best practices. Twice a month.\n\nSubscribe\nProduct\nFeatures\nEnterprise\nCopilot\nAI\nSecurity\nPricing\nTeam\nResources\nRoadmap\nCompare GitHub\nPlatform\nDeveloper API\nPartners\nEducation\nGitHub CLI\nGitHub Desktop\nGitHub Mobile\nSupport\nDocs\nCommunity Forum\nProfessional Services\nPremiu",
+            "timestamp": "2025-08-23T22:50:38.051Z"
+          },
+          {
+            "url": "https://developer.mozilla.org/example",
+            "verified": false,
+            "confidence": 0,
+            "screenshot": "automation-artifacts/evidence/screenshots/screenshot-1755989441555-y44aqznu7.png",
+            "extractedContent": "Skip to main content\nSkip to search\nPage not found\nPage not found\n\nGo back to the home page\n\nYour blueprint for a better internet.\n\nMDN\nAbout\nBlog\nMozilla careers\nAdvertise with us\nMDN Plus\nProduct help\nContribute\nMDN Community\nCommunity resources\nWriting guidelines\nMDN Discord\nMDN on GitHub\nDevelopers\nWeb technologies\nLearn web development\nGuides\nTutorials\nGlossary\nHacks blog\nWebsite Privacy Notice\nCookies\nLegal\nCommunity Participation Guidelines\n\nVisit Mozilla Corporation’s not-for-profit pare",
+            "timestamp": "2025-08-23T22:50:41.651Z"
+          }
+        ],
+        "screenshots": [
+          "automation-artifacts/evidence/screenshots/screenshot-1755989437871-9rgzlnwii.png",
+          "automation-artifacts/evidence/screenshots/screenshot-1755989441555-y44aqznu7.png"
+        ]
+      },
+      "evidence": [],
+      "validatedSources": [],
+      "confidence": 0.8,
+      "endTime": 9962.090646,
+      "duration": "9.82"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "newTasks": [
+    {
+      "id": "research-26",
+      "title": "Implement component memoization for performance",
+      "source": "perplexity_research",
+      "topic": "Real-time music recommendation algorithms",
+      "complexity": 7,
+      "priority": 9,
+      "priorityScore": 7.199999999999999
+    },
+    {
+      "id": "research-1",
+      "title": "Implement component memoization for performance",
+      "source": "perplexity_research",
+      "topic": "Node.js performance optimization 2025",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-6",
+      "title": "Implement component memoization for performance",
+      "source": "perplexity_research",
+      "topic": "MongoDB query optimization techniques",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-11",
+      "title": "Implement component memoization for performance",
+      "source": "perplexity_research",
+      "topic": "Express.js security best practices",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-16",
+      "title": "Implement component memoization for performance",
+      "source": "perplexity_research",
+      "topic": "AI API integration patterns",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-21",
+      "title": "Implement component memoization for performance",
+      "source": "perplexity_research",
+      "topic": "Spotify API rate limiting strategies",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    }
+  ],
+  "timelineEstimate": {
+    "totalDays": 36,
+    "weeks": 6,
+    "estimatedCompletion": "2025-09-28"
+  },
+  "resourceRequirements": {
+    "developmentHours": 84,
+    "testingHours": 3,
+    "reviewHours": 2,
+    "requiredSkills": [
+      "Optimization",
+      "Caching",
+      "Monitoring"
+    ]
+  },
+  "riskAssessment": [],
+  "generatedAt": "2025-08-23T22:48:23.917Z"
+}

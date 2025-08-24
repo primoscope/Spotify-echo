@@ -1,0 +1,116 @@
+{
+  "newTasks": [
+    {
+      "id": "research-14",
+      "title": "Use Linting for Security:** Integrate tools like `eslint-plugin-security` to catch insecure code patterns during development[1].",
+      "source": "perplexity_research",
+      "topic": "Express.js security best practices",
+      "complexity": 8,
+      "priority": 9,
+      "priorityScore": 6.8999999999999995
+    },
+    {
+      "id": "research-15",
+      "title": "Example Security Middleware Setup:**",
+      "source": "perplexity_research",
+      "topic": "Express.js security best practices",
+      "complexity": 8,
+      "priority": 9,
+      "priorityScore": 6.8999999999999995
+    },
+    {
+      "id": "research-1",
+      "title": "Essential Node.js Performance Optimization Techniques (2025):**",
+      "source": "perplexity_research",
+      "topic": "Node.js performance optimization 2025",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-5",
+      "title": "Example: Installing High-Performance Native Module**",
+      "source": "perplexity_research",
+      "topic": "Node.js performance optimization 2025",
+      "complexity": 7,
+      "priority": 8,
+      "priorityScore": 6.5
+    },
+    {
+      "id": "research-2",
+      "title": "Advanced Optimization Patterns:**",
+      "source": "perplexity_research",
+      "topic": "Node.js performance optimization 2025",
+      "complexity": 5,
+      "priority": 7,
+      "priorityScore": 6.3999999999999995
+    },
+    {
+      "id": "research-12",
+      "title": "Rate Limiting:** Apply rate limiting to APIs to mitigate brute-force and denial-of-service attacks[1].",
+      "source": "perplexity_research",
+      "topic": "Express.js security best practices",
+      "complexity": 6,
+      "priority": 6,
+      "priorityScore": 5.3999999999999995
+    },
+    {
+      "id": "research-21",
+      "title": "Batching Requests:** Where possible, use batch endpoints or combine multiple operations into a single request to reduce total API calls.",
+      "source": "perplexity_research",
+      "topic": "Spotify API rate limiting strategies",
+      "complexity": 6,
+      "priority": 6,
+      "priorityScore": 5.3999999999999995
+    },
+    {
+      "id": "research-23",
+      "title": "Implementation considerations:",
+      "source": "perplexity_research",
+      "topic": "Real-time music recommendation algorithms",
+      "complexity": 6,
+      "priority": 6,
+      "priorityScore": 5.3999999999999995
+    },
+    {
+      "id": "codebase-25",
+      "title": "API routes could benefit from additional organization and middleware",
+      "source": "codebase_analysis",
+      "complexity": 6,
+      "priority": 6,
+      "priorityScore": 5.3999999999999995
+    },
+    {
+      "id": "research-3",
+      "title": "Batch Operations:** Batch package management, testing, and build processes to minimize overhead and maximize resource utilization[1].",
+      "source": "perplexity_research",
+      "topic": "Node.js performance optimization 2025",
+      "complexity": 5,
+      "priority": 5,
+      "priorityScore": 5
+    }
+  ],
+  "timelineEstimate": {
+    "totalDays": 50,
+    "weeks": 8,
+    "estimatedCompletion": "2025-10-12"
+  },
+  "resourceRequirements": {
+    "developmentHours": 128,
+    "testingHours": 5,
+    "reviewHours": 3,
+    "requiredSkills": [
+      "Security",
+      "Authentication",
+      "Encryption",
+      "Optimization",
+      "Caching",
+      "Monitoring",
+      "General Development"
+    ]
+  },
+  "riskAssessment": [
+    "Security-related tasks require thorough testing and review"
+  ],
+  "generatedAt": "2025-08-23T23:47:43.092Z"
+}

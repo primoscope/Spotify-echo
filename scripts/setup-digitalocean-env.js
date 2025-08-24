@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * EchoTune AI - Vercel Environment Variables Setup Script
- * This script helps configure environment variables for Vercel deployment
+ * EchoTune AI - DigitalOcean Environment Variables Setup Script
+ * This script helps configure environment variables for DigitalOcean deployment
  */
 
 const fs = require('fs');
@@ -60,13 +60,28 @@ function askYesNo(question, defaultValue = false) {
 }
 
 // Main configuration function
-async function configureVercelEnvironment() {
+async function configureDigitalOceanEnvironment() {
   try {
-    log.header('🚀 EchoTune AI - Vercel Environment Setup');
-    log.info('This script will help you configure environment variables for Vercel deployment');
+    log.header('🚀 EchoTune AI - DigitalOcean Environment Setup');
+    log.info('This script will help you configure environment variables for DigitalOcean deployment');
     log.info('Press Enter to use default values where available\n');
 
     const envVars = {};
+
+    // Application Configuration
+    log.step('⚙️ Application Configuration');
+    envVars.NODE_ENV = 'production';
+    envVars.PORT = '3000';
+    
+    envVars.FRONTEND_URL = await askQuestion(
+      'Enter your production frontend URL',
+      'https://your-domain.com'
+    );
+    
+    envVars.DOMAIN = await askQuestion(
+      'Enter your production domain',
+      'your-domain.com'
+    );
 
     // Database Configuration
     log.step('📊 Database Configuration');
@@ -92,26 +107,13 @@ async function configureVercelEnvironment() {
       'your_very_long_random_session_secret_key_here'
     );
 
-    // Application Configuration
-    log.step('⚙️ Application Configuration');
-    envVars.NODE_ENV = 'production';
-    
-    envVars.FRONTEND_URL = await askQuestion(
-      'Enter your production frontend URL',
-      'https://echotune-ai.vercel.app'
-    );
-    
-    envVars.DOMAIN = await askQuestion(
-      'Enter your production domain',
-      'echotune-ai.vercel.app'
-    );
-
     // Spotify Configuration
     log.step('🎵 Spotify Configuration');
     const useSpotify = await askYesNo('Do you want to configure Spotify integration?', true);
     if (useSpotify) {
       envVars.SPOTIFY_CLIENT_ID = await askQuestion('Enter your Spotify Client ID');
       envVars.SPOTIFY_CLIENT_SECRET = await askQuestion('Enter your Spotify Client Secret');
+      envVars.SPOTIFY_REDIRECT_URI = `${envVars.FRONTEND_URL}/auth/callback`;
     }
 
     // AI/LLM Configuration
@@ -173,13 +175,6 @@ async function configureVercelEnvironment() {
     envVars.MAX_REQUEST_SIZE = '10mb';
     envVars.COMPRESSION = 'true';
 
-    // Vite Build-time Variables
-    log.step('🔨 Build Configuration');
-    envVars.VITE_SOCKET_URL = envVars.DOMAIN;
-    envVars.VITE_API_URL = `${envVars.FRONTEND_URL}/api`;
-    envVars.VITE_APP_VERSION = '2.1.0';
-    envVars.VITE_BUILD_TIME = new Date().toISOString();
-
     // Performance and Caching
     log.step('⚡ Performance Configuration');
     envVars.CACHE_TTL = '3600000';
@@ -193,48 +188,98 @@ async function configureVercelEnvironment() {
     envVars.ENABLE_HEALTH_CHECKS = 'true';
     envVars.ENABLE_PERFORMANCE_MONITORING = 'true';
 
-    // Generate .env.production.vercel
+    // Generate .env.production.digitalocean
     log.step('📝 Generating Configuration Files');
-    const envFile = path.join(process.cwd(), '.env.production.vercel');
+    const envFile = path.join(process.cwd(), '.env.production.digitalocean');
     
-    const envContent = Object.entries(envVars)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('\n');
-    
-    fs.writeFileSync(envFile, `# EchoTune AI - Production Environment Variables for Vercel\n# Generated on ${new Date().toISOString()}\n\n${envContent}`);
-    
-    log.success(`Generated .env.production.vercel`);
+    const envContent = `# EchoTune AI - DigitalOcean Production Environment
+# Generated on ${new Date().toISOString()}
 
-    // Generate Vercel environment setup commands
-    const vercelCommands = Object.entries(envVars)
+${Object.entries(envVars)
+  .map(([key, value]) => `${key}=${value}`)
+  .join('\n')}`;
+    
+    fs.writeFileSync(envFile, envContent);
+    
+    log.success(`Generated .env.production.digitalocean`);
+
+    // Generate DigitalOcean App Platform commands
+    const appPlatformCommands = Object.entries(envVars)
       .filter(([_, value]) => value && value !== '')
-      .map(([key, value]) => `vercel env add ${key} production`)
+      .map(([key, value]) => {
+        const isSecret = ['JWT_SECRET', 'SESSION_SECRET', 'SPOTIFY_CLIENT_SECRET', 'OPENAI_API_KEY', 'PERPLEXITY_API_KEY', 'GOOGLE_API_KEY', 'XAI_API_KEY', 'BROWSERBASE_API_KEY', 'N8N_API_KEY', 'AGENTOPS_API_KEY', 'SENTRY_DSN'].includes(key);
+        return `doctl apps env set your-app-id ${key}=${value}${isSecret ? ' --type SECRET' : ''}`;
+      })
       .join('\n');
 
-    const commandsFile = path.join(process.cwd(), 'vercel-env-commands.sh');
-    const commandsContent = `#!/bin/bash
-# Vercel Environment Variables Setup Commands
-# Run these commands to set up your Vercel project environment variables
+    const appPlatformFile = path.join(process.cwd(), 'digitalocean-app-commands.sh');
+    const appPlatformContent = `#!/bin/bash
+# DigitalOcean App Platform Environment Variables Setup Commands
+# Run these commands to set up your DigitalOcean App Platform environment variables
 
-${vercelCommands}
+${appPlatformCommands}
 
-echo "Environment variables set successfully!"
-echo "You can now deploy with: vercel --prod"
+echo "App Platform environment variables set successfully!"
+echo "You can now deploy your app on DigitalOcean App Platform"
 `;
 
-    fs.writeFileSync(commandsFile, commandsContent);
-    fs.chmodSync(commandsFile, '755');
+    fs.writeFileSync(appPlatformFile, appPlatformContent);
+    fs.chmodSync(appPlatformFile, '755');
     
-    log.success(`Generated vercel-env-commands.sh`);
+    log.success(`Generated digitalocean-app-commands.sh`);
+
+    // Generate Docker Compose environment file
+    const dockerEnvFile = path.join(process.cwd(), '.env.docker.digitalocean');
+    fs.writeFileSync(dockerEnvFile, envContent);
+    
+    log.success(`Generated .env.docker.digitalocean`);
+
+    // Generate Kubernetes secrets template
+    const k8sSecretsFile = path.join(process.cwd(), 'k8s-digitalocean-secrets.yaml');
+    const k8sSecretsContent = `apiVersion: v1
+kind: Secret
+metadata:
+  name: echotune-ai-secrets
+  namespace: default
+type: Opaque
+data:
+${Object.entries(envVars)
+  .filter(([_, value]) => value && value !== '')
+  .map(([key, value]) => `  ${key}: ${Buffer.from(value).toString('base64')}`)
+  .join('\n')}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: echotune-ai-config
+  namespace: default
+data:
+${Object.entries(envVars)
+  .filter(([_, value]) => value && value !== '' && !['JWT_SECRET', 'SESSION_SECRET', 'SPOTIFY_CLIENT_SECRET', 'OPENAI_API_KEY', 'PERPLEXITY_API_KEY', 'GOOGLE_API_KEY', 'XAI_API_KEY', 'BROWSERBASE_API_KEY', 'N8N_API_KEY', 'AGENTOPS_API_KEY', 'SENTRY_DSN'].includes(key))
+  .map(([key, value]) => `  ${key}: "${value}"`)
+  .join('\n')}`;
+
+    fs.writeFileSync(k8sSecretsFile, k8sSecretsContent);
+    
+    log.success(`Generated k8s-digitalocean-secrets.yaml`);
 
     // Generate README section
-    const readmeSection = `## 🚀 Quick Deploy to Vercel
+    const readmeSection = `## 🚀 Quick Deploy to DigitalOcean
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/dzp5103/Spotify-echo&env=${Object.keys(envVars).join(',')}&envDescription=Environment%20variables%20for%20EchoTune%20AI&envLink=https://github.com/dzp5103/Spotify-echo/blob/main/vercel.env.txt)
+### Option 1: DigitalOcean App Platform (Recommended)
+
+[![Deploy to DigitalOcean](https://www.digitalocean.com/assets/media/logo-icon-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo&refcode=your_ref_code)
+
+### Option 2: DigitalOcean Droplet with Docker
+
+\`\`\`bash
+# One-command deployment
+curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/deploy-digitalocean-droplet.sh | sudo bash
+\`\`\`
 
 ### Environment Variables Required
 
-Copy these environment variables to your Vercel project:
+Copy these environment variables to your DigitalOcean deployment:
 
 \`\`\`bash
 ${Object.entries(envVars)
@@ -243,33 +288,38 @@ ${Object.entries(envVars)
   .join('\n')}
 \`\`\`
 
-### Manual Setup
+### Setup Commands
 
-1. Run: \`chmod +x vercel-env-commands.sh\`
-2. Execute: \`./vercel-env-commands.sh\`
-3. Deploy: \`vercel --prod\`
+1. **App Platform**: \`chmod +x digitalocean-app-commands.sh && ./digitalocean-app-commands.sh\`
+2. **Docker**: \`cp .env.docker.digitalocean .env && docker-compose up -d\`
+3. **Kubernetes**: \`kubectl apply -f k8s-digitalocean-secrets.yaml\`
 
-For detailed instructions, see [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md)
+For detailed instructions, see [DEPLOY_TO_DIGITALOCEAN.md](./DEPLOY_TO_DIGITALOCEAN.md)
 `;
 
-    log.success(`Generated README section for Vercel deployment`);
+    log.success(`Generated README section for DigitalOcean deployment`);
 
     // Final instructions
     log.header('🎉 Configuration Complete!');
     log.info('Next steps:');
-    log.info('1. Review the generated .env.production.vercel file');
-    log.info('2. Run the vercel-env-commands.sh script to set up Vercel');
-    log.info('3. Deploy with: npm run deploy:vercel');
-    log.info('4. Or manually: vercel --prod');
+    log.info('1. Review the generated configuration files');
+    log.info('2. Choose your deployment method:');
+    log.info('   - App Platform: Use digitalocean-app-commands.sh');
+    log.info('   - Docker: Use .env.docker.digitalocean');
+    log.info('   - Kubernetes: Use k8s-digitalocean-secrets.yaml');
+    log.info('3. Deploy with: npm run deploy:digitalocean:app');
+    log.info('4. Or manually follow the deployment guide');
     log.info('\n📁 Generated files:');
-    log.info(`   - .env.production.vercel (${Object.keys(envVars).length} variables)`);
-    log.info(`   - vercel-env-commands.sh (automated setup)`);
+    log.info(`   - .env.production.digitalocean (${Object.keys(envVars).length} variables)`);
+    log.info(`   - digitalocean-app-commands.sh (App Platform setup)`);
+    log.info(`   - .env.docker.digitalocean (Docker deployment)`);
+    log.info(`   - k8s-digitalocean-secrets.yaml (Kubernetes secrets)`);
     log.info(`   - README section (copy to your README.md)`);
 
     // Save README section for user to copy
-    const readmeFile = path.join(process.cwd(), 'VERCEL_README_SECTION.md');
+    const readmeFile = path.join(process.cwd(), 'DIGITALOCEAN_README_SECTION.md');
     fs.writeFileSync(readmeFile, readmeSection);
-    log.info(`   - VERCEL_README_SECTION.md (copy to your README.md)`);
+    log.info(`   - DIGITALOCEAN_README_SECTION.md (copy to your README.md)`);
 
   } catch (error) {
     log.error(`Configuration failed: ${error.message}`);
@@ -281,7 +331,7 @@ For detailed instructions, see [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md)
 
 // Run the configuration
 if (require.main === module) {
-  configureVercelEnvironment();
+  configureDigitalOceanEnvironment();
 }
 
-module.exports = { configureVercelEnvironment };
+module.exports = { configureDigitalOceanEnvironment };

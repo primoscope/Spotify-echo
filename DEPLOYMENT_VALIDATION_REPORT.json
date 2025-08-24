@@ -1,0 +1,257 @@
+{
+  "timestamp": "2025-08-24T10:06:00.055Z",
+  "deployment": {
+    "docker": {
+      "checks": [
+        {
+          "name": "Dockerfile exists",
+          "status": "passed",
+          "details": "Found Dockerfile with 63 lines"
+        },
+        {
+          "name": "Multi-stage build",
+          "status": "passed",
+          "details": "Multi-stage build detected for optimization"
+        },
+        {
+          "name": "Health check in Dockerfile",
+          "status": "passed",
+          "details": "Health check configuration found"
+        },
+        {
+          "name": "docker-compose.yml exists",
+          "status": "passed",
+          "details": "Found docker-compose.yml"
+        },
+        {
+          "name": "docker-compose.yml environment config",
+          "status": "passed",
+          "details": "Environment configuration found"
+        },
+        {
+          "name": "docker-compose.production.yml exists",
+          "status": "passed",
+          "details": "Found docker-compose.production.yml"
+        },
+        {
+          "name": "docker-compose.production.yml environment config",
+          "status": "passed",
+          "details": "Environment configuration found"
+        },
+        {
+          "name": "docker-compose.dev.yml exists",
+          "status": "passed",
+          "details": "Found docker-compose.dev.yml"
+        },
+        {
+          "name": "docker-compose.dev.yml environment config",
+          "status": "passed",
+          "details": "Environment configuration found"
+        },
+        {
+          "name": ".dockerignore exists",
+          "status": "passed",
+          "details": "Found .dockerignore with 42 rules"
+        }
+      ]
+    },
+    "environment": {
+      "checks": [
+        {
+          "name": ".env.example exists",
+          "status": "passed",
+          "details": "Found .env.example with 40 variables"
+        },
+        {
+          "name": ".env.production.example exists",
+          "status": "passed",
+          "details": "Found .env.production.example with 192 variables"
+        },
+        {
+          "name": ".env.mcp.example exists",
+          "status": "passed",
+          "details": "Found .env.mcp.example with 24 variables"
+        },
+        {
+          "name": "NODE_ENV configured",
+          "status": "passed",
+          "details": "NODE_ENV is set"
+        },
+        {
+          "name": "PORT configured",
+          "status": "passed",
+          "details": "PORT is set"
+        },
+        {
+          "name": "MONGODB_URI configured",
+          "status": "passed",
+          "details": "MONGODB_URI is set"
+        },
+        {
+          "name": "JWT_SECRET configured",
+          "status": "passed",
+          "details": "JWT_SECRET is set"
+        },
+        {
+          "name": "SESSION_SECRET configured",
+          "status": "passed",
+          "details": "SESSION_SECRET is set"
+        },
+        {
+          "name": "JWT_SECRET strength",
+          "status": "passed",
+          "details": "JWT_SECRET has sufficient length"
+        },
+        {
+          "name": "SESSION_SECRET strength",
+          "status": "passed",
+          "details": "SESSION_SECRET has sufficient length"
+        }
+      ]
+    },
+    "security": {
+      "checks": [
+        {
+          "name": "Security package: helmet",
+          "status": "passed",
+          "details": "helmet is installed"
+        },
+        {
+          "name": "Security package: cors",
+          "status": "passed",
+          "details": "cors is installed"
+        },
+        {
+          "name": "Security package: express-rate-limit",
+          "status": "passed",
+          "details": "express-rate-limit is installed"
+        },
+        {
+          "name": "Security package: bcrypt",
+          "status": "warning",
+          "details": "Consider installing bcrypt for security"
+        },
+        {
+          "name": "Security package: jsonwebtoken",
+          "status": "passed",
+          "details": "jsonwebtoken is installed"
+        },
+        {
+          "name": "HTTPS configuration",
+          "status": "passed",
+          "details": "HTTPS/SSL configuration detected"
+        },
+        {
+          "name": "Security headers",
+          "status": "passed",
+          "details": "Security headers configuration found"
+        }
+      ]
+    },
+    "performance": {
+      "checks": [
+        {
+          "name": "Caching (Redis)",
+          "status": "passed",
+          "details": "Redis caching configured"
+        },
+        {
+          "name": "Response compression",
+          "status": "warning",
+          "details": "Consider enabling response compression"
+        },
+        {
+          "name": "CDN configuration",
+          "status": "warning",
+          "details": "Consider configuring CDN for better performance"
+        },
+        {
+          "name": "Database optimization",
+          "status": "passed",
+          "details": "MongoDB retry writes enabled"
+        }
+      ]
+    },
+    "monitoring": {
+      "checks": [
+        {
+          "name": "Logging configuration",
+          "status": "passed",
+          "details": "Log level set to: info"
+        },
+        {
+          "name": "Health check endpoint",
+          "status": "passed",
+          "details": "Health check endpoint found"
+        },
+        {
+          "name": "External monitoring",
+          "status": "warning",
+          "details": "Consider configuring external monitoring"
+        }
+      ]
+    }
+  },
+  "production": {
+    "database": {
+      "checks": [
+        {
+          "name": "MongoDB Atlas",
+          "status": "passed",
+          "details": "MongoDB Atlas connection configured"
+        },
+        {
+          "name": "MongoDB connectivity",
+          "status": "failed",
+          "details": "MongoDB connection failed: Command failed: node -e \"const mongoose = require('mongoose'); mongoose.connect(process.env.MONGODB_"
+        }
+      ]
+    },
+    "cache": {
+      "checks": [
+        {
+          "name": "Redis production",
+          "status": "passed",
+          "details": "External Redis configured"
+        },
+        {
+          "name": "Redis connectivity",
+          "status": "passed",
+          "details": "Successfully connected to Redis"
+        }
+      ]
+    },
+    "apis": {
+      "checks": [
+        {
+          "name": "Spotify API",
+          "status": "passed",
+          "details": "Spotify API credentials configured"
+        },
+        {
+          "name": "OpenAI API",
+          "status": "passed",
+          "details": "OpenAI API key configured"
+        },
+        {
+          "name": "Gemini API",
+          "status": "passed",
+          "details": "Gemini API key configured"
+        },
+        {
+          "name": "Perplexity API",
+          "status": "passed",
+          "details": "Perplexity API key configured"
+        }
+      ]
+    },
+    "cdn": {}
+  },
+  "summary": {
+    "totalChecks": 42,
+    "passedChecks": 37,
+    "failedChecks": 1,
+    "warnings": 4,
+    "readiness": "mostly-ready"
+  }
+}

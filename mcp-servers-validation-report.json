@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-16T18:24:52.450Z",
+  "timestamp": "2025-08-24T10:11:03.582Z",
   "summary": {
     "total": 8,
-    "passed": 6,
+    "passed": 7,
     "failed": 1,
-    "skipped": 1,
-    "successRate": 75
+    "skipped": 0,
+    "successRate": 88
   },
   "servers": [
     {
@@ -34,11 +34,14 @@
     },
     {
       "name": "GitHub Repos Manager MCP",
-      "status": "SKIPPED",
-      "capabilities": [],
+      "status": "PASSED",
+      "capabilities": [
+        "github_automation",
+        "repository_management"
+      ],
       "path": "/home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/github-repos-manager/index.js",
-      "error": "Missing authentication: GITHUB_TOKEN or GITHUB_PAT",
-      "message": null
+      "error": null,
+      "message": "Server started successfully (timed out as expected)"
     },
     {
       "name": "Brave Search MCP",

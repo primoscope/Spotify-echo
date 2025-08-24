@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-08-15T17:43:27.362Z",
+  "timestamp": "2025-08-24T10:08:33.604Z",
   "totalTests": 12,
-  "passed": 9,
-  "failed": 3,
+  "passed": 8,
+  "failed": 4,
   "warnings": 0,
   "secrets": {
     "SPOTIFY_API": {
       "status": "✅ WORKING",
-      "responseTime": "433ms",
+      "responseTime": "672ms",
       "features": [
         "OAuth authentication",
         "Search API",
@@ -15,24 +15,17 @@
       ],
       "testData": "Found 1 tracks in search test",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:27.800Z"
+      "timestamp": "2025-08-24T10:08:34.281Z"
     },
     "PERPLEXITY_API": {
-      "status": "✅ WORKING",
-      "responseTime": "4088ms",
-      "features": [
-        "AI research queries",
-        "Citations",
-        "Real-time web data"
-      ],
-      "testData": "Response length: 1118 characters",
-      "cost": "$0.003 per query (estimated)",
+      "status": "❌ FAILED",
+      "error": "Perplexity API failed: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:31.889Z"
+      "timestamp": "2025-08-24T10:08:34.404Z"
     },
     "BRAVE_API": {
       "status": "✅ WORKING",
-      "responseTime": "220ms",
+      "responseTime": "559ms",
       "features": [
         "Privacy-focused search",
         "Web results",
@@ -40,11 +33,11 @@
       ],
       "testData": "Found 5 search results",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:32.109Z"
+      "timestamp": "2025-08-24T10:08:34.963Z"
     },
     "BROWSERBASE_API": {
       "status": "✅ WORKING",
-      "responseTime": "716ms",
+      "responseTime": "987ms",
       "features": [
         "Cloud browser automation",
         "Session management",
@@ -60,19 +53,19 @@
       "apiKeyStatus": "LATEST: bb_live_P4BWp-i1Atz_NMBWXr521kxcrXw",
       "authMethod": "✅ Fixed: Uses x-bb-api-key header instead of Bearer token",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:32.825Z"
+      "timestamp": "2025-08-24T10:08:35.951Z"
     },
     "DIGITALOCEAN_API": {
       "status": "❌ FAILED",
       "error": "DigitalOcean API failed: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:32.985Z"
+      "timestamp": "2025-08-24T10:08:36.116Z"
     },
     "GITHUB_API": {
       "status": "❌ FAILED",
-      "error": "Both tokens failed: ❌ GH_PAT: 401 Unauthorized",
+      "error": "Both tokens failed: ",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:33.186Z"
+      "timestamp": "2025-08-24T10:08:36.117Z"
     },
     "CURSOR_API": {
       "status": "✅ VALIDATED",
@@ -84,11 +77,11 @@
       ],
       "testData": "Key format valid: 68 characters starting with 'key_'",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:33.186Z"
+      "timestamp": "2025-08-24T10:08:36.117Z"
     },
     "MONGODB_URI": {
       "status": "✅ WORKING",
-      "responseTime": "2079ms",
+      "responseTime": "2017ms",
       "features": [
         "Database connectivity",
         "User data storage",
@@ -96,11 +89,11 @@
       ],
       "testData": "Ping result: Connected",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:35.268Z"
+      "timestamp": "2025-08-24T10:08:38.137Z"
     },
     "REDIS_URI": {
       "status": "✅ WORKING",
-      "responseTime": "1122ms",
+      "responseTime": "953ms",
       "features": [
         "High-speed caching",
         "Session storage",
@@ -108,7 +101,7 @@
       ],
       "testData": "Ping successful, Set/Get operations working",
       "connectionDetails": {
-        "host": "redis-15392.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:15392",
+        "host": "redis-11786.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:11786",
         "username": "default",
         "passwordLength": "32 chars"
       },
@@ -117,40 +110,40 @@
         "usedAPI": "✅ Available"
       },
       "tested": true,
-      "timestamp": "2025-08-15T17:43:36.545Z"
+      "timestamp": "2025-08-24T10:08:39.224Z"
     },
     "GEMINI_API": {
       "status": "✅ WORKING",
-      "responseTime": "2046ms",
+      "responseTime": "980ms",
       "features": [
         "AI text generation",
         "Multimodal AI",
         "Alternative LLM provider"
       ],
-      "testData": "Working key: 1 of 6",
-      "workingKey": "Key 1: ...W7ssz3bzTw",
+      "testData": "Working key: 4 of 6",
+      "workingKey": "Key 4: ...oU_vrZfSSc",
       "allResults": [
-        "✅ Key 1: Working (Response: \"Four\")",
-        "✅ Key 2: Working (Response: \"Four\")",
-        "✅ Key 3: Working (Response: \"Four\")",
+        "❌ Key 1: 429 Too Many Requests",
+        "❌ Key 2: 429 Too Many Requests",
+        "❌ Key 3: 429 Too Many Requests",
         "✅ Key 4: Working (Response: \"Four\")",
         "✅ Key 5: Working (Response: \"Four\")",
         "✅ Key 6: Working (Response: \"Four\")"
       ],
       "totalKeys": 6,
-      "workingKeys": 6,
+      "workingKeys": 3,
       "tested": true,
-      "timestamp": "2025-08-15T17:43:38.592Z"
+      "timestamp": "2025-08-24T10:08:40.205Z"
     },
     "OPENROUTER_API": {
       "status": "❌ FAILED",
       "error": "All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:39.527Z"
+      "timestamp": "2025-08-24T10:08:41.011Z"
     },
     "SECURITY_SECRETS": {
       "status": "✅ WORKING",
-      "responseTime": "23ms",
+      "responseTime": "22ms",
       "features": [
         "JWT token generation",
         "Session security",
@@ -158,14 +151,15 @@
       ],
       "testData": "JWT secret length: 64 characters",
       "tested": true,
-      "timestamp": "2025-08-15T17:43:39.550Z"
+      "timestamp": "2025-08-24T10:08:41.034Z"
     }
   },
   "performance": {},
   "recommendations": [],
   "errors": [
+    "PERPLEXITY_API: Perplexity API failed: 401 Unauthorized",
     "DIGITALOCEAN_API: DigitalOcean API failed: 401 Unauthorized",
-    "GITHUB_API: Both tokens failed: ❌ GH_PAT: 401 Unauthorized",
+    "GITHUB_API: Both tokens failed: ",
     "OPENROUTER_API: All 3 keys failed: ❌ Key 1: 401 Unauthorized, ❌ Key 2: 401 Unauthorized, ❌ Key 3: 401 Unauthorized"
   ]
 }

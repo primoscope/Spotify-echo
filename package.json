@@ -341,7 +341,12 @@
     "analysis:research": "node scripts/continuous-analysis-system.js single",
     "analysis:report": "echo 'Check automation-outputs/reports/ for latest analysis report'",
     "perplexity:research": "node -e \"const P = require('./src/chat/llm-providers/perplexity-provider'); const p = new P({apiKey: process.env.PERPLEXITY_API_KEY}); p.initialize().then(() => p.research(process.argv[1])).then(console.log).catch(console.error)\" -- ",
-    "grok4:analyze": "node -e \"const G = require('./src/chat/llm-providers/grok4-provider'); const g = new G({apiKey: process.env.XAI_API_KEY}); g.initialize().then(() => g.analyzeRepository('sample code', 'comprehensive')).then(console.log).catch(console.error)\""
+    "grok4:analyze": "node -e \"const G = require('./src/chat/llm-providers/grok4-provider'); const g = new G({apiKey: process.env.XAI_API_KEY}); g.initialize().then(() => g.analyzeRepository('sample code', 'comprehensive')).then(console.log).catch(console.error)\"",
+    "test:comprehensive-mcp": "node scripts/comprehensive-mcp-workflow-test.js",
+    "validate:deployment-comprehensive": "node scripts/deployment-validator.js",
+    "orchestrate:master": "node scripts/master-orchestrator.js",
+    "orchestrate:master-deploy": "node scripts/master-orchestrator.js --deploy",
+    "test:full-workflow": "npm run test:comprehensive-mcp && npm run validate:deployment-comprehensive"
   },
   "keywords": [
     "music-discovery",
@@ -468,7 +473,7 @@
     "n8n-mcp": "^2.10.2",
     "node-cache": "^5.1.2",
     "nodemon": "^3.0.0",
-    "pino-pretty": "^11.2.2",
+    "pino-pretty": "^11.3.0",
     "postcss": "^8.5.6",
     "prettier": "^3.0.0",
     "puppeteer": "^24.16.2",

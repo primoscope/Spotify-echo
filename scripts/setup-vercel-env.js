@@ -21,60 +21,23 @@ const colors = {
   cyan: '\x1b[36m'
 };
 
+// Logging utility
 const log = {
-  info: (msg) => console.log(`${colors.blue}[INFO]${colors.reset} ${msg}`),
-  success: (msg) => console.log(`${colors.green}[SUCCESS]${colors.reset} ${msg}`),
-  warning: (msg) => console.log(`${colors.yellow}[WARNING]${colors.reset} ${msg}`),
-  error: (msg) => console.log(`${colors.red}[ERROR]${colors.reset} ${msg}`),
-  header: (msg) => console.log(`\n${colors.bright}${colors.cyan}${msg}${colors.reset}`)
+  header: (msg) => console.log(`\n${colors.bright}${colors.cyan}${msg}${colors.reset}`),
+  info: (msg) => console.log(`${colors.blue}ℹ ${msg}${colors.reset}`),
+  success: (msg) => console.log(`${colors.green}✅ ${msg}${colors.reset}`),
+  warning: (msg) => console.log(`${colors.yellow}⚠️  ${msg}${colors.reset}`),
+  error: (msg) => console.log(`${colors.red}❌ ${msg}${colors.reset}`),
+  step: (msg) => console.log(`\n${colors.magenta}${msg}${colors.reset}`)
 };
 
-// Environment variable templates
-const envTemplates = {
-  core: {
-    NODE_ENV: 'production',
-    PORT: '3000',
-    DOMAIN: '',
-    FRONTEND_URL: '',
-    ALLOWED_ORIGINS: ''
-  },
-  security: {
-    JWT_SECRET: '',
-    SESSION_SECRET: '',
-    ENCRYPTION_KEY: ''
-  },
-  spotify: {
-    SPOTIFY_CLIENT_ID: '',
-    SPOTIFY_CLIENT_SECRET: '',
-    SPOTIFY_REDIRECT_URI: ''
-  },
-  database: {
-    MONGODB_URI: '',
-    REDIS_URL: ''
-  },
-  ai: {
-    OPENAI_API_KEY: '',
-    GOOGLE_AI_API_KEY: '',
-    PERPLEXITY_API_KEY: '',
-    ANTHROPIC_API_KEY: '',
-    OPENROUTER_API_KEY: ''
-  },
-  services: {
-    SENTRY_DSN: '',
-    AGENTOPS_API_KEY: '',
-    BROWSERBASE_API_KEY: '',
-    BROWSERBASE_PROJECT_ID: '',
-    XAI_API_KEY: ''
-  }
-};
-
-// Create readline interface
+// Readline interface for user input
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-// Utility function to prompt user for input
+// Utility function to ask questions
 function askQuestion(question, defaultValue = '') {
   return new Promise((resolve) => {
     const prompt = defaultValue ? `${question} (${defaultValue}): ` : `${question}: `;
@@ -84,146 +47,172 @@ function askQuestion(question, defaultValue = '') {
   });
 }
 
-// Generate random secrets
-function generateSecret(length = 32) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
-
-// Validate environment variables
-function validateEnvVars(envVars) {
-  const errors = [];
-  const warnings = [];
-
-  // Required variables
-  const required = [
-    'DOMAIN',
-    'SPOTIFY_CLIENT_ID',
-    'SPOTIFY_CLIENT_SECRET',
-    'MONGODB_URI',
-    'JWT_SECRET',
-    'SESSION_SECRET',
-    'ENCRYPTION_KEY'
-  ];
-
-  required.forEach(key => {
-    if (!envVars[key] || envVars[key].includes('your_') || envVars[key].includes('generate_')) {
-      errors.push(`${key} is required and must be set to a real value`);
-    }
+// Utility function to ask yes/no questions
+function askYesNo(question, defaultValue = false) {
+  return new Promise((resolve) => {
+    const prompt = `${question} (${defaultValue ? 'Y/n' : 'y/N'}): `;
+    rl.question(prompt, (answer) => {
+      const normalized = answer.trim().toLowerCase();
+      if (normalized === '') resolve(defaultValue);
+      else resolve(['y', 'yes'].includes(normalized));
+    });
   });
-
-  // Validation rules
-  if (envVars.DOMAIN && !envVars.DOMAIN.includes('.')) {
-    warnings.push('DOMAIN should be a valid domain name');
-  }
-
-  if (envVars.MONGODB_URI && !envVars.MONGODB_URI.startsWith('mongodb')) {
-    errors.push('MONGODB_URI should be a valid MongoDB connection string');
-  }
-
-  if (envVars.REDIS_URL && !envVars.REDIS_URL.startsWith('redis')) {
-    warnings.push('REDIS_URL should be a valid Redis connection string');
-  }
-
-  return { errors, warnings };
 }
 
-// Main setup function
-async function setupEnvironment() {
-  log.header('🚀 EchoTune AI - Vercel Environment Setup');
-  log.info('This script will help you configure environment variables for Vercel deployment');
-  log.info('Press Enter to use default values or type your custom values\n');
+// Main configuration function
+async function configureVercelEnvironment() {
+  try {
+    log.header('🚀 EchoTune AI - Vercel Environment Setup');
+    log.info('This script will help you configure environment variables for Vercel deployment');
+    log.info('Press Enter to use default values where available\n');
 
-  const envVars = {};
+    const envVars = {};
 
-  // Core configuration
-  log.header('🌐 Core Configuration');
-  envVars.DOMAIN = await askQuestion('Enter your production domain (e.g., your-app.vercel.app)', 'your-app.vercel.app');
-  envVars.FRONTEND_URL = `https://${envVars.DOMAIN}`;
-  envVars.ALLOWED_ORIGINS = `https://${envVars.DOMAIN},https://www.${envVars.DOMAIN}`;
+    // Database Configuration
+    log.step('📊 Database Configuration');
+    envVars.MONGODB_URI = await askQuestion(
+      'Enter your MongoDB connection string',
+      'mongodb+srv://username:password@cluster.mongodb.net/database'
+    );
+    
+    envVars.REDIS_URL = await askQuestion(
+      'Enter your Redis connection string (optional)',
+      'redis://username:password@host:port'
+    );
 
-  // Security configuration
-  log.header('🔐 Security Configuration');
-  log.info('Generating secure secrets...');
-  envVars.JWT_SECRET = generateSecret(32);
-  envVars.SESSION_SECRET = generateSecret(32);
-  envVars.ENCRYPTION_KEY = generateSecret(32);
+    // Security Configuration
+    log.step('🔐 Security Configuration');
+    envVars.JWT_SECRET = await askQuestion(
+      'Enter your JWT secret (32+ characters recommended)',
+      'your_very_long_random_jwt_secret_key_here'
+    );
+    
+    envVars.SESSION_SECRET = await askQuestion(
+      'Enter your session secret (32+ characters recommended)',
+      'your_very_long_random_session_secret_key_here'
+    );
 
-  // Spotify configuration
-  log.header('🎵 Spotify API Configuration');
-  log.info('Get these from https://developer.spotify.com/dashboard');
-  envVars.SPOTIFY_CLIENT_ID = await askQuestion('Enter your Spotify Client ID');
-  envVars.SPOTIFY_CLIENT_SECRET = await askQuestion('Enter your Spotify Client Secret');
-  envVars.SPOTIFY_REDIRECT_URI = `https://${envVars.DOMAIN}/auth/callback`;
+    // Application Configuration
+    log.step('⚙️ Application Configuration');
+    envVars.NODE_ENV = 'production';
+    
+    envVars.FRONTEND_URL = await askQuestion(
+      'Enter your production frontend URL',
+      'https://echotune-ai.vercel.app'
+    );
+    
+    envVars.DOMAIN = await askQuestion(
+      'Enter your production domain',
+      'echotune-ai.vercel.app'
+    );
 
-  // Database configuration
-  log.header('📊 Database Configuration');
-  log.info('MongoDB Atlas recommended for production');
-  envVars.MONGODB_URI = await askQuestion('Enter your MongoDB connection string');
-  envVars.REDIS_URL = await askQuestion('Enter your Redis connection string (optional)', '');
+    // Spotify Configuration
+    log.step('🎵 Spotify Configuration');
+    const useSpotify = await askYesNo('Do you want to configure Spotify integration?', true);
+    if (useSpotify) {
+      envVars.SPOTIFY_CLIENT_ID = await askQuestion('Enter your Spotify Client ID');
+      envVars.SPOTIFY_CLIENT_SECRET = await askQuestion('Enter your Spotify Client Secret');
+    }
 
-  // AI providers
-  log.header('🤖 AI/LLM Providers (Optional)');
-  envVars.OPENAI_API_KEY = await askQuestion('Enter your OpenAI API key (optional)', '');
-  envVars.GOOGLE_AI_API_KEY = await askQuestion('Enter your Google AI API key (optional)', '');
-  envVars.PERPLEXITY_API_KEY = await askQuestion('Enter your Perplexity API key (optional)', '');
-  envVars.ANTHROPIC_API_KEY = await askQuestion('Enter your Anthropic API key (optional)', '');
-  envVars.OPENROUTER_API_KEY = await askQuestion('Enter your OpenRouter API key (optional)', '');
+    // AI/LLM Configuration
+    log.step('🤖 AI/LLM Configuration');
+    const useOpenAI = await askYesNo('Do you want to configure OpenAI?', false);
+    if (useOpenAI) {
+      envVars.OPENAI_API_KEY = await askQuestion('Enter your OpenAI API Key');
+    }
 
-  // Additional services
-  log.header('🔍 Additional Services (Optional)');
-  envVars.SENTRY_DSN = await askQuestion('Enter your Sentry DSN (optional)', '');
-  envVars.AGENTOPS_API_KEY = await askQuestion('Enter your AgentOps API key (optional)', '');
-  envVars.BROWSERBASE_API_KEY = await askQuestion('Enter your BrowserBase API key (optional)', '');
-  envVars.BROWSERBASE_PROJECT_ID = await askQuestion('Enter your BrowserBase Project ID (optional)', '');
-  envVars.XAI_API_KEY = await askQuestion('Enter your XAI API key (optional)', '');
+    const usePerplexity = await askYesNo('Do you want to configure Perplexity AI?', true);
+    if (usePerplexity) {
+      envVars.PERPLEXITY_API_KEY = await askQuestion('Enter your Perplexity API Key');
+    }
 
-  // Add core values
-  Object.assign(envVars, envTemplates.core);
-  envVars.NODE_ENV = 'production';
+    const useGoogle = await askYesNo('Do you want to configure Google AI?', false);
+    if (useGoogle) {
+      envVars.GOOGLE_API_KEY = await askQuestion('Enter your Google API Key');
+    }
 
-  // Validate configuration
-  log.header('✅ Validation');
-  const validation = validateEnvVars(envVars);
+    const useXAI = await askYesNo('Do you want to configure XAI (Grok)?', false);
+    if (useXAI) {
+      envVars.XAI_API_KEY = await askQuestion('Enter your XAI API Key');
+    }
 
-  if (validation.errors.length > 0) {
-    log.error('Configuration errors found:');
-    validation.errors.forEach(error => log.error(`  - ${error}`));
-    log.error('\nPlease fix these errors before proceeding.');
-    rl.close();
-    return;
-  }
+    // Browser Automation (Optional)
+    log.step('🌐 Browser Automation (Optional)');
+    const useBrowserBase = await askYesNo('Do you want to configure BrowserBase?', false);
+    if (useBrowserBase) {
+      envVars.BROWSERBASE_API_KEY = await askQuestion('Enter your BrowserBase API Key');
+      envVars.BROWSERBASE_PROJECT_ID = await askQuestion('Enter your BrowserBase Project ID');
+    }
 
-  if (validation.warnings.length > 0) {
-    log.warning('Configuration warnings:');
-    validation.warnings.forEach(warning => log.warning(`  - ${warning}`));
-    log.info('\nYou can proceed, but consider addressing these warnings.');
-  }
+    // Workflow Automation (Optional)
+    log.step('⚡ Workflow Automation (Optional)');
+    const useN8N = await askYesNo('Do you want to configure N8N workflow automation?', false);
+    if (useN8N) {
+      envVars.N8N_API_URL = await askQuestion('Enter your N8N API URL');
+      envVars.N8N_API_KEY = await askQuestion('Enter your N8N API Key');
+    }
 
-  // Generate files
-  log.header('📁 Generating Configuration Files');
+    // Observability (Optional)
+    log.step('📈 Observability (Optional)');
+    const useAgentOps = await askYesNo('Do you want to configure AgentOps?', false);
+    if (useAgentOps) {
+      envVars.AGENTOPS_API_KEY = await askQuestion('Enter your AgentOps API Key');
+    }
 
-  // Generate .env.production.vercel
-  const envContent = Object.entries(envVars)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('\n');
+    const useSentry = await askYesNo('Do you want to configure Sentry error tracking?', false);
+    if (useSentry) {
+      envVars.SENTRY_DSN = await askQuestion('Enter your Sentry DSN');
+    }
 
-  const envFile = path.join(process.cwd(), '.env.production.vercel');
-  fs.writeFileSync(envFile, envContent);
-  log.success(`Generated ${envFile}`);
+    // Rate Limiting and Security
+    log.step('🛡️ Rate Limiting and Security');
+    envVars.RATE_LIMIT_WINDOW_MS = '900000';
+    envVars.RATE_LIMIT_MAX_REQUESTS = '100';
+    envVars.AUTH_RATE_LIMIT_MAX = '5';
+    envVars.CORS_ORIGINS = `${envVars.FRONTEND_URL},https://localhost:3000`;
+    envVars.MAX_REQUEST_SIZE = '10mb';
+    envVars.COMPRESSION = 'true';
 
-  // Generate Vercel environment setup commands
-  const vercelCommands = Object.entries(envVars)
-    .filter(([_, value]) => value && !value.includes('your_') && !value.includes('generate_'))
-    .map(([key, value]) => `vercel env add ${key} production`)
-    .join('\n');
+    // Vite Build-time Variables
+    log.step('🔨 Build Configuration');
+    envVars.VITE_SOCKET_URL = envVars.DOMAIN;
+    envVars.VITE_API_URL = `${envVars.FRONTEND_URL}/api`;
+    envVars.VITE_APP_VERSION = '2.1.0';
+    envVars.VITE_BUILD_TIME = new Date().toISOString();
 
-  const commandsFile = path.join(process.cwd(), 'vercel-env-commands.sh');
-  const commandsContent = `#!/bin/bash
+    // Performance and Caching
+    log.step('⚡ Performance Configuration');
+    envVars.CACHE_TTL = '3600000';
+    envVars.REDIS_CACHE_TTL = '1800000';
+    envVars.API_CACHE_TTL = '300000';
+
+    // Monitoring and Logging
+    log.step('📊 Monitoring Configuration');
+    envVars.LOG_LEVEL = 'info';
+    envVars.ENABLE_METRICS = 'true';
+    envVars.ENABLE_HEALTH_CHECKS = 'true';
+    envVars.ENABLE_PERFORMANCE_MONITORING = 'true';
+
+    // Generate .env.production.vercel
+    log.step('📝 Generating Configuration Files');
+    const envFile = path.join(process.cwd(), '.env.production.vercel');
+    
+    const envContent = Object.entries(envVars)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n');
+    
+    fs.writeFileSync(envFile, `# EchoTune AI - Production Environment Variables for Vercel\n# Generated on ${new Date().toISOString()}\n\n${envContent}`);
+    
+    log.success(`Generated .env.production.vercel`);
+
+    // Generate Vercel environment setup commands
+    const vercelCommands = Object.entries(envVars)
+      .filter(([_, value]) => value && value !== '')
+      .map(([key, value]) => `vercel env add ${key} production`)
+      .join('\n');
+
+    const commandsFile = path.join(process.cwd(), 'vercel-env-commands.sh');
+    const commandsContent = `#!/bin/bash
 # Vercel Environment Variables Setup Commands
 # Run these commands to set up your Vercel project environment variables
 
@@ -233,48 +222,66 @@ echo "Environment variables set successfully!"
 echo "You can now deploy with: vercel --prod"
 `;
 
-  fs.writeFileSync(commandsFile, commandsContent);
-  fs.chmodSync(commandsFile, '755');
-  log.success(`Generated ${commandsFile}`);
+    fs.writeFileSync(commandsFile, commandsContent);
+    fs.chmodSync(commandsFile, '755');
+    
+    log.success(`Generated vercel-env-commands.sh`);
 
-  // Generate summary
-  log.header('📋 Configuration Summary');
-  log.info('Core Configuration:');
-  log.info(`  Domain: ${envVars.DOMAIN}`);
-  log.info(`  Frontend URL: ${envVars.FRONTEND_URL}`);
-  log.info(`  Allowed Origins: ${envVars.ALLOWED_ORIGINS}`);
+    // Generate README section
+    const readmeSection = `## 🚀 Quick Deploy to Vercel
 
-  log.info('\nSecurity:');
-  log.info(`  JWT Secret: ${envVars.JWT_SECRET ? '✅ Generated' : '❌ Missing'}`);
-  log.info(`  Session Secret: ${envVars.SESSION_SECRET ? '✅ Generated' : '❌ Missing'}`);
-  log.info(`  Encryption Key: ${envVars.ENCRYPTION_KEY ? '✅ Generated' : '❌ Missing'}`);
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/dzp5103/Spotify-echo&env=${Object.keys(envVars).join(',')}&envDescription=Environment%20variables%20for%20EchoTune%20AI&envLink=https://github.com/dzp5103/Spotify-echo/blob/main/vercel.env.txt)
 
-  log.info('\nSpotify API:');
-  log.info(`  Client ID: ${envVars.SPOTIFY_CLIENT_ID ? '✅ Set' : '❌ Missing'}`);
-  log.info(`  Client Secret: ${envVars.SPOTIFY_CLIENT_SECRET ? '✅ Set' : '❌ Missing'}`);
-  log.info(`  Redirect URI: ${envVars.SPOTIFY_REDIRECT_URI}`);
+### Environment Variables Required
 
-  log.info('\nDatabase:');
-  log.info(`  MongoDB: ${envVars.MONGODB_URI ? '✅ Set' : '❌ Missing'}`);
-  log.info(`  Redis: ${envVars.REDIS_URL ? '✅ Set' : '❌ Missing'}`);
+Copy these environment variables to your Vercel project:
 
-  log.info('\nNext Steps:');
-  log.info('1. Review the generated .env.production.vercel file');
-  log.info('2. Run the vercel-env-commands.sh script to set up Vercel');
-  log.info('3. Deploy with: npm run deploy:vercel');
-  log.info('4. Or manually: vercel --prod');
+\`\`\`bash
+${Object.entries(envVars)
+  .filter(([_, value]) => value && value !== '')
+  .map(([key, value]) => `${key}=${value}`)
+  .join('\n')}
+\`\`\`
 
-  log.success('\nEnvironment setup completed successfully!');
-  rl.close();
-}
+### Manual Setup
 
-// Handle script execution
-if (require.main === module) {
-  setupEnvironment().catch((error) => {
-    log.error('Setup failed:');
-    log.error(error.message);
+1. Run: \`chmod +x vercel-env-commands.sh\`
+2. Execute: \`./vercel-env-commands.sh\`
+3. Deploy: \`vercel --prod\`
+
+For detailed instructions, see [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md)
+`;
+
+    log.success(`Generated README section for Vercel deployment`);
+
+    // Final instructions
+    log.header('🎉 Configuration Complete!');
+    log.info('Next steps:');
+    log.info('1. Review the generated .env.production.vercel file');
+    log.info('2. Run the vercel-env-commands.sh script to set up Vercel');
+    log.info('3. Deploy with: npm run deploy:vercel');
+    log.info('4. Or manually: vercel --prod');
+    log.info('\n📁 Generated files:');
+    log.info(`   - .env.production.vercel (${Object.keys(envVars).length} variables)`);
+    log.info(`   - vercel-env-commands.sh (automated setup)`);
+    log.info(`   - README section (copy to your README.md)`);
+
+    // Save README section for user to copy
+    const readmeFile = path.join(process.cwd(), 'VERCEL_README_SECTION.md');
+    fs.writeFileSync(readmeFile, readmeSection);
+    log.info(`   - VERCEL_README_SECTION.md (copy to your README.md)`);
+
+  } catch (error) {
+    log.error(`Configuration failed: ${error.message}`);
     process.exit(1);
-  });
+  } finally {
+    rl.close();
+  }
 }
 
-module.exports = { setupEnvironment, validateEnvVars };
+// Run the configuration
+if (require.main === module) {
+  configureVercelEnvironment();
+}
+
+module.exports = { configureVercelEnvironment };

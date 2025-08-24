@@ -3,13 +3,17 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
+const serverless = require('serverless-http');
 
 // Import routes
 const spotifyRoutes = require('../src/api/routes/spotify');
-const authRoutes = require('../src/api/routes/auth');
-const userRoutes = require('../src/api/routes/user');
 const recommendationRoutes = require('../src/api/routes/recommendations');
 const healthRoutes = require('../src/api/routes/health');
+const chatRoutes = require('../src/api/routes/chat');
+const playlistRoutes = require('../src/api/routes/playlists');
+const analyticsRoutes = require('../src/api/routes/analytics');
+const settingsRoutes = require('../src/api/routes/settings');
+const systemRoutes = require('../src/api/routes/system');
 
 const app = express();
 
@@ -63,16 +67,20 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
+    platform: 'vercel'
   });
 });
 
 // API routes
 app.use('/api/spotify', spotifyRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/playlists', playlistRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/system', systemRoutes);
 
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {

@@ -1,0 +1,358 @@
+name: 🤖 GitHub Coding Agent Slash Commands
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Slash command to execute'
+        required: true
+        default: '/perplexity-quick-analysis'
+        type: choice
+        options:
+          - '/analyze-and-code-with-perplexity'
+          - '/perplexity-research-roadmap'
+          - '/code-priority-tasks'
+          - '/validate-and-optimize'
+          - '/perplexity-quick-analysis'
+          - '/update-roadmap-from-research'
+          - '/run-automation-cycle'
+      context:
+        description: 'Additional context for the command'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  detect-slash-commands:
+    if: github.event_name == 'issue_comment' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      should_execute: ${{ steps.detect.outputs.should_execute }}
+      command: ${{ steps.detect.outputs.command }}
+      user: ${{ steps.detect.outputs.user }}
+      context: ${{ steps.detect.outputs.context }}
+    steps:
+      - name: 🔍 Detect Slash Commands
+        id: detect
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_execute=true" >> $GITHUB_OUTPUT
+            echo "command=${{ github.event.inputs.command }}" >> $GITHUB_OUTPUT
+            echo "user=${{ github.actor }}" >> $GITHUB_OUTPUT
+            echo "context=${{ github.event.inputs.context }}" >> $GITHUB_OUTPUT
+          else
+            comment="${{ github.event.comment.body }}"
+            user="${{ github.event.comment.user.login }}"
+            
+            # Check for slash commands
+            if echo "$comment" | grep -q -E "/(analyze-and-code-with-perplexity|perplexity-research-roadmap|code-priority-tasks|validate-and-optimize|perplexity-quick-analysis|update-roadmap-from-research|run-automation-cycle)"; then
+              echo "should_execute=true" >> $GITHUB_OUTPUT
+              command=$(echo "$comment" | grep -o -E "/(analyze-and-code-with-perplexity|perplexity-research-roadmap|code-priority-tasks|validate-and-optimize|perplexity-quick-analysis|update-roadmap-from-research|run-automation-cycle)" | head -1)
+              echo "command=$command" >> $GITHUB_OUTPUT
+              echo "user=$user" >> $GITHUB_OUTPUT
+              echo "context=$comment" >> $GITHUB_OUTPUT
+            else
+              echo "should_execute=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  execute-slash-command:
+    needs: detect-slash-commands
+    if: needs.detect-slash-commands.outputs.should_execute == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --only=production
+          # Install additional dependencies for slash command processing
+          npm install readline
+
+      - name: 🔐 Configure Environment
+        run: |
+          echo "PERPLEXITY_API_KEY=${{ secrets.PERPLEXITY_API_KEY }}" >> .env
+          echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> .env
+          echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> .env
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> .env
+
+      - name: ✅ Validate Environment
+        run: |
+          echo "🔍 Validating environment configuration..."
+          if [[ -z "${{ secrets.PERPLEXITY_API_KEY }}" ]]; then
+            echo "❌ PERPLEXITY_API_KEY not configured"
+            exit 1
+          fi
+          echo "✅ Environment validation passed"
+
+      - name: 🎯 Execute Slash Command
+        id: execute_command
+        run: |
+          echo "🤖 Executing command: ${{ needs.detect-slash-commands.outputs.command }}"
+          echo "👤 Requested by: ${{ needs.detect-slash-commands.outputs.user }}"
+          
+          # Execute the slash command processor
+          node github-coding-agent-slash-processor.js "${{ needs.detect-slash-commands.outputs.command }}" > command_output.json 2>&1 || true
+          
+          # Check if command was successful
+          if [[ -f command_output.json ]]; then
+            echo "✅ Command execution completed"
+            echo "command_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Command execution failed"
+            echo "command_success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📊 Generate Execution Report
+        if: always()
+        run: |
+          echo "# 🤖 Slash Command Execution Report" > execution_report.md
+          echo "" >> execution_report.md
+          echo "**Command**: \`${{ needs.detect-slash-commands.outputs.command }}\`" >> execution_report.md
+          echo "**Requested by**: @${{ needs.detect-slash-commands.outputs.user }}" >> execution_report.md
+          echo "**Execution Time**: $(date -u)" >> execution_report.md
+          echo "**Status**: ${{ steps.execute_command.outputs.command_success == 'true' && '✅ Success' || '❌ Failed' }}" >> execution_report.md
+          echo "" >> execution_report.md
+          
+          if [[ -f command_output.json ]]; then
+            echo "## 📋 Command Output" >> execution_report.md
+            echo "\`\`\`json" >> execution_report.md
+            cat command_output.json >> execution_report.md
+            echo "" >> execution_report.md
+            echo "\`\`\`" >> execution_report.md
+          fi
+          
+          echo "" >> execution_report.md
+          echo "## 📁 Files Generated" >> execution_report.md
+          if ls perplexity-*-analysis-*.md 1> /dev/null 2>&1; then
+            echo "### 🔬 Perplexity Analysis Files" >> execution_report.md
+            for file in perplexity-*-analysis-*.md; do
+              echo "- [\`$file\`](./$file)" >> execution_report.md
+            done
+          fi
+          
+          if [[ -f AUTONOMOUS_DEVELOPMENT_ROADMAP.md ]]; then
+            echo "### 📈 Updated Roadmap" >> execution_report.md
+            echo "- [\`AUTONOMOUS_DEVELOPMENT_ROADMAP.md\`](./AUTONOMOUS_DEVELOPMENT_ROADMAP.md)" >> execution_report.md
+          fi
+
+      - name: 💾 Commit Results
+        if: steps.execute_command.outputs.command_success == 'true'
+        run: |
+          # Configure git
+          git config user.name "GitHub Coding Agent"
+          git config user.email "actions@github.com"
+          
+          # Add generated files
+          git add -A
+          
+          # Create commit message
+          commit_message="🤖 Slash command execution: ${{ needs.detect-slash-commands.outputs.command }}
+          
+          Command: ${{ needs.detect-slash-commands.outputs.command }}
+          Requested by: @${{ needs.detect-slash-commands.outputs.user }}
+          Execution time: $(date -u)
+          
+          Generated files:
+          $(ls -la perplexity-*-analysis-*.md 2>/dev/null | wc -l) analysis files
+          $(ls -la *report*.md 2>/dev/null | wc -l) report files
+          
+          Auto-generated by GitHub Coding Agent Slash Command Processor"
+          
+          # Commit if there are changes
+          if ! git diff --cached --quiet; then
+            git commit -m "$commit_message"
+            git push
+            echo "✅ Results committed and pushed"
+          else
+            echo "ℹ️ No changes to commit"
+          fi
+
+      - name: 💬 Comment on Issue/PR
+        if: github.event_name == 'issue_comment' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            let reportContent = '# 🤖 Slash Command Execution Complete\n\n';
+            
+            if ('${{ steps.execute_command.outputs.command_success }}' === 'true') {
+              reportContent += '✅ **Status**: Command executed successfully\n';
+              reportContent += `🎯 **Command**: \`${{ needs.detect-slash-commands.outputs.command }}\`\n`;
+              reportContent += `👤 **Requested by**: @${{ needs.detect-slash-commands.outputs.user }}\n`;
+              reportContent += `⏱️ **Execution Time**: ${new Date().toISOString()}\n\n`;
+              
+              // Add summary from command output if available
+              try {
+                if (fs.existsSync('command_output.json')) {
+                  const output = JSON.parse(fs.readFileSync('command_output.json', 'utf8'));
+                  if (output.summary) {
+                    reportContent += '## 📊 Execution Summary\n';
+                    reportContent += '```json\n';
+                    reportContent += JSON.stringify(output.summary, null, 2);
+                    reportContent += '\n```\n\n';
+                  }
+                  
+                  if (output.nextActions && output.nextActions.length > 0) {
+                    reportContent += '## 🎯 Suggested Next Actions\n';
+                    output.nextActions.forEach(action => {
+                      reportContent += `- ${action}\n`;
+                    });
+                    reportContent += '\n';
+                  }
+                }
+              } catch (error) {
+                console.log('Could not parse command output:', error.message);
+              }
+              
+              // List generated files
+              const analysisFiles = require('child_process').execSync('ls perplexity-*-analysis-*.md 2>/dev/null || echo ""', {encoding: 'utf8'}).trim();
+              if (analysisFiles) {
+                reportContent += '## 📁 Generated Files\n';
+                analysisFiles.split('\n').forEach(file => {
+                  if (file) reportContent += `- 🔬 [\`${file}\`](./${file})\n`;
+                });
+              }
+              
+            } else {
+              reportContent += '❌ **Status**: Command execution failed\n';
+              reportContent += `🎯 **Command**: \`${{ needs.detect-slash-commands.outputs.command }}\`\n`;
+              reportContent += `👤 **Requested by**: @${{ needs.detect-slash-commands.outputs.user }}\n\n`;
+              reportContent += '💡 **Suggestion**: Check the workflow logs for details and try again with a simpler command like `/perplexity-quick-analysis`\n';
+            }
+            
+            reportContent += '\n---\n*Automated response from GitHub Coding Agent Slash Command Processor*';
+            
+            // Post comment
+            if (context.issue) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: reportContent
+              });
+            }
+
+      - name: 📈 Update Action Summary
+        if: always()
+        run: |
+          echo "# 🤖 GitHub Coding Agent Slash Command Execution" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Command**: \`${{ needs.detect-slash-commands.outputs.command }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**User**: @${{ needs.detect-slash-commands.outputs.user }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ steps.execute_command.outputs.command_success == 'true' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Time**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ steps.execute_command.outputs.command_success }}" == "true" ]]; then
+            echo "## 📊 Results Generated" >> $GITHUB_STEP_SUMMARY
+            echo "- Analysis files: $(ls perplexity-*-analysis-*.md 2>/dev/null | wc -l)" >> $GITHUB_STEP_SUMMARY
+            echo "- Report files: $(ls *report*.md 2>/dev/null | wc -l)" >> $GITHUB_STEP_SUMMARY
+            echo "- Changes committed: ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Execution Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Check the workflow logs for detailed error information." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎯 Available Commands" >> $GITHUB_STEP_SUMMARY
+          echo "- \`/analyze-and-code-with-perplexity\` - Complete development cycle" >> $GITHUB_STEP_SUMMARY
+          echo "- \`/perplexity-research-roadmap\` - Deep research analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- \`/code-priority-tasks\` - Focus on high-priority tasks" >> $GITHUB_STEP_SUMMARY
+          echo "- \`/validate-and-optimize\` - System validation" >> $GITHUB_STEP_SUMMARY
+          echo "- \`/perplexity-quick-analysis\` - Fast insights" >> $GITHUB_STEP_SUMMARY
+          echo "- \`/update-roadmap-from-research\` - Process research" >> $GITHUB_STEP_SUMMARY
+          echo "- \`/run-automation-cycle\` - Single workflow cycle" >> $GITHUB_STEP_SUMMARY
+
+  # Backup job for natural language processing
+  process-natural-language:
+    if: github.event_name == 'issue_comment' && needs.detect-slash-commands.outputs.should_execute == 'false'
+    needs: detect-slash-commands
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 💬 Process Natural Language
+        run: |
+          comment="${{ github.event.comment.body }}"
+          
+          # Check for natural language patterns that suggest automation intent
+          if echo "$comment" | grep -q -i -E "(analyze.*perplexity|research.*roadmap|code.*priority|automation.*cycle|perplexity.*research)"; then
+            echo "🔍 Natural language automation request detected"
+            echo "Comment: $comment"
+            echo ""
+            echo "💡 Suggested slash commands:"
+            echo "- Use \`/analyze-and-code-with-perplexity\` for complete development cycles"
+            echo "- Use \`/perplexity-research-roadmap\` for research and analysis"  
+            echo "- Use \`/code-priority-tasks\` to focus on high-priority tasks"
+            echo "- Use \`/perplexity-quick-analysis\` for quick insights"
+            
+            # Comment with suggestions
+            cat > suggestion_comment.md << EOF
+          ## 🤖 Natural Language Request Detected
+          
+          I detected a request for automation or analysis in your comment. For more reliable execution, please use one of these slash commands:
+          
+          ### 🎯 Primary Commands
+          - \`/analyze-and-code-with-perplexity\` - Complete development cycle (45-60 min)
+          - \`/perplexity-research-roadmap\` - Deep research analysis (15-20 min) 
+          - \`/code-priority-tasks\` - Focus on priority tasks (30-45 min)
+          - \`/perplexity-quick-analysis\` - Fast insights (3-5 min)
+          
+          ### ⚡ Quick Actions
+          - \`/validate-and-optimize\` - System health check (20-30 min)
+          - \`/update-roadmap-from-research\` - Process research results (5-10 min)
+          - \`/run-automation-cycle\` - Single workflow cycle (10-15 min)
+          
+          **Example**: Simply comment \`/perplexity-quick-analysis\` to get immediate repository insights!
+          
+          ---
+          *These commands integrate with the working Perplexity API and provide structured automation workflows.*
+          EOF
+          
+          fi
+          
+      - name: 💬 Post Suggestions
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            if (fs.existsSync('suggestion_comment.md')) {
+              const suggestionContent = fs.readFileSync('suggestion_comment.md', 'utf8');
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: suggestionContent
+              });
+            }

@@ -1,16 +1,21 @@
 {
-  "generated": "2025-08-17T15:38:57.902Z",
-  "version": "2.0",
-  "optimizedFor": "EchoTune AI - Music Platform with MCP Integration",
+  "generated": "2025-08-24T02:05:00.000Z",
+  "version": "3.0",
+  "optimizedFor": "EchoTune AI - GitHub Coding Agent Automation with Perplexity Integration",
   "configuration": {
     "cursorrules": {
       "projectType": "EchoTune AI - Enhanced Music Platform with Browser Research",
       "techStack": "React 19 + Vite + Node.js 20 + Express + MongoDB + Redis + Python ML",
       "aiModelSelection": {
+        "githubAutomation": {
+          "model": "Perplexity Sonar Pro",
+          "use": "Repository analysis, roadmap generation, task automation",
+          "context": "Include GitHubCodingAgentPerplexity.js, current roadmap, recent commits, automation workflows"
+        },
         "architecture": {
           "model": "Perplexity Sonar Pro",
           "use": "System design, database schema, API architecture, scalability planning",
-          "context": "Include current architecture diagrams, performance requirements, browser research findings"
+          "context": "Include current architecture diagrams, performance requirements, automation insights"
         },
         "codeGeneration": {
           "model": "Claude 3.5 Sonnet (preferred) or GPT-4",
@@ -23,40 +28,41 @@
           "context": "Minimal context, focus on immediate task"
         },
         "research": {
-          "model": "Perplexity Sonar Pro with Browser Research",
-          "use": "Technology decisions, security research, performance optimization",
+          "model": "Perplexity Sonar Pro with GitHub Automation",
+          "use": "Technology decisions, security research, automation optimization, roadmap updates",
           "triggers": [
+            "automation",
+            "roadmap", 
+            "github agent",
             "latest",
             "best practice",
             "security",
             "performance",
-            "2024",
             "2025"
           ],
-          "integration": "Always include current tech stack context, specific requirements, browser validation"
+          "integration": "Use GitHubCodingAgentPerplexity for repository analysis and task generation"
         }
       },
       "contextAwareness": {
         "highPriority": [
+          "GitHubCodingAgentPerplexity.js",
+          "AUTONOMOUS_DEVELOPMENT_ROADMAP.md", 
+          "CURSOR_CODING_INSTRUCTIONS_OPTIMIZED.md",
           "package.json",
-          "vite.config.js",
           "server.js",
-          "server-phase3.js",
-          ".cursor/mcp.json",
-          ".cursor/workflows/*.json",
-          "src/server.js",
-          "src/api/ai-integration/*.js",
           "src/frontend/App.jsx",
-          "src/database/*.js",
-          "tests/jest.config.js",
-          "scripts/research/*.js"
+          ".env",
+          "perplexity-repository-analysis-*.md",
+          "perplexity-roadmap-analysis-*.md",
+          "automation-workflow-report-*.json"
         ],
         "dynamicContext": {
+          "automationWork": "GitHubCodingAgentPerplexity.js, automation workflows, roadmap analysis",
           "apiWork": "src/api/*, middleware patterns, error handling",
           "frontendWork": "src/frontend/*, component patterns, styling",
           "mlWork": "scripts/*, ml_datasets/, Python requirements",
           "mcpWork": "mcp-servers/*, integration patterns",
-          "researchWork": "scripts/research/*, browser automation, validation"
+          "githubWork": "GitHub Actions, automation workflows, Perplexity integration"
         },
         "exclusions": "build artifacts, logs, generated documentation, node_modules",
         "contextWindow": "Monitor usage and trim less relevant files"

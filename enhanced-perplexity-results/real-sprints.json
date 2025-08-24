@@ -1,0 +1,20 @@
+[
+  {
+    "id": "sprint-1755995184645",
+    "name": "Music Player Sprint 1",
+    "startDate": "2025-08-24T00:26:24.645Z",
+    "endDate": "2025-08-31T00:26:24.645Z",
+    "goals": [
+      "Build core music player",
+      "Implement real-time features",
+      "Add MCP integration",
+      "Add testing"
+    ],
+    "tasks": [
+      "task-1755995184643-nn0kxnqyv",
+      "task-1755995184645-h5rszbusk"
+    ],
+    "status": "planned",
+    "createdAt": "2025-08-24T00:26:24.645Z"
+  }
+]

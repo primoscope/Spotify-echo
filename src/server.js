@@ -41,7 +41,7 @@ const { validateProductionConfig, getEnvironmentConfig } = require('./config/pro
 // Import lifecycle management
 const { initializeReadiness } = require('./infra/lifecycle/readiness');
 const { initializeGracefulShutdown } = require('./infra/lifecycle/gracefulShutdown');
-const cacheManager = require('./infra/cache');
+const appCacheManager = require('./infra/cache/index');
 
 // Validate production configuration
 try {
@@ -164,6 +164,13 @@ app.use(metricsMw);
 app.use('/internal/health', healthRoute);
 app.use('/internal/metrics', metricsRoute);
 app.use('/internal/ready', readyRoute);
+
+// Demo routes (only enabled with ENABLE_DEMO_ROUTES=1)
+if (process.env.ENABLE_DEMO_ROUTES === '1') {
+  const playlistGenerateRoute = require('./routes/internal/demo/playlist-generate');
+  app.use('/internal/demo/playlist-generate', playlistGenerateRoute);
+  console.log('🧪 Demo routes enabled at /internal/demo/*');
+}
 
 // Phase 1 Security Baseline - Example validation route
 app.use('/internal/example-validation', require('./routes/internal/example-validation'));
@@ -383,6 +390,11 @@ app.use(ensureDatabase);
 
 // User extraction middleware for all routes
 app.use(extractUser);
+
+// Optional: Non-enforcing auth scaffold middleware
+// Uncomment to enable JWT token parsing on all routes
+// const { authMiddleware } = require('./security/auth');
+// app.use(authMiddleware);
 
 // Enhanced API routes with new systems
 app.use('/api', healthRoutes);
@@ -1139,26 +1151,40 @@ io.on('connection', async (socket) => {
 // eslint-disable-next-line no-unused-vars
 app.use(errorHandler);
 
+// 404 catch-all handler - must be after all other routes
+app.use((req, res) => {
+  const { createNotFoundError } = require('./errors/createError');
+  const error = createNotFoundError('Endpoint', req.path);
+  
+  res.status(error.statusCode).json({
+    error: {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      timestamp: error.timestamp
+    }
+  });
+});
+
 // Catch-all handler for React Router (client-side routing)
 app.get('*', (req, res) => {
   // Only serve the React app for non-API routes
-  if (!req.path.startsWith('/api/') && !req.path.startsWith('/auth/')) {
+  if (!req.path.startsWith('/api/') && !req.path.startsWith('/auth/') && !req.path.startsWith('/internal/')) {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   } else {
     // Let the 404 handler take care of API routes
-    res.status(404).json({
-      error: 'Not found',
-      message: 'The requested resource was not found',
+    const { createNotFoundError } = require('./errors/createError');
+    const error = createNotFoundError('API Endpoint', req.path);
+    
+    res.status(error.statusCode).json({
+      error: {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        timestamp: error.timestamp
+      }
     });
   }
-});
-
-// 404 handler (this will no longer be reached for non-API routes)
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not found',
-    message: 'The requested resource was not found',
-  });
 });
 
 // Start server
@@ -1175,7 +1201,7 @@ server.listen(PORT, '0.0.0.0', async () => {
   initializeReadiness();
   
   // Initialize cache system
-  cacheManager.initialize();
+  appCacheManager.initialize();
 
   // Initialize Redis first
   try {

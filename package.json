@@ -74,6 +74,7 @@
     "test:mcp": "jest --config tests/jest.config.js tests/integration/enhanced-mcp-tools.test.js",
     "test:mcp-performance": "jest --config tests/jest.config.js tests/performance/mcp-performance.test.js",
     "test:mcp-integration": "./tests/mcp-integration.test.sh",
+    "perf:bench": "./scripts/performance/bench.sh",
     "lint": "npx eslint src/",
     "lint:fix": "npx eslint src/ --fix",
     "format": "npx prettier --write src/",

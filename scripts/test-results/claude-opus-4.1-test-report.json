@@ -1,0 +1,87 @@
+{
+  "modelRegistry": {
+    "status": "success",
+    "model": {
+      "name": "Claude Opus 4.1",
+      "description": "Anthropic's most advanced model and industry leader for coding and agent capabilities via Vertex AI",
+      "capabilities": [
+        "text",
+        "coding",
+        "reasoning",
+        "agents",
+        "extended-thinking",
+        "long-horizon-tasks",
+        "multimodal"
+      ],
+      "maxTokens": 32000,
+      "contextWindow": 200000,
+      "costPer1kTokens": {
+        "input": 0.015,
+        "output": 0.075
+      },
+      "latencyTier": "medium",
+      "qualityTier": "highest",
+      "extendedThinking": true,
+      "agentCapable": true,
+      "codingOptimized": true,
+      "vertexModelId": "publishers/anthropic/models/claude-opus-4-1",
+      "versionId": "claude-opus-4-1@20250805",
+      "provider": "vertex-anthropic",
+      "available": false,
+      "lastTested": null,
+      "performanceMetrics": {
+        "avgLatency": null,
+        "successRate": null,
+        "tokensPerSecond": null
+      }
+    }
+  },
+  "providerInit": {
+    "status": "success",
+    "capabilities": {
+      "streaming": true,
+      "functionCalling": true,
+      "maxTokens": 32000,
+      "supportedModels": [
+        "claude-opus-4-1",
+        "claude-3-5-sonnet",
+        "claude-3-opus",
+        "claude-3-sonnet",
+        "claude-3-haiku"
+      ],
+      "features": [
+        "chat",
+        "completion",
+        "streaming",
+        "function-calling",
+        "extended-thinking",
+        "coding",
+        "agents"
+      ],
+      "extendedThinking": true
+    }
+  },
+  "basicCompletion": {
+    "status": "skipped",
+    "reason": "No GCP credentials"
+  },
+  "extendedThinking": {
+    "status": "skipped",
+    "reason": "No GCP credentials"
+  },
+  "codingCapabilities": {
+    "status": "skipped",
+    "reason": "No GCP credentials"
+  },
+  "agentWorkflow": null,
+  "deployment": {
+    "status": "success",
+    "deploymentStatus": "failed"
+  },
+  "overall": {
+    "status": "NEEDS CONFIGURATION",
+    "successCount": 3,
+    "totalTests": 6,
+    "timestamp": "2025-08-24T16:12:44.580Z"
+  }
+}

@@ -11,6 +11,7 @@ class GeminiProvider extends BaseLLMProvider {
     this.client = null;
     this.defaultModel = config.model || 'gemini-1.5-flash';
     this.supportedModels = [
+      'gemini-2.5-pro',
       'gemini-1.5-flash',
       'gemini-1.5-pro',
       'gemini-pro',
@@ -49,6 +50,7 @@ class GeminiProvider extends BaseLLMProvider {
 
   getMaxTokensForModel(model) {
     const tokenLimits = {
+      'gemini-2.5-pro': 2000000,
       'gemini-pro': 32768,
       'gemini-pro-vision': 16384,
       'gemini-1.5-pro': 1048576,

@@ -300,6 +300,73 @@ app.get('/health', async (req, res) => {
   res.status(statusCode).json(health);
 });
 
+// AI Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+  try {
+    const aiMetrics = require('./metrics/aiMetrics');
+    const metrics = await aiMetrics.getMetrics();
+    
+    res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    res.send(metrics);
+  } catch (error) {
+    console.error('Failed to generate metrics:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate metrics',
+      message: error.message 
+    });
+  }
+});
+
+// AI Analytics endpoint for detailed metrics
+app.get('/api/ai/metrics', async (req, res) => {
+  try {
+    const aiMetrics = require('./metrics/aiMetrics');
+    const values = await aiMetrics.getMetricValues();
+    const report = await aiMetrics.generatePerformanceReport();
+    const costReport = await aiMetrics.generateCostReport();
+    
+    res.json({
+      success: true,
+      data: {
+        performance: report,
+        cost: costReport,
+        raw: values
+      }
+    });
+  } catch (error) {
+    console.error('Failed to get AI metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Agent Router analytics endpoint
+app.get('/api/ai/routing', async (req, res) => {
+  try {
+    const AgentRouter = require('./ai/agent/router');
+    const router = new AgentRouter();
+    const analytics = router.getAnalytics();
+    const health = await router.healthCheck();
+    
+    res.json({
+      success: true,
+      data: {
+        analytics,
+        health,
+        providers: router.getProviders()
+      }
+    });
+  } catch (error) {
+    console.error('Failed to get routing analytics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Enhanced security headers (replaces basic securityHeaders)
 app.use(securityHeaders);
 

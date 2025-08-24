@@ -1,14 +1,42 @@
+# Node
 node_modules
-npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist
+build
+coverage
+.playwright
+
+# VCS
 .git
 .gitignore
-README.md
+
+# Env
 .env
-.nyc_output
-coverage
+.env.*
+!.env.example
+
+# OS/editor
 .DS_Store
-*.log
-logs
-*.tmp
+*.swp
+*.swo
 .vscode
 .idea
+
+# Tests and artifacts
+reports
+test-results
+validation-reports
+perplexity-cache.json
+perplexity-usage-tracking.json
+automation-artifacts
+perf_reports
+perplexity-test-results
+
+# Docker
+Dockerfile.*
+**/*.local.*

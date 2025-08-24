@@ -1124,7 +1124,7 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-if (!process.env.VERCEL) server.listen(PORT, '0.0.0.0', async () => {
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, '0.0.0.0', async () => {
   console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔑 Spotify configured: ${!!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)}`);
@@ -1178,42 +1178,14 @@ if (!process.env.VERCEL) server.listen(PORT, '0.0.0.0', async () => {
         console.warn('⚠️ MongoDB not available, cannot set global database reference');
       }
     } else {
-      console.error('❌ Database initialization failed - running without database');
+      console.warn('⚠️ Database manager initialization failed');
     }
-
-    // Initialize LLM provider manager
-    console.log('🤖 LLM Provider Manager: Using existing chat system');
-    const llmProviderManager = require('./chat/llm-provider-manager');
-    try {
-      await llmProviderManager.initialize();
-      console.log('✅ LLM Provider Manager initialized successfully');
-      const providerStatus = llmProviderManager.getProviderStatus();
-      const available = Object.values(providerStatus.providers).filter((p) => p.available).length;
-      console.log(`🔌 Available LLM providers: ${available}`);
-      console.log(`🎯 Active provider: ${providerStatus.currentProvider}`);
-    } catch (error) {
-      console.warn('⚠️ LLM Provider Manager initialization warning:', error.message);
-      console.log('📦 Running with default mock provider for chat functionality');
-    }
-    // } else {
-    //     console.error('❌ LLM Provider Manager initialization failed');
-    // }
-    console.log('🤖 LLM Provider Manager: Using existing chat system');
   } catch (error) {
-    console.error('❌ System initialization failed:', error.message);
-  }
-
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`🔗 Local access: http://localhost:${PORT}`);
-    console.log(`🎤 Health check: http://localhost:${PORT}/health`);
-    console.log(`🤖 Chat API: http://localhost:${PORT}/api/chat`);
-    console.log(`📡 Socket.IO: ws://localhost:${PORT}`);
-    console.log(`🎯 Recommendations API: http://localhost:${PORT}/api/recommendations`);
-    console.log(`🎵 Spotify API: http://localhost:${PORT}/api/spotify`);
+    console.error('❌ Database manager initialization error:', error.message);
   }
 });
 
 // Phase 1 Security Baseline - Centralized error handler (must be last middleware)
 app.use(securityErrorHandler);
 
-module.exports = app;
+module.exports = { app, server };

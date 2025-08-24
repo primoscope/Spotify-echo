@@ -1,5 +1,48 @@
 import { test as base } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
-export const test = base.extend<{ step: <T>(name: string, fn: () => Promise<T>) => Promise<T> }>({ step: async ({ page }, use, testInfo) => { async function stepFn<T>(name: string, fn: () => Promise<T>): Promise<T> { const specName = testInfo.titlePath[1].replace(/\s+/g,'-').toLowerCase(); const existing = testInfo.attachments.filter(a=>a.name.startsWith('ss-')).length; const idx = String(existing + 1).padStart(2,'0'); const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); const baseDir = path.join('artifacts','screenshots'); try { const result = await fn(); const fileRel = path.join('success', specName, `${idx}-${slug}.png`); const fileAbs = path.join(baseDir, fileRel); await fs.promises.mkdir(path.dirname(fileAbs), { recursive: true }); await page.screenshot({ path: fileAbs, fullPage: true }); testInfo.attachments.push({ name: `ss-${idx}-${slug}-ok`, path: fileAbs, contentType: 'image/png' }); return result; } catch (e) { const fileRel = path.join('failures', specName, `${idx}-${slug}.png`); const fileAbs = path.join(baseDir, fileRel); await fs.promises.mkdir(path.dirname(fileAbs), { recursive: true }); await page.screenshot({ path: fileAbs, fullPage: true }); testInfo.attachments.push({ name: `ss-${idx}-${slug}-fail`, path: fileAbs, contentType: 'image/png' }); throw e; } } await use(stepFn); } });
+
+export const test = base.extend<{ 
+  step: <T>(name: string, fn: () => Promise<T>) => Promise<T> 
+}>({ 
+  step: async ({ page }, use, testInfo) => { 
+    async function stepFn<T>(name: string, fn: () => Promise<T>): Promise<T> { 
+      const specName = testInfo.titlePath[1].replace(/\s+/g,'-').toLowerCase(); 
+      const existing = testInfo.attachments.filter(a=>a.name.startsWith('ss-')).length; 
+      const idx = String(existing + 1).padStart(2,'0'); 
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); 
+      const baseDir = path.join('artifacts','screenshots'); 
+      
+      try { 
+        console.log(`🔸 Step ${idx}: ${name}`);
+        const result = await fn(); 
+        const fileRel = path.join('success', specName, `${idx}-${slug}.png`); 
+        const fileAbs = path.join(baseDir, fileRel); 
+        await fs.promises.mkdir(path.dirname(fileAbs), { recursive: true }); 
+        await page.screenshot({ path: fileAbs, fullPage: true }); 
+        testInfo.attachments.push({ 
+          name: `ss-${idx}-${slug}-ok`, 
+          path: fileAbs, 
+          contentType: 'image/png' 
+        }); 
+        console.log(`✅ Step ${idx} completed: ${name}`);
+        return result; 
+      } catch (e) { 
+        const fileRel = path.join('failures', specName, `${idx}-${slug}.png`); 
+        const fileAbs = path.join(baseDir, fileRel); 
+        await fs.promises.mkdir(path.dirname(fileAbs), { recursive: true }); 
+        await page.screenshot({ path: fileAbs, fullPage: true }); 
+        testInfo.attachments.push({ 
+          name: `ss-${idx}-${slug}-fail`, 
+          path: fileAbs, 
+          contentType: 'image/png' 
+        }); 
+        console.log(`❌ Step ${idx} failed: ${name} - ${e.message}`);
+        throw e; 
+      } 
+    } 
+    await use(stepFn); 
+  } 
+});
+
 export const expect = test.expect;

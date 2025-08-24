@@ -1,0 +1,1844 @@
+<testsuites id="" name="" tests="21" failures="16" skipped="5" errors="0" time="64.33953">
+<testsuite name="auth-flow.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="chromium" tests="5" failures="4" skipped="1" time="3.832" errors="0">
+<testcase name="EchoTune AI Auth Flow › should retrieve Spotify auth URL from API" classname="auth-flow.spec.ts" time="1.39">
+<failure message="auth-flow.spec.ts:14:7 should retrieve Spotify auth URL from API" type="FAILURE">
+<![CDATA[  [chromium] › auth-flow.spec.ts:14:7 › EchoTune AI Auth Flow › should retrieve Spotify auth URL from API 
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/api/spotify/auth/login
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.16 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:18:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/api/spotify/auth/login
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.16 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:18:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/api/spotify/auth/login
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.16 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:18:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[🔍 Testing auth URL generation...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium/video.webm]]
+🔍 Testing auth URL generation...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry1/trace.zip]]
+🔍 Testing auth URL generation...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-chromium-retry2/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle Spotify OAuth flow with screenshots" classname="auth-flow.spec.ts" time="0.129">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle auth callback page" classname="auth-flow.spec.ts" time="0.761">
+<failure message="auth-flow.spec.ts:164:7 should handle auth callback page" type="FAILURE">
+<![CDATA[  [chromium] › auth-flow.spec.ts:164:7 › EchoTune AI Auth Flow › should handle auth callback page ──
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/auth/callback?code=test_auth_code_1756036099974&state=test_state_1756036099974
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?code=test_auth_code_1756036099974&state=test_state_1756036099974", waiting until "load"
+
+
+      176 |
+      177 |     // Navigate to callback URL with test parameters
+    > 178 |     await page.goto(`/auth/callback?code=${testCode}&state=${testState}`);
+          |                ^
+      179 |     
+      180 |     // Screenshot the callback page
+      181 |     await page.screenshot({ 
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/auth/callback?code=test_auth_code_1756036100856&state=test_state_1756036100856
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?code=test_auth_code_1756036100856&state=test_state_1756036100856", waiting until "load"
+
+
+      176 |
+      177 |     // Navigate to callback URL with test parameters
+    > 178 |     await page.goto(`/auth/callback?code=${testCode}&state=${testState}`);
+          |                ^
+      179 |     
+      180 |     // Screenshot the callback page
+      181 |     await page.screenshot({ 
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/auth/callback?code=test_auth_code_1756036101798&state=test_state_1756036101798
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?code=test_auth_code_1756036101798&state=test_state_1756036101798", waiting until "load"
+
+
+      176 |
+      177 |     // Navigate to callback URL with test parameters
+    > 178 |     await page.goto(`/auth/callback?code=${testCode}&state=${testState}`);
+          |                ^
+      179 |     
+      180 |     // Screenshot the callback page
+      181 |     await page.screenshot({ 
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[🔄 Testing auth callback handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium/video.webm]]
+🔄 Testing auth callback handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry1/trace.zip]]
+🔄 Testing auth callback handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-chromium-retry2/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle auth errors gracefully" classname="auth-flow.spec.ts" time="0.553">
+<failure message="auth-flow.spec.ts:198:7 should handle auth errors gracefully" type="FAILURE">
+<![CDATA[  [chromium] › auth-flow.spec.ts:198:7 › EchoTune AI Auth Flow › should handle auth errors gracefully 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/auth/callback?error=access_denied&state=test_state
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?error=access_denied&state=test_state", waiting until "load"
+
+
+      200 |     
+      201 |     // Test with error parameter
+    > 202 |     await page.goto('/auth/callback?error=access_denied&state=test_state');
+          |                ^
+      203 |     
+      204 |     await page.screenshot({ 
+      205 |       path: 'artifacts/screenshots/11-auth-error-page.png',
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:202:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/auth/callback?error=access_denied&state=test_state
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?error=access_denied&state=test_state", waiting until "load"
+
+
+      200 |     
+      201 |     // Test with error parameter
+    > 202 |     await page.goto('/auth/callback?error=access_denied&state=test_state');
+          |                ^
+      203 |     
+      204 |     await page.screenshot({ 
+      205 |       path: 'artifacts/screenshots/11-auth-error-page.png',
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:202:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/auth/callback?error=access_denied&state=test_state
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?error=access_denied&state=test_state", waiting until "load"
+
+
+      200 |     
+      201 |     // Test with error parameter
+    > 202 |     await page.goto('/auth/callback?error=access_denied&state=test_state');
+          |                ^
+      203 |     
+      204 |     await page.screenshot({ 
+      205 |       path: 'artifacts/screenshots/11-auth-error-page.png',
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:202:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[❌ Testing auth error handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium/video.webm]]
+❌ Testing auth error handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry1/trace.zip]]
+❌ Testing auth error handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-chromium-retry2/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Health Endpoint › should respond to health checks" classname="auth-flow.spec.ts" time="0.999">
+<failure message="auth-flow.spec.ts:217:7 should respond to health checks" type="FAILURE">
+<![CDATA[  [chromium] › auth-flow.spec.ts:217:7 › Health Endpoint › should respond to health checks ─────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.16 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.16 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.16 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+]]>
+</failure>
+<system-out>
+<![CDATA[🏥 Testing health endpoint...
+🏥 Testing health endpoint...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-chromium-retry1/trace.zip]]
+🏥 Testing health endpoint...
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="chromium" tests="1" failures="1" skipped="0" time="0.711" errors="0">
+<testcase name="Chat interaction (provider-agnostic) › basic conversation with mock or openrouter" classname="chat-interaction.spec.ts" time="0.711">
+<failure message="chat-interaction.spec.ts:4:7 basic conversation with mock or openrouter" type="FAILURE">
+<![CDATA[  [chromium] › chat-interaction.spec.ts:4:7 › Chat interaction (provider-agnostic) › basic conversation with mock or openrouter 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      4 |   test('basic conversation with mock or openrouter', async ({ page, step }) => {
+      5 |     test.skip(process.env.LLM_PROVIDER === 'google', 'Handled in gemini spec when live');
+    > 6 |     await step('home', async () => { await page.goto('/'); await expect(page).toHaveTitle(/Spotify/i); });
+        |                                                 ^
+      7 |     await step('open chat', async () => { await page.click('[data-testid="chat-open-button"], [data-testid="chat-input"]').catch(()=>{}); });
+      8 |     await step('send prompt', async () => { await page.fill('[data-testid="chat-input"]', 'Show my top 5 artists (test)'); await page.click('[data-testid="chat-send"]'); });
+      9 |     await step('receive answer', async () => { await page.waitForSelector('[data-testid="chat-message-assistant"]', { timeout: 15000 }); const txt = await page.textContent('[data-testid="chat-message-assistant"] >> nth=0'); expect(txt).toBeTruthy(); });
+        at fn (/home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:49)
+        at step (/home/runner/work/Spotify-echo/Spotify-echo/tests/utils/step.ts:4:586)
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:11
+
+    attachment #1: ss-01-home-fail (image/png) ─────────────────────────────────────────────────────
+    ../../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      4 |   test('basic conversation with mock or openrouter', async ({ page, step }) => {
+      5 |     test.skip(process.env.LLM_PROVIDER === 'google', 'Handled in gemini spec when live');
+    > 6 |     await step('home', async () => { await page.goto('/'); await expect(page).toHaveTitle(/Spotify/i); });
+        |                                                 ^
+      7 |     await step('open chat', async () => { await page.click('[data-testid="chat-open-button"], [data-testid="chat-input"]').catch(()=>{}); });
+      8 |     await step('send prompt', async () => { await page.fill('[data-testid="chat-input"]', 'Show my top 5 artists (test)'); await page.click('[data-testid="chat-send"]'); });
+      9 |     await step('receive answer', async () => { await page.waitForSelector('[data-testid="chat-message-assistant"]', { timeout: 15000 }); const txt = await page.textContent('[data-testid="chat-message-assistant"] >> nth=0'); expect(txt).toBeTruthy(); });
+        at fn (/home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:49)
+        at step (/home/runner/work/Spotify-echo/Spotify-echo/tests/utils/step.ts:4:586)
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:11
+
+    attachment #1: ss-01-home-fail (image/png) ─────────────────────────────────────────────────────
+    ../../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      4 |   test('basic conversation with mock or openrouter', async ({ page, step }) => {
+      5 |     test.skip(process.env.LLM_PROVIDER === 'google', 'Handled in gemini spec when live');
+    > 6 |     await step('home', async () => { await page.goto('/'); await expect(page).toHaveTitle(/Spotify/i); });
+        |                                                 ^
+      7 |     await step('open chat', async () => { await page.click('[data-testid="chat-open-button"], [data-testid="chat-input"]').catch(()=>{}); });
+      8 |     await step('send prompt', async () => { await page.fill('[data-testid="chat-input"]', 'Show my top 5 artists (test)'); await page.click('[data-testid="chat-send"]'); });
+      9 |     await step('receive answer', async () => { await page.waitForSelector('[data-testid="chat-message-assistant"]', { timeout: 15000 }); const txt = await page.textContent('[data-testid="chat-message-assistant"] >> nth=0'); expect(txt).toBeTruthy(); });
+        at fn (/home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:49)
+        at step (/home/runner/work/Spotify-echo/Spotify-echo/tests/utils/step.ts:4:586)
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:11
+
+    attachment #1: ss-01-home-fail (image/png) ─────────────────────────────────────────────────────
+    ../../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry1/trace.zip]]
+
+[[ATTACHMENT|../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-chromium-retry2/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="gemini-chat.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Gemini direct chat (live) › basic prompt -&gt; response" classname="gemini-chat.spec.ts" time="0">
+<properties>
+<property name="skip" value="Live Gemini test disabled">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="firefox" tests="5" failures="4" skipped="1" time="11.393" errors="0">
+<testcase name="EchoTune AI Auth Flow › should retrieve Spotify auth URL from API" classname="auth-flow.spec.ts" time="3.386">
+<failure message="auth-flow.spec.ts:14:7 should retrieve Spotify auth URL from API" type="FAILURE">
+<![CDATA[  [firefox] › auth-flow.spec.ts:14:7 › EchoTune AI Auth Flow › should retrieve Spotify auth URL from API 
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/api/spotify/auth/login
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:18:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/api/spotify/auth/login
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:18:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/api/spotify/auth/login
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:18:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[🔍 Testing auth URL generation...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox/video.webm]]
+🔍 Testing auth URL generation...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry1/trace.zip]]
+🔍 Testing auth URL generation...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-firefox-retry2/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle Spotify OAuth flow with screenshots" classname="auth-flow.spec.ts" time="0.894">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle auth callback page" classname="auth-flow.spec.ts" time="2.825">
+<failure message="auth-flow.spec.ts:164:7 should handle auth callback page" type="FAILURE">
+<![CDATA[  [firefox] › auth-flow.spec.ts:164:7 › EchoTune AI Auth Flow › should handle auth callback page ───
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?code=test_auth_code_1756036119637&state=test_state_1756036119637", waiting until "load"
+
+
+      176 |
+      177 |     // Navigate to callback URL with test parameters
+    > 178 |     await page.goto(`/auth/callback?code=${testCode}&state=${testState}`);
+          |                ^
+      179 |     
+      180 |     // Screenshot the callback page
+      181 |     await page.screenshot({ 
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?code=test_auth_code_1756036122068&state=test_state_1756036122068", waiting until "load"
+
+
+      176 |
+      177 |     // Navigate to callback URL with test parameters
+    > 178 |     await page.goto(`/auth/callback?code=${testCode}&state=${testState}`);
+          |                ^
+      179 |     
+      180 |     // Screenshot the callback page
+      181 |     await page.screenshot({ 
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?code=test_auth_code_1756036124640&state=test_state_1756036124640", waiting until "load"
+
+
+      176 |
+      177 |     // Navigate to callback URL with test parameters
+    > 178 |     await page.goto(`/auth/callback?code=${testCode}&state=${testState}`);
+          |                ^
+      179 |     
+      180 |     // Screenshot the callback page
+      181 |     await page.screenshot({ 
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry2/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🔄 Testing auth callback handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox/error-context.md]]
+🔄 Testing auth callback handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/error-context.md]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry1/trace.zip]]
+🔄 Testing auth callback handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry2/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-firefox-retry2/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle auth errors gracefully" classname="auth-flow.spec.ts" time="3.286">
+<failure message="auth-flow.spec.ts:198:7 should handle auth errors gracefully" type="FAILURE">
+<![CDATA[  [firefox] › auth-flow.spec.ts:198:7 › EchoTune AI Auth Flow › should handle auth errors gracefully 
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?error=access_denied&state=test_state", waiting until "load"
+
+
+      200 |     
+      201 |     // Test with error parameter
+    > 202 |     await page.goto('/auth/callback?error=access_denied&state=test_state');
+          |                ^
+      203 |     
+      204 |     await page.screenshot({ 
+      205 |       path: 'artifacts/screenshots/11-auth-error-page.png',
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:202:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?error=access_denied&state=test_state", waiting until "load"
+
+
+      200 |     
+      201 |     // Test with error parameter
+    > 202 |     await page.goto('/auth/callback?error=access_denied&state=test_state');
+          |                ^
+      203 |     
+      204 |     await page.screenshot({ 
+      205 |       path: 'artifacts/screenshots/11-auth-error-page.png',
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:202:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/auth/callback?error=access_denied&state=test_state", waiting until "load"
+
+
+      200 |     
+      201 |     // Test with error parameter
+    > 202 |     await page.goto('/auth/callback?error=access_denied&state=test_state');
+          |                ^
+      203 |     
+      204 |     await page.screenshot({ 
+      205 |       path: 'artifacts/screenshots/11-auth-error-page.png',
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:202:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry2/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[❌ Testing auth error handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox/error-context.md]]
+❌ Testing auth error handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/error-context.md]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry1/trace.zip]]
+❌ Testing auth error handling...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry2/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-firefox-retry2/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Health Endpoint › should respond to health checks" classname="auth-flow.spec.ts" time="1.002">
+<failure message="auth-flow.spec.ts:217:7 should respond to health checks" type="FAILURE">
+<![CDATA[  [firefox] › auth-flow.spec.ts:217:7 › Health Endpoint › should respond to health checks ──────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-firefox-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-firefox-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+]]>
+</failure>
+<system-out>
+<![CDATA[🏥 Testing health endpoint...
+🏥 Testing health endpoint...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-firefox-retry1/trace.zip]]
+🏥 Testing health endpoint...
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="firefox" tests="1" failures="1" skipped="0" time="3.4" errors="0">
+<testcase name="Chat interaction (provider-agnostic) › basic conversation with mock or openrouter" classname="chat-interaction.spec.ts" time="3.4">
+<failure message="chat-interaction.spec.ts:4:7 basic conversation with mock or openrouter" type="FAILURE">
+<![CDATA[  [firefox] › chat-interaction.spec.ts:4:7 › Chat interaction (provider-agnostic) › basic conversation with mock or openrouter 
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      4 |   test('basic conversation with mock or openrouter', async ({ page, step }) => {
+      5 |     test.skip(process.env.LLM_PROVIDER === 'google', 'Handled in gemini spec when live');
+    > 6 |     await step('home', async () => { await page.goto('/'); await expect(page).toHaveTitle(/Spotify/i); });
+        |                                                 ^
+      7 |     await step('open chat', async () => { await page.click('[data-testid="chat-open-button"], [data-testid="chat-input"]').catch(()=>{}); });
+      8 |     await step('send prompt', async () => { await page.fill('[data-testid="chat-input"]', 'Show my top 5 artists (test)'); await page.click('[data-testid="chat-send"]'); });
+      9 |     await step('receive answer', async () => { await page.waitForSelector('[data-testid="chat-message-assistant"]', { timeout: 15000 }); const txt = await page.textContent('[data-testid="chat-message-assistant"] >> nth=0'); expect(txt).toBeTruthy(); });
+        at fn (/home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:49)
+        at step (/home/runner/work/Spotify-echo/Spotify-echo/tests/utils/step.ts:4:586)
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:11
+
+    attachment #1: ss-01-home-fail (image/png) ─────────────────────────────────────────────────────
+    ../../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      4 |   test('basic conversation with mock or openrouter', async ({ page, step }) => {
+      5 |     test.skip(process.env.LLM_PROVIDER === 'google', 'Handled in gemini spec when live');
+    > 6 |     await step('home', async () => { await page.goto('/'); await expect(page).toHaveTitle(/Spotify/i); });
+        |                                                 ^
+      7 |     await step('open chat', async () => { await page.click('[data-testid="chat-open-button"], [data-testid="chat-input"]').catch(()=>{}); });
+      8 |     await step('send prompt', async () => { await page.fill('[data-testid="chat-input"]', 'Show my top 5 artists (test)'); await page.click('[data-testid="chat-send"]'); });
+      9 |     await step('receive answer', async () => { await page.waitForSelector('[data-testid="chat-message-assistant"]', { timeout: 15000 }); const txt = await page.textContent('[data-testid="chat-message-assistant"] >> nth=0'); expect(txt).toBeTruthy(); });
+        at fn (/home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:49)
+        at step (/home/runner/work/Spotify-echo/Spotify-echo/tests/utils/step.ts:4:586)
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:11
+
+    attachment #1: ss-01-home-fail (image/png) ─────────────────────────────────────────────────────
+    ../../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      4 |   test('basic conversation with mock or openrouter', async ({ page, step }) => {
+      5 |     test.skip(process.env.LLM_PROVIDER === 'google', 'Handled in gemini spec when live');
+    > 6 |     await step('home', async () => { await page.goto('/'); await expect(page).toHaveTitle(/Spotify/i); });
+        |                                                 ^
+      7 |     await step('open chat', async () => { await page.click('[data-testid="chat-open-button"], [data-testid="chat-input"]').catch(()=>{}); });
+      8 |     await step('send prompt', async () => { await page.fill('[data-testid="chat-input"]', 'Show my top 5 artists (test)'); await page.click('[data-testid="chat-send"]'); });
+      9 |     await step('receive answer', async () => { await page.waitForSelector('[data-testid="chat-message-assistant"]', { timeout: 15000 }); const txt = await page.textContent('[data-testid="chat-message-assistant"] >> nth=0'); expect(txt).toBeTruthy(); });
+        at fn (/home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:49)
+        at step (/home/runner/work/Spotify-echo/Spotify-echo/tests/utils/step.ts:4:586)
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/chat-interaction.spec.ts:6:11
+
+    attachment #1: ss-01-home-fail (image/png) ─────────────────────────────────────────────────────
+    ../../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry2/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox/error-context.md]]
+
+[[ATTACHMENT|../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/error-context.md]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry1/trace.zip]]
+
+[[ATTACHMENT|../artifacts/screenshots/failures/chat-interaction-(provider-agnostic)/01-home.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry2/video.webm]]
+
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-firefox-retry2/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="gemini-chat.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="firefox" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Gemini direct chat (live) › basic prompt -&gt; response" classname="gemini-chat.spec.ts" time="0">
+<properties>
+<property name="skip" value="Live Gemini test disabled">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="webkit" tests="5" failures="5" skipped="0" time="1.049" errors="0">
+<testcase name="EchoTune AI Auth Flow › should retrieve Spotify auth URL from API" classname="auth-flow.spec.ts" time="0.012">
+<failure message="auth-flow.spec.ts:14:7 should retrieve Spotify auth URL from API" type="FAILURE">
+<![CDATA[  [webkit] › auth-flow.spec.ts:14:7 › EchoTune AI Auth Flow › should retrieve Spotify auth URL from API 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-webkit-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-webkit-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-45cde-e-Spotify-auth-URL-from-API-webkit-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle Spotify OAuth flow with screenshots" classname="auth-flow.spec.ts" time="0.012">
+<failure message="auth-flow.spec.ts:34:7 should handle Spotify OAuth flow with screenshots" type="FAILURE">
+<![CDATA[  [webkit] › auth-flow.spec.ts:34:7 › EchoTune AI Auth Flow › should handle Spotify OAuth flow with screenshots 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-a0631-OAuth-flow-with-screenshots-webkit-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-a0631-OAuth-flow-with-screenshots-webkit-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-a0631-OAuth-flow-with-screenshots-webkit-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle auth callback page" classname="auth-flow.spec.ts" time="0.012">
+<failure message="auth-flow.spec.ts:164:7 should handle auth callback page" type="FAILURE">
+<![CDATA[  [webkit] › auth-flow.spec.ts:164:7 › EchoTune AI Auth Flow › should handle auth callback page ────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-webkit-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-webkit-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-5aef8-d-handle-auth-callback-page-webkit-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="EchoTune AI Auth Flow › should handle auth errors gracefully" classname="auth-flow.spec.ts" time="0.012">
+<failure message="auth-flow.spec.ts:198:7 should handle auth errors gracefully" type="FAILURE">
+<![CDATA[  [webkit] › auth-flow.spec.ts:198:7 › EchoTune AI Auth Flow › should handle auth errors gracefully 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-webkit-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-webkit-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-EchoTune-AI-Auth-77a29-ndle-auth-errors-gracefully-webkit-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Health Endpoint › should respond to health checks" classname="auth-flow.spec.ts" time="1.001">
+<failure message="auth-flow.spec.ts:217:7 should respond to health checks" type="FAILURE">
+<![CDATA[  [webkit] › auth-flow.spec.ts:217:7 › Health Endpoint › should respond to health checks ───────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-webkit-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-webkit-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: apiRequestContext.get: connect ECONNREFUSED ::1:3000
+    Call log:
+      - → GET http://localhost:3000/health
+        - user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+        at apiRequestContext.get: connect ECONNREFUSED ::1:3000
+        at /home/runner/work/Spotify-echo/Spotify-echo/tests/e2e/auth-flow.spec.ts:220:36
+]]>
+</failure>
+<system-out>
+<![CDATA[🏥 Testing health endpoint...
+🏥 Testing health endpoint...
+
+[[ATTACHMENT|../artifacts/screenshots/auth-flow-Health-Endpoint-should-respond-to-health-checks-webkit-retry1/trace.zip]]
+🏥 Testing health endpoint...
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="webkit" tests="1" failures="1" skipped="0" time="0.012" errors="0">
+<testcase name="Chat interaction (provider-agnostic) › basic conversation with mock or openrouter" classname="chat-interaction.spec.ts" time="0.012">
+<failure message="chat-interaction.spec.ts:4:7 basic conversation with mock or openrouter" type="FAILURE">
+<![CDATA[  [webkit] › chat-interaction.spec.ts:4:7 › Chat interaction (provider-agnostic) › basic conversation with mock or openrouter 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-webkit-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-webkit-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Missing libraries:                                   ║
+    ║     libgtk-4.so.1                                    ║
+    ║     libgraphene-1.0.so.0                             ║
+    ║     libwoff2dec.so.1.0.2                             ║
+    ║     libvpx.so.9                                      ║
+    ║     libevent-2.1.so.7                                ║
+    ║     libopus.so.0                                     ║
+    ║     libgstallocators-1.0.so.0                        ║
+    ║     libgstapp-1.0.so.0                               ║
+    ║     libgstpbutils-1.0.so.0                           ║
+    ║     libgstaudio-1.0.so.0                             ║
+    ║     libgsttag-1.0.so.0                               ║
+    ║     libgstvideo-1.0.so.0                             ║
+    ║     libgstgl-1.0.so.0                                ║
+    ║     libgstcodecparsers-1.0.so.0                      ║
+    ║     libgstfft-1.0.so.0                               ║
+    ║     libflite.so.1                                    ║
+    ║     libflite_usenglish.so.1                          ║
+    ║     libflite_cmu_grapheme_lang.so.1                  ║
+    ║     libflite_cmu_grapheme_lex.so.1                   ║
+    ║     libflite_cmu_indic_lang.so.1                     ║
+    ║     libflite_cmu_indic_lex.so.1                      ║
+    ║     libflite_cmulex.so.1                             ║
+    ║     libflite_cmu_time_awb.so.1                       ║
+    ║     libflite_cmu_us_awb.so.1                         ║
+    ║     libflite_cmu_us_kal16.so.1                       ║
+    ║     libflite_cmu_us_kal.so.1                         ║
+    ║     libflite_cmu_us_rms.so.1                         ║
+    ║     libflite_cmu_us_slt.so.1                         ║
+    ║     libavif.so.16                                    ║
+    ║     libharfbuzz-icu.so.0                             ║
+    ║     libsecret-1.so.0                                 ║
+    ║     libhyphen.so.0                                   ║
+    ║     libmanette-0.2.so.0                              ║
+    ║     libGLESv2.so.2                                   ║
+    ║     libx264.so                                       ║
+    ╚══════════════════════════════════════════════════════╝
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../artifacts/screenshots/chat-interaction-Chat-inte-fad72-ion-with-mock-or-openrouter-webkit-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="gemini-chat.spec.ts" timestamp="2025-08-24T11:48:13.324Z" hostname="webkit" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Gemini direct chat (live) › basic prompt -&gt; response" classname="gemini-chat.spec.ts" time="0">
+<properties>
+<property name="skip" value="Live Gemini test disabled">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

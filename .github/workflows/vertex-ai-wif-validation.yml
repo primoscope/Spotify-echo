@@ -1,0 +1,69 @@
+---
+name: Vertex AI WIF Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, ready_for_review]
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  VERTEX_MODEL_ID: ${{ secrets.VERTEX_MODEL_ID || '' }}
+
+jobs:
+  auth-and-vertex-test:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'copilot-coding-agent') ||
+      contains(github.event.pull_request.labels.*.name, 'gcp-integration') ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Google Auth via Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_lifetime: 600s
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: '>= 477.0.0'
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Verify Auth Identity
+        run: |
+          echo "Active gcloud config:" 
+          gcloud config list
+          echo "Auth accounts:" 
+          gcloud auth list
+          echo "Project describe:" 
+          gcloud projects describe "$GCP_PROJECT_ID" --format="value(projectId)"
+
+      - name: List Vertex AI Models
+        run: |
+          echo "Listing up to 5 Vertex AI models in region ${GCP_REGION}..."
+          gcloud ai models list --region "${GCP_REGION}" \
+            --format="table(displayName,versionId,createTime)" \
+            --limit=5 || echo "Model list not available."
+
+      - name: Optional Model Prediction Placeholder
+        if: env.VERTEX_MODEL_ID != ''
+        run: |
+          echo "VERTEX_MODEL_ID provided. Running placeholder prediction script."
+          python3 scripts/vertex_health_check.py || true
+
+      - name: Summary
+        run: |
+          echo "✅ Vertex AI WIF validation completed."

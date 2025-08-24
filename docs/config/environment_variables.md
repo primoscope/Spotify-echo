@@ -72,6 +72,30 @@ This document lists all environment variables used by the EchoTune AI applicatio
 |----------|---------|-------------|
 | `ENABLE_DEMO_ROUTES` | - | Set to "1" to enable demo routes at `/internal/demo/*` |
 
+## Smoke Testing & Validation
+
+The smoke validation script (`scripts/ci/smoke.sh`) uses the following variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NODE_ENV` | `test` | Environment for smoke testing (set to 'test' by script) |
+| `PORT` | `3000` | Server port for smoke testing |
+| `ENABLE_DEMO_ROUTES` | `1` | Enables demo routes for comprehensive testing |
+
+**Smoke Script Usage:**
+```bash
+# Run smoke validation locally
+bash scripts/ci/smoke.sh
+
+# Custom port and environment
+NODE_ENV=development PORT=3001 bash scripts/ci/smoke.sh
+
+# Required minimal environment for smoke testing
+NODE_ENV=test ENABLE_DEMO_ROUTES=1 JWT_SECRET=test_secret bash scripts/ci/smoke.sh
+```
+
+The smoke script validates `/internal/health`, `/internal/ready`, and `/internal/metrics` endpoints and generates a `smoke_report.json` with detailed results.
+
 ## Rate Limiting
 
 | Variable | Default | Description |

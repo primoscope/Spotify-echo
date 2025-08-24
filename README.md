@@ -102,6 +102,16 @@ npm run mcp:orchestrated-start
 
 Visit `http://localhost:3000` to start discovering music!
 
+## 🗺️ Roadmap
+
+For detailed development roadmap, strategic initiatives, and future planning, see our [Comprehensive Roadmap Documentation](docs/roadmap/ROADMAP.md).
+
+### Current Focus Areas
+- **Phase 3 Initiatives**: SLO metrics, chaos engineering, OpenAPI specification
+- **Backend Evolution**: Microservices transition, enhanced resilience patterns
+- **Frontend Development**: React-based UI with accessibility-first design
+- **Quality Enhancement**: 80%+ test coverage, mutation testing, performance gates
+
 ## 🏗️ Technology Stack
 
 ### Frontend

@@ -333,7 +333,7 @@ class MultiAgentOrchestrator {
             return result;
 
         } catch (error) {
-            console.error(`❌ Workflow execution failed:`, error.message);
+            console.error('❌ Workflow execution failed:', error.message);
             throw error;
         }
     }

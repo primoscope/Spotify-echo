@@ -10,16 +10,16 @@ module.exports = function applyHelmet(app) {
       contentSecurityPolicy: {
         reportOnly: true,
         directives: {
-          defaultSrc: ["'self'"],
-          objectSrc: ["'none'"],
-          frameAncestors: ["'none'"],
-          baseUri: ["'self'"],
+          defaultSrc: ['\'self\''],
+          objectSrc: ['\'none\''],
+          frameAncestors: ['\'none\''],
+          baseUri: ['\'self\''],
           // Allow additional sources commonly needed
-          scriptSrc: ["'self'", "'unsafe-inline'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "https:"],
-          fontSrc: ["'self'"],
-          connectSrc: ["'self'"]
+          scriptSrc: ['\'self\'', '\'unsafe-inline\''],
+          styleSrc: ['\'self\'', '\'unsafe-inline\''],
+          imgSrc: ['\'self\'', 'data:', 'https:'],
+          fontSrc: ['\'self\''],
+          connectSrc: ['\'self\'']
         }
       }
     }));

@@ -14,8 +14,12 @@
 - p95_http_latency_ms: TBA
 
 ## Security
-- high_vulnerabilities: TBA
-- medium_vulnerabilities: TBA
+- last_audit_timestamp: TBA
+- dependency_vulnerabilities: { critical: TBA, high: TBA, medium: TBA, low: TBA }
+- security_headers: ENABLED (helmet)
+- rate_limiting: ENABLED (window=60s, max=RATE_LIMIT_MAX|120)
+- input_validation: PARTIAL (sample route)
+- codeql: ENABLED (if workflow added)
 
 ## Testing
 - coverage_lines: TBA

@@ -103,6 +103,9 @@ const SecurityManager = require('./api/security/security-manager');
 const performanceMonitor = require('./api/monitoring/performance-monitor');
 const logger = require('./api/utils/logger');
 
+// Phase 2 Vertex AI - Budget tracking for AI costs
+const { BudgetTracker } = require('./ai/cost/budgetTracker');
+
 // Import Redis-backed rate limiting and performance monitoring
 const { rateLimiters } = require('./middleware/redis-rate-limiter');
 const { middleware: slowRequestMiddleware } = require('./middleware/slow-request-logger');
@@ -139,6 +142,23 @@ const PORT = config.server.port;
 
 // Initialize enhanced systems
 const securityManager = new SecurityManager();
+
+// Phase 2 Vertex AI - Initialize budget tracker
+let budgetTracker = null;
+try {
+  budgetTracker = new BudgetTracker();
+  console.log('💰 AI Budget tracker initialized');
+  logger.info('budget-tracker-initialized', { 
+    monthlyBudget: budgetTracker.config.monthlyBudgetUsd,
+    hardStop: budgetTracker.config.hardStop
+  });
+} catch (error) {
+  console.warn('⚠️ Budget tracker initialization failed:', error.message);
+  logger.error('budget-tracker-failed', { error: error.message });
+}
+
+// Make budget tracker available globally for AI integrations
+global.budgetTracker = budgetTracker;
 
 // Initialize Redis and session management
 let redisManager = null;
@@ -179,6 +199,10 @@ app.use(metricsMw);
 app.use('/internal/health', healthRoute);
 app.use('/internal/metrics', metricsRoute);
 app.use('/internal/ready', readyRoute);
+
+// Phase 2 Vertex AI - Enhanced metrics and health routes
+const enhancedMetricsRoute = require('./server/metricsRoute');
+app.use('/', enhancedMetricsRoute);
 
 // Demo routes (only enabled with ENABLE_DEMO_ROUTES=1)
 if (process.env.ENABLE_DEMO_ROUTES === '1') {

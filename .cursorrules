@@ -1,313 +1,189 @@
-Project: EchoTune AI — Enhanced Cursor Rules
-Repository Type: Full-Stack Music AI Platform with MCP Integration
-Tech Stack: React 19 + Vite + Node.js 20 + Express + MongoDB + Redis + Python ML
+# 🎵 EchoTune AI - GitHub Coding Agent Rules (2025-08-24)
 
-## 🎯 Core Development Standards
+## Project Context
+EchoTune AI - Advanced music recommendation platform with autonomous coding agent integration
+- Tech Stack: Node.js + React + MongoDB + Redis + Python ML + Perplexity API
+- Status: 26% complete, 38 tasks in roadmap, automation-ready
+- Focus: Autonomous coding cycles with repository analysis and roadmap updates
 
-### JavaScript/JSX Standards
-- Use modern ES2024+ features with consistent destructuring and arrow functions
-- Prefer `const` over `let`, use template literals for string interpolation
-- Implement proper error boundaries in React components
-- Use React 19's concurrent features: Suspense, Error Boundaries, and Server Components
-- Maintain component composition over inheritance patterns
-- Generate comprehensive JSDoc documentation for all functions and components
+## Automation Workflow
+1. **Coding Agent**: Complete tasks from roadmap using established patterns
+2. **Perplexity Research**: Analyze repository + roadmap with sonar-pro model
+3. **Roadmap Updates**: Generate new tasks based on analysis findings
+4. **Continuous Cycle**: Repeat for autonomous development
 
-### Node.js Backend Standards
-- Use ES modules (`import/export`) consistently across backend
-- Implement comprehensive error handling with custom error classes
-- Use middleware pattern for cross-cutting concerns (auth, logging, validation)
-- Follow RESTful API design principles with proper HTTP status codes
-- Implement request validation using Joi or similar schema validation
-- Use async/await exclusively, avoid callback patterns
+## Coding Standards
+- **JavaScript**: ES2024+, async/await only, comprehensive error handling
+- **React**: React 19 + Vite, component-based architecture, performance optimized
+- **Node.js**: Express.js, modular architecture, middleware patterns
+- **Database**: MongoDB aggregation pipelines, proper indexing, Redis caching
+- **AI Integration**: Real API calls only - NO MOCK implementations
+- **Testing**: Jest + React Testing Library, >80% coverage for business logic
 
-### Database & Caching Patterns
-- MongoDB: Use aggregation pipelines for complex queries, implement proper indexing
-- Redis: Implement cache-aside pattern with TTL-based expiration
-- Use transactions for multi-document operations
-- Implement connection pooling and proper error handling
-- Generate data access layer with repository pattern
+## File Priorities (Always include in context)
+1. GitHubCodingAgentPerplexity.js - Main automation integration
+2. AUTONOMOUS_DEVELOPMENT_ROADMAP.md - Current roadmap
+3. package.json - Dependencies and scripts
+4. server.js - Main backend server
+5. src/frontend/App.jsx - Main React component
+6. .env - Environment configuration
 
-### Testing Requirements
-- Unit tests: >80% coverage for business logic and utilities
-- Integration tests: All API endpoints with success/error scenarios
-- React Testing Library for component tests with user interaction patterns
-- Mock external dependencies (Spotify API, OpenAI, etc.) in tests
-- Performance tests for critical user flows
+## Security Requirements
+- Input validation for all user data
+- Rate limiting on API endpoints
+- HTTPS only in production
+- OAuth best practices
+- No hardcoded secrets (use env vars)
 
-## 🤖 Enhanced AI Model Selection & Orchestration with Perplexity Integration
+## Performance Targets
+- API responses: <500ms for simple, <2s for complex
+- Database queries: <100ms simple, <1s complex
+- Frontend: First Contentful Paint <1.5s
+- Perplexity API: <30s for full repository analysis
 
-### Optimized Model Routing (Post-Integration Testing)
-```
-Task Classification → Model Selection:
+## Automation Commands
+Use these commands to trigger automation workflows:
+- `node GitHubCodingAgentPerplexity.js` - Test integration
+- `node test-full-automation-workflow.js` - Complete workflow test
+- Repository analysis: Uses sonar-pro model for comprehensive insights
+- Roadmap generation: Creates actionable tasks with effort estimates
 
-REAL-TIME RESEARCH & ANALYSIS:
-- Use: Perplexity Sonar Pro ($0.006/1k tokens) 
-- When: Complex technical analysis, security research, performance optimization
-- Budget: $3.00/week with 80% alert threshold
-- Context: Automatic complexity scoring (1-10) with model selection
-- Cache: 14-day TTL with MD5 deduplication (80%+ hit rate)
+## Current Priority Tasks (From Latest Analysis)
+1. [P0] Integrate LangGraph for Multi-Agent Orchestration (Large, High Automation)
+2. [P0] AI-Driven DevOps Automation (Medium, High Automation) 
+3. [P1] Implement Explainable AI & Ethical Compliance (Large, Medium Automation)
+4. [P1] Edge Computing & Federated Learning Integration (Large, High Automation)
+5. [P1] Advanced Monitoring & Self-Healing Systems (Medium, High Automation)
 
-RAPID DEVELOPMENT ASSISTANCE:  
-- Use: Perplexity Sonar Reasoning ($0.003/1k tokens)
-- When: Medium complexity tasks, API integration, database queries
-- Triggers: Complexity score 6-7, technical documentation needs
-
-QUICK TASKS & SYNTAX:
-- Use: Perplexity Sonar ($0.001/1k tokens) 
-- When: Simple analysis, code review, basic implementation
-- Triggers: Complexity score < 6, routine development tasks
-
-CODE GENERATION & REFACTORING:
-- Use: Claude 3.5 Sonnet (preferred) or GPT-4
-- When: Complex business logic, React components, API endpoints
-- Context: Include existing patterns, style guides, test requirements
-
-ISSUE ANALYSIS & RESEARCH:
-- Use: Perplexity Sonar Pro (for complex issues) or Perplexity Sonar (for simple)
-- When: Analyzing GitHub issues, researching best practices, security analysis
-- Context: Issue title, body, complexity score, repository context
-- Budget: Automatic budget management with $3/week limit
-
-QUICK FIXES & SIMPLE TASKS:
-- Use: GPT-4-mini or Llama 3.1 8B
-- When: Bug fixes, simple utilities, documentation updates
-- Context: Minimal context, focus on immediate task
-
-RESEARCH & BEST PRACTICES:
-- Use: Perplexity Sonar Pro
-- When: Technology decisions, security research, performance optimization
-- Trigger Words: "latest", "best practice", "security", "performance", "2024", "2025"
-- Always include: current tech stack context, specific requirements
-```
-
-### Perplexity API Integration Rules
-```
-Budget Management:
-- Weekly budget: $3.00 USD (configurable via PPLX_WEEKLY_BUDGET)
-- Automatic model selection based on issue complexity (1-10 scale)
-- Smart caching with 14-day TTL to minimize costs
-- Batch processing for similar issues to optimize API usage
-
-Model Selection Logic:
-- Complexity >= 8: sonar-pro ($0.006/1k tokens)
-- Complexity >= 6: sonar-reasoning ($0.003/1k tokens)  
-- Complexity < 6: sonar ($0.001/1k tokens)
-
-Cost Optimization:
-- Cache-first approach for repeated analyses
-- Similarity-based grouping for batch processing
-- Budget alerts at 80% usage, hard lock at 100%
-- Automatic weekly reset on Mondays
+## Code Patterns
+**API Integration Pattern:**
+```javascript
+async function makeAPICall(endpoint, options = {}) {
+    try {
+        const response = await fetch(endpoint, {
+            ...options,
+            headers: { 
+                'Authorization': `Bearer ${process.env.API_KEY}`,
+                ...options.headers 
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
 ```
 
-### Multi-Model Orchestration
-- **Parallel Processing**: Use Claude + Perplexity for code generation with research validation
-- **Consensus Checking**: Critical architectural decisions require 2+ model agreement
-- **Automatic Fallbacks**: GPT-4 → Claude → GPT-4-mini for availability issues
-- **Cost Optimization**: Cache Perplexity research results for 24h, use cheaper models for iterations
+**React Component Pattern:**
+```jsx
+import React, { useState, useEffect } from 'react';
 
-### Research Integration Triggers
-```
-Automatic Perplexity Research:
-- When implementing new npm packages or Python libraries
-- Before suggesting security-related code changes
-- When performance issues are detected (>1s response times)
-- For API integration patterns not in existing codebase
-- When user mentions "industry standard" or "best practice"
-```
+function Component({ prop1, prop2 }) {
+    const [state, setState] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true);
+                const data = await apiCall();
+                setState(data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        fetchData();
+    }, [prop1, prop2]);
+    
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
+    
+    return (
+        <div className="component">
+            {/* Component content */}
+        </div>
+    );
+}
 
-## 🚀 Enhanced Context Management
-
-### Smart File Inclusion with Perplexity Integration
-```
-@Highest Priority (Always Include):
-- package.json, vite.config.js, server.js, server-phase3.js  
-- scripts/perplexity_client.py, scripts/issue_analyzer.py
-- .perplexity/usage_ledger.json (budget status - non-sensitive)
-- src/server.js, src/api/ai-integration/*.js
-- src/middleware/timing.js (performance monitoring)
-- .github/workflows/ai-*.yml (Perplexity workflows)
-
-@High Priority (Context-Aware):
-- .cursor/mcp.json, .cursor/workflows/*.json
-- Key React components: src/frontend/App.jsx
-- Database models: src/database/*.js  
-- Test configurations: tests/jest.config.js
-- ROADMAP.md (for context on current development goals)
-
-Dynamic Context (based on current task):
-- API Work: Include src/api/*, middleware patterns, error handling
-- Frontend Work: Include src/frontend/*, component patterns, styling
-- ML Work: Include scripts/*, ml_datasets/, Python requirements
-- MCP Work: Include mcp-servers/*, integration patterns
-- Perplexity Work: Include budget status, complexity scoring, cache analytics
-
-Excluded Files (Security & Performance):
-- .perplexity/cache/* (cached API responses - privacy)
-- .env* files (secrets and API keys)
-- *validation-report*.json, *test-results*.json (large files)
-- node_modules/*, build/*, dist/*, logs/*
-- perplexity_test/* (test artifacts)
+export default Component;
 ```
 
-### Progressive Context Building
-- Start with core files (<50 files total)
-- Add related dependencies based on import/require statements
-- Include test files only when testing context is active
-- Exclude build artifacts, logs, and generated documentation
-- Monitor context window usage and trim less relevant files
-
-### Performance Optimization Rules
-- Prefer targeted file reads over full directory scans
-- Use `@Web` research only for unknowns not covered by existing codebase
-- Cache frequently accessed patterns and configurations
-- Limit concurrent API calls to prevent rate limiting
-
-## 🔄 Automated Workflow Integration with Perplexity
-
-### Pre-Development Research with AI
-```
-Before starting any feature:
-1. Research current best practices using Perplexity Sonar Pro for the technology stack
-2. Check for security vulnerabilities in planned approach with browser research
-3. Validate against existing architecture patterns
-4. Identify reusable components or utilities
-5. Analyze issue complexity and select appropriate Perplexity model (sonar/sonar-reasoning/sonar-pro)
-6. Check budget status and cache availability
+## Database Query Pattern
+```javascript
+// MongoDB with proper error handling and indexing
+async function queryDatabase(collection, filter, options = {}) {
+    try {
+        const db = await connectToDatabase();
+        const result = await db.collection(collection)
+            .find(filter)
+            .sort(options.sort || { createdAt: -1 })
+            .limit(options.limit || 50)
+            .toArray();
+            
+        return result;
+    } catch (error) {
+        console.error('Database query failed:', error);
+        throw new Error('Database operation failed');
+    }
+}
 ```
 
-### Code Quality Gates with AI Analysis
+## Testing Pattern
+```javascript
+// Jest test with proper setup and mocking
+describe('Feature', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+    
+    it('should handle success case', async () => {
+        // Arrange
+        const mockData = { id: 1, name: 'test' };
+        jest.spyOn(api, 'getData').mockResolvedValue(mockData);
+        
+        // Act
+        const result = await feature.process();
+        
+        // Assert
+        expect(result).toEqual(mockData);
+        expect(api.getData).toHaveBeenCalledWith(expect.any(Object));
+    });
+    
+    it('should handle error case', async () => {
+        // Arrange
+        jest.spyOn(api, 'getData').mockRejectedValue(new Error('API Error'));
+        
+        // Act & Assert
+        await expect(feature.process()).rejects.toThrow('API Error');
+    });
+});
 ```
-After any substantial changes:
-1. Run ESLint and Prettier validation
-2. Execute relevant test suites
-3. Check for security anti-patterns using Perplexity research
-4. Validate performance impact
+
+## When Creating New Features
+1. Follow established patterns from existing codebase
+2. Include comprehensive error handling
+3. Add proper logging with console.log/error
+4. Create tests for business logic
 5. Update documentation if needed
-6. Analyze issue complexity for future AI model selection
-```
+6. Use TypeScript-style JSDoc comments
+7. Consider performance implications
+8. Implement proper validation
 
-### Perplexity-Enhanced Continuous Learning Triggers
-- Research new patterns when generating novel solutions using Perplexity Sonar
-- Update knowledge base with successful implementation patterns
-- Track and suggest refactoring opportunities with AI analysis  
-- Monitor for deprecated dependencies or patterns using browser research
-- Automatic issue analysis with budget-aware model selection
-- Cache successful analysis results to minimize API costs
+## Current Architecture Insights (From Perplexity Analysis)
+- Modern microservices with MCP integration
+- Strong API foundation with room for optimization
+- Automation opportunities in ML workflows and API monitoring
+- Need for enhanced caching, security auditing, and CI/CD
+- Ready for agent-driven development acceleration
 
-## 🎵 Domain-Specific Rules (Music AI Platform)
-
-### Music Data Handling
-- Use proper audio format validation (MP3, FLAC, WAV)
-- Implement streaming-friendly data structures for large audio files
-- Respect music copyright considerations in all data processing
-- Use appropriate audio processing libraries (Web Audio API, FFmpeg)
-
-### Spotify Integration Patterns
-- Implement proper OAuth 2.0 flows with refresh token handling
-- Use rate limiting strategies to respect Spotify API limits
-- Cache playlist and track data appropriately
-- Handle playlist privacy settings correctly
-
-### AI/ML Integration Standards
-- Validate all input data before sending to AI models
-- Implement proper error handling for AI API failures
-- Use streaming responses for long-running AI operations
-- Cache AI model results to reduce costs and latency
-
-## 🔒 Enhanced Security & Compliance
-
-### API Security
-- Validate all inputs using schema validation
-- Implement rate limiting on all public endpoints
-- Use proper CORS configuration for frontend/backend communication
-- Encrypt sensitive data in transit and at rest
-- Never log API keys or sensitive user data
-
-### Music Industry Compliance
-- Implement proper attribution for music recommendations
-- Respect user privacy in music preference analysis
-- Use proper licensing for any music content processing
-- Follow DMCA guidelines for user-generated content
-
-## 🛠 MCP Server Standards
-
-### MCP Integration Patterns
-- Use proper error handling and timeout configurations
-- Implement resource management for MCP tools
-- Follow MCP protocol specifications exactly
-- Document all custom MCP server capabilities
-- Test MCP servers in isolation before integration
-
-### Research Workflow Standards
-- Always cite sources from Perplexity research
-- Validate research accuracy against official documentation
-- Cache research results to prevent duplicate API calls
-- Format research results for easy consumption by development tools
-
-## 📊 Performance & Monitoring
-
-### Response Time Targets
-- API Endpoints: p95 < 500ms for simple queries, < 2s for complex
-- Frontend Rendering: First Contentful Paint < 1.5s
-- Database Queries: Simple queries < 100ms, complex < 1s
-- AI Model Responses: < 3s for code generation, < 10s for research
-
-### Resource Management
-- Memory usage monitoring for all services
-- Database connection pooling with proper limits
-- Redis memory management with appropriate eviction policies
-- File system monitoring for log rotation and cleanup
-
-## 🚨 Error Handling Playbook
-
-### Development Errors
-- **Test Failures**: Research error patterns, propose fixes with explanation
-- **Linter Errors**: Auto-fix safe patterns, manual review for complex issues
-- **Build Failures**: Check dependency conflicts, suggest resolution strategies
-- **Performance Issues**: Profile code, research optimization patterns
-
-### Production Error Response
-- **API Errors**: Implement proper error codes and user-friendly messages
-- **Database Errors**: Graceful degradation with proper fallback strategies
-- **AI Service Failures**: Implement circuit breaker patterns with fallbacks
-- **Integration Failures**: Retry logic with exponential backoff
-
-## 📝 Documentation Standards
-
-### Code Documentation
-- JSDoc for all functions with parameter types and examples
-- README files for all major components and services
-- API documentation using OpenAPI/Swagger specifications
-- Architecture decision records (ADRs) for major design choices
-
-### Knowledge Management
-- Maintain updated technology decision rationale
-- Document all external integrations and their configurations
-- Keep runbooks for common operational procedures
-- Regular updates to onboarding documentation
-
-## 🎯 YOLO Mode (Enhanced Automation)
-
-### Expanded Allowlist (when explicitly enabled)
-- **Code Quality**: `npm run lint:fix`, `npm run format`
-- **Testing**: `npm run test:unit`, `npm run test:integration`
-- **Documentation**: Auto-generation of API docs and code comments
-- **Dependencies**: Automated security patch application (non-breaking)
-
-### Enhanced Safety Measures
-- **Backup Creation**: Auto-create git stash before major changes
-- **Rollback Capability**: Provide clear rollback instructions
-- **Change Validation**: Run tests after any automated changes
-- **Human Approval**: Request confirmation for any structural changes
-
----
-
-## 🎵 Music AI Context Awareness
-
-When working on music-related features, automatically:
-- Research current music technology trends and best practices
-- Consider accessibility for users with hearing impairments
-- Validate against music theory principles when applicable
-- Ensure compatibility with major streaming platforms
-- Respect cultural sensitivity in music recommendations
+Remember: Focus on production-ready, scalable code that follows existing patterns and maintains high quality standards.

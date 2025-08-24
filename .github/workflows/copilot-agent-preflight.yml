@@ -84,6 +84,17 @@ jobs:
             echo "📖 See docs/REPOSITORY_SECRETS_SETUP_GUIDE.md for detailed instructions"
             exit 1
           fi
+          
+          echo "🔍 Checking GCP WIF configuration variables..."
+          MISSING_GCP=()
+          [ -z "${{ secrets.WIF_PROVIDER }}" ] && MISSING_GCP+=("WIF_PROVIDER")
+          [ -z "${{ secrets.GCP_SERVICE_ACCOUNT }}" ] && MISSING_GCP+=("GCP_SERVICE_ACCOUNT")
+          [ -z "${{ secrets.GCP_PROJECT_ID }}" ] && MISSING_GCP+=("GCP_PROJECT_ID")
+          if [ ${#MISSING_GCP[@]} -eq 0 ]; then
+            echo "✅ GCP WIF variables present"
+          else
+            echo "⚠️ Missing GCP variables: ${MISSING_GCP[*]}"
+          fi
 
       - name: 🌐 Provider Latency Check
         id: latency

@@ -78,7 +78,14 @@ const schema = {
   // API Configuration
   LOG_LEVEL: { required: false, allowed: ['error', 'warn', 'info', 'debug'], default: 'info' },
   RATE_LIMIT_MAX: { required: false },
-  CACHE_TTL: { required: false }
+  CACHE_TTL: { required: false },
+
+  // Google Cloud / Vertex AI (Workload Identity Federation)
+  GCP_PROJECT_ID: { required: false, desc: 'Google Cloud project ID for Vertex AI operations' },
+  GCP_REGION: { required: false, default: 'us-central1', desc: 'Default GCP region for Vertex AI' },
+  WIF_PROVIDER: { required: false, desc: 'Full Workload Identity Provider resource name' },
+  GCP_SERVICE_ACCOUNT: { required: false, desc: 'Service account email used via WIF' },
+  VERTEX_MODEL_ID: { required: false, desc: 'Optional Vertex AI model ID used in validation workflow' }
 };
 
 // Validation

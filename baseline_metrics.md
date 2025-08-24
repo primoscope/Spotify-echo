@@ -30,3 +30,6 @@
 
 ## Recommendation
 - maturity_index: 1 (skeleton)
+
+## Governance / Review Practices
+- pr_review_checklist: ENABLED

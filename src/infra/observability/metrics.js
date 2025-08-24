@@ -9,6 +9,8 @@ const externalApiLatency = new client.Histogram({ name: 'external_api_latency_ms
 const cacheHitCounter = new client.Counter({ name: 'cache_hits_total', help: 'Cache hits', labelNames: ['cache'] });
 const cacheMissCounter = new client.Counter({ name: 'cache_misses_total', help: 'Cache misses', labelNames: ['cache'] });
 const cacheHitRatio = new client.Gauge({ name: 'cache_hit_ratio', help: 'Cache hit ratio', labelNames: ['cache'] });
+const externalCircuitState = new client.Gauge({ name: 'external_circuit_state', help: 'Circuit breaker state (0=closed,1=open,2=half_open)', labelNames: ['breaker'] });
+const externalCallRetriesTotal = new client.Counter({ name: 'external_call_retries_total', help: 'External call retries', labelNames: ['breaker','outcome'] });
 register.registerMetric(httpRequestsTotal);
 register.registerMetric(httpRequestDurationMs);
 register.registerMetric(httpRequestsErrors);
@@ -16,6 +18,8 @@ register.registerMetric(externalApiLatency);
 register.registerMetric(cacheHitCounter);
 register.registerMetric(cacheMissCounter);
 register.registerMetric(cacheHitRatio);
+register.registerMetric(externalCircuitState);
+register.registerMetric(externalCallRetriesTotal);
 function updateCacheRatio(cache='default') { const hits = cacheHitCounter.hashMap[`cache:${cache}`]?.value||0; const misses = cacheMissCounter.hashMap[`cache:${cache}`]?.value||0; const total = hits+misses; if (total===0) return; cacheHitRatio.set({cache}, hits/total); }
-async function timeExternal(service, operation, fn) { const end = externalApiLatency.startTimer({ service, operation }); try { const r = await fn(); end({ status: 'success' }); return r; } catch (e) { end({ status: 'error' }); throw e; } }
-module.exports = { register, httpRequestsTotal, httpRequestDurationMs, httpRequestsErrors, cacheHitCounter, cacheMissCounter, cacheHitRatio, updateCacheRatio, timeExternal };
+async function timeExternal(service, operation, fn) { const end = externalApiLatency.startTimer({ service, operation }); try { const { timeExternalWithTracing } = require('./tracing'); if (timeExternalWithTracing) { const r = await timeExternalWithTracing(service, operation, fn); end({ status: 'success' }); return r; } else { const r = await fn(); end({ status: 'success' }); return r; } } catch (e) { end({ status: 'error' }); throw e; } }
+module.exports = { register, httpRequestsTotal, httpRequestDurationMs, httpRequestsErrors, cacheHitCounter, cacheMissCounter, cacheHitRatio, updateCacheRatio, timeExternal, externalCircuitState, externalCallRetriesTotal };

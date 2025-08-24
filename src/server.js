@@ -38,6 +38,11 @@ const { initializeRedis, getRedisManager } = require('./utils/redis');
 // Import configuration and validation
 const { validateProductionConfig, getEnvironmentConfig } = require('./config/production');
 
+// Import lifecycle management
+const { initializeReadiness } = require('./infra/lifecycle/readiness');
+const { initializeGracefulShutdown } = require('./infra/lifecycle/gracefulShutdown');
+const cacheManager = require('./infra/cache');
+
 // Validate production configuration
 try {
   validateProductionConfig();
@@ -153,10 +158,12 @@ const requestId = require('./middleware/requestId');
 const metricsMw = require('./middleware/metrics');
 const healthRoute = require('./routes/internal/health');
 const metricsRoute = require('./routes/internal/metrics');
+const readyRoute = require('./routes/internal/ready');
 app.use(requestId);
 app.use(metricsMw);
 app.use('/internal/health', healthRoute);
 app.use('/internal/metrics', metricsRoute);
+app.use('/internal/ready', readyRoute);
 
 // Phase 1 Security Baseline - Example validation route
 app.use('/internal/example-validation', require('./routes/internal/example-validation'));
@@ -1162,6 +1169,13 @@ server.listen(PORT, '0.0.0.0', async () => {
   console.log(
     `🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`
   );
+
+  // Initialize lifecycle management
+  initializeGracefulShutdown(server);
+  initializeReadiness();
+  
+  // Initialize cache system
+  cacheManager.initialize();
 
   // Initialize Redis first
   try {

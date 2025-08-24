@@ -1,0 +1,126 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-01-17T00:00:00Z",
+    "description": "Vertex AI model and endpoint registry for EchoTune AI"
+  },
+  "models": {
+    "text-generation": {
+      "primary": {
+        "modelId": "text-bison@latest",
+        "displayName": "Text Bison Latest", 
+        "description": "Primary text generation model for music recommendations",
+        "capabilities": ["text-generation", "conversation", "reasoning"],
+        "maxTokens": 8192,
+        "contextWindow": 8192,
+        "latencyTier": "medium",
+        "costTier": "standard",
+        "labels": {
+          "service": "echotune",
+          "model_family": "text-bison",
+          "version": "latest",
+          "latency_tier": "medium"
+        }
+      },
+      "fallback": {
+        "modelId": "text-bison@001",
+        "displayName": "Text Bison 001",
+        "description": "Fallback text generation model", 
+        "capabilities": ["text-generation", "conversation"],
+        "maxTokens": 4096,
+        "contextWindow": 4096,
+        "latencyTier": "fast",
+        "costTier": "economy",
+        "labels": {
+          "service": "echotune",
+          "model_family": "text-bison",
+          "version": "001",
+          "latency_tier": "fast"
+        }
+      }
+    },
+    "embeddings": {
+      "primary": {
+        "modelId": "textembedding-gecko@latest",
+        "displayName": "Text Embedding Gecko Latest",
+        "description": "Primary embedding model for music similarity",
+        "capabilities": ["embeddings", "similarity"],
+        "maxTokens": 3072,
+        "vectorDimensions": 768,
+        "latencyTier": "fast",
+        "costTier": "economy",
+        "labels": {
+          "service": "echotune",
+          "model_family": "textembedding-gecko", 
+          "version": "latest",
+          "latency_tier": "fast"
+        }
+      }
+    },
+    "recommendation-reranker": {
+      "primary": {
+        "modelId": "text-bison@latest",
+        "displayName": "Recommendation Re-ranker",
+        "description": "Model for re-ranking music recommendations based on context",
+        "capabilities": ["text-generation", "ranking", "scoring"],
+        "maxTokens": 4096,
+        "contextWindow": 4096,
+        "latencyTier": "fast",
+        "costTier": "standard",
+        "labels": {
+          "service": "echotune",
+          "model_family": "text-bison",
+          "version": "latest",
+          "latency_tier": "fast",
+          "task": "reranker"
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "text-generation-primary": {
+      "modelId": "text-bison@latest",
+      "machineType": "n1-standard-2",
+      "minReplicas": 1,
+      "maxReplicas": 3,
+      "trafficPercentage": 100,
+      "deploymentTimeout": 1800
+    },
+    "text-generation-fallback": {
+      "modelId": "text-bison@001", 
+      "machineType": "n1-standard-1",
+      "minReplicas": 1,
+      "maxReplicas": 2,
+      "trafficPercentage": 0,
+      "deploymentTimeout": 1200
+    },
+    "embeddings-primary": {
+      "modelId": "textembedding-gecko@latest",
+      "machineType": "n1-standard-1",
+      "minReplicas": 1,
+      "maxReplicas": 2,
+      "trafficPercentage": 100,
+      "deploymentTimeout": 900
+    },
+    "recommendation-reranker": {
+      "modelId": "text-bison@latest",
+      "machineType": "n1-standard-1", 
+      "minReplicas": 1,
+      "maxReplicas": 2,
+      "trafficPercentage": 100,
+      "deploymentTimeout": 1200
+    }
+  },
+  "environment_overrides": {
+    "development": {
+      "minReplicas": 0,
+      "maxReplicas": 1,
+      "machineType": "n1-standard-1"
+    },
+    "production": {
+      "minReplicas": 2,
+      "maxReplicas": 10,
+      "machineType": "n1-standard-4"
+    }
+  }
+}

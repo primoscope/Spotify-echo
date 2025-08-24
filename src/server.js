@@ -139,6 +139,15 @@ async function initializeRedisSession() {
 app.use(performanceMonitor.requestTracker());
 app.use(slowRequestMiddleware);
 
+// Phase 1 Security Baseline - Environment validation and security setup
+const applyHelmet = require('./security/helmet');
+const createRateLimiter = require('./security/rateLimit');
+const { validateEnv } = require('./security/envValidate');
+const securityErrorHandler = require('./middleware/errorHandler');
+
+// Validate environment variables at startup
+validateEnv(require('./infra/observability/logger'));
+
 // Observability Foundation - Request ID and metrics middleware (before other middleware)
 const requestId = require('./middleware/requestId');
 const metricsMw = require('./middleware/metrics');
@@ -148,6 +157,9 @@ app.use(requestId);
 app.use(metricsMw);
 app.use('/internal/health', healthRoute);
 app.use('/internal/metrics', metricsRoute);
+
+// Phase 1 Security Baseline - Example validation route
+app.use('/internal/example-validation', require('./routes/internal/example-validation'));
 
 // Initialize MCP Performance Analytics
 const mcpAnalytics = new MCPPerformanceAnalytics();
@@ -179,7 +191,12 @@ const getDefaultFrontendUrl = () => {
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedirectUri();
 const FRONTEND_URL = process.env.FRONTEND_URL || getDefaultFrontendUrl();
 
-// Security and performance middleware
+// Security and performance middleware - Phase 1 Security Baseline
+// Apply Phase 1 security middleware in proper order
+applyHelmet(app);
+app.use(createRateLimiter());
+
+// Existing security middleware (maintained for compatibility)
 app.use(securityManager.securityHeaders);
 app.use(securityManager.detectSuspiciousActivity());
 app.use(securityManager.validateAndSanitizeInput());
@@ -1219,5 +1236,8 @@ server.listen(PORT, '0.0.0.0', async () => {
     console.log(`🎵 Spotify API: http://localhost:${PORT}/api/spotify`);
   }
 });
+
+// Phase 1 Security Baseline - Centralized error handler (must be last middleware)
+app.use(securityErrorHandler);
 
 module.exports = app;

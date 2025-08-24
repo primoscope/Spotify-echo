@@ -388,7 +388,8 @@
     "socket.io-client": "^4.8.1",
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.1",
-    "ws": "^8.14.0"
+    "ws": "^8.14.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@azure/openai": "^2.0.0",

@@ -335,6 +335,7 @@ class GCPCredentialsConfigurator {
 
     console.log('\n🧪 Test your setup:');
     console.log('   node claude-opus-command-processor.js test');
+    console.log('   node scripts/configure-gcp-credentials.js vertex-verify');
 
     return true;
   }
@@ -367,6 +368,105 @@ class GCPCredentialsConfigurator {
     console.log('2. Or run manual setup: node scripts/configure-gcp-credentials.js setup');
 
     return false;
+  }
+
+  /**
+   * Setup Workload Identity Federation using the idempotent script
+   */
+  async setupWorkloadIdentity() {
+    console.log('🔧 Setting up Workload Identity Federation...\n');
+
+    await this.loadCurrentConfig();
+
+    if (!this.config.projectId) {
+      console.log('❌ GCP_PROJECT_ID not configured. Run setup first.');
+      return false;
+    }
+
+    // Determine repository name
+    let repoName = process.env.GITHUB_REPOSITORY;
+    if (!repoName) {
+      try {
+        // Try to get from git remote
+        const remoteUrl = this.runCommand('git config --get remote.origin.url', { silent: true });
+        const match = remoteUrl.match(/github\.com[\/:](.+?\/.+?)(?:\.git)?$/);
+        if (match) {
+          repoName = match[1];
+        }
+      } catch (error) {
+        // Ignore error
+      }
+    }
+
+    if (!repoName) {
+      console.log('❌ Could not determine repository name');
+      console.log('Please set GITHUB_REPOSITORY environment variable or run from git repository');
+      return false;
+    }
+
+    console.log(`📋 Configuration:`);
+    console.log(`   Project ID: ${this.config.projectId}`);
+    console.log(`   Repository: ${repoName}`);
+
+    const scriptPath = path.join(__dirname, 'gcp', 'setup_workload_identity.sh');
+    
+    try {
+      // Set environment variables for the script
+      const env = {
+        ...process.env,
+        PROJECT_ID: this.config.projectId,
+        PROJECT_NUMBER: this.config.projectNumber || '',
+        REPO_FULL_NAME: repoName,
+        FORCE_RECREATE: process.env.FORCE_RECREATE || 'false',
+        DRY_RUN: process.env.DRY_RUN || 'false'
+      };
+
+      console.log('🚀 Running Workload Identity setup script...\n');
+      
+      const result = this.runCommand(`bash "${scriptPath}"`, { 
+        silent: false, 
+        env: env
+      });
+
+      console.log('\n✅ Workload Identity Federation setup completed!');
+      console.log('🧪 Next step: node scripts/configure-gcp-credentials.js vertex-verify');
+      
+      return true;
+
+    } catch (error) {
+      console.log('\n❌ Workload Identity setup failed:', error.message);
+      console.log('💡 Try running with DRY_RUN=true first to check configuration');
+      return false;
+    }
+  }
+
+  /**
+   * Verify Vertex AI access and toggle mock mode
+   */
+  async verifyVertex() {
+    console.log('🧪 Verifying Vertex AI Configuration...\n');
+
+    const verifyScript = path.join(__dirname, 'vertex', 'verify-vertex.js');
+    
+    try {
+      console.log('🚀 Running Vertex AI verification...\n');
+      
+      const result = this.runCommand(`node "${verifyScript}"`, { 
+        silent: false
+      });
+
+      console.log('\n✅ Vertex AI verification completed successfully!');
+      return true;
+
+    } catch (error) {
+      console.log('\n❌ Vertex AI verification failed:', error.message);
+      console.log('💡 Check the error details above and ensure:');
+      console.log('   1. GCP_PROJECT_ID is set correctly in .env file');
+      console.log('   2. You are authenticated: gcloud auth application-default login');
+      console.log('   3. Vertex AI API is enabled in your project');
+      console.log('   4. You have the required permissions');
+      return false;
+    }
   }
 
   /**
@@ -511,7 +611,8 @@ class GCPCredentialsConfigurator {
       const result = execSync(command, { 
         encoding: 'utf8',
         stdio: options.silent ? 'pipe' : 'inherit',
-        timeout: 30000
+        timeout: 30000,
+        env: options.env || process.env
       });
       return result;
     } catch (error) {
@@ -578,14 +679,22 @@ async function main() {
       case 'test':
         await configurator.test();
         break;
+      case 'wif-setup':
+        await configurator.setupWorkloadIdentity();
+        break;
+      case 'vertex-verify':
+        await configurator.verifyVertex();
+        break;
       case 'help':
         console.log('Available commands:');
-        console.log('  check      - Check current GCP configuration status');
-        console.log('  setup      - Interactive setup process');
-        console.log('  validate   - Validate GCP credentials and access');
-        console.log('  bootstrap  - Run automated GCP bootstrap');
-        console.log('  test       - Test GCP configuration with API call');
-        console.log('  help       - Show this help message');
+        console.log('  check          - Check current GCP configuration status');
+        console.log('  setup          - Interactive setup process');
+        console.log('  validate       - Validate GCP credentials and access');
+        console.log('  bootstrap      - Run automated GCP bootstrap');
+        console.log('  test           - Test GCP configuration with API call');
+        console.log('  wif-setup      - Setup Workload Identity Federation');
+        console.log('  vertex-verify  - Verify Vertex AI access and toggle mock mode');
+        console.log('  help           - Show this help message');
         break;
       default:
         console.log(`❌ Unknown command: ${command}`);

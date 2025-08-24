@@ -92,6 +92,23 @@ After the workflow completes successfully:
 
 ## 🔧 Advanced Usage
 
+### New Idempotent Setup Commands (Recommended)
+
+The repository now includes improved, idempotent setup commands that handle existing resources gracefully:
+
+```bash
+# Setup Workload Identity Federation (handles NOT_FOUND errors gracefully)
+node scripts/configure-gcp-credentials.js wif-setup
+
+# Verify Vertex AI access and automatically disable mock mode on success
+node scripts/configure-gcp-credentials.js vertex-verify
+
+# Run comprehensive validation tests
+node scripts/tests/test-vertex-config.mjs
+```
+
+These commands replace the need for the full bootstrap workflow in most cases and provide better error handling.
+
 ### CLI Utilities
 
 The bootstrap includes a CLI utility for validation and management:
@@ -177,6 +194,25 @@ Error: Cannot bind workload identity
 ```
 **Solution**: Check that the repository name matches exactly and try running the workflow again.
 
+#### 5. NOT_FOUND Error with FORCE_RECREATE
+```
+(gcloud.iam.workload-identity-pools.delete) NOT_FOUND: Requested entity was not found.
+```
+**Solution**: This error is now handled gracefully by the new idempotent setup script. The script uses `|| true` to ignore NOT_FOUND errors when `FORCE_RECREATE=true`. This is expected behavior when trying to delete resources that don't exist yet.
+
+#### 6. GCP Bootstrap Fails During WIF Setup
+```
+Error: Workload Identity Federation setup fails
+```
+**Solution**: Use the new idempotent commands:
+```bash
+# Setup Workload Identity Federation (handles existing resources gracefully)
+node scripts/configure-gcp-credentials.js wif-setup
+
+# Verify Vertex AI access and disable mock mode
+node scripts/configure-gcp-credentials.js vertex-verify
+```
+
 ### Validation Commands
 
 Run validation to diagnose issues:
@@ -187,6 +223,15 @@ node scripts/validate-vertex-bootstrap.js
 
 # Check specific component
 node scripts/vertex-ai-bootstrap.js validate
+
+# Test new idempotent setup (recommended)
+node scripts/configure-gcp-credentials.js wif-setup
+
+# Verify Vertex AI and disable mock mode
+node scripts/configure-gcp-credentials.js vertex-verify
+
+# Run comprehensive tests
+node scripts/tests/test-vertex-config.mjs
 ```
 
 ### Manual Cleanup

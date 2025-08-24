@@ -259,86 +259,15 @@ jobs:
           gcloud auth activate-service-account --key-file=/tmp/sa-key.json
           gcloud config set project "$PROJECT_ID"
           
-          POOL_ID="github-actions"
-          PROVIDER_ID="github-oidc"
-          SA_EMAIL="github-vertex@${PROJECT_ID}.iam.gserviceaccount.com"
+          # Use the new idempotent script
+          export PROJECT_ID="$PROJECT_ID"
+          export PROJECT_NUMBER="$PROJECT_NUMBER"
+          export REPO_FULL_NAME="$REPO_FULL_NAME"
+          export FORCE_RECREATE="$FORCE_RECREATE"
+          export DRY_RUN="$DRY_RUN"
           
-          echo "🔧 Setting up Workload Identity Federation..."
-          
-          # Check if pool exists
-          if gcloud iam workload-identity-pools describe "$POOL_ID" --location="global" > /dev/null 2>&1; then
-            if [ "$FORCE_RECREATE" = "true" ]; then
-              if [ "$DRY_RUN" = "true" ]; then
-                echo "🔄 [DRY RUN] Would recreate workload identity pool: $POOL_ID"
-              else
-                echo "🗑️ Deleting existing pool: $POOL_ID"
-                gcloud iam workload-identity-pools delete "$POOL_ID" --location="global" --quiet
-                echo "🔄 Creating new workload identity pool: $POOL_ID"
-                gcloud iam workload-identity-pools create "$POOL_ID" \
-                  --location="global" \
-                  --display-name="GitHub Actions Pool"
-              fi
-            else
-              echo "✅ Workload identity pool already exists: $POOL_ID"
-            fi
-          else
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "🔄 [DRY RUN] Would create workload identity pool: $POOL_ID"
-            else
-              echo "🔄 Creating workload identity pool: $POOL_ID"
-              gcloud iam workload-identity-pools create "$POOL_ID" \
-                --location="global" \
-                --display-name="GitHub Actions Pool"
-              echo "✅ Created workload identity pool: $POOL_ID"
-            fi
-          fi
-          
-          # Check if provider exists
-          if gcloud iam workload-identity-pools providers describe "$PROVIDER_ID" \
-               --workload-identity-pool="$POOL_ID" --location="global" > /dev/null 2>&1; then
-            if [ "$FORCE_RECREATE" = "true" ]; then
-              if [ "$DRY_RUN" = "true" ]; then
-                echo "🔄 [DRY RUN] Would recreate OIDC provider: $PROVIDER_ID"
-              else
-                echo "🗑️ Deleting existing provider: $PROVIDER_ID"
-                gcloud iam workload-identity-pools providers delete "$PROVIDER_ID" \
-                  --workload-identity-pool="$POOL_ID" --location="global" --quiet
-                echo "🔄 Creating new OIDC provider: $PROVIDER_ID"
-                gcloud iam workload-identity-pools providers create-oidc "$PROVIDER_ID" \
-                  --workload-identity-pool="$POOL_ID" \
-                  --location="global" \
-                  --issuer-uri="https://token.actions.githubusercontent.com" \
-                  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
-                  --attribute-condition="assertion.repository=='$REPO_FULL_NAME'"
-              fi
-            else
-              echo "✅ OIDC provider already exists: $PROVIDER_ID"
-            fi
-          else
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "🔄 [DRY RUN] Would create OIDC provider: $PROVIDER_ID"
-            else
-              echo "🔄 Creating OIDC provider: $PROVIDER_ID"
-              gcloud iam workload-identity-pools providers create-oidc "$PROVIDER_ID" \
-                --workload-identity-pool="$POOL_ID" \
-                --location="global" \
-                --issuer-uri="https://token.actions.githubusercontent.com" \
-                --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
-                --attribute-condition="assertion.repository=='$REPO_FULL_NAME'"
-              echo "✅ Created OIDC provider: $PROVIDER_ID"
-            fi
-          fi
-          
-          # Bind workload identity user role
-          echo "🔐 Setting up IAM binding for Workload Identity..."
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "🔄 [DRY RUN] Would bind iam.workloadIdentityUser"
-          else
-            gcloud iam service-accounts add-iam-policy-binding "$SA_EMAIL" \
-              --role="roles/iam.workloadIdentityUser" \
-              --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$POOL_ID/attribute.repository/$REPO_FULL_NAME"
-            echo "✅ Bound iam.workloadIdentityUser role"
-          fi
+          echo "🚀 Running idempotent Workload Identity Federation setup..."
+          bash scripts/gcp/setup_workload_identity.sh
           
           # Clean up
           rm -f /tmp/sa-key.json

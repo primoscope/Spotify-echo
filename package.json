@@ -211,6 +211,7 @@
     "demo:automation": "node scripts/demo-automation-workflow.js",
     "status:automation": "node scripts/automation-system-status.js",
     "research:music": "node scripts/music-research-automation.js",
+    "research:improvements": "node scripts/research-improvements-and-update-roadmap.js",
     "test:music-integration": "npm run test:integration -- --testPathPattern=music.*test",
     "test:perplexity-api": "npm run test:integration -- --testPathPattern=perplexity.*test",
     "test:browser-research": "npm run test:integration -- --testPathPattern=browser.*test",

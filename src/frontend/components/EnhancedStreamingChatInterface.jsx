@@ -546,11 +546,11 @@ const EnhancedStreamingChatInterface = ({ sessionId = 'default', onAutonomousEnh
           </Typography>
           
           <Box display="flex" gap={1} alignItems="center">
-            <Tooltip title={autonomousMode ? "Disable autonomous enhancements" : "Enable autonomous enhancements"}>
+            <Tooltip title={autonomousMode ? 'Disable autonomous enhancements' : 'Enable autonomous enhancements'}>
               <Chip
                 icon={<AutoAwesome />}
-                label={autonomousMode ? "Autonomous ON" : "Autonomous OFF"}
-                color={autonomousMode ? "primary" : "default"}
+                label={autonomousMode ? 'Autonomous ON' : 'Autonomous OFF'}
+                color={autonomousMode ? 'primary' : 'default'}
                 onClick={toggleAutonomousMode}
                 clickable
               />
@@ -572,7 +572,7 @@ const EnhancedStreamingChatInterface = ({ sessionId = 'default', onAutonomousEnh
             <Chip
               key={providerId}
               label={info.name}
-              variant={providerId === currentProvider ? "filled" : "outlined"}
+              variant={providerId === currentProvider ? 'filled' : 'outlined'}
               color={getProviderHealthColor(providerId)}
               size="small"
               onClick={() => handleProviderSwitch(providerId)}

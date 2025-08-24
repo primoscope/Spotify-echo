@@ -209,13 +209,13 @@ const TrackAnalytics = memo(({ track }) => {
             Quick Insights
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {analytics.audioFeatures.energy > 0.7 && "This is a high-energy track perfect for workouts. "}
-            {analytics.audioFeatures.valence > 0.7 && "The mood is very positive and uplifting. "}
-            {analytics.audioFeatures.danceability > 0.7 && "Great for dancing! "}
-            {analytics.metrics.tempo > 140 && "Fast-paced with an upbeat tempo. "}
-            {analytics.metrics.tempo < 80 && "Slow and relaxed tempo, perfect for chill sessions. "}
-            {analytics.audioFeatures.acousticness > 0.7 && "Features acoustic instruments prominently. "}
-            {analytics.audioFeatures.instrumentalness > 0.5 && "Mostly instrumental with minimal vocals. "}
+            {analytics.audioFeatures.energy > 0.7 && 'This is a high-energy track perfect for workouts. '}
+            {analytics.audioFeatures.valence > 0.7 && 'The mood is very positive and uplifting. '}
+            {analytics.audioFeatures.danceability > 0.7 && 'Great for dancing! '}
+            {analytics.metrics.tempo > 140 && 'Fast-paced with an upbeat tempo. '}
+            {analytics.metrics.tempo < 80 && 'Slow and relaxed tempo, perfect for chill sessions. '}
+            {analytics.audioFeatures.acousticness > 0.7 && 'Features acoustic instruments prominently. '}
+            {analytics.audioFeatures.instrumentalness > 0.5 && 'Mostly instrumental with minimal vocals. '}
           </Typography>
         </Box>
       </CardContent>

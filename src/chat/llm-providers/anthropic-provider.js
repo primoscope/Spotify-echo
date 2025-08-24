@@ -15,6 +15,7 @@ class AnthropicProvider extends BaseLLMProvider {
       'claude-3-opus-20240229',
       'claude-3-sonnet-20240229',
       'claude-3-haiku-20240307',
+      'claude-opus-4-1@20250805', // Available through Vertex AI
     ];
   }
 
@@ -56,6 +57,7 @@ class AnthropicProvider extends BaseLLMProvider {
       'claude-3-opus-20240229': 200000,
       'claude-3-sonnet-20240229': 200000,
       'claude-3-haiku-20240307': 200000,
+      'claude-opus-4-1@20250805': 32000, // Claude Opus 4.1 specific limit
     };
     return tokenLimits[model] || 200000;
   }

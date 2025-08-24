@@ -195,6 +195,52 @@ class MultiProviderDeployment {
     }
   }
 
+  async testVertexAnthropicConnection() {
+    this.log('🧪 Testing Vertex AI Anthropic (Claude Opus 4.1) Connection...\n');
+    
+    try {
+      if (!process.env.GCP_PROJECT_ID || process.env.GCP_PROJECT_ID === 'your-project-id') {
+        throw new Error('GCP_PROJECT_ID not configured for Vertex AI Anthropic');
+      }
+
+      const VertexAnthropicProvider = require('../src/chat/llm-providers/vertex-anthropic-provider');
+      const vertexAnthropic = new VertexAnthropicProvider({
+        projectId: process.env.GCP_PROJECT_ID,
+        location: process.env.GCP_VERTEX_LOCATION || 'us-central1',
+        model: 'claude-opus-4-1'
+      });
+
+      await vertexAnthropic.initialize();
+      
+      if (this.dryRun) {
+        this.log('🔍 DRY RUN: Would test Claude Opus 4.1 via Vertex AI connection');
+        return { status: 'dry-run', model: 'claude-opus-4-1' };
+      }
+
+      // Test with a simple prompt
+      const response = await vertexAnthropic.generateCompletion([
+        { role: 'user', content: 'Hello, respond with just "Claude Opus 4.1 via Vertex AI connected"' }
+      ], { maxTokens: 15 });
+
+      if (response && response.content) {
+        this.log('✅ Claude Opus 4.1 via Vertex AI connected successfully');
+        this.log(`   Response: ${response.content.substring(0, 50)}...\n`);
+        return { 
+          status: 'success', 
+          model: 'claude-opus-4-1',
+          provider: 'vertex-anthropic',
+          response: response.content.substring(0, 100)
+        };
+      } else {
+        throw new Error('No response received from Claude Opus 4.1');
+      }
+      
+    } catch (error) {
+      this.log(`❌ Claude Opus 4.1 via Vertex AI connection failed: ${error.message}\n`);
+      return { status: 'failed', error: error.message };
+    }
+  }
+
   async testMultiProviderRouting() {
     this.log('🧭 Testing Multi-Provider Routing...\n');
     
@@ -246,7 +292,7 @@ class MultiProviderDeployment {
     this.log('📊 DEPLOYMENT REPORT\n');
     this.log('=' .repeat(50));
     
-    const { envCheck, vertexAI, gemini, anthropic, routing } = results;
+    const { envCheck, vertexAI, gemini, anthropic, vertexAnthropic, routing } = results;
     
     // Environment status
     this.log('\n🔧 ENVIRONMENT CONFIGURATION:');
@@ -256,7 +302,7 @@ class MultiProviderDeployment {
     
     // Service status
     this.log('\n🚀 SERVICE DEPLOYMENT STATUS:');
-    const services = { vertexAI, gemini, anthropic, routing };
+    const services = { vertexAI, gemini, anthropic, vertexAnthropic, routing };
     
     for (const [service, result] of Object.entries(services)) {
       const status = result.status === 'success' ? '✅' : 
@@ -322,10 +368,11 @@ class MultiProviderDeployment {
       const vertexAI = await this.deployVertexAI();
       const gemini = await this.testGeminiConnection();
       const anthropic = await this.testAnthropicConnection();
+      const vertexAnthropic = await this.testVertexAnthropicConnection();
       const routing = await this.testMultiProviderRouting();
       
       const report = await this.generateDeploymentReport({
-        envCheck, vertexAI, gemini, anthropic, routing
+        envCheck, vertexAI, gemini, anthropic, vertexAnthropic, routing
       });
       
       return report;

@@ -143,6 +143,34 @@
           "version": "3-opus",
           "latency_tier": "medium"
         }
+      },
+      "claude-opus-4.1": {
+        "modelId": "publishers/anthropic/models/claude-opus-4-1",
+        "versionId": "claude-opus-4-1@20250805",
+        "displayName": "Claude Opus 4.1",
+        "description": "Anthropic's most advanced model and industry leader for coding and agent capabilities",
+        "capabilities": ["text-generation", "conversation", "reasoning", "analysis", "coding", "extended-thinking", "agents"],
+        "maxTokens": 32000,
+        "contextWindow": 200000,
+        "latencyTier": "medium",
+        "costTier": "premium-plus",
+        "extendedThinking": true,
+        "features": {
+          "advancedCoding": true,
+          "longHorizonTasks": true,
+          "agenticSearch": true,
+          "memoryManagement": true,
+          "multiStepReasoning": true
+        },
+        "labels": {
+          "service": "echotune",
+          "model_family": "claude",
+          "version": "opus-4.1",
+          "latency_tier": "medium",
+          "publisher": "anthropic",
+          "coding_optimized": "true",
+          "agent_capable": "true"
+        }
       }
     }
   },
@@ -178,6 +206,22 @@
       "maxReplicas": 2,
       "trafficPercentage": 100,
       "deploymentTimeout": 1200
+    },
+    "claude-opus-4.1-endpoint": {
+      "modelId": "publishers/anthropic/models/claude-opus-4-1",
+      "versionId": "claude-opus-4-1@20250805",
+      "machineType": "n1-standard-4",
+      "minReplicas": 1,
+      "maxReplicas": 3,
+      "trafficPercentage": 100,
+      "deploymentTimeout": 2400,
+      "enableExtendedThinking": true,
+      "labels": {
+        "service": "echotune",
+        "model": "claude-opus-4.1",
+        "provider": "anthropic",
+        "capability": "advanced-reasoning"
+      }
     }
   },
   "environment_overrides": {

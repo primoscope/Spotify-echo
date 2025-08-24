@@ -69,6 +69,14 @@ class AIProviderTester {
         { temperature: 0.7, maxTokens: 200 }
       );
       response = await provider.invoke(request);
+    } else if (providerName === 'vertex-anthropic') {
+      // For Vertex AI Anthropic, test Claude Opus 4.1
+      const messages = [{ role: 'user', content: this.testPrompt }];
+      response = await provider.generateCompletion(messages, { 
+        maxTokens: 200,
+        temperature: 0.7,
+        model: 'claude-opus-4-1'
+      });
     } else {
       // For other providers, use the standard format
       const messages = [{ role: 'user', content: this.testPrompt }];

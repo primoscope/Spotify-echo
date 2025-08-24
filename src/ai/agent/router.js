@@ -82,6 +82,22 @@ class AgentRouter {
       console.warn('⚠️  Anthropic provider initialization failed:', error.message);
     }
 
+    // Vertex AI Anthropic Provider (Claude Opus 4.1)
+    try {
+      const VertexAnthropicProvider = require('../../chat/llm-providers/vertex-anthropic-provider');
+      const vertexAnthropicProvider = new VertexAnthropicProvider({
+        projectId: process.env.GCP_PROJECT_ID,
+        location: process.env.GCP_VERTEX_LOCATION || 'us-central1'
+      });
+      await vertexAnthropicProvider.initialize();
+      if (vertexAnthropicProvider.isAvailable()) {
+        this.providers.set('vertex-anthropic', vertexAnthropicProvider);
+        console.log('✅ Vertex AI Anthropic provider initialized');
+      }
+    } catch (error) {
+      console.warn('⚠️  Vertex AI Anthropic provider initialization failed:', error.message);
+    }
+
     // Mock provider for testing
     try {
       const { default: MockProvider } = await import('../../chat/llm-providers/mock-provider.js');

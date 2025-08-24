@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-24T11:43:18.694Z",
-  "executionTime": "3684ms",
+  "timestamp": "2025-08-24T13:02:13.917Z",
+  "executionTime": "3637ms",
   "results": {
     "workflows": {
-      "total": 33,
+      "total": 34,
       "passed": 10,
-      "failed": 23,
+      "failed": 24,
       "errors": [
         {
           "file": "ai-budget-monitor.yml",
@@ -98,6 +98,10 @@
         {
           "file": "smoke.yml",
           "error": "::group::.github/workflows/smoke.yml\n::error file=.github/workflows/smoke.yml,line=169,col=121::169:121 [line-length] line too long (125 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "vertex-bootstrap.yml",
+          "error": "::group::.github/workflows/vertex-bootstrap.yml\n::error file=.github/workflows/vertex-bootstrap.yml,line=47,col=121::47:121 [line-length] line too long (182 > 120 characters)\n::error file=.github/workflows/vertex-bootstrap.yml,line=441,col=121::441:121 [line-length] line too long (168 > 120 characters)\n::endgroup::\n\n"
         }
       ]
     },
@@ -120,7 +124,7 @@
       "errors": []
     },
     "overall": {
-      "score": 50,
+      "score": 49,
       "status": "NEEDS_WORK"
     }
   }

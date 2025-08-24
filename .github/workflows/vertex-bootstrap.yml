@@ -1,0 +1,491 @@
+---
+name: Vertex AI Bootstrap - One-Click GCP Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Perform a dry run without making actual changes"
+        required: false
+        default: false
+        type: boolean
+      force_recreate:
+        description: "Force recreation of existing resources"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  GCP_BOOTSTRAP_SA_KEY: ${{ secrets.GCP_BOOTSTRAP_SA_KEY }}
+
+jobs:
+  validate-prerequisites:
+    runs-on: ubuntu-latest
+    outputs:
+      project_id: ${{ steps.extract_project.outputs.project_id }}
+      project_number: ${{ steps.extract_project.outputs.project_number }}
+      validation_status: ${{ steps.validate.outputs.status }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --only=production
+
+      - name: Validate Bootstrap Key
+        id: validate
+        run: |
+          if [ -z "$GCP_BOOTSTRAP_SA_KEY" ]; then
+            echo "❌ GCP_BOOTSTRAP_SA_KEY secret not found"
+            echo "Please add the secret to repository settings with a high-privilege service account key"
+            echo "Required roles: roles/owner or custom role with iam.serviceAccounts.*, iam.workloadIdentityPoolAdmin, aiplatform.admin, storage.admin, serviceusage.services.enable"
+            echo "status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          echo "✅ GCP_BOOTSTRAP_SA_KEY secret found"
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Extract Project Information
+        id: extract_project
+        run: |
+          # Create temporary service account key file
+          echo "$GCP_BOOTSTRAP_SA_KEY" | base64 -d > /tmp/sa-key.json
+          
+          # Extract project information from service account key
+          PROJECT_ID=$(cat /tmp/sa-key.json | jq -r '.project_id')
+          
+          if [ "$PROJECT_ID" = "null" ] || [ -z "$PROJECT_ID" ]; then
+            echo "❌ Could not extract project_id from service account key"
+            rm -f /tmp/sa-key.json
+            exit 1
+          fi
+          
+          echo "✅ Extracted Project ID: $PROJECT_ID"
+          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
+          
+          # Setup gcloud with service account
+          gcloud auth activate-service-account --key-file=/tmp/sa-key.json
+          gcloud config set project "$PROJECT_ID"
+          
+          # Get project number
+          PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
+          echo "✅ Extracted Project Number: $PROJECT_NUMBER"
+          echo "project_number=$PROJECT_NUMBER" >> $GITHUB_OUTPUT
+          
+          # Clean up temporary file
+          rm -f /tmp/sa-key.json
+
+  setup-apis:
+    runs-on: ubuntu-latest
+    needs: validate-prerequisites
+    if: needs.validate-prerequisites.outputs.validation_status == 'success'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --only=production
+
+      - name: Setup GCP CLI
+        run: |
+          # Create temporary service account key file
+          echo "$GCP_BOOTSTRAP_SA_KEY" | base64 -d > /tmp/sa-key.json
+          
+          # Setup gcloud
+          gcloud auth activate-service-account --key-file=/tmp/sa-key.json
+          gcloud config set project "${{ needs.validate-prerequisites.outputs.project_id }}"
+
+      - name: Enable Required APIs
+        run: |
+          PROJECT_ID="${{ needs.validate-prerequisites.outputs.project_id }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          
+          # List of required APIs
+          REQUIRED_APIS=(
+            "aiplatform.googleapis.com"
+            "iamcredentials.googleapis.com"
+            "iam.googleapis.com"
+            "storage.googleapis.com"
+            "serviceusage.googleapis.com"
+          )
+          
+          echo "🔧 Enabling required Google Cloud APIs..."
+          
+          for api in "${REQUIRED_APIS[@]}"; do
+            echo "📡 Checking API: $api"
+            
+            if gcloud services list --enabled --filter="name:$api" --format="value(name)" | grep -q "$api"; then
+              echo "✅ $api already enabled"
+            else
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "🔄 [DRY RUN] Would enable: $api"
+              else
+                echo "🔄 Enabling: $api"
+                gcloud services enable "$api"
+                echo "✅ Enabled: $api"
+              fi
+            fi
+          done
+          
+          # Clean up
+          rm -f /tmp/sa-key.json
+
+  setup-service-account:
+    runs-on: ubuntu-latest
+    needs: [validate-prerequisites, setup-apis]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --only=production
+
+      - name: Create GitHub Service Account
+        run: |
+          PROJECT_ID="${{ needs.validate-prerequisites.outputs.project_id }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          FORCE_RECREATE="${{ github.event.inputs.force_recreate }}"
+          
+          # Create temporary service account key file
+          echo "$GCP_BOOTSTRAP_SA_KEY" | base64 -d > /tmp/sa-key.json
+          
+          # Setup gcloud
+          gcloud auth activate-service-account --key-file=/tmp/sa-key.json
+          gcloud config set project "$PROJECT_ID"
+          
+          SA_EMAIL="github-vertex@${PROJECT_ID}.iam.gserviceaccount.com"
+          SA_NAME="github-vertex"
+          SA_DISPLAY_NAME="GitHub Actions Vertex AI Service Account"
+          
+          echo "🔧 Setting up service account: $SA_EMAIL"
+          
+          # Check if service account exists
+          if gcloud iam service-accounts describe "$SA_EMAIL" > /dev/null 2>&1; then
+            if [ "$FORCE_RECREATE" = "true" ]; then
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "🔄 [DRY RUN] Would delete and recreate: $SA_EMAIL"
+              else
+                echo "🗑️ Deleting existing service account: $SA_EMAIL"
+                gcloud iam service-accounts delete "$SA_EMAIL" --quiet
+                echo "🔄 Creating new service account: $SA_EMAIL"
+                gcloud iam service-accounts create "$SA_NAME" \
+                  --display-name="$SA_DISPLAY_NAME" \
+                  --description="Service account for GitHub Actions Vertex AI integration"
+              fi
+            else
+              echo "✅ Service account already exists: $SA_EMAIL"
+            fi
+          else
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "🔄 [DRY RUN] Would create: $SA_EMAIL"
+            else
+              echo "🔄 Creating service account: $SA_EMAIL"
+              gcloud iam service-accounts create "$SA_NAME" \
+                --display-name="$SA_DISPLAY_NAME" \
+                --description="Service account for GitHub Actions Vertex AI integration"
+              echo "✅ Created service account: $SA_EMAIL"
+            fi
+          fi
+          
+          # Grant necessary roles to the service account
+          REQUIRED_ROLES=(
+            "roles/aiplatform.user"
+            "roles/storage.admin"
+            "roles/monitoring.viewer"
+            "roles/logging.viewer"
+          )
+          
+          for role in "${REQUIRED_ROLES[@]}"; do
+            echo "🔐 Granting role: $role"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "🔄 [DRY RUN] Would grant $role to $SA_EMAIL"
+            else
+              gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+                --member="serviceAccount:$SA_EMAIL" \
+                --role="$role"
+            fi
+          done
+          
+          # Clean up
+          rm -f /tmp/sa-key.json
+
+  setup-workload-identity:
+    runs-on: ubuntu-latest
+    needs: [validate-prerequisites, setup-apis, setup-service-account]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --only=production
+
+      - name: Create Workload Identity Pool and Provider
+        run: |
+          PROJECT_ID="${{ needs.validate-prerequisites.outputs.project_id }}"
+          PROJECT_NUMBER="${{ needs.validate-prerequisites.outputs.project_number }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          FORCE_RECREATE="${{ github.event.inputs.force_recreate }}"
+          REPO_FULL_NAME="${{ github.repository }}"
+          
+          # Create temporary service account key file
+          echo "$GCP_BOOTSTRAP_SA_KEY" | base64 -d > /tmp/sa-key.json
+          
+          # Setup gcloud
+          gcloud auth activate-service-account --key-file=/tmp/sa-key.json
+          gcloud config set project "$PROJECT_ID"
+          
+          POOL_ID="github-actions"
+          PROVIDER_ID="github-oidc"
+          SA_EMAIL="github-vertex@${PROJECT_ID}.iam.gserviceaccount.com"
+          
+          echo "🔧 Setting up Workload Identity Federation..."
+          
+          # Check if pool exists
+          if gcloud iam workload-identity-pools describe "$POOL_ID" --location="global" > /dev/null 2>&1; then
+            if [ "$FORCE_RECREATE" = "true" ]; then
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "🔄 [DRY RUN] Would recreate workload identity pool: $POOL_ID"
+              else
+                echo "🗑️ Deleting existing pool: $POOL_ID"
+                gcloud iam workload-identity-pools delete "$POOL_ID" --location="global" --quiet
+                echo "🔄 Creating new workload identity pool: $POOL_ID"
+                gcloud iam workload-identity-pools create "$POOL_ID" \
+                  --location="global" \
+                  --display-name="GitHub Actions Pool"
+              fi
+            else
+              echo "✅ Workload identity pool already exists: $POOL_ID"
+            fi
+          else
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "🔄 [DRY RUN] Would create workload identity pool: $POOL_ID"
+            else
+              echo "🔄 Creating workload identity pool: $POOL_ID"
+              gcloud iam workload-identity-pools create "$POOL_ID" \
+                --location="global" \
+                --display-name="GitHub Actions Pool"
+              echo "✅ Created workload identity pool: $POOL_ID"
+            fi
+          fi
+          
+          # Check if provider exists
+          if gcloud iam workload-identity-pools providers describe "$PROVIDER_ID" \
+               --workload-identity-pool="$POOL_ID" --location="global" > /dev/null 2>&1; then
+            if [ "$FORCE_RECREATE" = "true" ]; then
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "🔄 [DRY RUN] Would recreate OIDC provider: $PROVIDER_ID"
+              else
+                echo "🗑️ Deleting existing provider: $PROVIDER_ID"
+                gcloud iam workload-identity-pools providers delete "$PROVIDER_ID" \
+                  --workload-identity-pool="$POOL_ID" --location="global" --quiet
+                echo "🔄 Creating new OIDC provider: $PROVIDER_ID"
+                gcloud iam workload-identity-pools providers create-oidc "$PROVIDER_ID" \
+                  --workload-identity-pool="$POOL_ID" \
+                  --location="global" \
+                  --issuer-uri="https://token.actions.githubusercontent.com" \
+                  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+                  --attribute-condition="assertion.repository=='$REPO_FULL_NAME'"
+              fi
+            else
+              echo "✅ OIDC provider already exists: $PROVIDER_ID"
+            fi
+          else
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "🔄 [DRY RUN] Would create OIDC provider: $PROVIDER_ID"
+            else
+              echo "🔄 Creating OIDC provider: $PROVIDER_ID"
+              gcloud iam workload-identity-pools providers create-oidc "$PROVIDER_ID" \
+                --workload-identity-pool="$POOL_ID" \
+                --location="global" \
+                --issuer-uri="https://token.actions.githubusercontent.com" \
+                --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+                --attribute-condition="assertion.repository=='$REPO_FULL_NAME'"
+              echo "✅ Created OIDC provider: $PROVIDER_ID"
+            fi
+          fi
+          
+          # Bind workload identity user role
+          echo "🔐 Setting up IAM binding for Workload Identity..."
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "🔄 [DRY RUN] Would bind iam.workloadIdentityUser"
+          else
+            gcloud iam service-accounts add-iam-policy-binding "$SA_EMAIL" \
+              --role="roles/iam.workloadIdentityUser" \
+              --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$POOL_ID/attribute.repository/$REPO_FULL_NAME"
+            echo "✅ Bound iam.workloadIdentityUser role"
+          fi
+          
+          # Clean up
+          rm -f /tmp/sa-key.json
+
+  setup-storage:
+    runs-on: ubuntu-latest
+    needs: [validate-prerequisites, setup-apis]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --only=production
+
+      - name: Create Storage Bucket
+        run: |
+          PROJECT_ID="${{ needs.validate-prerequisites.outputs.project_id }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          
+          # Create temporary service account key file
+          echo "$GCP_BOOTSTRAP_SA_KEY" | base64 -d > /tmp/sa-key.json
+          
+          # Setup gcloud
+          gcloud auth activate-service-account --key-file=/tmp/sa-key.json
+          gcloud config set project "$PROJECT_ID"
+          
+          BUCKET_NAME="${PROJECT_ID}-vertex-ai-artifacts"
+          
+          echo "🗄️ Setting up storage bucket: $BUCKET_NAME"
+          
+          # Check if bucket exists
+          if gsutil ls -b "gs://$BUCKET_NAME" > /dev/null 2>&1; then
+            echo "✅ Storage bucket already exists: $BUCKET_NAME"
+          else
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "🔄 [DRY RUN] Would create bucket: $BUCKET_NAME"
+            else
+              echo "🔄 Creating storage bucket: $BUCKET_NAME"
+              gsutil mb -p "$PROJECT_ID" "gs://$BUCKET_NAME"
+              
+              # Set appropriate bucket labels
+              gsutil label ch -l "purpose:vertex-ai" "gs://$BUCKET_NAME"
+              gsutil label ch -l "created-by:github-actions" "gs://$BUCKET_NAME"
+              gsutil label ch -l "project:echotune-ai" "gs://$BUCKET_NAME"
+              
+              echo "✅ Created storage bucket: $BUCKET_NAME"
+            fi
+          fi
+          
+          # Clean up
+          rm -f /tmp/sa-key.json
+
+  generate-outputs:
+    runs-on: ubuntu-latest
+    needs: [validate-prerequisites, setup-apis, setup-service-account, setup-workload-identity, setup-storage]
+    steps:
+      - name: Generate Configuration Summary
+        run: |
+          PROJECT_ID="${{ needs.validate-prerequisites.outputs.project_id }}"
+          PROJECT_NUMBER="${{ needs.validate-prerequisites.outputs.project_number }}"
+          REPO_FULL_NAME="${{ github.repository }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          
+          echo "# 🚀 Vertex AI Bootstrap Complete" > bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "## 📋 Configuration Summary" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "- **Project ID**: \`$PROJECT_ID\`" >> bootstrap-summary.md
+          echo "- **Project Number**: \`$PROJECT_NUMBER\`" >> bootstrap-summary.md
+          echo "- **Repository**: \`$REPO_FULL_NAME\`" >> bootstrap-summary.md
+          echo "- **Dry Run**: \`$DRY_RUN\`" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "## 🔧 Created Resources" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "### Service Account" >> bootstrap-summary.md
+          echo "- **Email**: \`github-vertex@${PROJECT_ID}.iam.gserviceaccount.com\`" >> bootstrap-summary.md
+          echo "- **Roles**: aiplatform.user, storage.admin, monitoring.viewer, logging.viewer" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "### Workload Identity Federation" >> bootstrap-summary.md
+          echo "- **Pool**: \`github-actions\`" >> bootstrap-summary.md
+          echo "- **Provider**: \`github-oidc\`" >> bootstrap-summary.md
+          echo "- **Condition**: \`assertion.repository=='$REPO_FULL_NAME'\`" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "### Storage" >> bootstrap-summary.md
+          echo "- **Bucket**: \`${PROJECT_ID}-vertex-ai-artifacts\`" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "## 🔑 Required Repository Secrets" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "Add these secrets to your repository settings:" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "\`\`\`" >> bootstrap-summary.md
+          echo "GCP_PROJECT_ID=$PROJECT_ID" >> bootstrap-summary.md
+          echo "GCP_PROJECT_NUMBER=$PROJECT_NUMBER" >> bootstrap-summary.md
+          echo "WORKLOAD_IDENTITY_PROVIDER=projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github-actions/providers/github-oidc" >> bootstrap-summary.md
+          echo "GCP_SERVICE_ACCOUNT=github-vertex@${PROJECT_ID}.iam.gserviceaccount.com" >> bootstrap-summary.md
+          echo "GCP_VERTEX_BUCKET=${PROJECT_ID}-vertex-ai-artifacts" >> bootstrap-summary.md
+          echo "\`\`\`" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "## 🎯 Next Steps" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "1. Add the above secrets to your repository" >> bootstrap-summary.md
+          echo "2. Remove the temporary \`GCP_BOOTSTRAP_SA_KEY\` secret" >> bootstrap-summary.md
+          echo "3. Test Vertex AI integration with the new service account" >> bootstrap-summary.md
+          echo "4. Update your workflows to use Workload Identity Federation" >> bootstrap-summary.md
+          echo "" >> bootstrap-summary.md
+          echo "---" >> bootstrap-summary.md
+          echo "*Bootstrap completed at $(date -u)*" >> bootstrap-summary.md
+
+      - name: Upload Bootstrap Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: vertex-ai-bootstrap-summary
+          path: bootstrap-summary.md
+          retention-days: 30
+
+      - name: Post Summary Comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          script: |
+            const fs = require('fs');
+            
+            let summaryContent = '';
+            try {
+              summaryContent = fs.readFileSync('bootstrap-summary.md', 'utf8');
+            } catch (error) {
+              summaryContent = `## 🚀 Vertex AI Bootstrap Summary
+              
+              Bootstrap workflow completed successfully!
+              
+              **Project ID**: ${{ needs.validate-prerequisites.outputs.project_id }}
+              **Project Number**: ${{ needs.validate-prerequisites.outputs.project_number }}
+              
+              Check the workflow logs for detailed information about created resources.`;
+            }
+
+            // Create a new issue with the summary
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚀 Vertex AI Bootstrap Complete - ${new Date().toISOString().split('T')[0]}`,
+              body: summaryContent,
+              labels: ['vertex-ai', 'bootstrap', 'infrastructure']
+            });

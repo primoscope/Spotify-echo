@@ -7,6 +7,7 @@
 [![Version](https://img.shields.io/badge/version-2.1.0-blue?style=flat-square)](https://github.com/dzp5103/Spotify-echo)
 [![Node.js](https://img.shields.io/badge/node.js-20.0.0+-green?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/react-19.1.1-blue?style=flat-square&logo=react)](https://reactjs.org/)
+[![Roadmap](https://img.shields.io/badge/roadmap-active-blue?style=flat-square)](docs/roadmap/ROADMAP.md)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 **AI-powered music discovery platform with conversational search, intelligent recommendations, and comprehensive analytics**

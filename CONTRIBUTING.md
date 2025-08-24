@@ -370,6 +370,26 @@ Brief description of changes and motivation.
 - [ ] Code comments updated
 - [ ] API documentation updated (if applicable)
 - [ ] README updated (if applicable)
+- [ ] Roadmap format maintained (if editing roadmap files)
+
+### Roadmap Format Guidelines
+
+When contributing to roadmap files (`docs/roadmap/*.md`), please maintain these formats for automated parsing:
+
+**Table Format:**
+```markdown
+| ID | Title | Category | Priority | Status |
+|---|---|---|---|---|
+| FEATURE-001 | New Feature | Enhancement | High | Planned |
+```
+
+**Bullet List Format:**
+```markdown
+- [x] ITEM-001: Completed item (Priority: High, Status: Done, Category: Feature)
+- [ ] ITEM-002: Planned item (Priority: Medium, Status: Planned, Category: Bug Fix)
+```
+
+This ensures the automated roadmap index generation continues to work properly.
 
 ## 📋 Checklist
 - [ ] Code follows project style guidelines

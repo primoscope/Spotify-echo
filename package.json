@@ -300,6 +300,7 @@
     "continuous-analysis:continuous": "node scripts/continuous-analysis-system.js continuous",
     "analysis:research": "node scripts/continuous-analysis-system.js single",
     "analysis:report": "echo 'Check automation-outputs/reports/ for latest analysis report'",
+    "roadmap:index": "node scripts/roadmap/build_index.js --pretty",
     "perplexity:research": "node -e \"const P = require('./src/chat/llm-providers/perplexity-provider'); const p = new P({apiKey: process.env.PERPLEXITY_API_KEY}); p.initialize().then(() => p.research(process.argv[1])).then(console.log).catch(console.error)\" -- ",
     "grok4:analyze": "node -e \"const G = require('./src/chat/llm-providers/grok4-provider'); const g = new G({apiKey: process.env.XAI_API_KEY}); g.initialize().then(() => g.analyzeRepository('sample code', 'comprehensive')).then(console.log).catch(console.error)\""
   },

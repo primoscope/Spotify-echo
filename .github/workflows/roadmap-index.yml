@@ -1,0 +1,51 @@
+name: Roadmap Index
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/roadmap/**'
+      - 'ROADMAP.md'
+      - 'scripts/roadmap/**'
+  workflow_dispatch:
+
+jobs:
+  generate-roadmap-index:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Generate roadmap index
+      run: npm run roadmap:index
+      
+    - name: Upload roadmap index artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: roadmap_index
+        path: generated/roadmap_index.json
+        retention-days: 30
+        
+    - name: Display generation summary
+      run: |
+        echo "📊 Roadmap Index Generated!"
+        if [ -f generated/roadmap_index.json ]; then
+          echo "✅ File size: $(stat -c%s generated/roadmap_index.json) bytes"
+          echo "📈 Items found: $(jq '.stats.total' generated/roadmap_index.json)"
+          echo "🔄 Phases: $(jq -r '.stats.by_phase | keys | join(", ")' generated/roadmap_index.json)"
+          echo "📋 Status distribution:"
+          jq -r '.stats.by_status | to_entries[] | "  - \(.key): \(.value)"' generated/roadmap_index.json
+        else
+          echo "❌ Roadmap index file not found"
+          exit 1
+        fi

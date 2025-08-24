@@ -64,7 +64,7 @@
       ],
       "env": {
         "MONGODB_URI": "mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-        "REDIS_URL": "redis://default:jn7FVNpAbtvNvXpldDoc1IaQbYW5AIS4@redis-15392.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:15392"
+        "REDIS_URL": "redis://default:wZSsoenleylqrJAarlo8xnPaTAUdSqxg@redis-11786.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:11786"
       }
     },
     "code-sandbox": {

@@ -28,7 +28,7 @@ class AdvancedN8nCodingAgentWorkflows {
             digitalocean: 'dop_v1_93910c446f36d3069ca4462ba1779792e21b84f15da4831688f04094ca6680ff',
             brave: 'BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW',
             perplexity: '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',
-            redis: 'redis://default:jn7FVNpAbtvNvXpldDoc1IaQbYW5AIS4@redis-15392.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:15392',
+            redis: 'redis://default:wZSsoenleylqrJAarlo8xnPaTAUdSqxg@redis-11786.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:11786',
             e2b: 'e2b_d4bd1880d1447d46bc054503cb7822a17e30c26f',
             openrouter: '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',
             spotify_client_id: 'dcc2df507bde447c93a0199358ca219d',

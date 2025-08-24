@@ -1,0 +1,5 @@
+'use strict';
+const { httpRequestsTotal, httpRequestDurationMs, httpRequestsErrors } = require('../infra/observability/metrics');
+const logger = require('../infra/observability/logger');
+const { getCorrelationId } = require('../infra/observability/requestContext');
+module.exports = function metricsMiddleware(req, res, next) { const start = process.hrtime.bigint(); let routePath = req.path || req.route?.path || 'unresolved'; res.on('finish', () => { if (res.req && res.req.route && res.req.route.path) routePath = res.req.route.path; const status = res.statusCode; const durationMs = Number(process.hrtime.bigint() - start)/1_000_000; httpRequestsTotal.inc({ method: req.method, route: routePath, status }); httpRequestDurationMs.observe({ method: req.method, route: routePath, status }, durationMs); if (status >= 500) httpRequestsErrors.inc({ method: req.method, route: routePath, status }); logger.info({ msg: 'HTTP request complete', requestId: getCorrelationId(), method: req.method, route: routePath, status, durationMs: Math.round(durationMs*100)/100 }); }); next(); };

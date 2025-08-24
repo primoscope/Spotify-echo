@@ -139,6 +139,16 @@ async function initializeRedisSession() {
 app.use(performanceMonitor.requestTracker());
 app.use(slowRequestMiddleware);
 
+// Observability Foundation - Request ID and metrics middleware (before other middleware)
+const requestId = require('./middleware/requestId');
+const metricsMw = require('./middleware/metrics');
+const healthRoute = require('./routes/internal/health');
+const metricsRoute = require('./routes/internal/metrics');
+app.use(requestId);
+app.use(metricsMw);
+app.use('/internal/health', healthRoute);
+app.use('/internal/metrics', metricsRoute);
+
 // Initialize MCP Performance Analytics
 const mcpAnalytics = new MCPPerformanceAnalytics();
 

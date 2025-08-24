@@ -46,7 +46,7 @@ class PerplexityResearchService {
     if (!this.apiKey || this.apiKey === 'demo_mode' || this.apiKey === 'your_api_key_here') {
       console.log('⚠️ Using mock Perplexity response (no API key configured)');
       console.log(`   API key status: ${!this.apiKey ? 'missing' : 'invalid/placeholder'}`);
-      console.log(`   Expected format: pplx-...`);
+      console.log('   Expected format: pplx-...');
       return this.getMockResearchData(query);
     }
 
@@ -65,7 +65,7 @@ class PerplexityResearchService {
           messages: [
             {
               role: 'system',
-              content: `You are a research assistant specializing in software development and UI/UX best practices. Provide comprehensive, actionable insights based on the latest industry trends and research.`
+              content: 'You are a research assistant specializing in software development and UI/UX best practices. Provide comprehensive, actionable insights based on the latest industry trends and research.'
             },
             {
               role: 'user', 

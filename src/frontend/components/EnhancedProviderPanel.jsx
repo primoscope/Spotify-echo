@@ -236,7 +236,7 @@ const EnhancedProviderPanel = ({ onAutonomousRecommendation }) => {
   // Benchmark all providers
   const runProviderBenchmark = useCallback(async () => {
     setIsRunningBenchmark(true);
-    const testQuery = "Recommend 3 popular rock songs from the 2000s";
+    const testQuery = 'Recommend 3 popular rock songs from the 2000s';
     const benchmarkPromises = [];
 
     Object.keys(providers).forEach(providerId => {
@@ -752,7 +752,7 @@ const EnhancedProviderPanel = ({ onAutonomousRecommendation }) => {
 
                   {/* Switch Button */}
                   <Button
-                    variant={providerId === currentProvider ? "outlined" : "contained"}
+                    variant={providerId === currentProvider ? 'outlined' : 'contained'}
                     onClick={() => handleProviderSwitch(providerId)}
                     disabled={providerId === currentProvider || !info.available}
                     size="small"

@@ -125,7 +125,7 @@ class BrowserResearchService {
   }
   
   async perplexityResearch(topic, options = {}) {
-    console.log(`🧠 Conducting Perplexity research...`);
+    console.log('🧠 Conducting Perplexity research...');
     
     const query = this.enhanceQuery(topic, options);
     
@@ -204,7 +204,7 @@ class BrowserResearchService {
   }
   
   async browserVerification(perplexityResults, criteria = {}) {
-    console.log(`🌐 Verifying sources with browser automation...`);
+    console.log('🌐 Verifying sources with browser automation...');
     
     if (!this.browserAvailable) {
       console.log('⚠️ Browser verification unavailable - using mock verification');
@@ -588,7 +588,7 @@ async function main() {
   
   const service = new BrowserResearchService();
   
-  console.log(`\n🔬 Starting Browser Research Service`);
+  console.log('\n🔬 Starting Browser Research Service');
   console.log(`📋 Topic: ${topic}`);
   console.log(`🌐 Browser Verification: ${options.verifyWithBrowser ? 'Enabled' : 'Disabled'}`);
   console.log(`🤖 Model: ${options.model}`);

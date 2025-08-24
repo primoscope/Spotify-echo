@@ -8,28 +8,33 @@
  * that expect server.js in the root directory (like DigitalOcean App Platform)
  */
 
-// Initialize OpenTelemetry tracing before any other imports
-require('./src/infra/observability/tracing').initializeTracing();
+// Initialize OpenTelemetry tracing before any other imports (with feature flag)
+if (process.env.ENABLE_TRACING !== 'false') {
+  require('./src/infra/observability/tracing').initializeTracing();
+} else {
+  console.log('⚪ OpenTelemetry tracing disabled (ENABLE_TRACING=false)');
+}
 
 // Load environment variables first
 require('dotenv').config();
 
-// Initialize AgentOps
-// Optional agentops integration
+// Initialize AgentOps with feature flag
 let agentops = null;
-try {
-  agentops = require('agentops');
-} catch (error) {
-  console.log('📊 AgentOps not installed, skipping telemetry integration');
-}
-if (process.env.AGENTOPS_API_KEY && agentops) {
-  agentops.init(process.env.AGENTOPS_API_KEY, {
-    auto_start_session: false,
-    tags: ['spotify-echo', 'server-entry', 'deployment']
-  });
-  console.log('🔍 AgentOps initialized from server entry point');
+const enableAgentOps = process.env.ENABLE_AGENTOPS !== 'false' && process.env.AGENTOPS_API_KEY;
+
+if (enableAgentOps) {
+  try {
+    agentops = require('agentops');
+    agentops.init(process.env.AGENTOPS_API_KEY, {
+      auto_start_session: false,
+      tags: ['spotify-echo', 'server-entry', 'deployment']
+    });
+    console.log('🔍 AgentOps initialized from server entry point');
+  } catch (error) {
+    console.log('📊 AgentOps not available:', error.message);
+  }
 } else {
-  console.warn('⚠️ AGENTOPS_API_KEY not found, AgentOps disabled');
+  console.log('⚪ AgentOps disabled (ENABLE_AGENTOPS=false or no API key)');
 }
 
 // Start the application by requiring the main server

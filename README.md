@@ -1,28 +1,142 @@
 # 🎵 EchoTune AI - Advanced Music Discovery Platform
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/dzp5103/Spotify-echo&env=MONGODB_URI,JWT_SECRET,SESSION_SECRET,REDIS_URL,SPOTIFY_CLIENT_ID,SPOTIFY_CLIENT_SECRET,OPENAI_API_KEY,PERPLEXITY_API_KEY&envDescription=Environment%20variables%20for%20EchoTune%20AI&envLink=https://github.com/dzp5103/Spotify-echo/blob/main/vercel.env.txt)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/primoscope/Spotify-echo&env=MONGODB_URI,JWT_SECRET,SESSION_SECRET,SPOTIFY_CLIENT_ID,SPOTIFY_CLIENT_SECRET&envDescription=Environment%20variables%20for%20EchoTune%20AI%20deployment&envLink=https://github.com/primoscope/Spotify-echo/blob/main/.env.example)
 
-[![Deploy to DigitalOcean](https://www.digitalocean.com/assets/media/logo-icon-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/dzp5103/Spotify-echo&refcode=your_ref_code)
+[![Deploy to DigitalOcean](https://www.digitalocean.com/assets/media/logo-icon-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/primoscope/Spotify-echo&refcode=your_ref_code)
 
 ## 🚀 Quick Deploy
 
-### Vercel (Recommended for Frontend + API)
-Click the "Deploy with Vercel" button above for instant deployment to Vercel's serverless platform.
+### Vercel (Recommended for Serverless)
+Click the "Deploy with Vercel" button above for instant deployment to Vercel's serverless platform with automatic scaling and global CDN.
+
+**Features:**
+- ✅ Automatic HTTPS with SSL certificates
+- ✅ Global CDN with edge caching  
+- ✅ Serverless functions with auto-scaling
+- ✅ Built-in CI/CD from GitHub
+- ✅ Real-time features automatically disabled for serverless compatibility
 
 ### DigitalOcean (Recommended for Full Control)
-Click the "Deploy to DigitalOcean" button above for deployment to DigitalOcean's managed platform.
+Click the "Deploy to DigitalOcean" button above for deployment to DigitalOcean's managed platform with full server control.
+
+**Features:**
+- ✅ Full Node.js server with persistent connections
+- ✅ Real-time Socket.IO support
+- ✅ MongoDB and Redis integration
+- ✅ Managed load balancing
+- ✅ Direct server access and monitoring
 
 ### One-Command Deployment
 ```bash
-# Vercel
-npm run deploy:vercel
+# Vercel (Serverless)
+npm run vercel-build  # Validates environment
+vercel deploy
 
-# DigitalOcean Droplet
-curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/deploy-digitalocean-droplet.sh | sudo bash
+# DigitalOcean Droplet (VPS)
+curl -fsSL https://raw.githubusercontent.com/primoscope/Spotify-echo/main/scripts/deploy-digitalocean-droplet.sh | sudo bash
 
-# DigitalOcean App Platform
+# DigitalOcean App Platform (Managed)
 npm run deploy:digitalocean:app
 ```
+
+## 🏗️ Architecture Overview
+
+### Monolithic Server + Future Decomposition Plan
+
+**Current Architecture (Phase 1):**
+- Single Node.js server handling all requests (`server.js` → `src/server.js`)
+- Express.js API with Socket.IO for real-time features
+- MongoDB for data persistence, Redis for caching/sessions
+- React frontend served from `dist/` directory
+
+**Future Decomposition Plan (Phases 2-3):**
+- **Phase 2**: Gradually migrate endpoints to serverless functions
+- **Phase 3**: Decompose into microservices (auth, recommendations, analytics)
+- **Database Migration**: MongoDB Atlas for serverless, connection pooling
+
+**Vercel Deployment Strategy:**
+- Deploy as single serverless function for cold start optimization
+- Real-time features automatically disabled (`DISABLE_REALTIME=true`)
+- Graceful degradation to HTTP polling for chat features
+
+### Environment Variables
+
+#### Required (Application will not start without these)
+```bash
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/echotune
+JWT_SECRET=your-jwt-secret-32-chars-minimum
+```
+
+#### Recommended (Important for production)
+```bash
+SESSION_SECRET=your-session-secret-32-chars-minimum
+REDIS_URL=redis://user:pass@host:port
+NODE_ENV=production
+PORT=3000
+```
+
+#### Spotify Integration (Required for music features)
+```bash
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret  
+SPOTIFY_REDIRECT_URI=https://yourdomain.com/auth/callback
+```
+
+#### Feature Flags (Control application behavior)
+```bash
+DISABLE_REALTIME=false    # Set to 'true' for serverless deployment
+ENABLE_TRACING=true       # OpenTelemetry tracing
+ENABLE_AGENTOPS=false     # AgentOps telemetry (when API key provided)
+```
+
+#### AI Providers (Optional - enables advanced features)
+```bash
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=AIza...
+PERPLEXITY_API_KEY=pplx-...
+XAI_API_KEY=xai-...
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+#### Performance & Monitoring
+```bash
+LOG_LEVEL=info
+COMPRESSION=true
+CACHE_TTL=3600
+RATE_LIMIT_MAX=100
+```
+
+For complete environment variable documentation, see [.env.example](./.env.example).
+
+### Real-time Feature Flag
+
+**Serverless Deployment (Vercel):**
+- Set `DISABLE_REALTIME=true` to disable Socket.IO
+- Chat features gracefully degrade to HTTP polling
+- Reduces cold start time and memory usage
+
+**Full Server Deployment (DigitalOcean):**
+- Keep `DISABLE_REALTIME=false` for full real-time features
+- WebSocket connections for live chat and notifications
+- Better user experience with instant updates
+
+### Deployment Notes
+
+#### Cold Start Considerations
+- **Vercel**: Optimized for sub-500ms cold starts with minimal dependencies
+- **Prestart validation**: Only runs when `RUN_ENV_VALIDATION=true`
+- **Dependency optimization**: MCP tooling moved to devDependencies (19.4% reduction)
+
+#### Session Management
+- **With Redis**: Persistent sessions across server restarts/scaling
+- **Without Redis**: Memory store with warning in production logs
+- **Recommendation**: Always configure `REDIS_URL` for production
+
+#### Health Monitoring
+- **Health endpoint**: `GET /health` with Redis connectivity check
+- **Readiness probe**: `GET /ready` for load balancer health checks  
+- **Liveness probe**: `GET /alive` for basic application response
+- **Observability**: Structured logging with configurable levels
 
 ## 📦 Deployment (Docker, DigitalOcean, Vercel)
 

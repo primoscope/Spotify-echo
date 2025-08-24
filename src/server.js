@@ -8,28 +8,27 @@ const crypto = require('crypto');
 const { URLSearchParams } = require('url');
 const compression = require('compression');
 
-// AgentOps integration
-// Optional agentops integration
+// AgentOps integration with feature flag
 let agentops = null;
-try {
-  agentops = require('agentops');
-} catch (error) {
-  console.log('📊 AgentOps not installed in src/server, skipping telemetry integration');
+const enableAgentOps = process.env.ENABLE_AGENTOPS !== 'false' && process.env.AGENTOPS_API_KEY;
+
+if (enableAgentOps) {
+  try {
+    agentops = require('agentops');
+    agentops.init(process.env.AGENTOPS_API_KEY, {
+      auto_start_session: false,
+      tags: ['spotify-echo', 'music-ai', 'llm-provider']
+    });
+    console.log('🔍 AgentOps initialized');
+  } catch (error) {
+    console.log('📊 AgentOps not available:', error.message);
+  }
+} else {
+  console.log('⚪ AgentOps disabled (ENABLE_AGENTOPS=false or no API key)');
 }
 
 // Load environment variables
 dotenv.config();
-
-// Initialize AgentOps
-if (process.env.AGENTOPS_API_KEY && agentops) {
-  agentops.init(process.env.AGENTOPS_API_KEY, {
-    auto_start_session: false,
-    tags: ['spotify-echo', 'music-ai', 'llm-provider']
-  });
-  console.log('🔍 AgentOps initialized');
-} else {
-  console.warn('⚠️ AGENTOPS_API_KEY not found, AgentOps disabled');
-}
 
 // Import Redis and session management
 const session = require('express-session');
@@ -111,19 +110,31 @@ const { MCPPerformanceAnalytics } = require('./utils/mcp-performance-analytics')
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? [`https://${process.env.DOMAIN || 'primosphere.studio'}`]
-        : ['http://localhost:3000', 'http://127.0.0.1:3000'],
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-  transports: ['websocket', 'polling'],
-  pingTimeout: 60000,
-  pingInterval: 25000,
-});
+
+// Feature flag for disabling real-time features in serverless environments
+const realtimeEnabled = process.env.DISABLE_REALTIME !== 'true';
+let io = null;
+
+if (realtimeEnabled) {
+  io = socketIo(server, {
+    cors: {
+      origin:
+        process.env.NODE_ENV === 'production'
+          ? [`https://${process.env.DOMAIN || 'primosphere.studio'}`]
+          : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+    transports: ['websocket', 'polling'],
+    pingTimeout: 60000,
+    pingInterval: 25000,
+  });
+  console.log('🔗 Real-time features enabled (Socket.IO initialized)');
+  logger.info('realtime-features', { status: 'enabled', transport: 'socket.io' });
+} else {
+  console.log('⚪ Real-time features disabled (DISABLE_REALTIME=true)');
+  logger.info('realtime-features', { status: 'disabled', reason: 'DISABLE_REALTIME=true' });
+}
 const PORT = config.server.port;
 
 // Initialize enhanced systems
@@ -253,16 +264,40 @@ const sessionConfig = {
 // Note: Redis session store will be configured during initialization
 app.use(session(sessionConfig));
 
-// Simple health check before rate limiting
-app.get('/health', (req, res) => {
-  res.json({
+// Enhanced health check with Redis and service status
+app.get('/health', async (req, res) => {
+  const health = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     service: 'EchoTune AI',
     version: process.env.npm_package_version || '2.1.0',
-    environment: process.env.NODE_ENV || 'development'
-  });
+    environment: process.env.NODE_ENV || 'development',
+    features: {
+      realtime: realtimeEnabled,
+      tracing: process.env.ENABLE_TRACING !== 'false',
+      agentops: enableAgentOps
+    }
+  };
+
+  // Quick Redis health check with timeout
+  try {
+    if (redisManager && redisManager.useRedis) {
+      await Promise.race([
+        redisManager.ping(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+      ]);
+      health.redis = 'ok';
+    } else {
+      health.redis = 'not_configured';
+    }
+  } catch (error) {
+    health.redis = 'down';
+    health.status = 'degraded';
+  }
+
+  const statusCode = health.status === 'healthy' ? 200 : 503;
+  res.status(statusCode).json(health);
 });
 
 // Enhanced security headers (replaces basic securityHeaders)
@@ -936,8 +971,9 @@ async function initializeSocketChatbot() {
   return socketChatbot;
 }
 
-// Socket.IO connection handling
-io.on('connection', async (socket) => {
+// Socket.IO connection handling (only if real-time is enabled)
+if (realtimeEnabled && io) {
+  io.on('connection', async (socket) => {
   console.log(`🔗 Client connected: ${socket.id}`);
 
   try {
@@ -1086,6 +1122,9 @@ io.on('connection', async (socket) => {
     });
   }
 });
+} else {
+  console.log('⚪ Socket.IO connection handling disabled');
+}
 
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
@@ -1135,6 +1174,19 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
   console.log(
     `🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`
   );
+  
+  // Structured logging for key server info
+  logger.info('server-start', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    spotify_configured: !!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET),
+    auth_mode: process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'development' : 'production',
+    features: {
+      realtime: realtimeEnabled,
+      tracing: process.env.ENABLE_TRACING !== 'false',
+      agentops: enableAgentOps
+    }
+  });
 
   // Initialize lifecycle management
   initializeGracefulShutdown(server);
@@ -1150,9 +1202,16 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
       console.log('💾 Redis initialized for sessions and caching');
     } else {
       console.log('💾 Using in-memory fallback for sessions and caching');
+      if (process.env.NODE_ENV === 'production') {
+        console.warn('⚠️  WARNING: Using memory store for sessions in production is not recommended');
+        console.warn('   💡 Configure REDIS_URL for proper session persistence');
+      }
     }
   } catch (error) {
     console.warn('⚠️ Redis setup failed:', error.message);
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('⚠️  WARNING: Session store fallback to memory in production');
+    }
   }
 
   // Initialize database manager with fallback support

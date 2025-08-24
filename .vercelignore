@@ -108,29 +108,124 @@ temp/
 *.sln
 *.sw?
 
-# MCP server files
+# MCP server files (excluded from deployment)
 mcp-server/
 mcp-servers/
+mcp-config/
+.mcp-config/
 
-# Documentation
+# Development scripts and automation
+scripts/
+*.sh
+!scripts/validate-env.js
+!scripts/list-env.js
+
+# Documentation (exclude except README)
 docs/
 *.md
 !README.md
 
-# Scripts
-scripts/
-*.sh
-
-# Validation reports
+# Validation and analysis reports
 validation-reports/
+test-results/
+perf_reports/
+automation-outputs/
+enhanced-*/
+perplexity-*/
+search-results/
+automation-workflow-report-*.json
+comprehensive-*.json
 *.json
 !package.json
 !package-lock.json
+!vercel.json
 
-# Autonomous coding session files
+# AI and automation session files
 .autonomous-coding-session/
 .autonomous-session/
+.copilot/
+.cursor/
+.perplexity/
+.gemini/
+.do/
+agent-workflow/
+coding-agent-workflows/
+autonomous-session-reports/
+coding-progress-reports/
+perplexity-research-updates/
 
-# Perplexity research files
-perplexity-*/
-search-results/
+# Development and testing artifacts
+examples/
+demo-*.js
+test-*.js
+quick-*.js
+validate-*.js
+enhance-*.js
+comprehensive-*.js
+fix-*.js
+integrate-*.js
+discover-*.js
+create-*.js
+real-*.js
+working-*.js
+baseline_metrics.md
+smoke_report.json
+interactive-command-launcher.js
+
+# Large data and ML files
+ml_datasets/
+data/
+databases/
+
+# Docker and deployment (keep minimal)
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+digitalocean-app.yaml
+app.yaml
+nginx/
+k8s/
+
+# Git and version control
+.git/
+.gitleaksignore
+
+# Development configuration
+.eslintrc.js
+eslint.config.js
+jest.config.*.js
+playwright.config.mjs
+.lighthouserc.json
+.yamllint.yml
+.prettierrc
+sonar-project.properties
+
+# Large generated files and backups
+document-backups-*/
+document-cleanup-summary.json
+COMPREHENSIVE_*.md
+ENHANCED_*.md
+API_*.md
+MCP_*.md
+GITHUB_*.md
+DEPLOY_*.md
+DEVELOPMENT_*.md
+PRODUCTION_*.md
+STATUS_*.md
+VALIDATION_*.md
+*.backup
+*.backup-*
+
+# Python files (if not needed for runtime)
+requirements.txt
+*.py
+*.pyc
+__pycache__/
+
+# Cache files
+perplexity-cache.json
+perplexity-usage-tracking.json
+working-perplexity-models.json
+mcp-*.json
+automation-artifacts/
+workflow_state.md

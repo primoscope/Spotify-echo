@@ -72,7 +72,7 @@ const envCategories = {
   // New feature flags
   feature_flags: [
     'DISABLE_REALTIME',
-    'ENABLE_TRACING',
+    'ENABLE_TRACING', 
     'ENABLE_AGENTOPS'
   ],
   

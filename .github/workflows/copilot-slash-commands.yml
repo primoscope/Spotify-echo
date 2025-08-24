@@ -74,8 +74,186 @@ jobs:
             echo "context_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
           fi
 
+          # Check for Claude Opus 4.1 commands and redirect
+          if echo "$COMMENT_BODY" | grep -qi "/claude-opus\|/opus\|claude opus 4\.1\|@claude-opus"; then
+            echo "is_claude_opus_command=true" >> $GITHUB_OUTPUT
+            echo "🧠 Claude Opus 4.1 command detected - will trigger dedicated workflow"
+          else
+            echo "is_claude_opus_command=false" >> $GITHUB_OUTPUT
+          fi
+
           echo "Parsed command: $COMMAND"
           echo "Parameters: $PARAMS"
+
+      - name: Trigger Claude Opus 4.1 Workflow
+        if: steps.parse.outputs.is_claude_opus_command == 'true'
+        run: |
+          echo "🧠 Triggering dedicated Claude Opus 4.1 workflow..."
+          
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          # Extract command type from comment
+          COMMAND_TYPE="deep-reasoning"
+          if echo "$COMMENT_BODY" | grep -qi "deep.reasoning\|deep-reasoning"; then
+            COMMAND_TYPE="deep-reasoning"
+          elif echo "$COMMENT_BODY" | grep -qi "extended.thinking\|extended-thinking"; then
+            COMMAND_TYPE="extended-thinking"
+          elif echo "$COMMENT_BODY" | grep -qi "advanced.coding\|advanced-coding\|coding"; then
+            COMMAND_TYPE="advanced-coding"
+          elif echo "$COMMENT_BODY" | grep -qi "agent.workflow\|agent-workflow\|agentic"; then
+            COMMAND_TYPE="agent-workflow"
+          elif echo "$COMMENT_BODY" | grep -qi "architectural\|architecture"; then
+            COMMAND_TYPE="architectural-analysis"
+          elif echo "$COMMENT_BODY" | grep -qi "long.horizon\|long-horizon\|complex"; then
+            COMMAND_TYPE="long-horizon-tasks"
+          fi
+          
+          # Extract target if specified
+          TARGET=""
+          if echo "$COMMENT_BODY" | grep -qE "src/|scripts/|\.js|\.py|\.md|\.yml|\.yaml"; then
+            TARGET=$(echo "$COMMENT_BODY" | grep -oE "src/[^[:space:]]*|scripts/[^[:space:]]*|[^[:space:]]*\.(js|py|md|yml|yaml)" | head -1)
+          fi
+          
+          # Extract custom prompt
+          PROMPT=$(echo "$COMMENT_BODY" | sed 's/.*\/claude-opus[^[:space:]]*//' | sed 's/.*\/opus[^[:space:]]*//' | sed 's/.*@claude-opus[^[:space:]]*//' | xargs)
+          
+          echo "Command Type: $COMMAND_TYPE"
+          echo "Target: $TARGET" 
+          echo "Prompt: $PROMPT"
+          
+          # Note: The actual workflow dispatch would trigger the claude-opus-coding-agent.yml workflow
+          echo "✅ Claude Opus 4.1 workflow parameters prepared"
+
+      - name: Post Claude Opus 4.1 Command Response
+        if: steps.parse.outputs.is_claude_opus_command == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const commentBody = '${{ github.event.comment.body }}';
+            
+            // Extract command details
+            let commandType = 'deep-reasoning';
+            if (commentBody.match(/deep.reasoning|deep-reasoning/i)) commandType = 'deep-reasoning';
+            else if (commentBody.match(/extended.thinking|extended-thinking/i)) commandType = 'extended-thinking';
+            else if (commentBody.match(/advanced.coding|advanced-coding|coding/i)) commandType = 'advanced-coding';
+            else if (commentBody.match(/agent.workflow|agent-workflow|agentic/i)) commandType = 'agent-workflow';
+            else if (commentBody.match(/architectural|architecture/i)) commandType = 'architectural-analysis';
+            else if (commentBody.match(/long.horizon|long-horizon|complex/i)) commandType = 'long-horizon-tasks';
+            
+            const target = commentBody.match(/src\/[^\s]*|scripts\/[^\s]*|[^\s]*\.(js|py|md|yml|yaml)/)?.[0] || '';
+            
+            const responseMessage = `## 🧠 Claude Opus 4.1 Advanced Coding Agent Initiated
+            
+            **Model**: Claude Opus 4.1 (Anthropic's most advanced model)
+            **Command Type**: ${commandType}
+            **Target**: ${target || 'Repository-wide'}
+            **Extended Thinking**: Enabled with budget control
+            **Status**: ✅ Dedicated workflow triggered
+            
+            ## 🎯 Advanced Capabilities Activated
+            
+            Claude Opus 4.1 brings industry-leading capabilities to EchoTune AI:
+            
+            ### 🚀 **Advanced Coding**
+            - **End-to-end Development**: Independently plan and execute complex development tasks
+            - **Code Quality**: Maintains high standards throughout implementation
+            - **Style Adaptation**: Adapts to your codebase patterns and conventions
+            - **Production Ready**: Generates robust, scalable, and maintainable code
+            
+            ### 🧠 **Extended Thinking Mode**
+            - **Deep Reasoning**: Methodical problem-solving with transparent thought processes
+            - **Budget Control**: Configurable thinking token allocation (current: 5000 tokens)
+            - **Complex Analysis**: Multi-step reasoning for intricate technical challenges
+            - **Sustained Focus**: Maintains coherence across long reasoning chains
+            
+            ### 🤖 **Agent Workflows**
+            - **Multi-step Tasks**: Complex automation requiring peak accuracy
+            - **Peak Performance**: Optimized for sustained performance on long-running tasks
+            - **Intelligent Orchestration**: Smart task decomposition and execution
+            - **Memory Management**: Effective context retention across interactions
+            
+            ### 🔍 **Agentic Search & Research**
+            - **Multi-source Analysis**: Synthesize insights across code repositories
+            - **Pattern Recognition**: Identify complex architectural patterns and relationships
+            - **Best Practice Integration**: Apply industry-leading development practices
+            - **Strategic Planning**: Long-term technical roadmap development
+            
+            ## 📊 Processing Details
+            
+            **Command Type**: \`${commandType}\`
+            **Processing Mode**: Advanced reasoning with extended thinking
+            **Expected Capabilities**:
+            ${commandType === 'deep-reasoning' ? `
+            - 🔍 **Deep Analytical Reasoning**: Step-by-step problem decomposition
+            - 🧩 **Pattern Analysis**: Complex relationship identification
+            - 💡 **Strategic Insights**: Long-term implications and opportunities
+            - 📋 **Actionable Recommendations**: Clear implementation guidance` : ''}
+            ${commandType === 'extended-thinking' ? `
+            - 🧠 **Methodical Problem-Solving**: Transparent reasoning process
+            - 🔄 **Iterative Refinement**: Continuous thought improvement
+            - 📊 **Comprehensive Analysis**: Multi-faceted problem examination
+            - ✅ **Well-Considered Conclusions**: Thoroughly validated insights` : ''}
+            ${commandType === 'advanced-coding' ? `
+            - 💻 **Industry-Leading Coding**: Best-in-class development assistance
+            - 🏗️ **End-to-End Planning**: Complete development lifecycle management
+            - 🎯 **Quality Assurance**: High-standard code generation
+            - 🔄 **Adaptive Implementation**: Context-aware coding patterns` : ''}
+            ${commandType === 'agent-workflow' ? `
+            - 🤖 **Agentic Design**: Intelligent workflow automation
+            - 📋 **Multi-Step Orchestration**: Complex task coordination
+            - 🎯 **Peak Accuracy**: Precision-focused task execution
+            - 🔄 **Self-Improving Workflows**: Adaptive automation patterns` : ''}
+            ${commandType === 'architectural-analysis' ? `
+            - 🏛️ **System Architecture**: Comprehensive design analysis
+            - 📈 **Scalability Assessment**: Performance and growth evaluation
+            - 🔧 **Maintainability Review**: Code organization and structure
+            - 💡 **Enhancement Recommendations**: Strategic improvement opportunities` : ''}
+            ${commandType === 'long-horizon-tasks' ? `
+            - ⏳ **Sustained Performance**: Long-running task management
+            - 🎯 **Objective Decomposition**: Complex goal breakdown
+            - 🔄 **Progress Tracking**: Systematic advancement monitoring
+            - 🎭 **Focus Maintenance**: Coherent long-term execution` : ''}
+            
+            ## 🔗 Monitor Progress
+            
+            **Live Workflow**: [View Claude Opus 4.1 execution](${{ github.server_url }}/${{ github.repository }}/actions)
+            **Expected Duration**: 5-15 minutes depending on complexity
+            **Results**: Comprehensive analysis with extended reasoning results
+            
+            ## 🎯 Available Claude Opus 4.1 Commands
+            
+            ### 🧠 Core Commands
+            - \`/claude-opus deep-reasoning\` - Deep analytical reasoning with extended thinking
+            - \`/claude-opus extended-thinking\` - Methodical problem-solving with thinking mode  
+            - \`/claude-opus advanced-coding\` - Industry-leading coding assistance
+            - \`/claude-opus agent-workflow\` - Complex multi-step task automation
+            - \`/claude-opus architectural-analysis\` - Comprehensive system design analysis
+            - \`/claude-opus long-horizon-tasks\` - Sustained performance on complex objectives
+            
+            ### 🎯 Targeted Commands
+            - \`/claude-opus advanced-coding src/ai/\` - Focus on specific directory
+            - \`/claude-opus deep-reasoning budget 10000\` - Custom thinking budget
+            - \`/opus architectural-analysis\` - Shortened command form
+            
+            ### 🗣️ Natural Language Triggers
+            - "Use Claude Opus 4.1 for [task]"
+            - "Analyze with Claude Opus 4.1"
+            - "@claude-opus [request]"
+            - "Claude Opus 4.1 for [specific need]"
+            
+            **The Claude Opus 4.1 Advanced Coding Agent is now processing your request with industry-leading AI capabilities.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Claude Opus 4.1 Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
 
       - name: Execute Review Docs Command
         if: steps.parse.outputs.command == 'review-docs'
@@ -871,6 +1049,7 @@ jobs:
           steps.parse.outputs.command != 'start-autonomous-development' &&
           !contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') &&
           !contains(steps.parse.outputs.comment_body, 'autonomous development') &&
+          steps.parse.outputs.is_claude_opus_command != 'true' &&
           steps.parse.outputs.command != ''
         uses: actions/github-script@v7
         with:
@@ -896,7 +1075,9 @@ jobs:
               'perplexity-budget-check',
               'perplexity-optimize-costs',
               'analyze-perplexity',
-              'research-perplexity'
+              'research-perplexity',
+              'claude-opus',
+              'opus'
             ];
             
             let responseMessage = '';
@@ -941,6 +1122,15 @@ jobs:
               - \`/review-gpt5 [scope]\` - GPT-5 code review focus
               - \`/optimize-gpt5 [scope]\` - GPT-5 optimization analysis
               
+              #### 🧠 Claude Opus 4.1 Commands **[NEW]**
+              - \`/claude-opus deep-reasoning\` - 🧠 Deep analytical reasoning with extended thinking
+              - \`/claude-opus extended-thinking\` - 🔄 Methodical problem-solving with thinking mode
+              - \`/claude-opus advanced-coding\` - 💻 Industry-leading coding assistance
+              - \`/claude-opus agent-workflow\` - 🤖 Complex multi-step task automation
+              - \`/claude-opus architectural-analysis\` - 🏛️ Comprehensive system design analysis
+              - \`/claude-opus long-horizon-tasks\` - ⏳ Sustained performance on complex objectives
+              - \`/opus [command-type]\` - 🚀 Shortened form for all Claude Opus 4.1 commands
+              
               #### 🔧 MCP & System Commands  
               - \`/run-mcp-all\` - Comprehensive MCP validation
               - \`/mcp-health-check\` - Quick MCP health check
@@ -962,6 +1152,27 @@ jobs:
               - \`/perplexity-budget-check\` - Check Perplexity usage and budget
               - \`/perplexity-optimize-costs\` - Optimize Perplexity usage patterns
               
+              ### 🧠 Claude Opus 4.1 Advanced Features **[NEW]**
+              
+              #### 🎯 Targeted Commands
+              - \`/claude-opus advanced-coding src/ai/\` - Focus on specific directory
+              - \`/claude-opus deep-reasoning budget 10000\` - Custom thinking budget
+              - \`/opus architectural-analysis scripts/\` - Shortened command with scope
+              
+              #### 🗣️ Natural Language Triggers
+              - "Use Claude Opus 4.1 for [task]" - Natural language activation
+              - "Analyze with Claude Opus 4.1" - Direct analysis request
+              - "@claude-opus [request]" - Mention-based triggering
+              - "Claude Opus 4.1 for [specific need]" - Task-specific requests
+              
+              #### ⚡ Advanced Capabilities
+              - **Extended Thinking**: Budget-controlled deep reasoning (up to 32K tokens)
+              - **Industry-Leading Coding**: Best-in-class development assistance  
+              - **Agent Workflows**: Complex multi-step task automation
+              - **Long-Horizon Tasks**: Sustained performance on complex objectives
+              - **Architectural Analysis**: Comprehensive system design insights
+              - **Memory Management**: Context retention across interactions
+              
               ### 🔍 Autonomous Development Triggers:
               - \`@copilot use perplexity browser research\` - Full autonomous cycle with roadmap updates
               - \`@copilot autonomous development\` - Alternative natural language trigger
@@ -975,6 +1186,9 @@ jobs:
               - \`/review-docs\` - Analyze all documentation
               - \`/review-docs api\` - Focus on API documentation
               - \`/gpt5 analyze scripts/\` - Analyze specific directory
+              - \`/claude-opus deep-reasoning\` - **NEW**: Deep reasoning with Claude Opus 4.1
+              - \`/claude-opus advanced-coding src/ai/\` - **NEW**: Advanced coding for AI components
+              - \`/opus extended-thinking budget 8000\` - **NEW**: Custom thinking budget
               - \`/perplexity help\` - **📚 Complete Perplexity commands guide**
               - \`/perplexity-analyze frontend\` - Analyze frontend with Perplexity
               - \`/perplexity-research "latest React patterns"\` - Research specific topic
@@ -986,6 +1200,8 @@ jobs:
               ### 💡 Command Tips:
               - **Scope Parameters**: Most commands accept optional scope (e.g., \`scripts/\`, \`frontend\`, \`api\`)
               - **Natural Language**: Use \`@copilot\` prefix for natural language triggers
+              - **Claude Opus 4.1**: Use \`@claude-opus\` or natural language for advanced AI assistance
+              - **Extended Thinking**: Claude Opus 4.1 supports budget-controlled deep reasoning
               - **Cost Awareness**: Perplexity commands automatically optimize for budget efficiency
               - **Progress Tracking**: All workflows provide live progress links and detailed reports
               

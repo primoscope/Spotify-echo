@@ -23,13 +23,15 @@ EchoTune AI is a sophisticated music recommendation platform that combines the p
 
 ### ✨ Key Features
 
-- **🎯 Multi-Provider AI Integration**: Vertex AI, Gemini 2.5 Pro, Claude Opus 4.1, Claude 3.5 Sonnet, OpenAI, and more
+- **🎯 Multi-Provider AI Integration**: Claude Opus 4.1, Vertex AI, Gemini 2.5 Pro, Claude 3.5 Sonnet, OpenAI, and more
+- **🧠 Advanced Coding Agent**: Claude Opus 4.1 with extended thinking, deep reasoning, and industry-leading coding capabilities
 - **🤖 Conversational Music Discovery**: Natural language music search and recommendations
 - **📊 Advanced Analytics**: Real-time insights into listening patterns and preferences
 - **🔄 Intelligent Routing**: Automatic provider selection based on cost, latency, and quality
 - **📈 Enterprise Monitoring**: Prometheus metrics, circuit breakers, and health checks
 - **🎵 Spotify Integration**: Seamless integration with Spotify Web API
 - **🔧 MCP Automation**: 81+ tracked MCP servers for enhanced development workflow
+- **💭 Extended Thinking**: Budget-controlled deep reasoning with up to 32K output tokens
 
 ---
 
@@ -194,14 +196,22 @@ EchoTune AI supports multiple AI providers with intelligent routing and fallback
 - **Use Cases**: Complex reasoning, detailed analysis, structured output
 - **Pricing**: $0.003/1K input, $0.015/1K output
 
-#### 🚀 Claude Opus 4.1 (Vertex AI + Anthropic)
+#### 🚀 Claude Opus 4.1 (Vertex AI + Anthropic) **[NEW]**
 - **Models**: claude-opus-4-1@20250805 via publishers/anthropic/models/claude-opus-4-1
-- **Features**: Industry-leading coding capabilities, extended thinking, agent workflows, long-horizon tasks
-- **Capabilities**: Advanced coding, multimodal analysis, memory management, multi-step reasoning
+- **Features**: Industry-leading coding capabilities, extended thinking mode, agent workflows, long-horizon tasks
+- **Advanced Capabilities**:
+  - 🧠 **Extended Thinking**: Budget-controlled deep reasoning with transparent thought processes
+  - 💻 **Advanced Coding**: End-to-end development task execution with production-ready code
+  - 🤖 **Agent Workflows**: Complex multi-step task automation and orchestration
+  - ⏳ **Long-horizon Tasks**: Sustained performance on objectives requiring thousands of steps
+  - 🔍 **Agentic Search**: Comprehensive insight synthesis across multiple data sources
+  - 💾 **Memory Management**: Context retention across multiple interactions
 - **Context**: 200K input tokens, 32K output tokens
-- **Use Cases**: Complex development tasks, agent automation, agentic search, coding assistance
+- **Extended Thinking Budget**: Configurable up to 32K thinking tokens
+- **Use Cases**: Complex development tasks, agent automation, agentic search, coding assistance, architectural analysis
 - **Pricing**: $0.015/1K input, $0.075/1K output (premium)
-- **Provider**: Accessed through Vertex AI publisher system (not direct Anthropic API)
+- **Provider**: Accessed through Vertex AI Anthropic publisher system
+- **GitHub Integration**: Comprehensive slash command support with natural language triggers
 
 #### 🔮 OpenAI (Fallback)
 - **Models**: gpt-4-turbo, gpt-3.5-turbo
@@ -300,7 +310,7 @@ GEMINI_API_KEY=your_gemini_api_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
 OPENAI_API_KEY=your_openai_api_key
 
-# Vertex AI (for enterprise features)
+# Vertex AI (for enterprise features and Claude Opus 4.1)
 GCP_PROJECT_ID=your-project-id
 GCP_VERTEX_LOCATION=us-central1
 ```
@@ -395,12 +405,13 @@ Visit `http://localhost:3000` and check:
    npm run ai:test:providers
    ```
 
-#### Claude Opus 4.1 (Vertex AI) Setup
+#### Claude Opus 4.1 (Vertex AI) Setup **[FEATURED]**
 
 1. **Prerequisites**:
    - Google Cloud Project with Vertex AI API enabled
    - Access to Anthropic models through Vertex AI Publisher
-   - Proper IAM permissions for Vertex AI
+   - Proper IAM permissions for Vertex AI (Vertex AI User role minimum)
+   - Enable Model Garden access for Anthropic publisher
 
 2. **Configure Project**:
    ```env
@@ -411,13 +422,44 @@ Visit `http://localhost:3000` and check:
 
 3. **Deploy Model**:
    ```bash
+   # Test Claude Opus 4.1 connectivity
+   npm run test:claude-opus
+   
    # Deploy all AI providers including Claude Opus 4.1
    npm run ai:deploy:all-providers
    
-   # Deploy specific model (requires manual Vertex AI setup)
+   # Manual Vertex AI setup (if needed):
    # 1. Go to Vertex AI Model Garden
    # 2. Find Claude Opus 4.1 under Anthropic publisher
-   # 3. Deploy to endpoint or use on-demand
+   # 3. Deploy to endpoint or use Publisher API
+   ```
+
+4. **Test Claude Opus 4.1 Integration**:
+   ```bash
+   # Basic functionality test
+   npm run test:claude-opus
+   
+   # Full API test (requires valid setup)
+   npm run test:claude-opus:api
+   
+   # Test individual command types
+   npm run claude-opus:deep-reasoning
+   npm run claude-opus:extended-thinking
+   npm run claude-opus:advanced-coding
+   ```
+
+5. **GitHub Integration Commands**:
+   ```bash
+   # Direct slash commands in GitHub issues/PRs:
+   /claude-opus deep-reasoning
+   /claude-opus extended-thinking src/ai/
+   /claude-opus advanced-coding "implement caching layer"
+   /opus architectural-analysis budget 10000
+   
+   # Natural language triggers:
+   "Use Claude Opus 4.1 for analyzing the recommendation engine"
+   "@claude-opus help me optimize the database queries"
+   ```
    ```
 
 4. **Test Integration**:
@@ -456,6 +498,105 @@ AI_TIMEOUT_MS=30000
 AI_RETRY_MAX_ATTEMPTS=3
 AI_RETRY_BASE_DELAY=1000
 ```
+
+---
+
+## 🧠 Claude Opus 4.1 GitHub Coding Agent
+
+**Industry-leading AI coding assistance with extended thinking, deep reasoning, and agent workflows**
+
+### ✨ Advanced Capabilities
+
+Claude Opus 4.1 brings unprecedented AI assistance to EchoTune AI development:
+
+- **🧠 Extended Thinking**: Budget-controlled deep reasoning with transparent thought processes
+- **💻 Advanced Coding**: Industry-leading development assistance with end-to-end task execution  
+- **🤖 Agent Workflows**: Complex multi-step task automation and intelligent orchestration
+- **⏳ Long-horizon Tasks**: Sustained performance on objectives requiring thousands of steps
+- **🔍 Agentic Search**: Comprehensive insight synthesis across multiple data sources
+- **💾 Memory Management**: Context retention across multiple interactions
+
+### 🎯 GitHub Integration Commands
+
+#### Core Slash Commands
+
+```bash
+# Deep analytical reasoning with extended thinking
+/claude-opus deep-reasoning [target] [budget tokens]
+
+# Methodical problem-solving with thinking mode
+/claude-opus extended-thinking [target] [budget tokens]
+
+# Industry-leading coding assistance
+/claude-opus advanced-coding [target] [specific request]
+
+# Complex multi-step task automation
+/claude-opus agent-workflow [target] [workflow type]
+
+# Comprehensive system design analysis
+/claude-opus architectural-analysis [target] [focus area]
+
+# Sustained performance on complex objectives
+/claude-opus long-horizon-tasks [objective] [budget tokens]
+
+# Shortened form (works with all command types)
+/opus [command-type] [parameters]
+```
+
+#### Usage Examples
+
+```bash
+# Analyze specific components
+/claude-opus deep-reasoning src/ai/
+/claude-opus advanced-coding src/recommendation/ "optimize algorithm"
+/opus architectural-analysis "database design"
+
+# Custom thinking budgets
+/claude-opus extended-thinking budget 10000
+/claude-opus long-horizon-tasks "complete system refactor" budget 15000
+
+# Natural language triggers
+"Use Claude Opus 4.1 for analyzing the Spotify integration performance"
+"@claude-opus help me design a better caching strategy"
+"Claude Opus 4.1 for comprehensive security review"
+```
+
+#### Advanced Features
+
+- **Extended Thinking Budget**: Configurable 1K-32K thinking tokens for deep reasoning
+- **Target Scoping**: Focus analysis on specific files, directories, or components
+- **Custom Prompts**: Natural language requests for specific assistance
+- **Workflow Integration**: Seamless integration with existing GitHub workflows
+- **Progress Monitoring**: Real-time workflow tracking and detailed reporting
+
+### 📊 Command Types Guide
+
+| Command Type | Best For | Default Budget | Use Cases |
+|--------------|----------|----------------|-----------|
+| **Deep Reasoning** | Complex analysis, strategic planning | 8,000 tokens | Research, architecture decisions, optimization |
+| **Extended Thinking** | Problem-solving, debugging | 10,000 tokens | Troubleshooting, methodology, systematic analysis |
+| **Advanced Coding** | Development tasks, code generation | 6,000 tokens | Implementation, refactoring, code review |
+| **Agent Workflow** | Automation design, process optimization | 7,000 tokens | CI/CD, deployment, testing automation |
+| **Architectural Analysis** | System design, scalability planning | 8,000 tokens | Architecture review, performance planning |
+| **Long-horizon Tasks** | Major refactors, comprehensive overhauls | 12,000 tokens | Large projects, complete system redesigns |
+
+### 🚀 Quick Start Examples
+
+```bash
+# Test the integration
+/claude-opus deep-reasoning "test Claude Opus 4.1 connectivity"
+
+# Analyze EchoTune architecture
+/claude-opus architectural-analysis "review music recommendation system"
+
+# Get coding assistance
+/claude-opus advanced-coding src/api/ "implement rate limiting"
+
+# Design automation workflows
+/claude-opus agent-workflow "comprehensive testing pipeline"
+```
+
+For complete documentation, see: [Claude Opus 4.1 Integration Guide](./CLAUDE_OPUS_INTEGRATION_GUIDE.md)
 
 ---
 

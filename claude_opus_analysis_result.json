@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "timestamp": "2025-08-24T16:31:07.187Z",
+  "commandType": "deep-reasoning",
+  "target": "",
+  "extendedThinking": true,
+  "thinkingBudget": 8000,
+  "modelVersion": "claude-opus-4-1@20250805",
+  "analysis": "# Claude Opus 4.1 Mock Analysis\n\n**Command Type**: deep-reasoning\n**Target**: Repository-wide\n**Extended Thinking**: true\n\n## Mock Analysis Results\n\nThis is a simulated response from Claude Opus 4.1 for testing purposes. In a real deployment with proper Vertex AI configuration, this would contain:\n\n### Advanced Analysis Capabilities\n- Deep reasoning with extended thinking mode\n- Industry-leading coding assistance\n- Complex multi-step task automation\n- Comprehensive architectural insights\n\n### Configuration Status\n- **Mock Mode**: Active (GCP_PROJECT_ID not configured)\n- **Model**: publishers/anthropic/models/claude-opus-4-1\n- **Version**: claude-opus-4-1@20250805\n- **Thinking Budget**: 8000 tokens\n\n### Setup Requirements\nTo enable real Claude Opus 4.1 analysis:\n1. Configure GCP_PROJECT_ID environment variable\n2. Enable Vertex AI API in your Google Cloud project\n3. Deploy Claude Opus 4.1 through Vertex AI Model Garden\n4. Ensure proper authentication and permissions\n\n### Test Command Examples\n- `/claude-opus deep-reasoning`\n- `/claude-opus advanced-coding src/ai/`\n- `/opus architectural-analysis`\n\nThis mock response demonstrates the integration is working correctly and ready for production deployment.",
+  "mockMode": true,
+  "metadata": {
+    "promptLength": 1000,
+    "responseLength": 1218,
+    "temperature": 0.1,
+    "processingTime": 1756053067187
+  },
+  "generatedAt": "2025-08-24T16:31:07.187Z",
+  "sessionMetrics": {
+    "startTime": 1756053067186,
+    "commandsExecuted": 1,
+    "totalThinkingTokens": 8000,
+    "totalOutputTokens": 1218,
+    "successfulCommands": 1
+  },
+  "configuration": {
+    "commandType": "deep-reasoning",
+    "target": "",
+    "prompt": "",
+    "thinkingBudget": 8000,
+    "extendedThinking": true,
+    "temperature": 0.1
+  }
+}

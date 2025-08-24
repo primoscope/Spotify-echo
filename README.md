@@ -23,7 +23,7 @@ EchoTune AI is a sophisticated music recommendation platform that combines the p
 
 ### ✨ Key Features
 
-- **🎯 Multi-Provider AI Integration**: Vertex AI, Gemini 2.5 Pro, Claude 3.5 Sonnet, OpenAI, and more
+- **🎯 Multi-Provider AI Integration**: Vertex AI, Gemini 2.5 Pro, Claude Opus 4.1, Claude 3.5 Sonnet, OpenAI, and more
 - **🤖 Conversational Music Discovery**: Natural language music search and recommendations
 - **📊 Advanced Analytics**: Real-time insights into listening patterns and preferences
 - **🔄 Intelligent Routing**: Automatic provider selection based on cost, latency, and quality
@@ -51,6 +51,7 @@ graph TB
     Router --> VertexAI[🤖 Vertex AI<br/>text-bison, embeddings]
     Router --> Gemini[🧠 Gemini 2.5 Pro<br/>Multimodal, 2M tokens]
     Router --> Claude[🎭 Claude 3.5 Sonnet<br/>Analysis, reasoning]
+    Router --> ClaudeOpus[🚀 Claude Opus 4.1<br/>Coding, agents, extended thinking]
     Router --> OpenAI[🔮 OpenAI GPT<br/>Fallback provider]
     Router --> Mock[🎪 Mock Provider<br/>Testing & CI]
     
@@ -74,6 +75,7 @@ graph TB
     VertexAI <--> GCP[☁️ Google Cloud Platform]
     Gemini <--> GoogleAI[🤖 Google AI Studio]
     Claude <--> AnthropicAPI[🔗 Anthropic API]
+    ClaudeOpus <--> VertexAnthropicAPI[🔗 Vertex AI Anthropic Publisher]
     
     %% Monitoring & Observability
     API --> Metrics[📈 Prometheus Metrics]
@@ -94,10 +96,10 @@ graph TB
     classDef external fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef monitoring fill:#fce4ec,stroke:#880e4f,stroke-width:2px
     
-    class VertexAI,Gemini,Claude,OpenAI,Router ai
+    class VertexAI,Gemini,Claude,ClaudeOpus,OpenAI,Router ai
     class MongoDB,Redis,VectorDB data
     class API,ChatService,RecommendEngine service
-    class SpotifyWeb,GCP,GoogleAI,AnthropicAPI external
+    class SpotifyWeb,GCP,GoogleAI,AnthropicAPI,VertexAnthropicAPI external
     class Metrics,Tracing,Logging,Dashboard monitoring
 ```
 
@@ -191,6 +193,15 @@ EchoTune AI supports multiple AI providers with intelligent routing and fallback
 - **Features**: Superior reasoning, analysis, function calling
 - **Use Cases**: Complex reasoning, detailed analysis, structured output
 - **Pricing**: $0.003/1K input, $0.015/1K output
+
+#### 🚀 Claude Opus 4.1 (Vertex AI + Anthropic)
+- **Models**: claude-opus-4-1@20250805 via publishers/anthropic/models/claude-opus-4-1
+- **Features**: Industry-leading coding capabilities, extended thinking, agent workflows, long-horizon tasks
+- **Capabilities**: Advanced coding, multimodal analysis, memory management, multi-step reasoning
+- **Context**: 200K input tokens, 32K output tokens
+- **Use Cases**: Complex development tasks, agent automation, agentic search, coding assistance
+- **Pricing**: $0.015/1K input, $0.075/1K output (premium)
+- **Provider**: Accessed through Vertex AI publisher system (not direct Anthropic API)
 
 #### 🔮 OpenAI (Fallback)
 - **Models**: gpt-4-turbo, gpt-3.5-turbo
@@ -382,6 +393,47 @@ Visit `http://localhost:3000` and check:
 3. **Test Connection**:
    ```bash
    npm run ai:test:providers
+   ```
+
+#### Claude Opus 4.1 (Vertex AI) Setup
+
+1. **Prerequisites**:
+   - Google Cloud Project with Vertex AI API enabled
+   - Access to Anthropic models through Vertex AI Publisher
+   - Proper IAM permissions for Vertex AI
+
+2. **Configure Project**:
+   ```env
+   GCP_PROJECT_ID=your-project-id
+   GCP_VERTEX_LOCATION=us-central1
+   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+   ```
+
+3. **Deploy Model**:
+   ```bash
+   # Deploy all AI providers including Claude Opus 4.1
+   npm run ai:deploy:all-providers
+   
+   # Deploy specific model (requires manual Vertex AI setup)
+   # 1. Go to Vertex AI Model Garden
+   # 2. Find Claude Opus 4.1 under Anthropic publisher
+   # 3. Deploy to endpoint or use on-demand
+   ```
+
+4. **Test Integration**:
+   ```bash
+   npm run ai:test:providers         # Test all providers
+   npm run ai:deploy:all-providers:dry-run  # Dry run test
+   ```
+
+5. **Extended Thinking Mode** (Optional):
+   ```javascript
+   // Enable extended thinking for complex tasks
+   const response = await vertexAnthropicProvider.generateCompletion(messages, {
+     model: 'claude-opus-4-1',
+     enableExtendedThinking: true,
+     maxTokens: 32000
+   });
    ```
 
 ### Routing Configuration

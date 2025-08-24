@@ -354,6 +354,8 @@
     "ai:test:providers": "node scripts/test-ai-providers.js providers",
     "ai:test:health": "node scripts/test-ai-providers.js health",
     "ai:test:routing": "node scripts/test-ai-providers.js routing",
+    "ai:test:claude-opus": "node -e \"const Provider = require('./src/chat/llm-providers/vertex-anthropic-provider'); const p = new Provider({projectId: process.env.GCP_PROJECT_ID}); p.initialize().then(() => p.generateCompletion([{role: 'user', content: 'Test Claude Opus 4.1'}], {model: 'claude-opus-4-1'})).then(console.log).catch(console.error)\"",
+    "ai:test:claude-opus-comprehensive": "node scripts/test-claude-opus-4.1.js",
     "ai:eval": "node scripts/ai/run_eval.js run",
     "ai:eval:list": "node scripts/ai/run_eval.js list",
     "ai:eval:baseline": "node scripts/ai/run_eval.js run --model text-bison@latest --suite baseline_recommendations",

@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 /** Centralized error handler (must be last). */
-const logger = require("../infra/observability/logger");
+const logger = require('../infra/observability/logger');
 module.exports = function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-vars
   const status = err.statusCode || 500;
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = process.env.NODE_ENV === 'production';
   logger.error({
-    msg: "Unhandled error",
+    msg: 'Unhandled error',
     status,
     err: {
       message: err.message,
@@ -15,8 +15,8 @@ module.exports = function errorHandler(err, req, res, next) { // eslint-disable-
   });
   res.status(status).json({
     error: {
-      message: err.publicMessage || (status === 500 ? "Internal Server Error" : err.message),
-      code: err.code || "internal_error"
+      message: err.publicMessage || (status === 500 ? 'Internal Server Error' : err.message),
+      code: err.code || 'internal_error'
     }
   });
 };

@@ -1,5 +1,5 @@
-"use strict";
-const rateLimit = require("express-rate-limit");
+'use strict';
+const rateLimit = require('express-rate-limit');
 module.exports = function createRateLimiter() {
   return rateLimit({
     windowMs: 60_000,

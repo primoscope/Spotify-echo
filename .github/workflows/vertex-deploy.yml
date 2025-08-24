@@ -1,0 +1,378 @@
+name: 🤖 Vertex AI Model Deployment
+
+on:
+  push:
+    paths:
+      - 'models/**'
+    branches:
+      - main
+      - 'feature/**'
+      - 'vertex-ai/**'
+  pull_request:
+    paths:
+      - 'models/**'
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      model_path:
+        description: 'Path to model directory (relative to models/)'
+        required: false
+        default: 'sample-model'
+        type: string
+      force_deploy:
+        description: 'Force deployment even if model exists'
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: 'Skip model testing after deployment'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+  VERTEX_AI_REGION: ${{ vars.VERTEX_AI_REGION || 'us-central1' }}
+  VERTEX_AI_STAGING_BUCKET: ${{ secrets.VERTEX_AI_STAGING_BUCKET }}
+  NODE_VERSION: '20'
+
+jobs:
+  # Validation job - runs on all triggers
+  validate:
+    name: 🔍 Validate Configuration
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      model_path: ${{ steps.check.outputs.model_path }}
+      changed_models: ${{ steps.check.outputs.changed_models }}
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 🔍 Check Deployment Conditions
+        id: check
+        run: |
+          should_deploy="false"
+          model_path=""
+          changed_models=""
+          
+          # Check if manual dispatch
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            should_deploy="true"
+            model_path="${{ github.event.inputs.model_path }}"
+            echo "Manual deployment triggered for: $model_path"
+          
+          # Check if PR has vertex-deploy label
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'vertex-deploy') }}" == "true" ]]; then
+              should_deploy="true"
+              echo "PR labeled with vertex-deploy"
+            fi
+          
+          # Check if push to main with model changes
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            should_deploy="true"
+            echo "Push to main with model changes"
+          fi
+          
+          # Detect changed models if not manual dispatch
+          if [[ "${{ github.event_name }}" != "workflow_dispatch" ]]; then
+            changed_models=$(git diff --name-only HEAD~1 HEAD | grep '^models/' | cut -d'/' -f2 | sort -u | tr '\n' ' ')
+            if [[ -n "$changed_models" ]]; then
+              model_path=$(echo "$changed_models" | cut -d' ' -f1)
+              echo "Detected changed models: $changed_models"
+              echo "Will deploy first changed model: $model_path"
+            fi
+          fi
+          
+          echo "should_deploy=$should_deploy" >> $GITHUB_OUTPUT
+          echo "model_path=$model_path" >> $GITHUB_OUTPUT
+          echo "changed_models=$changed_models" >> $GITHUB_OUTPUT
+
+      - name: 📋 Validate Environment Variables
+        if: steps.check.outputs.should_deploy == 'true'
+        run: |
+          echo "🔍 Validating required environment variables..."
+          
+          if [[ -z "$GOOGLE_CLOUD_PROJECT" ]]; then
+            echo "❌ GOOGLE_CLOUD_PROJECT secret is required"
+            exit 1
+          fi
+          
+          if [[ -z "$VERTEX_AI_STAGING_BUCKET" ]]; then
+            echo "❌ VERTEX_AI_STAGING_BUCKET secret is required"
+            exit 1
+          fi
+          
+          echo "✅ Environment variables validated"
+          echo "   Project: $GOOGLE_CLOUD_PROJECT"
+          echo "   Region: $VERTEX_AI_REGION"
+          echo "   Bucket: $VERTEX_AI_STAGING_BUCKET"
+
+      - name: 📂 Validate Model Path
+        if: steps.check.outputs.should_deploy == 'true'
+        run: |
+          model_path="${{ steps.check.outputs.model_path }}"
+          full_path="models/$model_path"
+          
+          if [[ ! -d "$full_path" ]]; then
+            echo "❌ Model directory does not exist: $full_path"
+            exit 1
+          fi
+          
+          if [[ ! -f "$full_path/model_metadata.json" ]]; then
+            echo "❌ model_metadata.json not found in: $full_path"
+            exit 1
+          fi
+          
+          echo "✅ Model path validated: $full_path"
+
+  # Deployment job - runs only if validation passes
+  deploy:
+    name: 🚀 Deploy to Vertex AI
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.should_deploy == 'true'
+    
+    permissions:
+      contents: read
+      id-token: write  # Required for Workload Identity Federation
+      pull-requests: write  # To comment on PRs
+    
+    outputs:
+      deployment_results: ${{ steps.deploy.outputs.deployment_results }}
+      endpoint_id: ${{ steps.deploy.outputs.endpoint_id }}
+      prediction_url: ${{ steps.deploy.outputs.prediction_url }}
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔐 Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          # Prefer Workload Identity Federation
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          # Fallback to service account key
+          credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          # Export credentials for Node.js
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: 🔧 Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: 'latest'
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci
+          # Install @google-cloud/aiplatform if not in package.json yet
+          npm list @google-cloud/aiplatform || npm install @google-cloud/aiplatform@latest
+
+      - name: 🛠️ Setup Vertex AI Environment
+        run: |
+          echo "🔧 Running Vertex AI setup..."
+          npm run vertex:setup
+
+      - name: 🚀 Deploy Model
+        id: deploy
+        run: |
+          model_path="models/${{ needs.validate.outputs.model_path }}"
+          force_flag=""
+          
+          if [[ "${{ github.event.inputs.force_deploy }}" == "true" ]]; then
+            force_flag="--force"
+          fi
+          
+          echo "🚀 Deploying model from: $model_path"
+          npm run vertex:deploy "$model_path" $force_flag
+          
+          # Extract deployment results
+          if [[ -f "vertex-ai-deployment-results.json" ]]; then
+            deployment_results=$(cat vertex-ai-deployment-results.json)
+            endpoint_id=$(echo "$deployment_results" | jq -r '.endpoint_id')
+            prediction_url=$(echo "$deployment_results" | jq -r '.prediction_url')
+            
+            echo "deployment_results<<EOF" >> $GITHUB_OUTPUT
+            echo "$deployment_results" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            echo "endpoint_id=$endpoint_id" >> $GITHUB_OUTPUT
+            echo "prediction_url=$prediction_url" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Deployment results file not found"
+            exit 1
+          fi
+
+      - name: 📊 Upload Deployment Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vertex-ai-deployment-results
+          path: |
+            vertex-ai-deployment-results.json
+            vertex-ai-test-results.json
+          retention-days: 30
+
+  # Testing job - runs after successful deployment
+  test:
+    name: 🧪 Test Deployed Model
+    runs-on: ubuntu-latest
+    needs: [validate, deploy]
+    if: |
+      needs.deploy.result == 'success' && 
+      github.event.inputs.skip_tests != 'true'
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔐 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 📥 Download Deployment Results
+        uses: actions/download-artifact@v4
+        with:
+          name: vertex-ai-deployment-results
+
+      - name: 🧪 Run Model Tests
+        run: |
+          echo "🧪 Testing deployed model..."
+          npm run vertex:test-model "${{ needs.validate.outputs.model_path }}"
+
+      - name: 📊 Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vertex-ai-test-results
+          path: vertex-ai-test-results.json
+          retention-days: 30
+
+  # Notification job - runs after all jobs complete
+  notify:
+    name: 📢 Update PR with Results
+    runs-on: ubuntu-latest
+    needs: [validate, deploy, test]
+    if: always() && github.event_name == 'pull_request'
+    
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vertex-ai-deployment-results
+        continue-on-error: true
+
+      - name: 📝 Generate PR Comment
+        id: comment
+        run: |
+          comment_body="## 🤖 Vertex AI Deployment Results\n\n"
+          
+          if [[ "${{ needs.deploy.result }}" == "success" ]]; then
+            endpoint_id="${{ needs.deploy.outputs.endpoint_id }}"
+            prediction_url="${{ needs.deploy.outputs.prediction_url }}"
+            
+            comment_body+="### ✅ Deployment Successful\n\n"
+            comment_body+="**Model:** \`${{ needs.validate.outputs.model_path }}\`\n"
+            comment_body+="**Endpoint ID:** \`$endpoint_id\`\n"
+            comment_body+="**Prediction URL:** \`$prediction_url\`\n"
+            comment_body+="**Region:** \`$VERTEX_AI_REGION\`\n\n"
+            
+            console_url="https://console.cloud.google.com/vertex-ai/endpoints/detail/$VERTEX_AI_REGION/$endpoint_id?project=$GOOGLE_CLOUD_PROJECT"
+            comment_body+="🔗 [View in Google Cloud Console]($console_url)\n\n"
+            
+            if [[ "${{ needs.test.result }}" == "success" ]]; then
+              comment_body+="### ✅ Testing Successful\n\n"
+              comment_body+="The deployed model passed all validation tests.\n\n"
+            elif [[ "${{ needs.test.result }}" == "skipped" ]]; then
+              comment_body+="### ⏭️ Testing Skipped\n\n"
+              comment_body+="Model testing was skipped for this deployment.\n\n"
+            else
+              comment_body+="### ❌ Testing Failed\n\n"
+              comment_body+="The deployed model failed validation tests. Please check the logs.\n\n"
+            fi
+            
+            comment_body+="### 🔬 Testing the Model\n\n"
+            comment_body+="You can test the deployed model using:\n"
+            comment_body+="\`\`\`bash\n"
+            comment_body+="npm run vertex:test-model ${{ needs.validate.outputs.model_path }}\n"
+            comment_body+="\`\`\`\n\n"
+            
+          else
+            comment_body+="### ❌ Deployment Failed\n\n"
+            comment_body+="The model deployment to Vertex AI failed. Please check the workflow logs for details.\n\n"
+          fi
+          
+          comment_body+="---\n"
+          comment_body+="*Deployed by GitHub Actions workflow at $(date -u)*"
+          
+          echo "comment_body<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$comment_body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            // Find existing bot comment
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🤖 Vertex AI Deployment Results')
+            );
+            
+            const commentBody = `${{ steps.comment.outputs.comment_body }}`;
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }

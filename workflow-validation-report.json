@@ -1,18 +1,28 @@
 {
-  "timestamp": "2025-08-16T01:01:06.861Z",
+  "timestamp": "2025-08-24T12:53:58.920Z",
   "summary": {
-    "total": 47,
-    "valid": 47,
-    "warnings": 28,
-    "errors": 0,
+    "total": 34,
+    "valid": 33,
+    "warnings": 16,
+    "errors": 1,
     "optimizations": [
       {
-        "file": "mcp-integration.yml",
+        "file": "ai-budget-monitor.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
       },
       {
-        "file": "agent-mcp-automation.yml",
+        "file": "ai-issue-analysis.yml",
+        "type": "caching",
+        "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
+        "file": "autonomous-coding-perplexity-cycle.yml",
+        "type": "caching",
+        "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
+        "file": "autonomous-perplexity-development-cycle.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
       },
@@ -22,29 +32,29 @@
         "suggestion": "Consider adding pip cache for faster builds"
       },
       {
+        "file": "codeql.yml",
+        "type": "caching",
+        "suggestion": "Consider adding npm cache for faster builds"
+      },
+      {
+        "file": "containerization-ci.yml",
+        "type": "caching",
+        "suggestion": "Consider adding npm cache for faster builds"
+      },
+      {
+        "file": "continuous-roadmap-research.yml",
+        "type": "caching",
+        "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
         "file": "copilot-agent-preflight.yml",
         "type": "caching",
         "suggestion": "Consider adding npm cache for faster builds"
       },
       {
-        "file": "deploy-one-click.yml",
-        "type": "caching",
-        "suggestion": "Consider adding pip cache for faster builds"
-      },
-      {
-        "file": "digitalocean-deploy.yml",
-        "type": "caching",
-        "suggestion": "Consider adding pip cache for faster builds"
-      },
-      {
-        "file": "enhanced-copilot-agent-integration.yml",
+        "file": "github-coding-agent-slash-commands.yml",
         "type": "caching",
         "suggestion": "Consider adding npm cache for faster builds"
-      },
-      {
-        "file": "epic-mvp-integration.yml",
-        "type": "caching",
-        "suggestion": "Consider adding pip cache for faster builds"
       },
       {
         "file": "gpt5-advanced-multimodel.yml",
@@ -52,14 +62,14 @@
         "suggestion": "Consider adding pip cache for faster builds"
       },
       {
-        "file": "mcp-validation-gateway.yml",
-        "type": "caching",
-        "suggestion": "Consider adding npm cache for faster builds"
-      },
-      {
-        "file": "mcp-validation-gateway.yml",
+        "file": "mcp-integration.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
+        "file": "mcp-servers-integration.yml",
+        "type": "caching",
+        "suggestion": "Consider adding npm cache for faster builds"
       },
       {
         "file": "mcp-validation.yml",
@@ -67,19 +77,24 @@
         "suggestion": "Consider adding pip cache for faster builds"
       },
       {
-        "file": "music-pipeline.yml",
+        "file": "music-research-automation.yml",
         "type": "caching",
         "suggestion": "Consider adding npm cache for faster builds"
       },
       {
-        "file": "music-pipeline.yml",
+        "file": "perplexity-budget-guard.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
       },
       {
-        "file": "pr-slash-commands.yml",
+        "file": "security-audit.yml",
         "type": "caching",
         "suggestion": "Consider adding pip cache for faster builds"
+      },
+      {
+        "file": "vertex-deploy.yml",
+        "type": "caching",
+        "suggestion": "Consider adding npm cache for faster builds"
       }
     ]
   },

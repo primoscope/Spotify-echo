@@ -1,54 +1,136 @@
-node_modules
-.git
-.github
+# Development files
 .env
-.env.local
-.env.development
-.env.production
-.env.test
-coverage
-logs
+.env.*
+!.env.example
+!.env.production.example
+
+# Test files
+tests/
+test-*/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+coverage/
+.nyc_output/
+
+# Build artifacts
+dist/
+build/
+.next/
+.nuxt/
+.vuepress/dist/
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
 *.log
-scripts/experimental
-tmp
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
 .cache
-.autonomous-coding-session
-.autonomous-session
-.copilot
-.cursor
-.cursorignore
-.cursorrules
-.do
-.dockerignore
-.env.cursor-agent
-.env.mcp.example
-.env.production.example
-.env.template
-.gemini
-.github (2)
-.lighthouserc.json
-.mcp-config
-.openmcp
-.perplexity
-.prettierrc
-.tasks
-.vscode
-.yamllint.yml
-automation-artifacts
-autonomous-coding-orchestrator.js.backup-*
-automation-workflow-report-*.json
-comprehensive-*-report.json
-document-backups-*
-enhanced-*-report.json
-enhanced-*-results
-github_workflows_*.yml.txt
-grok4-*-report.json
-mcp-*-report.json
-perplexity-*-report.json
-test-artifacts
-testing_screenshots
-validation-reports
-workflow-*.json
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# MCP server files
+mcp-server/
+mcp-servers/
+
+# Documentation
+docs/
 *.md
 !README.md
-!docs/DEPLOYMENT_VERCEL.md
+
+# Scripts
+scripts/
+*.sh
+
+# Validation reports
+validation-reports/
+*.json
+!package.json
+!package-lock.json
+
+# Autonomous coding session files
+.autonomous-coding-session/
+.autonomous-session/
+
+# Perplexity research files
+perplexity-*/
+search-results/

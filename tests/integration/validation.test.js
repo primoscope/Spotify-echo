@@ -4,7 +4,7 @@
  */
 
 const request = require('supertest');
-const app = require('../../src/server');
+const { app } = require('../../src/server');
 
 describe('/internal/example-validation', () => {
   test('should validate correct input', async () => {

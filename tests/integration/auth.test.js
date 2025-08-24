@@ -4,7 +4,7 @@
  */
 
 const request = require('supertest');
-const app = require('../../src/server');
+const { app } = require('../../src/server');
 const { generateToken } = require('../../src/security/auth');
 
 describe('Auth Middleware', () => {

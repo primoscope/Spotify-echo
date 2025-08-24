@@ -4,7 +4,7 @@
  */
 
 const request = require('supertest');
-const app = require('../../src/server');
+const { app } = require('../../src/server');
 
 describe('/internal/ready', () => {
   test('should eventually return 200 ready status', async () => {

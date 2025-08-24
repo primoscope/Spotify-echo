@@ -43,6 +43,10 @@ const { initializeReadiness } = require('./infra/lifecycle/readiness');
 const { initializeGracefulShutdown } = require('./infra/lifecycle/gracefulShutdown');
 const appCacheManager = require('./infra/cache/index');
 
+// Eager-load modules that register Prometheus metrics
+require('./security/auth');
+require('./domain/playlist/metrics');
+
 // Validate production configuration
 try {
   validateProductionConfig();

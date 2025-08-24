@@ -4,7 +4,7 @@
  */
 
 const request = require('supertest');
-const app = require('../../src/server');
+const { app } = require('../../src/server');
 
 describe('CSP (Content Security Policy)', () => {
   const originalEnvValue = process.env.ENABLE_CSP_REPORT_ONLY;

@@ -68,6 +68,20 @@ class AgentRouter {
       console.warn('⚠️  Gemini provider initialization failed:', error.message);
     }
 
+    try {
+      const AnthropicProvider = require('../../chat/llm-providers/anthropic-provider');
+      const anthropicProvider = new AnthropicProvider({
+        apiKey: process.env.ANTHROPIC_API_KEY
+      });
+      await anthropicProvider.initialize();
+      if (anthropicProvider.isAvailable()) {
+        this.providers.set('anthropic', anthropicProvider);
+        console.log('✅ Anthropic provider initialized');
+      }
+    } catch (error) {
+      console.warn('⚠️  Anthropic provider initialization failed:', error.message);
+    }
+
     // Mock provider for testing
     try {
       const { default: MockProvider } = await import('../../chat/llm-providers/mock-provider.js');

@@ -75,6 +75,75 @@
           "task": "reranker"
         }
       }
+    },
+    "gemini-models": {
+      "gemini-2.5-pro": {
+        "modelId": "gemini-2.5-pro",
+        "displayName": "Gemini 2.5 Pro",
+        "description": "Google's most advanced multimodal AI model",
+        "capabilities": ["text-generation", "conversation", "reasoning", "multimodal", "code"],
+        "maxTokens": 2000000,
+        "contextWindow": 2000000,
+        "latencyTier": "medium",
+        "costTier": "premium",
+        "labels": {
+          "service": "echotune",
+          "model_family": "gemini",
+          "version": "2.5-pro",
+          "latency_tier": "medium",
+          "multimodal": "true"
+        }
+      },
+      "gemini-1.5-pro": {
+        "modelId": "gemini-1.5-pro",
+        "displayName": "Gemini 1.5 Pro",
+        "description": "High-performance multimodal model",
+        "capabilities": ["text-generation", "conversation", "reasoning", "multimodal"],
+        "maxTokens": 1048576,
+        "contextWindow": 1048576,
+        "latencyTier": "fast",
+        "costTier": "standard",
+        "labels": {
+          "service": "echotune",
+          "model_family": "gemini",
+          "version": "1.5-pro",
+          "latency_tier": "fast"
+        }
+      }
+    },
+    "anthropic-models": {
+      "claude-3.5-sonnet": {
+        "modelId": "claude-3-5-sonnet-20241022",
+        "displayName": "Claude 3.5 Sonnet",
+        "description": "Anthropic's most capable model with improved reasoning",
+        "capabilities": ["text-generation", "conversation", "reasoning", "analysis"],
+        "maxTokens": 200000,
+        "contextWindow": 200000,
+        "latencyTier": "fast",
+        "costTier": "premium",
+        "labels": {
+          "service": "echotune",
+          "model_family": "claude",
+          "version": "3.5-sonnet",
+          "latency_tier": "fast"
+        }
+      },
+      "claude-3-opus": {
+        "modelId": "claude-3-opus-20240229",
+        "displayName": "Claude 3 Opus",
+        "description": "Anthropic's most powerful model for complex tasks",
+        "capabilities": ["text-generation", "conversation", "reasoning", "analysis"],
+        "maxTokens": 200000,
+        "contextWindow": 200000,
+        "latencyTier": "medium",
+        "costTier": "premium",
+        "labels": {
+          "service": "echotune",
+          "model_family": "claude",
+          "version": "3-opus",
+          "latency_tier": "medium"
+        }
+      }
     }
   },
   "endpoints": {

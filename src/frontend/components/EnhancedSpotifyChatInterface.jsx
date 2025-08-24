@@ -944,25 +944,25 @@ You can also ask natural language questions like:
           <Chip 
             label="What's playing?" 
             size="small" 
-            onClick={() => setInputMessage("/spotify current-track")}
+            onClick={() => setInputMessage('/spotify current-track')}
             icon={<MusicNote />}
           />
           <Chip 
             label="My top songs" 
             size="small" 
-            onClick={() => setInputMessage("/spotify top-tracks")}
+            onClick={() => setInputMessage('/spotify top-tracks')}
             icon={<Star />}
           />
           <Chip 
             label="Database stats" 
             size="small" 
-            onClick={() => setInputMessage("/db stats")}
+            onClick={() => setInputMessage('/db stats')}
             icon={<Analytics />}
           />
           <Chip 
             label="Recommend music" 
             size="small" 
-            onClick={() => setInputMessage("Recommend music for studying")}
+            onClick={() => setInputMessage('Recommend music for studying')}
             icon={<Psychology />}
           />
         </Box>

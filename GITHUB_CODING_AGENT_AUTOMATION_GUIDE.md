@@ -22,7 +22,46 @@
 
 ## 🚀 Quick Start: Ready-to-Use Commands
 
-### **Immediate Execution (Copy-Paste Ready)**
+### **🎯 User-Driven Slash Commands (NEW)**
+
+**Copy-paste these commands directly to @copilot in GitHub:**
+
+```markdown
+# Primary automation commands
+@copilot /analyze-and-code-with-perplexity
+@copilot /perplexity-research-roadmap  
+@copilot /code-priority-tasks
+@copilot /validate-and-optimize
+
+# Quick actions
+@copilot /perplexity-quick-analysis
+@copilot /update-roadmap-from-research
+@copilot /run-automation-cycle
+```
+
+### **🎮 Interactive Command Launcher**
+
+```bash
+# Launch interactive command interface
+node interactive-command-launcher.js
+
+# This provides a user-friendly menu for all commands
+```
+
+### **💬 Natural Language Prompts**
+
+```markdown
+# Complete development session
+@copilot I need you to run a complete autonomous development session. Start by analyzing the current roadmap, complete 3-5 high-priority tasks with real implementation, then use Perplexity API to research improvements and update the roadmap.
+
+# Research-focused workflow  
+@copilot Use Perplexity API with sonar-pro model to research the current repository, analyze technology stack, identify improvement opportunities, and generate new tasks for the roadmap.
+
+# Coding-focused session
+@copilot Focus on completing high-priority tasks from the roadmap. Look for [P0] and [P1] items, implement them following existing code patterns, then update task statuses.
+```
+
+### **🛠️ Legacy Command Line (Still Available)**
 
 ```bash
 # Navigate to repository
@@ -41,7 +80,7 @@ node autonomous-coding-orchestrator.js --cycle-count=3
 tail -f perplexity-*.md & tail -f automation-workflow-report-*.json
 ```
 
-**Expected Result**: System executes 3 complete cycles of coding → research → roadmap updates automatically.
+**Expected Result**: System executes complete cycles of coding → research → roadmap updates automatically.
 
 ---
 

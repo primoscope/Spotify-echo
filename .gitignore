@@ -355,8 +355,21 @@ split_data_part_*.csv
 databases/split_data_part_*.csv
 databases/jf
 
-# Machine Learning models
-models/
+# Machine Learning models (exclude large binaries but allow small examples)
+models/*.pkl
+models/*.h5
+models/*.bin
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*/large-*
+models/*/trained-*
+# Allow model metadata and configuration files
+!models/*/model_metadata.json
+!models/*/requirements.txt
+!models/README.md
+# Allow small sample/placeholder files
+!models/sample-model/model.pkl
 *.pkl
 *.joblib
 *.h5

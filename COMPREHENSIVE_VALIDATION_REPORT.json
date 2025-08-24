@@ -1,12 +1,20 @@
 {
-  "timestamp": "2025-08-20T20:56:30.389Z",
-  "executionTime": "2080ms",
+  "timestamp": "2025-08-24T11:43:18.694Z",
+  "executionTime": "3684ms",
   "results": {
     "workflows": {
-      "total": 21,
-      "passed": 7,
-      "failed": 14,
+      "total": 33,
+      "passed": 10,
+      "failed": 23,
       "errors": [
+        {
+          "file": "ai-budget-monitor.yml",
+          "error": "::group::.github/workflows/ai-budget-monitor.yml\n::error file=.github/workflows/ai-budget-monitor.yml,line=47,col=121::47:121 [line-length] line too long (124 > 120 characters)\n::error file=.github/workflows/ai-budget-monitor.yml,line=48,col=121::48:121 [line-length] line too long (139 > 120 characters)\n::error file=.github/workflows/ai-budget-monitor.yml,line=49,col=121::49:121 [line-length] line too long (133 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "ai-issue-analysis.yml",
+          "error": "::group::.github/workflows/ai-issue-analysis.yml\n::error file=.github/workflows/ai-issue-analysis.yml,line=183,col=121::183:121 [line-length] line too long (124 > 120 characters)\n::error file=.github/workflows/ai-issue-analysis.yml,line=214,col=121::214:121 [line-length] line too long (122 > 120 characters)\n::error file=.github/workflows/ai-issue-analysis.yml,line=343,col=121::343:121 [line-length] line too long (208 > 120 characters)\n::error file=.github/workflows/ai-issue-analysis.yml,line=344,col=121::344:121 [line-length] line too long (213 > 120 characters)\n::endgroup::\n\n"
+        },
         {
           "file": "api-tests.yml",
           "error": "::group::.github/workflows/api-tests.yml\n::error file=.github/workflows/api-tests.yml,line=66,col=121::66:121 [line-length] line too long (125 > 120 characters)\n::error file=.github/workflows/api-tests.yml,line=155,col=121::155:121 [line-length] line too long (146 > 120 characters)\n::endgroup::\n\n"
@@ -16,12 +24,28 @@
           "error": "::group::.github/workflows/auto-merge-gate.yml\n::error file=.github/workflows/auto-merge-gate.yml,line=17,col=121::17:121 [line-length] line too long (136 > 120 characters)\n::endgroup::\n\n"
         },
         {
+          "file": "autonomous-coding-perplexity-cycle.yml",
+          "error": "::group::.github/workflows/autonomous-coding-perplexity-cycle.yml\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=77,col=121::77:121 [line-length] line too long (135 > 120 characters)\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=87,col=121::87:121 [line-length] line too long (159 > 120 characters)\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=257,col=121::257:121 [line-length] line too long (121 > 120 characters)\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=333,col=121::333:121 [line-length] line too long (155 > 120 characters)\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=340,col=121::340:121 [line-length] line too long (150 > 120 characters)\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=352,col=121::352:121 [line-length] line too long (142 > 120 characters)\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=532,col=121::532:121 [line-length] line too long (131 > 120 characters)\n::error file=.github/workflows/autonomous-coding-perplexity-cycle.yml,line=559,col=121::559:121 [line-length] line too long (129 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
           "file": "autonomous-development-validation.yml",
           "error": "::group::.github/workflows/autonomous-development-validation.yml\n::error file=.github/workflows/autonomous-development-validation.yml,line=271,col=121::271:121 [line-length] line too long (141 > 120 characters)\n::error file=.github/workflows/autonomous-development-validation.yml,line=274,col=121::274:121 [line-length] line too long (128 > 120 characters)\n::endgroup::\n\n"
         },
         {
+          "file": "autonomous-perplexity-development-cycle.yml",
+          "error": "::group::.github/workflows/autonomous-perplexity-development-cycle.yml\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=76,col=121::76:121 [line-length] line too long (135 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=86,col=121::86:121 [line-length] line too long (161 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=232,col=121::232:121 [line-length] line too long (141 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=292,col=121::292:121 [line-length] line too long (152 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=384,col=121::384:121 [line-length] line too long (149 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=421,col=121::421:121 [line-length] line too long (127 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=477,col=121::477:121 [line-length] line too long (157 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=488,col=121::488:121 [line-length] line too long (145 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=605,col=121::605:121 [line-length] line too long (131 > 120 characters)\n::error file=.github/workflows/autonomous-perplexity-development-cycle.yml,line=622,col=121::622:121 [line-length] line too long (129 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
           "file": "ci.yml",
           "error": "::group::.github/workflows/ci.yml\n::error file=.github/workflows/ci.yml,line=92,col=121::92:121 [line-length] line too long (129 > 120 characters)\n::error file=.github/workflows/ci.yml,line=110,col=121::110:121 [line-length] line too long (127 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "containerization-ci.yml",
+          "error": "::group::.github/workflows/containerization-ci.yml\n::error file=.github/workflows/containerization-ci.yml,line=264,col=121::264:121 [line-length] line too long (161 > 120 characters)\n::error file=.github/workflows/containerization-ci.yml,line=271,col=121::271:121 [line-length] line too long (167 > 120 characters)\n::error file=.github/workflows/containerization-ci.yml,line=278,col=121::278:121 [line-length] line too long (167 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "continuous-roadmap-research.yml",
+          "error": "::group::.github/workflows/continuous-roadmap-research.yml\n::error file=.github/workflows/continuous-roadmap-research.yml,line=96,col=121::96:121 [line-length] line too long (128 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=132,col=121::132:121 [line-length] line too long (124 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=190,col=121::190:121 [line-length] line too long (130 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=244,col=121::244:121 [line-length] line too long (134 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=297,col=121::297:121 [line-length] line too long (121 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=302,col=121::302:121 [line-length] line too long (227 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=462,col=121::462:121 [line-length] line too long (137 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=463,col=121::463:121 [line-length] line too long (121 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=470,col=121::470:121 [line-length] line too long (149 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=541,col=121::541:121 [line-length] line too long (137 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=603,col=121::603:121 [line-length] line too long (177 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=606,col=121::606:121 [line-length] line too long (208 > 120 characters)\n::error file=.github/workflows/continuous-roadmap-research.yml,line=649,col=121::649:121 [line-length] line too long (186 > 120 characters)\n::endgroup::\n\n"
         },
         {
           "file": "copilot-agent-preflight.yml",
@@ -29,19 +53,19 @@
         },
         {
           "file": "copilot-slash-commands.yml",
-          "error": "::group::.github/workflows/copilot-slash-commands.yml\n::error file=.github/workflows/copilot-slash-commands.yml,line=164,col=121::164:121 [line-length] line too long (121 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=267,col=121::267:121 [line-length] line too long (162 > 120 characters)\n::endgroup::\n\n"
+          "error": "::group::.github/workflows/copilot-slash-commands.yml\n::error file=.github/workflows/copilot-slash-commands.yml,line=164,col=121::164:121 [line-length] line too long (121 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=268,col=121::268:121 [line-length] line too long (122 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=414,col=121::414:121 [line-length] line too long (185 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=749,col=121::749:121 [line-length] line too long (126 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=784,col=121::784:121 [line-length] line too long (168 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=852,col=121::852:121 [line-length] line too long (133 > 120 characters)\n::error file=.github/workflows/copilot-slash-commands.yml,line=992,col=121::992:121 [line-length] line too long (162 > 120 characters)\n::endgroup::\n\n"
         },
         {
           "file": "deploy-digitalocean.yml",
           "error": "::group::.github/workflows/deploy-digitalocean.yml\n::error file=.github/workflows/deploy-digitalocean.yml,line=383,col=121::383:121 [line-length] line too long (144 > 120 characters)\n::error file=.github/workflows/deploy-digitalocean.yml,line=419,col=121::419:121 [line-length] line too long (151 > 120 characters)\n::error file=.github/workflows/deploy-digitalocean.yml,line=420,col=121::420:121 [line-length] line too long (145 > 120 characters)\n::error file=.github/workflows/deploy-digitalocean.yml,line=421,col=121::421:121 [line-length] line too long (177 > 120 characters)\n::endgroup::\n\n"
         },
         {
-          "file": "gpt5-advanced-multimodel.yml",
-          "error": "::group::.github/workflows/gpt5-advanced-multimodel.yml\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=102,col=121::102:121 [line-length] line too long (135 > 120 characters)\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=195,col=121::195:121 [line-length] line too long (126 > 120 characters)\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=455,col=121::455:121 [line-length] line too long (227 > 120 characters)\n::endgroup::\n\n"
+          "file": "github-coding-agent-slash-commands.yml",
+          "error": "::group::.github/workflows/github-coding-agent-slash-commands.yml\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=52,col=121::52:121 [line-length] line too long (233 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=54,col=121::54:121 [line-length] line too long (247 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=113,col=121::113:121 [line-length] line too long (141 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=132,col=121::132:121 [line-length] line too long (143 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=229,col=121::229:121 [line-length] line too long (153 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=241,col=121::241:121 [line-length] line too long (160 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=263,col=121::263:121 [line-length] line too long (144 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=306,col=121::306:121 [line-length] line too long (146 > 120 characters)\n::error file=.github/workflows/github-coding-agent-slash-commands.yml,line=320,col=121::320:121 [line-length] line too long (143 > 120 characters)\n::endgroup::\n\n"
         },
         {
-          "file": "mcp-integration.yml",
-          "error": "::group::.github/workflows/mcp-integration.yml\n::error file=.github/workflows/mcp-integration.yml,line=37,col=7::37:7 syntax error: expected <block end>, but found '?' (syntax)\n::endgroup::\n\n"
+          "file": "gpt5-advanced-multimodel.yml",
+          "error": "::group::.github/workflows/gpt5-advanced-multimodel.yml\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=102,col=121::102:121 [line-length] line too long (135 > 120 characters)\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=195,col=121::195:121 [line-length] line too long (126 > 120 characters)\n::error file=.github/workflows/gpt5-advanced-multimodel.yml,line=455,col=121::455:121 [line-length] line too long (227 > 120 characters)\n::endgroup::\n\n"
         },
         {
           "file": "mcp-validation.yml",
@@ -56,12 +80,24 @@
           "error": "::group::.github/workflows/nightly-app-baseline.yml\n::error file=.github/workflows/nightly-app-baseline.yml,line=68,col=121::68:121 [line-length] line too long (157 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=87,col=121::87:121 [line-length] line too long (132 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=88,col=121::88:121 [line-length] line too long (132 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=90,col=121::90:121 [line-length] line too long (125 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=95,col=121::95:121 [line-length] line too long (130 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=96,col=121::96:121 [line-length] line too long (134 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=99,col=121::99:121 [line-length] line too long (137 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=100,col=121::100:121 [line-length] line too long (141 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=103,col=121::103:121 [line-length] line too long (147 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=104,col=121::104:121 [line-length] line too long (143 > 120 characters)\n::error file=.github/workflows/nightly-app-baseline.yml,line=214,col=121::214:121 [line-length] line too long (131 > 120 characters)\n::endgroup::\n\n"
         },
         {
+          "file": "perplexity-budget-guard.yml",
+          "error": "::group::.github/workflows/perplexity-budget-guard.yml\n::error file=.github/workflows/perplexity-budget-guard.yml,line=93,col=121::93:121 [line-length] line too long (138 > 120 characters)\n::error file=.github/workflows/perplexity-budget-guard.yml,line=95,col=121::95:121 [line-length] line too long (123 > 120 characters)\n::error file=.github/workflows/perplexity-budget-guard.yml,line=100,col=121::100:121 [line-length] line too long (134 > 120 characters)\n::error file=.github/workflows/perplexity-budget-guard.yml,line=148,col=121::148:121 [line-length] line too long (151 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
           "file": "perplexity-research.yml",
-          "error": "::group::.github/workflows/perplexity-research.yml\n::error file=.github/workflows/perplexity-research.yml,line=31,col=121::31:121 [line-length] line too long (165 > 120 characters)\n::error file=.github/workflows/perplexity-research.yml,line=38,col=121::38:121 [line-length] line too long (145 > 120 characters)\n::endgroup::\n\n"
+          "error": "::group::.github/workflows/perplexity-research.yml\n::error file=.github/workflows/perplexity-research.yml,line=150,col=121::150:121 [line-length] line too long (132 > 120 characters)\n::error file=.github/workflows/perplexity-research.yml,line=232,col=1::232:1 syntax error: could not find expected ':' (syntax)\n::error file=.github/workflows/perplexity-research.yml,line=256,col=121::256:121 [line-length] line too long (173 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "security-audit.yml",
+          "error": "::group::.github/workflows/security-audit.yml\n::error file=.github/workflows/security-audit.yml,line=101,col=121::101:121 [line-length] line too long (182 > 120 characters)\n::error file=.github/workflows/security-audit.yml,line=107,col=121::107:121 [line-length] line too long (123 > 120 characters)\n::error file=.github/workflows/security-audit.yml,line=183,col=121::183:121 [line-length] line too long (189 > 120 characters)\n::endgroup::\n\n"
         },
         {
           "file": "security.yml",
           "error": "::group::.github/workflows/security.yml\n::error file=.github/workflows/security.yml,line=272,col=121::272:121 [line-length] line too long (212 > 120 characters)\n::error file=.github/workflows/security.yml,line=273,col=121::273:121 [line-length] line too long (201 > 120 characters)\n::error file=.github/workflows/security.yml,line=274,col=121::274:121 [line-length] line too long (208 > 120 characters)\n::error file=.github/workflows/security.yml,line=278,col=121::278:121 [line-length] line too long (128 > 120 characters)\n::endgroup::\n\n"
+        },
+        {
+          "file": "smoke.yml",
+          "error": "::group::.github/workflows/smoke.yml\n::error file=.github/workflows/smoke.yml,line=169,col=121::169:121 [line-length] line too long (125 > 120 characters)\n::endgroup::\n\n"
         }
       ]
     },
@@ -84,7 +120,7 @@
       "errors": []
     },
     "overall": {
-      "score": 59,
+      "score": 50,
       "status": "NEEDS_WORK"
     }
   }

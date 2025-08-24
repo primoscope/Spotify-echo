@@ -367,6 +367,24 @@ npm run test:music-integration
 
 ## 🚀 Deployment
 
+### Vercel One-Click Deploy (Recommended)
+
+Deploy EchoTune AI to Vercel with a single click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/dzp5103/Spotify-echo&project-name=echotune-ai&repository-name=Spotify-echo&demo-title=EchoTune%20AI&demo-description=AI-powered%20music%20discovery%20platform&env=MONGODB_URI,REDIS_URL,OPENAI_API_KEY,GOOGLE_AI_API_KEY,ANTHROPIC_API_KEY,PERPLEXITY_API_KEY,SPOTIFY_CLIENT_ID,SPOTIFY_CLIENT_SECRET,JWT_SECRET,SESSION_SECRET,AGENTOPS_API_KEY,ENCRYPTION_KEY,ALLOWED_ORIGINS,FRONTEND_URL,DOMAIN,BROWSERBASE_API_KEY,BROWSERBASE_PROJECT_ID)
+
+**Required Environment Variables for Vercel:**
+```bash
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/echotune
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret  
+JWT_SECRET=your_long_random_jwt_secret_32_chars_min
+```
+
+📖 **[Complete Vercel Deployment Guide](docs/DEPLOYMENT_VERCEL.md)**
+
+### Alternative Deployment Options
+
 ### DigitalOcean Deployment
 
 ```bash

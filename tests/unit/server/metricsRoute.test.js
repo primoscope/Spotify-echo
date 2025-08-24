@@ -4,7 +4,16 @@
 
 const request = require('supertest');
 const express = require('express');
-const metricsRoute = require('../../src/server/metricsRoute');
+
+// Mock the metrics registry before importing the route
+jest.mock('../../../src/infra/observability/metrics', () => ({
+  register: {
+    contentType: 'text/plain; version=0.0.4; charset=utf-8',
+    metrics: jest.fn().mockResolvedValue('# HELP test_metric Test metric help\n# TYPE test_metric counter\ntest_metric 1')
+  }
+}));
+
+const metricsRoute = require('../../../src/server/metricsRoute');
 
 describe('Enhanced Metrics Routes', () => {
   let app;

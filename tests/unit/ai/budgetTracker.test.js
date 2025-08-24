@@ -4,17 +4,36 @@
 
 const fs = require('fs');
 const path = require('path');
-const { BudgetTracker, BudgetExceededError } = require('../../src/ai/cost/budgetTracker');
+const { BudgetTracker, BudgetExceededError } = require('../../../src/ai/cost/budgetTracker');
 
 // Mock logger to avoid issues in tests
-jest.mock('../../src/infra/observability/logger', () => ({
+jest.mock('../../../src/infra/observability/logger', () => ({
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn()
 }));
 
-// Mock prom-client register
-jest.mock('../../src/infra/observability/metrics', () => ({
+// Mock prom-client completely to avoid registration conflicts
+jest.mock('prom-client', () => {
+  const mockMetric = {
+    inc: jest.fn(),
+    set: jest.fn(),
+    observe: jest.fn(),
+    startTimer: jest.fn(() => jest.fn())
+  };
+  
+  return {
+    Gauge: jest.fn(() => mockMetric),
+    Counter: jest.fn(() => mockMetric),
+    Histogram: jest.fn(() => mockMetric),
+    Registry: jest.fn(() => ({
+      registerMetric: jest.fn()
+    }))
+  };
+});
+
+// Mock the metrics module  
+jest.mock('../../../src/infra/observability/metrics', () => ({
   register: {
     registerMetric: jest.fn()
   }
@@ -38,8 +57,16 @@ describe('BudgetTracker', () => {
     jest.spyOn(Date.prototype, 'getFullYear').mockReturnValue(2024);
     jest.spyOn(Date.prototype, 'getMonth').mockReturnValue(7); // August (0-indexed)
     
+    // Clean up any existing test files
+    if (fs.existsSync(testStateDir)) {
+      fs.rmSync(testStateDir, { recursive: true, force: true });
+    }
+    
     budgetTracker = new BudgetTracker();
     budgetTracker.config.stateFilePath = path.join(testStateDir, 'test_ai_cost_state.json');
+    // Clear any existing state
+    budgetTracker.monthlySpending.clear();
+    budgetTracker.alertsEmitted.clear();
   });
 
   afterEach(() => {
@@ -160,7 +187,7 @@ describe('BudgetTracker', () => {
 
   describe('alert thresholds', () => {
     it('should emit alert when threshold exceeded', () => {
-      const loggerMock = require('../../src/infra/observability/logger');
+      const loggerMock = require('../../../src/infra/observability/logger');
       
       budgetTracker.recordCost('gpt-4', 'openai', 200); // 80% of budget, triggers alert
       
@@ -173,7 +200,7 @@ describe('BudgetTracker', () => {
     it('should emit exceeded alert when budget exceeded', () => {
       process.env.AI_BUDGET_HARD_STOP = 'true';
       const tracker = new BudgetTracker();
-      const loggerMock = require('../../src/infra/observability/logger');
+      const loggerMock = require('../../../src/infra/observability/logger');
       
       tracker.recordCost('gpt-4', 'openai', 260);
       
@@ -186,11 +213,17 @@ describe('BudgetTracker', () => {
 
   describe('getSpendingReport', () => {
     it('should generate detailed spending report', () => {
-      budgetTracker.recordCost('gpt-4', 'openai', 10.00);
-      budgetTracker.recordCost('gpt-3.5', 'openai', 5.00);
-      budgetTracker.recordCost('gemini-pro', 'google', 7.50);
+      // Create a completely fresh tracker for this test only
+      const freshTracker = new BudgetTracker();
+      freshTracker.config.stateFilePath = path.join(testStateDir, 'fresh_report_test.json');
+      freshTracker.monthlySpending.clear();
+      freshTracker.alertsEmitted.clear();
       
-      const report = budgetTracker.getSpendingReport();
+      freshTracker.recordCost('gpt-4', 'openai', 10.00);
+      freshTracker.recordCost('gpt-3.5', 'openai', 5.00);
+      freshTracker.recordCost('gemini-pro', 'google', 7.50);
+      
+      const report = freshTracker.getSpendingReport();
       
       expect(report.month).toBe('2024-08');
       expect(report.totalSpent).toBe(22.50);

@@ -341,7 +341,19 @@
     "analysis:research": "node scripts/continuous-analysis-system.js single",
     "analysis:report": "echo 'Check automation-outputs/reports/ for latest analysis report'",
     "perplexity:research": "node -e \"const P = require('./src/chat/llm-providers/perplexity-provider'); const p = new P({apiKey: process.env.PERPLEXITY_API_KEY}); p.initialize().then(() => p.research(process.argv[1])).then(console.log).catch(console.error)\" -- ",
-    "grok4:analyze": "node -e \"const G = require('./src/chat/llm-providers/grok4-provider'); const g = new G({apiKey: process.env.XAI_API_KEY}); g.initialize().then(() => g.analyzeRepository('sample code', 'comprehensive')).then(console.log).catch(console.error)\""
+    "grok4:analyze": "node -e \"const G = require('./src/chat/llm-providers/grok4-provider'); const g = new G({apiKey: process.env.XAI_API_KEY}); g.initialize().then(() => g.analyzeRepository('sample code', 'comprehensive')).then(console.log).catch(console.error)\"",
+    "ai:deploy": "node src/ai/vertex/deploymentScript.js deploy",
+    "ai:deploy:dry-run": "node src/ai/vertex/deploymentScript.js deploy --dry-run",
+    "ai:deploy:endpoint": "node src/ai/vertex/deploymentScript.js deploy",
+    "ai:list": "node src/ai/vertex/deploymentScript.js list",
+    "ai:status": "node src/ai/vertex/deploymentScript.js status",
+    "ai:delete": "node src/ai/vertex/deploymentScript.js delete",
+    "ai:eval": "node scripts/ai/run_eval.js run",
+    "ai:eval:list": "node scripts/ai/run_eval.js list",
+    "ai:eval:baseline": "node scripts/ai/run_eval.js run --model text-bison@latest --suite baseline_recommendations",
+    "ai:health": "node -e \"const AgentRouter = require('./src/ai/agent/router'); const router = new AgentRouter(); router.healthCheck().then(console.log).catch(console.error)\"",
+    "ai:analytics": "node -e \"const AgentRouter = require('./src/ai/agent/router'); const router = new AgentRouter(); console.log(JSON.stringify(router.getAnalytics(), null, 2))\"",
+    "ai:metrics": "curl -s http://localhost:3000/metrics | grep echotune_ai || echo 'Metrics endpoint not available'"
   },
   "keywords": [
     "music-discovery",

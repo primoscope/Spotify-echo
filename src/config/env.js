@@ -57,6 +57,11 @@ const schema = {
   FRONTEND_URL: { required: false },
   DOMAIN: { required: false },
 
+  // Feature Flags for Vercel deployment optimization
+  DISABLE_REALTIME: { required: false, allowed: ['true', 'false'], default: 'false', desc: 'Disable Socket.IO for serverless environments' },
+  ENABLE_TRACING: { required: false, allowed: ['true', 'false'], default: 'true', desc: 'Enable OpenTelemetry tracing' },
+  ENABLE_AGENTOPS: { required: false, allowed: ['true', 'false'], desc: 'Enable AgentOps telemetry when API key present' },
+
   // Development & Deployment
   GITHUB_TOKEN: { required: false },
   DIGITALOCEAN_API_TOKEN: { required: false },

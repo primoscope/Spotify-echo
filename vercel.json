@@ -1,22 +1,49 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
+  "buildCommand": "npm run vercel-build",
+  "installCommand": "npm install --production=false",
   "outputDirectory": "dist",
-  "framework": "vite",
+  "framework": null,
   "functions": {
-    "api/**": {
-      "runtime": "nodejs20",
+    "server.js": {
+      "runtime": "nodejs20.x",
       "memory": 1024,
-      "maxDuration": 60
+      "maxDuration": 30
     }
   },
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/socket.io/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/auth/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/ready",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/alive", 
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/server.js"
+    }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "DISABLE_REALTIME": "true"
   },
   "build": {
     "env": {
@@ -41,12 +68,6 @@
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://YOUR_BACKEND_DOMAIN/api/:path*"
     }
   ]
 }

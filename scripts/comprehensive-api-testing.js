@@ -52,7 +52,7 @@ class ComprehensiveAPITester {
             // Database and cache - UPDATED Redis with new credentials
             MONGODB_URI: process.env.MONGODB_URI || 'mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
             JWT_SECRET: process.env.JWT_SECRET || 'fb66bf34fc84939cc49bf532a573169ee05c70e4f628d1d8b940cab82d5c030f',
-            REDIS_URI: process.env.REDIS_URI || 'redis://default:jn7FVNpAbtvNvXpldDoc1IaQbYW5AIS4@redis-15392.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:15392',
+            REDIS_URI: process.env.REDIS_URI || 'redis://default:wZSsoenleylqrJAarlo8xnPaTAUdSqxg@redis-11786.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:11786',
             
             // Alternative Redis API credentials
             REDIS_ACCOUNT_API: process.env.REDIS_ACCOUNT_API || 'A5e1ywsx7reztlheukjqb1woez26nisypjynf1ycxkdpbju0bvk',
@@ -557,7 +557,7 @@ class ComprehensiveAPITester {
                 features: ['High-speed caching', 'Session storage', 'Performance optimization'],
                 testData: `Ping successful, Set/Get operations working`,
                 connectionDetails: {
-                    host: 'redis-15392.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:15392',
+                    host: 'redis-11786.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:11786',
                     username: 'default',
                     passwordLength: `${this.secrets.REDIS_URI.match(/default:([^@]+)@/)?.[1]?.length || 0} chars`
                 },

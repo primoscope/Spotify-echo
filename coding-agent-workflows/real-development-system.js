@@ -25,7 +25,7 @@ class RealDevelopmentSystem {
             PERPLEXITY_API: process.env.PERPLEXITY_API || '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',
             GITHUB_API: process.env.GITHUB_API || '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',
             MONGODB_URI: process.env.MONGODB_URI || 'mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
-            REDIS_URL: process.env.REDIS_URL || 'redis://default:jn7FVNqAbtvNvXpldDoc1IaQbYW5AIS4@redis-15392.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:15392'
+            REDIS_URL: process.env.REDIS_URL || 'redis://default:wZSsoenleylqrJAarlo8xnPaTAUdSqxg@redis-11786.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:11786'
         };
         
         this.currentTasks = [];

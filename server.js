@@ -8,6 +8,9 @@
  * that expect server.js in the root directory (like DigitalOcean App Platform)
  */
 
+// Initialize OpenTelemetry tracing before any other imports
+require('./src/infra/observability/tracing').initializeTracing();
+
 // Load environment variables first
 require('dotenv').config();
 

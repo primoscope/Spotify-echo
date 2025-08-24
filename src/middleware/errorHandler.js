@@ -1,22 +1,43 @@
 'use strict';
 /** Centralized error handler (must be last). */
 const logger = require('../infra/observability/logger');
+const { wrapError, ERROR_CODES } = require('../errors/createError');
+const { getCorrelationId } = require('../infra/observability/requestContext');
+
 module.exports = function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-vars
-  const status = err.statusCode || 500;
+  // Wrap error with standardized format if needed
+  const standardizedError = wrapError(err);
+  
+  const status = standardizedError.statusCode || 500;
   const isProd = process.env.NODE_ENV === 'production';
+  
   logger.error({
     msg: 'Unhandled error',
+    requestId: getCorrelationId(),
     status,
+    code: standardizedError.code,
     err: {
-      message: err.message,
-      stack: isProd ? undefined : err.stack,
-      code: err.code
+      message: standardizedError.message,
+      stack: isProd ? undefined : standardizedError.stack,
+      details: standardizedError.details
     }
   });
-  res.status(status).json({
+
+  // Build error response
+  const errorResponse = {
     error: {
-      message: err.publicMessage || (status === 500 ? 'Internal Server Error' : err.message),
-      code: err.code || 'internal_error'
+      code: standardizedError.code || ERROR_CODES.E_INTERNAL,
+      message: standardizedError.message,
+      timestamp: standardizedError.timestamp
     }
-  });
+  };
+
+  // Include details in non-production or for client errors
+  if (!isProd || (status >= 400 && status < 500)) {
+    if (standardizedError.details) {
+      errorResponse.error.details = standardizedError.details;
+    }
+  }
+
+  res.status(status).json(errorResponse);
 };

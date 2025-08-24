@@ -1,13 +1,13 @@
 # Comprehensive Validation Report
 
-**Generated:** 2025-08-24T11:43:18.695Z  
-**Execution Time:** 3684ms  
-**Overall Score:** 50/100 (NEEDS_WORK)
+**Generated:** 2025-08-24T13:02:13.919Z  
+**Execution Time:** 3637ms  
+**Overall Score:** 49/100 (NEEDS_WORK)
 
 ## 📋 Workflow Files
-- **Total:** 33
+- **Total:** 34
 - **Passed:** 10
-- **Failed:** 23
+- **Failed:** 24
 
 ### Errors:
 - **ai-budget-monitor.yml:** ::group::.github/workflows/ai-budget-monitor.yml
@@ -33,6 +33,7 @@
 - **security-audit.yml:** ::group::.github/workflows/security-audit.yml
 - **security.yml:** ::group::.github/workflows/security.yml
 - **smoke.yml:** ::group::.github/workflows/smoke.yml
+- **vertex-bootstrap.yml:** ::group::.github/workflows/vertex-bootstrap.yml
 
 ## 🔧 JavaScript Files
 - **Total:** 7

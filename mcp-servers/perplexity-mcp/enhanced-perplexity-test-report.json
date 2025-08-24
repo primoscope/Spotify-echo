@@ -1,145 +1,31 @@
 {
   "testSuite": "Enhanced Perplexity MCP Server",
-  "timestamp": "2025-08-24T11:43:18.660Z",
+  "timestamp": "2025-08-24T13:02:13.885Z",
   "summary": {
     "totalTests": 2,
-    "passed": 2,
-    "failed": 0,
-    "errors": 0
+    "passed": 0,
+    "failed": 2,
+    "errors": 2
   },
   "results": {
-    "models": {
-      "grok-4": {
-        "status": "configured",
-        "config": {
-          "provider": "perplexity",
-          "contextLength": 128000,
-          "costPer1kTokens": 0.005,
-          "recommended": "advanced reasoning and coding",
-          "features": [
-            "web_search",
-            "real_time_data",
-            "coding",
-            "math"
-          ]
-        },
-        "features": [
-          "web_search",
-          "real_time_data",
-          "coding",
-          "math"
-        ],
-        "costPer1k": 0.005
-      },
-      "sonar-pro": {
-        "status": "configured",
-        "config": {
-          "provider": "perplexity",
-          "contextLength": 128000,
-          "costPer1kTokens": 0.003,
-          "recommended": "general research and analysis",
-          "features": [
-            "web_search",
-            "citations",
-            "recent_data"
-          ]
-        },
-        "features": [
-          "web_search",
-          "citations",
-          "recent_data"
-        ],
-        "costPer1k": 0.003
-      },
-      "sonar-reasoning-pro": {
-        "status": "configured",
-        "config": {
-          "provider": "perplexity",
-          "contextLength": 128000,
-          "costPer1kTokens": 0.004,
-          "recommended": "complex reasoning and problem solving",
-          "features": [
-            "step_by_step_reasoning",
-            "web_search",
-            "citations"
-          ]
-        },
-        "features": [
-          "step_by_step_reasoning",
-          "web_search",
-          "citations"
-        ],
-        "costPer1k": 0.004
-      },
-      "llama-3.1-sonar-small-128k-online": {
-        "status": "configured",
-        "config": {
-          "provider": "perplexity",
-          "contextLength": 128000,
-          "costPer1kTokens": 0.002,
-          "recommended": "fast research queries",
-          "features": [
-            "web_search",
-            "fast_response",
-            "online_data"
-          ]
-        },
-        "features": [
-          "web_search",
-          "fast_response",
-          "online_data"
-        ],
-        "costPer1k": 0.002
-      },
-      "llama-3.1-sonar-large-128k-online": {
-        "status": "configured",
-        "config": {
-          "provider": "perplexity",
-          "contextLength": 128000,
-          "costPer1kTokens": 0.004,
-          "recommended": "large context research",
-          "features": [
-            "web_search",
-            "large_context",
-            "online_data"
-          ]
-        },
-        "features": [
-          "web_search",
-          "large_context",
-          "online_data"
-        ],
-        "costPer1k": 0.004
-      },
-      "gpt-5": {
-        "status": "configured",
-        "config": {
-          "provider": "perplexity",
-          "contextLength": 200000,
-          "costPer1kTokens": 0.008,
-          "recommended": "advanced coding and complex analysis",
-          "features": [
-            "advanced_reasoning",
-            "coding",
-            "multimodal",
-            "web_search"
-          ]
-        },
-        "features": [
-          "advanced_reasoning",
-          "coding",
-          "multimodal",
-          "web_search"
-        ],
-        "costPer1k": 0.008
-      }
-    },
+    "models": {},
     "workflows": {},
     "performance": {},
-    "errors": [],
+    "errors": [
+      {
+        "test": "server_health",
+        "error": "Cannot find module '@modelcontextprotocol/sdk/server/index.js'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/perplexity-mcp-server.js\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/test-enhanced-perplexity.js",
+        "timestamp": "2025-08-24T13:02:13.884Z"
+      },
+      {
+        "test": "model_configurations",
+        "error": "Cannot find module '@modelcontextprotocol/sdk/server/index.js'\nRequire stack:\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/perplexity-mcp-server.js\n- /home/runner/work/Spotify-echo/Spotify-echo/mcp-servers/perplexity-mcp/test-enhanced-perplexity.js",
+        "timestamp": "2025-08-24T13:02:13.885Z"
+      }
+    ],
     "summary": {
-      "serverHealth": "PASS",
-      "modelConfigurations": "PASS"
+      "serverHealth": "FAIL",
+      "modelConfigurations": "FAIL"
     }
   }
 }

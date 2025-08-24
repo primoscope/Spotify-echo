@@ -51,3 +51,6 @@
 
 ## Recommendation
 - maturity_index: 3 (substantial implementation with monitoring and resilience)
+
+## Governance
+- roadmap_docs: ENABLED

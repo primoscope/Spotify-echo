@@ -1,0 +1,243 @@
+name: Smoke Test
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - 'src/**'
+      - 'server.js'
+      - 'package*.json'
+      - 'scripts/**'
+      - '.github/workflows/smoke.yml'
+  workflow_dispatch:
+    inputs:
+      node_version:
+        description: 'Node.js version to test'
+        required: false
+        default: '18.x'
+      enable_debug:
+        description: 'Enable debug output'
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-test:
+    name: Smoke Test - Node.js ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x]
+    
+    env:
+      NODE_ENV: test
+      ENABLE_DEMO_ROUTES: 1
+      PORT: 3000
+      # Minimal environment for smoke testing
+      MONGODB_URI: mongodb://localhost:27017/echotune_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: test_jwt_secret_for_smoke_testing_only
+      SESSION_SECRET: test_session_secret_for_smoke_testing_only
+      LLM_PROVIDER: mock
+    
+    services:
+      # MongoDB service for database connectivity tests
+      mongodb:
+        image: mongo:6.0
+        env:
+          MONGO_INITDB_DATABASE: echotune_test
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval \"db.adminCommand('ping')\""
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      # Redis service for caching tests
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+            ${{ runner.os }}-node-
+      
+      - name: Install dependencies
+        run: npm ci --omit=dev
+        env:
+          npm_config_audit: false
+          npm_config_fund: false
+      
+      - name: Wait for services
+        run: |
+          echo "Waiting for MongoDB..."
+          timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/localhost/27017; do sleep 1; done'
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/localhost/6379; do sleep 1; done'
+          echo "Services are ready"
+      
+      - name: Run smoke test
+        id: smoke-test
+        run: |
+          echo "::group::Smoke Test Execution"
+          if [[ "${{ inputs.enable_debug }}" == "true" ]]; then
+            set -x
+          fi
+          
+          # Run the smoke test script
+          bash scripts/ci/smoke.sh
+          smoke_exit_code=$?
+          
+          echo "::endgroup::"
+          
+          # Set output for subsequent steps
+          echo "exit_code=$smoke_exit_code" >> $GITHUB_OUTPUT
+          
+          # Exit with the smoke test result
+          exit $smoke_exit_code
+        timeout-minutes: 5
+      
+      - name: Display smoke test report
+        if: always()
+        run: |
+          if [[ -f smoke_report.json ]]; then
+            echo "::group::Smoke Test Report"
+            if command -v jq &> /dev/null; then
+              jq '.' smoke_report.json
+            else
+              cat smoke_report.json
+            fi
+            echo "::endgroup::"
+          else
+            echo "::error::Smoke report file not found"
+          fi
+      
+      - name: Upload smoke test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-report-node-${{ matrix.node-version }}
+          path: |
+            smoke_report.json
+            *.log
+          retention-days: 7
+          if-no-files-found: warn
+      
+      - name: Validate report structure
+        if: always()
+        run: |
+          if [[ -f smoke_report.json ]]; then
+            # Basic JSON validation
+            if command -v jq &> /dev/null; then
+              jq empty smoke_report.json
+              echo "✅ Report JSON is valid"
+              
+              # Check required fields
+              required_fields=("timestamp_iso" "attempts" "health_http_code" "ready_http_code" "metrics_http_code" "success")
+              for field in "${required_fields[@]}"; do
+                if jq -e "has(\"$field\")" smoke_report.json > /dev/null; then
+                  echo "✅ Required field '$field' present"
+                else
+                  echo "::error::Required field '$field' missing from report"
+                  exit 1
+                fi
+              done
+            else
+              echo "jq not available for validation, skipping structure check"
+            fi
+          fi
+      
+      - name: Create smoke test summary
+        if: always()
+        run: |
+          echo "## 🔥 Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ -f smoke_report.json ]]; then
+            if command -v jq &> /dev/null; then
+              success=$(jq -r '.success' smoke_report.json)
+              attempts=$(jq -r '.attempts' smoke_report.json)
+              duration=$(jq -r '.duration_ms' smoke_report.json)
+              health_status=$(jq -r '.health_http_code' smoke_report.json)
+              ready_status=$(jq -r '.ready_http_code' smoke_report.json)
+              metrics_status=$(jq -r '.metrics_http_code' smoke_report.json)
+              
+              if [[ "$success" == "true" ]]; then
+                echo "### ✅ Status: PASSED" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "### ❌ Status: FAILED" >> $GITHUB_STEP_SUMMARY
+              fi
+              
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+              echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+              echo "| Duration | ${duration}ms |" >> $GITHUB_STEP_SUMMARY
+              echo "| Attempts | $attempts/60 |" >> $GITHUB_STEP_SUMMARY
+              echo "| Health Endpoint | $health_status |" >> $GITHUB_STEP_SUMMARY
+              echo "| Ready Endpoint | $ready_status |" >> $GITHUB_STEP_SUMMARY
+              echo "| Metrics Endpoint | $metrics_status |" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Node.js Version: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "Raw report:" >> $GITHUB_STEP_SUMMARY
+              echo '```json' >> $GITHUB_STEP_SUMMARY
+              cat smoke_report.json >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "### ❌ Status: NO REPORT GENERATED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Aggregate results from matrix builds
+  smoke-test-result:
+    name: Smoke Test Result
+    runs-on: ubuntu-latest
+    needs: smoke-test
+    if: always()
+    
+    steps:
+      - name: Check smoke test results
+        run: |
+          # Check if any smoke tests failed
+          if [[ "${{ contains(needs.smoke-test.result, 'failure') }}" == "true" ]]; then
+            echo "::error::One or more smoke tests failed"
+            exit 1
+          elif [[ "${{ contains(needs.smoke-test.result, 'cancelled') }}" == "true" ]]; then
+            echo "::warning::One or more smoke tests were cancelled"
+            exit 1
+          else
+            echo "✅ All smoke tests passed successfully"
+          fi

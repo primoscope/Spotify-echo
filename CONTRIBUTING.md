@@ -445,6 +445,35 @@ Other approaches you've considered.
 Any other context or screenshots.
 ```
 
+### Roadmap Change Proposals
+
+For strategic roadmap changes and long-term initiative proposals:
+
+1. **Open GitHub Issue**: Create an issue with the `roadmap-proposal` label
+2. **Reference Roadmap Section**: Link to relevant section in [docs/roadmap/ROADMAP.md](docs/roadmap/ROADMAP.md)
+3. **Community Discussion**: Allow 1-2 weeks for community input and feedback
+4. **Technical Assessment**: Maintainers will evaluate feasibility and resource requirements
+5. **Integration Planning**: Approved proposals are integrated into appropriate roadmap phase
+
+#### Roadmap Proposal Template
+```markdown
+## 🗺️ Roadmap Change Proposal
+
+## 📍 Roadmap Section
+Which section of the roadmap does this affect? (Backend, Frontend, Testing, etc.)
+
+## 🎯 Proposed Change
+Detailed description of the proposed roadmap modification.
+
+## 🔄 Impact Assessment
+- Affected components and dependencies
+- Resource requirements (time, expertise, tools)
+- Risk assessment and mitigation strategies
+
+## 📋 Implementation Plan
+High-level implementation approach and timeline.
+```
+
 ## 🌟 Recognition
 
 ### Contributors

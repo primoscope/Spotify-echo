@@ -1124,7 +1124,7 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-server.listen(PORT, '0.0.0.0', async () => {
+if (!process.env.VERCEL) server.listen(PORT, '0.0.0.0', async () => {
   console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔑 Spotify configured: ${!!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET)}`);

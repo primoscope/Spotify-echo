@@ -1,0 +1,39 @@
+# DigitalOcean App Platform Spec for EchoTune AI
+# Usage:
+#   doctl apps create --spec app.yaml
+
+name: spotify-echo
+services:
+  - name: web
+    source_dir: .
+    dockerfile_path: Dockerfile
+    http_port: 3000
+    internal_ports: [3000]
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: HOST
+        value: 0.0.0.0
+      # Secrets (set values in DO dashboard or via doctl)
+      - key: SPOTIFY_CLIENT_ID
+        type: SECRET
+      - key: SPOTIFY_CLIENT_SECRET
+        type: SECRET
+      - key: SPOTIFY_REDIRECT_URI
+        value: https://YOUR_DO_DOMAIN/auth/callback
+      - key: JWT_SECRET
+        type: SECRET
+      - key: SESSION_SECRET
+        type: SECRET
+      - key: REDIS_URL
+        type: SECRET
+      - key: MONGODB_URI
+        type: SECRET
+      - key: FRONTEND_URL
+        value: https://YOUR_DO_DOMAIN

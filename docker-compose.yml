@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BUILD_SHA: ${BUILD_SHA:-dev}
+        BUILD_TIME: ${BUILD_TIME:-2025-01-01T00:00:00Z}
     image: echotune-ai:latest
     container_name: echotune-app
     restart: unless-stopped
@@ -16,15 +19,15 @@ services:
       # Derived URLs commonly needed
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:${PORT:-3000}}
       # Internal service URLs for app
-      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/${MONGODB_DATABASE:-echotune_production}}
       REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD:-echotune_redis_pass}@redis:6379}
     ports:
       - "${PORT:-3000}:3000"
     depends_on:
-      - mongo
       - redis
+      # Uncomment to run local MongoDB
+      # - mongo
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:${PORT:-3000}/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:${PORT:-3000}/health"]
       interval: 30s
       timeout: 5s
       retries: 5

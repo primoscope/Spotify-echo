@@ -24,6 +24,71 @@ curl -fsSL https://raw.githubusercontent.com/dzp5103/Spotify-echo/main/scripts/d
 npm run deploy:digitalocean:app
 ```
 
+## 📦 Deployment (Docker, DigitalOcean, Vercel)
+
+### 1) Environment
+```bash
+cp .env.example .env
+# Edit .env and set at least:
+# JWT_SECRET, SESSION_SECRET, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
+# Optional: MONGODB_URI, REDIS_URL, PERPLEXITY_API_KEY
+```
+
+### 2) Docker (production)
+```bash
+# Build
+docker build --build-arg BUILD_SHA=$(git rev-parse --short HEAD) \
+  --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") -t echotune-ai:latest .
+
+# Run
+docker run --env-file .env -p 3000:3000 --name echotune echotune-ai:latest
+
+# Health
+curl -fsS http://localhost:3000/health
+```
+
+### 3) Docker Compose
+```bash
+# Production-like stack (app + redis, optional mongo)
+docker compose up -d
+
+# Logs
+docker compose logs -f app
+
+# Dev override (hot reload)
+docker compose -f docker-compose.yml -f docker-compose.override.yml --profile dev up app-dev vite redis
+```
+
+### 4) DigitalOcean App Platform
+```bash
+# Create app from spec
+#doctl auth init
+#doctl apps create --spec app.yaml
+
+# Important: In Spotify Dashboard set redirect:
+#  https://YOUR_DO_DOMAIN/auth/callback
+```
+
+### 5) Vercel
+- This repo builds a Vite frontend to `dist/`. If you deploy on Vercel but host API elsewhere, set the API proxy in `vercel.json` rewrites to your backend domain.
+- Add environment variables via Vercel dashboard (no secrets in code).
+- Spotify redirect to configure in Spotify Dashboard:
+  - https://YOUR_VERCEL_DOMAIN/auth/callback
+
+### OAuth Redirects
+- Dev: http://localhost:3000/auth/callback
+- DigitalOcean: https://YOUR_DO_DOMAIN/auth/callback
+- Vercel: https://YOUR_VERCEL_DOMAIN/auth/callback
+
+If mismatched, Spotify will return: INVALID_CLIENT: Invalid redirect URI.
+
+### Health Endpoints
+- GET `/health` basic JSON status
+- GET `/api/health` quick API health
+- GET `/api/health/detailed` comprehensive report
+
+See `DEPLOY_CHECKLIST.md` before going live.
+
 ## 📖 Overview
 
 EchoTune AI is an advanced music discovery platform that combines AI-powered recommendations, conversational music search, and comprehensive analytics. Built with modern technologies including React 19, Node.js, MongoDB, and Redis, it provides a seamless music experience powered by multiple AI providers.

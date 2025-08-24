@@ -10,6 +10,8 @@ dist
 build
 coverage
 .playwright
+.next
+.next/cache
 
 # VCS
 .git
@@ -19,6 +21,7 @@ coverage
 .env
 .env.*
 !.env.example
+*.env
 
 # OS/editor
 .DS_Store
@@ -39,4 +42,11 @@ perplexity-test-results
 
 # Docker
 Dockerfile.*
+Dockerfile*
+docker-compose*.yml
 **/*.local.*
+
+# Misc
+*.tmp
+*.cache
+**/*.map

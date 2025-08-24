@@ -1,0 +1,68 @@
+name: Environment Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate-env:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Validate environment schema
+      run: |
+        # Test environment validation without actual secrets
+        # This validates the schema structure and required field definitions
+        node -e "
+          const { schema } = require('./src/config/env');
+          console.log('✅ Environment schema validation passed');
+          console.log('Schema includes', Object.keys(schema).length, 'variables');
+          
+          // Validate schema structure
+          const requiredFields = Object.entries(schema).filter(([k, v]) => v.required);
+          const optionalFields = Object.entries(schema).filter(([k, v]) => !v.required);
+          
+          console.log('Required fields:', requiredFields.length);
+          console.log('Optional fields:', optionalFields.length);
+          
+          // Ensure critical fields are marked as required
+          const criticalFields = ['JWT_SECRET', 'MONGODB_URI', 'SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'];
+          const missingCritical = criticalFields.filter(field => 
+            !schema[field] || !schema[field].required
+          );
+          
+          if (missingCritical.length > 0) {
+            throw new Error('Critical fields not marked as required: ' + missingCritical.join(', '));
+          }
+          
+          console.log('✅ All critical fields properly configured as required');
+        "
+        
+    - name: Validate build process
+      run: |
+        npm run build
+        echo "✅ Build completed successfully"
+        
+    - name: Check for secret leakage in build
+      run: |
+        # Ensure no secrets are present in built artifacts
+        if grep -r "JWT_SECRET\|MONGODB_URI\|SPOTIFY_CLIENT_SECRET\|OPENAI_API_KEY" dist/; then
+          echo "❌ Secrets found in build output!"
+          exit 1
+        else
+          echo "✅ No secrets found in build output"
+        fi

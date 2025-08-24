@@ -20,8 +20,16 @@ export const SocketProvider = ({ children }) => {
   const [typingUsers, setTypingUsers] = useState(new Set());
 
   useEffect(() => {
+    // In production (e.g., Vercel static hosting), use explicit backend URL
+    const socketBaseUrl = import.meta.env.VITE_SOCKET_URL || '';
+
+    if (import.meta.env.PROD && !socketBaseUrl) {
+      console.warn('Socket not initialized: VITE_SOCKET_URL is not set in production');
+      return;
+    }
+
     // Initialize Socket.IO connection
-    const newSocket = io('/', {
+    const newSocket = io(socketBaseUrl || '/', {
       transports: ['websocket', 'polling'],
       timeout: 20000,
       reconnection: true,

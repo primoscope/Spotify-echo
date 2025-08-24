@@ -677,75 +677,11 @@ app.get('/auth/spotify', (req, res) => {
   res.redirect(authURL);
 });
 
-// Spotify OAuth callback
-app.get('/auth/callback', async (req, res) => {
-  const { code, state, error } = req.query;
-
-  if (error) {
-    console.error('Spotify auth error:', error);
-    return res.redirect(`${FRONTEND_URL}?error=access_denied`);
-  }
-
-  if (!code || !state) {
-    return res.redirect(`${FRONTEND_URL}?error=invalid_request`);
-  }
-
-  // Verify state
-  const storedState = authStates.get(state);
-  if (!storedState) {
-    return res.redirect(`${FRONTEND_URL}?error=state_mismatch`);
-  }
-
-  // Remove used state
-  authStates.delete(state);
-
-  try {
-    // Exchange code for access token
-    const tokenResponse = await axios.post(
-      'https://accounts.spotify.com/api/token',
-      new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: SPOTIFY_REDIRECT_URI,
-      }),
-      {
-        headers: {
-          Authorization: 'Basic ' + base64encode(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`),
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
-
-    const { access_token } = tokenResponse.data;
-    // Note: refresh_token and expires_in available for future token refresh implementation
-
-    // Get user profile
-    const userResponse = await axios.get('https://api.spotify.com/v1/me', {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    });
-
-    const userProfile = userResponse.data;
-
-    // In a real application, store these tokens securely in a database
-    // For now, we'll redirect with success and include basic user info
-    const userInfo = {
-      id: userProfile.id,
-      display_name: userProfile.display_name,
-      email: userProfile.email,
-      country: userProfile.country,
-      followers: userProfile.followers?.total || 0,
-      premium: userProfile.product === 'premium',
-    };
-
-    // Redirect to frontend with success
-    const encodedUserInfo = encodeURIComponent(JSON.stringify(userInfo));
-    res.redirect(`${FRONTEND_URL}?auth=success&user=${encodedUserInfo}`);
-  } catch (error) {
-    console.error('Token exchange error:', error.response?.data || error.message);
-    res.redirect(`${FRONTEND_URL}?error=token_exchange_failed`);
-  }
+// Spotify OAuth callback - delegate to API route for single canonical implementation
+app.get('/auth/callback', (req, res, next) => {
+  // Forward to the canonical Spotify API callback handler to avoid code duplication
+  req.url = '/api/spotify/auth/callback' + (req.url.indexOf('?') !== -1 ? req.url.substring(req.url.indexOf('?')) : '');
+  next('router');
 });
 
 // API endpoint to get user's Spotify data (requires authentication in production)

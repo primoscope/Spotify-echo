@@ -22,9 +22,30 @@ class AgentRouter {
     this.policies = new Map();
     this.routingHistory = [];
     this.performanceCache = new Map();
+    this.initialized = false;
     
-    this.initializeProviders();
+    // Initialize asynchronously
+    this.initializationPromise = this.initialize();
+  }
+
+  /**
+   * Initialize router with providers and policies
+   */
+  async initialize() {
+    if (this.initialized) return;
+    
+    await this.initializeProviders();
     this.initializePolicies();
+    this.initialized = true;
+  }
+
+  /**
+   * Ensure router is initialized before use
+   */
+  async ensureInitialized() {
+    if (!this.initialized) {
+      await this.initializationPromise;
+    }
   }
 
   /**
@@ -231,6 +252,9 @@ class AgentRouter {
    * @returns {Promise<Object>} Response from selected provider
    */
   async route(request, routingOptions = {}) {
+    // Ensure router is initialized
+    await this.ensureInitialized();
+    
     // Normalize request
     const normalizedRequest = this.normalizeRequest(request);
     
@@ -401,23 +425,41 @@ class AgentRouter {
    * Select best available provider for given policy
    */
   async selectBestProvider(policyChoice, request) {
+    if (!policyChoice) {
+      throw new ModelUnavailableError('No policy choice provided', 'unknown');
+    }
+
     const providerName = policyChoice.provider;
     const provider = this.providers.get(providerName);
     
     if (!provider || !provider.isAvailable()) {
-      throw new ModelUnavailableError(
-        `Provider ${providerName} is not available`,
-        policyChoice.model
-      );
+      // Try to find an alternative available provider
+      const availableProviders = Array.from(this.providers.entries())
+        .filter(([_, p]) => p.isAvailable());
+      
+      if (availableProviders.length === 0) {
+        throw new ModelUnavailableError(
+          'No providers are available',
+          policyChoice.model
+        );
+      }
+
+      // Use the first available provider as fallback
+      const [fallbackName, fallbackProvider] = availableProviders[0];
+      console.warn(`⚠️ Provider ${providerName} not available, using fallback: ${fallbackName}`);
+      
+      return {
+        provider: fallbackName,
+        model: policyChoice.model,
+        providerInstance: fallbackProvider,
+        performance: this.getDefaultPerformance(),
+        rationale: `Fallback to ${fallbackName} due to ${providerName} unavailability`
+      };
     }
 
     // Get performance data
     const performanceKey = `${providerName}:${policyChoice.model}`;
-    const performance = this.performanceCache.get(performanceKey) || {
-      averageLatency: 1000,
-      successRate: 1.0,
-      averageCost: 0.001
-    };
+    const performance = this.performanceCache.get(performanceKey) || this.getDefaultPerformance();
 
     return {
       provider: providerName,
@@ -425,6 +467,17 @@ class AgentRouter {
       providerInstance: provider,
       performance,
       rationale: `Selected ${providerName} for ${request.type} based on policy`
+    };
+  }
+
+  /**
+   * Get default performance metrics
+   */
+  getDefaultPerformance() {
+    return {
+      averageLatency: 1000,
+      successRate: 1.0,
+      averageCost: 0.001
     };
   }
 
@@ -755,6 +808,9 @@ class AgentRouter {
    * Health check for all providers
    */
   async healthCheck() {
+    // Ensure router is initialized
+    await this.ensureInitialized();
+    
     const health = {};
     
     for (const [name, provider] of this.providers) {

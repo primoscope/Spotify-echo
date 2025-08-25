@@ -218,6 +218,35 @@ class AIMetrics {
     this.mockProviderBlocked.inc({ reason });
   }
 
+  // General AI routing metrics
+  recordSuccess(options = {}) {
+    const {
+      provider = 'unknown',
+      model = 'unknown',
+      type = 'unknown',
+      routing_strategy = 'unknown'
+    } = options;
+
+    this.recordAIRequest(provider, model, type, 0); // Duration tracked separately
+    this.aiProviderHealth.set({ provider, model }, 1); // Healthy
+  }
+
+  recordFailure(options = {}) {
+    const {
+      provider = 'unknown',
+      model = 'unknown',
+      type = 'unknown',
+      routing_strategy = 'unknown',
+      error_class = 'unknown',
+      error_code = 'unknown'
+    } = options;
+
+    this.aiProviderHealth.set({ provider, model }, 0); // Unhealthy
+    
+    // Could add specific failure counter if needed
+    console.log(`📊 AI Failure recorded: ${provider}/${model} - ${error_class}`);
+  }
+
   // Utility methods
   async getMetrics() {
     return await this.register.metrics();

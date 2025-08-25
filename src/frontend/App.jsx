@@ -18,6 +18,9 @@ const AutonomousUIAgent = lazy(() => import('./components/AutonomousUIAgent'));
 const EnhancedStreamingChatInterface = lazy(() => import('./components/EnhancedStreamingChatInterface'));
 const EnhancedProviderPanel = lazy(() => import('./components/EnhancedProviderPanel'));
 const GitHubInfo = lazy(() => import('../components/GitHubInfo'));
+const EnhancedMusicRecommendationEngine = lazy(() => import('./components/EnhancedMusicRecommendationEngine'));
+const ClaudeOpus41ChatInterface = lazy(() => import('./components/ClaudeOpus41ChatInterface'));
+const AIIntegrationDashboard = lazy(() => import('./components/AIIntegrationDashboard'));
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
@@ -36,6 +39,9 @@ const prefetchers = {
   autonomous: () => import('./components/AutonomousUIAgent'),
   enhancedStreaming: () => import('./components/EnhancedStreamingChatInterface'),
   providerPanel: () => import('./components/EnhancedProviderPanel'),
+  enhancedRecommendations: () => import('./components/EnhancedMusicRecommendationEngine'),
+  claudeOpusChat: () => import('./components/ClaudeOpus41ChatInterface'),
+  aiIntegration: () => import('./components/AIIntegrationDashboard'),
   settings: () =>
     Promise.all([
       import('./components/EnhancedConfigPanel'),
@@ -72,6 +78,9 @@ function App() {
               <Route path="/analytics" element={<MainApplication initialTab="analytics" />} />
               <Route path="/insights" element={<MainApplication initialTab="insights" />} />
               <Route path="/autonomous" element={<MainApplication initialTab="autonomous" />} />
+              <Route path="/enhanced-ai" element={<MainApplication initialTab="enhanced-ai" />} />
+              <Route path="/claude-opus" element={<MainApplication initialTab="claude-opus" />} />
+              <Route path="/ai-integration" element={<MainApplication initialTab="ai-integration" />} />
               <Route path="/settings" element={<MainApplication initialTab="settings" />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
@@ -351,6 +360,21 @@ function MainApplication({ initialTab = 'chat' }) {
               onMouseEnter={() => handlePrefetch('autonomous')}
             />
             <Tab
+              label="🧠 Enhanced AI"
+              value="enhanced-ai"
+              onMouseEnter={() => handlePrefetch('enhancedRecommendations')}
+            />
+            <Tab
+              label="🎯 Claude Opus"
+              value="claude-opus"
+              onMouseEnter={() => handlePrefetch('claudeOpusChat')}
+            />
+            <Tab
+              label="🏗️ AI Integration"
+              value="ai-integration"
+              onMouseEnter={() => handlePrefetch('aiIntegration')}
+            />
+            <Tab
               label="⚙️ Settings"
               value="settings"
               onMouseEnter={() => handlePrefetch('settings')}
@@ -469,6 +493,24 @@ function MainApplication({ initialTab = 'chat' }) {
                   }}
                 />
               </Box>
+            </Container>
+          )}
+
+          {currentTab === 'enhanced-ai' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <EnhancedMusicRecommendationEngine />
+            </Container>
+          )}
+
+          {currentTab === 'claude-opus' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 0 }}>
+              <ClaudeOpus41ChatInterface />
+            </Container>
+          )}
+
+          {currentTab === 'ai-integration' && (
+            <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+              <AIIntegrationDashboard />
             </Container>
           )}
 

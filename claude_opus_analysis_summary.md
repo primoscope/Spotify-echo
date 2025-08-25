@@ -1,18 +1,11 @@
 # 🧠 Claude Opus 4.1 Analysis Summary
 
 **Status**: ❌ Failed
-**Command**: test
+**Command**: invalid-command-type
 **Target**: Repository-wide
 **Extended Thinking**: Disabled
 
-**Error**: Claude Opus 4.1 analysis failed: [VertexAI.GoogleAuthError]: 
-Unable to authenticate your request        
-Depending on your run time environment, you can get authentication by        
-- if in local instance or cloud shell: `!gcloud auth login`        
-- if in Colab:        
-    -`from google.colab import auth`        
-    -`auth.authenticate_user()`        
-- if in service account or other: please follow guidance in https://cloud.google.com/docs/authentication
+**Error**: Unsupported command type: invalid-command-type
 
 Please check the full report for troubleshooting steps.
 

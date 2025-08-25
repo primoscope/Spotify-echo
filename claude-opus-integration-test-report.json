@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-08-24T16:30:59.908Z",
+  "timestamp": "2025-08-25T04:28:09.062Z",
   "testSuite": "Claude Opus 4.1 Integration Test Suite",
   "totalTests": 8,
   "passedTests": 8,
   "failedTests": 0,
-  "totalDuration": 6,
+  "totalDuration": 9,
   "apiTestsEnabled": false,
   "results": [
     {
@@ -12,11 +12,11 @@
       "status": "PASS",
       "duration": 1,
       "details": {
-        "projectId": "mock-project-id",
+        "projectId": "spotify-echo-ai-project",
         "model": "publishers/anthropic/models/claude-opus-4-1",
         "maxTokens": 32000,
         "contextWindow": 200000,
-        "hasGCPConfig": false,
+        "hasGCPConfig": true,
         "apiTestsEnabled": false
       }
     },
@@ -25,6 +25,12 @@
       "status": "PASS",
       "duration": 0,
       "details": {
+        "test": {
+          "description": "Test Vertex AI connection and configuration",
+          "extendedThinking": false,
+          "thinkingBudget": 1000,
+          "temperature": 0.1
+        },
         "deep-reasoning": {
           "description": "Deep analytical reasoning with step-by-step problem decomposition",
           "extendedThinking": true,
@@ -77,7 +83,7 @@
     {
       "name": "Target File Processing",
       "status": "PASS",
-      "duration": 2,
+      "duration": 3,
       "details": {
         "existingFileProcessed": true,
         "missingFileHandled": true,
@@ -115,7 +121,7 @@
     {
       "name": "Error Handling",
       "status": "PASS",
-      "duration": 2,
+      "duration": 4,
       "details": {
         "invalidCommandHandled": true,
         "invalidBudgetHandled": true
@@ -140,7 +146,7 @@
         "commandsExecuted": 3,
         "successfulCommands": 1,
         "totalThinkingTokens": 3000,
-        "sessionDuration": 7
+        "sessionDuration": 9
       }
     }
   ]

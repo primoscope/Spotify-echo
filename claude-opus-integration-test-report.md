@@ -1,6 +1,6 @@
 # 🧠 Claude Opus 4.1 Integration Test Report
 
-**Timestamp**: 2025-08-24T16:30:59.908Z
+**Timestamp**: 2025-08-25T04:28:09.062Z
 **Test Suite**: Claude Opus 4.1 Integration Test Suite
 **API Tests Enabled**: ❌ No
 
@@ -10,7 +10,7 @@
 - **Passed**: 8 ✅
 - **Failed**: 0 
 - **Pass Rate**: 100.0%
-- **Total Duration**: 6ms
+- **Total Duration**: 9ms
 
 ## 📋 Detailed Results
 
@@ -25,11 +25,11 @@
 **Details**:
 ```json
 {
-  "projectId": "mock-project-id",
+  "projectId": "spotify-echo-ai-project",
   "model": "publishers/anthropic/models/claude-opus-4-1",
   "maxTokens": 32000,
   "contextWindow": 200000,
-  "hasGCPConfig": false,
+  "hasGCPConfig": true,
   "apiTestsEnabled": false
 }
 ```
@@ -45,6 +45,12 @@
 **Details**:
 ```json
 {
+  "test": {
+    "description": "Test Vertex AI connection and configuration",
+    "extendedThinking": false,
+    "thinkingBudget": 1000,
+    "temperature": 0.1
+  },
   "deep-reasoning": {
     "description": "Deep analytical reasoning with step-by-step problem decomposition",
     "extendedThinking": true,
@@ -106,7 +112,7 @@
 ### ✅ Target File Processing
 
 **Status**: PASS
-**Duration**: 2ms
+**Duration**: 3ms
 
 **Result**: Test completed successfully
 
@@ -158,7 +164,7 @@
 ### ✅ Error Handling
 
 **Status**: PASS
-**Duration**: 2ms
+**Duration**: 4ms
 
 **Result**: Test completed successfully
 
@@ -202,7 +208,7 @@
   "commandsExecuted": 3,
   "successfulCommands": 1,
   "totalThinkingTokens": 3000,
-  "sessionDuration": 7
+  "sessionDuration": 9
 }
 ```
 

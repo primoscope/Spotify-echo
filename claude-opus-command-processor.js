@@ -18,9 +18,9 @@ class ClaudeOpusCommandProcessor {
         this.config = {
             projectId: process.env.GCP_PROJECT_ID || 'mock-project-id',
             location: process.env.GCP_VERTEX_LOCATION || 'us-central1',
-            // Use a basic model for testing, Claude Opus 4.1 may not be available in all regions
-            model: process.env.VERTEX_TEST_MODEL || 'text-bison@001',
-            claudeModel: 'publishers/anthropic/models/claude-3-5-sonnet@20241022',
+            // The primary model for this processor should be the Claude Opus 4.1 model.
+            model: 'publishers/anthropic/models/claude-opus-4-1',
+            claudeModel: 'publishers/anthropic/models/claude-opus-4-1',
             version: 'claude-opus-4-1@20250805',
             maxOutputTokens: 32000,
             contextWindow: 200000,

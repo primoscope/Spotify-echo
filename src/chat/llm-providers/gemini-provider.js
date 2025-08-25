@@ -68,9 +68,11 @@ class GeminiProvider extends BaseLLMProvider {
 
   async initialize() {
     try {
+      // Call super.initialize() to set up base provider properties
+      await super.initialize();
+
       // Initialize enhanced Gemini client
       await this.client.initialize();
-      this.isInitialized = true;
       
       console.log(`✅ Enhanced Gemini provider initialized`);
       console.log(`   Model: ${this.defaultModel}`);
@@ -81,15 +83,17 @@ class GeminiProvider extends BaseLLMProvider {
       
     } catch (error) {
       console.error('❌ Failed to initialize enhanced Gemini provider:', error.message);
+      this.isInitialized = false; // Ensure it's marked as not initialized on error
       throw error;
     }
   }
 
   validateConfig() {
     if (this.config.useVertex) {
-      return !!(this.config.projectId);
+      // For Vertex, we rely on application-default credentials or other GCP auth methods
+      return !!(this.config.projectId || process.env.GCP_PROJECT_ID);
     } else {
-      return !!(this.config.apiKey);
+      return !!(this.config.apiKey || process.env.GEMINI_API_KEY);
     }
   }
 
@@ -127,13 +131,10 @@ class GeminiProvider extends BaseLLMProvider {
     return tokenLimits[model] || 32768;
   }
 
-  async generateCompletion(messages, options = {}) {
+  async _generateCompletion(messages, options = {}) {
     try {
-      if (!this.isAvailable()) {
-        throw new Error('Gemini provider not initialized or configured');
-      }
-
-      this.metrics.requests++;
+      // This check is now handled by the BaseLLMProvider's executeWithRetry
+      // this.metrics.requests++; // This is now handled by the base class telemetry
 
       // Check cache first (if enabled)
       const cacheKey = this.generateCacheKey(messages, options);
@@ -413,51 +414,6 @@ class GeminiProvider extends BaseLLMProvider {
     };
 
     return await this.generateCompletion(messages, visionOptions);
-  }
-
-  async *generateStreamingCompletion(messages, options = {}) {
-    try {
-      if (!this.isAvailable()) {
-        throw new Error('Gemini provider not initialized or configured');
-      }
-
-      const model = this.client.getGenerativeModel({
-        model: options.model || this.defaultModel,
-        generationConfig: {
-          maxOutputTokens: options.maxTokens || 2000,
-          temperature: options.temperature ?? 0.7,
-          topP: options.topP ?? 0.8,
-          topK: options.topK ?? 10,
-        },
-      });
-
-      const geminiMessages = this.formatMessagesForGemini(messages);
-
-      let stream;
-      if (geminiMessages.length === 1) {
-        stream = await model.generateContentStream(geminiMessages[0].parts);
-      } else {
-        const chat = model.startChat({
-          history: geminiMessages.slice(0, -1),
-        });
-        const lastMessage = geminiMessages[geminiMessages.length - 1];
-        stream = await chat.sendMessageStream(lastMessage.parts);
-      }
-
-      for await (const chunk of stream.stream) {
-        const chunkText = chunk.text();
-        if (chunkText) {
-          yield {
-            content: chunkText,
-            role: 'assistant',
-            model: options.model || this.defaultModel,
-            isPartial: true,
-          };
-        }
-      }
-    } catch (error) {
-      yield this.handleError(error);
-    }
   }
 
   formatMessagesForGemini(messages) {

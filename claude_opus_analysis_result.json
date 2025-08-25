@@ -1,18 +1,18 @@
 {
   "success": false,
-  "error": "Claude Opus 4.1 analysis failed: [VertexAI.GoogleAuthError]: \nUnable to authenticate your request        \nDepending on your run time environment, you can get authentication by        \n- if in local instance or cloud shell: `!gcloud auth login`        \n- if in Colab:        \n    -`from google.colab import auth`        \n    -`auth.authenticate_user()`        \n- if in service account or other: please follow guidance in https://cloud.google.com/docs/authentication",
-  "timestamp": "2025-08-24T16:56:47.303Z",
-  "commandType": "test",
-  "executionTime": 19,
-  "generatedAt": "2025-08-24T16:56:47.304Z",
+  "error": "Unsupported command type: invalid-command-type",
+  "timestamp": "2025-08-25T04:28:09.058Z",
+  "commandType": "invalid-command-type",
+  "executionTime": 1,
+  "generatedAt": "2025-08-25T04:28:09.058Z",
   "sessionMetrics": {
-    "startTime": 1756054607283,
+    "startTime": 1756096089052,
     "commandsExecuted": 1,
     "totalThinkingTokens": 0,
     "totalOutputTokens": 0,
     "successfulCommands": 0
   },
   "configuration": {
-    "commandType": "test"
+    "commandType": "invalid-command-type"
   }
 }

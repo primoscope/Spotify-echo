@@ -111,6 +111,123 @@ The repository includes automated agent workflows:
 - **`agent-mcp-automation.yml`**: MCP validation with performance budgets
 - **`mcp-validation-gateway.yml`**: Pre-merge validation gates
 
+## 🔍 PR Reviewer Guide for AI Agents
+
+### Code Review Focus Areas
+
+#### Provider Integration Testing
+When reviewing provider integration code, focus on these key test patterns:
+
+**API Connectivity Test Pattern:**
+```javascript
+async testConnectivity() {
+  console.log('\n🔍 Testing API Connectivity...');
+  
+  try {
+    const response = await this.provider.generateCompletion([
+      { role: 'user', content: 'Hello! Please respond with "Connection successful."' }
+    ], { maxTokens: 50 });
+
+    if (response.content && response.content.toLowerCase().includes('connection successful')) {
+      console.log('✅ API connectivity successful.');
+      console.log(`   Provider response: "${response.content.trim()}"`);
+      this.results.connectivity = true;
+    } else {
+      throw new Error(`Unexpected response: ${response.content}`);
+    }
+  } catch (error) {
+    console.log('❌ API connectivity failed:', error.message);
+    this.results.connectivity = false;
+  }
+}
+```
+
+**Basic Prompt Test Pattern:**
+```javascript
+async testBasicPrompt() {
+  console.log('\n🔍 Testing Basic Prompt...');
+
+  try {
+      const response = await this.provider.generateCompletion([
+          { role: 'user', content: 'Explain the concept of a "language model" in one sentence.' }
+      ]);
+
+      if (response.content && response.content.length > 10) {
+          console.log('✅ Basic prompt test successful.');
+          console.log(`   Response: "${response.content.trim()}"`);
+          this.results.basicPrompt = true;
+      } else {
+          throw new Error('Invalid or empty response for basic prompt.');
+      }
+  } catch (error) {
+      console.log('❌ Basic prompt test failed:', error.message);
+      this.results.basicPrompt = false;
+  }
+}
+```
+
+**Configuration Mode Verification Pattern:**
+```javascript
+async checkVertexMode() {
+  console.log('\n🔍 Verifying Configuration Mode...');
+  const isUsingVertex = this.provider.config.useVertex;
+  const expectedMode = process.env.GEMINI_USE_VERTEX === 'true';
+
+  if (isUsingVertex === expectedMode) {
+    console.log(`✅ Provider is correctly in ${expectedMode ? 'Vertex AI' : 'Google AI Studio'} mode.`);
+    this.results.vertexModeCheck = true;
+  } else {
+    console.log(`❌ FAIL: Provider is in the wrong mode. Expected 'useVertex' to be ${expectedMode}, but it is ${isUsingVertex}.`);
+    this.results.vertexModeCheck = false;
+  }
+}
+```
+
+**Provider Initialization Pattern:**
+```javascript
+async initialize() {
+  try {
+    // Call super.initialize() to set up base provider properties
+    await super.initialize();
+
+    // Initialize enhanced Gemini client
+    await this.client.initialize();
+
+    console.log(`✅ Enhanced Gemini provider initialized`);
+    console.log(`   Model: ${this.defaultModel}`);
+    console.log(`   Client: ${this.client.getClientInfo().type}`);
+    console.log(`   Safety: ${this.config.safetyMode}`);
+    console.log(`   Function calling: ${this.config.functionCallingEnabled ? 'enabled' : 'disabled'}`);
+    console.log(`   Caching: ${this.config.cacheTTL}ms TTL`);
+
+  } catch (error) {
+    console.error('❌ Failed to initialize enhanced Gemini provider:', error.message);
+    this.isInitialized = false; // Ensure it's marked as not initialized on error
+    throw error;
+  }
+}
+```
+
+#### Environment Configuration Validation
+Ensure these environment variables are properly configured for Gemini provider testing:
+```env
+AI_ENABLE_METRICS=true
+AI_MOCK_MODE=false
+GCP_CREDENTIALS_VALIDATED=false
+# Forcing Gemini to use Vertex AI for integration tests
+GEMINI_USE_VERTEX=true
+```
+
+#### Review Checklist for Provider Testing
+- [ ] API connectivity tests use expected response validation
+- [ ] Basic prompt tests verify content length and validity
+- [ ] Configuration mode checks match environment settings
+- [ ] Provider initialization includes comprehensive logging
+- [ ] Error handling covers all failure scenarios
+- [ ] Mock mode support for testing without API quotas
+- [ ] Fallback mechanisms are properly implemented
+- [ ] Performance logging includes response times and metrics
+
 ## 📊 Performance Budgets & Validation
 
 ### Performance Budget Enforcement

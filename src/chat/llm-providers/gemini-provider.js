@@ -74,7 +74,7 @@ class GeminiProvider extends BaseLLMProvider {
       // Initialize enhanced Gemini client
       await this.client.initialize();
       
-      console.log(`✅ Enhanced Gemini provider initialized`);
+      console.log('✅ Enhanced Gemini provider initialized');
       console.log(`   Model: ${this.defaultModel}`);
       console.log(`   Client: ${this.client.getClientInfo().type}`);
       console.log(`   Safety: ${this.config.safetyMode}`);

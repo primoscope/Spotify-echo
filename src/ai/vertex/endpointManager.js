@@ -393,7 +393,7 @@ class VertexEndpointManager {
       // Simple test request
       const testRequest = {
         instances: [{
-          prompt: "Hello, this is a test."
+          prompt: 'Hello, this is a test.'
         }],
         parameters: {
           temperature: 0.1,
@@ -510,7 +510,7 @@ class VertexEndpointManager {
       return {
         action: 'DELETING',
         operation: response.data.name,
-        message: `Endpoint deletion started`
+        message: 'Endpoint deletion started'
       };
       
     } catch (error) {

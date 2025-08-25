@@ -1,0 +1,94 @@
+{
+  "Image Generation": {
+    "Imagen 3.0": {
+      "model_id": "imagen-3.0-generate-001",
+      "capabilities": [
+        "text-to-image",
+        "high-resolution",
+        "style-transfer"
+      ],
+      "max_resolution": "1536x1536",
+      "provider": "google",
+      "type": "image_generation"
+    },
+    "Imagen 2.0": {
+      "model_id": "imagegeneration@006",
+      "capabilities": [
+        "text-to-image",
+        "image-editing"
+      ],
+      "max_resolution": "1024x1024",
+      "provider": "google",
+      "type": "image_generation"
+    },
+    "Imagen Edits": {
+      "model_id": "imageediting@006",
+      "capabilities": [
+        "image-editing",
+        "inpainting",
+        "outpainting"
+      ],
+      "max_resolution": "1024x1024",
+      "provider": "google",
+      "type": "image_editing"
+    }
+  },
+  "Video Generation": {
+    "Veo 2.0": {
+      "model_id": "veo-2.0-001",
+      "capabilities": [
+        "text-to-video",
+        "high-quality",
+        "various-lengths"
+      ],
+      "max_duration": "2 minutes",
+      "max_resolution": "4K",
+      "provider": "google",
+      "type": "video_generation"
+    },
+    "Veo 1.5": {
+      "model_id": "veo-1.5-001",
+      "capabilities": [
+        "text-to-video",
+        "image-to-video"
+      ],
+      "max_duration": "1 minute",
+      "max_resolution": "1080p",
+      "provider": "google",
+      "type": "video_generation"
+    }
+  },
+  "Community Models (HuggingFace)": {
+    "Stable Diffusion XL": {
+      "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
+      "capabilities": [
+        "text-to-image",
+        "high-resolution"
+      ],
+      "max_resolution": "1024x1024",
+      "provider": "stability_ai",
+      "type": "image_generation"
+    },
+    "Stable Video Diffusion": {
+      "model_id": "stabilityai/stable-video-diffusion-img2vid-xt",
+      "capabilities": [
+        "image-to-video",
+        "short-clips"
+      ],
+      "max_duration": "4 seconds",
+      "provider": "stability_ai",
+      "type": "video_generation"
+    },
+    "FLUX.1": {
+      "model_id": "black-forest-labs/FLUX.1-dev",
+      "capabilities": [
+        "text-to-image",
+        "photorealistic",
+        "artistic"
+      ],
+      "max_resolution": "1024x1024",
+      "provider": "black_forest_labs",
+      "type": "image_generation"
+    }
+  }
+}

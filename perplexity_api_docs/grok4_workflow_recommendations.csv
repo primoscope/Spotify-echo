@@ -1,7 +1,0 @@
-Workflow Type,Recommended Approach,Key Benefits,Implementation Notes
-Quick Research & Citations,Perplexity Pro + Grok-4 selection,"Fast, cited responses with web context",Select Grok-4 in model dropdown
-Deep Academic Research,Perplexity Pro + Research Mode + Grok-4,Comprehensive reports with sources,Use Research Mode for comprehensive analysis
-Code Analysis & Review,Direct xAI API for full context,Full 256K context for large codebases,Integrate via xAI API for full capabilities
-Multi-Agent Research,Perplexity API + Custom agents,Specialized task distribution,Combine Perplexity MCP with custom logic
-Content Generation,Perplexity Pro + Labs integration,End-to-end deliverable creation,Leverage Labs for document/chart generation
-Data Analysis & Insights,Perplexity Pro + file upload + Grok-4,Multimodal analysis capabilities,Upload files directly to Pro interface

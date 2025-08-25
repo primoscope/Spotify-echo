@@ -1,7 +1,0 @@
-{
-  "cycle": 2,
-  "timestamp": "2025-08-03T23:56:46.647Z",
-  "tasks_generated": 2,
-  "status": "tasks_ready",
-  "next_action": "create_pr"
-}

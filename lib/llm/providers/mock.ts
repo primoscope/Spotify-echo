@@ -1,2 +1,0 @@
-import type { LlmMessage, LlmProvider } from '../types';
-export class MockProvider implements LlmProvider { name = 'mock'; private model = 'mock/test'; getActiveModel() { return this.model; } async generate(messages: LlmMessage[]): Promise<string> { const lastUser = [...messages].reverse().find(m => m.role === 'user')?.content || ''; return `MOCK_RESPONSE: (${lastUser.slice(0,40)}) :: top_artists=["Artist A","Artist B"]`; } }

@@ -1,9 +1,0 @@
-{
-  "timestamp": "${new Date().toISOString()}",
-  "metrics": {
-    "build_ms": null,
-    "test_ms": null,
-    "mcp_validation_score": null
-  },
-  "notes": "Initialized baseline; to be filled by CI runs."
-}

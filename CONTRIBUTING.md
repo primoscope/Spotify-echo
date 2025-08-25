@@ -1,6 +1,6 @@
-# 🤝 Contributing to EchoTune AI
+# 🤝 Contributing to GitHub Coding Agent Integration Template
 
-Thank you for your interest in contributing to EchoTune AI! This guide will help you get started with contributing to our music recommendation platform.
+Thank you for your interest in contributing to this comprehensive GitHub Coding Agent integration template! This guide will help you contribute to improving autonomous development workflows and AI-powered coding systems.
 
 ## 🚀 Quick Start
 

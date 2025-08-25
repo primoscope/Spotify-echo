@@ -1,0 +1,128 @@
+{
+  "registeredModels": [
+    {
+      "name": "imagen_3_0_generate_001",
+      "provider": "vertex",
+      "resourcePath": "us-central1/models/imagen-3.0-generate-001",
+      "capabilitiesHash": "sha256:a1b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "image_generation",
+      "configuration": {
+        "max_resolution": "1536x1536",
+        "cost_per_image": 0.025,
+        "capabilities": ["text-to-image", "high-resolution", "style-transfer"]
+      }
+    },
+    {
+      "name": "imagegeneration_006",
+      "provider": "vertex",
+      "resourcePath": "us-central1/models/imagegeneration@006",
+      "capabilitiesHash": "sha256:b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789a",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "image_generation",
+      "configuration": {
+        "max_resolution": "1024x1024",
+        "cost_per_image": 0.020,
+        "capabilities": ["text-to-image", "image-editing"]
+      }
+    },
+    {
+      "name": "veo_2_0_001",
+      "provider": "vertex",
+      "resourcePath": "us-central1/models/veo-2.0-001",
+      "capabilitiesHash": "sha256:c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789ab",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "video_generation",
+      "configuration": {
+        "max_duration": 120,
+        "max_resolution": "4K",
+        "cost_per_second": 0.50,
+        "capabilities": ["text-to-video", "high-quality"]
+      }
+    },
+    {
+      "name": "veo_1_5_001",
+      "provider": "vertex",
+      "resourcePath": "us-central1/models/veo-1.5-001",
+      "capabilitiesHash": "sha256:d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abc",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "video_generation",
+      "configuration": {
+        "max_duration": 60,
+        "max_resolution": "1080p",
+        "cost_per_second": 0.30,
+        "capabilities": ["text-to-video", "image-to-video"]
+      }
+    },
+    {
+      "name": "stable_diffusion_xl_base_1_0",
+      "provider": "huggingface",
+      "resourcePath": "stabilityai/stable-diffusion-xl-base-1.0",
+      "capabilitiesHash": "sha256:e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abcd",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "image_generation",
+      "configuration": {
+        "max_resolution": "1024x1024",
+        "cost_per_image": 0.015,
+        "capabilities": ["text-to-image", "photorealistic"]
+      }
+    },
+    {
+      "name": "flux_1_dev",
+      "provider": "huggingface",
+      "resourcePath": "black-forest-labs/FLUX.1-dev",
+      "capabilitiesHash": "sha256:f6789abcdef0123456789abcdef0123456789abcdef0123456789abcde",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "image_generation",
+      "configuration": {
+        "max_resolution": "1024x1024",
+        "cost_per_image": 0.022,
+        "capabilities": ["text-to-image", "artistic"]
+      }
+    },
+    {
+      "name": "gemini_2_5_pro",
+      "provider": "vertex",
+      "resourcePath": "us-central1/models/gemini-2.5-pro",
+      "capabilitiesHash": "sha256:789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "text_generation",
+      "configuration": {
+        "context_length": 2048000,
+        "cost_per_1k_tokens": 0.001,
+        "capabilities": ["text-generation", "analysis", "reasoning"]
+      }
+    },
+    {
+      "name": "claude_opus_4_1",
+      "provider": "anthropic",
+      "resourcePath": "claude-3-opus-20241022",
+      "capabilitiesHash": "sha256:89abcdef0123456789abcdef0123456789abcdef0123456789abcdef0",
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastValidated": "2025-01-25T09:55:42Z",
+      "status": "active",
+      "type": "text_generation",
+      "configuration": {
+        "context_length": 200000,
+        "cost_per_1k_tokens": 0.015,
+        "capabilities": ["text-generation", "deep-reasoning", "analysis"]
+      }
+    }
+  ],
+  "version": 1,
+  "lastUpdated": "2025-01-25T09:55:42Z"
+}

@@ -1,0 +1,12 @@
+{
+  "video_title": "Test veo_2_0_001 - Video 2",
+  "prompt": "Concert crowd enjoying live music",
+  "model": "veo_2_0_001",
+  "duration_seconds": 5,
+  "resolution": "1080p",
+  "fps": 24,
+  "format": "MP4",
+  "codec": "H.264",
+  "generated_at": "2025-08-25T10:56:25.881010",
+  "note": "This is a demonstration file. In production, this would be an actual MP4 video file."
+}

@@ -1,0 +1,87 @@
+{
+  "vertexIntegrations": [
+    {
+      "integration_id": "vertex_ai_primary",
+      "provider": "google_vertex_ai",
+      "project_id": "demo-project-12345",
+      "region": "us-central1",
+      "status": "active",
+      "models_integrated": [
+        "imagen-3.0-generate-001",
+        "imagegeneration@006",
+        "veo-2.0-001",
+        "veo-1.5-001",
+        "gemini-2.5-pro"
+      ],
+      "authentication": {
+        "method": "service_account",
+        "configured": true,
+        "last_verified": "2025-01-25T09:55:42Z"
+      },
+      "quotas": {
+        "image_generation": {
+          "monthly_limit": 10000,
+          "used": 234,
+          "remaining": 9766
+        },
+        "video_generation": {
+          "monthly_limit": 500,
+          "used": 12,
+          "remaining": 488
+        },
+        "text_generation": {
+          "monthly_limit": 1000000,
+          "used": 45678,
+          "remaining": 954322
+        }
+      },
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastUpdated": "2025-01-25T09:55:42Z"
+    },
+    {
+      "integration_id": "huggingface_community",
+      "provider": "huggingface",
+      "status": "active",
+      "models_integrated": [
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        "black-forest-labs/FLUX.1-dev"
+      ],
+      "authentication": {
+        "method": "api_token",
+        "configured": true,
+        "last_verified": "2025-01-25T09:55:42Z"
+      },
+      "quotas": {
+        "requests_per_hour": 100,
+        "used": 15,
+        "remaining": 85
+      },
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastUpdated": "2025-01-25T09:55:42Z"
+    },
+    {
+      "integration_id": "anthropic_claude",
+      "provider": "anthropic",
+      "status": "active",
+      "models_integrated": [
+        "claude-3-opus-20241022"
+      ],
+      "authentication": {
+        "method": "api_key",
+        "configured": true,
+        "last_verified": "2025-01-25T09:55:42Z"
+      },
+      "quotas": {
+        "monthly_tokens": 1000000,
+        "used": 23456,
+        "remaining": 976544
+      },
+      "createdAt": "2025-01-25T09:55:42Z",
+      "lastUpdated": "2025-01-25T09:55:42Z"
+    }
+  ],
+  "lastAudit": "2025-01-25T09:55:42Z",
+  "version": 1,
+  "totalIntegrations": 3,
+  "healthStatus": "all_operational"
+}

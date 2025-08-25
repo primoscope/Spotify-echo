@@ -218,7 +218,9 @@ class StandaloneUnifiedAgent:
                 cmd_name, params = SlashCommandParser.parse(input_text)
                 mode = self._determine_mode_from_command(cmd_name, params)
                 models_to_use = self._route_from_command(cmd_name, params)
-                prompt = params.get('prompt', params.get('task', input_text))
+                prompt = params.get('prompt') or params.get('task')
+                if not prompt:
+                    raise ValueError("Slash command requires a 'prompt' or 'task' parameter.")
             else:
                 intent = IntentParser.parse_intent(input_text)
                 mode = intent['mode']

@@ -177,40 +177,41 @@ class GenerativeAICLI:
         
         print(f"\n✅ Service is healthy and ready for use!")
     
-    def batch_generate(self, config_file: str) -> None:
-        """Generate multiple items from a configuration file."""
+    async def batch_generate_async(self, config_file: str) -> None:
+        """Generate multiple items from a configuration file (async-safe)."""
         logger.info(f"📄 Loading batch configuration from: {config_file}")
-        
         try:
             with open(config_file, 'r') as f:
                 config = json.load(f)
-            
-            # Process batch requests
+
             print(f"🔄 Processing {len(config.get('requests', []))} batch requests...")
-            
+            tasks = []
             for i, request in enumerate(config.get('requests', []), 1):
                 print(f"\n📋 Processing request {i}/{len(config['requests'])}")
-                
-                if request['type'] == 'image':
-                    asyncio.run(self.generate_image(
+                if request.get('type') == 'image':
+                    tasks.append(self.generate_image(
                         prompt=request['prompt'],
                         model=request.get('model', 'imagegeneration@006'),
                         style=request.get('style'),
                         aspect_ratio=request.get('aspect_ratio', '1:1'),
                         count=request.get('count', 1)
                     ))
-                elif request['type'] == 'video':
-                    asyncio.run(self.generate_video(
+                elif request.get('type') == 'video':
+                    tasks.append(self.generate_video(
                         prompt=request['prompt'],
                         model=request.get('model', 'veo-1.5-001'),
                         duration=request.get('duration', 5)
                     ))
-            
+            # execute sequentially or concurrently; here concurrently:
+            await asyncio.gather(*tasks)
             print(f"\n🎉 Batch processing complete!")
-            
         except Exception as e:
             logger.error(f"❌ Batch processing failed: {e}")
             sys.exit(1)
+
+    def batch_generate(self, config_file: str) -> None:
+        """Sync wrapper for async batch generation."""
+        asyncio.run(self.batch_generate_async(config_file))
 
 
 def create_sample_batch_config():

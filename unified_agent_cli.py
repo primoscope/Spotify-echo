@@ -21,7 +21,9 @@ from typing import Optional, Dict, Any
 import os
 
 # Add project root to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 # Mock environment for demo
 os.environ.setdefault('GCP_PROJECT_ID', 'demo-project-12345')

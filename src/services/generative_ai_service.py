@@ -380,10 +380,14 @@ class GenerativeAIService:
             # Prepare generation parameters
             generation_params = {
                 "prompt": request.prompt,
-                "number_of_images": request.image_count,
+                "number_of_images": max(1, int(request.image_count)),
                 "aspect_ratio": request.aspect_ratio,
                 "safety_filter_level": "block_some" if request.safety_filter else "block_none"
             }
+            # Validate aspect ratio
+            supported_aspects = model_config.get("supported_aspects", [])
+            if supported_aspects and request.aspect_ratio not in supported_aspects:
+                raise ValueError(f"Unsupported aspect ratio '{request.aspect_ratio}'. Supported: {supported_aspects}")
             
             if request.negative_prompt:
                 generation_params["negative_prompt"] = request.negative_prompt
@@ -397,22 +401,37 @@ class GenerativeAIService:
                 **generation_params
             )
             
-            # Save images and collect paths
+            # Validate response
+            images = getattr(response, "images", None)
+            if not images:
+                raise Exception("No images returned by the model (possibly blocked by safety filters).")
+
             content_paths = []
             content_urls = []
-            
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            
-            for i, image in enumerate(response.images):
+
+            for i, img in enumerate(images):
                 filename = f"{request.model_id.replace('/', '_')}_{timestamp}_{i+1}.{request.output_format.lower()}"
                 image_path = self.output_dir / "images" / filename
                 image_path.parent.mkdir(exist_ok=True)
-                
-                # Save image
-                image.save(location=str(image_path))
+
+                # Support Vertex Image and raw bytes/PIL
+                try:
+                    if hasattr(img, "save"):
+                        img.save(location=str(image_path))
+                    elif isinstance(img, (bytes, bytearray)):
+                        with open(image_path, "wb") as f:
+                            f.write(img)
+                    else:
+                        # Try PIL fallback
+                        from PIL import Image as PILImage
+                        import io
+                        PILImage.open(io.BytesIO(img)).save(image_path)
+                except Exception as e:
+                    logger.error(f"Failed to save generated image: {e}")
+                    continue
+
                 content_paths.append(str(image_path))
-                
-                # For now, use file path as URL (in production, upload to cloud storage)
                 content_urls.append(f"file://{image_path}")
             
             # Calculate cost
@@ -494,12 +513,20 @@ class GenerativeAIService:
             video_path = self.output_dir / "videos" / filename
             video_path.parent.mkdir(exist_ok=True)
             
-            # Create a placeholder video file (in production, this would be the actual generated video)
-            # For now, just create an empty file with metadata
-            with open(video_path, 'w') as f:
-                f.write(f"# Video placeholder for prompt: {request.prompt}\n")
-                f.write(f"# Model: {request.model_id}\n")
-                f.write(f"# Duration: {request.duration_seconds or 5} seconds\n")
+            # Create placeholder artifacts: JSON metadata + optional empty mp4
+            metadata = {
+                "prompt": request.prompt,
+                "model": request.model_id,
+                "duration_seconds": request.duration_seconds or 5,
+                "note": "Placeholder artifact; replace with real video generation."
+            }
+            meta_path = video_path.with_suffix(".json")
+            with open(meta_path, "w") as f:
+                import json
+                json.dump(metadata, f, indent=2)
+            # Create an empty mp4 container placeholder
+            with open(video_path, "wb") as f:
+                f.write(b"")
             
             duration = request.duration_seconds or 5
             cost_estimate = duration * model_config.get("cost_per_second", 0.50)

@@ -121,6 +121,16 @@ class MockLLMProvider extends BaseLLMProvider {
    * Find the category that best matches the user message
    */
   _findMessageCategory(userMessage) {
+    // Special case for connectivity test
+    if (userMessage.includes('hello') && userMessage.includes('connection successful')) {
+      return 'connectivity_test';
+    }
+    
+    // Special case for language model explanation
+    if (userMessage.includes('language model') && userMessage.includes('concept')) {
+      return 'language_model_explanation';
+    }
+    
     const keywordCategories = {
       workout: ['workout', 'exercise', 'gym'],
       study: ['study', 'focus', 'concentration'],
@@ -148,6 +158,8 @@ class MockLLMProvider extends BaseLLMProvider {
    */
   _getResponseForCategory(category) {
     const responses = {
+      connectivity_test: 'Connection successful.',
+      language_model_explanation: 'A language model is an AI system trained to predict and generate human-like text by learning patterns from vast amounts of text data.',
       workout: this.musicResponses.workout,
       study: this.musicResponses.study,
       chill: this.musicResponses.chill,

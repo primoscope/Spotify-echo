@@ -1,29 +1,91 @@
-# Google Gemini Direct Integration
+# 🧠 Gemini Integration Guide
 
-This project can call Google Gemini (Generative Language API) directly.
+## Overview
 
-## Environment Variables
-- LLM_PROVIDER=google
-- GEMINI_API_KEY= (DO NOT COMMIT)
-- GEMINI_MODEL=gemini-1.5-flash (default)
-- LLM_TIMEOUT_MS= (applies to all providers)
+This document provides comprehensive instructions for integrating and using the enhanced Google Gemini provider in EchoTune AI, including multimodal capabilities, advanced caching, and comprehensive observability.
 
-## Usage
-1. Set GEMINI_API_KEY in your local .env (never commit).
-2. Set LLM_PROVIDER=google and optionally GEMINI_MODEL.
-3. Run the app; the chat will use Gemini for responses.
+## Quick Start
 
-## Live Test
-Enable the live e2e test (consumes quota):
+### Environment Configuration
+
+```bash
+# Required - Google AI Studio (recommended for development)
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-pro
+
+# Optional - Vertex AI (production environments)
+GEMINI_USE_VERTEX=false
+GCP_PROJECT_ID=your_project_id
+GCP_VERTEX_LOCATION=us-central1
+
+# Advanced Configuration
+GEMINI_MODEL_FALLBACK=gemini-1.5-flash
+GEMINI_SAFETY_MODE=BLOCK_MEDIUM_AND_ABOVE
+GEMINI_RESPONSE_FORMAT=text
+GEMINI_FUNCTION_CALLING_ENABLED=false
+GEMINI_CODE_ASSIST_ENABLED=false
+GEMINI_CACHE_TTL_MS=600000
 ```
-GEMINI_API_KEY=... LLM_PROVIDER=google LIVE_LLM_TEST=1 npm run test:e2e
+
+### Basic Usage
+
+```javascript
+const GeminiProvider = require('../src/chat/llm-providers/gemini-provider');
+
+// Initialize provider
+const provider = new GeminiProvider({
+  apiKey: process.env.GEMINI_API_KEY,
+  model: 'gemini-2.5-pro'
+});
+
+await provider.initialize();
+
+// Simple text completion
+const response = await provider.generateCompletion([
+  { role: 'user', content: 'Recommend jazz albums for coding' }
+]);
+
+console.log(response.content);
 ```
-This runs `tests/e2e/gemini-chat.spec.ts`.
 
-## Notes
-- Free-only enforcement currently applies only to OpenRouter provider.
-- Generation config is minimal (temperature=0.7). Adjust in `providers/google.ts`.
-- Extend by adding system prompts: include a `{ role: 'system', content: '...' }` message; provider maps system role to user (Gemini API does not have dedicated system role).
+## CLI Tools
 
-## Security
-Rotate keys immediately if leaked. Never paste your real GEMINI_API_KEY in code or PR comments.
+### Gemini CLI Wrapper
+
+```bash
+# Simple prompt
+npm run gemini:prompt -- --prompt "Suggest 5 indie rock bands"
+
+# With image
+npm run gemini:prompt -- --prompt "Analyze this album cover" --images ./cover.jpg
+
+# Streaming response
+npm run gemini:prompt -- --prompt "Tell a story" --stream
+
+# JSON output
+npm run gemini:prompt -- --prompt "List top 10 albums" --json
+```
+
+### Benchmarking
+
+```bash
+# Run standard benchmark
+npm run gemini:benchmark
+
+# Specific strategy testing
+npm run ai:eval:gemini-completion
+npm run ai:eval:gemini-streaming
+npm run ai:eval:gemini-safety
+```
+
+### Connectivity Testing
+
+```bash
+# Test all Gemini features
+npm run gemini:test
+
+# Verbose output
+npm run gemini:test -- --verbose
+```
+
+For complete documentation, see the enhanced integration guide.

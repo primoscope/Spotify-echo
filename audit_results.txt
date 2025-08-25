@@ -1,0 +1,13 @@
+# npm audit report
+
+mermaid  11.0.0-alpha.1 - 11.9.0
+Severity: moderate
+Mermaid does not properly sanitize architecture diagram iconText leading to XSS - https://github.com/advisories/GHSA-8gwm-58g9-j8pw
+Mermaid improperly sanitizes sequence diagram labels leading to XSS - https://github.com/advisories/GHSA-7rqq-prvp-x9jh
+fix available via `npm audit fix`
+node_modules/mermaid
+
+1 moderate severity vulnerability
+
+To address all issues, run:
+  npm audit fix

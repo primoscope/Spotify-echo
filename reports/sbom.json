@@ -1,1 +1,2642 @@
-{}
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:3780b880-4977-4d37-b9e9-3c25bc829659",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-08-25T22:35:47.898Z",
+    "tools": [
+      {
+        "vendor": "EchoTune AI",
+        "name": "SBOM Generator",
+        "version": "1.0.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "bom-ref": "echotune-ai",
+      "name": "echotune-ai",
+      "version": "2.1.0",
+      "description": "EchoTune AI - Advanced music discovery platform with AI-powered recommendations, conversational music search, and comprehensive analytics",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/echotune-ai@2.1.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "@anthropic-ai/sdk@0.60.0",
+      "name": "@anthropic-ai/sdk",
+      "version": "0.60.0",
+      "scope": "required",
+      "purl": "pkg:npm/@anthropic-ai/sdk@0.60.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.60.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "The official TypeScript library for the Anthropic API"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@emotion/react@11.14.0",
+      "name": "@emotion/react",
+      "version": "11.14.0",
+      "scope": "required",
+      "purl": "pkg:npm/@emotion/react@11.14.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^11.14.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "> Simple styling in React."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@emotion/styled@11.14.1",
+      "name": "@emotion/styled",
+      "version": "11.14.1",
+      "scope": "required",
+      "purl": "pkg:npm/@emotion/styled@11.14.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^11.14.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "styled API for emotion"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@google-cloud/aiplatform@5.6.0",
+      "name": "@google-cloud/aiplatform",
+      "version": "5.6.0",
+      "scope": "required",
+      "purl": "pkg:npm/@google-cloud/aiplatform@5.6.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.6.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Vertex AI client for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@google-cloud/vertexai@1.10.0",
+      "name": "@google-cloud/vertexai",
+      "version": "1.10.0",
+      "scope": "required",
+      "purl": "pkg:npm/@google-cloud/vertexai@1.10.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.10.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Vertex Generative AI client for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@google/generative-ai@0.2.1",
+      "name": "@google/generative-ai",
+      "version": "0.2.1",
+      "scope": "required",
+      "purl": "pkg:npm/@google/generative-ai@0.2.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.2.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Google AI JavaScript SDK"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@langchain/core@0.3.72",
+      "name": "@langchain/core",
+      "version": "0.3.72",
+      "scope": "required",
+      "purl": "pkg:npm/@langchain/core@0.3.72",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.3.72"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Core LangChain.js abstractions and schemas"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@langchain/langgraph@0.4.6",
+      "name": "@langchain/langgraph",
+      "version": "0.4.6",
+      "scope": "required",
+      "purl": "pkg:npm/@langchain/langgraph@0.4.6",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.4.6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "LangGraph"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@langchain/langgraph-checkpoint-mongodb@0.1.0",
+      "name": "@langchain/langgraph-checkpoint-mongodb",
+      "version": "0.1.0",
+      "scope": "required",
+      "purl": "pkg:npm/@langchain/langgraph-checkpoint-mongodb@0.1.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.1.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "LangGraph"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@langchain/openai@0.6.9",
+      "name": "@langchain/openai",
+      "version": "0.6.9",
+      "scope": "required",
+      "purl": "pkg:npm/@langchain/openai@0.6.9",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.6.9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "OpenAI integrations for LangChain.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@mui/icons-material@7.3.1",
+      "name": "@mui/icons-material",
+      "version": "7.3.1",
+      "scope": "required",
+      "purl": "pkg:npm/@mui/icons-material@7.3.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.3.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Material Design icons distributed as SVG React components."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@mui/material@7.3.1",
+      "name": "@mui/material",
+      "version": "7.3.1",
+      "scope": "required",
+      "purl": "pkg:npm/@mui/material@7.3.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.3.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Material UI is an open-source React component library that implements Google's Material Design. It's comprehensive and can be used in production out of the box."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@mui/system@7.3.1",
+      "name": "@mui/system",
+      "version": "7.3.1",
+      "scope": "required",
+      "purl": "pkg:npm/@mui/system@7.3.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.3.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "MUI System is a set of CSS utilities to help you build custom designs more efficiently. It makes it possible to rapidly lay out custom designs."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@octokit/rest@22.0.0",
+      "name": "@octokit/rest",
+      "version": "22.0.0",
+      "scope": "required",
+      "purl": "pkg:npm/@octokit/rest@22.0.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^22.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "GitHub REST API client for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@opentelemetry/auto-instrumentations-node@0.62.1",
+      "name": "@opentelemetry/auto-instrumentations-node",
+      "version": "0.62.1",
+      "scope": "required",
+      "purl": "pkg:npm/@opentelemetry/auto-instrumentations-node@0.62.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.62.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Metapackage which bundles opentelemetry node core and contrib instrumentations"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@opentelemetry/exporter-trace-otlp-http@0.203.0",
+      "name": "@opentelemetry/exporter-trace-otlp-http",
+      "version": "0.203.0",
+      "scope": "required",
+      "purl": "pkg:npm/@opentelemetry/exporter-trace-otlp-http@0.203.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.203.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "OpenTelemetry Collector Trace Exporter allows user to send collected traces to the OpenTelemetry Collector"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@opentelemetry/sdk-node@0.203.0",
+      "name": "@opentelemetry/sdk-node",
+      "version": "0.203.0",
+      "scope": "required",
+      "purl": "pkg:npm/@opentelemetry/sdk-node@0.203.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.203.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "OpenTelemetry SDK for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@sentry/node@10.3.0",
+      "name": "@sentry/node",
+      "version": "10.3.0",
+      "scope": "required",
+      "purl": "pkg:npm/@sentry/node@10.3.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^10.3.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Sentry Node SDK using OpenTelemetry for performance instrumentation"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@supabase/supabase-js@2.53.0",
+      "name": "@supabase/supabase-js",
+      "version": "2.53.0",
+      "scope": "required",
+      "purl": "pkg:npm/@supabase/supabase-js@2.53.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.53.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Isomorphic Javascript client for Supabase"
+    },
+    {
+      "type": "library",
+      "bom-ref": "ajv@8.17.1",
+      "name": "ajv",
+      "version": "8.17.1",
+      "scope": "required",
+      "purl": "pkg:npm/ajv@8.17.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^8.12.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Another JSON Schema Validator"
+    },
+    {
+      "type": "library",
+      "bom-ref": "ajv-formats@2.1.1",
+      "name": "ajv-formats",
+      "version": "2.1.1",
+      "scope": "required",
+      "purl": "pkg:npm/ajv-formats@2.1.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.1.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Format validation for Ajv v7+"
+    },
+    {
+      "type": "library",
+      "bom-ref": "better-sqlite3@12.2.0",
+      "name": "better-sqlite3",
+      "version": "12.2.0",
+      "scope": "required",
+      "purl": "pkg:npm/better-sqlite3@12.2.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^12.2.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "The fastest and simplest library for SQLite in Node.js."
+    },
+    {
+      "type": "library",
+      "bom-ref": "cls-hooked@4.2.2",
+      "name": "cls-hooked",
+      "version": "4.2.2",
+      "scope": "required",
+      "purl": "pkg:npm/cls-hooked@4.2.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.2.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "description": "CLS using AsynWrap instead of async-listener - Node >= 4.7.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "commander@12.1.0",
+      "name": "commander",
+      "version": "12.1.0",
+      "scope": "required",
+      "purl": "pkg:npm/commander@12.1.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^12.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "the complete solution for node.js command-line programs"
+    },
+    {
+      "type": "library",
+      "bom-ref": "compression@1.8.1",
+      "name": "compression",
+      "version": "1.8.1",
+      "scope": "required",
+      "purl": "pkg:npm/compression@1.8.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.7.4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Node.js compression middleware"
+    },
+    {
+      "type": "library",
+      "bom-ref": "cookie-parser@1.4.7",
+      "name": "cookie-parser",
+      "version": "1.4.7",
+      "scope": "required",
+      "purl": "pkg:npm/cookie-parser@1.4.7",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.4.7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Parse HTTP request cookies"
+    },
+    {
+      "type": "library",
+      "bom-ref": "cors@2.8.5",
+      "name": "cors",
+      "version": "2.8.5",
+      "scope": "required",
+      "purl": "pkg:npm/cors@2.8.5",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.8.5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Node.js CORS middleware"
+    },
+    {
+      "type": "library",
+      "bom-ref": "csv-parser@3.2.0",
+      "name": "csv-parser",
+      "version": "3.2.0",
+      "scope": "required",
+      "purl": "pkg:npm/csv-parser@3.2.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^3.2.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Streaming CSV parser that aims for maximum speed as well as compatibility with the csv-spectrum test suite"
+    },
+    {
+      "type": "library",
+      "bom-ref": "express@4.21.2",
+      "name": "express",
+      "version": "4.21.2",
+      "scope": "required",
+      "purl": "pkg:npm/express@4.21.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.18.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Fast, unopinionated, minimalist web framework"
+    },
+    {
+      "type": "library",
+      "bom-ref": "express-rate-limit@7.5.1",
+      "name": "express-rate-limit",
+      "version": "7.5.1",
+      "scope": "required",
+      "purl": "pkg:npm/express-rate-limit@7.5.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.5.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Basic IP rate-limiting middleware for Express. Use to limit repeated requests to public APIs and/or endpoints such as password reset."
+    },
+    {
+      "type": "library",
+      "bom-ref": "express-session@1.18.2",
+      "name": "express-session",
+      "version": "1.18.2",
+      "scope": "required",
+      "purl": "pkg:npm/express-session@1.18.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.18.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Simple session middleware for Express"
+    },
+    {
+      "type": "library",
+      "bom-ref": "express-slow-down@2.1.0",
+      "name": "express-slow-down",
+      "version": "2.1.0",
+      "scope": "required",
+      "purl": "pkg:npm/express-slow-down@2.1.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.1.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Basic IP rate-limiting middleware for Express that slows down responses rather than blocking the user."
+    },
+    {
+      "type": "library",
+      "bom-ref": "glob@11.0.3",
+      "name": "glob",
+      "version": "11.0.3",
+      "scope": "required",
+      "purl": "pkg:npm/glob@11.0.3",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^11.0.3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "description": "the most correct and second fastest glob implementation in JavaScript"
+    },
+    {
+      "type": "library",
+      "bom-ref": "google-auth-library@10.2.1",
+      "name": "google-auth-library",
+      "version": "10.2.1",
+      "scope": "required",
+      "purl": "pkg:npm/google-auth-library@10.2.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^10.2.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Google APIs Authentication Client Library for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "googleapis@157.0.0",
+      "name": "googleapis",
+      "version": "157.0.0",
+      "scope": "required",
+      "purl": "pkg:npm/googleapis@157.0.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^157.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Google APIs Client Library for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "helmet@7.2.0",
+      "name": "helmet",
+      "version": "7.2.0",
+      "scope": "required",
+      "purl": "pkg:npm/helmet@7.2.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.2.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "help secure Express/Connect apps with various HTTP headers"
+    },
+    {
+      "type": "library",
+      "bom-ref": "ioredis@5.7.0",
+      "name": "ioredis",
+      "version": "5.7.0",
+      "scope": "required",
+      "purl": "pkg:npm/ioredis@5.7.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.7.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "A robust, performance-focused and full-featured Redis client for Node.js."
+    },
+    {
+      "type": "library",
+      "bom-ref": "js-yaml@4.1.0",
+      "name": "js-yaml",
+      "version": "4.1.0",
+      "scope": "required",
+      "purl": "pkg:npm/js-yaml@4.1.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.1.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "YAML 1.2 parser and serializer"
+    },
+    {
+      "type": "library",
+      "bom-ref": "jsonwebtoken@9.0.2",
+      "name": "jsonwebtoken",
+      "version": "9.0.2",
+      "scope": "required",
+      "purl": "pkg:npm/jsonwebtoken@9.0.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^9.0.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "JSON Web Token implementation (symmetric and asymmetric)"
+    },
+    {
+      "type": "library",
+      "bom-ref": "lodash@4.17.21",
+      "name": "lodash",
+      "version": "4.17.21",
+      "scope": "required",
+      "purl": "pkg:npm/lodash@4.17.21",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.17.21"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Lodash modular utilities."
+    },
+    {
+      "type": "library",
+      "bom-ref": "lru-cache@7.18.3",
+      "name": "lru-cache",
+      "version": "7.18.3",
+      "scope": "required",
+      "purl": "pkg:npm/lru-cache@7.18.3",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.18.3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "description": "A cache object that deletes the least-recently-used items."
+    },
+    {
+      "type": "library",
+      "bom-ref": "multer@2.0.2",
+      "name": "multer",
+      "version": "2.0.2",
+      "scope": "required",
+      "purl": "pkg:npm/multer@2.0.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Middleware for handling `multipart/form-data`."
+    },
+    {
+      "type": "library",
+      "bom-ref": "node-fetch@3.3.2",
+      "name": "node-fetch",
+      "version": "3.3.2",
+      "scope": "required",
+      "purl": "pkg:npm/node-fetch@3.3.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^3.3.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "A light-weight module that brings Fetch API to node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "openai@4.104.0",
+      "name": "openai",
+      "version": "4.104.0",
+      "scope": "required",
+      "purl": "pkg:npm/openai@4.104.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.24.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "The official TypeScript library for the OpenAI API"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pino@9.7.0",
+      "name": "pino",
+      "version": "9.7.0",
+      "scope": "required",
+      "purl": "pkg:npm/pino@9.7.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^9.1.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "super fast, all natural json logger"
+    },
+    {
+      "type": "library",
+      "bom-ref": "prom-client@15.1.3",
+      "name": "prom-client",
+      "version": "15.1.3",
+      "scope": "required",
+      "purl": "pkg:npm/prom-client@15.1.3",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^15.1.3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Client for prometheus"
+    },
+    {
+      "type": "library",
+      "bom-ref": "prop-types@15.8.1",
+      "name": "prop-types",
+      "version": "15.8.1",
+      "scope": "required",
+      "purl": "pkg:npm/prop-types@15.8.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^15.8.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Runtime type checking for React props and similar objects."
+    },
+    {
+      "type": "library",
+      "bom-ref": "react@19.1.1",
+      "name": "react",
+      "version": "19.1.1",
+      "scope": "required",
+      "purl": "pkg:npm/react@19.1.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^19.1.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "React is a JavaScript library for building user interfaces."
+    },
+    {
+      "type": "library",
+      "bom-ref": "react-dom@19.1.1",
+      "name": "react-dom",
+      "version": "19.1.1",
+      "scope": "required",
+      "purl": "pkg:npm/react-dom@19.1.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^19.1.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "React package for working with the DOM."
+    },
+    {
+      "type": "library",
+      "bom-ref": "react-router-dom@7.7.1",
+      "name": "react-router-dom",
+      "version": "7.7.1",
+      "scope": "required",
+      "purl": "pkg:npm/react-router-dom@7.7.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.7.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Declarative routing for React web applications"
+    },
+    {
+      "type": "library",
+      "bom-ref": "redis@4.7.1",
+      "name": "redis",
+      "version": "4.7.1",
+      "scope": "required",
+      "purl": "pkg:npm/redis@4.7.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.7.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "A modern, high performance Redis client"
+    },
+    {
+      "type": "library",
+      "bom-ref": "response-time@2.3.4",
+      "name": "response-time",
+      "version": "2.3.4",
+      "scope": "required",
+      "purl": "pkg:npm/response-time@2.3.4",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.3.4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Response time for Node.js servers"
+    },
+    {
+      "type": "library",
+      "bom-ref": "serverless-http@3.2.0",
+      "name": "serverless-http",
+      "version": "3.2.0",
+      "scope": "required",
+      "purl": "pkg:npm/serverless-http@3.2.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^3.2.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Use existing web application frameworks in serverless environments"
+    },
+    {
+      "type": "library",
+      "bom-ref": "socket.io@4.8.1",
+      "name": "socket.io",
+      "version": "4.8.1",
+      "scope": "required",
+      "purl": "pkg:npm/socket.io@4.8.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.7.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "node.js realtime framework server"
+    },
+    {
+      "type": "library",
+      "bom-ref": "socket.io-client@4.8.1",
+      "name": "socket.io-client",
+      "version": "4.8.1",
+      "scope": "required",
+      "purl": "pkg:npm/socket.io-client@4.8.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.8.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Realtime application framework client"
+    },
+    {
+      "type": "library",
+      "bom-ref": "sqlite3@5.1.7",
+      "name": "sqlite3",
+      "version": "5.1.7",
+      "scope": "required",
+      "purl": "pkg:npm/sqlite3@5.1.7",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.1.7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "description": "Asynchronous, non-blocking SQLite3 bindings"
+    },
+    {
+      "type": "library",
+      "bom-ref": "uuid@9.0.1",
+      "name": "uuid",
+      "version": "9.0.1",
+      "scope": "required",
+      "purl": "pkg:npm/uuid@9.0.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^9.0.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "RFC4122 (v1, v4, and v5) UUIDs"
+    },
+    {
+      "type": "library",
+      "bom-ref": "ws@8.18.3",
+      "name": "ws",
+      "version": "8.18.3",
+      "scope": "required",
+      "purl": "pkg:npm/ws@8.18.3",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^8.14.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Simple to use, blazing fast and thoroughly tested websocket client and server for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "zod@3.25.76",
+      "name": "zod",
+      "version": "3.25.76",
+      "scope": "required",
+      "purl": "pkg:npm/zod@3.25.76",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^3.25.76"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript-first schema declaration and validation library with static type inference"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@azure/openai@2.0.0",
+      "name": "@azure/openai",
+      "version": "2.0.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@azure/openai@2.0.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "A companion library to openai for Azure OpenAI."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@babel/core@7.28.0",
+      "name": "@babel/core",
+      "version": "7.28.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@babel/core@7.28.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.28.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Babel compiler core."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@babel/plugin-transform-modules-commonjs@7.27.1",
+      "name": "@babel/plugin-transform-modules-commonjs",
+      "version": "7.27.1",
+      "scope": "optional",
+      "purl": "pkg:npm/@babel/plugin-transform-modules-commonjs@7.27.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.27.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "This plugin transforms ES2015 modules to CommonJS"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@babel/preset-env@7.28.0",
+      "name": "@babel/preset-env",
+      "version": "7.28.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@babel/preset-env@7.28.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.28.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "A Babel preset for each environment."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@babel/preset-react@7.27.1",
+      "name": "@babel/preset-react",
+      "version": "7.27.1",
+      "scope": "optional",
+      "purl": "pkg:npm/@babel/preset-react@7.27.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.27.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Babel preset for all React plugins."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@browserbasehq/mcp-server-browserbase@2.0.0",
+      "name": "@browserbasehq/mcp-server-browserbase",
+      "version": "2.0.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@browserbasehq/mcp-server-browserbase@2.0.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "github:browserbase/mcp-server-browserbase"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "MCP server for AI web browser automation using Browserbase and Stagehand"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@eslint/js@9.33.0",
+      "name": "@eslint/js",
+      "version": "9.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@eslint/js@9.33.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^9.33.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "ESLint JavaScript language implementation"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@hisma/server-puppeteer@0.6.5",
+      "name": "@hisma/server-puppeteer",
+      "version": "0.6.5",
+      "scope": "optional",
+      "purl": "pkg:npm/@hisma/server-puppeteer@0.6.5",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.6.5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Fork and update (v0.6.5) of the original @modelcontextprotocol/server-puppeteer MCP server for browser automation using Puppeteer."
+    },
+    {
+      "type": "library",
+      "bom-ref": "@modelcontextprotocol/sdk@1.17.3",
+      "name": "@modelcontextprotocol/sdk",
+      "version": "1.17.3",
+      "scope": "optional",
+      "purl": "pkg:npm/@modelcontextprotocol/sdk@1.17.3",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.17.3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Model Context Protocol implementation for TypeScript"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@modelcontextprotocol/server-filesystem@2025.7.29",
+      "name": "@modelcontextprotocol/server-filesystem",
+      "version": "2025.7.29",
+      "scope": "optional",
+      "purl": "pkg:npm/@modelcontextprotocol/server-filesystem@2025.7.29",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2025.7.29"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "MCP server for filesystem access"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@modelcontextprotocol/server-memory@2025.8.4",
+      "name": "@modelcontextprotocol/server-memory",
+      "version": "2025.8.4",
+      "scope": "optional",
+      "purl": "pkg:npm/@modelcontextprotocol/server-memory@2025.8.4",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2025.8.4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "MCP server for enabling memory for Claude through a knowledge graph"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@modelcontextprotocol/server-puppeteer@2025.5.12",
+      "name": "@modelcontextprotocol/server-puppeteer",
+      "version": "2025.5.12",
+      "scope": "optional",
+      "purl": "pkg:npm/@modelcontextprotocol/server-puppeteer@2025.5.12",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2025.5.12"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "MCP server for browser automation using Puppeteer"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@modelcontextprotocol/server-sequential-thinking@2025.7.1",
+      "name": "@modelcontextprotocol/server-sequential-thinking",
+      "version": "2025.7.1",
+      "scope": "optional",
+      "purl": "pkg:npm/@modelcontextprotocol/server-sequential-thinking@2025.7.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2025.7.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "MCP server for sequential thinking and problem solving"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@playwright/test@1.55.0",
+      "name": "@playwright/test",
+      "version": "1.55.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@playwright/test@1.55.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.55.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "A high-level API to automate web browsers"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@types/cors@2.8.19",
+      "name": "@types/cors",
+      "version": "2.8.19",
+      "scope": "optional",
+      "purl": "pkg:npm/@types/cors@2.8.19",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.8.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript definitions for cors"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@types/express@4.17.23",
+      "name": "@types/express",
+      "version": "4.17.23",
+      "scope": "optional",
+      "purl": "pkg:npm/@types/express@4.17.23",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.17.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript definitions for express"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@types/jest@29.5.14",
+      "name": "@types/jest",
+      "version": "29.5.14",
+      "scope": "optional",
+      "purl": "pkg:npm/@types/jest@29.5.14",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^29.5.14"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript definitions for jest"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@types/multer@1.4.13",
+      "name": "@types/multer",
+      "version": "1.4.13",
+      "scope": "optional",
+      "purl": "pkg:npm/@types/multer@1.4.13",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.4.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript definitions for multer"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@types/node@20.19.11",
+      "name": "@types/node",
+      "version": "20.19.11",
+      "scope": "optional",
+      "purl": "pkg:npm/@types/node@20.19.11",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^20.19.11"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript definitions for node"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@typescript-eslint/eslint-plugin@6.21.0",
+      "name": "@typescript-eslint/eslint-plugin",
+      "version": "6.21.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@typescript-eslint/eslint-plugin@6.21.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^6.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript plugin for ESLint"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@typescript-eslint/parser@6.21.0",
+      "name": "@typescript-eslint/parser",
+      "version": "6.21.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@typescript-eslint/parser@6.21.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^6.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "description": "An ESLint custom parser which leverages TypeScript ESTree"
+    },
+    {
+      "type": "library",
+      "bom-ref": "@vitejs/plugin-react@4.7.0",
+      "name": "@vitejs/plugin-react",
+      "version": "4.7.0",
+      "scope": "optional",
+      "purl": "pkg:npm/@vitejs/plugin-react@4.7.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^4.7.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "The default Vite plugin for React projects"
+    },
+    {
+      "type": "library",
+      "bom-ref": "autocannon@8.0.0",
+      "name": "autocannon",
+      "version": "8.0.0",
+      "scope": "optional",
+      "purl": "pkg:npm/autocannon@8.0.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^8.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Fast HTTP benchmarking tool written in Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "autoprefixer@10.4.21",
+      "name": "autoprefixer",
+      "version": "10.4.21",
+      "scope": "optional",
+      "purl": "pkg:npm/autoprefixer@10.4.21",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^10.4.21"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Parse CSS and add vendor prefixes to CSS rules using values from the Can I Use website"
+    },
+    {
+      "type": "library",
+      "bom-ref": "axios@1.11.0",
+      "name": "axios",
+      "version": "1.11.0",
+      "scope": "optional",
+      "purl": "pkg:npm/axios@1.11.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^1.11.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Promise based HTTP client for the browser and node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "babel-jest@30.0.5",
+      "name": "babel-jest",
+      "version": "30.0.5",
+      "scope": "optional",
+      "purl": "pkg:npm/babel-jest@30.0.5",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^30.0.5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Jest plugin to use babel for transformation."
+    },
+    {
+      "type": "library",
+      "bom-ref": "concurrently@9.2.0",
+      "name": "concurrently",
+      "version": "9.2.0",
+      "scope": "optional",
+      "purl": "pkg:npm/concurrently@9.2.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^9.2.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Run commands concurrently"
+    },
+    {
+      "type": "library",
+      "bom-ref": "dotenv@16.6.1",
+      "name": "dotenv",
+      "version": "16.6.1",
+      "scope": "optional",
+      "purl": "pkg:npm/dotenv@16.6.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^16.6.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "description": "Loads environment variables from .env file"
+    },
+    {
+      "type": "library",
+      "bom-ref": "eslint@8.57.1",
+      "name": "eslint",
+      "version": "8.57.1",
+      "scope": "optional",
+      "purl": "pkg:npm/eslint@8.57.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^8.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "An AST-based pattern checker for JavaScript."
+    },
+    {
+      "type": "library",
+      "bom-ref": "eslint-config-prettier@9.1.2",
+      "name": "eslint-config-prettier",
+      "version": "9.1.2",
+      "scope": "optional",
+      "purl": "pkg:npm/eslint-config-prettier@9.1.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^9.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Turns off all rules that are unnecessary or might conflict with Prettier."
+    },
+    {
+      "type": "library",
+      "bom-ref": "eslint-plugin-prettier@5.5.3",
+      "name": "eslint-plugin-prettier",
+      "version": "5.5.3",
+      "scope": "optional",
+      "purl": "pkg:npm/eslint-plugin-prettier@5.5.3",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Runs prettier as an eslint rule"
+    },
+    {
+      "type": "library",
+      "bom-ref": "eslint-plugin-react@7.37.5",
+      "name": "eslint-plugin-react",
+      "version": "7.37.5",
+      "scope": "optional",
+      "purl": "pkg:npm/eslint-plugin-react@7.37.5",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.37.5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "React specific linting rules for ESLint"
+    },
+    {
+      "type": "library",
+      "bom-ref": "eslint-plugin-react-hooks@5.2.0",
+      "name": "eslint-plugin-react-hooks",
+      "version": "5.2.0",
+      "scope": "optional",
+      "purl": "pkg:npm/eslint-plugin-react-hooks@5.2.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.2.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "ESLint rules for React Hooks"
+    },
+    {
+      "type": "library",
+      "bom-ref": "FileScopeMCP@1.0.0",
+      "name": "FileScopeMCP",
+      "version": "1.0.0",
+      "scope": "optional",
+      "purl": "pkg:npm/FileScopeMCP@1.0.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "github:admica/FileScopeMCP"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "globals@16.3.0",
+      "name": "globals",
+      "version": "16.3.0",
+      "scope": "optional",
+      "purl": "pkg:npm/globals@16.3.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^16.3.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Global identifiers from different JavaScript environments"
+    },
+    {
+      "type": "library",
+      "bom-ref": "jest@29.7.0",
+      "name": "jest",
+      "version": "29.7.0",
+      "scope": "optional",
+      "purl": "pkg:npm/jest@29.7.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^29.7.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Delightful JavaScript Testing."
+    },
+    {
+      "type": "library",
+      "bom-ref": "jest-environment-jsdom@30.0.5",
+      "name": "jest-environment-jsdom",
+      "version": "30.0.5",
+      "scope": "optional",
+      "purl": "pkg:npm/jest-environment-jsdom@30.0.5",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^30.0.5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "mcp-server-code-runner@0.1.7",
+      "name": "mcp-server-code-runner",
+      "version": "0.1.7",
+      "scope": "optional",
+      "purl": "pkg:npm/mcp-server-code-runner@0.1.7",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.1.7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Code Runner MCP Server"
+    },
+    {
+      "type": "library",
+      "bom-ref": "mongodb@6.18.0",
+      "name": "mongodb",
+      "version": "6.18.0",
+      "scope": "optional",
+      "purl": "pkg:npm/mongodb@6.18.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^6.18.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "The official MongoDB driver for Node.js"
+    },
+    {
+      "type": "library",
+      "bom-ref": "mongodb-mcp-server@0.2.0",
+      "name": "mongodb-mcp-server",
+      "version": "0.2.0",
+      "scope": "optional",
+      "purl": "pkg:npm/mongodb-mcp-server@0.2.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.2.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "MongoDB Model Context Protocol Server"
+    },
+    {
+      "type": "library",
+      "bom-ref": "n8n-mcp@2.10.2",
+      "name": "n8n-mcp",
+      "version": "2.10.2",
+      "scope": "optional",
+      "purl": "pkg:npm/n8n-mcp@2.10.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^2.10.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Integration between n8n workflow automation and Model Context Protocol (MCP)"
+    },
+    {
+      "type": "library",
+      "bom-ref": "node-cache@5.1.2",
+      "name": "node-cache",
+      "version": "5.1.2",
+      "scope": "optional",
+      "purl": "pkg:npm/node-cache@5.1.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.1.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Simple and fast NodeJS internal caching. Node internal in memory cache like memcached."
+    },
+    {
+      "type": "library",
+      "bom-ref": "nodemon@3.1.10",
+      "name": "nodemon",
+      "version": "3.1.10",
+      "scope": "optional",
+      "purl": "pkg:npm/nodemon@3.1.10",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^3.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Simple monitor script for use during development of a Node.js app."
+    },
+    {
+      "type": "library",
+      "bom-ref": "pino-pretty@11.3.0",
+      "name": "pino-pretty",
+      "version": "11.3.0",
+      "scope": "optional",
+      "purl": "pkg:npm/pino-pretty@11.3.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^11.2.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Prettifier for Pino log lines"
+    },
+    {
+      "type": "library",
+      "bom-ref": "postcss@8.5.6",
+      "name": "postcss",
+      "version": "8.5.6",
+      "scope": "optional",
+      "purl": "pkg:npm/postcss@8.5.6",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^8.5.6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Tool for transforming styles with JS plugins"
+    },
+    {
+      "type": "library",
+      "bom-ref": "prettier@3.6.2",
+      "name": "prettier",
+      "version": "3.6.2",
+      "scope": "optional",
+      "purl": "pkg:npm/prettier@3.6.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^3.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Prettier is an opinionated code formatter"
+    },
+    {
+      "type": "library",
+      "bom-ref": "puppeteer@24.16.2",
+      "name": "puppeteer",
+      "version": "24.16.2",
+      "scope": "optional",
+      "purl": "pkg:npm/puppeteer@24.16.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^24.16.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "A high-level API to control headless Chrome over the DevTools Protocol"
+    },
+    {
+      "type": "library",
+      "bom-ref": "puppeteer-mcp-server@0.7.2",
+      "name": "puppeteer-mcp-server",
+      "version": "0.7.2",
+      "scope": "optional",
+      "purl": "pkg:npm/puppeteer-mcp-server@0.7.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.7.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Experimental MCP server for browser automation using Puppeteer (inspired by @modelcontextprotocol/server-puppeteer)"
+    },
+    {
+      "type": "library",
+      "bom-ref": "supertest@7.1.4",
+      "name": "supertest",
+      "version": "7.1.4",
+      "scope": "optional",
+      "purl": "pkg:npm/supertest@7.1.4",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.1.4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "SuperAgent driven library for testing HTTP servers"
+    },
+    {
+      "type": "library",
+      "bom-ref": "swagger-jsdoc@6.2.8",
+      "name": "swagger-jsdoc",
+      "version": "6.2.8",
+      "scope": "optional",
+      "purl": "pkg:npm/swagger-jsdoc@6.2.8",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^6.2.8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Generates swagger doc based on JSDoc"
+    },
+    {
+      "type": "library",
+      "bom-ref": "swagger-ui-express@5.0.1",
+      "name": "swagger-ui-express",
+      "version": "5.0.1",
+      "scope": "optional",
+      "purl": "pkg:npm/swagger-ui-express@5.0.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.0.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Swagger UI Express"
+    },
+    {
+      "type": "library",
+      "bom-ref": "terser@5.43.1",
+      "name": "terser",
+      "version": "5.43.1",
+      "scope": "optional",
+      "purl": "pkg:npm/terser@5.43.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.43.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "description": "JavaScript parser, mangler/compressor and beautifier toolkit for ES6+"
+    },
+    {
+      "type": "library",
+      "bom-ref": "ts-jest@29.4.0",
+      "name": "ts-jest",
+      "version": "29.4.0",
+      "scope": "optional",
+      "purl": "pkg:npm/ts-jest@29.4.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^29.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "A Jest transformer with source map support that lets you use Jest to test projects written in TypeScript"
+    },
+    {
+      "type": "library",
+      "bom-ref": "ts-node@10.9.2",
+      "name": "ts-node",
+      "version": "10.9.2",
+      "scope": "optional",
+      "purl": "pkg:npm/ts-node@10.9.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^10.9.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "TypeScript execution environment and REPL for node.js, with source map support"
+    },
+    {
+      "type": "library",
+      "bom-ref": "typescript@5.9.2",
+      "name": "typescript",
+      "version": "5.9.2",
+      "scope": "optional",
+      "purl": "pkg:npm/typescript@5.9.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.9.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "TypeScript is a language for application scale JavaScript development"
+    },
+    {
+      "type": "library",
+      "bom-ref": "vite@7.0.6",
+      "name": "vite",
+      "version": "7.0.6",
+      "scope": "optional",
+      "purl": "pkg:npm/vite@7.0.6",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^7.0.6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Native-ESM powered web dev build tool"
+    },
+    {
+      "type": "library",
+      "bom-ref": "vite-plugin-compression@0.5.1",
+      "name": "vite-plugin-compression",
+      "version": "0.5.1",
+      "scope": "optional",
+      "purl": "pkg:npm/vite-plugin-compression@0.5.1",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^0.5.1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Use gzip or brotli to compress resources."
+    },
+    {
+      "type": "library",
+      "bom-ref": "web-vitals@3.5.2",
+      "name": "web-vitals",
+      "version": "3.5.2",
+      "scope": "optional",
+      "purl": "pkg:npm/web-vitals@3.5.2",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^3.5.2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Easily measure performance metrics in JavaScript"
+    },
+    {
+      "type": "library",
+      "bom-ref": "webpack@5.101.0",
+      "name": "webpack",
+      "version": "5.101.0",
+      "scope": "optional",
+      "purl": "pkg:npm/webpack@5.101.0",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "Packs ECMAScript/CommonJs/AMD modules for the browser. Allows you to split your codebase into multiple bundles, which can be loaded on demand. Supports loaders to preprocess files, i.e. json, jsx, es7, css, less, ... and your custom stuff."
+    },
+    {
+      "type": "library",
+      "bom-ref": "webpack-cli@5.1.4",
+      "name": "webpack-cli",
+      "version": "5.1.4",
+      "scope": "optional",
+      "purl": "pkg:npm/webpack-cli@5.1.4",
+      "properties": [
+        {
+          "name": "npm:version-range",
+          "value": "^5.0.0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "description": "CLI for webpack & friends"
+    }
+  ]
+}

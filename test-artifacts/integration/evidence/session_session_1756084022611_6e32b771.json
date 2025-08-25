@@ -1,0 +1,48 @@
+{
+  "sessionId": "session_1756084022611_6e32b771",
+  "startTime": 1756084022611,
+  "queries": [
+    {
+      "id": "framework-comparison-1",
+      "query": "React performance vs Vue.js performance 2025",
+      "sources": [],
+      "priority": "high",
+      "searchFilters": {
+        "domains": [
+          "react.dev",
+          "vuejs.org"
+        ],
+        "recency": "month"
+      }
+    },
+    {
+      "id": "framework-comparison-2",
+      "query": "React vs Vue.js developer experience comparison",
+      "sources": [],
+      "priority": "high",
+      "searchFilters": {
+        "domains": [
+          "stackoverflow.com",
+          "reddit.com"
+        ],
+        "recency": "month"
+      }
+    }
+  ],
+  "evidence": [],
+  "results": [],
+  "performance": {
+    "totalQueries": 2,
+    "successfulQueries": 0,
+    "averageLatency": 0,
+    "evidenceCollected": 0,
+    "reliabilityScore": 0
+  },
+  "validation": {
+    "crossReferences": 0,
+    "conflictingEvidence": [],
+    "supportingEvidence": [],
+    "consensusScore": 0
+  },
+  "endTime": 1756084022611
+}

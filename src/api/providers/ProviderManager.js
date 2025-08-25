@@ -179,9 +179,28 @@ class ProviderManager {
   }
 
   /**
-   * Initialize Mock provider (always available)
+   * Initialize Mock provider with production safeguards
    */
   async initializeMockProvider() {
+    // Production safeguard: disable mock provider unless explicitly allowed
+    const isProduction = process.env.NODE_ENV === 'production';
+    const allowMockInProd = process.env.AI_ALLOW_MOCK_IN_PROD === 'true';
+    const disableMockInProd = process.env.AI_DISABLE_MOCK_IN_PROD !== 'false'; // default true
+
+    if (isProduction && disableMockInProd && !allowMockInProd) {
+      console.warn('⚠️ Mock provider disabled in production environment');
+      console.warn('   Set AI_ALLOW_MOCK_IN_PROD=true to override this safeguard');
+      
+      const config = this.providerConfigs.get('mock');
+      if (config) {
+        config.status = 'disabled_production';
+        config.available = false;
+        config.lastTested = new Date().toISOString();
+        config.error = 'Mock provider disabled in production for security';
+      }
+      return;
+    }
+
     const MockProvider = require('../../chat/llm-providers/mock-provider');
     const mockProvider = new MockProvider();
 
@@ -191,6 +210,10 @@ class ProviderManager {
     config.status = 'connected';
     config.available = true;
     config.lastTested = new Date().toISOString();
+    
+    if (isProduction && allowMockInProd) {
+      console.warn('⚠️ Mock provider enabled in production via AI_ALLOW_MOCK_IN_PROD override');
+    }
   }
 
   /**
@@ -346,7 +369,17 @@ class ProviderManager {
       return providerId;
     }
 
-    // Fallback to mock if nothing else works
+    // Enhanced fallback logic for production safety
+    const isProduction = process.env.NODE_ENV === 'production';
+    const mockConfig = this.providerConfigs.get('mock');
+    
+    if (isProduction && mockConfig?.status === 'disabled_production') {
+      console.error('❌ No providers available and mock disabled in production');
+      console.error('   Configure a production LLM provider or set AI_ALLOW_MOCK_IN_PROD=true');
+      throw new Error('No LLM providers available in production environment');
+    }
+
+    // Fallback to mock if nothing else works and allowed
     this.currentProvider = 'mock';
     return 'mock';
   }

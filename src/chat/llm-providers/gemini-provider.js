@@ -1,15 +1,51 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const BaseLLMProvider = require('./base-provider');
+const NodeCache = require('node-cache');
+
+// Enhanced Gemini modules
+const GeminiClient = require('../../ai/providers/gemini/client');
+const GeminiSafety = require('../../ai/providers/gemini/safety');
+const GeminiStreaming = require('../../ai/providers/gemini/streaming');
+const GeminiCostModel = require('../../ai/providers/gemini/cost-model');
+const GeminiTransformer = require('../../ai/providers/gemini/transformer');
 
 /**
- * Google Gemini LLM Provider
- * Supports Gemini Pro and other Google AI models
+ * Enhanced Google Gemini LLM Provider
+ * Supports multimodal, function calling, caching, and comprehensive observability
  */
 class GeminiProvider extends BaseLLMProvider {
   constructor(config) {
     super(config);
-    this.client = null;
-    this.defaultModel = config.model || 'gemini-1.5-flash';
+    this.name = 'gemini';
+    
+    // Enhanced configuration
+    this.config = {
+      ...this.config,
+      useVertex: config.useVertex || process.env.GEMINI_USE_VERTEX === 'true',
+      model: config.model || process.env.GEMINI_MODEL || 'gemini-2.5-pro',
+      fallbackModel: process.env.GEMINI_MODEL_FALLBACK || 'gemini-1.5-flash',
+      safetyMode: process.env.GEMINI_SAFETY_MODE || 'BLOCK_MEDIUM_AND_ABOVE',
+      functionCallingEnabled: process.env.GEMINI_FUNCTION_CALLING_ENABLED === 'true',
+      codeAssistEnabled: process.env.GEMINI_CODE_ASSIST_ENABLED === 'true',
+      cacheTTL: parseInt(process.env.GEMINI_CACHE_TTL_MS || '600000'), // 10 minutes
+      ...config
+    };
+
+    // Initialize enhanced modules
+    this.client = new GeminiClient(this.config);
+    this.safety = new GeminiSafety();
+    this.streaming = new GeminiStreaming(this.safety);
+    this.costModel = new GeminiCostModel();
+    this.transformer = new GeminiTransformer();
+    
+    // Setup caching with LRU
+    this.cache = new NodeCache({
+      stdTTL: this.config.cacheTTL / 1000, // Convert to seconds
+      maxKeys: 1000,
+      useClones: false
+    });
+
+    this.defaultModel = this.config.model;
     this.supportedModels = [
       'gemini-2.5-pro',
       'gemini-1.5-flash',
@@ -17,34 +53,66 @@ class GeminiProvider extends BaseLLMProvider {
       'gemini-pro',
       'gemini-pro-vision',
     ];
+
+    // Metrics tracking
+    this.metrics = {
+      requests: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
+      multimodalRequests: 0,
+      functionCalls: 0,
+      safetyBlocks: 0,
+      fallbackUsage: 0
+    };
   }
 
   async initialize() {
     try {
-      if (!this.config.apiKey) {
-        throw new Error('Google AI API key not provided');
-      }
-
-      this.client = new GoogleGenerativeAI(this.config.apiKey);
+      // Initialize enhanced Gemini client
+      await this.client.initialize();
       this.isInitialized = true;
-      console.log(`✅ Gemini provider initialized with model: ${this.defaultModel}`);
+      
+      console.log(`✅ Enhanced Gemini provider initialized`);
+      console.log(`   Model: ${this.defaultModel}`);
+      console.log(`   Client: ${this.client.getClientInfo().type}`);
+      console.log(`   Safety: ${this.config.safetyMode}`);
+      console.log(`   Function calling: ${this.config.functionCallingEnabled ? 'enabled' : 'disabled'}`);
+      console.log(`   Caching: ${this.config.cacheTTL}ms TTL`);
+      
     } catch (error) {
-      console.error('❌ Failed to initialize Gemini provider:', error.message);
+      console.error('❌ Failed to initialize enhanced Gemini provider:', error.message);
       throw error;
     }
   }
 
   validateConfig() {
-    return !!this.config.apiKey;
+    if (this.config.useVertex) {
+      return !!(this.config.projectId);
+    } else {
+      return !!(this.config.apiKey);
+    }
   }
 
   getCapabilities() {
     return {
       streaming: true,
-      functionCalling: false, // Limited function calling support
+      functionCalling: this.config.functionCallingEnabled,
+      multimodal: true,
       maxTokens: this.getMaxTokensForModel(this.defaultModel),
       supportedModels: this.supportedModels,
-      features: ['chat', 'completion', 'streaming', 'vision'],
+      features: [
+        'chat', 
+        'completion', 
+        'streaming', 
+        'vision', 
+        'multimodal',
+        ...(this.config.functionCallingEnabled ? ['function_calling'] : []),
+        ...(this.config.codeAssistEnabled ? ['code_assist'] : [])
+      ],
+      supportsMultimodal: true,
+      supportsExtendedThinking: false,
+      maxContextTokens: this.getMaxTokensForModel(this.defaultModel),
+      costProfile: 'medium' // For routing decisions
     };
   }
 
@@ -65,52 +133,286 @@ class GeminiProvider extends BaseLLMProvider {
         throw new Error('Gemini provider not initialized or configured');
       }
 
-      // Always use Gemini's default model, don't inherit from other providers
-      const modelName =
-        options.model && options.model.includes('gemini') ? options.model : this.defaultModel;
+      this.metrics.requests++;
 
+      // Check cache first (if enabled)
+      const cacheKey = this.generateCacheKey(messages, options);
+      if (this.config.cacheTTL > 0) {
+        const cached = this.cache.get(cacheKey);
+        if (cached) {
+          this.metrics.cacheHits++;
+          return {
+            ...cached,
+            metadata: {
+              ...cached.metadata,
+              cacheHit: true,
+              provider: 'gemini'
+            }
+          };
+        }
+        this.metrics.cacheMisses++;
+      }
+
+      // Validate multimodal content
+      const validationIssues = this.transformer.validateMultimodalContent(messages);
+      if (validationIssues.length > 0) {
+        throw new Error(`Multimodal validation failed: ${validationIssues.map(i => i.error).join(', ')}`);
+      }
+
+      // Check for multimodal content
+      const images = this.transformer.extractImages(messages);
+      if (images.length > 0) {
+        this.metrics.multimodalRequests++;
+      }
+
+      // Transform messages to Gemini format
+      const geminiMessages = this.transformer.transformMessages(messages);
+      
+      // Determine model to use
+      const modelName = this.selectModel(options, images.length > 0);
+      
+      // Create generation config
+      const generationConfig = this.transformer.createGenerationConfig(options);
+      
+      // Get model instance
       const model = this.client.getGenerativeModel({
         model: modelName,
-        generationConfig: {
-          maxOutputTokens: options.maxTokens || 2000,
-          temperature: options.temperature ?? 0.7,
-          topP: options.topP ?? 0.8,
-          topK: options.topK ?? 10,
-        },
+        generationConfig,
+        safetySettings: this.safety.getSafetySettings(options.safetyMode)
       });
 
-      // Convert messages to Gemini format
-      const geminiMessages = this.formatMessagesForGemini(messages);
-
       let response;
-      if (geminiMessages.length === 1) {
-        // Single message - use generateContent
-        response = await model.generateContent(geminiMessages[0].parts);
-      } else {
-        // Multiple messages - use chat
-        const chat = model.startChat({
-          history: geminiMessages.slice(0, -1),
-        });
-        const lastMessage = geminiMessages[geminiMessages.length - 1];
-        response = await chat.sendMessage(lastMessage.parts);
+      const startTime = Date.now();
+      
+      try {
+        if (geminiMessages.length === 1) {
+          // Single message - use generateContent
+          response = await model.generateContent(geminiMessages[0].parts);
+        } else {
+          // Multiple messages - use chat
+          const chat = model.startChat({
+            history: geminiMessages.slice(0, -1),
+          });
+          const lastMessage = geminiMessages[geminiMessages.length - 1];
+          response = await chat.sendMessage(lastMessage.parts);
+        }
+      } catch (error) {
+        // Try fallback model if primary fails
+        if (modelName !== this.config.fallbackModel) {
+          console.warn(`Primary model ${modelName} failed, trying fallback ${this.config.fallbackModel}`);
+          this.metrics.fallbackUsage++;
+          
+          const fallbackModel = this.client.getGenerativeModel({
+            model: this.config.fallbackModel,
+            generationConfig,
+            safetySettings: this.safety.getSafetySettings(options.safetyMode)
+          });
+          
+          if (geminiMessages.length === 1) {
+            response = await fallbackModel.generateContent(geminiMessages[0].parts);
+          } else {
+            const chat = fallbackModel.startChat({
+              history: geminiMessages.slice(0, -1),
+            });
+            const lastMessage = geminiMessages[geminiMessages.length - 1];
+            response = await chat.sendMessage(lastMessage.parts);
+          }
+        } else {
+          throw error;
+        }
+      }
+
+      const latency = Date.now() - startTime;
+
+      // Process safety ratings
+      const candidate = response.response.candidates?.[0];
+      if (candidate) {
+        const safetyInfo = this.safety.processSafetyRatings(candidate);
+        if (safetyInfo.blocked) {
+          this.metrics.safetyBlocks++;
+          throw new Error(this.safety.formatSafetyError(safetyInfo));
+        }
       }
 
       const content = response.response.text();
+      
+      // Calculate token usage and cost
+      const inputTokens = this.costModel.estimateTokens(
+        geminiMessages.map(m => m.parts.map(p => p.text || '').join(' ')).join(' ')
+      );
+      const outputTokens = this.costModel.estimateTokens(content);
+      const imageTokens = images.reduce((sum, img) => 
+        sum + this.costModel.estimateImageTokens(img.size), 0
+      );
 
-      return this.parseResponse({
+      const costInfo = this.costModel.recordUsage(modelName, inputTokens, outputTokens, imageTokens);
+
+      const result = {
         content,
         role: 'assistant',
         model: modelName,
         usage: {
-          promptTokens: response.response.usageMetadata?.promptTokenCount || 0,
-          completionTokens: response.response.usageMetadata?.candidatesTokenCount || 0,
-          totalTokens: response.response.usageMetadata?.totalTokenCount || 0,
+          promptTokens: inputTokens,
+          completionTokens: outputTokens,
+          totalTokens: inputTokens + outputTokens,
+          imageTokens,
+          cost: costInfo.currentCost
         },
-        finishReason: response.response.candidates?.[0]?.finishReason,
-      });
+        metadata: {
+          provider: 'gemini',
+          model: modelName,
+          latency,
+          cacheHit: false,
+          safety: this.safety.getSafetyStats(),
+          multimodal: images.length > 0,
+          fallbackUsed: modelName !== options.model && modelName !== this.defaultModel
+        },
+      };
+
+      // Cache the result (if enabled)
+      if (this.config.cacheTTL > 0) {
+        this.cache.set(cacheKey, result);
+      }
+
+      return result;
+
     } catch (error) {
-      return this.handleError(error);
+      console.error('Gemini completion error:', error);
+      throw error;
     }
+  }
+
+  async *generateStreamingCompletion(messages, options = {}) {
+    try {
+      if (!this.isAvailable()) {
+        throw new Error('Gemini provider not initialized or configured');
+      }
+
+      this.metrics.requests++;
+
+      // Validate and transform messages
+      const validationIssues = this.transformer.validateMultimodalContent(messages);
+      if (validationIssues.length > 0) {
+        yield* this.streaming.processStreamingResponse([{
+          error: `Multimodal validation failed: ${validationIssues.map(i => i.error).join(', ')}`
+        }], options);
+        return;
+      }
+
+      const images = this.transformer.extractImages(messages);
+      if (images.length > 0) {
+        this.metrics.multimodalRequests++;
+      }
+
+      const geminiMessages = this.transformer.transformMessages(messages);
+      const modelName = this.selectModel(options, images.length > 0);
+      const generationConfig = this.transformer.createGenerationConfig(options);
+
+      const model = this.client.getGenerativeModel({
+        model: modelName,
+        generationConfig,
+        safetySettings: this.safety.getSafetySettings(options.safetyMode)
+      });
+
+      let stream;
+      try {
+        if (geminiMessages.length === 1) {
+          stream = await model.generateContentStream(geminiMessages[0].parts);
+        } else {
+          const chat = model.startChat({
+            history: geminiMessages.slice(0, -1),
+          });
+          const lastMessage = geminiMessages[geminiMessages.length - 1];
+          stream = await chat.sendMessageStream(lastMessage.parts);
+        }
+      } catch (error) {
+        // Fallback to non-streaming on stream failure
+        console.warn('Streaming failed, falling back to regular completion:', error.message);
+        const completion = await this.generateCompletion(messages, options);
+        yield* this.streaming.mockStream(completion.content);
+        return;
+      }
+
+      // Process the streaming response
+      yield* this.streaming.processStreamingResponse(stream, {
+        ...options,
+        model: modelName
+      });
+
+    } catch (error) {
+      console.error('Gemini streaming error:', error);
+      yield {
+        content: `Streaming error: ${error.message}`,
+        role: 'assistant',
+        isError: true,
+        isPartial: false,
+        metadata: {
+          provider: 'gemini',
+          error: error.message
+        }
+      };
+    }
+  }
+
+  // Helper methods
+  selectModel(options, hasImages = false) {
+    // Model selection logic
+    if (options.model && this.supportedModels.includes(options.model)) {
+      return options.model;
+    }
+
+    // For multimodal content, prefer vision-capable models
+    if (hasImages) {
+      if (this.supportedModels.includes('gemini-pro-vision')) {
+        return 'gemini-pro-vision';
+      }
+    }
+
+    return this.defaultModel;
+  }
+
+  generateCacheKey(messages, options) {
+    const keyData = {
+      messages: messages.map(m => ({ role: m.role, content: m.content })),
+      model: options.model || this.defaultModel,
+      temperature: options.temperature,
+      maxTokens: options.maxTokens
+    };
+    
+    return `gemini:${JSON.stringify(keyData)}`;
+  }
+
+  getMetrics() {
+    return {
+      ...this.metrics,
+      costModel: this.costModel.getUsageStats(),
+      safety: this.safety.getSafetyStats(),
+      cache: {
+        keys: this.cache.keys().length,
+        hits: this.metrics.cacheHits,
+        misses: this.metrics.cacheMisses,
+        hitRate: this.metrics.cacheHits / (this.metrics.cacheHits + this.metrics.cacheMisses) || 0
+      }
+    };
+  }
+
+  // Enhanced capabilities for multimodal support
+  async handleMultimodalQuery(messages, options = {}) {
+    // Specialized method for multimodal content
+    const images = this.transformer.extractImages(messages);
+    
+    if (images.length === 0) {
+      // No images, use regular completion
+      return await this.generateCompletion(messages, options);
+    }
+
+    // Ensure we're using a vision-capable model
+    const visionOptions = {
+      ...options,
+      model: this.selectModel(options, true)
+    };
+
+    return await this.generateCompletion(messages, visionOptions);
   }
 
   async *generateStreamingCompletion(messages, options = {}) {

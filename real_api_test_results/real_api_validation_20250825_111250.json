@@ -1,0 +1,175 @@
+{
+  "overall_status": "all_failed",
+  "test_timestamp": "2025-08-25T11:12:50.147486",
+  "providers_tested": {
+    "google_cloud": {
+      "provider": "google_cloud",
+      "status": "auth_failed",
+      "test_timestamp": "2025-08-25T11:12:50.147980",
+      "authentication": {
+        "provider": "google_cloud",
+        "status": "failed",
+        "method": "unknown",
+        "test_timestamp": "2025-08-25T11:12:50.148032",
+        "credentials_found": false,
+        "credentials_valid": false,
+        "errors": [
+          "Google Cloud auth failed: No module named 'google'"
+        ]
+      },
+      "api_tests": [],
+      "performance": {},
+      "errors": [
+        "Authentication failed: None"
+      ]
+    },
+    "vertex_ai": {
+      "provider": "vertex_ai",
+      "status": "auth_failed",
+      "test_timestamp": "2025-08-25T11:12:50.148626",
+      "authentication": {
+        "provider": "vertex_ai",
+        "status": "failed",
+        "method": "unknown",
+        "test_timestamp": "2025-08-25T11:12:50.148693",
+        "credentials_found": false,
+        "credentials_valid": false,
+        "errors": [
+          "Vertex AI auth failed: No module named 'vertexai'"
+        ]
+      },
+      "api_tests": [],
+      "performance": {},
+      "errors": [
+        "Authentication failed: None"
+      ]
+    },
+    "anthropic": {
+      "provider": "anthropic",
+      "status": "auth_failed",
+      "test_timestamp": "2025-08-25T11:12:50.148953",
+      "authentication": {
+        "provider": "anthropic",
+        "status": "failed",
+        "method": "unknown",
+        "test_timestamp": "2025-08-25T11:12:50.149001",
+        "credentials_found": false,
+        "credentials_valid": false,
+        "errors": [
+          "Anthropic auth failed: No module named 'anthropic'"
+        ]
+      },
+      "api_tests": [],
+      "performance": {},
+      "errors": [
+        "Authentication failed: None"
+      ]
+    },
+    "openai": {
+      "provider": "openai",
+      "status": "auth_failed",
+      "test_timestamp": "2025-08-25T11:12:50.149229",
+      "authentication": {
+        "provider": "openai",
+        "status": "failed",
+        "method": "unknown",
+        "test_timestamp": "2025-08-25T11:12:50.149273",
+        "credentials_found": false,
+        "credentials_valid": false,
+        "errors": [
+          "OpenAI auth failed: No module named 'openai'"
+        ]
+      },
+      "api_tests": [],
+      "performance": {},
+      "errors": [
+        "Authentication failed: None"
+      ]
+    },
+    "huggingface": {
+      "provider": "huggingface",
+      "status": "auth_failed",
+      "test_timestamp": "2025-08-25T11:12:50.149493",
+      "authentication": {
+        "provider": "huggingface",
+        "status": "failed",
+        "method": "api_token",
+        "test_timestamp": "2025-08-25T11:12:50.149541",
+        "credentials_found": false,
+        "credentials_valid": false,
+        "errors": [
+          "HUGGINGFACE_API_TOKEN or HF_TOKEN environment variable not set"
+        ]
+      },
+      "api_tests": [],
+      "performance": {},
+      "errors": [
+        "Authentication failed: None"
+      ]
+    },
+    "openrouter": {
+      "provider": "openrouter",
+      "status": "auth_failed",
+      "test_timestamp": "2025-08-25T11:12:50.200189",
+      "authentication": {
+        "provider": "openrouter",
+        "status": "failed",
+        "method": "api_key",
+        "test_timestamp": "2025-08-25T11:12:50.200239",
+        "credentials_found": false,
+        "credentials_valid": false,
+        "errors": [
+          "OPENROUTER_API_KEY environment variable not set"
+        ]
+      },
+      "api_tests": [],
+      "performance": {},
+      "errors": [
+        "Authentication failed: None"
+      ]
+    }
+  },
+  "authentication_summary": {},
+  "api_calls_made": [],
+  "failures": [
+    {
+      "provider": "google_cloud",
+      "error": "Unknown error",
+      "details": {}
+    },
+    {
+      "provider": "vertex_ai",
+      "error": "Unknown error",
+      "details": {}
+    },
+    {
+      "provider": "anthropic",
+      "error": "Unknown error",
+      "details": {}
+    },
+    {
+      "provider": "openai",
+      "error": "Unknown error",
+      "details": {}
+    },
+    {
+      "provider": "huggingface",
+      "error": "Unknown error",
+      "details": {}
+    },
+    {
+      "provider": "openrouter",
+      "error": "Unknown error",
+      "details": {}
+    }
+  ],
+  "recommendations": [
+    "\u274c CRITICAL: Fix authentication failures for failed providers",
+    "\ud83d\udea8 CRITICAL: Most providers failing, review authentication setup",
+    "\ud83d\udcca Monitor API quotas and usage limits regularly",
+    "\ud83d\udd12 Implement credential security best practices",
+    "\u26a1 Set up automated health monitoring for all providers",
+    "\ud83d\udcdd Document all API integration patterns for team reference"
+  ],
+  "success_rate": 0.0
+}

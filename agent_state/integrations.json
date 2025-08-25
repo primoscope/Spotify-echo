@@ -1,87 +1,92 @@
 {
   "vertexIntegrations": [
     {
-      "integration_id": "vertex_ai_primary",
+      "integration_id": "vertex_ai_real_auth",
       "provider": "google_vertex_ai",
-      "project_id": "demo-project-12345",
+      "project_id": "REQUIRED_SET_GCP_PROJECT_ID",
       "region": "us-central1",
-      "status": "active",
+      "status": "real_authentication_required",
       "models_integrated": [
-        "imagen-3.0-generate-001",
-        "imagegeneration@006",
-        "veo-2.0-001",
-        "veo-1.5-001",
-        "gemini-2.5-pro"
+        "gemini-1.5-pro",
+        "gemini-1.5-flash"
       ],
       "authentication": {
-        "method": "service_account",
-        "configured": true,
-        "last_verified": "2025-01-25T09:55:42Z"
+        "method": "service_account_key_required",
+        "configured": false,
+        "last_verified": null,
+        "requirements": [
+          "GCP_PROJECT_ID environment variable",
+          "GOOGLE_APPLICATION_CREDENTIALS file path or GCP_SERVICE_ACCOUNT_KEY",
+          "Vertex AI API enabled in GCP project",
+          "Service account with aiplatform.admin role"
+        ]
       },
       "quotas": {
-        "image_generation": {
-          "monthly_limit": 10000,
-          "used": 234,
-          "remaining": 9766
-        },
-        "video_generation": {
-          "monthly_limit": 500,
-          "used": 12,
-          "remaining": 488
-        },
-        "text_generation": {
-          "monthly_limit": 1000000,
-          "used": 45678,
-          "remaining": 954322
-        }
+        "status": "unknown_requires_auth",
+        "note": "Quotas will be checked after authentication"
       },
-      "createdAt": "2025-01-25T09:55:42Z",
-      "lastUpdated": "2025-01-25T09:55:42Z"
+      "createdAt": "2025-01-25T11:00:00Z",
+      "lastUpdated": "2025-01-25T11:00:00Z"
     },
     {
-      "integration_id": "huggingface_community",
-      "provider": "huggingface",
-      "status": "active",
-      "models_integrated": [
-        "stabilityai/stable-diffusion-xl-base-1.0",
-        "black-forest-labs/FLUX.1-dev"
-      ],
-      "authentication": {
-        "method": "api_token",
-        "configured": true,
-        "last_verified": "2025-01-25T09:55:42Z"
-      },
-      "quotas": {
-        "requests_per_hour": 100,
-        "used": 15,
-        "remaining": 85
-      },
-      "createdAt": "2025-01-25T09:55:42Z",
-      "lastUpdated": "2025-01-25T09:55:42Z"
-    },
-    {
-      "integration_id": "anthropic_claude",
+      "integration_id": "anthropic_real_auth",
       "provider": "anthropic",
-      "status": "active",
+      "status": "real_authentication_required",
       "models_integrated": [
-        "claude-3-opus-20241022"
+        "claude-3-haiku-20240307"
       ],
       "authentication": {
-        "method": "api_key",
-        "configured": true,
-        "last_verified": "2025-01-25T09:55:42Z"
+        "method": "api_key_required",
+        "configured": false,
+        "last_verified": null,
+        "requirements": [
+          "ANTHROPIC_API_KEY environment variable",
+          "Valid Anthropic account with API access"
+        ]
       },
       "quotas": {
-        "monthly_tokens": 1000000,
-        "used": 23456,
-        "remaining": 976544
+        "status": "unknown_requires_auth",
+        "note": "Quotas will be checked after authentication"
       },
-      "createdAt": "2025-01-25T09:55:42Z",
-      "lastUpdated": "2025-01-25T09:55:42Z"
+      "createdAt": "2025-01-25T11:00:00Z",
+      "lastUpdated": "2025-01-25T11:00:00Z"
+    },
+    {
+      "integration_id": "openai_real_auth",
+      "provider": "openai",
+      "status": "real_authentication_required",
+      "models_integrated": [
+        "gpt-3.5-turbo",
+        "dall-e-3"
+      ],
+      "authentication": {
+        "method": "api_key_required",
+        "configured": false,
+        "last_verified": null,
+        "requirements": [
+          "OPENAI_API_KEY environment variable",
+          "Valid OpenAI account with API credits"
+        ]
+      },
+      "quotas": {
+        "status": "unknown_requires_auth",
+        "note": "Quotas will be checked after authentication"
+      },
+      "createdAt": "2025-01-25T11:00:00Z",
+      "lastUpdated": "2025-01-25T11:00:00Z"
     }
   ],
-  "lastAudit": "2025-01-25T09:55:42Z",
-  "version": 1,
+  "lastAudit": null,
+  "version": 2,
   "totalIntegrations": 3,
-  "healthStatus": "all_operational"
+  "healthStatus": "authentication_required",
+  "mockApisDisabled": true,
+  "demoApisDisabled": true,
+  "realApisOnly": true,
+  "validationRequired": true,
+  "setupInstructions": {
+    "run_auth_setup": "python auth_setup_guide.py --check-all",
+    "run_validation": "python real_api_validation_suite.py --full-validation",
+    "setup_environment": "./setup_real_api_testing.sh"
+  }
 }

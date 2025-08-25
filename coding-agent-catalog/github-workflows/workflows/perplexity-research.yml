@@ -1,0 +1,277 @@
+name: Enhanced Perplexity Research with Budget Controls
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to analyze"
+        required: false
+        type: string
+      issue_number:
+        description: "Issue number to analyze"
+        required: false
+        type: string
+      enable_browser:
+        description: "Enable browser research capabilities"
+        required: false
+        type: boolean
+        default: true
+      max_cost_override:
+        description: "Override maximum cost per analysis (USD)"
+        required: false
+        type: string
+      force_analysis:
+        description: "Force analysis even if budget limits reached"
+        required: false
+        type: boolean
+        default: false
+  pull_request:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: perplexity-research-${{ github.event.number || github.run_number }}
+  cancel-in-progress: false
+
+env:
+  CONFIG_FILE: .github/perplexity-config.yml
+
+jobs:
+  budget-guard:
+    runs-on: ubuntu-latest
+    outputs:
+      can_proceed: ${{ steps.guard.outputs.can_proceed }}
+      state: ${{ steps.guard.outputs.state }}
+      remaining_usd: ${{ steps.guard.outputs.remaining_usd }}
+      usage_percentage: ${{ steps.guard.outputs.usage_percentage }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Dependencies
+        run: |
+          pip install pyyaml requests
+
+      - name: Budget Guard Check
+        id: guard
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🛡️ Running budget guard pre-check..."
+          
+          # Check for force analysis override
+          if [[ "${{ github.event.inputs.force_analysis }}" == "true" ]]; then
+            echo "⚠️ Force analysis enabled - bypassing budget guard"
+            echo "can_proceed=true" >> $GITHUB_OUTPUT
+            echo "state=OVERRIDE" >> $GITHUB_OUTPUT
+            echo "remaining_usd=999.99" >> $GITHUB_OUTPUT
+            echo "usage_percentage=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Run budget guard
+          python3 scripts/budget_guard.py --output-file budget-summary.json
+          
+          echo "💰 Budget guard check completed"
+
+      - name: Upload Budget Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: budget-summary-${{ github.run_number }}
+          path: budget-summary.json
+          retention-days: 7
+
+  enhanced-perplexity-research:
+    needs: budget-guard
+    if: needs.budget-guard.outputs.can_proceed == 'true' || github.event.inputs.force_analysis == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm i
+
+      - name: Setup Python for Budget Integration
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Python Dependencies
+        run: |
+          pip install pyyaml requests
+
+      - name: Get Issue/PR Context
+        id: context
+        run: |
+          if [[ -n "${{ github.event.inputs.issue_number }}" ]]; then
+            echo "type=issue" >> $GITHUB_OUTPUT
+            echo "number=${{ github.event.inputs.issue_number }}" >> $GITHUB_OUTPUT
+          elif [[ -n "${{ github.event.inputs.pr_number }}" ]]; then
+            echo "type=pr" >> $GITHUB_OUTPUT
+            echo "number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "type=pr" >> $GITHUB_OUTPUT
+            echo "number=${{ github.event.number }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "issue_comment" && -n "${{ github.event.issue.number }}" ]]; then
+            echo "type=issue" >> $GITHUB_OUTPUT
+            echo "number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Analyze Issue with Budget Controls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+          PERPLEXITY_MODEL: ${{ vars.PERPLEXITY_MODEL }}
+          ENABLE_BROWSER_RESEARCH: ${{ github.event.inputs.enable_browser || 'true' }}
+          BUDGET_OVERRIDE_COST: ${{ github.event.inputs.max_cost_override }}
+        run: |
+          echo "🚀 Starting Enhanced Perplexity Analysis with Budget Controls..."
+          echo "💰 Budget Status: ${{ needs.budget-guard.outputs.state }} (${{ needs.budget-guard.outputs.usage_percentage }}% used)"
+          echo "🔍 Remaining Budget: ${{ needs.budget-guard.outputs.remaining_usd }} USD"
+          echo "🎯 Context Type: ${{ steps.context.outputs.type }}"
+          echo "📝 Context Number: ${{ steps.context.outputs.number }}"
+          
+          # If we have a specific issue or PR to analyze
+          if [[ "${{ steps.context.outputs.type }}" == "issue" && -n "${{ steps.context.outputs.number }}" ]]; then
+            # Get issue details via GitHub API
+            ISSUE_DATA=$(gh issue view ${{ steps.context.outputs.number }} --json title,body,labels)
+            TITLE=$(echo "$ISSUE_DATA" | jq -r '.title')
+            BODY=$(echo "$ISSUE_DATA" | jq -r '.body // ""')
+            LABELS=$(echo "$ISSUE_DATA" | jq -r '.labels[].name' | tr '\n' ' ')
+            
+            echo "📋 Analyzing Issue #${{ steps.context.outputs.number }}: $TITLE"
+            
+            # Run enhanced issue analysis with budget controls
+            python3 scripts/analyze_issues.py \
+              --issue-number ${{ steps.context.outputs.number }} \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --labels $LABELS \
+              --output-file analysis-result.json \
+              --verbose
+              
+          elif [[ "${{ steps.context.outputs.type }}" == "pr" && -n "${{ steps.context.outputs.number }}" ]]; then
+            # Get PR details via GitHub API
+            PR_DATA=$(gh pr view ${{ steps.context.outputs.number }} --json title,body,labels)
+            TITLE=$(echo "$PR_DATA" | jq -r '.title')
+            BODY=$(echo "$PR_DATA" | jq -r '.body // ""')
+            LABELS=$(echo "$PR_DATA" | jq -r '.labels[].name' | tr '\n' ' ')
+            
+            echo "📋 Analyzing PR #${{ steps.context.outputs.number }}: $TITLE"
+            
+            # Run enhanced PR analysis
+            python3 scripts/analyze_issues.py \
+              --issue-number ${{ steps.context.outputs.number }} \
+              --title "PR: $TITLE" \
+              --body "$BODY" \
+              --labels $LABELS \
+              --output-file analysis-result.json \
+              --verbose
+          else
+            echo "🔍 Running general repository research..."
+            # Fallback to original research script
+            node scripts/research/perplexity-report.js
+          fi
+
+      - name: Upload Analysis Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perplexity-analysis-${{ github.run_number }}
+          path: |
+            analysis-result.json
+            budget-summary.json
+          retention-days: 30
+
+      - name: Post Analysis Comment
+        if: steps.context.outputs.number != '' && steps.context.outputs.type != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ -f "analysis-result.json" ]]; then
+            # Extract key information from analysis
+            ANALYSIS_SUCCESS=$(jq -r '.success // false' analysis-result.json)
+            DEFERRED=$(jq -r '.deferred // false' analysis-result.json)
+            COST=$(jq -r '.cost_info.estimated_cost_usd // 0' analysis-result.json)
+            MODEL=$(jq -r '.model // "unknown"' analysis-result.json)
+            CACHED=$(jq -r '.cache_info.cached // false' analysis-result.json)
+            CONTENT=$(jq -r '.content // ""' analysis-result.json)
+            
+            if [[ "$ANALYSIS_SUCCESS" == "true" ]]; then
+              # Create success comment
+              CACHE_STATUS=""
+              if [[ "$CACHED" == "true" ]]; then
+                CACHE_STATUS=" *(cached result)*"
+              fi
+              
+              COMMENT_BODY="## 🤖 AI Analysis Results$CACHE_STATUS
+
+$CONTENT
+
+---
+**💰 Cost Information:**
+- Model: \`$MODEL\`
+- Estimated Cost: \$$COST
+- Weekly Usage: ${{ needs.budget-guard.outputs.usage_percentage }}% / \$${{ needs.budget-guard.outputs.remaining_usd }} remaining
+- Budget Status: ${{ needs.budget-guard.outputs.state }}
+
+*Analysis powered by Perplexity AI with budget controls*"
+              
+            elif [[ "$DEFERRED" == "true" ]]; then
+              # Create deferred comment
+              REASON=$(jq -r '.reason // "Budget limit reached"' analysis-result.json)
+              
+              COMMENT_BODY="## ⏸️ Analysis Deferred
+
+This issue analysis has been deferred due to budget constraints.
+
+**Reason:** $REASON
+
+**Current Budget Status:**
+- Weekly Usage: ${{ needs.budget-guard.outputs.usage_percentage }}%
+- Remaining: \$${{ needs.budget-guard.outputs.remaining_usd }}
+- Status: ${{ needs.budget-guard.outputs.state }}
+
+The analysis will be automatically retried when the weekly budget resets (Monday). For urgent analysis, a repository maintainer can add the \`override-budget-guard\` label."
+              
+            else
+              # Create error comment  
+              ERROR=$(jq -r '.error // "Unknown error occurred"' analysis-result.json)
+              
+              COMMENT_BODY="## ❌ Analysis Failed
+
+The AI analysis could not be completed.
+
+**Error:** $ERROR
+
+Please try again later or contact a repository maintainer if this issue persists."
+            fi
+            
+            # Post comment based on context type
+            if [[ "${{ steps.context.outputs.type }}" == "issue" ]]; then
+              echo "$COMMENT_BODY" | gh issue comment ${{ steps.context.outputs.number }} --body-file -
+            elif [[ "${{ steps.context.outputs.type }}" == "pr" ]]; then
+              echo "$COMMENT_BODY" | gh pr comment ${{ steps.context.outputs.number }} --body-file -
+            fi
+          fi

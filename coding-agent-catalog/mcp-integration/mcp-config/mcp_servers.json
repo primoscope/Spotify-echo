@@ -1,0 +1,206 @@
+{
+  "version": "1.0.0",
+  "description": "EchoTune AI MCP Server Configuration - Organized by Tier",
+  "metadata": {
+    "created": "2024-12-17",
+    "lastUpdated": "2024-12-17",
+    "repository": "dzp5103/Spotify-echo",
+    "maintainer": "EchoTune AI Team"
+  },
+  "tiers": {
+    "tier1_essential": {
+      "priority": "highest",
+      "description": "Essential servers required for core functionality",
+      "servers": {
+        "github": {
+          "name": "GitHub MCP Server (Official)",
+          "command": "docker",
+          "args": [
+            "run", "-i", "--rm",
+            "-e", "GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}",
+            "ghcr.io/github/github-mcp-server"
+          ],
+          "env": {
+            "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+          },
+          "npmAlternative": {
+            "available": false,
+            "note": "Official Docker image only"
+          },
+          "dockerImage": "ghcr.io/github/github-mcp-server",
+          "permissions": ["repo", "issues", "pull_requests", "actions"],
+          "capabilities": ["repository_management", "issue_tracking", "pr_automation", "code_scanning"]
+        },
+        "filesystem": {
+          "name": "Filesystem MCP Server",
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-filesystem",
+            "${WORKSPACE_FOLDER:-.}",
+            "${WORKSPACE_FOLDER:-.}/src",
+            "${WORKSPACE_FOLDER:-.}/scripts",
+            "${WORKSPACE_FOLDER:-.}/mcp-server"
+          ],
+          "dockerAlternative": {
+            "command": "docker",
+            "args": [
+              "run", "-i", "--rm",
+              "--mount", "type=bind,src=${WORKSPACE_FOLDER:-.},dst=/workspace",
+              "mcp/filesystem",
+              "/workspace"
+            ]
+          },
+          "capabilities": ["file_operations", "directory_traversal", "secure_access"]
+        },
+        "github_repos_manager": {
+          "name": "GitHub Repos Manager MCP",
+          "command": "github-repos-manager-mcp",
+          "installCommand": "npm install -g github-repos-manager-mcp",
+          "env": {
+            "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+          },
+          "capabilities": ["80_github_tools", "token_automation", "no_docker_required"]
+        }
+      }
+    },
+    "tier2_high_value": {
+      "priority": "high",
+      "description": "High-value servers that significantly enhance functionality",
+      "servers": {
+        "git": {
+          "name": "Git MCP Server",
+          "command": "uvx",
+          "args": ["mcp-server-git"],
+          "pipAlternative": {
+            "installCommand": "pip install mcp-server-git",
+            "command": "python",
+            "args": ["-m", "mcp_server_git"]
+          },
+          "capabilities": ["git_operations", "repository_search", "commit_management"]
+        },
+        "memory": {
+          "name": "Memory MCP Server",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-memory"],
+          "capabilities": ["persistent_context", "conversation_history", "knowledge_graph"]
+        }
+      }
+    },
+    "tier3_specialized": {
+      "priority": "medium",
+      "description": "Specialized servers for specific use cases",
+      "servers": {
+        "docker": {
+          "name": "Docker MCP Server",
+          "command": "docker-mcp-server",
+          "installCommand": "npm install -g docker-mcp-server",
+          "env": {
+            "DOCKER_HOST": "unix:///var/run/docker.sock"
+          },
+          "capabilities": ["code_execution", "multi_language_support", "sandboxing"]
+        },
+        "sequential_thinking": {
+          "name": "Sequential Thinking MCP",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+          "dockerAlternative": {
+            "command": "docker",
+            "args": ["run", "--rm", "-i", "mcp/sequentialthinking"]
+          },
+          "capabilities": ["step_by_step_reasoning", "ai_enhancement", "problem_solving"]
+        },
+        "brave_search": {
+          "name": "Brave Search MCP",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+          "env": {
+            "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+          },
+          "freeTier": "2000 queries/month",
+          "signupUrl": "https://api.search.brave.com/app/keys",
+          "capabilities": ["privacy_focused_search", "research", "documentation_search"]
+        },
+        "fetch": {
+          "name": "Fetch MCP Server",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-fetch"],
+          "capabilities": ["web_content_fetching", "documentation_retrieval", "research"]
+        },
+        "perplexity_enhanced": {
+          "name": "Enhanced Perplexity Research MCP",
+          "command": "node",
+          "args": ["${WORKSPACE_FOLDER:-./mcp-servers/perplexity-mcp/perplexity-mcp-server.js}"],
+          "env": {
+            "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
+            "PERPLEXITY_MODEL": "${PERPLEXITY_MODEL:-sonar-pro}",
+            "PERPLEXITY_MAX_LATENCY_MS": "3000",
+            "PERPLEXITY_COST_BUDGET_USD": "0.50"
+          },
+          "capabilities": [
+            "advanced_research",
+            "model_comparison", 
+            "workflow_optimization",
+            "performance_budgets",
+            "multi_model_support"
+          ],
+          "models": ["grok-4", "sonar-pro", "sonar-reasoning-pro", "gpt-5", "llama-3.1-sonar-large-128k-online", "llama-3.1-sonar-small-128k-online"],
+          "features": [
+            "Real-time model comparison",
+            "Automated workflow optimization",
+            "Cost and performance budgeting",
+            "Advanced caching with Redis support",
+            "Comprehensive research capabilities"
+          ]
+        }
+      }
+    }
+  },
+  "environment_template": {
+    "description": "Required environment variables for MCP servers",
+    "variables": {
+      "GITHUB_TOKEN": {
+        "description": "GitHub Personal Access Token with repo, issues, pull_requests, actions permissions",
+        "required": true,
+        "scope": ["repo", "issues", "pull_requests", "actions"]
+      },
+      "BRAVE_API_KEY": {
+        "description": "Brave Search API Key (optional)",
+        "required": false,
+        "freeTier": "2000 queries/month",
+        "signupUrl": "https://api.search.brave.com/app/keys"
+      },
+      "WORKSPACE_FOLDER": {
+        "description": "Current workspace folder path",
+        "required": false,
+        "default": "."
+      },
+      "PERPLEXITY_API_KEY": {
+        "description": "Perplexity AI API Key for enhanced research capabilities",
+        "required": false,
+        "signupUrl": "https://www.perplexity.ai/settings/api",
+        "models": ["grok-4", "sonar-pro", "sonar-reasoning-pro", "gpt-5"]
+      },
+      "PERPLEXITY_MODEL": {
+        "description": "Default Perplexity model to use",
+        "required": false,
+        "default": "sonar-pro",
+        "options": ["grok-4", "sonar-pro", "sonar-reasoning-pro", "llama-3.1-sonar-small-128k-online", "llama-3.1-sonar-large-128k-online", "gpt-5"]
+      }
+    }
+  },
+  "installation_matrix": {
+    "npm_global": [
+      "github-repos-manager-mcp",
+      "docker-mcp-server"
+    ],
+    "pip_install": [
+      "mcp-server-git"
+    ],
+    "docker_images": [
+      "ghcr.io/github/github-mcp-server",
+      "mcp/filesystem",
+      "mcp/sequentialthinking"
+    ]
+  }
+}

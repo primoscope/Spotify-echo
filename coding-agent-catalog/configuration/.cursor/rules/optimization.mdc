@@ -1,0 +1,231 @@
+---
+description: Performance and automation optimization rules
+globs: ["**/*"]
+alwaysApply: true
+priority: high
+---
+
+# Performance Optimization Rules
+
+## Context Management
+
+**Intelligent File Inclusion:**
+- Use .cursorignore to exclude non-essential files
+- Implement semantic file organization by project area
+- Optimize codebase indexing frequency based on change patterns
+- Prioritize recently modified and related files
+
+**Context Window Optimization:**
+- Limit context to 120 files maximum for performance
+- Use progressive context loading for large operations
+- Implement file relevance scoring algorithm
+- Auto-prune less relevant files during long sessions
+
+**Smart Context Selection:**
+```javascript
+// Context selection algorithm
+const contextPriority = {
+  high: [
+    'package.json', 'tsconfig.json', '.cursorrules',
+    '**/*.config.js', '**/*.config.ts',
+    'src/**/*.{js,ts,jsx,tsx}' // Modified in last 24h
+  ],
+  medium: [
+    'tests/**/*.{js,ts,jsx,tsx}',
+    'docs/**/*.md',
+    'scripts/**/*.{js,ts}'
+  ],
+  low: [
+    'node_modules/**/*',
+    'dist/**/*', 'build/**/*',
+    '**/*.log', '**/*.tmp'
+  ]
+};
+```
+
+## Agent Behavior Optimization
+
+**YOLO Mode Configuration:**
+- Enable for trusted operations: testing, building, linting, formatting
+- Configure automatic command execution for development workflows
+- Implement progressive automation levels based on confidence
+- Auto-retry failed operations with intelligent backoff
+
+**Automation Levels:**
+- **Level 1:** Basic operations (file creation, directory setup)
+- **Level 2:** Development operations (build, test, lint)
+- **Level 3:** Advanced operations (deployment, database migrations)
+
+**Command Execution Policy:**
+```javascript
+const autoExecuteCommands = {
+  // Always safe to execute
+  safe: ['npm test', 'npm run build', 'npm run lint:fix', 'tsc'],
+  
+  // Require confirmation in production
+  cautious: ['npm run deploy', 'npm run migrate', 'git push origin main'],
+  
+  // Never auto-execute
+  dangerous: ['rm -rf', 'DROP TABLE', 'npm publish', 'docker rm']
+};
+```
+
+## Tool Integration Optimization
+
+**MCP Server Performance:**
+- Implement connection pooling for MCP servers
+- Use request batching for multiple operations
+- Configure optimal timeout values per server type
+- Monitor server response times and auto-scale
+
+**API Call Optimization:**
+- Batch similar API requests together
+- Implement intelligent caching with TTL
+- Use request deduplication for identical queries
+- Monitor rate limits and implement backoff
+
+**Caching Strategy:**
+```javascript
+const cacheConfig = {
+  perplexity: {
+    ttl: 3600000, // 1 hour for research results
+    maxSize: 1000,
+    persistent: true
+  },
+  github: {
+    ttl: 300000, // 5 minutes for API responses
+    maxSize: 500,
+    persistent: false
+  },
+  browser: {
+    ttl: 60000, // 1 minute for dynamic content
+    maxSize: 100,
+    persistent: false
+  }
+};
+```
+
+## Error Handling Optimization
+
+**Automatic Retry Mechanisms:**
+- Exponential backoff for network operations
+- Circuit breaker pattern for failing services
+- Graceful degradation for non-critical features
+- Comprehensive error logging with context
+
+**Error Classification:**
+- **Transient:** Network timeouts, temporary API failures
+- **Permanent:** Authentication errors, invalid configurations
+- **Recoverable:** Resource not found, permission issues
+- **Critical:** System failures, data corruption
+
+**Recovery Strategies:**
+```javascript
+const errorRecovery = {
+  NetworkTimeout: () => retryWithBackoff(3, 1000),
+  AuthenticationFailed: () => refreshTokenAndRetry(),
+  ResourceNotFound: () => createResourceAndRetry(),
+  RateLimitExceeded: () => waitAndRetry(rateLimitReset),
+  InternalServerError: () => escalateToHuman()
+};
+```
+
+## Performance Monitoring
+
+**Key Performance Indicators:**
+- Agent response time per operation
+- Context loading and processing time
+- API call latency and success rates
+- Memory usage and optimization opportunities
+- Error rates and recovery success
+
+**Automated Optimization:**
+- Detect performance regressions automatically
+- Suggest optimization opportunities based on usage patterns
+- Auto-tune cache configurations based on hit rates
+- Optimize context selection based on success metrics
+
+**Monitoring Configuration:**
+```javascript
+const performanceMetrics = {
+  responseTime: {
+    target: 2000, // ms
+    critical: 5000, // ms
+    samples: 100
+  },
+  memoryUsage: {
+    target: 256, // MB
+    critical: 512, // MB
+    checkInterval: 30000 // ms
+  },
+  errorRate: {
+    target: 0.02, // 2%
+    critical: 0.10, // 10%
+    window: 3600000 // 1 hour
+  }
+};
+```
+
+## Resource Management
+
+**Memory Optimization:**
+- Implement garbage collection hints for large operations
+- Use streaming for large file processing
+- Clear unused contexts periodically
+- Monitor memory leaks and auto-restart if needed
+
+**CPU Optimization:**
+- Use worker threads for CPU-intensive operations
+- Implement operation queuing to prevent overload
+- Prioritize user-facing operations over background tasks
+- Auto-scale based on system load
+
+**Network Optimization:**
+- Implement request compression where possible
+- Use HTTP/2 for improved multiplexing
+- Cache static resources aggressively
+- Implement offline fallback strategies
+
+## Development Workflow Integration
+
+**Git Integration:**
+- Auto-commit automation artifacts
+- Create feature branches for experimental changes
+- Implement automatic PR creation for major changes
+- Tag successful automation runs
+
+**CI/CD Integration:**
+- Trigger builds on automation completion
+- Run tests automatically after code changes
+- Deploy to staging environments for validation
+- Generate deployment artifacts
+
+**Quality Gates:**
+- Run linting and formatting before commits
+- Execute test suites before major changes
+- Perform security scans on new dependencies
+- Validate performance impact of changes
+
+## Monitoring and Alerting
+
+**Real-time Monitoring:**
+- Track automation success rates
+- Monitor system resource usage
+- Alert on performance degradations
+- Generate daily performance reports
+
+**Alerting Thresholds:**
+```javascript
+const alertThresholds = {
+  errorRate: 0.05, // 5% error rate
+  responseTime: 5000, // 5 second response time
+  memoryUsage: 80, // 80% memory utilization
+  diskSpace: 90 // 90% disk utilization
+};
+```
+
+**Reporting:**
+- Weekly automation performance summaries
+- Monthly optimization opportunity reports
+- Quarterly system health assessments
+- Annual performance trend analysis

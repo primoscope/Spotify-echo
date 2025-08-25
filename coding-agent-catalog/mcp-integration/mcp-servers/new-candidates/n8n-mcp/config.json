@@ -1,0 +1,51 @@
+{
+  "name": "n8n-mcp",
+  "package": "n8n-mcp",
+  "priority": "high",
+  "relevanceScore": 15,
+  "description": "Integration between n8n workflow automation and Model Context Protocol (MCP)",
+  "useCase": "CI/CD and testing workflows automation",
+  "configuration": {
+    "enabled": true,
+    "port": 3019,
+    "environment": "production",
+    "logLevel": "info",
+    "n8nApiUrl": "https://primosphere.ninja",
+    "n8nApiUrlFallback": "46.101.106.220",
+    "apiToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNjg4N2M4Yy0wMmNhLTQ1ZGMtOGJiYy00OGQ2OTZiOTA2M2EiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NDA0NzE4fQ.6qHdCB7KuA3xpOhuccOMggJOnG2mXpbXg7wFHHVQn_Q",
+    "credentials": {
+      "username": "willexmen8@gmail.com",
+      "password": "DapperMan77$$"
+    }
+  },
+  "integration": {
+    "spotify": true,
+    "database": true,
+    "workflow": true,
+    "code": true,
+    "mcp": true
+  },
+  "capabilities": [
+    "workflow-automation",
+    "ci-cd",
+    "api-integration",
+    "automation-orchestration",
+    "data-processing",
+    "webhook-triggers",
+    "scheduled-tasks"
+  ],
+  "installation": {
+    "command": "npm install n8n-mcp",
+    "dependencies": [],
+    "postInstall": [
+      "configure-api-connection",
+      "test-connectivity"
+    ]
+  },
+  "endpoints": {
+    "health": "/health",
+    "workflows": "/api/v1/workflows",
+    "executions": "/api/v1/executions",
+    "webhooks": "/webhook"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "UI Smoke via Playwright MCP",
+  "description": "Run minimal UI flow with Playwright MCP/Browserbase if available",
+  "yolo": true,
+  "steps": [
+    {
+      "tool": "echotune-filesystem",
+      "action": "scan",
+      "args": { "paths": ["./src"], "maxFiles": 50 }
+    },
+    {
+      "tool": "echotune-perplexity",
+      "action": "research",
+      "args": {
+        "prompt": "Check latest Playwright MCP usage examples and best practices for Cursor integration. Return concise steps."
+      }
+    },
+    {
+      "tool": "browserbase",
+      "action": "run_script",
+      "optional": true,
+      "args": {
+        "script": "const { chromium } = require('playwright');\n(async () => { const browser = await chromium.launch(); const page = await browser.newPage(); await page.goto('http://localhost:3000'); await page.waitForSelector('body'); await browser.close(); })();"
+      }
+    }
+  ]
+}

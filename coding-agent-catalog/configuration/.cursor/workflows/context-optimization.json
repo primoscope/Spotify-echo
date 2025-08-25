@@ -1,0 +1,19 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "Context Optimization",
+  "description": "Evaluate large-repo context selection and @Recommended prioritization",
+  "steps": [
+    {
+      "tool": "echotune-filesystem",
+      "action": "scan",
+      "args": { "paths": ["./"], "maxFiles": 200, "respectIgnore": true }
+    },
+    {
+      "tool": "echotune-perplexity",
+      "action": "research",
+      "args": {
+        "prompt": "From scanned repo, pick @Recommended files for a React+Node refactor. Provide top 15 files only."
+      }
+    }
+  ]
+}

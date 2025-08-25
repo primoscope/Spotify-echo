@@ -1,0 +1,115 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "mcp-servers/filesystem/index.js"
+      ]
+    },
+    "memory": {
+      "command": "node",
+      "args": [
+        "mcp-servers/memory/index.js"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "node",
+      "args": [
+        "mcp-servers/sequential-thinking/dist/index.js"
+      ]
+    },
+    "github-repos-manager": {
+      "command": "node",
+      "args": [
+        "mcp-servers/github-repos-manager/index.js"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "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",
+        "GITHUB_PAT": "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",
+        "GITHUB_API_KEY": "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"
+      }
+    },
+    "brave-search": {
+      "command": "node",
+      "args": [
+        "mcp-servers/brave-search/brave-search-mcp.js"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW"
+      }
+    },
+    "perplexity-mcp": {
+      "command": "node",
+      "args": [
+        "mcp-servers/perplexity-mcp/index.js"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "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"
+      }
+    },
+    "browserbase-automation": {
+      "command": "node",
+      "args": [
+        "mcp-servers/browserbase/index.js"
+      ],
+      "env": {
+        "BROWSERBASE_API_KEY": "bb_live_NKhsq1t4-MmXPTZO7vQqX5nCs8Q",
+        "BROWSERBASE_PROJECT_ID": "default"
+      }
+    },
+    "analytics-server": {
+      "command": "node",
+      "args": [
+        "mcp-servers/analytics-server/index.js"
+      ],
+      "env": {
+        "MONGODB_URI": "mongodb+srv://copilot:DapperMan77@cluster0.ofnyuy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        "REDIS_URL": "redis://default:wZSsoenleylqrJAarlo8xnPaTAUdSqxg@redis-11786.crce175.eu-north-1-1.ec2.redns.redis-cloud.com:11786"
+      }
+    },
+    "code-sandbox": {
+      "command": "node",
+      "args": [
+        "mcp-servers/code-sandbox/index.js"
+      ],
+      "env": {
+        "E2B_API_KEY": "e2b_d4bd1880d1447d46bc054503cb7822a17e30c26f"
+      }
+    },
+    "n8n-automation": {
+      "command": "node",
+      "args": [
+        "mcp-servers/n8n-integration/index.js"
+      ],
+      "env": {
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNjg4N2M4Yy0wMmNhLTQ1ZGMtOGJiYy00OGQ2OTZiOTA2M2EiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NDgzMDM3LCJleHAiOjE7NTc5OTUyMDB9.YB3-9YlDP4fOgspsenl0wEAUvSYBg8YyLeCUx09AC8w",
+        "N8N_BASE_URL": "http://localhost:5678"
+      }
+    },
+    "digitalocean-management": {
+      "command": "node",
+      "args": [
+        "mcp-servers/digitalocean/index.js"
+      ],
+      "env": {
+        "DIGITALOCEAN_API_TOKEN": "dop_v1_93910c446f36d3069ca4462ba1779792e21b84f15da4831688f04094ca6680ff"
+      }
+    },
+    "cursor-integration": {
+      "command": "node",
+      "args": [
+        "mcp-servers/cursor-ai/index.js"
+      ],
+      "env": {
+        "CURSOR_API_KEY": "key_01fc5475538efbe41e0cfa7f72eb1a7eeaab9a9217db67d509caaefe45280319"
+      }
+    }
+  },
+  "settings": {
+    "autoStart": true,
+    "validateOnStartup": true,
+    "healthCheckInterval": 30000,
+    "retryAttempts": 3,
+    "logLevel": "info"
+  }
+}

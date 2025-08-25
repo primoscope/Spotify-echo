@@ -1,0 +1,23 @@
+{
+  "name": "github-repos-manager-mcp-server",
+  "version": "1.0.0",
+  "description": "GitHub Repos Manager MCP Server with 80+ GitHub tools and automation",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@octokit/rest": "^20.0.2"
+  },
+  "keywords": [
+    "mcp",
+    "github",
+    "repository-management",
+    "automation",
+    "version-control"
+  ],
+  "author": "EchoTune AI Team",
+  "license": "MIT"
+}

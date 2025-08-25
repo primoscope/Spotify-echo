@@ -1,0 +1,36 @@
+---
+name: Auto-merge Gate
+
+on:
+  pull_request:
+    types: [labeled, synchronize, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  enable-automerge:
+    if: |
+      !github.event.pull_request.draft &&
+      (contains(github.event.pull_request.labels.*.name, 'agent-pr') || contains(github.event.pull_request.labels.*.name, 'automation'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for required checks
+        uses: lewagon/wait-on-check-action@v1.3.3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          check-name: |
+            MCP Validation
+            CI (Lint & Tests)
+          wait-interval: 15
+          allowed-conclusions: success
+      - name: Enable auto-merge
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: squash

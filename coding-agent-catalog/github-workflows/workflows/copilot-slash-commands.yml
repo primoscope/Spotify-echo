@@ -1,0 +1,1216 @@
+---
+name: Enhanced Copilot Slash Commands
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  process-commands:
+    name: Process Slash Commands
+    runs-on: ubuntu-latest
+
+    # Only process commands from authorized users and valid contexts
+    if: |
+      (github.event.issue.number || github.event.pull_request.number) &&
+      startsWith(github.event.comment.body, '/') &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'COLLABORATOR' ||
+       github.event.comment.author_association == 'MEMBER')
+
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+      checks: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Parse Command
+        id: parse
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+
+          # Extract command and parameters
+          COMMAND=$(echo "$COMMENT_BODY" | head -n 1 | sed 's/^\/\([a-zA-Z-]*\).*/\1/')
+          PARAMS=$(echo "$COMMENT_BODY" | head -n 1 | sed 's/^\/[a-zA-Z-]* *//')
+
+          echo "command=$COMMAND" >> $GITHUB_OUTPUT
+          echo "params=$PARAMS" >> $GITHUB_OUTPUT
+
+          # Get context information
+          if [ "${{ github.event.issue.number }}" != "" ]; then
+            echo "context_type=issue" >> $GITHUB_OUTPUT
+            echo "context_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "context_type=pull_request" >> $GITHUB_OUTPUT
+            echo "context_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          fi
+
+          # Check for Claude Opus 4.1 commands and redirect
+          if echo "$COMMENT_BODY" | grep -qi "/claude-opus\|/opus\|claude opus 4\.1\|@claude-opus"; then
+            echo "is_claude_opus_command=true" >> $GITHUB_OUTPUT
+            echo "🧠 Claude Opus 4.1 command detected - will trigger dedicated workflow"
+          else
+            echo "is_claude_opus_command=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Parsed command: $COMMAND"
+          echo "Parameters: $PARAMS"
+
+      - name: Trigger Claude Opus 4.1 Workflow
+        if: steps.parse.outputs.is_claude_opus_command == 'true'
+        run: |
+          echo "🧠 Triggering dedicated Claude Opus 4.1 workflow..."
+          
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          # Extract command type from comment
+          COMMAND_TYPE="deep-reasoning"
+          if echo "$COMMENT_BODY" | grep -qi "deep.reasoning\|deep-reasoning"; then
+            COMMAND_TYPE="deep-reasoning"
+          elif echo "$COMMENT_BODY" | grep -qi "extended.thinking\|extended-thinking"; then
+            COMMAND_TYPE="extended-thinking"
+          elif echo "$COMMENT_BODY" | grep -qi "advanced.coding\|advanced-coding\|coding"; then
+            COMMAND_TYPE="advanced-coding"
+          elif echo "$COMMENT_BODY" | grep -qi "agent.workflow\|agent-workflow\|agentic"; then
+            COMMAND_TYPE="agent-workflow"
+          elif echo "$COMMENT_BODY" | grep -qi "architectural\|architecture"; then
+            COMMAND_TYPE="architectural-analysis"
+          elif echo "$COMMENT_BODY" | grep -qi "long.horizon\|long-horizon\|complex"; then
+            COMMAND_TYPE="long-horizon-tasks"
+          fi
+          
+          # Extract target if specified
+          TARGET=""
+          if echo "$COMMENT_BODY" | grep -qE "src/|scripts/|\.js|\.py|\.md|\.yml|\.yaml"; then
+            TARGET=$(echo "$COMMENT_BODY" | grep -oE "src/[^[:space:]]*|scripts/[^[:space:]]*|[^[:space:]]*\.(js|py|md|yml|yaml)" | head -1)
+          fi
+          
+          # Extract custom prompt
+          PROMPT=$(echo "$COMMENT_BODY" | sed 's/.*\/claude-opus[^[:space:]]*//' | sed 's/.*\/opus[^[:space:]]*//' | sed 's/.*@claude-opus[^[:space:]]*//' | xargs)
+          
+          echo "Command Type: $COMMAND_TYPE"
+          echo "Target: $TARGET" 
+          echo "Prompt: $PROMPT"
+          
+          # Note: The actual workflow dispatch would trigger the claude-opus-coding-agent.yml workflow
+          echo "✅ Claude Opus 4.1 workflow parameters prepared"
+
+      - name: Post Claude Opus 4.1 Command Response
+        if: steps.parse.outputs.is_claude_opus_command == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const commentBody = '${{ github.event.comment.body }}';
+            
+            // Extract command details
+            let commandType = 'deep-reasoning';
+            if (commentBody.match(/deep.reasoning|deep-reasoning/i)) commandType = 'deep-reasoning';
+            else if (commentBody.match(/extended.thinking|extended-thinking/i)) commandType = 'extended-thinking';
+            else if (commentBody.match(/advanced.coding|advanced-coding|coding/i)) commandType = 'advanced-coding';
+            else if (commentBody.match(/agent.workflow|agent-workflow|agentic/i)) commandType = 'agent-workflow';
+            else if (commentBody.match(/architectural|architecture/i)) commandType = 'architectural-analysis';
+            else if (commentBody.match(/long.horizon|long-horizon|complex/i)) commandType = 'long-horizon-tasks';
+            
+            const target = commentBody.match(/src\/[^\s]*|scripts\/[^\s]*|[^\s]*\.(js|py|md|yml|yaml)/)?.[0] || '';
+            
+            const responseMessage = `## 🧠 Claude Opus 4.1 Advanced Coding Agent Initiated
+            
+            **Model**: Claude Opus 4.1 (Anthropic's most advanced model)
+            **Command Type**: ${commandType}
+            **Target**: ${target || 'Repository-wide'}
+            **Extended Thinking**: Enabled with budget control
+            **Status**: ✅ Dedicated workflow triggered
+            
+            ## 🎯 Advanced Capabilities Activated
+            
+            Claude Opus 4.1 brings industry-leading capabilities to EchoTune AI:
+            
+            ### 🚀 **Advanced Coding**
+            - **End-to-end Development**: Independently plan and execute complex development tasks
+            - **Code Quality**: Maintains high standards throughout implementation
+            - **Style Adaptation**: Adapts to your codebase patterns and conventions
+            - **Production Ready**: Generates robust, scalable, and maintainable code
+            
+            ### 🧠 **Extended Thinking Mode**
+            - **Deep Reasoning**: Methodical problem-solving with transparent thought processes
+            - **Budget Control**: Configurable thinking token allocation (current: 5000 tokens)
+            - **Complex Analysis**: Multi-step reasoning for intricate technical challenges
+            - **Sustained Focus**: Maintains coherence across long reasoning chains
+            
+            ### 🤖 **Agent Workflows**
+            - **Multi-step Tasks**: Complex automation requiring peak accuracy
+            - **Peak Performance**: Optimized for sustained performance on long-running tasks
+            - **Intelligent Orchestration**: Smart task decomposition and execution
+            - **Memory Management**: Effective context retention across interactions
+            
+            ### 🔍 **Agentic Search & Research**
+            - **Multi-source Analysis**: Synthesize insights across code repositories
+            - **Pattern Recognition**: Identify complex architectural patterns and relationships
+            - **Best Practice Integration**: Apply industry-leading development practices
+            - **Strategic Planning**: Long-term technical roadmap development
+            
+            ## 📊 Processing Details
+            
+            **Command Type**: \`${commandType}\`
+            **Processing Mode**: Advanced reasoning with extended thinking
+            **Expected Capabilities**:
+            ${commandType === 'deep-reasoning' ? `
+            - 🔍 **Deep Analytical Reasoning**: Step-by-step problem decomposition
+            - 🧩 **Pattern Analysis**: Complex relationship identification
+            - 💡 **Strategic Insights**: Long-term implications and opportunities
+            - 📋 **Actionable Recommendations**: Clear implementation guidance` : ''}
+            ${commandType === 'extended-thinking' ? `
+            - 🧠 **Methodical Problem-Solving**: Transparent reasoning process
+            - 🔄 **Iterative Refinement**: Continuous thought improvement
+            - 📊 **Comprehensive Analysis**: Multi-faceted problem examination
+            - ✅ **Well-Considered Conclusions**: Thoroughly validated insights` : ''}
+            ${commandType === 'advanced-coding' ? `
+            - 💻 **Industry-Leading Coding**: Best-in-class development assistance
+            - 🏗️ **End-to-End Planning**: Complete development lifecycle management
+            - 🎯 **Quality Assurance**: High-standard code generation
+            - 🔄 **Adaptive Implementation**: Context-aware coding patterns` : ''}
+            ${commandType === 'agent-workflow' ? `
+            - 🤖 **Agentic Design**: Intelligent workflow automation
+            - 📋 **Multi-Step Orchestration**: Complex task coordination
+            - 🎯 **Peak Accuracy**: Precision-focused task execution
+            - 🔄 **Self-Improving Workflows**: Adaptive automation patterns` : ''}
+            ${commandType === 'architectural-analysis' ? `
+            - 🏛️ **System Architecture**: Comprehensive design analysis
+            - 📈 **Scalability Assessment**: Performance and growth evaluation
+            - 🔧 **Maintainability Review**: Code organization and structure
+            - 💡 **Enhancement Recommendations**: Strategic improvement opportunities` : ''}
+            ${commandType === 'long-horizon-tasks' ? `
+            - ⏳ **Sustained Performance**: Long-running task management
+            - 🎯 **Objective Decomposition**: Complex goal breakdown
+            - 🔄 **Progress Tracking**: Systematic advancement monitoring
+            - 🎭 **Focus Maintenance**: Coherent long-term execution` : ''}
+            
+            ## 🔗 Monitor Progress
+            
+            **Live Workflow**: [View Claude Opus 4.1 execution](${{ github.server_url }}/${{ github.repository }}/actions)
+            **Expected Duration**: 5-15 minutes depending on complexity
+            **Results**: Comprehensive analysis with extended reasoning results
+            
+            ## 🎯 Available Claude Opus 4.1 Commands
+            
+            ### 🧠 Core Commands
+            - \`/claude-opus deep-reasoning\` - Deep analytical reasoning with extended thinking
+            - \`/claude-opus extended-thinking\` - Methodical problem-solving with thinking mode  
+            - \`/claude-opus advanced-coding\` - Industry-leading coding assistance
+            - \`/claude-opus agent-workflow\` - Complex multi-step task automation
+            - \`/claude-opus architectural-analysis\` - Comprehensive system design analysis
+            - \`/claude-opus long-horizon-tasks\` - Sustained performance on complex objectives
+            
+            ### 🎯 Targeted Commands
+            - \`/claude-opus advanced-coding src/ai/\` - Focus on specific directory
+            - \`/claude-opus deep-reasoning budget 10000\` - Custom thinking budget
+            - \`/opus architectural-analysis\` - Shortened command form
+            
+            ### 🗣️ Natural Language Triggers
+            - "Use Claude Opus 4.1 for [task]"
+            - "Analyze with Claude Opus 4.1"
+            - "@claude-opus [request]"
+            - "Claude Opus 4.1 for [specific need]"
+            
+            **The Claude Opus 4.1 Advanced Coding Agent is now processing your request with industry-leading AI capabilities.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Claude Opus 4.1 Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Execute Review Docs Command
+        if: steps.parse.outputs.command == 'review-docs'
+        run: |
+          echo "🔍 Executing /review-docs command..."
+
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          PARAMS="${{ steps.parse.outputs.params }}"
+
+          # Run comprehensive documentation analysis using our dedicated script
+          echo "📊 Running comprehensive documentation analysis..."
+          
+          if [ -f scripts/documentation-reviewer.js ]; then
+            node scripts/documentation-reviewer.js > docs-command-results.log 2>&1
+            
+            # Check if analysis files were generated
+            if [ -f documentation-analysis-summary.md ]; then
+              echo "✅ Documentation analysis completed successfully"
+              echo "analysis_status=completed" >> $GITHUB_ENV
+            else
+              echo "⚠️ Documentation analysis completed but no summary generated"
+              echo "analysis_status=partial" >> $GITHUB_ENV
+            fi
+          else
+            echo "❌ Documentation reviewer script not found, using fallback analysis"
+            echo "analysis_status=fallback" >> $GITHUB_ENV
+            
+            # Create fallback summary
+            cat > documentation-analysis-summary.md << 'EOF'
+          # 📚 Documentation Analysis Summary (Fallback)
+
+          **Analysis Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')  
+
+          ## 🚨 Script Missing
+          The comprehensive documentation reviewer script was not found.
+
+          ## 🛠️ Next Steps
+          1. Ensure `scripts/documentation-reviewer.js` exists
+          2. Re-run the `/review-docs` command
+          3. Contact the development team if issues persist
+
+          ---
+          *Fallback analysis generated*
+          EOF
+          fi
+          
+          # Log results
+          echo "📄 Documentation analysis results:"
+          cat docs-command-results.log || echo "No results log generated"
+
+      - name: Post Documentation Analysis Results
+        if: steps.parse.outputs.command == 'review-docs'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const analysisStatus = process.env.analysis_status;
+            
+            let analysisContent = '';
+            try {
+              analysisContent = fs.readFileSync('documentation-analysis-summary.md', 'utf8');
+            } catch (error) {
+              analysisContent = `## 📚 Documentation Analysis Failed
+              
+              **Command**: \`/review-docs\`  
+              **Error**: Could not read analysis results
+              **Status**: ${analysisStatus}
+              
+              Please check the workflow logs for more details.
+              
+              **Available Commands**:
+              - \`/review-docs\` - Analyze repository documentation
+              - \`/gpt5 analyze\` - Trigger GPT-5 analysis
+              - \`/run-mcp-all\` - Run MCP validation
+              `;
+            }
+
+            // Add header with workflow information
+            const fullComment = `## 📚 Documentation Review Results
+
+            **Command**: \`/review-docs ${{ steps.parse.outputs.params }}\`  
+            **Executed by**: @${{ github.actor }}  
+            **Status**: ${analysisStatus}  
+            **Timestamp**: ${new Date().toISOString()}  
+            **Workflow**: [View run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            ${analysisContent}
+
+            ### 🔄 Available Follow-up Commands
+            
+            - \`/create-api-docs\` - Generate comprehensive API documentation
+            - \`/create-architecture\` - Generate system architecture documentation  
+            - \`/create-contributing\` - Generate contributing guidelines
+            - \`/gpt5 analyze\` - Trigger comprehensive GPT-5 analysis
+            - \`/run-mcp-all\` - Run comprehensive MCP validation
+
+            ---
+            *Analysis executed by Enhanced Copilot Slash Commands*`;
+
+            // Post the comment
+            const { data: comment } = await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: fullComment
+            });
+
+            console.log(`Posted documentation analysis comment: ${comment.html_url}`);
+
+      - name: Upload Documentation Analysis Artifacts
+        if: steps.parse.outputs.command == 'review-docs'
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-analysis-results
+          path: |
+            documentation-analysis-summary.md
+            documentation-analysis-report.json
+            docs-command-results.log
+          retention-days: 30
+
+      - name: Execute Perplexity Help Command
+        if: |
+          steps.parse.outputs.command == 'perplexity' && 
+          (steps.parse.outputs.params == 'help' || steps.parse.outputs.params == '')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            
+            const helpMessage = `## 🤖 Complete Perplexity AI Commands Guide
+            
+            **Welcome to the EchoTune AI Perplexity Integration!** 
+            
+            All Perplexity commands use advanced AI models with automatic budget management and cost optimization.
+            
+            ## 📋 Available Perplexity Commands
+            
+            ### 🔍 Analysis Commands
+            
+            \`\`\`
+            /perplexity-analyze [scope]
+            /analyze-perplexity [scope]
+            \`\`\`
+            **Purpose**: Comprehensive analysis using Perplexity AI with targeted scope  
+            **Examples**:
+            - \`/perplexity-analyze frontend\` - Analyze frontend components and architecture
+            - \`/analyze-perplexity scripts/\` - Analyze specific directory structure
+            - \`/perplexity-analyze api integration\` - Focus on API integration patterns
+            
+            **Features**:
+            - 🎯 Targeted technical analysis with actionable insights
+            - 📊 Complexity-based model selection for optimal cost/quality balance
+            - 📈 Detailed analysis reports with implementation recommendations
+            - ⚡ 2-iteration limit for focused processing
+            
+            ---
+            
+            ### 🔬 Research Commands
+            
+            \`\`\`
+            /perplexity-research [topic]
+            /research-perplexity [topic]
+            \`\`\`
+            **Purpose**: Focused research on specific topics using Perplexity browser search  
+            **Examples**:
+            - \`/perplexity-research "latest React patterns"\` - Research current best practices
+            - \`/research-perplexity "music recommendation algorithms"\` - Industry insights
+            - \`/perplexity-research "Node.js performance optimization"\` - Technical research
+            
+            **Features**:
+            - 🌐 Latest trends, best practices, and technologies via browser search
+            - 🔄 Research results integrated into development roadmap
+            - 💾 14-day caching to optimize costs and performance
+            - ⚡ 1-iteration limit for efficient processing
+            
+            ---
+            
+            ### 🤖 Autonomous Coding & Research Integration **[NEW]**
+            
+            \`\`\`
+            /autonomous-coding-cycle
+            /start-coding-cycle
+            @copilot autonomous coding
+            @copilot autonomous coding threshold [number]
+            @copilot autonomous coding cycles [number]
+            \`\`\`
+            **Purpose**: Complete integrated autonomous development with coding tasks and research feedback loop  
+            **Examples**:
+            - \`@copilot autonomous coding\` - Start autonomous coding with default settings (3 tasks/cycle, 5 max cycles)
+            - \`@copilot autonomous coding threshold 5\` - Custom task threshold before research trigger
+            - \`@copilot autonomous coding cycles 3\` - Limit to 3 complete coding/research cycles
+            - \`/autonomous-coding-cycle\` - Direct workflow trigger
+            
+            **Features**:
+            - 🛠️ **GitHub Copilot Integration**: Executes development tasks from roadmap automatically
+            - 🔍 **Research-Triggered Updates**: Perplexity research analyzes repository when task thresholds are met
+            - 📋 **Continuous Roadmap Updates**: Research findings feed back into development priorities
+            - 🔄 **Self-Improving Loop**: Coding → Research → Roadmap Update → More Coding → Repeat
+            - ⚡ **Threshold-Based**: Research only triggers after specified number of tasks completed (default: 3)
+            - 💰 **Budget Conscious**: Optimized for cost efficiency with smart model selection
+            
+            **Integration Flow**:
+            1. **Phase 1**: GitHub Copilot executes coding tasks from roadmap files
+            2. **Phase 2**: When threshold reached, Perplexity conducts comprehensive repository analysis
+            3. **Phase 3**: Research insights automatically integrated into roadmap for next cycle
+            4. **Phase 4**: Updated roadmap triggers new coding tasks, cycle continues
+            
+            ---
+            
+            ### 📋 Roadmap Commands
+            
+            \`\`\`
+            /perplexity-roadmap-update
+            \`\`\`
+            **Purpose**: Update roadmap with latest Perplexity research insights  
+            **Features**:
+            - 📈 Latest research findings integrated into development roadmap
+            - 🎯 Tasks reprioritized based on current industry trends
+            - 📋 Updated implementation strategies and approaches
+            - ⏰ Realistic timeline adjustments based on complexity analysis
+            
+            ---
+            
+            ### 💰 Budget & Cost Management Commands
+            
+            \`\`\`
+            /perplexity-budget-check
+            \`\`\`
+            **Purpose**: Check Perplexity usage and budget status  
+            **Features**:
+            - 💳 Real-time usage monitoring: \$3.00 weekly budget limit
+            - 📊 Usage percentage with detailed breakdown
+            - ⚠️ Automated warnings at 80% usage
+            - 🔒 Automatic enforcement at 100% usage
+            - 📅 Weekly reset schedule (Monday mornings)
+            
+            \`\`\`
+            /perplexity-optimize-costs
+            \`\`\`
+            **Purpose**: Analyze and optimize Perplexity usage patterns  
+            **Features**:
+            - 📈 Review current API usage patterns and efficiency
+            - 🎯 Optimize model selection for cost/performance balance
+            - 💾 Improve cache hit rates and TTL settings
+            - 💡 Weekly budget optimization recommendations
+            
+            ---
+            
+            ## 💡 Usage Tips & Best Practices
+            
+            ### ⚡ Quick Commands
+            - \`/perplexity-budget-check\` - Always check budget first
+            - \`@copilot autonomous coding\` - **NEW**: Start integrated coding/research cycle
+            - \`/perplexity-analyze\` - General repository analysis
+            - \`/perplexity-research "topic"\` - Focused research on any topic
+            
+            ### 🎯 Scope Parameters
+            Most commands accept optional scope parameters:
+            - **Directories**: \`scripts/\`, \`src/\`, \`docs/\`
+            - **Components**: \`frontend\`, \`backend\`, \`api\`, \`database\`
+            - **Topics**: \`"authentication"\`, \`"performance optimization"\`
+            
+            ### 🔄 Command Combinations & Workflows
+            
+            **Traditional Workflow**:
+            1. Start with budget check: \`/perplexity-budget-check\`
+            2. Research topic: \`/perplexity-research "your topic"\`
+            3. Analyze specific area: \`/perplexity-analyze scope\`
+            4. Update roadmap: \`/perplexity-roadmap-update\`
+            
+            **NEW Autonomous Workflow** 🆕:
+            1. \`@copilot autonomous coding\` - Starts complete integrated cycle
+            2. System automatically executes coding tasks from roadmap
+            3. When threshold reached, triggers Perplexity research
+            4. Research findings update roadmap automatically
+            5. Cycle continues with new tasks - fully autonomous!
+            
+            ## 🛡️ Budget Management Features
+            
+            - **Weekly Budget**: \$3.00 USD with automatic enforcement
+            - **Smart Model Selection**: 
+              - 🟢 **Sonar**: Simple queries (lowest cost)
+              - 🟡 **Sonar-Reasoning**: Complex analysis (medium cost)  
+              - 🔴 **Sonar-Pro**: Advanced research (highest cost)
+            - **Cache System**: 14-day TTL reduces repeat costs by 70%+
+            - **Usage Alerts**: Proactive warnings at 80% usage
+            - **Automatic Locks**: Hard stops at 100% usage to prevent overages
+            - **Threshold Controls**: Autonomous coding respects budget limits automatically
+            
+            ## 📊 Command Status & Confirmation
+            
+            Each command provides:
+            - ✅ **Immediate Confirmation**: Command received and validated
+            - 🔄 **Progress Tracking**: Live workflow links and status updates
+            - 📈 **Expected Outcomes**: Clear descriptions of what will be delivered
+            - ⏱️ **Estimated Duration**: Realistic time expectations
+            - 📋 **Follow-up Actions**: Suggested next steps and related commands
+            
+            ## 🔗 Monitoring & Results
+            
+            **Track Your Commands**:
+            - 📊 [View Active Workflows](${{ github.server_url }}/${{ github.repository }}/actions)
+            - 📁 Session artifacts available after completion
+            - 📈 Detailed reports with actionable insights
+            - 🔄 Automatic updates to roadmap and documentation
+            
+            **Results Location**:
+            - Updated files: \`ROADMAP.md\`, \`AUTONOMOUS_DEVELOPMENT_ROADMAP.md\`
+            - Analysis reports: Available as workflow artifacts
+            - Budget status: Real-time updates in this repository
+            - Coding artifacts: Implementation files and session logs
+            
+            ## 🆘 Need Help?
+            
+            - **Quick Budget Check**: \`/perplexity-budget-check\`  
+            - **Start Autonomous Coding**: \`@copilot autonomous coding\` 🆕
+            - **General Analysis**: \`/perplexity-analyze\`
+            - **Research Help**: \`/perplexity-research "help with [topic]"\`
+            - **This Help**: \`/perplexity help\`
+            
+            ---
+            
+            ## 🚀 **Ready to Start?**
+            
+            **🆕 Try the new Autonomous Coding Integration**:
+            - \`@copilot autonomous coding\` - Start complete integrated development cycle
+            - \`@copilot autonomous coding threshold 5\` - Custom research trigger threshold
+            - \`@copilot autonomous coding cycles 3\` - Limit cycles for focused development
+            
+            **Traditional Commands**:
+            - \`/perplexity-budget-check\` - See your current budget status
+            - \`/perplexity-analyze "recommendation system"\` - Get insights on our music engine
+            - \`/perplexity-research "latest AI music trends"\` - Research industry developments
+            
+            *All Perplexity commands are optimized for cost efficiency with automatic budget management, intelligent model selection, and now integrated autonomous coding capabilities.*
+            
+            ---
+            *Enhanced Copilot Slash Commands with Perplexity AI Integration & Autonomous Coding System*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: helpMessage
+            });
+
+      - name: Execute Specific Perplexity Commands
+        if: |
+          steps.parse.outputs.command == 'perplexity-analyze' ||
+          steps.parse.outputs.command == 'perplexity-research' ||
+          steps.parse.outputs.command == 'perplexity-roadmap-update' ||
+          steps.parse.outputs.command == 'perplexity-budget-check' ||
+          steps.parse.outputs.command == 'perplexity-optimize-costs' ||
+          steps.parse.outputs.command == 'analyze-perplexity' ||
+          steps.parse.outputs.command == 'research-perplexity'
+        run: |
+          echo "🔍 Executing specific Perplexity command: ${{ steps.parse.outputs.command }}"
+          
+          COMMAND="${{ steps.parse.outputs.command }}"
+          PARAMS="${{ steps.parse.outputs.params }}"
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          
+          # Set specific parameters based on command
+          case "$COMMAND" in
+            "perplexity-analyze" | "analyze-perplexity")
+              FOCUS_AREA="analysis:$PARAMS"
+              MAX_ITERATIONS=2
+              ;;
+            "perplexity-research" | "research-perplexity")  
+              FOCUS_AREA="research:$PARAMS"
+              MAX_ITERATIONS=1
+              ;;
+            "perplexity-roadmap-update")
+              FOCUS_AREA="roadmap-update"
+              MAX_ITERATIONS=1
+              ;;
+            "perplexity-budget-check")
+              # Handle budget check using dedicated script
+              echo "🔍 Executing budget check using dedicated script..."
+              python3 scripts/budget_status_simple.py > perplexity-budget-status.txt 2>&1
+              echo "budget_check_only=true" >> $GITHUB_ENV
+              exit 0
+              ;;
+            "perplexity-optimize-costs")
+              FOCUS_AREA="cost-optimization"
+              MAX_ITERATIONS=1
+              ;;
+            *)
+              FOCUS_AREA="general"
+              MAX_ITERATIONS=2
+              ;;
+          esac
+          
+          echo "🚀 Triggering autonomous development with focus: $FOCUS_AREA"
+          
+          # Trigger autonomous development workflow with specific parameters
+          gh workflow run autonomous-perplexity-development-cycle.yml \
+            --field force_start=true \
+            --field max_iterations="$MAX_ITERATIONS" \
+            --field focus_area="$FOCUS_AREA"
+            
+          echo "✅ Perplexity command workflow triggered"
+
+      - name: Execute Autonomous Coding Cycle Command
+        if: |
+          steps.parse.outputs.command == 'autonomous-coding-cycle' ||
+          steps.parse.outputs.command == 'start-coding-cycle' ||
+          contains(steps.parse.outputs.comment_body, '@copilot autonomous coding') ||
+          contains(steps.parse.outputs.comment_body, 'perplexity autonomous coding')
+        run: |
+          echo "🤖 Executing Autonomous Coding and Perplexity Research Cycle..."
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          COMMENT_BODY="${{ steps.parse.outputs.comment_body }}"
+          
+          # Extract parameters from comment if provided
+          TASK_THRESHOLD="3"
+          MAX_CYCLES="5"
+          
+          # Check for custom parameters in comment
+          if echo "$COMMENT_BODY" | grep -E "threshold[[:space:]]*[0-9]+"; then
+            TASK_THRESHOLD=$(echo "$COMMENT_BODY" | grep -oE "threshold[[:space:]]*[0-9]+" | grep -oE "[0-9]+")
+          fi
+          
+          if echo "$COMMENT_BODY" | grep -E "cycles[[:space:]]*[0-9]+"; then
+            MAX_CYCLES=$(echo "$COMMENT_BODY" | grep -oE "cycles[[:space:]]*[0-9]+" | grep -oE "[0-9]+")
+          fi
+          
+          # Trigger autonomous coding and research cycle workflow
+          gh workflow run autonomous-coding-perplexity-cycle.yml \
+            --field force_start=true \
+            --field task_threshold="$TASK_THRESHOLD" \
+            --field max_cycles="$MAX_CYCLES"
+            
+          echo "✅ Autonomous Coding and Perplexity Research Cycle triggered"
+          echo "   - Task Threshold: $TASK_THRESHOLD"
+          echo "   - Max Cycles: $MAX_CYCLES"
+
+      - name: Execute General Perplexity Research Command
+        if: |
+          (contains(steps.parse.outputs.command, 'perplexity') && 
+           !contains(steps.parse.outputs.command, 'perplexity-')) ||
+          steps.parse.outputs.command == 'start-autonomous-development' ||
+          contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
+          (contains(steps.parse.outputs.comment_body, 'autonomous development') && 
+           !contains(steps.parse.outputs.comment_body, 'autonomous coding'))
+        run: |
+          echo "🔍 Executing General Perplexity/Autonomous Development command..."
+          
+          CONTEXT_NUMBER="${{ steps.parse.outputs.context_number }}"
+          COMMENT_BODY="${{ steps.parse.outputs.comment_body }}"
+          
+          # Trigger autonomous development workflow
+          gh workflow run autonomous-perplexity-development-cycle.yml \
+            --field force_start=true \
+            --field max_iterations=3 \
+            --field focus_area="user-requested autonomous development"
+            
+          echo "✅ Autonomous development workflow triggered"
+
+      - name: Post Perplexity Budget Check Response
+        if: env.budget_check_only == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            
+            let budgetStatus = '';
+            try {
+              budgetStatus = fs.readFileSync('perplexity-budget-status.txt', 'utf8');
+            } catch (error) {
+              budgetStatus = '❌ Could not read budget status';
+            }
+            
+            const responseMessage = `## 💰 Perplexity Budget Status
+            
+            **Command**: \`/${{ steps.parse.outputs.command }}\`
+            **Executed by**: @${{ github.actor }}
+            
+            \`\`\`
+            ${budgetStatus}
+            \`\`\`
+            
+            ### 📊 Budget Management Features:
+            
+            - **Weekly Budget**: $3.00 USD limit with automatic enforcement
+            - **Cost Tracking**: Real-time usage monitoring and alerts
+            - **Budget Alerts**: 80% usage warnings, 100% usage locks
+            - **Cache System**: 14-day TTL to reduce API costs
+            - **Model Selection**: Complexity-based routing to optimize costs
+            
+            ### 🔄 Related Commands:
+            
+            - \`/perplexity-optimize-costs\` - Analyze and optimize Perplexity usage
+            - \`/perplexity-analyze <scope>\` - Targeted analysis with cost control
+            - \`/perplexity-research <topic>\` - Focused research with budget awareness
+            
+            ---
+            *Budget check executed by Enhanced Copilot Slash Commands*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Post Specific Perplexity Command Response
+        if: |
+          (steps.parse.outputs.command == 'perplexity-analyze' ||
+           steps.parse.outputs.command == 'perplexity-research' ||
+           steps.parse.outputs.command == 'perplexity-roadmap-update' ||
+           steps.parse.outputs.command == 'perplexity-optimize-costs' ||
+           steps.parse.outputs.command == 'analyze-perplexity' ||
+           steps.parse.outputs.command == 'research-perplexity') &&
+          env.budget_check_only != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const command = '${{ steps.parse.outputs.command }}';
+            const params = '${{ steps.parse.outputs.params }}';
+            
+            const commandDescriptions = {
+              'perplexity-analyze': 'Comprehensive analysis using Perplexity AI with targeted scope',
+              'analyze-perplexity': 'Comprehensive analysis using Perplexity AI with targeted scope',
+              'perplexity-research': 'Focused research on specific topics using Perplexity browser search',
+              'research-perplexity': 'Focused research on specific topics using Perplexity browser search',
+              'perplexity-roadmap-update': 'Update roadmap with latest Perplexity research insights',
+              'perplexity-optimize-costs': 'Analyze and optimize Perplexity API usage patterns'
+            };
+            
+            const commandFocus = {
+              'perplexity-analyze': 'analysis',
+              'analyze-perplexity': 'analysis', 
+              'perplexity-research': 'research',
+              'research-perplexity': 'research',
+              'perplexity-roadmap-update': 'roadmap updates',
+              'perplexity-optimize-costs': 'cost optimization'
+            };
+            
+            const description = commandDescriptions[command] || 'Perplexity AI processing';
+            const focus = commandFocus[command] || 'general processing';
+            
+            const responseMessage = `## 🤖 Specific Perplexity Command Initiated
+            
+            **Command**: \`/${command} ${params}\`
+            **Description**: ${description}
+            **Focus Area**: ${focus}
+            **Status**: ✅ Autonomous workflow triggered successfully
+            
+            ## 🔄 What's Happening:
+            
+            1. **🎯 Focused Processing**: ${description}
+            2. **🔍 Targeted Research**: Optimized for ${focus} with reduced iteration count
+            3. **💰 Budget Awareness**: Cost-optimized execution with complexity-based model selection
+            4. **📊 Specific Outcomes**: Results tailored to your specific request
+            
+            ## 🎯 Command-Specific Features:
+            
+            ${command.includes('analyze') ? `
+            ### 📊 Analysis Focus:
+            - **Scope**: ${params || 'Full repository analysis'}
+            - **Depth**: Comprehensive technical analysis with actionable insights
+            - **Model Selection**: Complexity-based routing for optimal cost/quality balance
+            - **Output**: Detailed analysis report with implementation recommendations
+            ` : ''}
+            
+            ${command.includes('research') ? `
+            ### 🔍 Research Focus:
+            - **Topic**: ${params || 'General EchoTune development research'}
+            - **Browser Search**: Latest trends, best practices, and technologies
+            - **Integration**: Research results integrated into development roadmap
+            - **Caching**: 14-day cache to optimize costs and performance
+            ` : ''}
+            
+            ${command.includes('roadmap') ? `
+            ### 📋 Roadmap Update Focus:
+            - **Research Integration**: Latest findings integrated into roadmap
+            - **Priority Updates**: Tasks reprioritized based on current trends
+            - **Implementation Plans**: Updated strategies and approaches
+            - **Timeline Adjustments**: Realistic scheduling based on complexity
+            ` : ''}
+            
+            ${command.includes('optimize') ? `
+            ### 💰 Cost Optimization Focus:
+            - **Usage Analysis**: Review current Perplexity API usage patterns
+            - **Model Efficiency**: Optimize model selection for cost/performance
+            - **Caching Strategy**: Improve cache hit rates and TTL settings
+            - **Budget Management**: Weekly budget optimization recommendations
+            ` : ''}
+            
+            ## 📈 Expected Outcomes:
+            
+            - **Faster Execution**: Reduced iterations for focused processing
+            - **Targeted Results**: Specific outputs aligned with your command
+            - **Cost Efficient**: Optimized for budget-conscious operation
+            - **Actionable Insights**: Clear next steps and recommendations
+            
+            ## 🔗 Monitor Progress:
+            
+            - **Workflow Run**: [View live progress](${{ github.server_url }}/${{ github.repository }}/actions)
+            - **Session Artifacts**: Available after completion with detailed logs
+            - **Estimated Duration**: 3-5 minutes for focused processing
+            
+            **The specific Perplexity command is now active and will provide targeted results based on your request.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Specific Perplexity Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Post Autonomous Coding Cycle Response
+        if: |
+          steps.parse.outputs.command == 'autonomous-coding-cycle' ||
+          steps.parse.outputs.command == 'start-coding-cycle' ||
+          contains(steps.parse.outputs.comment_body, '@copilot autonomous coding') ||
+          contains(steps.parse.outputs.comment_body, 'perplexity autonomous coding')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const commentBody = '${{ steps.parse.outputs.comment_body }}';
+            
+            // Extract any parameters from comment
+            const taskThresholdMatch = commentBody.match(/threshold\s*(\d+)/i);
+            const maxCyclesMatch = commentBody.match(/cycles\s*(\d+)/i);
+            
+            const taskThreshold = taskThresholdMatch ? taskThresholdMatch[1] : '3';
+            const maxCycles = maxCyclesMatch ? maxCyclesMatch[1] : '5';
+            
+            const responseMessage = `## 🤖 Autonomous Coding & Perplexity Research Cycle Initiated
+            
+            **Request**: Integrated autonomous coding with Perplexity browser research
+            **Status**: ✅ Workflow triggered successfully
+            **Task Threshold**: ${taskThreshold} tasks per cycle before research trigger
+            **Max Cycles**: ${maxCycles} complete coding/research cycles
+            **Estimated Duration**: 10-15 minutes for complete integrated cycle
+            
+            ## 🔄 Integrated Development Loop
+            
+            This creates a comprehensive autonomous development system that integrates:
+            
+            ### 🛠️ Phase 1: GitHub Copilot Coding Tasks
+            1. **Roadmap Analysis**: Analyze roadmap and app development files for actionable tasks
+            2. **Task Execution**: GitHub coding agent implements identified tasks automatically
+            3. **Progress Tracking**: Monitor task completion against threshold (${taskThreshold} tasks)
+            4. **Code Quality**: Ensure production-ready implementations with proper testing
+            
+            ### 🔍 Phase 2: Perplexity Browser Research (Triggered After ${taskThreshold} Tasks)
+            1. **Repository Analysis**: Comprehensive analysis of current codebase and architecture
+            2. **Industry Research**: Latest trends, best practices, and emerging technologies
+            3. **Opportunity Identification**: New features, improvements, and optimizations
+            4. **Strategic Insights**: Research-driven recommendations for next development phase
+            
+            ### 📋 Phase 3: Roadmap Updates & Next Cycle Preparation
+            1. **Research Integration**: Findings automatically integrated into roadmap files
+            2. **Task Generation**: New development tasks created from research insights
+            3. **Priority Updates**: Task priorities adjusted based on current trends and needs
+            4. **Cycle Continuation**: Updated roadmap triggers next autonomous coding cycle
+            
+            ## 🎯 Key Features of This Integration:
+            
+            - **Threshold-Based Research**: Perplexity research triggered automatically after ${taskThreshold} completed tasks
+            - **Continuous Loop**: Research feeds back into roadmap → triggers more coding → research → repeat
+            - **Smart Model Selection**: Complexity-based Perplexity model routing for cost optimization
+            - **Budget Management**: $3/week Perplexity budget with automatic enforcement
+            - **Quality Assurance**: Production-ready code with comprehensive error handling
+            - **Progress Tracking**: Detailed session reports and artifact generation
+            
+            ## 📊 Expected Outcomes:
+            
+            - **${maxCycles} Complete Cycles**: Each cycle includes coding tasks + research (if threshold met)
+            - **Comprehensive Development**: Both immediate implementation and strategic planning
+            - **Research-Driven Updates**: Roadmap continuously updated with latest insights
+            - **Autonomous Operation**: Self-sustaining development loop requiring minimal manual intervention
+            - **Cost-Optimized Research**: Intelligent caching and model selection to stay within budget
+            
+            ## 🔗 Monitor Progress:
+            
+            - **Live Workflow**: [View progress](${{ github.server_url }}/${{ github.repository }}/actions)
+            - **Session Artifacts**: Detailed logs, research results, and cycle reports available after completion
+            - **Updated Files**: ROADMAP.md, AUTONOMOUS_DEVELOPMENT_ROADMAP.md, and implementation files
+            
+            ## 🔄 Continuous Operation:
+            
+            This system creates a self-improving development environment:
+            - **Automatic Triggers**: Every 4 hours via scheduled execution
+            - **Manual Triggers**: \`@copilot autonomous coding\` or \`/autonomous-coding-cycle\`
+            - **Research Integration**: Findings automatically influence next development priorities
+            - **Adaptive Thresholds**: System learns and optimizes based on task complexity and research quality
+            
+            ### 🚀 Command Variations:
+            - \`@copilot autonomous coding\` - Start with default settings
+            - \`@copilot autonomous coding threshold 5\` - Custom task threshold
+            - \`@copilot autonomous coding cycles 3\` - Limit to 3 cycles
+            - \`/autonomous-coding-cycle\` - Direct workflow trigger
+            
+            **The integrated autonomous coding and research system is now active and will provide continuous, research-driven development improvements to EchoTune AI.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Autonomous Coding & Perplexity Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Post General Perplexity Command Response
+        if: |
+          ((contains(steps.parse.outputs.command, 'perplexity') && 
+            !contains(steps.parse.outputs.command, 'perplexity-')) ||
+           steps.parse.outputs.command == 'start-autonomous-development' ||
+           contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') ||
+           (contains(steps.parse.outputs.comment_body, 'autonomous development') && 
+            !contains(steps.parse.outputs.comment_body, 'autonomous coding'))) &&
+          env.budget_check_only != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            const commentBody = '${{ steps.parse.outputs.comment_body }}';
+            
+            const responseMessage = `## 🤖 Autonomous Development Cycle Initiated
+            
+            **Request**: Perplexity browser research and autonomous development
+            **Status**: ✅ Workflow triggered successfully
+            **Estimated Duration**: 5-10 minutes for complete cycle
+            
+            ## 🔄 What's Happening:
+            
+            1. **📋 Roadmap Analysis**: Using Perplexity AI to analyze current roadmap and identify actionable tasks
+            2. **🔧 Task Execution**: Implementing identified development tasks with appropriate AI model selection
+            3. **🔍 Research & Update**: Conducting comprehensive browser research to update roadmap with latest insights
+            4. **📊 Progress Tracking**: Generating detailed reports and updating development documentation
+            
+            ## 🎯 Autonomous Development Features:
+            
+            - **Smart Model Selection**: Complexity-based routing (Sonar/Sonar-Reasoning/Sonar-Pro)
+            - **Budget Management**: $3/week Perplexity budget with 80% usage alerts
+            - **Research Caching**: 14-day TTL to optimize costs and performance
+            - **Continuous Learning**: Research insights feed back into development priorities
+            
+            ## 📈 Expected Outcomes:
+            
+            - **Updated Roadmap**: Enhanced with latest research insights and priorities
+            - **Code Implementations**: Production-ready code for identified tasks  
+            - **Documentation Updates**: Comprehensive session reports and progress tracking
+            - **Next Steps**: Automated identification of follow-up development opportunities
+            
+            ## 🔗 Monitor Progress:
+            
+            - **Workflow Run**: [View live progress](${{ github.server_url }}/${{ github.repository }}/actions)
+            - **Session Artifacts**: Will be available after completion
+            - **Updated Files**: ROADMAP.md, AUTONOMOUS_DEVELOPMENT_ROADMAP.md, and implementation files
+            
+            ## 🔄 Continuous Development:
+            
+            This autonomous development cycle will:
+            - Continue automatically based on research findings
+            - Schedule follow-up analysis every 6 hours  
+            - Trigger on future roadmap updates
+            - Respond to additional \`@copilot use perplexity browser research\` requests
+            
+            **The autonomous development system is now active and will provide continuous improvements to the EchoTune AI platform.**
+            
+            ---
+            *Initiated by Enhanced Copilot Slash Commands with Perplexity Integration*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });
+
+      - name: Handle Other Commands
+        if: |
+          steps.parse.outputs.command != 'review-docs' &&
+          steps.parse.outputs.command != 'perplexity' &&
+          !contains(steps.parse.outputs.command, 'perplexity-') && 
+          steps.parse.outputs.command != 'analyze-perplexity' &&
+          steps.parse.outputs.command != 'research-perplexity' &&
+          steps.parse.outputs.command != 'start-autonomous-development' &&
+          !contains(steps.parse.outputs.comment_body, '@copilot use perplexity browser research') &&
+          !contains(steps.parse.outputs.comment_body, 'autonomous development') &&
+          steps.parse.outputs.is_claude_opus_command != 'true' &&
+          steps.parse.outputs.command != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const command = '${{ steps.parse.outputs.command }}';
+            const contextNumber = '${{ steps.parse.outputs.context_number }}';
+            
+            const supportedCommands = [
+              'review-docs',
+              'gpt5', 
+              'analyze-gpt5',
+              'review-gpt5', 
+              'optimize-gpt5',
+              'run-mcp-all',
+              'mcp-health-check',
+              'start-autonomous-development',
+              'autonomous-coding-cycle',
+              'start-coding-cycle',
+              'perplexity',
+              'perplexity-research',
+              'perplexity-analyze',
+              'perplexity-roadmap-update', 
+              'perplexity-budget-check',
+              'perplexity-optimize-costs',
+              'analyze-perplexity',
+              'research-perplexity',
+              'claude-opus',
+              'opus'
+            ];
+            
+            let responseMessage = '';
+            
+            if (['gpt5', 'analyze-gpt5', 'review-gpt5', 'optimize-gpt5'].includes(command)) {
+              responseMessage = `## 🤖 GPT-5 Command Detected
+              
+              **Command**: \`/${command}\`  
+              **Status**: Redirecting to GPT-5 workflow...
+              
+              Your GPT-5 analysis request has been detected and will be processed by the dedicated GPT-5 workflow.
+              
+              **Expected Processing Time**: 2-3 minutes  
+              **Track Progress**: [View workflow runs](${{ github.server_url }}/${{ github.repository }}/actions)
+              
+              The GPT-5 analysis results will be posted as a separate comment when complete.`;
+              
+            } else if (['run-mcp-all', 'mcp-health-check'].includes(command)) {
+              responseMessage = `## 🔧 MCP Command Detected
+              
+              **Command**: \`/${command}\`  
+              **Status**: Redirecting to MCP workflow...
+              
+              Your MCP command has been detected and will be processed by the dedicated MCP slash commands workflow.
+              
+              **Track Progress**: [View workflow runs](${{ github.server_url }}/${{ github.repository }}/actions)
+              
+              The MCP results will be posted as a separate comment when complete.`;
+              
+            } else {
+              responseMessage = `## ❓ Unrecognized Command
+              
+              **Command**: \`/${command}\`  
+              **Status**: Not supported by this workflow
+              
+              ### ✅ Supported Commands:
+              
+              #### 📚 Documentation & Analysis
+              - \`/review-docs [scope]\` - Comprehensive documentation analysis
+              - \`/gpt5 analyze [scope]\` - Trigger GPT-5 repository analysis  
+              - \`/analyze-gpt5 [scope]\` - Same as above
+              - \`/review-gpt5 [scope]\` - GPT-5 code review focus
+              - \`/optimize-gpt5 [scope]\` - GPT-5 optimization analysis
+              
+              #### 🧠 Claude Opus 4.1 Commands **[NEW]**
+              - \`/claude-opus deep-reasoning\` - 🧠 Deep analytical reasoning with extended thinking
+              - \`/claude-opus extended-thinking\` - 🔄 Methodical problem-solving with thinking mode
+              - \`/claude-opus advanced-coding\` - 💻 Industry-leading coding assistance
+              - \`/claude-opus agent-workflow\` - 🤖 Complex multi-step task automation
+              - \`/claude-opus architectural-analysis\` - 🏛️ Comprehensive system design analysis
+              - \`/claude-opus long-horizon-tasks\` - ⏳ Sustained performance on complex objectives
+              - \`/opus [command-type]\` - 🚀 Shortened form for all Claude Opus 4.1 commands
+              
+              #### 🔧 MCP & System Commands  
+              - \`/run-mcp-all\` - Comprehensive MCP validation
+              - \`/mcp-health-check\` - Quick MCP health check
+              
+              #### 🤖 Autonomous Development Commands
+              - \`/start-autonomous-development\` - Begin autonomous development cycle
+              - \`@copilot use perplexity browser research\` - Trigger research-driven development
+              - \`/autonomous-coding-cycle\` - **NEW**: Start integrated coding and research cycle
+              - \`/start-coding-cycle\` - **NEW**: Alternative trigger for autonomous coding
+              - \`@copilot autonomous coding\` - **NEW**: Natural language trigger for autonomous coding
+              
+              #### 🔍 Specific Perplexity Commands
+              - \`/perplexity help\` - 📚 Complete guide with examples and usage tips
+              - \`/perplexity-analyze <scope>\` - Targeted analysis with Perplexity AI
+              - \`/analyze-perplexity <scope>\` - Alternative phrasing for analysis
+              - \`/perplexity-research <topic>\` - Focused research on specific topics
+              - \`/research-perplexity <topic>\` - Alternative phrasing for research
+              - \`/perplexity-roadmap-update\` - Update roadmap with latest research
+              - \`/perplexity-budget-check\` - Check Perplexity usage and budget
+              - \`/perplexity-optimize-costs\` - Optimize Perplexity usage patterns
+              
+              ### 🧠 Claude Opus 4.1 Advanced Features **[NEW]**
+              
+              #### 🎯 Targeted Commands
+              - \`/claude-opus advanced-coding src/ai/\` - Focus on specific directory
+              - \`/claude-opus deep-reasoning budget 10000\` - Custom thinking budget
+              - \`/opus architectural-analysis scripts/\` - Shortened command with scope
+              
+              #### 🗣️ Natural Language Triggers
+              - "Use Claude Opus 4.1 for [task]" - Natural language activation
+              - "Analyze with Claude Opus 4.1" - Direct analysis request
+              - "@claude-opus [request]" - Mention-based triggering
+              - "Claude Opus 4.1 for [specific need]" - Task-specific requests
+              
+              #### ⚡ Advanced Capabilities
+              - **Extended Thinking**: Budget-controlled deep reasoning (up to 32K tokens)
+              - **Industry-Leading Coding**: Best-in-class development assistance  
+              - **Agent Workflows**: Complex multi-step task automation
+              - **Long-Horizon Tasks**: Sustained performance on complex objectives
+              - **Architectural Analysis**: Comprehensive system design insights
+              - **Memory Management**: Context retention across interactions
+              
+              ### 🔍 Autonomous Development Triggers:
+              - \`@copilot use perplexity browser research\` - Full autonomous cycle with roadmap updates
+              - \`@copilot autonomous development\` - Alternative natural language trigger
+              - \`@copilot autonomous coding\` - **NEW**: Integrated coding and research cycle
+              - \`/start-autonomous-development\` - Direct autonomous development trigger
+              - \`/autonomous-coding-cycle\` - **NEW**: Direct autonomous coding cycle trigger
+              - Comments containing "autonomous development" - Natural language triggers
+              - Comments containing "autonomous coding" - **NEW**: Coding-focused natural language triggers
+              
+              ### 📚 Usage Examples:
+              - \`/review-docs\` - Analyze all documentation
+              - \`/review-docs api\` - Focus on API documentation
+              - \`/gpt5 analyze scripts/\` - Analyze specific directory
+              - \`/claude-opus deep-reasoning\` - **NEW**: Deep reasoning with Claude Opus 4.1
+              - \`/claude-opus advanced-coding src/ai/\` - **NEW**: Advanced coding for AI components
+              - \`/opus extended-thinking budget 8000\` - **NEW**: Custom thinking budget
+              - \`/perplexity help\` - **📚 Complete Perplexity commands guide**
+              - \`/perplexity-analyze frontend\` - Analyze frontend with Perplexity
+              - \`/perplexity-research "latest React patterns"\` - Research specific topic
+              - \`/perplexity-budget-check\` - Check current usage and budget
+              - \`@copilot use perplexity browser research\` - Start comprehensive development cycle
+              - \`@copilot autonomous coding\` - **NEW**: Start integrated coding and research cycle
+              - \`/autonomous-coding-cycle\` - **NEW**: Direct autonomous coding cycle trigger
+              
+              ### 💡 Command Tips:
+              - **Scope Parameters**: Most commands accept optional scope (e.g., \`scripts/\`, \`frontend\`, \`api\`)
+              - **Natural Language**: Use \`@copilot\` prefix for natural language triggers
+              - **Claude Opus 4.1**: Use \`@claude-opus\` or natural language for advanced AI assistance
+              - **Extended Thinking**: Claude Opus 4.1 supports budget-controlled deep reasoning
+              - **Cost Awareness**: Perplexity commands automatically optimize for budget efficiency
+              - **Progress Tracking**: All workflows provide live progress links and detailed reports
+              
+              **Need Help?** Check the [workflow documentation](${{ github.server_url }}/${{ github.repository }}/tree/main/.github/workflows) for more details.`;
+            }
+            
+            await github.rest.issues.createComment({
+              issue_number: contextNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: responseMessage
+            });

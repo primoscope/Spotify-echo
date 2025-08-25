@@ -1,0 +1,444 @@
+# Music Discovery Automation for EchoTune AI
+
+## 🎵 Repository Context & Technical Stack
+
+**EchoTune AI Architecture:**
+- **Backend:** Node.js, Express.js, Socket.io
+- **Frontend:** React, Material-UI  
+- **Database:** MongoDB (primary), SQLite (fallback)
+- **AI Integration:** Multi-provider LLM support (OpenAI GPT-4o, Google Gemini 2.0, Claude 3.5)
+- **Music APIs:** Spotify Web API with OAuth integration
+- **Infrastructure:** Docker, nginx, automated deployment
+
+**Key Integration Points:**
+- Multi-provider LLM integration in `/src/chat/llm-providers/`
+- Spotify API services in `/src/spotify/`
+- ML recommendation engine in `/src/ml/`
+- React components in `/src/frontend/components/`
+- MongoDB analytics in `/src/api/routes/`
+
+## 🤖 Music-Specific Development Rules
+
+### Context Awareness Rules
+```javascript
+// Always consider when working on music features:
+CONTEXT_REQUIREMENTS = {
+  multiLLMArchitecture: 'Maintain compatibility with OpenAI, Gemini, Claude providers',
+  spotifyOAuth: 'Preserve existing OAuth flow and token management',
+  analyticsSystem: 'Maintain analytics dashboard functionality',
+  errorHandling: 'Follow established patterns in chatbot.js',
+  musicAPIs: 'Consider Spotify API rate limits and best practices'
+};
+```
+
+### Code Generation Standards
+- **Audio Analysis:** Always include proper error handling for audio feature extraction
+- **Playlist Operations:** Implement proper OAuth scope validation for Spotify operations
+- **Recommendation Logic:** Maintain both collaborative and content-based filtering approaches
+- **Real-time Features:** Use Socket.io patterns for live music discovery updates
+- **User Privacy:** Implement proper data handling for music preferences and listening history
+
+### Music Discovery Algorithm Patterns
+```javascript
+// Standard pattern for music recommendation integration
+class MusicRecommendationService {
+  async generateRecommendations(userId, context = {}) {
+    try {
+      // 1. Get user preferences from analytics
+      const userProfile = await this.getUserMusicProfile(userId);
+      
+      // 2. Apply collaborative filtering
+      const collaborativeResults = await this.collaborativeFilter(userProfile);
+      
+      // 3. Apply content-based filtering
+      const contentResults = await this.contentBasedFilter(userProfile, context);
+      
+      // 4. Merge and rank results
+      const recommendations = await this.mergeAndRank(collaborativeResults, contentResults);
+      
+      // 5. Track recommendation for analytics
+      await this.trackRecommendation(userId, recommendations, context);
+      
+      return recommendations;
+    } catch (error) {
+      logger.error('Music recommendation error:', error);
+      throw new MusicRecommendationError(error.message);
+    }
+  }
+}
+```
+
+## 🔍 Perplexity Music Research Integration
+
+### Research Query Patterns
+```javascript
+// Music research automation patterns
+const MUSIC_RESEARCH_QUERIES = {
+  trends: 'What are the latest {genre} music trends in {year}?',
+  artists: 'Research artists similar to {artist} with recent releases',
+  genres: 'Analyze emerging subgenres in {mainGenre} music',
+  industry: 'Latest developments in music streaming and discovery technology',
+  algorithms: 'Current best practices for music recommendation algorithms'
+};
+
+// Perplexity integration for music discovery
+async function researchMusicTrends(genre, timeframe = '2025') {
+  const query = `Latest ${genre} music trends and emerging artists in ${timeframe}, include streaming data and industry insights`;
+  
+  const research = await perplexityClient.search(query, {
+    model: 'llama-3.1-sonar-huge-128k-online',
+    return_citations: true,
+    search_domain_filter: ['spotify.com', 'musicindustryresearch.com', 'billboard.com']
+  });
+  
+  return {
+    trends: research.content,
+    sources: research.citations,
+    timestamp: new Date().toISOString(),
+    genre: genre
+  };
+}
+```
+
+### Music Research Automation Triggers
+- **New User Onboarding:** Research personalized genre recommendations
+- **Algorithm Updates:** Weekly research on recommendation improvements
+- **Trend Analysis:** Daily monitoring of emerging music trends
+- **Competitive Analysis:** Monthly research on music platform features
+- **User Feedback Analysis:** Research solutions for common user requests
+
+## 🎯 Spotify API Integration Standards
+
+### OAuth Flow Patterns
+```javascript
+// Standard Spotify OAuth integration
+class SpotifyOAuthService {
+  constructor() {
+    this.scopes = [
+      'user-read-private',
+      'user-read-email', 
+      'playlist-read-private',
+      'playlist-modify-public',
+      'playlist-modify-private',
+      'user-library-read',
+      'user-library-modify',
+      'user-top-read',
+      'user-read-recently-played'
+    ];
+  }
+
+  async refreshTokenIfNeeded(user) {
+    if (this.isTokenExpired(user.spotify.expires_at)) {
+      return await this.refreshAccessToken(user.spotify.refresh_token);
+    }
+    return user.spotify.access_token;
+  }
+}
+```
+
+### Audio Feature Analysis
+```javascript
+// Comprehensive audio analysis for recommendations
+async function analyzeTrackFeatures(trackId, spotifyToken) {
+  try {
+    const [features, analysis] = await Promise.all([
+      spotify.getAudioFeatures(trackId),
+      spotify.getAudioAnalysis(trackId)
+    ]);
+    
+    return {
+      danceability: features.danceability,
+      energy: features.energy,
+      valence: features.valence,
+      tempo: features.tempo,
+      acousticness: features.acousticness,
+      instrumentalness: features.instrumentalness,
+      liveness: features.liveness,
+      speechiness: features.speechiness,
+      // Advanced analysis
+      timeSignature: features.time_signature,
+      key: features.key,
+      mode: features.mode,
+      // Temporal features from analysis
+      sections: analysis.sections.length,
+      segments: analysis.segments.length
+    };
+  } catch (error) {
+    logger.warn(`Audio analysis failed for track ${trackId}:`, error);
+    return null;
+  }
+}
+```
+
+## 🤖 AI-Powered Music Discovery Patterns
+
+### Multi-LLM Orchestration for Music
+```javascript
+// Route music queries to optimal AI provider
+function routeMusicQuery(queryType, content) {
+  const routing = {
+    'playlist-generation': 'claude-3.5-sonnet', // Creative tasks
+    'music-analysis': 'gpt-4o', // Technical analysis
+    'trend-research': 'perplexity-sonar', // Real-time research
+    'user-conversation': 'gemini-2.0', // Natural conversation
+    'recommendation-explanation': 'claude-3.5-sonnet' // Clear explanations
+  };
+  
+  return routing[queryType] || 'gpt-4o'; // Default fallback
+}
+```
+
+### Conversational Music Discovery
+```javascript
+// Enhanced chat interface for music discovery
+class MusicChatService {
+  async processUserMessage(message, userId, context) {
+    // 1. Classify user intent
+    const intent = await this.classifyMusicIntent(message);
+    
+    // 2. Route to appropriate AI provider
+    const provider = this.selectProviderForIntent(intent);
+    
+    // 3. Enhance with user music context
+    const musicContext = await this.getUserMusicContext(userId);
+    
+    // 4. Generate response with music recommendations
+    const response = await provider.generateResponse(message, {
+      ...context,
+      musicProfile: musicContext,
+      spotifyData: await this.getRecentSpotifyActivity(userId)
+    });
+    
+    // 5. Extract actionable music recommendations
+    const recommendations = await this.extractMusicRecommendations(response);
+    
+    return {
+      text: response,
+      recommendations: recommendations,
+      intent: intent,
+      provider: provider.name
+    };
+  }
+}
+```
+
+## 📊 Analytics Integration for Music Discovery
+
+### Music Analytics Tracking
+```javascript
+// Comprehensive music analytics
+const MUSIC_EVENTS = {
+  'recommendation_generated': {
+    user_id: String,
+    algorithm_type: String,
+    recommendations: Array,
+    context: Object,
+    timestamp: Date
+  },
+  'recommendation_accepted': {
+    user_id: String,
+    track_id: String,
+    recommendation_id: String,
+    action: String, // 'played', 'saved', 'added_to_playlist'
+    timestamp: Date
+  },
+  'music_research_performed': {
+    query: String,
+    provider: String,
+    results_count: Number,
+    user_context: Object,
+    timestamp: Date
+  }
+};
+
+// Track music discovery effectiveness
+async function trackMusicDiscoveryEvent(eventType, data) {
+  const event = {
+    type: eventType,
+    data: data,
+    timestamp: new Date(),
+    session_id: data.session_id
+  };
+  
+  // Store in MongoDB for analytics
+  await db.collection('music_analytics').insertOne(event);
+  
+  // Real-time analytics via Socket.io
+  io.emit('music_analytics_update', {
+    event_type: eventType,
+    summary: await generateEventSummary(event)
+  });
+}
+```
+
+## 🚀 GitHub Actions Integration
+
+### Music Research Automation Workflow
+```yaml
+# .github/workflows/music-research.yml
+name: Weekly Music Research
+on:
+  schedule:
+    - cron: '0 9 * * MON' # Every Monday at 9 AM
+  workflow_dispatch:
+
+jobs:
+  music_research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Research Music Trends
+        run: |
+          node scripts/research-music-trends.js
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PPLX_API_KEY }}
+      - name: Update Recommendation Data
+        run: |
+          node scripts/update-recommendation-data.js
+      - name: Create Research Report
+        run: |
+          node scripts/generate-music-report.js
+```
+
+### AI Code Review for Music Features
+```yaml
+# .github/workflows/music-code-review.yml
+name: AI Music Code Review
+on:
+  pull_request:
+    paths:
+      - 'src/chat/**'
+      - 'src/spotify/**'
+      - 'src/ml/**'
+
+jobs:
+  ai_review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AI Code Analysis
+        run: |
+          node scripts/ai-music-code-review.js
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_KEY }}
+          PR_NUMBER: ${{ github.event.number }}
+```
+
+## 🎼 Music Discovery Validation Framework
+
+### Algorithm Performance Testing
+```javascript
+// A/B testing for music recommendations
+class MusicRecommendationTester {
+  async runABTest(testName, userSegments) {
+    const results = {};
+    
+    for (const segment of userSegments) {
+      // Generate recommendations with different algorithms
+      const variantA = await this.generateRecommendations(segment.users, 'collaborative');
+      const variantB = await this.generateRecommendations(segment.users, 'hybrid');
+      
+      // Track user engagement
+      const engagementA = await this.trackEngagement(variantA, '24h');
+      const engagementB = await this.trackEngagement(variantB, '24h');
+      
+      results[segment.name] = {
+        variant_a: { recommendations: variantA, engagement: engagementA },
+        variant_b: { recommendations: variantB, engagement: engagementB }
+      };
+    }
+    
+    return this.analyzeABTestResults(results);
+  }
+}
+```
+
+### Real-time Quality Monitoring
+```javascript
+// Monitor recommendation quality in real-time
+class MusicQualityMonitor {
+  async monitorRecommendationQuality() {
+    const metrics = await this.collectQualityMetrics();
+    
+    // Check for quality degradation
+    if (metrics.userSatisfaction < 0.7) {
+      await this.alertQualityIssue('Low user satisfaction detected');
+    }
+    
+    if (metrics.diversityScore < 0.5) {
+      await this.alertQualityIssue('Low recommendation diversity');
+    }
+    
+    // Auto-adjust parameters if needed
+    if (metrics.clickThroughRate < 0.2) {
+      await this.adjustRecommendationParameters();
+    }
+  }
+}
+```
+
+## 🎯 Development Workflow Integration
+
+### Pre-commit Hooks for Music Features
+```bash
+#!/bin/sh
+# .git/hooks/pre-commit
+
+# Test music recommendation algorithms
+npm run test:music-algorithms
+
+# Validate Spotify API integration
+npm run test:spotify-integration
+
+# Check audio analysis accuracy
+npm run test:audio-features
+
+# Lint music-specific code
+npm run lint:music-features
+```
+
+### Automated Documentation for Music APIs
+```javascript
+// Auto-generate music API documentation
+async function generateMusicAPIDoc() {
+  const endpoints = await scanMusicEndpoints();
+  const spotifyMethods = await scanSpotifyMethods();
+  
+  const documentation = {
+    endpoints: endpoints.map(ep => ({
+      path: ep.path,
+      method: ep.method,
+      description: ep.description,
+      musicContext: ep.musicFeatures
+    })),
+    spotifyIntegration: spotifyMethods,
+    recommendationAlgorithms: await documentAlgorithms()
+  };
+  
+  await generateMarkdownDoc(documentation, 'docs/MUSIC_API.md');
+}
+```
+
+## 🎵 Success Metrics for Music Discovery
+
+### Key Performance Indicators
+- **User Engagement:** Play rate, save rate, playlist additions
+- **Discovery Effectiveness:** New artist/genre adoption rate
+- **Recommendation Accuracy:** User rating and feedback scores
+- **System Performance:** API response times, error rates
+- **Research Quality:** Trend prediction accuracy, insight relevance
+
+### Automated Reporting
+```javascript
+// Daily music discovery metrics
+async function generateMusicMetricsReport() {
+  const metrics = {
+    recommendations: await getRecommendationMetrics(),
+    userEngagement: await getUserEngagementMetrics(),
+    spotifyAPI: await getSpotifyAPIMetrics(),
+    aiProviders: await getAIProviderMetrics(),
+    researchQuality: await getResearchMetrics()
+  };
+  
+  await publishMetricsReport(metrics);
+}
+```

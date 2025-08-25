@@ -1,0 +1,27 @@
+---
+name: Gemini Code Review (Non-Copilot PRs)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+jobs:
+  code_review:
+    runs-on: ubuntu-latest
+    # Only run for non-Copilot PRs to avoid conflicts
+    if: |
+      github.event.pull_request.user.login != 'Copilot' &&
+      !contains(github.event.pull_request.head.ref, 'copilot/') &&
+      !contains(github.event.pull_request.labels.*.name, 'copilot-coding-agent')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gemini AI Code Reviewer
+        uses: truongnh1992/gemini-ai-code-reviewer@v6.5.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-flash-lite
+          INPUT_EXCLUDE: "node_modules,dist,build,coverage,*.min.js,package-lock.json,.env"

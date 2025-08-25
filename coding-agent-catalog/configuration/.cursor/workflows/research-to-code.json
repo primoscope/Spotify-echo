@@ -1,0 +1,42 @@
+{
+  "name": "Research-to-Code Workflow",
+  "description": "Complete workflow from research to implementation",
+  "steps": [
+    {
+      "action": "research",
+      "tool": "perplexity",
+      "prompt": "Research latest developments in {topic} with focus on production implementation",
+      "timeout": "30s"
+    },
+    {
+      "action": "analyze",
+      "tool": "memory",
+      "prompt": "Analyze research findings and create implementation plan",
+      "timeout": "15s"
+    },
+    {
+      "action": "implement",
+      "tool": "filesystem",
+      "prompt": "Implement solution following architecture rules and performance budgets",
+      "timeout": "300s"
+    },
+    {
+      "action": "test",
+      "tool": "testing",
+      "prompt": "Generate and run comprehensive tests for implementation",
+      "timeout": "60s"
+    },
+    {
+      "action": "validate",
+      "tool": "analytics",
+      "prompt": "Validate performance against budgets and generate metrics report",
+      "timeout": "30s"
+    }
+  ],
+  "acceptanceCriteria": [
+    "Research citations included in documentation",
+    "Performance budgets maintained",
+    "Tests achieve >80% coverage",
+    "No new security vulnerabilities"
+  ]
+}

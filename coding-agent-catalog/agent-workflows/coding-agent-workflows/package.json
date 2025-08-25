@@ -1,0 +1,57 @@
+{
+  "name": "echotune-ai-orchestrator",
+  "version": "1.0.0",
+  "description": "Autonomous Music App Orchestration System with Perplexity Research and Browser Automation",
+  "main": "launch-orchestrator.js",
+  "scripts": {
+    "start": "node launch-orchestrator.js launch",
+    "single": "node launch-orchestrator.js single",
+    "status": "node launch-orchestrator.js status",
+    "stop": "node launch-orchestrator.js stop",
+    "orchestrator": "node autonomous-music-orchestrator.js",
+    "research": "node music-perplexity-research.js",
+    "browser": "node music-browser-automation.js",
+    "cursor": "node cursor-agent-integration.js",
+    "cursor-browser": "node cursor-browser-research.js",
+    "performance": "node performance-optimizer.js",
+    "high-speed": "node high-speed-executor.js",
+    "speed-config": "node speed-config-optimizer.js",
+    "backend": "node autonomous-backend-agent.js",
+    "frontend": "node autonomous-frontend-agent.js",
+    "integration": "node comprehensive-integration-orchestrator.js",
+    "comprehensive": "node comprehensive-integration-orchestrator.js",
+    "test": "node -e \"console.log('Testing orchestrator components...'); require('./autonomous-music-orchestrator.js'); require('./music-perplexity-research.js'); require('./music-browser-automation.js'); require('./cursor-agent-integration.js'); require('./cursor-browser-research.js'); require('./performance-optimizer.js'); require('./high-speed-executor.js'); require('./speed-config-optimizer.js'); require('./autonomous-backend-agent.js'); require('./autonomous-frontend-agent.js'); require('./comprehensive-integration-orchestrator.js'); console.log('✅ All components loaded successfully');\"",
+    "validate": "node -e \"const fs = require('fs'); const files = ['autonomous-music-orchestrator.js', 'music-perplexity-research.js', 'music-browser-automation.js', 'cursor-agent-integration.js', 'cursor-browser-research.js', 'performance-optimizer.js', 'high-speed-executor.js', 'speed-config-optimizer.js', 'autonomous-backend-agent.js', 'autonomous-frontend-agent.js', 'comprehensive-integration-orchestrator.js', 'launch-orchestrator.js']; files.forEach(f => { if (fs.existsSync(f)) console.log('✅ ' + f); else console.log('❌ ' + f); });\"",
+    "setup": "mkdir -p ../enhanced-perplexity-results ../test-results ../testing_screenshots ../enhanced-perplexity-results/cursor-agents",
+    "clean": "rm -rf ../enhanced-perplexity-results/* ../test-results/* ../testing_screenshots/*",
+    "monitor": "node -e \"setInterval(() => { const fs = require('fs'); try { const status = JSON.parse(fs.readFileSync('../test-results/orchestration-report-latest.json', 'utf8')); console.log('📊 Status:', status); } catch(e) { console.log('⏳ Waiting for status...'); } }, 30000);\"",
+    "demo": "node -e \"console.log('🎵 EchoTune AI Autonomous Orchestrator Demo'); console.log('=' .repeat(50)); console.log('Available commands:'); console.log('  npm start     - Launch continuous orchestration'); console.log('  npm run single - Run single orchestration cycle'); console.log('  npm run status - Show orchestrator status'); console.log('  npm run cursor - Cursor agent integration'); console.log('  npm run cursor-browser - Cursor browser research'); console.log('  npm run performance - Performance optimization'); console.log('  npm run high-speed - High-speed workflow execution'); console.log('  npm run speed-config - Speed configuration optimization'); console.log('  npm run backend - Backend autonomous agent'); console.log('  npm run frontend - Frontend autonomous agent'); console.log('  npm run integration - Comprehensive integration'); console.log('  npm run comprehensive - Full comprehensive development'); console.log('  npm run test   - Validate all components'); console.log('  npm run setup  - Create required directories'); console.log('  npm run monitor - Monitor orchestrator status');\""
+  },
+  "keywords": [
+    "music",
+    "ai",
+    "orchestrator",
+    "perplexity",
+    "browser-automation",
+    "research",
+    "continuous-improvement",
+    "echotune"
+  ],
+  "author": "EchoTune AI Development Team",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/echotune-ai.git",
+    "directory": "coding-agent-workflows"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/echotune-ai/issues"
+  },
+  "homepage": "https://github.com/your-username/echotune-ai#readme"
+}

@@ -1,0 +1,34 @@
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.eslintcache
+.cache/
+*.log
+*.tmp
+*.bak
+*.min.*
+
+# Test outputs and reports
+test-results/
+reports/
+perplexity-test-results/
+enhanced-perplexity-results/
+validation-reports/
+search-results/
+
+# Screenshots and media
+testing_screenshots/
+
+# Large derived files
+full-architect-layout.txt
+package-lock.json
+
+# Datasets and binaries
+ml_datasets/
+*.bin
+*.dat
+
+# Generated docs
+docs/generated/

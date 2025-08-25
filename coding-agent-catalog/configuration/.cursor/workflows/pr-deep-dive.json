@@ -1,0 +1,30 @@
+{
+	"$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+	"name": "PR Deep Dive Review",
+	"description": "Scan repo context, research best practices, and generate actionable PR review recommendations",
+	"steps": [
+		{
+			"tool": "echotune-filesystem",
+			"action": "scan",
+			"args": {
+				"paths": ["./src", "./scripts"],
+				"maxFiles": 150
+			}
+		},
+		{
+			"tool": "brave-search",
+			"action": "search",
+			"args": {
+				"query": "best practices for pull request code reviews in Node.js and React 2025",
+				"count": 5
+			}
+		},
+		{
+			"tool": "echotune-perplexity",
+			"action": "research",
+			"args": {
+				"prompt": "Analyze the scanned repository context and the web findings to produce a PR deep-dive review with prioritized issues, risks, and concrete recommendations. Include short inline citations where applicable."
+			}
+		}
+	]
+}

@@ -1,0 +1,189 @@
+# 🎵 EchoTune AI - GitHub Coding Agent Rules (2025-08-24)
+
+## Project Context
+EchoTune AI - Advanced music recommendation platform with autonomous coding agent integration
+- Tech Stack: Node.js + React + MongoDB + Redis + Python ML + Perplexity API
+- Status: 26% complete, 38 tasks in roadmap, automation-ready
+- Focus: Autonomous coding cycles with repository analysis and roadmap updates
+
+## Automation Workflow
+1. **Coding Agent**: Complete tasks from roadmap using established patterns
+2. **Perplexity Research**: Analyze repository + roadmap with sonar-pro model
+3. **Roadmap Updates**: Generate new tasks based on analysis findings
+4. **Continuous Cycle**: Repeat for autonomous development
+
+## Coding Standards
+- **JavaScript**: ES2024+, async/await only, comprehensive error handling
+- **React**: React 19 + Vite, component-based architecture, performance optimized
+- **Node.js**: Express.js, modular architecture, middleware patterns
+- **Database**: MongoDB aggregation pipelines, proper indexing, Redis caching
+- **AI Integration**: Real API calls only - NO MOCK implementations
+- **Testing**: Jest + React Testing Library, >80% coverage for business logic
+
+## File Priorities (Always include in context)
+1. GitHubCodingAgentPerplexity.js - Main automation integration
+2. AUTONOMOUS_DEVELOPMENT_ROADMAP.md - Current roadmap
+3. package.json - Dependencies and scripts
+4. server.js - Main backend server
+5. src/frontend/App.jsx - Main React component
+6. .env - Environment configuration
+
+## Security Requirements
+- Input validation for all user data
+- Rate limiting on API endpoints
+- HTTPS only in production
+- OAuth best practices
+- No hardcoded secrets (use env vars)
+
+## Performance Targets
+- API responses: <500ms for simple, <2s for complex
+- Database queries: <100ms simple, <1s complex
+- Frontend: First Contentful Paint <1.5s
+- Perplexity API: <30s for full repository analysis
+
+## Automation Commands
+Use these commands to trigger automation workflows:
+- `node GitHubCodingAgentPerplexity.js` - Test integration
+- `node test-full-automation-workflow.js` - Complete workflow test
+- Repository analysis: Uses sonar-pro model for comprehensive insights
+- Roadmap generation: Creates actionable tasks with effort estimates
+
+## Current Priority Tasks (From Latest Analysis)
+1. [P0] Integrate LangGraph for Multi-Agent Orchestration (Large, High Automation)
+2. [P0] AI-Driven DevOps Automation (Medium, High Automation) 
+3. [P1] Implement Explainable AI & Ethical Compliance (Large, Medium Automation)
+4. [P1] Edge Computing & Federated Learning Integration (Large, High Automation)
+5. [P1] Advanced Monitoring & Self-Healing Systems (Medium, High Automation)
+
+## Code Patterns
+**API Integration Pattern:**
+```javascript
+async function makeAPICall(endpoint, options = {}) {
+    try {
+        const response = await fetch(endpoint, {
+            ...options,
+            headers: { 
+                'Authorization': `Bearer ${process.env.API_KEY}`,
+                ...options.headers 
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
+```
+
+**React Component Pattern:**
+```jsx
+import React, { useState, useEffect } from 'react';
+
+function Component({ prop1, prop2 }) {
+    const [state, setState] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true);
+                const data = await apiCall();
+                setState(data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        fetchData();
+    }, [prop1, prop2]);
+    
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
+    
+    return (
+        <div className="component">
+            {/* Component content */}
+        </div>
+    );
+}
+
+export default Component;
+```
+
+## Database Query Pattern
+```javascript
+// MongoDB with proper error handling and indexing
+async function queryDatabase(collection, filter, options = {}) {
+    try {
+        const db = await connectToDatabase();
+        const result = await db.collection(collection)
+            .find(filter)
+            .sort(options.sort || { createdAt: -1 })
+            .limit(options.limit || 50)
+            .toArray();
+            
+        return result;
+    } catch (error) {
+        console.error('Database query failed:', error);
+        throw new Error('Database operation failed');
+    }
+}
+```
+
+## Testing Pattern
+```javascript
+// Jest test with proper setup and mocking
+describe('Feature', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+    
+    it('should handle success case', async () => {
+        // Arrange
+        const mockData = { id: 1, name: 'test' };
+        jest.spyOn(api, 'getData').mockResolvedValue(mockData);
+        
+        // Act
+        const result = await feature.process();
+        
+        // Assert
+        expect(result).toEqual(mockData);
+        expect(api.getData).toHaveBeenCalledWith(expect.any(Object));
+    });
+    
+    it('should handle error case', async () => {
+        // Arrange
+        jest.spyOn(api, 'getData').mockRejectedValue(new Error('API Error'));
+        
+        // Act & Assert
+        await expect(feature.process()).rejects.toThrow('API Error');
+    });
+});
+```
+
+## When Creating New Features
+1. Follow established patterns from existing codebase
+2. Include comprehensive error handling
+3. Add proper logging with console.log/error
+4. Create tests for business logic
+5. Update documentation if needed
+6. Use TypeScript-style JSDoc comments
+7. Consider performance implications
+8. Implement proper validation
+
+## Current Architecture Insights (From Perplexity Analysis)
+- Modern microservices with MCP integration
+- Strong API foundation with room for optimization
+- Automation opportunities in ML workflows and API monitoring
+- Need for enhanced caching, security auditing, and CI/CD
+- Ready for agent-driven development acceleration
+
+Remember: Focus on production-ready, scalable code that follows existing patterns and maintains high quality standards.

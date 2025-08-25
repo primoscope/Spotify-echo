@@ -1,0 +1,24 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/cursor-workflow.json",
+  "name": "Error Auto-Research",
+  "description": "On failure, capture errors and research fixes via Perplexity + Brave",
+  "steps": [
+    {
+      "tool": "echotune-filesystem",
+      "action": "scan",
+      "args": { "paths": ["./test-results", "./reports"], "maxFiles": 40 }
+    },
+    {
+      "tool": "brave-search",
+      "action": "search",
+      "args": { "query": "Jest error common fix 2025 Node 20 React 19", "count": 5 }
+    },
+    {
+      "tool": "echotune-perplexity",
+      "action": "research",
+      "args": {
+        "prompt": "Given the failing test output, summarize root causes and propose code-level fixes with short refs."
+      }
+    }
+  ]
+}

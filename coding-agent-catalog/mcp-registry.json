@@ -1,0 +1,842 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-08-09T05:19:13.774Z",
+  "totalServers": 39,
+  "activeServers": 9,
+  "categories": {
+    "browser-automation": 5,
+    "file-operations": 2,
+    "music/audio": 1,
+    "development-tools": 20,
+    "automation": 4,
+    "testing": 4,
+    "code-analysis": 2,
+    "database": 2,
+    "analytics": 4
+  },
+  "servers": {
+    "browser": {
+      "name": "browser",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "env": [
+        "PUPPETEER_HEADLESS"
+      ],
+      "description": "",
+      "categories": [
+        "browser-automation"
+      ],
+      "capabilities": [
+        "screenshot",
+        "web-automation",
+        "scraping"
+      ],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.771Z"
+    },
+    "browserbase": {
+      "name": "browserbase",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "npx",
+      "args": [
+        "@browserbasehq/mcp-server-browserbase"
+      ],
+      "env": [
+        "BROWSERBASE_API_KEY",
+        "BROWSERBASE_PROJECT_ID"
+      ],
+      "requiredEnv": [
+        "BROWSERBASE_API_KEY",
+        "BROWSERBASE_PROJECT_ID"
+      ],
+      "envPassthrough": [
+        "BROWSERBASE_API_KEY",
+        "BROWSERBASE_PROJECT_ID"
+      ],
+      "description": "Browserbase cloud browser automation service with environment-gated startup",
+      "notes": "Server will only start when both BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID environment variables are present. Gracefully skipped during validation when envs are missing.",
+      "categories": [
+        "browser-automation"
+      ],
+      "capabilities": [
+        "screenshot",
+        "web-automation",
+        "scraping",
+        "cloud-browser"
+      ],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-01-17T00:00:00.000Z"
+    },
+    "filesystem": {
+      "name": "filesystem",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "node_modules/FileScopeMCP/dist/mcp-server.js"
+      ],
+      "env": [
+        "ALLOWED_DIRECTORIES"
+      ],
+      "description": "",
+      "categories": [
+        "file-operations"
+      ],
+      "capabilities": [
+        "file-read",
+        "file-write",
+        "directory-scan"
+      ],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.771Z"
+    },
+    "spotify": {
+      "name": "spotify",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "python",
+      "args": [
+        "mcp-server/spotify_server.py"
+      ],
+      "env": [
+        "SPOTIFY_CLIENT_ID",
+        "SPOTIFY_CLIENT_SECRET"
+      ],
+      "description": "",
+      "categories": [
+        "music/audio"
+      ],
+      "capabilities": [
+        "music-api",
+        "playlist-management",
+        "audio-analysis"
+      ],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.772Z"
+    },
+    "sequential-thinking": {
+      "name": "sequential-thinking",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/sequential-thinking/dist/index.js"
+      ],
+      "env": [],
+      "description": "Structured thinking and reasoning capabilities for complex tasks",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.772Z"
+    },
+    "screenshot-website": {
+      "name": "screenshot-website",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/screenshot-website/dist/index.js"
+      ],
+      "env": [],
+      "description": "Fast website screenshot capabilities for automation",
+      "categories": [
+        "automation"
+      ],
+      "capabilities": [],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.772Z"
+    },
+    "enhanced-file-utilities": {
+      "name": "enhanced-file-utilities",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/enhanced-file-utilities.js"
+      ],
+      "env": [],
+      "description": "Enhanced file handling with validation and security",
+      "categories": [
+        "file-operations"
+      ],
+      "capabilities": [
+        "file-read",
+        "file-write",
+        "directory-scan"
+      ],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.772Z"
+    },
+    "enhanced-browser-tools": {
+      "name": "enhanced-browser-tools",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/enhanced-browser-tools.js"
+      ],
+      "env": [],
+      "description": "Improved browser automation with error checking",
+      "categories": [
+        "browser-automation",
+        "automation",
+        "development-tools"
+      ],
+      "capabilities": [
+        "screenshot",
+        "web-automation",
+        "scraping"
+      ],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.772Z"
+    },
+    "comprehensive-validator": {
+      "name": "comprehensive-validator",
+      "type": "mcp-config",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/comprehensive-validator.js"
+      ],
+      "env": [],
+      "description": "System-wide validation and monitoring",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "configured",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:13.772Z"
+    },
+    "mcp:install": {
+      "name": "mcp:install",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-manager.js",
+        "install"
+      ],
+      "env": [],
+      "description": "npm script: mcp:install",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.829Z",
+      "lastUpdated": "2025-08-09T05:19:07.829Z"
+    },
+    "mcp:health": {
+      "name": "mcp:health",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-manager.js",
+        "health"
+      ],
+      "env": [],
+      "description": "npm script: mcp:health",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:test": {
+      "name": "mcp:test",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-manager.js",
+        "test"
+      ],
+      "env": [],
+      "description": "npm script: mcp:test",
+      "categories": [
+        "testing"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:report": {
+      "name": "mcp:report",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-manager.js",
+        "report"
+      ],
+      "env": [],
+      "description": "npm script: mcp:report",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:validate": {
+      "name": "mcp:validate",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "npm",
+      "args": [
+        "run",
+        "mcp:install",
+        "&&",
+        "npm",
+        "run",
+        "mcp:health",
+        "&&",
+        "npm",
+        "run",
+        "mcp:test",
+        "&&",
+        "npm",
+        "run",
+        "mcp:report"
+      ],
+      "env": [],
+      "description": "npm script: mcp:validate",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:package-mgmt": {
+      "name": "mcp:package-mgmt",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/package-management/package-version-mcp.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:package-mgmt",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:code-sandbox": {
+      "name": "mcp:code-sandbox",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/code-sandbox/code-sandbox-mcp.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:code-sandbox",
+      "categories": [
+        "code-analysis",
+        "database"
+      ],
+      "capabilities": [
+        "static-analysis",
+        "code-review",
+        "linting"
+      ],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:analytics": {
+      "name": "mcp:analytics",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/analytics-server/analytics-mcp.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:analytics",
+      "categories": [
+        "analytics"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:testing": {
+      "name": "mcp:testing",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/testing-automation/testing-automation-mcp.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:testing",
+      "categories": [
+        "testing"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:sentry": {
+      "name": "mcp:sentry",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/sentry-mcp/sentry-mcp-server.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:sentry",
+      "categories": [
+        "analytics"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:sentry-test": {
+      "name": "mcp:sentry-test",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/sentry-mcp/test-sentry-mcp.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:sentry-test",
+      "categories": [
+        "testing",
+        "analytics"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:sentry-health": {
+      "name": "mcp:sentry-health",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "curl",
+      "args": [
+        "-f",
+        "http://localhost:3012/health",
+        "||",
+        "exit",
+        "1"
+      ],
+      "env": [],
+      "description": "npm script: mcp:sentry-health",
+      "categories": [
+        "analytics"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:discover": {
+      "name": "mcp:discover",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/discover-new-mcp-servers.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:discover",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:auto-docs": {
+      "name": "mcp:auto-docs",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-documentation-automator.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:auto-docs",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:full-automation": {
+      "name": "mcp:full-automation",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "npm",
+      "args": [
+        "run",
+        "mcp:discover",
+        "&&",
+        "npm",
+        "run",
+        "mcp:auto-docs"
+      ],
+      "env": [],
+      "description": "npm script: mcp:full-automation",
+      "categories": [
+        "automation"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:test-automation": {
+      "name": "mcp:test-automation",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/test-mcp-automation.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:test-automation",
+      "categories": [
+        "testing",
+        "automation"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:health-all": {
+      "name": "mcp:health-all",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "npm",
+      "args": [
+        "run",
+        "mcp:health",
+        "&&",
+        "curl",
+        "-f",
+        "http://localhost:3002/health",
+        "&&",
+        "curl",
+        "-f",
+        "http://localhost:3003/status"
+      ],
+      "env": [],
+      "description": "npm script: mcp:health-all",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:validate-comprehensive": {
+      "name": "mcp:validate-comprehensive",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/comprehensive-mcp-validation.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:validate-comprehensive",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:health-start": {
+      "name": "mcp:health-start",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-health-monitor.js",
+        "start"
+      ],
+      "env": [],
+      "description": "npm script: mcp:health-start",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:health-check": {
+      "name": "mcp:health-check",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-health-monitor.js",
+        "check"
+      ],
+      "env": [],
+      "description": "npm script: mcp:health-check",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:health-status": {
+      "name": "mcp:health-status",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-health-monitor.js",
+        "status"
+      ],
+      "env": [],
+      "description": "npm script: mcp:health-status",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:registry-update": {
+      "name": "mcp:registry-update",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-registry-updater.js",
+        "update"
+      ],
+      "env": [],
+      "description": "npm script: mcp:registry-update",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:registry-status": {
+      "name": "mcp:registry-status",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/mcp-registry-updater.js",
+        "status"
+      ],
+      "env": [],
+      "description": "npm script: mcp:registry-status",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:orchestration-full": {
+      "name": "mcp:orchestration-full",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "npm",
+      "args": [
+        "run",
+        "mcp:health-check",
+        "&&",
+        "npm",
+        "run",
+        "mcp:registry-update",
+        "&&",
+        "npm",
+        "run",
+        "mcp:validate-comprehensive"
+      ],
+      "env": [],
+      "description": "npm script: mcp:orchestration-full",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:n8n_mcp": {
+      "name": "mcp:n8n_mcp",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/new-candidates/n8n-mcp/integration.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:n8n_mcp",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:mcp_server_code_runner": {
+      "name": "mcp:mcp_server_code_runner",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/new-candidates/mcp-server-code-runner/integration.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:mcp_server_code_runner",
+      "categories": [
+        "code-analysis"
+      ],
+      "capabilities": [
+        "static-analysis",
+        "code-review",
+        "linting"
+      ],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:mongodb_mcp_server": {
+      "name": "mcp:mongodb_mcp_server",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/new-candidates/mongodb-mcp-server/integration.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:mongodb_mcp_server",
+      "categories": [
+        "database"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:puppeteer_mcp_server": {
+      "name": "mcp:puppeteer_mcp_server",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/new-candidates/puppeteer-mcp-server/integration.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:puppeteer_mcp_server",
+      "categories": [
+        "browser-automation"
+      ],
+      "capabilities": [
+        "screenshot",
+        "web-automation",
+        "scraping"
+      ],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:hismaserver_puppeteer": {
+      "name": "mcp:hismaserver_puppeteer",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "mcp-servers/new-candidates/@hisma/server-puppeteer/integration.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:hismaserver_puppeteer",
+      "categories": [
+        "browser-automation"
+      ],
+      "capabilities": [
+        "screenshot",
+        "web-automation",
+        "scraping"
+      ],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    },
+    "mcp:candidates": {
+      "name": "mcp:candidates",
+      "type": "npm-script",
+      "source": "package.json",
+      "command": "node",
+      "args": [
+        "scripts/run-all-candidates.js"
+      ],
+      "env": [],
+      "description": "npm script: mcp:candidates",
+      "categories": [
+        "development-tools"
+      ],
+      "capabilities": [],
+      "status": "script",
+      "addedDate": "2025-08-09T05:19:07.830Z",
+      "lastUpdated": "2025-08-09T05:19:07.830Z"
+    }
+  },
+  "statusCounts": {
+    "configured": 9,
+    "script": 30
+  },
+  "sourceCounts": {
+    "package.json": 39
+  }
+}

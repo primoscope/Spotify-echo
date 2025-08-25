@@ -37,5 +37,66 @@
         "complexity_score": 8
       }
     ]
+  },
+  "2025-W35": {
+    "total_cost": 0.320152,
+    "request_count": 5,
+    "requests": [
+      {
+        "timestamp": "2025-08-25 20:22:23.620776",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1428,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-25 20:22:47.025775",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1309,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-25 20:23:03.746761",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 888,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-25 20:23:23.149395",
+        "model": "sonar-pro",
+        "input_tokens": 339,
+        "output_tokens": 1390,
+        "searches_performed": 5,
+        "estimated_cost": 0.06403400000000001,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-25 20:23:42.350555",
+        "model": "sonar-pro",
+        "input_tokens": 339,
+        "output_tokens": 1551,
+        "searches_performed": 5,
+        "estimated_cost": 0.06403400000000001,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      }
+    ]
   }
 }

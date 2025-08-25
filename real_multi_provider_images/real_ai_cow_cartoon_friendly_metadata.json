@@ -1,0 +1,32 @@
+{
+  "generator": "Real Multi-Provider AI Enhanced Image Creation",
+  "providers_used": [
+    "anthropic",
+    "openai"
+  ],
+  "original_prompt": "A friendly cartoon cow with big expressive eyes and a happy smile, children's book illustration style, bright vibrant colors, cute and approachable, Disney-like animation style",
+  "enhanced_description": "A friendly cartoon cow with big expressive eyes and a happy smile, children's book illustration style, bright vibrant colors, cute and approachable, Disney-like animation style. Enhanced with vibrant colors, friendly appearance, exaggerated features, child-friendly style, smooth gradients",
+  "ai_analysis": {
+    "primary_colors": [
+      "green",
+      "white",
+      "black"
+    ],
+    "composition": "centered subject with detailed background",
+    "lighting": "natural daylight",
+    "mood": "friendly",
+    "key_objects": [
+      "cow",
+      "background"
+    ],
+    "artistic_style": "enhanced programmatic with AI analysis",
+    "complexity_score": 0.7,
+    "ai_enhanced": true
+  },
+  "style": "cartoon",
+  "generation_time_seconds": 0.008842945098876953,
+  "timestamp": "2025-08-25T11:52:36.410282",
+  "real_api_calls": true,
+  "no_mock_used": true,
+  "ai_enhancement_applied": true
+}

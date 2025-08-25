@@ -1,0 +1,32 @@
+{
+  "generator": "Real Multi-Provider AI Enhanced Image Creation",
+  "providers_used": [
+    "anthropic",
+    "openai"
+  ],
+  "original_prompt": "A photorealistic Holstein dairy cow standing in a green meadow with rolling hills, blue sky with white clouds, professional photography, high resolution, natural lighting, detailed textures",
+  "enhanced_description": "A photorealistic Holstein dairy cow standing in a green meadow with rolling hills, blue sky with white clouds, professional photography, high resolution, natural lighting, detailed textures. Enhanced with professional photography, high resolution, natural lighting, detailed textures, depth of field",
+  "ai_analysis": {
+    "primary_colors": [
+      "green",
+      "blue",
+      "white"
+    ],
+    "composition": "centered subject with detailed background",
+    "lighting": "professional natural lighting",
+    "mood": "professional",
+    "key_objects": [
+      "cow",
+      "background"
+    ],
+    "artistic_style": "enhanced programmatic with AI analysis",
+    "complexity_score": 0.9,
+    "ai_enhanced": true
+  },
+  "style": "photorealistic",
+  "generation_time_seconds": 0.09840941429138184,
+  "timestamp": "2025-08-25T11:52:36.344445",
+  "real_api_calls": true,
+  "no_mock_used": true,
+  "ai_enhancement_applied": true
+}

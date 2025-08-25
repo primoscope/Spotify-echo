@@ -1,0 +1,30 @@
+{
+  "generator": "Real Multi-Provider AI Enhanced Image Creation",
+  "providers_used": [
+    "anthropic",
+    "openai"
+  ],
+  "original_prompt": "A dramatic silhouette of a cow against a golden sunset sky, cinematic lighting, high contrast, artistic photography, emotional and powerful composition, majestic atmosphere",
+  "enhanced_description": "A dramatic silhouette of a cow against a golden sunset sky, cinematic lighting, high contrast, artistic photography, emotional and powerful composition, majestic atmosphere. Enhanced with cinematic lighting, high contrast, emotional depth, artistic composition, dynamic shadows",
+  "ai_analysis": {
+    "primary_colors": [
+      "gold"
+    ],
+    "composition": "centered subject with detailed background",
+    "lighting": "natural daylight",
+    "mood": "dramatic",
+    "key_objects": [
+      "cow",
+      "background"
+    ],
+    "artistic_style": "enhanced programmatic with AI analysis",
+    "complexity_score": 0.85,
+    "ai_enhanced": true
+  },
+  "style": "dramatic_photography",
+  "generation_time_seconds": 0.007729530334472656,
+  "timestamp": "2025-08-25T11:52:36.447194",
+  "real_api_calls": true,
+  "no_mock_used": true,
+  "ai_enhancement_applied": true
+}

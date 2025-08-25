@@ -1,0 +1,31 @@
+{
+  "generator": "Real Multi-Provider AI Enhanced Image Creation",
+  "providers_used": [
+    "anthropic",
+    "openai"
+  ],
+  "original_prompt": "A minimalist artistic illustration of a cow silhouette, clean lines, geometric patterns, modern art style, black and white with subtle color accents, sophisticated design",
+  "enhanced_description": "A minimalist artistic illustration of a cow silhouette, clean lines, geometric patterns, modern art style, black and white with subtle color accents, sophisticated design. Enhanced with clean lines, geometric patterns, simple composition, modern aesthetic, high contrast",
+  "ai_analysis": {
+    "primary_colors": [
+      "white",
+      "black"
+    ],
+    "composition": "centered subject with detailed background",
+    "lighting": "natural daylight",
+    "mood": "artistic",
+    "key_objects": [
+      "cow",
+      "background"
+    ],
+    "artistic_style": "enhanced programmatic with AI analysis",
+    "complexity_score": 0.75,
+    "ai_enhanced": true
+  },
+  "style": "minimalist_art",
+  "generation_time_seconds": 0.005189418792724609,
+  "timestamp": "2025-08-25T11:52:36.374185",
+  "real_api_calls": true,
+  "no_mock_used": true,
+  "ai_enhancement_applied": true
+}

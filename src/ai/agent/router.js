@@ -6,7 +6,7 @@
 const { VertexInvoker, AIRequest } = require('../providers/vertexInvoker');
 const BaseLLMProvider = require('../../chat/llm-providers/base-provider');
 const { ValidationError, ModelUnavailableError } = require('../errors');
-const aiMetrics = require('../../metrics/aiMetrics');
+const aiMetrics = require('../../metrics/ai-metrics');
 
 class AgentRouter {
   constructor(options = {}) {
@@ -41,13 +41,14 @@ class AgentRouter {
       console.warn('⚠️  Vertex AI provider initialization failed:', error.message);
     }
 
-    // Add existing providers from chat system
+    // OpenAI provider
     try {
       const { default: OpenAIProvider } = await import('../../chat/llm-providers/openai-provider.js');
       const openaiProvider = new OpenAIProvider({
         apiKey: process.env.OPENAI_API_KEY
       });
       if (openaiProvider.isAvailable()) {
+        await openaiProvider.initialize();
         this.providers.set('openai', openaiProvider);
         console.log('✅ OpenAI provider initialized');
       }
@@ -55,26 +56,14 @@ class AgentRouter {
       console.warn('⚠️  OpenAI provider initialization failed:', error.message);
     }
 
+    // Anthropic/Claude provider
     try {
-      const { default: GeminiProvider } = await import('../../chat/llm-providers/gemini-provider.js');
-      const geminiProvider = new GeminiProvider({
-        apiKey: process.env.GEMINI_API_KEY
-      });
-      if (geminiProvider.isAvailable()) {
-        this.providers.set('gemini', geminiProvider);
-        console.log('✅ Gemini provider initialized');
-      }
-    } catch (error) {
-      console.warn('⚠️  Gemini provider initialization failed:', error.message);
-    }
-
-    try {
-      const AnthropicProvider = require('../../chat/llm-providers/anthropic-provider');
+      const { default: AnthropicProvider } = await import('../../chat/llm-providers/anthropic-provider.js');
       const anthropicProvider = new AnthropicProvider({
         apiKey: process.env.ANTHROPIC_API_KEY
       });
-      await anthropicProvider.initialize();
       if (anthropicProvider.isAvailable()) {
+        await anthropicProvider.initialize();
         this.providers.set('anthropic', anthropicProvider);
         console.log('✅ Anthropic provider initialized');
       }
@@ -82,20 +71,64 @@ class AgentRouter {
       console.warn('⚠️  Anthropic provider initialization failed:', error.message);
     }
 
-    // Vertex AI Anthropic Provider (Claude Opus 4.1)
+    // Vertex AI Anthropic (Claude Opus 4.1)
     try {
-      const VertexAnthropicProvider = require('../../chat/llm-providers/vertex-anthropic-provider');
+      const { default: VertexAnthropicProvider } = await import('../../chat/llm-providers/vertex-anthropic-provider.js');
       const vertexAnthropicProvider = new VertexAnthropicProvider({
-        projectId: process.env.GCP_PROJECT_ID,
-        location: process.env.GCP_VERTEX_LOCATION || 'us-central1'
+        projectId: process.env.GCP_PROJECT_ID
       });
-      await vertexAnthropicProvider.initialize();
       if (vertexAnthropicProvider.isAvailable()) {
+        await vertexAnthropicProvider.initialize();
         this.providers.set('vertex-anthropic', vertexAnthropicProvider);
         console.log('✅ Vertex AI Anthropic provider initialized');
       }
     } catch (error) {
       console.warn('⚠️  Vertex AI Anthropic provider initialization failed:', error.message);
+    }
+
+    // Gemini provider
+    try {
+      const { default: GeminiProvider } = await import('../../chat/llm-providers/gemini-provider.js');
+      const geminiProvider = new GeminiProvider({
+        apiKey: process.env.GEMINI_API_KEY
+      });
+      if (geminiProvider.isAvailable()) {
+        await geminiProvider.initialize();
+        this.providers.set('gemini', geminiProvider);
+        console.log('✅ Gemini provider initialized');
+      }
+    } catch (error) {
+      console.warn('⚠️  Gemini provider initialization failed:', error.message);
+    }
+
+    // Perplexity provider  
+    try {
+      const { default: PerplexityProvider } = await import('../../chat/llm-providers/perplexity-provider.js');
+      const perplexityProvider = new PerplexityProvider({
+        apiKey: process.env.PERPLEXITY_API_KEY
+      });
+      if (perplexityProvider.isAvailable()) {
+        await perplexityProvider.initialize();
+        this.providers.set('perplexity', perplexityProvider);
+        console.log('✅ Perplexity provider initialized');
+      }
+    } catch (error) {
+      console.warn('⚠️  Perplexity provider initialization failed:', error.message);
+    }
+
+    // Grok4 provider
+    try {
+      const { default: Grok4Provider } = await import('../../chat/llm-providers/grok4-provider.js');
+      const grok4Provider = new Grok4Provider({
+        apiKey: process.env.XAI_API_KEY
+      });
+      if (grok4Provider.isAvailable()) {
+        await grok4Provider.initialize();
+        this.providers.set('grok4', grok4Provider);
+        console.log('✅ Grok4 provider initialized');
+      }
+    } catch (error) {
+      console.warn('⚠️  Grok4 provider initialization failed:', error.message);
     }
 
     // Mock provider for testing
@@ -117,9 +150,9 @@ class AgentRouter {
   initializePolicies() {
     // Task-based routing policies
     this.policies.set('text-generation', {
-      primary: { provider: 'vertex', model: 'text-bison@latest', costTier: 'standard' },
-      fallback: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' },
-      backup: { provider: 'mock', model: 'mock-model', costTier: 'free' }
+      primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022', costTier: 'premium' },
+      fallback: { provider: 'vertex', model: 'text-bison@latest', costTier: 'standard' },
+      backup: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' }
     });
 
     this.policies.set('embeddings', {
@@ -129,34 +162,65 @@ class AgentRouter {
     });
 
     this.policies.set('rerank', {
-      primary: { provider: 'vertex', model: 'text-bison@latest', costTier: 'standard' },
-      fallback: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' },
-      backup: { provider: 'mock', model: 'mock-model', costTier: 'free' }
+      primary: { provider: 'gemini', model: 'gemini-2.5-pro', costTier: 'standard' },
+      fallback: { provider: 'vertex', model: 'text-bison@latest', costTier: 'standard' },
+      backup: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' }
     });
 
     this.policies.set('classification', {
-      primary: { provider: 'vertex', model: 'text-bison@latest', costTier: 'economy' },
-      fallback: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' },
-      backup: { provider: 'mock', model: 'mock-model', costTier: 'free' }
+      primary: { provider: 'gemini', model: 'gemini-1.5-flash', costTier: 'economy' },
+      fallback: { provider: 'vertex', model: 'text-bison@latest', costTier: 'economy' },
+      backup: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' }
     });
 
     // Dynamic policies based on performance
     this.policies.set('low-latency', {
       criteria: { maxLatency: 2000, costTier: 'any' },
       primary: { provider: 'openai', model: 'gpt-4o-mini' },
-      fallback: { provider: 'vertex', model: 'text-bison@001' }
+      fallback: { provider: 'gemini', model: 'gemini-1.5-flash' },
+      backup: { provider: 'mock', model: 'mock-model' }
     });
 
     this.policies.set('low-cost', {
       criteria: { maxCost: 0.001, latencyTier: 'any' },
-      primary: { provider: 'vertex', model: 'text-bison@001' },
-      fallback: { provider: 'mock', model: 'mock-model' }
+      primary: { provider: 'gemini', model: 'gemini-1.5-flash' },
+      fallback: { provider: 'vertex', model: 'text-bison@001' },
+      backup: { provider: 'mock', model: 'mock-model' }
     });
 
     this.policies.set('high-quality', {
       criteria: { costTier: 'any', latencyTier: 'any' },
-      primary: { provider: 'vertex', model: 'text-bison@latest' },
-      fallback: { provider: 'openai', model: 'gpt-4o' }
+      primary: { provider: 'vertex-anthropic', model: 'claude-opus-4-1' },
+      fallback: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+      backup: { provider: 'vertex', model: 'text-bison@latest' }
+    });
+
+    // Enhanced routing strategies from requirements
+    this.policies.set('balanced', {
+      criteria: { balanceLatencyAndCost: true },
+      primary: { provider: 'gemini', model: 'gemini-2.5-pro', costTier: 'standard' },
+      fallback: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' },
+      backup: { provider: 'vertex', model: 'text-bison@latest', costTier: 'standard' }
+    });
+
+    this.policies.set('cost-aware', {
+      criteria: { optimizeForCost: true },
+      primary: { provider: 'gemini', model: 'gemini-1.5-flash', costTier: 'economy' },
+      fallback: { provider: 'vertex', model: 'text-bison@001', costTier: 'economy' },
+      backup: { provider: 'openai', model: 'gpt-4o-mini', costTier: 'economy' }
+    });
+
+    this.policies.set('ensemble', {
+      criteria: { useMultipleProviders: true, aggregateResults: true },
+      primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+      fallback: { provider: 'gemini', model: 'gemini-2.5-pro' },
+      backup: { provider: 'openai', model: 'gpt-4o' },
+      ensemble: {
+        enabled: true,
+        providers: ['anthropic', 'gemini', 'openai'],
+        aggregationMethod: 'weighted_average',
+        weights: { anthropic: 0.5, gemini: 0.3, openai: 0.2 }
+      }
     });
   }
 
@@ -176,7 +240,12 @@ class AgentRouter {
     // Log routing decision
     this.logRoutingDecision(normalizedRequest, routing, routingOptions);
     
-    // Execute request
+    // Handle ensemble routing if enabled
+    if (routing.ensemble && routing.ensemble.enabled) {
+      return await this.executeEnsembleRequest(normalizedRequest, routing);
+    }
+    
+    // Execute single provider request
     const startTime = Date.now();
     let response = null;
     let error = null;
@@ -323,6 +392,7 @@ class AgentRouter {
       strategy: routingOptions.strategy || 'task-based',
       fallback: fallbackChoice,
       backup: backupChoice,
+      ensemble: policy.ensemble || null,
       rationale: primaryChoice.rationale
     };
   }
@@ -488,6 +558,158 @@ class AgentRouter {
       level: 'info',
       component: 'agent-router'
     }));
+  }
+
+  /**
+   * Execute ensemble request across multiple providers
+   */
+  async executeEnsembleRequest(request, routing) {
+    const ensemble = routing.ensemble;
+    const results = [];
+    const errors = [];
+
+    // Execute requests in parallel across ensemble providers
+    const promises = ensemble.providers.map(async (providerName) => {
+      try {
+        const provider = this.providers.get(providerName);
+        if (!provider || !provider.isAvailable()) {
+          throw new Error(`Provider ${providerName} not available`);
+        }
+
+        const providerRouting = {
+          ...routing,
+          provider: providerName,
+          model: routing.model // Use same model across providers where possible
+        };
+
+        const result = await this.executeRequest(request, providerRouting);
+        return {
+          provider: providerName,
+          result,
+          success: true
+        };
+      } catch (error) {
+        errors.push({ provider: providerName, error });
+        return {
+          provider: providerName,
+          error,
+          success: false
+        };
+      }
+    });
+
+    const ensembleResults = await Promise.allSettled(promises);
+    
+    // Collect successful results
+    const successfulResults = ensembleResults
+      .filter(result => result.status === 'fulfilled' && result.value.success)
+      .map(result => result.value);
+
+    if (successfulResults.length === 0) {
+      throw new Error(`All ensemble providers failed: ${errors.map(e => e.error.message).join(', ')}`);
+    }
+
+    // Aggregate results based on ensemble method
+    return this.aggregateEnsembleResults(successfulResults, ensemble);
+  }
+
+  /**
+   * Aggregate ensemble results using specified method
+   */
+  aggregateEnsembleResults(results, ensemble) {
+    const { aggregationMethod, weights } = ensemble;
+
+    switch (aggregationMethod) {
+      case 'weighted_average':
+        return this.weightedAverageAggregation(results, weights);
+      case 'consensus':
+        return this.consensusAggregation(results);
+      case 'best_confidence':
+        return this.bestConfidenceAggregation(results);
+      default:
+        // Default: return result from first successful provider
+        return results[0].result;
+    }
+  }
+
+  /**
+   * Weighted average aggregation for ensemble results
+   */
+  weightedAverageAggregation(results, weights) {
+    const aggregatedResult = {
+      content: '',
+      confidence: 0,
+      providers_used: results.map(r => r.provider),
+      aggregation_method: 'weighted_average',
+      individual_results: results.map(r => ({
+        provider: r.provider,
+        content: r.result.content || r.result.text,
+        confidence: r.result.confidence || 0.8
+      }))
+    };
+
+    // Combine text content with weights
+    let combinedContent = '';
+    let totalWeight = 0;
+    let totalConfidence = 0;
+
+    results.forEach(result => {
+      const provider = result.provider;
+      const weight = weights[provider] || (1 / results.length);
+      const content = result.result.content || result.result.text || '';
+      const confidence = result.result.confidence || 0.8;
+
+      if (combinedContent && content) {
+        combinedContent += `\n\n--- ${provider} (weight: ${weight}) ---\n${content}`;
+      } else {
+        combinedContent = content;
+      }
+
+      totalWeight += weight;
+      totalConfidence += confidence * weight;
+    });
+
+    aggregatedResult.content = combinedContent;
+    aggregatedResult.confidence = totalConfidence / totalWeight;
+
+    return aggregatedResult;
+  }
+
+  /**
+   * Consensus aggregation - find common elements
+   */
+  consensusAggregation(results) {
+    // For simplicity, return the result with highest confidence
+    // In a real implementation, this would analyze semantic similarity
+    const bestResult = results.reduce((best, current) => {
+      const currentConfidence = current.result.confidence || 0.8;
+      const bestConfidence = best.result.confidence || 0.8;
+      return currentConfidence > bestConfidence ? current : best;
+    });
+
+    return {
+      ...bestResult.result,
+      aggregation_method: 'consensus',
+      providers_consulted: results.map(r => r.provider)
+    };
+  }
+
+  /**
+   * Best confidence aggregation
+   */
+  bestConfidenceAggregation(results) {
+    const bestResult = results.reduce((best, current) => {
+      const currentConfidence = current.result.confidence || 0.8;
+      const bestConfidence = best.result.confidence || 0.8;
+      return currentConfidence > bestConfidence ? current : best;
+    });
+
+    return {
+      ...bestResult.result,
+      aggregation_method: 'best_confidence',
+      selected_provider: bestResult.provider,
+      all_providers: results.map(r => r.provider)
+    };
   }
 
   /**

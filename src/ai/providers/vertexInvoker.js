@@ -18,7 +18,7 @@ const {
   CircuitBreaker
 } = require('../errors');
 
-const aiMetrics = require('../../metrics/aiMetrics');
+const aiMetrics = require('../../metrics/ai-metrics');
 const BaseLLMProvider = require('../../chat/llm-providers/base-provider');
 
 /**

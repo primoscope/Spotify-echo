@@ -82,6 +82,7 @@ class VertexAIService:
         self.anthropic_client: Optional[AnthropicVertex] = None
         self.vertex_ai_initialized = False
         self.model_cache: Dict[str, Any] = {}
+        self._model_cache_lock = asyncio.Lock()
         
         # Rate limiting
         self.request_timestamps: List[float] = []
@@ -352,7 +353,7 @@ class VertexAIService:
         
         try:
             # Get or create model instance
-            model = self._get_gemini_model(request.model_id)
+            model = await self._get_gemini_model_async(request.model_id)
             
             # Prepare generation config
             generation_config = {
@@ -376,23 +377,36 @@ class VertexAIService:
                     safety_settings=safety_settings
                 )
                 
+                usage_md = getattr(response, "usage_metadata", None)
+                prompt_tokens = getattr(usage_md, "prompt_token_count", 0) if usage_md else 0
+                candidate_tokens = getattr(usage_md, "candidates_token_count", 0) if usage_md else 0
+                total_tokens = getattr(usage_md, "total_token_count", prompt_tokens + candidate_tokens) if usage_md else (prompt_tokens + candidate_tokens)
+                candidates = getattr(response, "candidates", []) or []
+                finish_reason = 'unknown'
+                safety_ratings = []
+                if candidates:
+                    first = candidates[0]
+                    finish_reason = getattr(getattr(first, "finish_reason", None), "name", 'unknown') or 'unknown'
+                    sr = getattr(first, "safety_ratings", None)
+                    if sr:
+                        safety_ratings = [
+                            {
+                                'category': getattr(rating.category, "name", str(rating.category)),
+                                'probability': getattr(rating.probability, "name", str(rating.probability))
+                            }
+                            for rating in sr
+                        ]
                 return {
-                    'content': response.text if response.text else '',
+                    'content': getattr(response, "text", "") or "",
                     'usage': {
-                        'input_tokens': response.usage_metadata.prompt_token_count,
-                        'output_tokens': response.usage_metadata.candidates_token_count,
-                        'total_tokens': response.usage_metadata.total_token_count
+                        'input_tokens': prompt_tokens,
+                        'output_tokens': candidate_tokens,
+                        'total_tokens': total_tokens
                     },
                     'metadata': {
                         'model': request.model_id,
-                        'finish_reason': response.candidates[0].finish_reason.name if response.candidates else 'unknown',
-                        'safety_ratings': [
-                            {
-                                'category': rating.category.name,
-                                'probability': rating.probability.name
-                            }
-                            for rating in response.candidates[0].safety_ratings
-                        ] if response.candidates and response.candidates[0].safety_ratings else []
+                        'finish_reason': finish_reason,
+                        'safety_ratings': safety_ratings
                     }
                 }
                 
@@ -432,17 +446,17 @@ class VertexAIService:
             logger.error(f"❌ Gemini streaming error: {e}")
             raise
     
-    def _get_gemini_model(self, model_id: str) -> Any:
-        """Get or create Gemini model instance with caching."""
-        if model_id not in self.model_cache:
-            try:
-                self.model_cache[model_id] = GenerativeModel(model_id)
-                logger.info(f"✅ Created Gemini model instance: {model_id}")
-            except Exception as e:
-                logger.error(f"❌ Failed to create Gemini model {model_id}: {e}")
-                raise
-        
-        return self.model_cache[model_id]
+    async def _get_gemini_model_async(self, model_id: str) -> Any:
+        """Get or create Gemini model instance with caching (async-safe)."""
+        async with self._model_cache_lock:
+            if model_id not in self.model_cache:
+                try:
+                    self.model_cache[model_id] = GenerativeModel(model_id)
+                    logger.info(f"✅ Created Gemini model instance: {model_id}")
+                except Exception as e:
+                    logger.error(f"❌ Failed to create Gemini model {model_id}: {e}")
+                    raise
+            return self.model_cache[model_id]
     
     def _get_safety_settings(self) -> List[SafetySetting]:
         """Get safety settings for Gemini models."""

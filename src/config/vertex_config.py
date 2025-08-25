@@ -58,12 +58,15 @@ class VertexAIConfig(BaseSettings):
     
     @field_validator('gcp_project_id')
     @classmethod
-    def validate_project_id(cls, v):
-        """Validate GCP project ID format."""
+    def validate_project_id(cls, v: str) -> str:
+        """Validate GCP project ID format per GCP rules."""
+        import re
         if not v:
             raise ValueError('GCP Project ID is required')
-        if not v.replace('-', '').replace('_', '').isalnum():
-            raise ValueError('Invalid GCP Project ID format')
+        # Must be 6-30 chars, lowercase letters, digits, or hyphens; start with letter; not end with hyphen
+        pattern = r'^[a-z][a-z0-9-]{4,28}[a-z0-9]$'
+        if not re.match(pattern, v):
+            raise ValueError('Invalid GCP Project ID. Must be 6-30 chars, start with a letter, contain only lowercase letters, digits, or hyphens, and not end with a hyphen.')
         return v
     
     @field_validator('gcp_region')

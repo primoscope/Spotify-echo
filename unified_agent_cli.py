@@ -169,16 +169,16 @@ Models Available:
                 latency = 850
         else:
             # Natural language
-            if any(word in user_input.lower() for word in ['deep', 'analyze', 'explain', 'why', 'complex']):
-                mode = "deep"
-                model = "claude-opus-4.1"
-                answer = f"[DEMO] Deep reasoning for: {user_input[:50]}...\n\nThis would provide sophisticated analysis with step-by-step reasoning."
-                latency = 1200
-            elif any(word in user_input.lower() for word in ['compare', 'versus', 'both', 'different']):
+            if any(word in user_input.lower() for word in ['compare', 'versus', 'both', 'different']):
                 mode = "consensus"
                 model = "gemini-pro,claude-opus-4.1" 
                 answer = f"[DEMO] Comparison analysis for: {user_input[:50]}...\n\nThis would provide perspectives from both models for comprehensive comparison."
                 latency = 1800
+            elif any(word in user_input.lower() for word in ['deep', 'analyze', 'explain', 'why', 'complex']):
+                mode = "deep"
+                model = "claude-opus-4.1"
+                answer = f"[DEMO] Deep reasoning for: {user_input[:50]}...\n\nThis would provide sophisticated analysis with step-by-step reasoning."
+                latency = 1200
             else:
                 mode = "lean"
                 model = "gemini-pro"

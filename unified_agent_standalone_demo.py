@@ -507,6 +507,10 @@ class UnifiedAgentDemo:
         """Print an info message."""
         print(f"ℹ️  {message}")
     
+    def print_warning(self, message: str):
+        """Print a warning message."""
+        print(f"⚠️  {message}")
+    
     async def demonstrate_slash_commands(self) -> Dict[str, Any]:
         """Demonstrate slash command functionality."""
         self.print_section("Slash Command Demonstrations")

@@ -5,19 +5,35 @@
 
 const request = require('supertest');
 const express = require('express');
+
+// Create mocks before requiring the actual modules
+const mockOrchestrator = {
+  getModelStatistics: jest.fn(),
+  healthCheck: jest.fn(),
+  optimizeModelSelection: jest.fn(),
+  models: {}
+};
+
+const mockWorkflowManager = {
+  getWorkflowStatus: jest.fn(),
+  healthCheckMCPServers: jest.fn(),
+  executeCodeAgentWorkflow: jest.fn(),
+  mcpServers: new Map()
+};
+
+// Mock the modules
+jest.mock('../../src/mcp/enhanced-multimodel-orchestrator', () => {
+  return jest.fn().mockImplementation(() => mockOrchestrator);
+});
+
+jest.mock('../../src/mcp/workflow-integration-manager', () => {
+  return jest.fn().mockImplementation(() => mockWorkflowManager);
+});
+
 const enhancedMcpRouter = require('../../src/api/routes/enhanced-mcp');
-
-// Mock the MCP managers
-jest.mock('../../src/mcp/enhanced-multimodel-orchestrator');
-jest.mock('../../src/mcp/workflow-integration-manager');
-
-const MockMultiModelOrchestrator = require('../../src/mcp/enhanced-multimodel-orchestrator');
-const MockWorkflowIntegrationManager = require('../../src/mcp/workflow-integration-manager');
 
 describe('Enhanced MCP API Endpoints', () => {
   let app;
-  let mockOrchestrator;
-  let mockWorkflowManager;
 
   beforeEach(() => {
     // Create Express app with MCP routes
@@ -25,11 +41,7 @@ describe('Enhanced MCP API Endpoints', () => {
     app.use(express.json());
     app.use('/api/enhanced-mcp', enhancedMcpRouter);
 
-    // Setup mocks
-    mockOrchestrator = new MockMultiModelOrchestrator();
-    mockWorkflowManager = new MockWorkflowIntegrationManager();
-
-    // Mock orchestrator methods
+    // Setup mock implementations
     mockOrchestrator.getModelStatistics.mockReturnValue({
       'gpt-4': { provider: 'openai', capabilities: ['text-generation', 'code-analysis'] },
       'gemini-pro': { provider: 'google', capabilities: ['text-generation', 'multimodal'] }
@@ -67,6 +79,12 @@ describe('Enhanced MCP API Endpoints', () => {
       results: { success: true }
     });
 
+    mockOrchestrator.models = {
+      'gpt-4': { provider: 'openai' },
+      'gemini-pro': { provider: 'google' }
+    };
+    
+    // Setup MCP servers map
     mockWorkflowManager.mcpServers = new Map([
       ['mcpHealth', { capabilities: ['health-monitoring'] }],
       ['mcpOrchestrator', { capabilities: ['server-orchestration'] }],
@@ -378,17 +396,3 @@ describe('Enhanced MCP API Endpoints', () => {
     });
   });
 });
-
-// Mock implementations for the MCP classes
-MockMultiModelOrchestrator.mockImplementation(() => ({
-  getModelStatistics: jest.fn(),
-  healthCheck: jest.fn(),
-  models: {}
-}));
-
-MockWorkflowIntegrationManager.mockImplementation(() => ({
-  getWorkflowStatus: jest.fn(),
-  healthCheckMCPServers: jest.fn(),
-  executeCodeAgentWorkflow: jest.fn(),
-  mcpServers: new Map()
-}));

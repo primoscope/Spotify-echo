@@ -1,0 +1,36 @@
+{
+  "sessionId": "session_1756144348651_1b8d3811",
+  "startTime": 1756144348652,
+  "queries": [
+    {
+      "id": "security-best-practices",
+      "query": "Node.js security best practices for production applications",
+      "sources": [],
+      "priority": "high",
+      "searchFilters": {
+        "domains": [
+          "nodejs.org",
+          "snyk.io",
+          "owasp.org"
+        ],
+        "recency": "month"
+      }
+    }
+  ],
+  "evidence": [],
+  "results": [],
+  "performance": {
+    "totalQueries": 1,
+    "successfulQueries": 0,
+    "averageLatency": 0,
+    "evidenceCollected": 0,
+    "reliabilityScore": 0
+  },
+  "validation": {
+    "crossReferences": 0,
+    "conflictingEvidence": [],
+    "supportingEvidence": [],
+    "consensusScore": 0
+  },
+  "endTime": 1756144348652
+}

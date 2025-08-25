@@ -1,0 +1,108 @@
+{
+  "title": "User Taste Evolution 3D Visualization",
+  "description": "Temporal analysis of user music preference evolution showing taste development over time",
+  "type": "3D trajectory plot with temporal clustering",
+  "dimensions": {
+    "width": 1920,
+    "height": 1080,
+    "depth": "interactive"
+  },
+  "axes": {
+    "x": {
+      "label": "Novelty Preference",
+      "range": [0, 1],
+      "description": "User's preference for discovering new vs familiar music"
+    },
+    "y": {
+      "label": "Genre Diversity Score",
+      "range": [0, 1], 
+      "description": "Breadth of musical genres in user's listening habits"
+    },
+    "z": {
+      "label": "Time (Months)",
+      "range": "Dynamic based on user data",
+      "description": "Temporal progression of user's musical journey"
+    }
+  },
+  "visualization_elements": {
+    "user_trajectories": {
+      "type": "3D curved lines with temporal markers",
+      "color_coding": "Gradient from past (blue) to present (red)",
+      "thickness": "Proportional to listening intensity",
+      "animation": "Progressive reveal over time"
+    },
+    "taste_clusters": {
+      "type": "3D ellipsoids representing preference regions",
+      "transparency": 0.4,
+      "colors": ["#667eea", "#764ba2", "#f093fb", "#f5576c", "#4facfe"]
+    },
+    "milestone_markers": {
+      "type": "Glowing spheres at significant taste shifts",
+      "labels": "Major preference changes (e.g., 'Discovered Jazz', 'Electronic Phase')",
+      "interaction": "Click to see playlist examples"
+    },
+    "preference_heatmap": {
+      "type": "3D surface showing preference density",
+      "opacity": 0.2,
+      "updates": "Real-time as user explores timeline"
+    }
+  },
+  "interactivity": {
+    "time_navigation": "Slider to scrub through user's musical timeline",
+    "user_selection": "Dropdown to switch between different users",
+    "comparison_mode": "Overlay multiple users' taste evolution",
+    "prediction": "AI-generated future taste trajectory",
+    "filtering": "Filter by significant events, seasons, or life changes"
+  },
+  "analytical_insights": {
+    "taste_stability": "Measure of how quickly preferences change",
+    "exploration_patterns": "Cycles of discovery vs consolidation",
+    "genre_transitions": "Common pathways between musical styles",
+    "social_influence": "Impact of friends' music on taste evolution",
+    "seasonal_patterns": "How music preferences change with seasons"
+  },
+  "data_sources": {
+    "listening_history": "Spotify play counts and timestamps",
+    "audio_features": "Track characteristics for novelty calculation",
+    "user_interactions": "Likes, skips, saves, and playlist additions",
+    "contextual_data": "Time of day, location, activity context"
+  },
+  "technical_implementation": {
+    "framework": "D3.js with Three.js for 3D rendering",
+    "data_processing": "Time-series analysis with smoothing algorithms",
+    "clustering": "HDBSCAN for temporal preference grouping",
+    "prediction_model": "LSTM neural network for taste trajectory forecasting"
+  },
+  "visualization_modes": {
+    "individual_journey": "Single user's complete taste evolution",
+    "comparative_analysis": "Multiple users side-by-side",
+    "population_trends": "Aggregate taste patterns across user base",
+    "cohort_analysis": "Users grouped by age, location, or join date"
+  },
+  "metrics_displayed": {
+    "novelty_score": "Percentage of new vs repeat artists/tracks",
+    "diversity_index": "Shannon entropy of genre distribution",
+    "exploration_velocity": "Rate of taste change over time",
+    "preference_strength": "Consistency of likes within preference clusters",
+    "social_alignment": "Similarity to friends' musical tastes"
+  },
+  "ai_generated_insights": {
+    "taste_profile_labels": "AI descriptions of preference phases",
+    "transition_explanations": "Hypotheses for major taste shifts",
+    "recommendation_opportunities": "Optimal times for music discovery",
+    "personality_correlations": "Links between taste evolution and user behavior"
+  },
+  "generation_parameters": {
+    "temporal_resolution": "Weekly aggregation for smooth trajectories",
+    "smoothing_algorithm": "Gaussian kernel with adaptive bandwidth",
+    "novelty_calculation": "Cosine similarity to user's historical preferences",
+    "clustering_parameters": {
+      "min_cluster_size": 4,
+      "min_samples": 2,
+      "cluster_selection_epsilon": 0.1
+    }
+  },
+  "file_path": "assets/visualizations/user_taste_evolution.png",
+  "created_date": "2025-01-25T10:05:30Z",
+  "created_by": "EchoTune AI Multi-Model Integration System"
+}

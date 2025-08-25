@@ -1,0 +1,82 @@
+{
+  "title": "Music Feature Space 3D Visualization",
+  "description": "Interactive 3D visualization of music feature clusters in audio characteristic space",
+  "type": "3D scatter plot with cluster boundaries",
+  "dimensions": {
+    "width": 1920,
+    "height": 1080,
+    "depth": "interactive"
+  },
+  "axes": {
+    "x": {
+      "label": "Valence (Musical Positivity)",
+      "range": [0, 1],
+      "description": "Measures the musical positiveness conveyed by a track"
+    },
+    "y": {
+      "label": "Energy (Musical Intensity)", 
+      "range": [0, 1],
+      "description": "Represents a perceptual measure of intensity and power"
+    },
+    "z": {
+      "label": "Danceability (Rhythmic Pattern)",
+      "range": [0, 1], 
+      "description": "How suitable a track is for dancing based on musical elements"
+    }
+  },
+  "visualization_elements": {
+    "data_points": {
+      "type": "3D spheres",
+      "color_coding": "By genre and cluster assignment",
+      "size": "Proportional to track popularity",
+      "count": "10,000+ tracks"
+    },
+    "cluster_boundaries": {
+      "type": "3D convex hulls",
+      "transparency": 0.3,
+      "colors": ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"]
+    },
+    "cluster_centroids": {
+      "type": "Larger highlighted spheres",
+      "labels": "AI-generated cluster names",
+      "animation": "Gentle pulsing effect"
+    }
+  },
+  "interactivity": {
+    "rotation": "360-degree orbital camera",
+    "zoom": "Smooth zoom in/out with mouse wheel",
+    "selection": "Click to highlight cluster and show details",
+    "filtering": "Genre, energy level, and mood filters",
+    "animation": "Transition between different clustering algorithms"
+  },
+  "technical_details": {
+    "framework": "Three.js with WebGL rendering",
+    "data_format": "JSON with normalized audio features",
+    "performance": "Optimized for 60fps with level-of-detail",
+    "accessibility": "Keyboard navigation and screen reader support"
+  },
+  "insights_displayed": {
+    "cluster_characteristics": "Hover to see average feature values",
+    "similarity_connections": "Lines between similar tracks",
+    "outlier_detection": "Highlighted unusual tracks",
+    "genre_distribution": "Color-coded genre representation"
+  },
+  "generation_parameters": {
+    "clustering_algorithm": "K-means with k=8",
+    "feature_weights": {
+      "danceability": 0.2,
+      "energy": 0.2, 
+      "valence": 0.15,
+      "acousticness": 0.15,
+      "instrumentalness": 0.1,
+      "speechiness": 0.05,
+      "liveness": 0.05,
+      "tempo": 0.1
+    },
+    "normalization": "Min-max scaling to [0,1] range",
+    "data_source": "Spotify audio features API"
+  },
+  "file_path": "assets/visualizations/music_feature_space.png",
+  "created_date": "2025-01-25T10:05:00Z",
+  "created_by": "EchoTune AI Multi-Model Integration System"
+}

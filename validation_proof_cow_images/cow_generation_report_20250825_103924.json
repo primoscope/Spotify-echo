@@ -1,0 +1,34 @@
+{
+  "validation_id": "real_cow_generation_20250825_103924",
+  "timestamp": "2025-08-25T10:39:24.343409",
+  "total_requested": 4,
+  "successful_generations": 0,
+  "failed_generations": 4,
+  "success_rate": 0.0,
+  "total_cost_estimate_usd": 0.0,
+  "generation_method": "REAL_APIS_NO_MOCKS",
+  "output_directory": "validation_proof_cow_images",
+  "available_apis": {
+    "gemini": true,
+    "openrouter": true,
+    "perplexity": true
+  },
+  "results": {
+    "cow_image_1": {
+      "status": "ERROR",
+      "error": "API error: 405"
+    },
+    "cow_image_2": {
+      "status": "ERROR",
+      "error": "API error: 405"
+    },
+    "cow_image_3": {
+      "status": "ERROR",
+      "error": "API error: 405"
+    },
+    "cow_image_4": {
+      "status": "ERROR",
+      "error": "API error: 405"
+    }
+  }
+}

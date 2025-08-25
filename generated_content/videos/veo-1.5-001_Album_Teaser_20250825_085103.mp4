@@ -1,0 +1,12 @@
+{
+  "video_title": "Album Teaser",
+  "prompt": "Artistic album teaser with abstract visuals and smooth transitions",
+  "model": "veo-1.5-001",
+  "duration_seconds": 8,
+  "resolution": "1080p",
+  "fps": 24,
+  "format": "MP4",
+  "codec": "H.264",
+  "generated_at": "2025-08-25T08:51:03.234090",
+  "note": "This is a demonstration file. In production, this would be an actual MP4 video file."
+}

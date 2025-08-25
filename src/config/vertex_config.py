@@ -7,7 +7,7 @@ using Pydantic BaseSettings for secure environment variable handling.
 
 import os
 from typing import Optional
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -49,11 +49,12 @@ class VertexAIConfig(BaseSettings):
     # Safety and Content Settings
     enable_safety_settings: bool = Field(default=True, env='VERTEX_ENABLE_SAFETY')
     
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
-        case_sensitive = False
-        extra = 'ignore'  # Ignore extra fields from .env
+    model_config = ConfigDict(
+        env_file='.env',
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore'  # Ignore extra fields from .env
+    )
     
     @field_validator('gcp_project_id')
     @classmethod

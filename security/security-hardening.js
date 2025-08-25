@@ -12,7 +12,6 @@
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 
 class SecurityHardening {
   constructor(config = {}) {

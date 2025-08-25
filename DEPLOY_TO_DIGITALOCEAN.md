@@ -77,44 +77,14 @@ kubectl apply -f k8s/digitalocean/
 
 ## 🚀 App Platform Deployment (Recommended)
 
-### Step 1: Prepare Repository
+The easiest way to deploy this application is by using the "Deploy to DigitalOcean" button at the top of this document. This will automatically configure the application, databases, and deployment settings.
 
-Your repository is already configured for DigitalOcean App Platform with:
-- ✅ `digitalocean-app.yaml` - App Platform configuration
-- ✅ `server.js` - Production entry point
-- ✅ `package.json` - Build and start scripts
-- ✅ `Dockerfile` - Container configuration
+### Environment Variables
 
-### Step 2: Deploy via DigitalOcean Console
+When you use the "Deploy to DigitalOcean" button, the platform will prompt you to enter the following environment variables. These should be kept secret.
 
-1. **Go to DigitalOcean App Platform**
-   - Visit [cloud.digitalocean.com/apps](https://cloud.digitalocean.com/apps)
-   - Click "Create App"
-
-2. **Connect GitHub Repository**
-   - Select "GitHub" as source
-   - Choose `dzp5103/Spotify-echo`
-   - Select `main` branch
-
-3. **Configure App Settings**
-   - **Name**: `echotune-ai`
-   - **Region**: Choose closest to your users
-   - **Plan**: Basic ($5/month) for testing, Standard ($12/month) for production
-
-4. **Set Environment Variables**
-   - Copy from the template below
-   - Mark sensitive variables as "SECRET"
-
-### Step 3: Environment Variables
-
-Copy these to your DigitalOcean App Platform environment variables:
-
-#### 🔐 Required Variables
+#### 🔐 Required Secrets
 ```bash
-# Database
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
-REDIS_URL=redis://username:password@host:port
-
 # Security
 JWT_SECRET=your_very_long_random_jwt_secret_key_here
 SESSION_SECRET=your_very_long_random_session_secret_key_here
@@ -129,6 +99,8 @@ PERPLEXITY_API_KEY=your_perplexity_api_key_here
 GOOGLE_API_KEY=your_google_api_key_here
 XAI_API_KEY=your_xai_api_key_here
 ```
+
+**Note:** The `MONGODB_URI` and `REDIS_URL` variables are automatically provided by the DigitalOcean App Platform when the database addons are created. You do not need to set them manually.
 
 #### 📊 Optional Variables
 ```bash
@@ -219,7 +191,7 @@ sudo ./scripts/deploy-digitalocean-droplet.sh
    cp .env.production.digitalocean .env
    
    # Deploy with Docker Compose
-   docker-compose -f docker-compose.production.yml up -d
+   docker-compose up -d
    ```
 
 ## 🔧 Environment Configuration

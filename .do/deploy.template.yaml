@@ -58,6 +58,10 @@ spec:
       value: info
     - key: SESSION_SECURE
       value: "true"
+    - key: MONGODB_URI
+      value: ${mongo-db.DATABASE_URL}
+    - key: REDIS_URL
+      value: ${redis-db.DATABASE_URL}
     
     # REQUIRED: Set these in DigitalOcean App Platform UI under Environment Variables
     # - SPOTIFY_CLIENT_ID (required for Spotify integration)
@@ -66,8 +70,6 @@ spec:
     # - OPENAI_API_KEY (required for AI chat features)
     # - GEMINI_API_KEY (optional - alternative AI provider)
     # - LLM_PROVIDER (openai or gemini - defaults to openai)
-    # - MONGODB_URI (required for data persistence)
-    # - REDIS_URL (optional - for caching and session storage)
     # - SESSION_SECRET (required - generate a secure random string)
     # - JWT_SECRET (required - generate a secure random string)
     # - BROWSERBASE_API_KEY (optional - for browser automation)
@@ -76,13 +78,15 @@ spec:
     # Routing
     routes:
     - path: /
-      
-  # Optional: Database services (uncomment if not using external services)
-  # databases:
-  # - name: echotune-db
-  #   engine: PG
-  #   version: "13"
-  #   size: db-s-dev-database
+
+databases:
+- name: mongo-db
+  engine: MONGODB
+  production: true
+
+- name: redis-db
+  engine: REDIS
+  production: true
   
   # Optional: Static site service for documentation
   # static_sites:

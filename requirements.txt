@@ -1,10 +1,10 @@
 # EchoTune AI - Python Dependencies with Security-Pinned Versions
 
-# Core ML and Data Processing (pinned for security)
-pandas==2.1.4
-numpy==1.24.4
-scikit-learn==1.3.2
-scipy==1.11.4
+# Core ML and Data Processing (compatible versions)
+pandas>=2.0.0
+numpy>=1.21.0
+scikit-learn>=1.2.0
+scipy>=1.9.0
 
 # API Integration
 spotipy==2.23.0
@@ -63,3 +63,9 @@ click==8.1.7
 # Web scraping and automation (for MCP servers)
 selenium==4.16.0
 beautifulsoup4==4.12.2
+
+# Vertex AI Integration for Claude Opus 4.1 and Gemini 2.5
+google-cloud-aiplatform==1.65.0
+anthropic[vertex]==0.60.0
+pydantic==2.10.4
+google-auth==2.36.0

@@ -531,3 +531,6 @@ automation_analysis.log
 # MCP local env
 .env.mcp
 perplexity-budget-status.txt
+
+# Google Cloud credentials
+gcp-credentials.json

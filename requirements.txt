@@ -24,7 +24,7 @@ plotly==5.17.0
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 pymongo==4.6.1
-supabase==2.3.0
+supabase
 
 # Development and Testing
 pytest==7.4.4
@@ -54,7 +54,7 @@ uvicorn==0.24.0
 structlog==23.2.0
 
 # Additional security and utility packages
-cryptography==41.0.8
+cryptography
 bcrypt==4.1.2
 pyjwt==2.8.0
 python-dateutil==2.8.2
@@ -66,6 +66,6 @@ beautifulsoup4==4.12.2
 
 # Vertex AI Integration for Claude Opus 4.1 and Gemini 2.5
 google-cloud-aiplatform==1.65.0
-anthropic[vertex]==0.60.0
+anthropic[vertex]
 pydantic==2.10.4
 google-auth==2.36.0

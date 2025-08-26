@@ -266,10 +266,49 @@ async function initializeInfrastructure() {
         // Store Phase 8 orchestrator in app locals for API access
         app.locals.phase8Orchestrator = phase8Orchestrator;
         
-        return { middlewareManager, phase6Integration, phase7Orchestrator, phase8Orchestrator };
+        // Phase 9: Initialize Advanced Observability, Analytics & Business Intelligence
+        const Phase9Orchestrator = require('./infra/Phase9Orchestrator');
+        const phase9Orchestrator = new Phase9Orchestrator({
+          environment: process.env.NODE_ENV || 'development',
+          enableAPM: process.env.ENABLE_APM !== 'false',
+          enableBusinessIntelligence: process.env.ENABLE_BI !== 'false',
+          enableRealTimeAnalytics: process.env.ENABLE_REAL_TIME_ANALYTICS !== 'false',
+          enableAdvancedAlerting: process.env.ENABLE_ADVANCED_ALERTING !== 'false',
+          integrationMode: 'full'
+        });
+        
+        await phase9Orchestrator.initialize();
+        console.log('✅ Phase 9: Advanced Observability, Analytics & Business Intelligence completed successfully');
+        
+        // Store Phase 9 orchestrator in app locals for API access
+        app.locals.phase9Orchestrator = phase9Orchestrator;
+        
+        return { middlewareManager, phase6Integration, phase7Orchestrator, phase8Orchestrator, phase9Orchestrator };
       } catch (phase8Error) {
         console.warn('⚠️ Phase 8: Advanced enterprise integration failed, continuing with Phase 7 only:', phase8Error.message);
-        return { middlewareManager, phase6Integration, phase7Orchestrator };
+        
+        // Try Phase 9 even if Phase 8 failed
+        try {
+          const Phase9Orchestrator = require('./infra/Phase9Orchestrator');
+          const phase9Orchestrator = new Phase9Orchestrator({
+            environment: process.env.NODE_ENV || 'development',
+            enableAPM: process.env.ENABLE_APM !== 'false',
+            enableBusinessIntelligence: process.env.ENABLE_BI !== 'false',
+            enableRealTimeAnalytics: process.env.ENABLE_REAL_TIME_ANALYTICS !== 'false',
+            enableAdvancedAlerting: process.env.ENABLE_ADVANCED_ALERTING !== 'false',
+            integrationMode: 'standard' // Reduced mode without Phase 8
+          });
+          
+          await phase9Orchestrator.initialize();
+          console.log('✅ Phase 9: Advanced Observability, Analytics & Business Intelligence completed successfully (standalone mode)');
+          
+          app.locals.phase9Orchestrator = phase9Orchestrator;
+          
+          return { middlewareManager, phase6Integration, phase7Orchestrator, phase9Orchestrator };
+        } catch (phase9Error) {
+          console.warn('⚠️ Phase 9: Advanced observability integration failed, continuing with Phase 7 only:', phase9Error.message);
+          return { middlewareManager, phase6Integration, phase7Orchestrator };
+        }
       }
       
     } catch (phase7Error) {
@@ -391,6 +430,10 @@ app.use('/api/event-driven', eventDrivenRoutes);
 // Phase 8: Advanced Security, Auto-Scaling, Multi-Region & ML Integration routes
 const phase8ApiRoutes = require('./routes/phase8-api');
 app.use('/api/phase8', phase8ApiRoutes);
+
+// Phase 9: Advanced Observability, Analytics & Business Intelligence routes
+const phase9ApiRoutes = require('./routes/phase9');
+app.use('/api/phase9', phase9ApiRoutes);
 
 // Phase 6: Legacy middleware configuration (to be replaced by MiddlewareConfigurationService)
 // Enhanced security headers (replaces basic securityHeaders)
@@ -626,6 +669,15 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
       console.log(`🔒 Security: ${phase8Metrics.services.security || 'enabled'}, 📈 Auto-Scaling: ${phase8Metrics.services.autoScaling || 'enabled'}`);
       console.log(`🌍 Multi-Region: ${phase8Metrics.services.multiRegion || 'enabled'}, 🧠 ML Pipelines: ${phase8Metrics.services.mlPipelines || 'enabled'}`);
       console.log(`🔗 Integrations: ${phase8Metrics.overview.activeIntegrations} active cross-service integrations`);
+    }
+    
+    // Phase 9: Show advanced observability services status
+    if (infrastructure.phase9Orchestrator) {
+      const phase9Overview = infrastructure.phase9Orchestrator.getOverview();
+      console.log(`✅ Phase 9: Advanced Observability & Analytics ready (${phase9Overview.services.active}/${phase9Overview.services.total} services)`);
+      console.log(`🔍 APM: enabled, 📊 Business Intelligence: enabled`);
+      console.log(`📈 Real-Time Analytics: enabled, 🚨 Advanced Alerting: enabled`);
+      console.log(`💡 Health Score: System ${phase9Overview.health.system.toFixed(1)}%, Business ${phase9Overview.health.business.toFixed(1)}%`);
     }
   } catch (error) {
     console.error('❌ Infrastructure initialization failed:', error);

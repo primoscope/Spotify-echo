@@ -1,0 +1,117 @@
+{
+  "actionable_tasks": [
+    {
+      "id": "task_1",
+      "title": "Persist Rolling Window Metrics to Redis",
+      "description": "Implement logic to persist API latency and error metrics in a rolling window to Redis for durability and multi-instance aggregation. This will improve observability and reliability of performance data across deployments.",
+      "priority": "high",
+      "estimated_time": "60-90 minutes",
+      "files_to_modify": [
+        "scripts/bench/api-latency.js",
+        "src/api/middleware/metrics.js",
+        "src/config/redis.js"
+      ],
+      "implementation_steps": [
+        "Set up Redis connection in src/config/redis.js (if not already present).",
+        "Modify metrics middleware to write rolling window data to Redis after each request.",
+        "Update scripts/bench/api-latency.js to read/write metrics from Redis for aggregation.",
+        "Test durability and aggregation by simulating multi-instance writes and reads."
+      ],
+      "complexity_score": 6
+    },
+    {
+      "id": "task_2",
+      "title": "TypeScript Migration Plan for High-Change Backend Modules",
+      "description": "Draft and begin implementing a migration plan to convert backend modules with high change-rate (e.g., src/api/routes/*, src/chat/*) from JavaScript to TypeScript. Start with type annotations and basic type safety improvements.",
+      "priority": "medium",
+      "estimated_time": "60 minutes",
+      "files_to_modify": [
+        "src/api/routes/*",
+        "src/chat/*"
+      ],
+      "implementation_steps": [
+        "Create a migration checklist and add TypeScript config if missing.",
+        "Rename one or two key files to .ts and add basic type annotations.",
+        "Fix type errors and ensure tests pass.",
+        "Document migration steps in WORKFLOW_STATE.md."
+      ],
+      "complexity_score": 5
+    },
+    {
+      "id": "task_3",
+      "title": "Containerize Node Backend with Simple Dockerfile",
+      "description": "Write a basic Dockerfile for the Node backend service to enable containerized development and deployment. Ensure the Dockerfile supports local development and can be used in a docker-compose setup.",
+      "priority": "high",
+      "estimated_time": "30-45 minutes",
+      "files_to_modify": [
+        "Dockerfile",
+        "docker-compose.yml",
+        "src/server.js"
+      ],
+      "implementation_steps": [
+        "Create Dockerfile in project root for Node backend.",
+        "Add necessary instructions for installing dependencies and running the server.",
+        "Create or update docker-compose.yml to include the backend service.",
+        "Test local build and run to verify containerization."
+      ],
+      "complexity_score": 4
+    },
+    {
+      "id": "task_4",
+      "title": "Expand Jest Integration/Security Tests for MCP Endpoints",
+      "description": "Add or enhance Jest tests to cover MCP endpoints and provider health checks, focusing on security and reliability. This will improve test coverage and catch regressions early.",
+      "priority": "medium",
+      "estimated_time": "45-60 minutes",
+      "files_to_modify": [
+        "src/api/routes/mcp.test.js",
+        "src/api/routes/providers.test.js"
+      ],
+      "implementation_steps": [
+        "Review existing test coverage for MCP endpoints.",
+        "Add new tests for edge cases and security (e.g., invalid input, unauthorized access).",
+        "Run tests and ensure all pass.",
+        "Update test documentation in WORKFLOW_STATE.md."
+      ],
+      "complexity_score": 5
+    },
+    {
+      "id": "task_5",
+      "title": "EnhancedChatInterface.jsx: Provider Quick-Switch and Badge",
+      "description": "Add a provider quick-switch UI element and display the current provider badge in the chat interface using useLLM(). This improves user experience and transparency.",
+      "priority": "medium",
+      "estimated_time": "30-45 minutes",
+      "files_to_modify": [
+        "src/frontend/components/EnhancedChatInterface.jsx"
+      ],
+      "implementation_steps": [
+        "Implement provider quick-switch dropdown or button using useLLM().",
+        "Display current provider as a badge/chip in the chat header.",
+        "Test switching and badge updates in the UI."
+      ],
+      "complexity_score": 3
+    },
+    {
+      "id": "task_6",
+      "title": "EnhancedMusicDiscovery.jsx: Mood Settings Radar/Sparkline Visualization",
+      "description": "Add client-only radar or sparkline charts to visualize moodSettings values in the music discovery UI. Use mock data for initial implementation.",
+      "priority": "low",
+      "estimated_time": "30 minutes",
+      "files_to_modify": [
+        "src/frontend/components/EnhancedMusicDiscovery.jsx"
+      ],
+      "implementation_steps": [
+        "Integrate a simple chart library (e.g., Chart.js or Recharts) for radar/sparkline visualization.",
+        "Map moodSettings values to chart data.",
+        "Render chart in the UI and test with mock data."
+      ],
+      "complexity_score": 2
+    }
+  ],
+  "next_research_topics": [
+    "Implementing circuit breaker pattern for provider failover",
+    "Request correlation IDs for end-to-end tracing",
+    "MongoDB compound and TTL indexes for analytics optimization",
+    "OpenTelemetry distributed tracing integration"
+  ],
+  "completion_percentage": 75
+}

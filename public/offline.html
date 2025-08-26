@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoTune AI - Offline</title>
+    <meta name="description" content="EchoTune AI is currently offline">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/api/manifest.json">
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6b73ff">
+    
+    <style>
+        :root {
+            --primary-color: #6b73ff;
+            --primary-dark: #5a67d8;
+            --background-dark: #121212;
+            --background-light: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --border-radius: 12px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .offline-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .offline-message {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .offline-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 115, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f39c12;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.online {
+            background: #1db954;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .cached-data {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .cached-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cached-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 600px) {
+            .offline-container {
+                padding: 30px 20px;
+            }
+            
+            .offline-title {
+                font-size: 28px;
+            }
+            
+            .offline-message {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            🎵
+        </div>
+        
+        <h1 class="offline-title">You're Offline</h1>
+        
+        <p class="offline-message">
+            EchoTune AI is currently offline, but don't worry! Your music discovery experience continues with cached recommendations and offline features.
+        </p>
+        
+        <div class="offline-actions">
+            <button class="btn btn-primary" onclick="checkConnection()">
+                Check Connection
+            </button>
+            
+            <button class="btn btn-secondary" onclick="viewCachedData()">
+                View Cached Recommendations
+            </button>
+        </div>
+        
+        <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Checking connection...</span>
+        </div>
+        
+        <div class="cached-data" id="cachedData" style="display: none;">
+            <h3 style="margin-bottom: 16px; color: var(--text-primary);">Available Offline</h3>
+            <div id="cachedItems"></div>
+        </div>
+    </div>
+
+    <script>
+        let isOnline = navigator.onLine;
+        
+        function updateStatus() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            if (navigator.onLine) {
+                statusDot.className = 'status-dot online';
+                statusText.textContent = 'Connection restored!';
+                
+                // Redirect to main app after a brief delay
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                statusDot.className = 'status-dot';
+                statusText.textContent = 'No internet connection';
+            }
+        }
+        
+        function checkConnection() {
+            const btn = event.target;
+            btn.textContent = 'Checking...';
+            btn.disabled = true;
+            
+            // Force a network request to check connectivity
+            fetch('/api/health', { cache: 'no-cache' })
+                .then(() => {
+                    updateStatus();
+                })
+                .catch(() => {
+                    setTimeout(() => {
+                        btn.textContent = 'Check Connection';
+                        btn.disabled = false;
+                        updateStatus();
+                    }, 1000);
+                });
+        }
+        
+        async function viewCachedData() {
+            const cachedDataDiv = document.getElementById('cachedData');
+            const cachedItemsDiv = document.getElementById('cachedItems');
+            
+            if (cachedDataDiv.style.display === 'none') {
+                // Show cached data
+                cachedDataDiv.style.display = 'block';
+                
+                // Try to get cached data from IndexedDB
+                if ('indexedDB' in window && window.echoTunePWA) {
+                    try {
+                        const profile = await window.echoTunePWA.getCachedData('user_profile');
+                        const recommendations = await window.echoTunePWA.getCachedData('recent_recommendations');
+                        
+                        let itemsHtml = '';
+                        
+                        if (profile) {
+                            itemsHtml += `
+                                <div class="cached-item">
+                                    <span>User Profile</span>
+                                    <span style="color: #1db954;">Available</span>
+                                </div>
+                            `;
+                        }
+                        
+                        if (recommendations) {
+                            itemsHtml += `
+                                <div class="cached-item">
+                                    <span>Recent Recommendations</span>
+                                    <span style="color: #1db954;">${recommendations.length || 'Available'}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        if (!itemsHtml) {
+                            itemsHtml = `
+                                <div class="cached-item">
+                                    <span>No cached data available</span>
+                                    <span style="color: #f39c12;">Visit online first</span>
+                                </div>
+                            `;
+                        }
+                        
+                        cachedItemsDiv.innerHTML = itemsHtml;
+                    } catch (error) {
+                        cachedItemsDiv.innerHTML = `
+                            <div class="cached-item">
+                                <span>Error accessing cached data</span>
+                                <span style="color: #e22134;">Error</span>
+                            </div>
+                        `;
+                    }
+                } else {
+                    cachedItemsDiv.innerHTML = `
+                        <div class="cached-item">
+                            <span>Offline features not available</span>
+                            <span style="color: #f39c12;">Enable PWA</span>
+                        </div>
+                    `;
+                }
+                
+                event.target.textContent = 'Hide Cached Data';
+            } else {
+                // Hide cached data
+                cachedDataDiv.style.display = 'none';
+                event.target.textContent = 'View Cached Recommendations';
+            }
+        }
+        
+        // Listen for online/offline events
+        window.addEventListener('online', updateStatus);
+        window.addEventListener('offline', updateStatus);
+        
+        // Initial status check
+        updateStatus();
+        
+        // Load PWA manager if available
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(() => {
+                // PWA features available
+                console.log('PWA features available offline');
+            });
+        }
+        
+        // Periodic connection check
+        setInterval(() => {
+            if (!navigator.onLine) {
+                fetch('/api/health', { cache: 'no-cache' })
+                    .then(() => {
+                        if (!isOnline) {
+                            updateStatus();
+                            isOnline = true;
+                        }
+                    })
+                    .catch(() => {
+                        isOnline = false;
+                    });
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

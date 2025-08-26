@@ -1,0 +1,242 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        pip install -r requirements.txt
+
+    - name: Run npm audit
+      run: |
+        npm audit --audit-level=moderate --json > npm-audit-results.json || true
+
+    - name: Run pip-audit
+      run: |
+        pip install pip-audit
+        pip-audit --format=json --output=pip-audit-results.json || true
+
+    - name: Run Trivy dependency scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-dependencies.sarif'
+
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-dependencies.sarif'
+
+    - name: Upload dependency scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dependency-scan-results
+        path: |
+          npm-audit-results.json
+          pip-audit-results.json
+          trivy-dependencies.sarif
+
+  sast-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Run Bandit security scan
+      run: |
+        pip install bandit[toml]
+        bandit -r scripts/ -f json -o bandit-results.json || true
+
+    - name: Run Semgrep SAST scan
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/secrets
+          p/javascript
+          p/typescript
+          p/python
+        generateSarif: "1"
+
+    - name: Upload Semgrep results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: semgrep.sarif
+
+    - name: Upload SAST results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: sast-scan-results
+        path: |
+          bandit-results.json
+          semgrep.sarif
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run GitLeaks secret scan
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
+
+    - name: Run TruffleHog secret scan
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  container-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: |
+        docker build -t echotune-ai:security-scan .
+
+    - name: Run Trivy container scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'echotune-ai:security-scan'
+        format: 'sarif'
+        output: 'trivy-container.sarif'
+
+    - name: Upload Trivy container results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-container.sarif'
+
+    - name: Run Snyk container scan
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: echotune-ai:security-scan
+        args: --severity-threshold=high --sarif-file-output=snyk-container.sarif
+
+    - name: Upload Snyk results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: snyk-container.sarif
+
+  security-report:
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, sast-scan, secret-scan, container-scan]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all scan results
+      uses: actions/download-artifact@v3
+      with:
+        pattern: "*-scan-results"
+        merge-multiple: true
+
+    - name: Generate security report
+      run: |
+        # TODO: Implement security report aggregation script
+        echo "Generating comprehensive security report - placeholder"
+        ./scripts/security/generate_security_report.py \
+          --npm-audit npm-audit-results.json \
+          --pip-audit pip-audit-results.json \
+          --bandit bandit-results.json \
+          --output security-report.json
+
+    - name: Security gate check
+      run: |
+        # TODO: Implement security gate script
+        echo "Security gate validation - placeholder"
+        ./scripts/validation/security_gate.py \
+          --report security-report.json \
+          --max-critical 0 \
+          --max-high 5
+
+    - name: Upload security report
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-report
+        path: security-report.json
+
+    - name: Comment security summary on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          // TODO: Implement PR comment with security summary
+          const fs = require('fs');
+          if (fs.existsSync('security-report.json')) {
+            const report = JSON.parse(fs.readFileSync('security-report.json', 'utf8'));
+            const comment = `## Security Scan Results
+            
+            - **Critical Issues**: ${report.critical || 0}
+            - **High Issues**: ${report.high || 0}
+            - **Medium Issues**: ${report.medium || 0}
+            - **Low Issues**: ${report.low || 0}
+            
+            ${report.critical > 0 ? '⚠️ Critical security issues found - please review' : '✅ No critical security issues found'}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }

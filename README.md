@@ -10,10 +10,99 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Deployment](https://img.shields.io/badge/Deploy-DigitalOcean-0080FF.svg)](docs/DEPLOYMENT.md)
+[![CI/CD Pipeline](https://github.com/primoscope/Spotify-echo/actions/workflows/build-test.yml/badge.svg)](https://github.com/primoscope/Spotify-echo/actions)
+[![Security Scan](https://github.com/primoscope/Spotify-echo/actions/workflows/security-scan.yml/badge.svg)](https://github.com/primoscope/Spotify-echo/actions)
 
 [🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [🤖 AI Integration](#-ai-integration) • [🔧 Configuration](#-configuration) • [🚢 Deployment](#-deployment)
 
 </div>
+
+---
+
+## 🏙️ Vision: Music Discovery in Smart Cities
+
+> **Phase 2 Scaffold Complete** - Hybrid recommendation system infrastructure with feedback ingestion, experimentation framework, PWA capabilities, and comprehensive observability.
+
+EchoTune AI envisions a future where music discovery seamlessly integrates with urban life, creating personalized soundtracks for city experiences:
+
+<!-- Photorealistic city images showcasing the future of music discovery -->
+![Tokyo Skyline - Music Discovery](assets/images/tokyo-music-discovery.jpg)
+*Tokyo's neon-lit streets become a canvas for AI-powered music recommendations*
+
+![New York City - Urban Beats](assets/images/nyc-urban-beats.jpg) 
+*New York's diverse neighborhoods inspire genre-blending recommendation algorithms*
+
+![London - Cultural Harmony](assets/images/london-cultural-harmony.jpg)
+*London's rich musical heritage meets cutting-edge AI for personalized discovery*
+
+![San Francisco - Tech Innovation](assets/images/sf-tech-innovation.jpg)
+*San Francisco's tech landscape where music and AI converge for the future*
+
+## 🚀 Phase 2: Hybrid Recommendation System
+
+### 🎯 What's New in Phase 2
+
+**Infrastructure Scaffolding Complete**
+- ✅ Hybrid recommendation engine architecture 
+- ✅ Event feedback ingestion system
+- ✅ A/B testing and experimentation framework
+- ✅ PWA offline capabilities foundation
+- ✅ Comprehensive observability platform
+- ✅ Model integrity and validation workflows
+- ✅ CI/CD pipelines with quality gates
+
+**Feature Flag Controlled Rollout**
+All new functionality is safely behind feature flags:
+```bash
+ENABLE_HYBRID_RECO=false          # Hybrid recommendation engine
+ENABLE_FEEDBACK_EVENTS=false     # Event feedback ingestion  
+ENABLE_EXPERIMENTS=false         # A/B testing framework
+ENABLE_PWA_OFFLINE=false         # PWA offline features
+ENABLE_ENHANCED_MONITORING=false # Advanced observability
+```
+
+### 📊 Phase 2 Architecture
+
+```mermaid
+graph TB
+    A[User Interface] --> B[API Gateway]
+    B --> C[Recommendation Engine]
+    B --> D[Event Ingestion]
+    B --> E[Experiment Framework]
+    
+    C --> F[Collaborative Filtering]
+    C --> G[Content-Based Filtering] 
+    C --> H[Hybrid Algorithm]
+    
+    D --> I[Event Processing]
+    D --> J[Feature Store]
+    
+    E --> K[A/B Testing]
+    E --> L[Statistical Analysis]
+    
+    M[Observability] --> N[Metrics]
+    M --> O[Logs]
+    M --> P[Traces]
+    
+    Q[PWA Shell] --> R[Offline Cache]
+    Q --> S[Background Sync]
+    Q --> T[Push Notifications]
+```
+
+### 🏗️ Directory Structure
+
+```
+├── docs/planning/              # Phase 2 planning documentation
+├── docs/adr/                  # Architecture Decision Records (ADR-003 to ADR-006)
+├── docs/feature-store/        # Feature store design documentation
+├── observability/dashboards/  # Grafana dashboard configurations
+├── reco/                      # Hybrid recommendation engine (scaffolding)
+├── events/                    # Event feedback ingestion (scaffolding)
+├── experiments/               # A/B testing framework (scaffolding)
+├── pwa/                       # Progressive Web App features (scaffolding)
+├── .github/workflows/         # CI/CD pipelines with quality gates
+└── scripts/                   # Validation and testing scripts
+```
 
 ---
 

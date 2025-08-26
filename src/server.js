@@ -31,7 +31,10 @@ if (enableAgentOps) {
 dotenv.config();
 
 // Import Redis and session management
-const session = require('express-session');
+const { getSessionManager } = require('./infra/SessionManager');
+const { configureStaticRoutes } = require('./routes/static');
+const { configureHealthRoutes } = require('./routes/health-consolidated');
+const { getSocketService } = require('./services/SocketService');
 const { initializeRedis, getRedisManager } = require('./utils/redis');
 
 // Import configuration and validation
@@ -280,23 +283,8 @@ if (config.server.compression) {
   );
 }
 
-// Session management with Redis store or memory fallback
-const sessionConfig = {
-  secret: process.env.SESSION_SECRET || 'fallback-dev-secret-change-in-production',
-  name: 'echotune.session',
-  resave: false,
-  saveUninitialized: false,
-  rolling: true,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-  },
-};
-
-// Note: Redis session store will be configured during initialization
-app.use(session(sessionConfig));
+// Session management - initialized during startup
+let sessionManager = null;
 
 // Mount modular routes
 app.use('/health', systemHealthRoutes);
@@ -366,75 +354,8 @@ app.use(
 // Input sanitization
 app.use(sanitizeInput);
 
-// Serve built React application static files first
-app.use(
-  express.static(path.join(__dirname, '../dist'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1y' : 0,
-    etag: true,
-    lastModified: true,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
-        // Hashed asset filenames are immutable
-        res.setHeader('Cache-Control', `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`);
-      }
-    },
-  })
-);
-
-// Static file serving with caching headers (fallback)
-app.use(
-  express.static(path.join(__dirname, '../public'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
-    etag: true,
-    lastModified: true,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
-        res.setHeader('Cache-Control', 'public, max-age=3600');
-      }
-    },
-  })
-);
-
-// Serve React frontend files
-app.use(
-  '/frontend',
-  express.static(path.join(__dirname, 'frontend'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
-    etag: false,
-    setHeaders: (res) => {
-      if (process.env.NODE_ENV !== 'production') {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      }
-    },
-  })
-);
-
-// Serve src directory for JavaScript modules with no-cache in development
-if (process.env.NODE_ENV !== 'production') {
-  app.use(
-    '/src',
-    express.static(path.join(__dirname), {
-      maxAge: 0,
-      etag: false,
-      setHeaders: (res) => {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      },
-    })
-  );
-}
-
-// Serve docs directory for API documentation
-app.use(
-  '/docs',
-  express.static(path.join(__dirname, '../docs'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
-        res.setHeader('Content-Type', 'text/yaml');
-      }
-    },
-  })
-);
+// Configure static file serving (extracted to routes/static.js)
+configureStaticRoutes(app);
 
 // Database connection middleware
 app.use(ensureDatabase);
@@ -476,54 +397,8 @@ const base64encode = (str) => {
 
 // Routes
 
-// Enhanced health check endpoints
-const HealthCheckSystem = require('./utils/health-check');
-const healthChecker = new HealthCheckSystem();
-
-// Comprehensive health check endpoint (bypass rate limiting)
-app.get('/health', async (req, res) => {
-  try {
-    const healthReport = await healthChecker.runAllChecks();
-
-    // For production deployment health checks, only fail on critical errors
-    // Warnings and missing optional services should not cause 503s
-    const hasCriticalErrors = Object.values(healthReport.checks).some(
-      (check) => check.status === 'unhealthy' && !check.optional
-    );
-
-    const statusCode = hasCriticalErrors ? 503 : 200;
-
-    res.status(statusCode).json(healthReport);
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Health check system failure',
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Individual health check endpoints
-app.get('/health/:check', async (req, res) => {
-  try {
-    const checkName = req.params.check;
-    const result = await healthChecker.runCheck(checkName);
-
-    const statusCode = result.status === 'healthy' ? 200 : result.status === 'warning' ? 200 : 503;
-
-    res.status(statusCode).json({
-      check: checkName,
-      ...result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      error: 'Invalid health check',
-      message: error.message,
-      availableChecks: Array.from(healthChecker.checks.keys()),
-    });
-  }
-});
+// Configure health check routes (extracted to routes/health-consolidated.js)
+configureHealthRoutes(app);
 
 // Simple readiness probe (lightweight check for load balancers)
 app.get('/ready', (req, res) => {
@@ -586,209 +461,19 @@ const playlistAutomationRoutes = require('./api/routes/playlist-automation');
 app.use('/api/recommendations', realtimeRecommendationsRoutes);
 app.use('/api/playlists', playlistAutomationRoutes);
 
-// Socket.IO Real-time Chat Integration
-const EchoTuneChatbot = require('./chat/chatbot');
-
-// Initialize chatbot for Socket.IO
-const chatbotConfig = {
-  llmProviders: {
-    openai: {
-      apiKey: process.env.OPENAI_API_KEY,
-      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
-    },
-    gemini: {
-      apiKey: process.env.GEMINI_API_KEY,
-      model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
-    },
-    azure: {
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      endpoint: process.env.AZURE_OPENAI_ENDPOINT,
-      deployment: process.env.AZURE_OPENAI_DEPLOYMENT,
-    },
-    openrouter: {
-      apiKey: process.env.OPENROUTER_API_KEY,
-      model: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1-0528:free',
-    },
-  },
-  // Determine the best available provider based on API keys - prioritize Gemini
-  defaultProvider:
-    process.env.DEFAULT_LLM_PROVIDER ||
-    (process.env.GEMINI_API_KEY
-      ? 'gemini'
-      : process.env.OPENAI_API_KEY
-        ? 'openai'
-        : process.env.OPENROUTER_API_KEY
-          ? 'openrouter'
-          : 'mock'),
-  defaultModel: process.env.DEFAULT_LLM_MODEL || 'gemini-1.5-flash',
-  enableMockProvider: true,
-};
-
-let socketChatbot = null;
-
-async function initializeSocketChatbot() {
-  if (!socketChatbot) {
-    socketChatbot = new EchoTuneChatbot(chatbotConfig);
-    await socketChatbot.initialize();
-    console.log('🔗 Socket.IO Chatbot initialized');
-  }
-  return socketChatbot;
-}
-
-// Socket.IO connection handling (only if real-time is enabled)
+// Socket.IO Real-time Chat Integration (extracted to services/SocketService.js)
+// Initialize Socket.IO service only if real-time is enabled
 if (realtimeEnabled && io) {
-  io.on('connection', async (socket) => {
-  console.log(`🔗 Client connected: ${socket.id}`);
-
-  try {
-    // Initialize chatbot
-    const chatbot = await initializeSocketChatbot();
-
-    // Send connection confirmation
-    socket.emit('connected', {
-      message: 'Connected to EchoTune AI',
-      socketId: socket.id,
-      timestamp: new Date().toISOString(),
-      providers: chatbot.getAvailableProviders(),
-    });
-
-    // Handle chat messages
-    socket.on('chat_message', async (data) => {
-      try {
-        const { message, sessionId, provider, userId = `socket_${socket.id}` } = data;
-
-        if (!message) {
-          socket.emit('error', { message: 'Message is required' });
-          return;
-        }
-
-        // Emit typing indicator
-        socket.emit('typing_start', { timestamp: new Date().toISOString() });
-
-        let activeSessionId = sessionId;
-
-        // Create session if not provided
-        if (!activeSessionId) {
-          const session = await chatbot.startConversation(userId, { provider });
-          activeSessionId = session.sessionId;
-          socket.emit('session_created', { sessionId: activeSessionId });
-        }
-
-        // Send message to chatbot
-        const response = await chatbot.sendMessage(activeSessionId, message, {
-          provider: provider || chatbot.config.defaultProvider,
-          userId,
-        });
-
-        // Stop typing indicator
-        socket.emit('typing_stop');
-
-        // Send response
-        socket.emit('chat_response', {
-          ...response,
-          sessionId: activeSessionId,
-          timestamp: new Date().toISOString(),
-        });
-      } catch (error) {
-        console.error('Socket chat error:', error);
-        socket.emit('typing_stop');
-        socket.emit('error', {
-          message: 'Failed to process message',
-          error: error.message,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    });
-
-    // Handle streaming messages
-    socket.on('chat_stream', async (data) => {
-      try {
-        const { message, sessionId, provider, userId = `socket_${socket.id}` } = data;
-
-        if (!message) {
-          socket.emit('error', { message: 'Message is required' });
-          return;
-        }
-
-        let activeSessionId = sessionId;
-
-        if (!activeSessionId) {
-          const session = await chatbot.startConversation(userId, { provider });
-          activeSessionId = session.sessionId;
-          socket.emit('session_created', { sessionId: activeSessionId });
-        }
-
-        // Start streaming
-        socket.emit('stream_start', { sessionId: activeSessionId });
-
-        for await (const chunk of chatbot.streamMessage(activeSessionId, message, { provider })) {
-          if (chunk.error) {
-            socket.emit('stream_error', { error: chunk.error });
-            break;
-          } else if (chunk.type === 'chunk') {
-            socket.emit('stream_chunk', {
-              content: chunk.content,
-              isPartial: chunk.isPartial,
-              sessionId: activeSessionId,
-            });
-          } else if (chunk.type === 'complete') {
-            socket.emit('stream_complete', {
-              sessionId: activeSessionId,
-              totalTime: chunk.totalTime,
-              timestamp: new Date().toISOString(),
-            });
-            break;
-          }
-        }
-      } catch (error) {
-        console.error('Socket stream error:', error);
-        socket.emit('stream_error', {
-          message: 'Failed to stream message',
-          error: error.message,
-        });
-      }
-    });
-
-    // Handle provider switching
-    socket.on('switch_provider', async (data) => {
-      try {
-        const { provider } = data;
-        const result = await chatbot.switchProvider(provider);
-
-        socket.emit('provider_switched', {
-          success: true,
-          provider: result.provider,
-          message: `Switched to ${provider}`,
-          timestamp: new Date().toISOString(),
-        });
-      } catch (error) {
-        socket.emit('provider_switch_error', {
-          message: 'Failed to switch provider',
-          error: error.message,
-        });
-      }
-    });
-
-    // Handle disconnect
-    socket.on('disconnect', () => {
-      console.log(`🔌 Client disconnected: ${socket.id}`);
-    });
-
-    // Handle errors
-    socket.on('error', (error) => {
-      console.error(`Socket error from ${socket.id}:`, error);
-    });
-  } catch (error) {
-    console.error('Socket connection initialization error:', error);
-    socket.emit('initialization_error', {
-      message: 'Failed to initialize chat service',
-      error: error.message,
-    });
-  }
-});
+  const socketService = getSocketService();
+  socketService.initialize(io);
 } else {
   console.log('⚪ Socket.IO connection handling disabled');
 }
+
+
+
+
+
 
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
@@ -825,6 +510,16 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
     console.log('🏗️ Infrastructure initialization completed');
   } catch (error) {
     console.error('❌ Infrastructure initialization failed:', error);
+  }
+
+  // Initialize session management
+  try {
+    sessionManager = getSessionManager();
+    await sessionManager.initialize();
+    sessionManager.configureSessionMiddleware(app);
+    console.log('🔐 Session management initialized');
+  } catch (error) {
+    console.error('❌ Session management initialization failed:', error);
   }
   
   // Structured logging for key server info

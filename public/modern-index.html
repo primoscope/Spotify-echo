@@ -5,7 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EchoTune AI - Your Personal Music Assistant</title>
     <meta name="description" content="Discover new music and create personalized playlists with AI-powered recommendations">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/api/manifest.json">
+    
+    <!-- Favicon and Icons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/favicon.ico">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6b73ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="EchoTune AI">
     
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://api.spotify.com">
@@ -913,5 +925,32 @@
     
     <!-- Socket.IO Client -->
     <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- PWA Service Worker -->
+    <script src="/js/pwa.js"></script>
+    
+    <!-- Initialize PWA features -->
+    <script>
+        // Initialize PWA when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.echoTunePWA) {
+                console.log('EchoTune PWA features initialized');
+                
+                // Set up analytics tracking for PWA events
+                window.trackPWAEvent = function(eventName, properties = {}) {
+                    if (window.echoTunePWA) {
+                        window.echoTunePWA.trackAnalytics(eventName, properties);
+                    }
+                };
+                
+                // Track app launch
+                window.trackPWAEvent('app_launch', {
+                    standalone: window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches,
+                    user_agent: navigator.userAgent,
+                    screen_resolution: `${screen.width}x${screen.height}`
+                });
+            }
+        });
+    </script>
 </body>
 </html>

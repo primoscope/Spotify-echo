@@ -109,6 +109,18 @@ const systemPerformanceRoutes = require('./routes/performance');
 const systemMonitoringRoutes = require('./routes/system');
 const systemMetricsRoutes = require('./routes/metrics');
 
+// Import new modular routes
+const authRoutes = require('./routes/auth');
+const spotifyApiRoutes = require('./routes/spotify-api');
+const enhancedApiRoutes = require('./routes/enhanced-api');
+const chatRoutes_local = require('./routes/chat');
+const appRoutes = require('./routes/app');
+
+// Import infrastructure systems
+const { getContainer, configureCoreServices } = require('./infra/DIContainer');
+const { getFeatureFlags, configureDefaultFlags } = require('./infra/FeatureFlags');
+const { getMiddlewareManager, configureDefaultMiddleware } = require('./infra/MiddlewareManager');
+
 // Import Redis-backed rate limiting and performance monitoring
 const { rateLimiters } = require('./middleware/redis-rate-limiter');
 const { middleware: slowRequestMiddleware } = require('./middleware/slow-request-logger');
@@ -199,6 +211,22 @@ app.use('/internal/example-validation', require('./routes/internal/example-valid
 // Initialize MCP Performance Analytics
 const mcpAnalytics = new MCPPerformanceAnalytics();
 
+// Initialize infrastructure systems
+async function initializeInfrastructure() {
+  // Configure dependency injection
+  configureCoreServices();
+  
+  // Configure feature flags
+  configureDefaultFlags();
+  
+  // Configure middleware
+  const middlewareManager = getMiddlewareManager();
+  configureDefaultMiddleware(middlewareManager);
+  
+  console.log('🏗️ Infrastructure systems initialized');
+  return { middlewareManager };
+}
+
 // Trust proxy if in production (for proper IP detection behind reverse proxy)
 if (config.server.trustProxy) {
   app.set('trust proxy', 1);
@@ -276,6 +304,13 @@ app.use('/metrics', systemMetricsRoutes);
 app.use('/api/performance', systemPerformanceRoutes);
 app.use('/api', systemMonitoringRoutes);
 app.use('/api', systemMetricsRoutes); // Mount under /api as well for AI routes
+
+// Mount new modular routes
+app.use('/auth', authRoutes);
+app.use('/api/spotify', spotifyApiRoutes);
+app.use('/api', enhancedApiRoutes);
+app.use('/api/chat', chatRoutes_local);
+app.use('/', appRoutes);
 
 // Enhanced security headers (replaces basic securityHeaders)
 app.use(securityHeaders);
@@ -422,153 +457,18 @@ app.use('/api/spotify', rateLimiters.spotify);
 app.use('/auth', rateLimiters.auth);
 app.use('/api/spotify/auth', rateLimiters.auth); // Additional auth endpoint protection
 
-// Enhanced performance monitoring route
-app.get('/api/performance', async (req, res) => {
-  try {
-    const report = performanceMonitor.getPerformanceReport();
-    const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
-    const slowRequestMetrics = getSlowRequestMetrics();
+// Enhanced API routes moved to /routes/enhanced-api.js
 
-    // Combine performance data
-    const enhancedReport = {
-      ...report,
-      slow_requests: slowRequestMetrics,
-      timestamp: new Date().toISOString(),
-    };
+// Store for temporary state (moved to auth routes module)
+// const authStates = new Map();
 
-    res.json(enhancedReport);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get performance report',
-      message: error.message,
-    });
-  }
-});
-
-// Endpoint percentiles (last 5 minutes)
-app.get('/api/performance/endpoints', (req, res) => {
-  try {
-    const windowMs = req.query.windowMs ? parseInt(req.query.windowMs, 10) : undefined;
-    const pct = performanceMonitor.getEndpointPercentiles(windowMs);
-    res.json({ success: true, windowMs: windowMs || 5 * 60 * 1000, endpoints: pct });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Failed to get endpoint percentiles' });
-  }
-});
-
-// Rate limiter statistics route
-app.get('/api/rate-limit/stats', (req, res) => {
-  try {
-    const stats = {};
-
-    for (const [name, limiter] of Object.entries(rateLimiters)) {
-      stats[name] = limiter.getStats();
-    }
-
-    res.json({
-      rate_limiters: stats,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get rate limiter stats',
-      message: error.message,
-    });
-  }
-});
-
-// MCP Analytics endpoint
-app.get('/api/mcp/analytics', async (req, res) => {
-  try {
-    const report = await mcpAnalytics.generateMCPReport();
-    res.json(report);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to generate MCP analytics report',
-      message: error.message,
-    });
-  }
-});
-
-// Performance baseline endpoint
-app.post('/api/performance/baseline', async (req, res) => {
-  try {
-    const { PerformanceBaseline } = require('./utils/performance-baseline');
-    const options = {
-      baseURL: req.body.baseURL || `http://localhost:${PORT}`,
-      testDuration: req.body.testDuration || 30000,
-      concurrentRequests: req.body.concurrentRequests || 3,
-    };
-
-    const baseline = new PerformanceBaseline(options);
-    const results = await baseline.runBaseline();
-
-    res.json({
-      success: true,
-      results: results,
-      message: 'Performance baseline completed',
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to run performance baseline',
-      message: error.message,
-    });
-  }
-});
-
-// Enhanced cache statistics route - now includes Redis stats and performance metrics
-app.get('/api/cache/stats', async (req, res) => {
-  try {
-    const cacheStats = await cacheManager.getStats();
-    const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
-    const slowRequestMetrics = getSlowRequestMetrics();
-
-    res.json({
-      cache: cacheStats,
-      performance: slowRequestMetrics,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get cache stats',
-      message: error.message,
-    });
-  }
-});
-
-// Redis health check route
-app.get('/api/redis/health', async (req, res) => {
-  try {
-    const redisManager = getRedisManager();
-    const health = await redisManager.healthCheck();
-    res.json(health);
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      error: error.message,
-    });
-  }
-});
-
-// Security statistics route (admin only in production)
-app.get('/api/security/stats', (req, res) => {
-  if (process.env.NODE_ENV === 'production' && !req.user?.isAdmin) {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  const stats = securityManager.getSecurityStats();
-  res.json(stats);
-});
-
-// Store for temporary state (in production, use Redis or database)
-const authStates = new Map();
-
-// Utility functions
-const generateRandomString = (length) => {
-  return crypto
-    .randomBytes(Math.ceil(length / 2))
-    .toString('hex')
-    .slice(0, length);
-};
+// Utility functions (moved to auth routes module)
+// const generateRandomString = (length) => {
+//   return crypto
+//     .randomBytes(Math.ceil(length / 2))
+//     .toString('hex')
+//     .slice(0, length);
+// };
 
 const base64encode = (str) => {
   return Buffer.from(str).toString('base64');
@@ -643,226 +543,13 @@ app.get('/alive', (req, res) => {
   });
 });
 
-// Main page - React Application
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
+// Main application routes moved to /routes/app.js
 
-// Legacy interface (for comparison)
-app.get('/legacy', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+// Spotify authentication routes moved to /routes/auth.js
 
-// Spotify authentication initiation
-app.get('/auth/spotify', (req, res) => {
-  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET) {
-    return res.status(500).json({
-      error: 'Spotify credentials not configured',
-      message: 'Please set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET environment variables',
-    });
-  }
+// Spotify API routes moved to /routes/spotify-api.js
 
-  const state = generateRandomString(16);
-  const scope =
-    'user-read-private user-read-email playlist-modify-public playlist-modify-private user-read-recently-played user-top-read';
-
-  // Store state for verification
-  authStates.set(state, {
-    timestamp: Date.now(),
-    ip: req.ip,
-  });
-
-  // Clean up old states (older than 10 minutes)
-  const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-  for (const [key, value] of authStates.entries()) {
-    if (value.timestamp < tenMinutesAgo) {
-      authStates.delete(key);
-    }
-  }
-
-  const authURL =
-    'https://accounts.spotify.com/authorize?' +
-    new URLSearchParams({
-      response_type: 'code',
-      client_id: SPOTIFY_CLIENT_ID,
-      scope: scope,
-      redirect_uri: SPOTIFY_REDIRECT_URI,
-      state: state,
-    }).toString();
-
-  res.redirect(authURL);
-});
-
-// Spotify OAuth callback - delegate to API route for single canonical implementation
-app.get('/auth/callback', (req, res, next) => {
-  // Forward to the canonical Spotify API callback handler to avoid code duplication
-  req.url = '/api/spotify/auth/callback' + (req.url.indexOf('?') !== -1 ? req.url.substring(req.url.indexOf('?')) : '');
-  next('router');
-});
-
-// API endpoint to get user's Spotify data (requires authentication in production)
-app.post('/api/spotify/recommendations', async (req, res) => {
-  try {
-    const { access_token, seed_genres, limit = 20, target_features = {} } = req.body;
-
-    if (!access_token) {
-      return res.status(401).json({ error: 'Access token required' });
-    }
-
-    // Build recommendations query
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-      seed_genres: (seed_genres || ['pop', 'rock']).join(','),
-    });
-
-    // Add target audio features if provided
-    Object.entries(target_features).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.append(`target_${key}`, value.toString());
-      }
-    });
-
-    const response = await axios.get(
-      `https://api.spotify.com/v1/recommendations?${params.toString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
-
-    res.json({
-      recommendations: response.data.tracks,
-      seed_genres: seed_genres,
-      target_features: target_features,
-      status: 'success',
-    });
-  } catch (error) {
-    console.error('Recommendations error:', error.response?.data || error.message);
-    res.status(500).json({
-      error: 'Failed to get recommendations',
-      message: error.response?.data?.error?.message || error.message,
-    });
-  }
-});
-
-// API endpoint to create playlist
-app.post('/api/spotify/playlist', async (req, res) => {
-  try {
-    const { access_token, name, description, tracks, isPublic = false } = req.body;
-
-    if (!access_token || !name || !tracks || !Array.isArray(tracks)) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    // Get user ID first
-    const userResponse = await axios.get('https://api.spotify.com/v1/me', {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-
-    const userId = userResponse.data.id;
-
-    // Create playlist
-    const playlistResponse = await axios.post(
-      `https://api.spotify.com/v1/users/${userId}/playlists`,
-      {
-        name: name,
-        description: description || 'Created by EchoTune AI',
-        public: isPublic,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    const playlist = playlistResponse.data;
-
-    // Add tracks to playlist
-    if (tracks.length > 0) {
-      await axios.post(
-        `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,
-        {
-          uris: tracks,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    }
-
-    res.json({
-      playlist: {
-        id: playlist.id,
-        name: playlist.name,
-        description: playlist.description,
-        external_url: playlist.external_urls.spotify,
-        tracks_added: tracks.length,
-      },
-      status: 'success',
-    });
-  } catch (error) {
-    console.error('Playlist creation error:', error.response?.data || error.message);
-    res.status(500).json({
-      error: 'Failed to create playlist',
-      message: error.response?.data?.error?.message || error.message,
-    });
-  }
-});
-
-// Chatbot endpoint (basic implementation)
-app.post('/api/chat', async (req, res) => {
-  try {
-    const { message } = req.body;
-    // Note: user_context available for future personalization features
-
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
-
-    // Simple intent recognition (in production, use proper NLP)
-    const lowerMessage = message.toLowerCase();
-    let response = '';
-    let action = null;
-
-    if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
-      response =
-        'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
-      action = 'recommend';
-    } else if (lowerMessage.includes('playlist')) {
-      response =
-        'I can help you create a personalized playlist! What would you like to name it and what kind of vibe are you going for?';
-      action = 'create_playlist';
-    } else if (lowerMessage.includes('mood') || lowerMessage.includes('feel')) {
-      response =
-        'Tell me more about your mood! Are you looking for something upbeat and energetic, or maybe something more chill and relaxing?';
-      action = 'mood_analysis';
-    } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      response =
-        'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
-    } else {
-      response =
-        'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
-    }
-
-    res.json({
-      response: response,
-      action: action,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error('Chat error:', error);
-    res.status(500).json({
-      error: 'Failed to process message',
-      message: 'Sorry, I encountered an error. Please try again.',
-    });
-  }
-});
+// Basic chatbot routes moved to /routes/chat.js
 
 // API Routes
 // Register API routes
@@ -1107,7 +794,8 @@ if (realtimeEnabled && io) {
 // eslint-disable-next-line no-unused-vars
 app.use(errorHandler);
 
-// 404 catch-all handler - must be after all other routes
+// 404 catch-all handler - must be after all other routes  
+// (Note: SPA routing is now handled in app routes)
 app.use((req, res) => {
   const { createNotFoundError } = require('./errors/createError');
   const error = createNotFoundError('Endpoint', req.path);
@@ -1122,27 +810,6 @@ app.use((req, res) => {
   });
 });
 
-// Catch-all handler for React Router (client-side routing)
-app.get('*', (req, res) => {
-  // Only serve the React app for non-API routes
-  if (!req.path.startsWith('/api/') && !req.path.startsWith('/auth/') && !req.path.startsWith('/internal/')) {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  } else {
-    // Let the 404 handler take care of API routes
-    const { createNotFoundError } = require('./errors/createError');
-    const error = createNotFoundError('API Endpoint', req.path);
-    
-    res.status(error.statusCode).json({
-      error: {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        timestamp: error.timestamp
-      }
-    });
-  }
-});
-
 // Start server
 if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, '0.0.0.0', async () => {
   console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
@@ -1151,6 +818,14 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
   console.log(
     `🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`
   );
+  
+  // Initialize infrastructure systems
+  try {
+    const { middlewareManager } = await initializeInfrastructure();
+    console.log('🏗️ Infrastructure initialization completed');
+  } catch (error) {
+    console.error('❌ Infrastructure initialization failed:', error);
+  }
   
   // Structured logging for key server info
   logger.info('server-start', {

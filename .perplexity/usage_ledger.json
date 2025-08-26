@@ -39,8 +39,8 @@
     ]
   },
   "2025-W35": {
-    "total_cost": 0.320152,
-    "request_count": 5,
+    "total_cost": 0.640304,
+    "request_count": 10,
     "requests": [
       {
         "timestamp": "2025-08-25 20:22:23.620776",
@@ -91,6 +91,61 @@
         "model": "sonar-pro",
         "input_tokens": 339,
         "output_tokens": 1551,
+        "searches_performed": 5,
+        "estimated_cost": 0.06403400000000001,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 01:26:45.458553",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1009,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 01:27:07.340917",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 974,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 01:27:27.452377",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1292,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 01:27:45.348554",
+        "model": "sonar-pro",
+        "input_tokens": 339,
+        "output_tokens": 1130,
+        "searches_performed": 5,
+        "estimated_cost": 0.06403400000000001,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 01:28:04.755929",
+        "model": "sonar-pro",
+        "input_tokens": 339,
+        "output_tokens": 1286,
         "searches_performed": 5,
         "estimated_cost": 0.06403400000000001,
         "actual_cost": null,

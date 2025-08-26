@@ -3,22 +3,22 @@
   "tasks_list": [
     {
       "task_id": "task_1",
-      "title": "Persist Rolling Window Metrics to Redis",
+      "title": "Persist Rolling Performance Metrics to Redis",
       "status": "attempted",
-      "complexity": 6
+      "complexity": 7
     },
     {
       "task_id": "task_2",
       "title": "TypeScript Migration Plan for High-Change Backend Modules",
       "status": "attempted",
-      "complexity": 5
+      "complexity": 6
     },
     {
       "task_id": "task_3",
       "title": "Containerize Node Backend with Simple Dockerfile",
       "status": "attempted",
-      "complexity": 4
+      "complexity": 5
     }
   ],
-  "timestamp": "Tue Aug 26 01:53:42 UTC 2025"
+  "timestamp": "Tue Aug 26 06:38:46 UTC 2025"
 }

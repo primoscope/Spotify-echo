@@ -283,7 +283,24 @@ async function initializeInfrastructure() {
         // Store Phase 9 orchestrator in app locals for API access
         app.locals.phase9Orchestrator = phase9Orchestrator;
         
-        return { middlewareManager, phase6Integration, phase7Orchestrator, phase8Orchestrator, phase9Orchestrator };
+        // Phase 10: Initialize Advanced AI/ML Capabilities & Real-Time Recommendations
+        const Phase10Orchestrator = require('./infra/Phase10Orchestrator');
+        const phase10Orchestrator = new Phase10Orchestrator({
+          environment: process.env.NODE_ENV || 'development',
+          enableAdvancedRecommendationEngine: process.env.ENABLE_ADVANCED_RECOMMENDATIONS !== 'false',
+          enableRealTimeInference: process.env.ENABLE_REAL_TIME_INFERENCE !== 'false',
+          enablePersonalizationEngine: process.env.ENABLE_PERSONALIZATION_ENGINE !== 'false',
+          enableAIModelManagement: process.env.ENABLE_AI_MODEL_MANAGEMENT !== 'false',
+          integrationMode: 'full'
+        });
+        
+        await phase10Orchestrator.initialize();
+        console.log('✅ Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations completed successfully');
+        
+        // Store Phase 10 orchestrator in app locals for API access
+        app.locals.phase10Orchestrator = phase10Orchestrator;
+        
+        return { middlewareManager, phase6Integration, phase7Orchestrator, phase8Orchestrator, phase9Orchestrator, phase10Orchestrator };
       } catch (phase8Error) {
         console.warn('⚠️ Phase 8: Advanced enterprise integration failed, continuing with Phase 7 only:', phase8Error.message);
         
@@ -304,10 +321,53 @@ async function initializeInfrastructure() {
           
           app.locals.phase9Orchestrator = phase9Orchestrator;
           
-          return { middlewareManager, phase6Integration, phase7Orchestrator, phase9Orchestrator };
+          // Try Phase 10 even if Phase 8 failed
+          try {
+            const Phase10Orchestrator = require('./infra/Phase10Orchestrator');
+            const phase10Orchestrator = new Phase10Orchestrator({
+              environment: process.env.NODE_ENV || 'development',
+              enableAdvancedRecommendationEngine: process.env.ENABLE_ADVANCED_RECOMMENDATIONS !== 'false',
+              enableRealTimeInference: process.env.ENABLE_REAL_TIME_INFERENCE !== 'false',
+              enablePersonalizationEngine: process.env.ENABLE_PERSONALIZATION_ENGINE !== 'false',
+              enableAIModelManagement: process.env.ENABLE_AI_MODEL_MANAGEMENT !== 'false',
+              integrationMode: 'standard' // Reduced mode without Phase 8
+            });
+            
+            await phase10Orchestrator.initialize();
+            console.log('✅ Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations completed successfully (standalone mode)');
+            
+            app.locals.phase10Orchestrator = phase10Orchestrator;
+            
+            return { middlewareManager, phase6Integration, phase7Orchestrator, phase9Orchestrator, phase10Orchestrator };
+          } catch (phase10Error) {
+            console.warn('⚠️ Phase 10: Advanced AI/ML integration failed, continuing with Phase 9 only:', phase10Error.message);
+            return { middlewareManager, phase6Integration, phase7Orchestrator, phase9Orchestrator };
+          }
         } catch (phase9Error) {
           console.warn('⚠️ Phase 9: Advanced observability integration failed, continuing with Phase 7 only:', phase9Error.message);
-          return { middlewareManager, phase6Integration, phase7Orchestrator };
+          
+          // Try Phase 10 even if Phase 9 failed
+          try {
+            const Phase10Orchestrator = require('./infra/Phase10Orchestrator');
+            const phase10Orchestrator = new Phase10Orchestrator({
+              environment: process.env.NODE_ENV || 'development',
+              enableAdvancedRecommendationEngine: process.env.ENABLE_ADVANCED_RECOMMENDATIONS !== 'false',
+              enableRealTimeInference: process.env.ENABLE_REAL_TIME_INFERENCE !== 'false',
+              enablePersonalizationEngine: process.env.ENABLE_PERSONALIZATION_ENGINE !== 'false',
+              enableAIModelManagement: process.env.ENABLE_AI_MODEL_MANAGEMENT !== 'false',
+              integrationMode: 'minimal' // Minimal mode without Phase 8 & 9
+            });
+            
+            await phase10Orchestrator.initialize();
+            console.log('✅ Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations completed successfully (minimal mode)');
+            
+            app.locals.phase10Orchestrator = phase10Orchestrator;
+            
+            return { middlewareManager, phase6Integration, phase7Orchestrator, phase10Orchestrator };
+          } catch (phase10Error) {
+            console.warn('⚠️ Phase 10: Advanced AI/ML integration failed, continuing with Phase 7 only:', phase10Error.message);
+            return { middlewareManager, phase6Integration, phase7Orchestrator };
+          }
         }
       }
       
@@ -434,6 +494,10 @@ app.use('/api/phase8', phase8ApiRoutes);
 // Phase 9: Advanced Observability, Analytics & Business Intelligence routes
 const phase9ApiRoutes = require('./routes/phase9');
 app.use('/api/phase9', phase9ApiRoutes);
+
+// Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations API routes
+const phase10ApiRoutes = require('./routes/phase10');
+app.use('/api/phase10', phase10ApiRoutes);
 
 // Phase 6: Legacy middleware configuration (to be replaced by MiddlewareConfigurationService)
 // Enhanced security headers (replaces basic securityHeaders)
@@ -678,6 +742,16 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
       console.log(`🔍 APM: enabled, 📊 Business Intelligence: enabled`);
       console.log(`📈 Real-Time Analytics: enabled, 🚨 Advanced Alerting: enabled`);
       console.log(`💡 Health Score: System ${phase9Overview.health.system.toFixed(1)}%, Business ${phase9Overview.health.business.toFixed(1)}%`);
+    }
+
+    // Phase 10: Show AI/ML services status
+    if (infrastructure.phase10Orchestrator) {
+      const phase10Overview = infrastructure.phase10Orchestrator.getStatus();
+      console.log(`✅ Phase 10: Advanced AI/ML Capabilities ready (${phase10Overview.services.healthy}/${phase10Overview.services.total} services)`);
+      console.log(`🤖 AI Services: ${phase10Overview.services.list.join(', ')}`);
+      console.log(`🎯 ML Pipeline: ${phase10Overview.metrics.totalRequests} requests processed, ${phase10Overview.metrics.averageLatency}ms avg latency`);
+      console.log(`⚡ Optimizations: ${phase10Overview.metrics.optimizationEvents} events, ${phase10Overview.integrationPatterns.length} integration patterns`);
+      console.log(`🔍 API Endpoints: 30+ endpoints available at /api/phase10/*`);
     }
   } catch (error) {
     console.error('❌ Infrastructure initialization failed:', error);

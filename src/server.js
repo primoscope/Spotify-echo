@@ -233,7 +233,27 @@ async function initializeInfrastructure() {
   try {
     const phase6Integration = await initializePhase6Integration(app);
     console.log('✅ Phase 6: Enterprise services integrated successfully');
-    return { middlewareManager, phase6Integration };
+    
+    // Phase 7: Initialize Event-Driven Architecture & Service Mesh
+    try {
+      const { getPhase7Orchestrator } = require('./infra/Phase7Orchestrator');
+      const phase7Orchestrator = getPhase7Orchestrator({
+        enableEventBus: true,
+        enableServiceMesh: true,
+        enableEventSourcing: true,
+        enableDistributedTransactions: true,
+        autoRegisterServices: true
+      });
+      
+      await phase7Orchestrator.initialize();
+      console.log('✅ Phase 7: Event-Driven Architecture & Service Mesh integrated successfully');
+      
+      return { middlewareManager, phase6Integration, phase7Orchestrator };
+    } catch (phase7Error) {
+      console.warn('⚠️ Phase 7: Event-Driven Architecture integration failed, continuing with Phase 6 only:', phase7Error.message);
+      return { middlewareManager, phase6Integration };
+    }
+    
   } catch (error) {
     console.warn('⚠️ Phase 6: Enterprise integration failed, continuing with legacy infrastructure:', error.message);
     return { middlewareManager };
@@ -340,6 +360,10 @@ app.use('/', appRoutes);
 // Phase 6: Enterprise health monitoring routes
 const enterpriseHealthRoutes = require('./routes/enterprise-health');
 app.use('/health', enterpriseHealthRoutes);
+
+// Phase 7: Event-Driven Architecture & Service Mesh routes
+const eventDrivenRoutes = require('./routes/event-driven');
+app.use('/api/event-driven', eventDrivenRoutes);
 
 // Phase 6: Legacy middleware configuration (to be replaced by MiddlewareConfigurationService)
 // Enhanced security headers (replaces basic securityHeaders)
@@ -558,6 +582,14 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
     } else {
       await setupEnterpriseMiddleware();
       await applyLegacyMiddleware();
+    }
+    
+    // Phase 7: Show event-driven architecture status
+    if (infrastructure.phase7Orchestrator) {
+      const phase7Health = await infrastructure.phase7Orchestrator.getHealthStatus();
+      const phase7Metrics = infrastructure.phase7Orchestrator.getMetrics();
+      console.log(`✅ Phase 7: Event-Driven Architecture ready (${phase7Health.status})`);
+      console.log(`📊 Phase 7: Components - Events: ${phase7Metrics.components.eventBus?.eventsPublished || 0}, Services: ${phase7Metrics.components.serviceMesh?.services?.length || 0}`);
     }
   } catch (error) {
     console.error('❌ Infrastructure initialization failed:', error);

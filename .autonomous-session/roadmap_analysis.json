@@ -1,0 +1,135 @@
+{
+  "actionable_tasks": [
+    {
+      "id": "task_1",
+      "title": "Persist Rolling Performance Metrics to Redis",
+      "description": "Implement logic to persist API latency and error metrics in a rolling window to Redis for durability and multi-instance aggregation. This will improve observability and reliability of performance data across deployments.",
+      "priority": "high",
+      "estimated_time": "60-90 minutes",
+      "files_to_modify": [
+        "scripts/bench/api-latency.js",
+        "src/api/middleware/performance.js",
+        "src/config/redis.js"
+      ],
+      "implementation_steps": [
+        "Set up Redis connection in src/config/redis.js (if not already present).",
+        "Modify scripts/bench/api-latency.js to write rolling metrics to Redis after each benchmark run.",
+        "Update performance middleware to read/write rolling metrics from Redis instead of in-memory storage.",
+        "Test multi-instance aggregation by simulating concurrent writes and reads."
+      ],
+      "complexity_score": 7
+    },
+    {
+      "id": "task_2",
+      "title": "TypeScript Migration Plan for High-Change Backend Modules",
+      "description": "Draft and begin implementing a migration plan to convert backend modules with high change-rate (e.g., src/api/routes/*, src/chat/*) from JavaScript to TypeScript. This will improve code quality and maintainability.",
+      "priority": "medium",
+      "estimated_time": "60 minutes",
+      "files_to_modify": [
+        "src/api/routes/*",
+        "src/chat/*",
+        "tsconfig.json"
+      ],
+      "implementation_steps": [
+        "Create tsconfig.json with appropriate settings for backend.",
+        "Rename one or two high-change files (e.g., src/api/routes/index.js) to .ts and add type annotations.",
+        "Fix type errors and update imports/exports as needed.",
+        "Document migration steps and priorities in a README or migration.md."
+      ],
+      "complexity_score": 6
+    },
+    {
+      "id": "task_3",
+      "title": "Containerize Node Backend with Simple Dockerfile",
+      "description": "Write a basic Dockerfile for the Node backend service to enable containerized development and deployment. This task does not require complex orchestration or external dependencies.",
+      "priority": "high",
+      "estimated_time": "30-45 minutes",
+      "files_to_modify": [
+        "Dockerfile",
+        "docker-compose.yml",
+        "src/server.js"
+      ],
+      "implementation_steps": [
+        "Create Dockerfile in project root for Node backend (use node:18-alpine as base).",
+        "Add basic build/run instructions (COPY, RUN npm install, CMD).",
+        "Create minimal docker-compose.yml for local dev (single service, mapped ports).",
+        "Test build and run locally; update documentation."
+      ],
+      "complexity_score": 5
+    },
+    {
+      "id": "task_4",
+      "title": "Expand Jest Integration/Security Tests for MCP Endpoints",
+      "description": "Add or improve Jest tests for MCP endpoints and provider health checks to ensure robust API validation and security coverage.",
+      "priority": "medium",
+      "estimated_time": "45-60 minutes",
+      "files_to_modify": [
+        "src/api/routes/mcp.test.js",
+        "src/api/routes/providers.test.js"
+      ],
+      "implementation_steps": [
+        "Identify MCP endpoints and provider health routes lacking test coverage.",
+        "Write new Jest test cases for edge cases, error handling, and security scenarios.",
+        "Run tests and verify coverage improvements.",
+        "Document new tests in test/README.md."
+      ],
+      "complexity_score": 5
+    },
+    {
+      "id": "task_5",
+      "title": "EnhancedChatInterface.jsx: Provider Quick-Switch and Badge",
+      "description": "Add provider quick-switch functionality and display current provider badge in the chat interface using useLLM(). This is a UI-only change and does not require backend modifications.",
+      "priority": "high",
+      "estimated_time": "30-45 minutes",
+      "files_to_modify": [
+        "src/components/EnhancedChatInterface.jsx"
+      ],
+      "implementation_steps": [
+        "Implement provider quick-switch dropdown or buttons using useLLM().",
+        "Display current provider as a badge/chip in the chat header.",
+        "Test UI interactions and update documentation."
+      ],
+      "complexity_score": 4
+    },
+    {
+      "id": "task_6",
+      "title": "EnhancedMusicDiscovery.jsx: Mood Sliders and Radar Visualization",
+      "description": "Add client-only mood sliders and radar/sparkline visualization for moodSettings values in the music discovery interface. This improves user experience and does not require backend changes.",
+      "priority": "medium",
+      "estimated_time": "45 minutes",
+      "files_to_modify": [
+        "src/components/EnhancedMusicDiscovery.jsx"
+      ],
+      "implementation_steps": [
+        "Implement mood sliders using existing UI components.",
+        "Add radar/sparkline chart for moodSettings values using a lightweight chart library.",
+        "Test UI and update documentation."
+      ],
+      "complexity_score": 4
+    },
+    {
+      "id": "task_7",
+      "title": "EnhancedAnalyticsDashboard.jsx: Sparkline Components for Metrics",
+      "description": "Add sparkline components for overview metrics using mock fallback data in the analytics dashboard. This is a UI-only enhancement.",
+      "priority": "low",
+      "estimated_time": "30 minutes",
+      "files_to_modify": [
+        "src/components/EnhancedAnalyticsDashboard.jsx"
+      ],
+      "implementation_steps": [
+        "Integrate sparkline chart components for key metrics (e.g., API latency, engagement).",
+        "Use mock data for initial implementation.",
+        "Test UI and update documentation."
+      ],
+      "complexity_score": 3
+    }
+  ],
+  "next_research_topics": [
+    "Implementing circuit breaker pattern for provider failover in Node.js",
+    "Request correlation IDs for distributed tracing",
+    "MongoDB compound and TTL indexes for analytics optimization",
+    "Prometheus metrics export for Node.js APIs",
+    "OpenTelemetry integration for distributed tracing"
+  ],
+  "completion_percentage": 75
+}

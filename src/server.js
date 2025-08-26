@@ -103,6 +103,12 @@ const SecurityManager = require('./api/security/security-manager');
 const performanceMonitor = require('./api/monitoring/performance-monitor');
 const logger = require('./api/utils/logger');
 
+// Import modular routes
+const systemHealthRoutes = require('./routes/health');
+const systemPerformanceRoutes = require('./routes/performance');
+const systemMonitoringRoutes = require('./routes/system');
+const systemMetricsRoutes = require('./routes/metrics');
+
 // Import Redis-backed rate limiting and performance monitoring
 const { rateLimiters } = require('./middleware/redis-rate-limiter');
 const { middleware: slowRequestMiddleware } = require('./middleware/slow-request-logger');
@@ -264,108 +270,12 @@ const sessionConfig = {
 // Note: Redis session store will be configured during initialization
 app.use(session(sessionConfig));
 
-// Enhanced health check with Redis and service status
-app.get('/health', async (req, res) => {
-  const health = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    service: 'EchoTune AI',
-    version: process.env.npm_package_version || '2.1.0',
-    environment: process.env.NODE_ENV || 'development',
-    features: {
-      realtime: realtimeEnabled,
-      tracing: process.env.ENABLE_TRACING !== 'false',
-      agentops: enableAgentOps
-    }
-  };
-
-  // Quick Redis health check with timeout
-  try {
-    if (redisManager && redisManager.useRedis) {
-      await Promise.race([
-        redisManager.ping(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
-      ]);
-      health.redis = 'ok';
-    } else {
-      health.redis = 'not_configured';
-    }
-  } catch (error) {
-    health.redis = 'down';
-    health.status = 'degraded';
-  }
-
-  const statusCode = health.status === 'healthy' ? 200 : 503;
-  res.status(statusCode).json(health);
-});
-
-// AI Metrics endpoint for Prometheus
-app.get('/metrics', async (req, res) => {
-  try {
-    const aiMetrics = require('./metrics/aiMetrics');
-    const metrics = await aiMetrics.getMetrics();
-    
-    res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
-    res.send(metrics);
-  } catch (error) {
-    console.error('Failed to generate metrics:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate metrics',
-      message: error.message 
-    });
-  }
-});
-
-// AI Analytics endpoint for detailed metrics
-app.get('/api/ai/metrics', async (req, res) => {
-  try {
-    const aiMetrics = require('./metrics/aiMetrics');
-    const values = await aiMetrics.getMetricValues();
-    const report = await aiMetrics.generatePerformanceReport();
-    const costReport = await aiMetrics.generateCostReport();
-    
-    res.json({
-      success: true,
-      data: {
-        performance: report,
-        cost: costReport,
-        raw: values
-      }
-    });
-  } catch (error) {
-    console.error('Failed to get AI metrics:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Agent Router analytics endpoint
-app.get('/api/ai/routing', async (req, res) => {
-  try {
-    const AgentRouter = require('./ai/agent/router');
-    const router = new AgentRouter();
-    const analytics = router.getAnalytics();
-    const health = await router.healthCheck();
-    
-    res.json({
-      success: true,
-      data: {
-        analytics,
-        health,
-        providers: router.getProviders()
-      }
-    });
-  } catch (error) {
-    console.error('Failed to get routing analytics:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+// Mount modular routes
+app.use('/health', systemHealthRoutes);
+app.use('/metrics', systemMetricsRoutes);
+app.use('/api/performance', systemPerformanceRoutes);
+app.use('/api', systemMonitoringRoutes);
+app.use('/api', systemMetricsRoutes); // Mount under /api as well for AI routes
 
 // Enhanced security headers (replaces basic securityHeaders)
 app.use(securityHeaders);

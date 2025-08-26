@@ -1,0 +1,23 @@
+{
+  "serviceId": "test-service",
+  "serialNumber": "8c2f4c6b24b89ecb1364976b2867a3a3",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApP9767XmHJEYOVr1fCU+\ndQaScV67e063ikG3tRQ2qU3qwosPI0tyHq4CuWssL+Od8T6Gk6F5UFx37sWkYsUr\nC2PUhf0A0ntUR7mSGerRsIepQd7fkrwfwKo1/WuMNjf5YpPO7T/k5hVilKmZpx4I\nPEgz0IrU4ezFmkxB+OfQfuNGLdAbPX2aQKEbKD4QRsGkgZlSsSCzTypGxq4GPSXq\nGVkO4yzCzjjwwTVgjJbJpvHWZ4CTnpDWuhclwUf1DegSjlLKfe6yZ7V4XXVXmozp\nLkvmEeG+bg9+h7EoRpgkMFgEp1SEh04fsYu7XyCDfl0iUe7qbXykKoFmZ+fBFKHS\nYQIDAQAB\n-----END PUBLIC KEY-----\n",
+  "privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCk/3vrteYckRg5\nWvV8JT51BpJxXrt7TreKQbe1FDapTerCiw8jS3IergK5aywv453xPoaToXlQXHfu\nxaRixSsLY9SF/QDSe1RHuZIZ6tGwh6lB3t+SvB/AqjX9a4w2N/lik87tP+TmFWKU\nqZmnHgg8SDPQitTh7MWaTEH459B+40Yt0Bs9fZpAoRsoPhBGwaSBmVKxILNPKkbG\nrgY9JeoZWQ7jLMLOOPDBNWCMlsmm8dZngJOekNa6FyXBR/UN6BKOUsp97rJntXhd\ndVeajOkuS+YR4b5uD36HsShGmCQwWASnVISHTh+xi7tfIIN+XSJR7uptfKQqgWZn\n58EUodJhAgMBAAECggEAAVl1kf/y2dj18cIkr9c+I4biO7sinWePaLoQ3pJDwC66\n9MxeW1OKo2WY8BtISTv7VrXENADmFRosgO9s4MHsEDPI0S+4igAoOE30O/IHtQHn\nCHriKTkQqWq69k+i3e6nQ38h+h7DqH4USFL6xrsgJh4RDmuUQiTFmPV2tKpwshj2\nZQJnVJACQP1IeCaryUUIqxyok5l3xYmQ3pOgWGaq2OwDsxVzNYtyzoyE2y8oDTC4\n32X7vi6vX1PJEzDoDquhxSTndIlrq6JjvgLck58AB9MWHQWtsfSxd6i2MuPZ9Odh\n6+vXwGRDryYfkdUmOKOsU8nafgt4U/Eun4LCTkuB4QKBgQDTYZnA6bf/e9QvkRkq\nHhD3yr+e3rx2HlNMxeGCDf1NK5RkKhT1VYxsdFLzakjJ2ui3KUgeGZ4h/ZHuMnDj\nvxYLLbP/S8u2zL3dTLpoETjBlfm4k3z1+Sm1b0vHxkez/ezZcesMgh/R2lFUmwC4\nkJitmEaUsGBv7H1YAyb7b9qb2wKBgQDH03kOZzEnqkZ+AoouyMaspQXKn75Ul114\nBkse6tqkxEgw4pLi92eSoUQkrcLmy6qGWYNgbNzy0fACjeTMu91H9kS3ZzX9Aw7U\nL/bVg8yt40AO3+0JliUbE4jJxBxzqDoO4muJGjAtpLF2EhvyMaOERBQkHZsSIoxi\nH1EZMzIdcwKBgQC7XkxXv9QlVrIi588SkkwgGUv5mx4a5Y6ZAt591cCt4u9KSjMB\ntK8gg4vz0EZtBuo5URJn+/U70/TC21tNxVfY2M4wghM1Gg9CVnz1Oi7BChutDK87\nqXzbIqhdkNiGJ5MGu//Jup5R+d8Vy7+72hA78DrAGgehrlL87O5k+iUg+QKBgFjC\n19gNAGmlGjDpAeZsKswPdXYe5RWAMvWYng+6tKpRwdttGWAWE3yvg6xjPtr0Bugs\npM3VLYPyuxD3ZHWI0W8gtj9daj7b999K+vK229k1w4OX9hu3BP50++Lb6ON7C2cH\nLks1RcdQi79tpdo8MG0VLHkqaXJxxDflv0lZU15/AoGBAIyXT6D38SjPkZ7WAxc7\norROVC/o7gsq2U0eJKydSgWSe7z4mBcjb6jT4Em7fsYHm8WTYyG8qHS0n1JcqXQc\nhz8nO3wnrMJy8DbHA1YsQOothgjwnUxWF6NxE7FN8CuA7KDbztG6TAkzA4Uq5NSD\nVEHAQ5QWlmC8LbkohwK+jP6q\n-----END PRIVATE KEY-----\n",
+  "issuedAt": "2025-08-26T16:06:00.535Z",
+  "expiresAt": "2025-09-25T16:06:00.535Z",
+  "status": "active",
+  "metadata": {
+    "subject": "CN=test-service",
+    "issuer": "EchoTune-CA",
+    "keyUsage": [
+      "digitalSignature",
+      "keyEncipherment"
+    ],
+    "extendedKeyUsage": [
+      "serverAuth",
+      "clientAuth"
+    ],
+    "version": "1.0.0",
+    "environment": "test"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "serviceId": "test-app-1756224387272-0",
+  "serialNumber": "e282465cb263c58f429f28702b25869b",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0CqU4/DQTpQyCxvzGGJv\n6VZY054NnEeAOznO9ONPp3Iid4PvZ+J3JxJGaQCIyb6UgtEy1zkghnypuPxNjiQ+\nS4Cz1R1A2hu/Jwjw82iuVyXS0FadoBKmxdA0modbrs16fKwbN2Ie7T38fzQWAkn8\nSdB6cjJ9mBl4h2mzrAkXuQLZfHFs7HRIa+4nmp4edQSDNEBcdc9M62cLAZ82imDf\noJAdSmWRgsGn7rPOz15yrFc+aI7OlhIGOLxwMrkvyj27Z8DLNp8lb0droe2rWedO\nYlFGIlrjDVHmjOC7i/G+SVbNy1cZeb7SMqKS7uIKJXyFbL9NM8QqtR2rHQOQqv9z\nDQIDAQAB\n-----END PUBLIC KEY-----\n",
+  "privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDQKpTj8NBOlDIL\nG/MYYm/pVljTng2cR4A7Oc7040+nciJ3g+9n4ncnEkZpAIjJvpSC0TLXOSCGfKm4\n/E2OJD5LgLPVHUDaG78nCPDzaK5XJdLQVp2gEqbF0DSah1uuzXp8rBs3Yh7tPfx/\nNBYCSfxJ0HpyMn2YGXiHabOsCRe5Atl8cWzsdEhr7ieanh51BIM0QFx1z0zrZwsB\nnzaKYN+gkB1KZZGCwafus87PXnKsVz5ojs6WEgY4vHAyuS/KPbtnwMs2nyVvR2uh\n7atZ505iUUYiWuMNUeaM4LuL8b5JVs3LVxl5vtIyopLu4golfIVsv00zxCq1Hasd\nA5Cq/3MNAgMBAAECggEAUv9HUgKn60ynD0rbh/Nnj29AB0/TOWZAuFx6KaWgErEt\nEN3nzFG9FDTzIdZ2s4lrCSWD0dATKcv2l6zw9yV4OP5dtTDutIevlU65UzN/n3uT\nLEH8ouAM4n37G0mwwmdm2OJ+D3ztu8WlMMqBo/P/xSZ8S5/Z95TgO41nd8ZAUSEb\nlYOg1+V5i+2ukGINhX3pNtImlLtOCrEljpI/RFZCFCfl/l27GE0M+2rCUfAg/hKw\nvYgNvoirEDo4l4/nPzCRP5v+oyhC0C52sMABw7+j6cw63t5Pdk9GnOrZT5bKkpVF\nA19qanojmRRXEWRA97A9IcFdT0d68uTNKE/y7LoX+QKBgQDsuY6uoPJTCE+jWX/E\ndKzsKZJITP5LC4Crn7n5oFhJw4Z29E2y7+HeqvWZ5TL39mqgr2Yu9rOlcOQ2Sljq\niyEtWSO1+EwUpPuQxDp0OidkqtjV3Dzijo8pxBLuCfDFbSkTzXo8yaGpJC6RVHW1\n8UOHHCEcbvxPSiNMh39ZB26TMwKBgQDhHbuXIWp4bBxx0MIzSZJduJsE8hIrplb1\njmBj0qR+U5puSz2dB8XFnZDjOBeU/BM6g9WwE3YISKow6oHJ2axpiBEUO5yVdYnN\nvtoL17ABc3ABpzIQNChnRdc0r/OWbJwqBpj9Rj2CiCd4Js26lcBc1opUvNFRpX04\nTi6oBoHgvwKBgQDl570EKrnOHHdD3SsygGJlJma0o1ohRjWb+Q+kua6lTSjtpI1F\nqKYEHKNU6H2cxwx9rHugRuboWYC6nXBHsgHxye3d0B0Lu8O6sGlY8hXKNgdLhI75\nNZ0i4hPEbZESHNdVLS13lhfUbphvesirgHql4JLjy4Jt+0HXFI2AyLACcwKBgBD6\nnB5+/7fLd63B8BPMNcTp2o9Z7rLqHd7xeSWuSofYqGovNJt2bZ1FEBuDLIwpIw4j\nyWc5YIqpaGS+G0HtMArZn2gmQt4m+ljRT0LbZsQFP+pwAN+l/3Iim2O27aln0bN9\nweZAeP0yZb+zNYsgJl0aNV7EywjccYBgrTYxH3SjAoGBAJVOWQjL76qMqYC83QLw\nNh6UKCkX2fov4BzkPddaEXIe9Q5VbmwXyJe14iYCCrAGtFTsXLkqz5X3KEPwy3Uo\n1NlDX+c4QtMLwI+vLQR0y/CjbmJqZPpBuGliW96gqiWyCGufXEmrguZl1Y7Bgc2o\n7/sQyYslh2agK458trbBt63u\n-----END PRIVATE KEY-----\n",
+  "issuedAt": "2025-08-26T16:06:27.797Z",
+  "expiresAt": "2025-09-25T16:06:27.797Z",
+  "status": "active",
+  "metadata": {
+    "subject": "CN=test-app-1756224387272-0",
+    "issuer": "EchoTune-CA",
+    "keyUsage": [
+      "digitalSignature",
+      "keyEncipherment"
+    ],
+    "extendedKeyUsage": [
+      "serverAuth",
+      "clientAuth"
+    ],
+    "serviceType": "test-app",
+    "scalingAction": true
+  }
+}

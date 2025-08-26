@@ -31,7 +31,10 @@ if (enableAgentOps) {
 dotenv.config();
 
 // Import Redis and session management
-const session = require('express-session');
+const { getSessionManager } = require('./infra/SessionManager');
+const { configureStaticRoutes } = require('./routes/static');
+const { configureHealthRoutes } = require('./routes/health-consolidated');
+const { getSocketService } = require('./services/SocketService');
 const { initializeRedis, getRedisManager } = require('./utils/redis');
 
 // Import configuration and validation
@@ -102,6 +105,24 @@ const cacheManager = require('./api/cache/cache-manager');
 const SecurityManager = require('./api/security/security-manager');
 const performanceMonitor = require('./api/monitoring/performance-monitor');
 const logger = require('./api/utils/logger');
+
+// Import modular routes
+const systemHealthRoutes = require('./routes/health');
+const systemPerformanceRoutes = require('./routes/performance');
+const systemMonitoringRoutes = require('./routes/system');
+const systemMetricsRoutes = require('./routes/metrics');
+
+// Import new modular routes
+const authRoutes = require('./routes/auth');
+const spotifyApiRoutes = require('./routes/spotify-api');
+const enhancedApiRoutes = require('./routes/enhanced-api');
+const chatRoutes_local = require('./routes/chat');
+const appRoutes = require('./routes/app');
+
+// Import infrastructure systems
+const { getContainer, configureCoreServices } = require('./infra/DIContainer');
+const { getFeatureFlags, configureDefaultFlags } = require('./infra/FeatureFlags');
+const { getMiddlewareManager, configureDefaultMiddleware } = require('./infra/MiddlewareManager');
 
 // Import Redis-backed rate limiting and performance monitoring
 const { rateLimiters } = require('./middleware/redis-rate-limiter');
@@ -193,12 +214,230 @@ app.use('/internal/example-validation', require('./routes/internal/example-valid
 // Initialize MCP Performance Analytics
 const mcpAnalytics = new MCPPerformanceAnalytics();
 
-// Trust proxy if in production (for proper IP detection behind reverse proxy)
-if (config.server.trustProxy) {
-  app.set('trust proxy', 1);
+// Phase 6: Enterprise Service Integration
+const { initializePhase6Integration } = require('./infra/Phase6ServerIntegration');
+
+// Initialize infrastructure systems
+async function initializeInfrastructure() {
+  // Configure dependency injection
+  configureCoreServices();
+  
+  // Configure feature flags
+  configureDefaultFlags();
+  
+  // Configure middleware
+  const middlewareManager = getMiddlewareManager();
+  configureDefaultMiddleware(middlewareManager);
+  
+  // Phase 6: Initialize enterprise services
+  try {
+    const phase6Integration = await initializePhase6Integration(app);
+    console.log('✅ Phase 6: Enterprise services integrated successfully');
+    
+    // Phase 7: Initialize Event-Driven Architecture & Service Mesh
+    try {
+      const { getPhase7Orchestrator } = require('./infra/Phase7Orchestrator');
+      const phase7Orchestrator = getPhase7Orchestrator({
+        enableEventBus: true,
+        enableServiceMesh: true,
+        enableEventSourcing: true,
+        enableDistributedTransactions: true,
+        autoRegisterServices: true
+      });
+      
+      await phase7Orchestrator.initialize();
+      console.log('✅ Phase 7: Event-Driven Architecture & Service Mesh integrated successfully');
+      
+      // Phase 8: Initialize Advanced Security, Auto-Scaling, Multi-Region & ML Integration
+      try {
+        const Phase8Orchestrator = require('./infra/Phase8Orchestrator');
+        const phase8Orchestrator = new Phase8Orchestrator({
+          enableSecurity: process.env.ENABLE_ZERO_TRUST !== 'false',
+          enableAutoScaling: process.env.ENABLE_AUTO_SCALING !== 'false',
+          enableMultiRegion: process.env.ENABLE_MULTI_REGION !== 'false',
+          enableMLPipelines: process.env.ENABLE_ML_PIPELINES !== 'false',
+          environment: process.env.NODE_ENV || 'production',
+          integrationMode: 'full'
+        });
+        
+        await phase8Orchestrator.initialize();
+        console.log('✅ Phase 8: Advanced Security, Auto-Scaling, Multi-Region & ML Integration completed successfully');
+        
+        // Store Phase 8 orchestrator in app locals for API access
+        app.locals.phase8Orchestrator = phase8Orchestrator;
+        
+        // Phase 9: Initialize Advanced Observability, Analytics & Business Intelligence
+        const Phase9Orchestrator = require('./infra/Phase9Orchestrator');
+        const phase9Orchestrator = new Phase9Orchestrator({
+          environment: process.env.NODE_ENV || 'development',
+          enableAPM: process.env.ENABLE_APM !== 'false',
+          enableBusinessIntelligence: process.env.ENABLE_BI !== 'false',
+          enableRealTimeAnalytics: process.env.ENABLE_REAL_TIME_ANALYTICS !== 'false',
+          enableAdvancedAlerting: process.env.ENABLE_ADVANCED_ALERTING !== 'false',
+          integrationMode: 'full'
+        });
+        
+        await phase9Orchestrator.initialize();
+        console.log('✅ Phase 9: Advanced Observability, Analytics & Business Intelligence completed successfully');
+        
+        // Store Phase 9 orchestrator in app locals for API access
+        app.locals.phase9Orchestrator = phase9Orchestrator;
+        
+        // Phase 10: Initialize Advanced AI/ML Capabilities & Real-Time Recommendations
+        const Phase10Orchestrator = require('./infra/Phase10Orchestrator');
+        const phase10Orchestrator = new Phase10Orchestrator({
+          environment: process.env.NODE_ENV || 'development',
+          enableAdvancedRecommendationEngine: process.env.ENABLE_ADVANCED_RECOMMENDATIONS !== 'false',
+          enableRealTimeInference: process.env.ENABLE_REAL_TIME_INFERENCE !== 'false',
+          enablePersonalizationEngine: process.env.ENABLE_PERSONALIZATION_ENGINE !== 'false',
+          enableAIModelManagement: process.env.ENABLE_AI_MODEL_MANAGEMENT !== 'false',
+          integrationMode: 'full'
+        });
+        
+        await phase10Orchestrator.initialize();
+        console.log('✅ Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations completed successfully');
+        
+        // Store Phase 10 orchestrator in app locals for API access
+        app.locals.phase10Orchestrator = phase10Orchestrator;
+        
+        return { middlewareManager, phase6Integration, phase7Orchestrator, phase8Orchestrator, phase9Orchestrator, phase10Orchestrator };
+      } catch (phase8Error) {
+        console.warn('⚠️ Phase 8: Advanced enterprise integration failed, continuing with Phase 7 only:', phase8Error.message);
+        
+        // Try Phase 9 even if Phase 8 failed
+        try {
+          const Phase9Orchestrator = require('./infra/Phase9Orchestrator');
+          const phase9Orchestrator = new Phase9Orchestrator({
+            environment: process.env.NODE_ENV || 'development',
+            enableAPM: process.env.ENABLE_APM !== 'false',
+            enableBusinessIntelligence: process.env.ENABLE_BI !== 'false',
+            enableRealTimeAnalytics: process.env.ENABLE_REAL_TIME_ANALYTICS !== 'false',
+            enableAdvancedAlerting: process.env.ENABLE_ADVANCED_ALERTING !== 'false',
+            integrationMode: 'standard' // Reduced mode without Phase 8
+          });
+          
+          await phase9Orchestrator.initialize();
+          console.log('✅ Phase 9: Advanced Observability, Analytics & Business Intelligence completed successfully (standalone mode)');
+          
+          app.locals.phase9Orchestrator = phase9Orchestrator;
+          
+          // Try Phase 10 even if Phase 8 failed
+          try {
+            const Phase10Orchestrator = require('./infra/Phase10Orchestrator');
+            const phase10Orchestrator = new Phase10Orchestrator({
+              environment: process.env.NODE_ENV || 'development',
+              enableAdvancedRecommendationEngine: process.env.ENABLE_ADVANCED_RECOMMENDATIONS !== 'false',
+              enableRealTimeInference: process.env.ENABLE_REAL_TIME_INFERENCE !== 'false',
+              enablePersonalizationEngine: process.env.ENABLE_PERSONALIZATION_ENGINE !== 'false',
+              enableAIModelManagement: process.env.ENABLE_AI_MODEL_MANAGEMENT !== 'false',
+              integrationMode: 'standard' // Reduced mode without Phase 8
+            });
+            
+            await phase10Orchestrator.initialize();
+            console.log('✅ Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations completed successfully (standalone mode)');
+            
+            app.locals.phase10Orchestrator = phase10Orchestrator;
+            
+            return { middlewareManager, phase6Integration, phase7Orchestrator, phase9Orchestrator, phase10Orchestrator };
+          } catch (phase10Error) {
+            console.warn('⚠️ Phase 10: Advanced AI/ML integration failed, continuing with Phase 9 only:', phase10Error.message);
+            return { middlewareManager, phase6Integration, phase7Orchestrator, phase9Orchestrator };
+          }
+        } catch (phase9Error) {
+          console.warn('⚠️ Phase 9: Advanced observability integration failed, continuing with Phase 7 only:', phase9Error.message);
+          
+          // Try Phase 10 even if Phase 9 failed
+          try {
+            const Phase10Orchestrator = require('./infra/Phase10Orchestrator');
+            const phase10Orchestrator = new Phase10Orchestrator({
+              environment: process.env.NODE_ENV || 'development',
+              enableAdvancedRecommendationEngine: process.env.ENABLE_ADVANCED_RECOMMENDATIONS !== 'false',
+              enableRealTimeInference: process.env.ENABLE_REAL_TIME_INFERENCE !== 'false',
+              enablePersonalizationEngine: process.env.ENABLE_PERSONALIZATION_ENGINE !== 'false',
+              enableAIModelManagement: process.env.ENABLE_AI_MODEL_MANAGEMENT !== 'false',
+              integrationMode: 'minimal' // Minimal mode without Phase 8 & 9
+            });
+            
+            await phase10Orchestrator.initialize();
+            console.log('✅ Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations completed successfully (minimal mode)');
+            
+            app.locals.phase10Orchestrator = phase10Orchestrator;
+            
+            return { middlewareManager, phase6Integration, phase7Orchestrator, phase10Orchestrator };
+          } catch (phase10Error) {
+            console.warn('⚠️ Phase 10: Advanced AI/ML integration failed, continuing with Phase 7 only:', phase10Error.message);
+            return { middlewareManager, phase6Integration, phase7Orchestrator };
+          }
+        }
+      }
+      
+    } catch (phase7Error) {
+      console.warn('⚠️ Phase 7: Event-Driven Architecture integration failed, continuing with Phase 6 only:', phase7Error.message);
+      return { middlewareManager, phase6Integration };
+    }
+    
+  } catch (error) {
+    console.warn('⚠️ Phase 6: Enterprise integration failed, continuing with legacy infrastructure:', error.message);
+    return { middlewareManager };
+  }
 }
 
-// Spotify OAuth configuration
+// Phase 6: Extract middleware configuration to enterprise service
+// Security and performance middleware configuration moved to MiddlewareConfigurationService
+// This section maintained for backward compatibility during transition
+
+// Initialize and configure enterprise middleware
+let enterpriseMiddleware = null;
+async function setupEnterpriseMiddleware() {
+  try {
+    const { getMiddlewareConfigurationService } = require('./infra/MiddlewareConfigurationService');
+    enterpriseMiddleware = getMiddlewareConfigurationService();
+    
+    if (!enterpriseMiddleware.initialized) {
+      await enterpriseMiddleware.initialize(app);
+      console.log('✅ Phase 6: Enterprise middleware configuration applied');
+      return true;
+    }
+  } catch (error) {
+    console.warn('⚠️ Phase 6: Enterprise middleware setup failed, using legacy configuration:', error.message);
+    return false;
+  }
+}
+
+// Apply legacy middleware if enterprise middleware is not available
+async function applyLegacyMiddleware() {
+  // Trust proxy if in production (for proper IP detection behind reverse proxy)
+  if (config.server.trustProxy) {
+    app.set('trust proxy', 1);
+  }
+
+  // Phase 1 Security Baseline - Apply security middleware in proper order
+  applyHelmet(app);
+  app.use(createRateLimiter());
+
+  // Existing security middleware (maintained for compatibility)
+  app.use(securityManager.securityHeaders);
+  app.use(securityManager.detectSuspiciousActivity());
+  app.use(securityManager.validateAndSanitizeInput());
+
+  // Compression middleware
+  if (config.server.compression) {
+    app.use(
+      compression({
+        filter: (req, res) => {
+          if (req.headers['x-no-compression']) {
+            return false;
+          }
+          return compression.filter(req, res);
+        },
+        level: 6,
+        threshold: 1024,
+      })
+    );
+  }
+}
+
+// Spotify OAuth configuration (moved to configuration service in Phase 6)
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
@@ -220,153 +459,47 @@ const getDefaultFrontendUrl = () => {
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedirectUri();
 const FRONTEND_URL = process.env.FRONTEND_URL || getDefaultFrontendUrl();
 
-// Security and performance middleware - Phase 1 Security Baseline
-// Apply Phase 1 security middleware in proper order
-applyHelmet(app);
-app.use(createRateLimiter());
+// Phase 6: Enhanced middleware and route configuration
+// Extract complex middleware setup to enterprise services
 
-// Existing security middleware (maintained for compatibility)
-app.use(securityManager.securityHeaders);
-app.use(securityManager.detectSuspiciousActivity());
-app.use(securityManager.validateAndSanitizeInput());
+// Session management - initialized during startup
+let sessionManager = null;
 
-// Compression middleware
-if (config.server.compression) {
-  app.use(
-    compression({
-      filter: (req, res) => {
-        if (req.headers['x-no-compression']) {
-          return false;
-        }
-        return compression.filter(req, res);
-      },
-      level: 6,
-      threshold: 1024,
-    })
-  );
-}
+// Mount modular routes (Phase 6: Route management moved to API Gateway)
+app.use('/health', systemHealthRoutes);
+app.use('/metrics', systemMetricsRoutes);
+app.use('/api/performance', systemPerformanceRoutes);
+app.use('/api', systemMonitoringRoutes);
+app.use('/api', systemMetricsRoutes); // Mount under /api as well for AI routes
 
-// Session management with Redis store or memory fallback
-const sessionConfig = {
-  secret: process.env.SESSION_SECRET || 'fallback-dev-secret-change-in-production',
-  name: 'echotune.session',
-  resave: false,
-  saveUninitialized: false,
-  rolling: true,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-  },
-};
+// Mount new modular routes
+app.use('/auth', authRoutes);
+app.use('/api/spotify', spotifyApiRoutes);
+app.use('/api', enhancedApiRoutes);
+app.use('/api/chat', chatRoutes_local);
+app.use('/', appRoutes);
 
-// Note: Redis session store will be configured during initialization
-app.use(session(sessionConfig));
+// Phase 6: Enterprise health monitoring routes
+const enterpriseHealthRoutes = require('./routes/enterprise-health');
+app.use('/health', enterpriseHealthRoutes);
 
-// Enhanced health check with Redis and service status
-app.get('/health', async (req, res) => {
-  const health = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    service: 'EchoTune AI',
-    version: process.env.npm_package_version || '2.1.0',
-    environment: process.env.NODE_ENV || 'development',
-    features: {
-      realtime: realtimeEnabled,
-      tracing: process.env.ENABLE_TRACING !== 'false',
-      agentops: enableAgentOps
-    }
-  };
+// Phase 7: Event-Driven Architecture & Service Mesh routes
+const eventDrivenRoutes = require('./routes/event-driven');
+app.use('/api/event-driven', eventDrivenRoutes);
 
-  // Quick Redis health check with timeout
-  try {
-    if (redisManager && redisManager.useRedis) {
-      await Promise.race([
-        redisManager.ping(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
-      ]);
-      health.redis = 'ok';
-    } else {
-      health.redis = 'not_configured';
-    }
-  } catch (error) {
-    health.redis = 'down';
-    health.status = 'degraded';
-  }
+// Phase 8: Advanced Security, Auto-Scaling, Multi-Region & ML Integration routes
+const phase8ApiRoutes = require('./routes/phase8-api');
+app.use('/api/phase8', phase8ApiRoutes);
 
-  const statusCode = health.status === 'healthy' ? 200 : 503;
-  res.status(statusCode).json(health);
-});
+// Phase 9: Advanced Observability, Analytics & Business Intelligence routes
+const phase9ApiRoutes = require('./routes/phase9');
+app.use('/api/phase9', phase9ApiRoutes);
 
-// AI Metrics endpoint for Prometheus
-app.get('/metrics', async (req, res) => {
-  try {
-    const aiMetrics = require('./metrics/aiMetrics');
-    const metrics = await aiMetrics.getMetrics();
-    
-    res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
-    res.send(metrics);
-  } catch (error) {
-    console.error('Failed to generate metrics:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate metrics',
-      message: error.message 
-    });
-  }
-});
+// Phase 10: Advanced AI/ML Capabilities & Real-Time Recommendations API routes
+const phase10ApiRoutes = require('./routes/phase10');
+app.use('/api/phase10', phase10ApiRoutes);
 
-// AI Analytics endpoint for detailed metrics
-app.get('/api/ai/metrics', async (req, res) => {
-  try {
-    const aiMetrics = require('./metrics/aiMetrics');
-    const values = await aiMetrics.getMetricValues();
-    const report = await aiMetrics.generatePerformanceReport();
-    const costReport = await aiMetrics.generateCostReport();
-    
-    res.json({
-      success: true,
-      data: {
-        performance: report,
-        cost: costReport,
-        raw: values
-      }
-    });
-  } catch (error) {
-    console.error('Failed to get AI metrics:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Agent Router analytics endpoint
-app.get('/api/ai/routing', async (req, res) => {
-  try {
-    const AgentRouter = require('./ai/agent/router');
-    const router = new AgentRouter();
-    const analytics = router.getAnalytics();
-    const health = await router.healthCheck();
-    
-    res.json({
-      success: true,
-      data: {
-        analytics,
-        health,
-        providers: router.getProviders()
-      }
-    });
-  } catch (error) {
-    console.error('Failed to get routing analytics:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
+// Phase 6: Legacy middleware configuration (to be replaced by MiddlewareConfigurationService)
 // Enhanced security headers (replaces basic securityHeaders)
 app.use(securityHeaders);
 
@@ -401,7 +534,7 @@ app.use(corsMiddleware);
 // Request size limiting
 app.use(requestSizeLimit);
 
-// Body parsing with size limits
+// Body parsing with size limits (Phase 6: moved to enterprise middleware service)
 app.use(
   express.json({
     limit: config.server.maxRequestSize,
@@ -421,75 +554,8 @@ app.use(
 // Input sanitization
 app.use(sanitizeInput);
 
-// Serve built React application static files first
-app.use(
-  express.static(path.join(__dirname, '../dist'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1y' : 0,
-    etag: true,
-    lastModified: true,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
-        // Hashed asset filenames are immutable
-        res.setHeader('Cache-Control', `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`);
-      }
-    },
-  })
-);
-
-// Static file serving with caching headers (fallback)
-app.use(
-  express.static(path.join(__dirname, '../public'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
-    etag: true,
-    lastModified: true,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
-        res.setHeader('Cache-Control', 'public, max-age=3600');
-      }
-    },
-  })
-);
-
-// Serve React frontend files
-app.use(
-  '/frontend',
-  express.static(path.join(__dirname, 'frontend'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
-    etag: false,
-    setHeaders: (res) => {
-      if (process.env.NODE_ENV !== 'production') {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      }
-    },
-  })
-);
-
-// Serve src directory for JavaScript modules with no-cache in development
-if (process.env.NODE_ENV !== 'production') {
-  app.use(
-    '/src',
-    express.static(path.join(__dirname), {
-      maxAge: 0,
-      etag: false,
-      setHeaders: (res) => {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      },
-    })
-  );
-}
-
-// Serve docs directory for API documentation
-app.use(
-  '/docs',
-  express.static(path.join(__dirname, '../docs'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
-        res.setHeader('Content-Type', 'text/yaml');
-      }
-    },
-  })
-);
+// Configure static file serving (extracted to routes/static.js)
+configureStaticRoutes(app);
 
 // Database connection middleware
 app.use(ensureDatabase);
@@ -512,153 +578,18 @@ app.use('/api/spotify', rateLimiters.spotify);
 app.use('/auth', rateLimiters.auth);
 app.use('/api/spotify/auth', rateLimiters.auth); // Additional auth endpoint protection
 
-// Enhanced performance monitoring route
-app.get('/api/performance', async (req, res) => {
-  try {
-    const report = performanceMonitor.getPerformanceReport();
-    const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
-    const slowRequestMetrics = getSlowRequestMetrics();
+// Enhanced API routes moved to /routes/enhanced-api.js
 
-    // Combine performance data
-    const enhancedReport = {
-      ...report,
-      slow_requests: slowRequestMetrics,
-      timestamp: new Date().toISOString(),
-    };
+// Store for temporary state (moved to auth routes module)
+// const authStates = new Map();
 
-    res.json(enhancedReport);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get performance report',
-      message: error.message,
-    });
-  }
-});
-
-// Endpoint percentiles (last 5 minutes)
-app.get('/api/performance/endpoints', (req, res) => {
-  try {
-    const windowMs = req.query.windowMs ? parseInt(req.query.windowMs, 10) : undefined;
-    const pct = performanceMonitor.getEndpointPercentiles(windowMs);
-    res.json({ success: true, windowMs: windowMs || 5 * 60 * 1000, endpoints: pct });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Failed to get endpoint percentiles' });
-  }
-});
-
-// Rate limiter statistics route
-app.get('/api/rate-limit/stats', (req, res) => {
-  try {
-    const stats = {};
-
-    for (const [name, limiter] of Object.entries(rateLimiters)) {
-      stats[name] = limiter.getStats();
-    }
-
-    res.json({
-      rate_limiters: stats,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get rate limiter stats',
-      message: error.message,
-    });
-  }
-});
-
-// MCP Analytics endpoint
-app.get('/api/mcp/analytics', async (req, res) => {
-  try {
-    const report = await mcpAnalytics.generateMCPReport();
-    res.json(report);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to generate MCP analytics report',
-      message: error.message,
-    });
-  }
-});
-
-// Performance baseline endpoint
-app.post('/api/performance/baseline', async (req, res) => {
-  try {
-    const { PerformanceBaseline } = require('./utils/performance-baseline');
-    const options = {
-      baseURL: req.body.baseURL || `http://localhost:${PORT}`,
-      testDuration: req.body.testDuration || 30000,
-      concurrentRequests: req.body.concurrentRequests || 3,
-    };
-
-    const baseline = new PerformanceBaseline(options);
-    const results = await baseline.runBaseline();
-
-    res.json({
-      success: true,
-      results: results,
-      message: 'Performance baseline completed',
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to run performance baseline',
-      message: error.message,
-    });
-  }
-});
-
-// Enhanced cache statistics route - now includes Redis stats and performance metrics
-app.get('/api/cache/stats', async (req, res) => {
-  try {
-    const cacheStats = await cacheManager.getStats();
-    const { getMetrics: getSlowRequestMetrics } = require('./middleware/slow-request-logger');
-    const slowRequestMetrics = getSlowRequestMetrics();
-
-    res.json({
-      cache: cacheStats,
-      performance: slowRequestMetrics,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get cache stats',
-      message: error.message,
-    });
-  }
-});
-
-// Redis health check route
-app.get('/api/redis/health', async (req, res) => {
-  try {
-    const redisManager = getRedisManager();
-    const health = await redisManager.healthCheck();
-    res.json(health);
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      error: error.message,
-    });
-  }
-});
-
-// Security statistics route (admin only in production)
-app.get('/api/security/stats', (req, res) => {
-  if (process.env.NODE_ENV === 'production' && !req.user?.isAdmin) {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  const stats = securityManager.getSecurityStats();
-  res.json(stats);
-});
-
-// Store for temporary state (in production, use Redis or database)
-const authStates = new Map();
-
-// Utility functions
-const generateRandomString = (length) => {
-  return crypto
-    .randomBytes(Math.ceil(length / 2))
-    .toString('hex')
-    .slice(0, length);
-};
+// Utility functions (moved to auth routes module)
+// const generateRandomString = (length) => {
+//   return crypto
+//     .randomBytes(Math.ceil(length / 2))
+//     .toString('hex')
+//     .slice(0, length);
+// };
 
 const base64encode = (str) => {
   return Buffer.from(str).toString('base64');
@@ -666,54 +597,8 @@ const base64encode = (str) => {
 
 // Routes
 
-// Enhanced health check endpoints
-const HealthCheckSystem = require('./utils/health-check');
-const healthChecker = new HealthCheckSystem();
-
-// Comprehensive health check endpoint (bypass rate limiting)
-app.get('/health', async (req, res) => {
-  try {
-    const healthReport = await healthChecker.runAllChecks();
-
-    // For production deployment health checks, only fail on critical errors
-    // Warnings and missing optional services should not cause 503s
-    const hasCriticalErrors = Object.values(healthReport.checks).some(
-      (check) => check.status === 'unhealthy' && !check.optional
-    );
-
-    const statusCode = hasCriticalErrors ? 503 : 200;
-
-    res.status(statusCode).json(healthReport);
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Health check system failure',
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Individual health check endpoints
-app.get('/health/:check', async (req, res) => {
-  try {
-    const checkName = req.params.check;
-    const result = await healthChecker.runCheck(checkName);
-
-    const statusCode = result.status === 'healthy' ? 200 : result.status === 'warning' ? 200 : 503;
-
-    res.status(statusCode).json({
-      check: checkName,
-      ...result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      error: 'Invalid health check',
-      message: error.message,
-      availableChecks: Array.from(healthChecker.checks.keys()),
-    });
-  }
-});
+// Configure health check routes (extracted to routes/health-consolidated.js)
+configureHealthRoutes(app);
 
 // Simple readiness probe (lightweight check for load balancers)
 app.get('/ready', (req, res) => {
@@ -733,226 +618,13 @@ app.get('/alive', (req, res) => {
   });
 });
 
-// Main page - React Application
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
+// Main application routes moved to /routes/app.js
 
-// Legacy interface (for comparison)
-app.get('/legacy', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+// Spotify authentication routes moved to /routes/auth.js
 
-// Spotify authentication initiation
-app.get('/auth/spotify', (req, res) => {
-  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET) {
-    return res.status(500).json({
-      error: 'Spotify credentials not configured',
-      message: 'Please set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET environment variables',
-    });
-  }
+// Spotify API routes moved to /routes/spotify-api.js
 
-  const state = generateRandomString(16);
-  const scope =
-    'user-read-private user-read-email playlist-modify-public playlist-modify-private user-read-recently-played user-top-read';
-
-  // Store state for verification
-  authStates.set(state, {
-    timestamp: Date.now(),
-    ip: req.ip,
-  });
-
-  // Clean up old states (older than 10 minutes)
-  const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-  for (const [key, value] of authStates.entries()) {
-    if (value.timestamp < tenMinutesAgo) {
-      authStates.delete(key);
-    }
-  }
-
-  const authURL =
-    'https://accounts.spotify.com/authorize?' +
-    new URLSearchParams({
-      response_type: 'code',
-      client_id: SPOTIFY_CLIENT_ID,
-      scope: scope,
-      redirect_uri: SPOTIFY_REDIRECT_URI,
-      state: state,
-    }).toString();
-
-  res.redirect(authURL);
-});
-
-// Spotify OAuth callback - delegate to API route for single canonical implementation
-app.get('/auth/callback', (req, res, next) => {
-  // Forward to the canonical Spotify API callback handler to avoid code duplication
-  req.url = '/api/spotify/auth/callback' + (req.url.indexOf('?') !== -1 ? req.url.substring(req.url.indexOf('?')) : '');
-  next('router');
-});
-
-// API endpoint to get user's Spotify data (requires authentication in production)
-app.post('/api/spotify/recommendations', async (req, res) => {
-  try {
-    const { access_token, seed_genres, limit = 20, target_features = {} } = req.body;
-
-    if (!access_token) {
-      return res.status(401).json({ error: 'Access token required' });
-    }
-
-    // Build recommendations query
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-      seed_genres: (seed_genres || ['pop', 'rock']).join(','),
-    });
-
-    // Add target audio features if provided
-    Object.entries(target_features).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.append(`target_${key}`, value.toString());
-      }
-    });
-
-    const response = await axios.get(
-      `https://api.spotify.com/v1/recommendations?${params.toString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
-
-    res.json({
-      recommendations: response.data.tracks,
-      seed_genres: seed_genres,
-      target_features: target_features,
-      status: 'success',
-    });
-  } catch (error) {
-    console.error('Recommendations error:', error.response?.data || error.message);
-    res.status(500).json({
-      error: 'Failed to get recommendations',
-      message: error.response?.data?.error?.message || error.message,
-    });
-  }
-});
-
-// API endpoint to create playlist
-app.post('/api/spotify/playlist', async (req, res) => {
-  try {
-    const { access_token, name, description, tracks, isPublic = false } = req.body;
-
-    if (!access_token || !name || !tracks || !Array.isArray(tracks)) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    // Get user ID first
-    const userResponse = await axios.get('https://api.spotify.com/v1/me', {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-
-    const userId = userResponse.data.id;
-
-    // Create playlist
-    const playlistResponse = await axios.post(
-      `https://api.spotify.com/v1/users/${userId}/playlists`,
-      {
-        name: name,
-        description: description || 'Created by EchoTune AI',
-        public: isPublic,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    const playlist = playlistResponse.data;
-
-    // Add tracks to playlist
-    if (tracks.length > 0) {
-      await axios.post(
-        `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,
-        {
-          uris: tracks,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    }
-
-    res.json({
-      playlist: {
-        id: playlist.id,
-        name: playlist.name,
-        description: playlist.description,
-        external_url: playlist.external_urls.spotify,
-        tracks_added: tracks.length,
-      },
-      status: 'success',
-    });
-  } catch (error) {
-    console.error('Playlist creation error:', error.response?.data || error.message);
-    res.status(500).json({
-      error: 'Failed to create playlist',
-      message: error.response?.data?.error?.message || error.message,
-    });
-  }
-});
-
-// Chatbot endpoint (basic implementation)
-app.post('/api/chat', async (req, res) => {
-  try {
-    const { message } = req.body;
-    // Note: user_context available for future personalization features
-
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
-
-    // Simple intent recognition (in production, use proper NLP)
-    const lowerMessage = message.toLowerCase();
-    let response = '';
-    let action = null;
-
-    if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
-      response =
-        'I\'d love to recommend some music for you! What mood are you in? Or what genre would you like to explore?';
-      action = 'recommend';
-    } else if (lowerMessage.includes('playlist')) {
-      response =
-        'I can help you create a personalized playlist! What would you like to name it and what kind of vibe are you going for?';
-      action = 'create_playlist';
-    } else if (lowerMessage.includes('mood') || lowerMessage.includes('feel')) {
-      response =
-        'Tell me more about your mood! Are you looking for something upbeat and energetic, or maybe something more chill and relaxing?';
-      action = 'mood_analysis';
-    } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      response =
-        'Hello! I\'m your AI music assistant. I can help you discover new music, create playlists, and find the perfect songs for any mood. What would you like to explore today?';
-    } else {
-      response =
-        'I\'m here to help you with music recommendations and playlist creation! Try asking me to recommend songs for a specific mood or to create a playlist.';
-    }
-
-    res.json({
-      response: response,
-      action: action,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error('Chat error:', error);
-    res.status(500).json({
-      error: 'Failed to process message',
-      message: 'Sorry, I encountered an error. Please try again.',
-    });
-  }
-});
+// Basic chatbot routes moved to /routes/chat.js
 
 // API Routes
 // Register API routes
@@ -989,215 +661,26 @@ const playlistAutomationRoutes = require('./api/routes/playlist-automation');
 app.use('/api/recommendations', realtimeRecommendationsRoutes);
 app.use('/api/playlists', playlistAutomationRoutes);
 
-// Socket.IO Real-time Chat Integration
-const EchoTuneChatbot = require('./chat/chatbot');
-
-// Initialize chatbot for Socket.IO
-const chatbotConfig = {
-  llmProviders: {
-    openai: {
-      apiKey: process.env.OPENAI_API_KEY,
-      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
-    },
-    gemini: {
-      apiKey: process.env.GEMINI_API_KEY,
-      model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
-    },
-    azure: {
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      endpoint: process.env.AZURE_OPENAI_ENDPOINT,
-      deployment: process.env.AZURE_OPENAI_DEPLOYMENT,
-    },
-    openrouter: {
-      apiKey: process.env.OPENROUTER_API_KEY,
-      model: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1-0528:free',
-    },
-  },
-  // Determine the best available provider based on API keys - prioritize Gemini
-  defaultProvider:
-    process.env.DEFAULT_LLM_PROVIDER ||
-    (process.env.GEMINI_API_KEY
-      ? 'gemini'
-      : process.env.OPENAI_API_KEY
-        ? 'openai'
-        : process.env.OPENROUTER_API_KEY
-          ? 'openrouter'
-          : 'mock'),
-  defaultModel: process.env.DEFAULT_LLM_MODEL || 'gemini-1.5-flash',
-  enableMockProvider: true,
-};
-
-let socketChatbot = null;
-
-async function initializeSocketChatbot() {
-  if (!socketChatbot) {
-    socketChatbot = new EchoTuneChatbot(chatbotConfig);
-    await socketChatbot.initialize();
-    console.log('🔗 Socket.IO Chatbot initialized');
-  }
-  return socketChatbot;
-}
-
-// Socket.IO connection handling (only if real-time is enabled)
+// Socket.IO Real-time Chat Integration (extracted to services/SocketService.js)
+// Initialize Socket.IO service only if real-time is enabled
 if (realtimeEnabled && io) {
-  io.on('connection', async (socket) => {
-  console.log(`🔗 Client connected: ${socket.id}`);
-
-  try {
-    // Initialize chatbot
-    const chatbot = await initializeSocketChatbot();
-
-    // Send connection confirmation
-    socket.emit('connected', {
-      message: 'Connected to EchoTune AI',
-      socketId: socket.id,
-      timestamp: new Date().toISOString(),
-      providers: chatbot.getAvailableProviders(),
-    });
-
-    // Handle chat messages
-    socket.on('chat_message', async (data) => {
-      try {
-        const { message, sessionId, provider, userId = `socket_${socket.id}` } = data;
-
-        if (!message) {
-          socket.emit('error', { message: 'Message is required' });
-          return;
-        }
-
-        // Emit typing indicator
-        socket.emit('typing_start', { timestamp: new Date().toISOString() });
-
-        let activeSessionId = sessionId;
-
-        // Create session if not provided
-        if (!activeSessionId) {
-          const session = await chatbot.startConversation(userId, { provider });
-          activeSessionId = session.sessionId;
-          socket.emit('session_created', { sessionId: activeSessionId });
-        }
-
-        // Send message to chatbot
-        const response = await chatbot.sendMessage(activeSessionId, message, {
-          provider: provider || chatbot.config.defaultProvider,
-          userId,
-        });
-
-        // Stop typing indicator
-        socket.emit('typing_stop');
-
-        // Send response
-        socket.emit('chat_response', {
-          ...response,
-          sessionId: activeSessionId,
-          timestamp: new Date().toISOString(),
-        });
-      } catch (error) {
-        console.error('Socket chat error:', error);
-        socket.emit('typing_stop');
-        socket.emit('error', {
-          message: 'Failed to process message',
-          error: error.message,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    });
-
-    // Handle streaming messages
-    socket.on('chat_stream', async (data) => {
-      try {
-        const { message, sessionId, provider, userId = `socket_${socket.id}` } = data;
-
-        if (!message) {
-          socket.emit('error', { message: 'Message is required' });
-          return;
-        }
-
-        let activeSessionId = sessionId;
-
-        if (!activeSessionId) {
-          const session = await chatbot.startConversation(userId, { provider });
-          activeSessionId = session.sessionId;
-          socket.emit('session_created', { sessionId: activeSessionId });
-        }
-
-        // Start streaming
-        socket.emit('stream_start', { sessionId: activeSessionId });
-
-        for await (const chunk of chatbot.streamMessage(activeSessionId, message, { provider })) {
-          if (chunk.error) {
-            socket.emit('stream_error', { error: chunk.error });
-            break;
-          } else if (chunk.type === 'chunk') {
-            socket.emit('stream_chunk', {
-              content: chunk.content,
-              isPartial: chunk.isPartial,
-              sessionId: activeSessionId,
-            });
-          } else if (chunk.type === 'complete') {
-            socket.emit('stream_complete', {
-              sessionId: activeSessionId,
-              totalTime: chunk.totalTime,
-              timestamp: new Date().toISOString(),
-            });
-            break;
-          }
-        }
-      } catch (error) {
-        console.error('Socket stream error:', error);
-        socket.emit('stream_error', {
-          message: 'Failed to stream message',
-          error: error.message,
-        });
-      }
-    });
-
-    // Handle provider switching
-    socket.on('switch_provider', async (data) => {
-      try {
-        const { provider } = data;
-        const result = await chatbot.switchProvider(provider);
-
-        socket.emit('provider_switched', {
-          success: true,
-          provider: result.provider,
-          message: `Switched to ${provider}`,
-          timestamp: new Date().toISOString(),
-        });
-      } catch (error) {
-        socket.emit('provider_switch_error', {
-          message: 'Failed to switch provider',
-          error: error.message,
-        });
-      }
-    });
-
-    // Handle disconnect
-    socket.on('disconnect', () => {
-      console.log(`🔌 Client disconnected: ${socket.id}`);
-    });
-
-    // Handle errors
-    socket.on('error', (error) => {
-      console.error(`Socket error from ${socket.id}:`, error);
-    });
-  } catch (error) {
-    console.error('Socket connection initialization error:', error);
-    socket.emit('initialization_error', {
-      message: 'Failed to initialize chat service',
-      error: error.message,
-    });
-  }
-});
+  const socketService = getSocketService();
+  socketService.initialize(io);
 } else {
   console.log('⚪ Socket.IO connection handling disabled');
 }
+
+
+
+
+
 
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
 app.use(errorHandler);
 
-// 404 catch-all handler - must be after all other routes
+// 404 catch-all handler - must be after all other routes  
+// (Note: SPA routing is now handled in app routes)
 app.use((req, res) => {
   const { createNotFoundError } = require('./errors/createError');
   const error = createNotFoundError('Endpoint', req.path);
@@ -1212,27 +695,6 @@ app.use((req, res) => {
   });
 });
 
-// Catch-all handler for React Router (client-side routing)
-app.get('*', (req, res) => {
-  // Only serve the React app for non-API routes
-  if (!req.path.startsWith('/api/') && !req.path.startsWith('/auth/') && !req.path.startsWith('/internal/')) {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  } else {
-    // Let the 404 handler take care of API routes
-    const { createNotFoundError } = require('./errors/createError');
-    const error = createNotFoundError('API Endpoint', req.path);
-    
-    res.status(error.statusCode).json({
-      error: {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        timestamp: error.timestamp
-      }
-    });
-  }
-});
-
 // Start server
 if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, '0.0.0.0', async () => {
   console.log(`🎵 EchoTune AI Server running on port ${PORT}`);
@@ -1241,6 +703,71 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
   console.log(
     `🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`
   );
+  
+  // Phase 6: Initialize infrastructure systems with enterprise services
+  try {
+    const infrastructure = await initializeInfrastructure();
+    console.log('🏗️ Infrastructure initialization completed');
+    
+    // Setup enterprise middleware if available
+    if (infrastructure.phase6Integration) {
+      const systemStatus = infrastructure.phase6Integration.getSystemStatus();
+      console.log(`✅ Phase 6: Enterprise services running (${systemStatus.healthyServices}/${systemStatus.totalServices} healthy)`);
+    } else {
+      await setupEnterpriseMiddleware();
+      await applyLegacyMiddleware();
+    }
+    
+    // Phase 7: Show event-driven architecture status
+    if (infrastructure.phase7Orchestrator) {
+      const phase7Health = await infrastructure.phase7Orchestrator.getHealthStatus();
+      const phase7Metrics = infrastructure.phase7Orchestrator.getMetrics();
+      console.log(`✅ Phase 7: Event-Driven Architecture ready (${phase7Health.status})`);
+      console.log(`📊 Phase 7: Components - Events: ${phase7Metrics.components.eventBus?.eventsPublished || 0}, Services: ${phase7Metrics.components.serviceMesh?.services?.length || 0}`);
+    }
+    
+    // Phase 8: Show advanced enterprise services status
+    if (infrastructure.phase8Orchestrator) {
+      const phase8Metrics = infrastructure.phase8Orchestrator.getPhase8Metrics();
+      console.log(`✅ Phase 8: Advanced Enterprise Services ready (${phase8Metrics.overview.totalServices} services)`);
+      console.log(`🔒 Security: ${phase8Metrics.services.security || 'enabled'}, 📈 Auto-Scaling: ${phase8Metrics.services.autoScaling || 'enabled'}`);
+      console.log(`🌍 Multi-Region: ${phase8Metrics.services.multiRegion || 'enabled'}, 🧠 ML Pipelines: ${phase8Metrics.services.mlPipelines || 'enabled'}`);
+      console.log(`🔗 Integrations: ${phase8Metrics.overview.activeIntegrations} active cross-service integrations`);
+    }
+    
+    // Phase 9: Show advanced observability services status
+    if (infrastructure.phase9Orchestrator) {
+      const phase9Overview = infrastructure.phase9Orchestrator.getOverview();
+      console.log(`✅ Phase 9: Advanced Observability & Analytics ready (${phase9Overview.services.active}/${phase9Overview.services.total} services)`);
+      console.log(`🔍 APM: enabled, 📊 Business Intelligence: enabled`);
+      console.log(`📈 Real-Time Analytics: enabled, 🚨 Advanced Alerting: enabled`);
+      console.log(`💡 Health Score: System ${phase9Overview.health.system.toFixed(1)}%, Business ${phase9Overview.health.business.toFixed(1)}%`);
+    }
+
+    // Phase 10: Show AI/ML services status
+    if (infrastructure.phase10Orchestrator) {
+      const phase10Overview = infrastructure.phase10Orchestrator.getStatus();
+      console.log(`✅ Phase 10: Advanced AI/ML Capabilities ready (${phase10Overview.services.healthy}/${phase10Overview.services.total} services)`);
+      console.log(`🤖 AI Services: ${phase10Overview.services.list.join(', ')}`);
+      console.log(`🎯 ML Pipeline: ${phase10Overview.metrics.totalRequests} requests processed, ${phase10Overview.metrics.averageLatency}ms avg latency`);
+      console.log(`⚡ Optimizations: ${phase10Overview.metrics.optimizationEvents} events, ${phase10Overview.integrationPatterns.length} integration patterns`);
+      console.log(`🔍 API Endpoints: 30+ endpoints available at /api/phase10/*`);
+    }
+  } catch (error) {
+    console.error('❌ Infrastructure initialization failed:', error);
+    // Fallback to legacy middleware
+    await applyLegacyMiddleware();
+  }
+
+  // Initialize session management
+  try {
+    sessionManager = getSessionManager();
+    await sessionManager.initialize();
+    sessionManager.configureSessionMiddleware(app);
+    console.log('🔐 Session management initialized');
+  } catch (error) {
+    console.error('❌ Session management initialization failed:', error);
+  }
   
   // Structured logging for key server info
   logger.info('server-start', {

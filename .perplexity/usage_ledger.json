@@ -39,8 +39,8 @@
     ]
   },
   "2025-W35": {
-    "total_cost": 1.5904139999999996,
-    "request_count": 24,
+    "total_cost": 2.0654659999999994,
+    "request_count": 31,
     "requests": [
       {
         "timestamp": "2025-08-25 20:22:23.620776",
@@ -302,6 +302,83 @@
         "output_tokens": 1035,
         "searches_performed": 5,
         "estimated_cost": 0.06403400000000001,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 12:42:31.033933",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1059,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 12:42:50.192037",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1588,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 12:43:10.383366",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 956,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 12:43:27.236147",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1360,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 12:44:15.939336",
+        "model": "sonar-pro",
+        "input_tokens": 338,
+        "output_tokens": 1066,
+        "searches_performed": 5,
+        "estimated_cost": 0.064028,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 12:53:25.523118",
+        "model": "sonar-pro",
+        "input_tokens": 2242,
+        "output_tokens": 1433,
+        "searches_performed": 5,
+        "estimated_cost": 0.075452,
+        "actual_cost": null,
+        "cache_hit": false,
+        "complexity_score": 10
+      },
+      {
+        "timestamp": "2025-08-26 12:54:03.139391",
+        "model": "sonar-pro",
+        "input_tokens": 2910,
+        "output_tokens": 1663,
+        "searches_performed": 5,
+        "estimated_cost": 0.07946,
         "actual_cost": null,
         "cache_hit": false,
         "complexity_score": 10

@@ -248,7 +248,30 @@ async function initializeInfrastructure() {
       await phase7Orchestrator.initialize();
       console.log('✅ Phase 7: Event-Driven Architecture & Service Mesh integrated successfully');
       
-      return { middlewareManager, phase6Integration, phase7Orchestrator };
+      // Phase 8: Initialize Advanced Security, Auto-Scaling, Multi-Region & ML Integration
+      try {
+        const Phase8Orchestrator = require('./infra/Phase8Orchestrator');
+        const phase8Orchestrator = new Phase8Orchestrator({
+          enableSecurity: process.env.ENABLE_ZERO_TRUST !== 'false',
+          enableAutoScaling: process.env.ENABLE_AUTO_SCALING !== 'false',
+          enableMultiRegion: process.env.ENABLE_MULTI_REGION !== 'false',
+          enableMLPipelines: process.env.ENABLE_ML_PIPELINES !== 'false',
+          environment: process.env.NODE_ENV || 'production',
+          integrationMode: 'full'
+        });
+        
+        await phase8Orchestrator.initialize();
+        console.log('✅ Phase 8: Advanced Security, Auto-Scaling, Multi-Region & ML Integration completed successfully');
+        
+        // Store Phase 8 orchestrator in app locals for API access
+        app.locals.phase8Orchestrator = phase8Orchestrator;
+        
+        return { middlewareManager, phase6Integration, phase7Orchestrator, phase8Orchestrator };
+      } catch (phase8Error) {
+        console.warn('⚠️ Phase 8: Advanced enterprise integration failed, continuing with Phase 7 only:', phase8Error.message);
+        return { middlewareManager, phase6Integration, phase7Orchestrator };
+      }
+      
     } catch (phase7Error) {
       console.warn('⚠️ Phase 7: Event-Driven Architecture integration failed, continuing with Phase 6 only:', phase7Error.message);
       return { middlewareManager, phase6Integration };
@@ -364,6 +387,10 @@ app.use('/health', enterpriseHealthRoutes);
 // Phase 7: Event-Driven Architecture & Service Mesh routes
 const eventDrivenRoutes = require('./routes/event-driven');
 app.use('/api/event-driven', eventDrivenRoutes);
+
+// Phase 8: Advanced Security, Auto-Scaling, Multi-Region & ML Integration routes
+const phase8ApiRoutes = require('./routes/phase8-api');
+app.use('/api/phase8', phase8ApiRoutes);
 
 // Phase 6: Legacy middleware configuration (to be replaced by MiddlewareConfigurationService)
 // Enhanced security headers (replaces basic securityHeaders)
@@ -590,6 +617,15 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
       const phase7Metrics = infrastructure.phase7Orchestrator.getMetrics();
       console.log(`✅ Phase 7: Event-Driven Architecture ready (${phase7Health.status})`);
       console.log(`📊 Phase 7: Components - Events: ${phase7Metrics.components.eventBus?.eventsPublished || 0}, Services: ${phase7Metrics.components.serviceMesh?.services?.length || 0}`);
+    }
+    
+    // Phase 8: Show advanced enterprise services status
+    if (infrastructure.phase8Orchestrator) {
+      const phase8Metrics = infrastructure.phase8Orchestrator.getPhase8Metrics();
+      console.log(`✅ Phase 8: Advanced Enterprise Services ready (${phase8Metrics.overview.totalServices} services)`);
+      console.log(`🔒 Security: ${phase8Metrics.services.security || 'enabled'}, 📈 Auto-Scaling: ${phase8Metrics.services.autoScaling || 'enabled'}`);
+      console.log(`🌍 Multi-Region: ${phase8Metrics.services.multiRegion || 'enabled'}, 🧠 ML Pipelines: ${phase8Metrics.services.mlPipelines || 'enabled'}`);
+      console.log(`🔗 Integrations: ${phase8Metrics.overview.activeIntegrations} active cross-service integrations`);
     }
   } catch (error) {
     console.error('❌ Infrastructure initialization failed:', error);

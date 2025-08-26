@@ -1,0 +1,23 @@
+{
+  "serviceId": "endpoint-1756224424552-6d195b86",
+  "serialNumber": "d95bc7c038cea7a45ce8f098c27ab29d",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNgzvtEdOW4oeZ2la67G\ndABwxFpfkg5SF9sPNQ1BllszQj+hNk6GNgT2Og1NEe+NG3CO/ULhJVGUCUZvRJeY\np0iMxintOIIMBRQ0givbKp+MJMuWCCvX/KR4jKdKOl6Hw8zgdk+tEteb24blPAkr\n0G6PphhctxsUedMfbdEo/foJNO4O8Qhdq3JcyfQgkCkLJrSAG8WQ6MryIBP7nDAX\nqt2dRtGg6dTkxJAZaXmy0Iwj57QvjTAMcGHgXZjtI/MZqZ//strsoPy6tyfIogr1\nK4BJO/cSOhTIlNkbz3lkbmDE7zJ8hgsND8R222WukKyBGclvkBGnOEINFu/RI+Uq\n8QIDAQAB\n-----END PUBLIC KEY-----\n",
+  "privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC82DO+0R05bih5\nnaVrrsZ0AHDEWl+SDlIX2w81DUGWWzNCP6E2ToY2BPY6DU0R740bcI79QuElUZQJ\nRm9El5inSIzGKe04ggwFFDSCK9sqn4wky5YIK9f8pHiMp0o6XofDzOB2T60S15vb\nhuU8CSvQbo+mGFy3GxR50x9t0Sj9+gk07g7xCF2rclzJ9CCQKQsmtIAbxZDoyvIg\nE/ucMBeq3Z1G0aDp1OTEkBlpebLQjCPntC+NMAxwYeBdmO0j8xmpn/+y2uyg/Lq3\nJ8iiCvUrgEk79xI6FMiU2RvPeWRuYMTvMnyGCw0PxHbbZa6QrIEZyW+QEac4Qg0W\n79Ej5SrxAgMBAAECggEAC1WwRGqlhggPQJ52Wnhk87s/iX+RpzD6GzG0L9dd+Y37\njYVHcjykGFuzokAgYTxXRD99K6UfIafr+mMKhGvTdy32+iFz2j2PBmKENNB4UQ5+\nwUohdRfZmNHP5QRZA5gfLsDOM7e8UApWMebevTvhL/tk3p+td/WVhOrnwuYIH3dP\nPxlYW7jtNPOoPPLQKOrP6RH/PkxByEFnoBzKtupwIeiaIhA3Cu9tLuxVcA5OsdlD\nrLERUzVqtRqN9r+Y00nHuHyo8w2+B8Zfyn/mQ4gHP9G6cFID2tDeu4AjJ6ZvWwDj\np19j+i85qkfPXHPvTGeeR+mSupQe+aLdZ5QDgVmqKQKBgQDd66cPB0oo12hlUPiw\n+7J24d8xTW45G8hsyo9zETIsUs30sgWYALdZXB7+WQxVvpdfkq4VvItQ7Bx62erD\n4o00jVGl1MicJ92DSjHrZ0xalCRovpyumXeBOxajzlwJSBQKU6UPXz8TiMrVxhcf\nEjfreqglYHFy523iW0pZTgmhmQKBgQDZ2DxWZElFPpVngkkHSmdxawh03eEFwCDM\ng5uZZKyddiEMZRpy/1NwdVnXL1L/fceqPv6qFEdAKhw2e4iB81op6kqxxssBdPR0\nZ9TDFHmNVT9OaiQoduhtNg42MJnURHCxDm6QWMXqcdFPprFDJCmVg4uvrz/I8x2w\nNR1+lHtbGQKBgQCeLBMjRAfYekffRsoqows9bpo9MrooHCRLXkjGM/B15QMEsEoK\nYCBOobk5glCnYLPVm99WgM8ve0qFSYLp4TTRyxPxxWrC2ispI53W8gZa3RHiUlGs\npJen1Wy6jh/NQcF+5sVT4og7rRkdKxZZwAt5XDAyi73wrwEEABtK8bMtqQKBgQCf\nFvixitmrlRHdHtugVGkI/kaVungcD/yj/rUCp/AbqmpmN+vB8c8IwNrUeH4fkcbg\nANNQeDC0nkwuSbceWA8Pr0fPXsNgk/32iOFreidu3MO3y3IOjxAcua5VStb8muLF\nmymJhxs6pNZcWfr4co9f3kqECfMGGO4kghXBHESd+QKBgQCb7rYuNEw0IfCaj+Qk\nlJ5HlWRUDsD6/NU0Exm63DimrvDujsHbMFrb605DLjN+x5kxl09w0rCASqjNtMvv\nL2lL7jjxtr7N60Pmh6eOBizUruO7ihuupFa4OP4i7DC8QWbMxjTCKg5hhYqIcmjM\nJWGbGaBGiwVm5/oCOXJ/mMsW9Q==\n-----END PRIVATE KEY-----\n",
+  "issuedAt": "2025-08-26T16:07:05.078Z",
+  "expiresAt": "2025-09-25T16:07:05.078Z",
+  "status": "active",
+  "metadata": {
+    "subject": "CN=endpoint-1756224424552-6d195b86",
+    "issuer": "EchoTune-CA",
+    "keyUsage": [
+      "digitalSignature",
+      "keyEncipherment"
+    ],
+    "extendedKeyUsage": [
+      "serverAuth",
+      "clientAuth"
+    ],
+    "serviceType": "ml-inference",
+    "modelId": "test-model-1756224424552"
+  }
+}

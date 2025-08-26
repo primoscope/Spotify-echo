@@ -17,7 +17,7 @@ const EnhancedConfigPanel = lazy(() => import('./components/EnhancedConfigPanel'
 const AutonomousUIAgent = lazy(() => import('./components/AutonomousUIAgent'));
 const EnhancedStreamingChatInterface = lazy(() => import('./components/EnhancedStreamingChatInterface'));
 const EnhancedProviderPanel = lazy(() => import('./components/EnhancedProviderPanel'));
-const GitHubInfo = lazy(() => import('../components/GitHubInfo'));
+const GitHubInfo = lazy(() => import('./components/GitHubInfo'));
 // import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LLMProvider } from './contexts/LLMContext';
 // import { DatabaseProvider } from './contexts/DatabaseContext';
@@ -40,11 +40,11 @@ const prefetchers = {
     Promise.all([
       import('./components/EnhancedConfigPanel'),
       import('./components/MobileResponsiveManager'),
-      import('../components/GitHubInfo'),
+      import('./components/GitHubInfo'),
     ]),
   settingsGeneral: () => import('./components/EnhancedConfigPanel'),
   settingsMobile: () => import('./components/MobileResponsiveManager'),
-  settingsGithub: () => import('../components/GitHubInfo'),
+  settingsGithub: () => import('./components/GitHubInfo'),
 };
 
 /**

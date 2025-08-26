@@ -10,6 +10,7 @@ import pandas as pd
 import os
 import sys
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -22,6 +23,11 @@ from reco.ml.pipelines.cf_trainer import CollaborativeFilteringTrainer, CFConfig
 from reco.ml.pipelines.content_embedder import ContentFeatureEmbedder, EmbedderConfig
 from feature_store.registry.feature_registry import FeatureRegistry, FeatureGroup, FeatureSchema
 from feature_store.serving.feature_server import FeatureStore, FeatureRequest
+from reco.service.ranking.hybrid import HybridRecommendationPipeline, HybridConfig, RecommendationCandidate
+from reco.jobs.trending_detector import TrendingDetectorJob, TrendingConfig
+from experiments.evaluation.multi_metric_evaluator import (
+    ExperimentEvaluationEngine, MetricDefinition, GuardrailDefinition, MetricType, GuardrailType
+)
 
 
 def test_event_enrichment():
@@ -266,6 +272,165 @@ async def test_feature_serving():
     print("✓ Feature serving working")
 
 
+def test_hybrid_blending():
+    """Test hybrid recommendation blending"""
+    print("Testing hybrid blending...")
+    
+    # Create synthetic CF candidates
+    cf_candidates = []
+    for i in range(10):
+        candidate = RecommendationCandidate(
+            item_id=f'track_{i}',
+            cf_score=np.random.uniform(0.1, 1.0),
+            artist_id=f'artist_{i % 3}',  # 3 artists
+            genre='pop' if i % 2 == 0 else 'rock',
+            release_date='2023-01-01' if i < 5 else '2024-01-01',
+            features={'tempo': 120 + i, 'danceability': 0.5 + i * 0.05}
+        )
+        cf_candidates.append(candidate)
+    
+    # Create synthetic content candidates
+    content_candidates = []
+    for i in range(15):
+        candidate = RecommendationCandidate(
+            item_id=f'track_{i}',
+            content_score=np.random.uniform(0.2, 0.9),
+            artist_id=f'artist_{i % 4}',  # 4 artists
+            genre='jazz' if i % 3 == 0 else 'electronic',
+            release_date='2023-06-01',
+            features={'tempo': 100 + i * 2, 'danceability': 0.3 + i * 0.03}
+        )
+        content_candidates.append(candidate)
+    
+    # Set feature flag
+    os.environ['ENABLE_HYBRID_RECO'] = 'true'
+    
+    config = HybridConfig(blend_alpha=0.7, diversity_weight=0.3, recency_weight=0.2)
+    pipeline = HybridRecommendationPipeline(config)
+    
+    # Test end-to-end recommendation
+    recommendations, metrics = pipeline.recommend(
+        user_id="test_user",
+        cf_candidates=cf_candidates,
+        content_candidates=content_candidates,
+        n_recommendations=10
+    )
+    
+    assert len(recommendations) <= 10
+    assert metrics.latency_ms < 120  # Performance budget
+    assert metrics.candidates_processed > 0
+    assert metrics.final_recommendations == len(recommendations)
+    
+    # Test diversity constraints
+    artist_counts = {}
+    for rec in recommendations:
+        artist_counts[rec.artist_id] = artist_counts.get(rec.artist_id, 0) + 1
+    
+    max_artist_ratio = max(artist_counts.values()) / len(recommendations)
+    assert max_artist_ratio <= config.max_artist_ratio
+    
+    print("✓ Hybrid blending working")
+
+
+def test_trending_detection():
+    """Test trending detection job"""
+    print("Testing trending detection...")
+    
+    # Set feature flag
+    os.environ['ENABLE_TRENDING_DETECTION'] = 'true'
+    
+    config = TrendingConfig(
+        baseline_window_hours=168,  # 7 days
+        recent_window_hours=24,     # 1 day
+        z_score_threshold=1.5,      # Lower threshold for testing
+        max_trending_items=20
+    )
+    
+    detector = TrendingDetectorJob(config)
+    
+    # Run trending detection
+    end_time = datetime.now(timezone.utc)
+    trending_items, metrics = detector.run_trending_detection(end_time)
+    
+    assert metrics.job_duration_seconds < 300  # Performance budget (5 min)
+    assert metrics.items_candidate_count > 0
+    assert len(trending_items) <= config.max_trending_items
+    
+    # Verify trending items have required fields
+    for item in trending_items:
+        assert item.item_id is not None
+        assert item.z_score >= config.z_score_threshold
+        assert item.velocity > 0  # Only positive trending
+        assert item.confidence >= 0 and item.confidence <= 1
+    
+    # Test API response format
+    api_response = detector.get_trending_api_response(trending_items)
+    assert 'trending_items' in api_response
+    assert 'metadata' in api_response
+    assert api_response['metadata']['total_count'] == len(trending_items)
+    
+    print("✓ Trending detection working")
+
+
+def test_experiment_evaluation():
+    """Test experiment evaluation and guardrails"""
+    print("Testing experiment evaluation...")
+    
+    # Set feature flag
+    os.environ['ENABLE_EXPERIMENT_EVALUATION'] = 'true'
+    
+    evaluator = ExperimentEvaluationEngine()
+    
+    # Test metric registration
+    custom_metric = MetricDefinition(
+        name="custom_metric",
+        metric_type=MetricType.ENGAGEMENT,
+        description="Custom test metric",
+        min_sample_size=10
+    )
+    evaluator.register_metric(custom_metric)
+    
+    # Test guardrail registration
+    custom_guardrail = GuardrailDefinition(
+        name="custom_guardrail",
+        metric_name="custom_metric",
+        guardrail_type=GuardrailType.THRESHOLD,
+        threshold=0.5,
+        severity="warning"
+    )
+    evaluator.register_guardrail(custom_guardrail)
+    
+    # Run evaluation
+    start_time = datetime.now(timezone.utc) - timedelta(days=1)
+    end_time = datetime.now(timezone.utc)
+    
+    evaluation = evaluator.evaluate_experiment(
+        experiment_id="test_experiment",
+        start_time=start_time,
+        end_time=end_time
+    )
+    
+    assert evaluation.experiment_id == "test_experiment"
+    assert evaluation.duration_seconds < 600  # Performance budget (10 min)
+    assert len(evaluation.metrics) > 0
+    assert len(evaluation.recommendations) > 0
+    
+    # Check for expected metrics
+    metric_names = {m.metric_name for m in evaluation.metrics}
+    expected_metrics = {'ctr', 'latency_p95', 'diversity_score', 'engagement_rate'}
+    assert expected_metrics.issubset(metric_names)
+    
+    # Test statistical tests
+    assert len(evaluation.statistical_tests) > 0
+    for metric_name, test_result in evaluation.statistical_tests.items():
+        assert 'treatment_value' in test_result
+        assert 'control_value' in test_result
+        assert 'effect_size' in test_result
+        assert 'statistically_significant' in test_result
+    
+    print("✓ Experiment evaluation working")
+
+
 def test_performance_budgets():
     """Test that components meet performance budgets"""
     print("Testing performance budgets...")
@@ -314,13 +479,30 @@ async def run_all_tests():
         test_feature_registry()
         await test_feature_serving()
         
+        # HYB workstream tests
+        test_hybrid_blending()
+        
+        # TRD workstream tests
+        test_trending_detection()
+        
+        # EXP workstream tests
+        test_experiment_evaluation()
+        
         # Performance tests
         test_performance_budgets()
         
         print("=" * 60)
         print("✅ ALL TESTS PASSED")
         print("=" * 60)
-        print("\nFoundation components ready for Phase 2.2!")
+        print("\nPhase 2.1 Foundation + Week 3-4 Core Models completed!")
+        print("\nImplemented workstreams:")
+        print("✓ FBK - Event enrichment & DLQ handling")
+        print("✓ CF - Collaborative filtering trainer") 
+        print("✓ EMB - Content feature embedder")
+        print("✓ FST - Feature store partial implementation")
+        print("✓ HYB - Hybrid blending & diversity re-ranking")
+        print("✓ TRD - Trending detection job")
+        print("✓ EXP - Multi-metric evaluation & guardrails")
         
         return True
         
@@ -339,6 +521,7 @@ if __name__ == "__main__":
         sys.exit(1)
     
     print("\nNext steps:")
-    print("1. Proceed to Week 3-4 Core Models (CF training pipeline, HYB blending)")  
-    print("2. Implement Week 5-6 Advanced Features (TRD, EXP, PWA)")
-    print("3. Begin UI/UX enhancements for frontend")
+    print("1. Week 5-6 Advanced Features: PWA push notifications & background sync")
+    print("2. Enhanced guardrail enforcement with auto-disable capabilities") 
+    print("3. Advanced diversity algorithms and seasonal trending adjustments")
+    print("4. UI/UX overhaul and modern frontend interfaces")

@@ -214,6 +214,9 @@ app.use('/internal/example-validation', require('./routes/internal/example-valid
 // Initialize MCP Performance Analytics
 const mcpAnalytics = new MCPPerformanceAnalytics();
 
+// Phase 6: Enterprise Service Integration
+const { initializePhase6Integration } = require('./infra/Phase6ServerIntegration');
+
 // Initialize infrastructure systems
 async function initializeInfrastructure() {
   // Configure dependency injection
@@ -226,16 +229,73 @@ async function initializeInfrastructure() {
   const middlewareManager = getMiddlewareManager();
   configureDefaultMiddleware(middlewareManager);
   
-  console.log('🏗️ Infrastructure systems initialized');
-  return { middlewareManager };
+  // Phase 6: Initialize enterprise services
+  try {
+    const phase6Integration = await initializePhase6Integration(app);
+    console.log('✅ Phase 6: Enterprise services integrated successfully');
+    return { middlewareManager, phase6Integration };
+  } catch (error) {
+    console.warn('⚠️ Phase 6: Enterprise integration failed, continuing with legacy infrastructure:', error.message);
+    return { middlewareManager };
+  }
 }
 
-// Trust proxy if in production (for proper IP detection behind reverse proxy)
-if (config.server.trustProxy) {
-  app.set('trust proxy', 1);
+// Phase 6: Extract middleware configuration to enterprise service
+// Security and performance middleware configuration moved to MiddlewareConfigurationService
+// This section maintained for backward compatibility during transition
+
+// Initialize and configure enterprise middleware
+let enterpriseMiddleware = null;
+async function setupEnterpriseMiddleware() {
+  try {
+    const { getMiddlewareConfigurationService } = require('./infra/MiddlewareConfigurationService');
+    enterpriseMiddleware = getMiddlewareConfigurationService();
+    
+    if (!enterpriseMiddleware.initialized) {
+      await enterpriseMiddleware.initialize(app);
+      console.log('✅ Phase 6: Enterprise middleware configuration applied');
+      return true;
+    }
+  } catch (error) {
+    console.warn('⚠️ Phase 6: Enterprise middleware setup failed, using legacy configuration:', error.message);
+    return false;
+  }
 }
 
-// Spotify OAuth configuration
+// Apply legacy middleware if enterprise middleware is not available
+async function applyLegacyMiddleware() {
+  // Trust proxy if in production (for proper IP detection behind reverse proxy)
+  if (config.server.trustProxy) {
+    app.set('trust proxy', 1);
+  }
+
+  // Phase 1 Security Baseline - Apply security middleware in proper order
+  applyHelmet(app);
+  app.use(createRateLimiter());
+
+  // Existing security middleware (maintained for compatibility)
+  app.use(securityManager.securityHeaders);
+  app.use(securityManager.detectSuspiciousActivity());
+  app.use(securityManager.validateAndSanitizeInput());
+
+  // Compression middleware
+  if (config.server.compression) {
+    app.use(
+      compression({
+        filter: (req, res) => {
+          if (req.headers['x-no-compression']) {
+            return false;
+          }
+          return compression.filter(req, res);
+        },
+        level: 6,
+        threshold: 1024,
+      })
+    );
+  }
+}
+
+// Spotify OAuth configuration (moved to configuration service in Phase 6)
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
@@ -257,36 +317,13 @@ const getDefaultFrontendUrl = () => {
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || getDefaultRedirectUri();
 const FRONTEND_URL = process.env.FRONTEND_URL || getDefaultFrontendUrl();
 
-// Security and performance middleware - Phase 1 Security Baseline
-// Apply Phase 1 security middleware in proper order
-applyHelmet(app);
-app.use(createRateLimiter());
-
-// Existing security middleware (maintained for compatibility)
-app.use(securityManager.securityHeaders);
-app.use(securityManager.detectSuspiciousActivity());
-app.use(securityManager.validateAndSanitizeInput());
-
-// Compression middleware
-if (config.server.compression) {
-  app.use(
-    compression({
-      filter: (req, res) => {
-        if (req.headers['x-no-compression']) {
-          return false;
-        }
-        return compression.filter(req, res);
-      },
-      level: 6,
-      threshold: 1024,
-    })
-  );
-}
+// Phase 6: Enhanced middleware and route configuration
+// Extract complex middleware setup to enterprise services
 
 // Session management - initialized during startup
 let sessionManager = null;
 
-// Mount modular routes
+// Mount modular routes (Phase 6: Route management moved to API Gateway)
 app.use('/health', systemHealthRoutes);
 app.use('/metrics', systemMetricsRoutes);
 app.use('/api/performance', systemPerformanceRoutes);
@@ -300,6 +337,11 @@ app.use('/api', enhancedApiRoutes);
 app.use('/api/chat', chatRoutes_local);
 app.use('/', appRoutes);
 
+// Phase 6: Enterprise health monitoring routes
+const enterpriseHealthRoutes = require('./routes/enterprise-health');
+app.use('/health', enterpriseHealthRoutes);
+
+// Phase 6: Legacy middleware configuration (to be replaced by MiddlewareConfigurationService)
 // Enhanced security headers (replaces basic securityHeaders)
 app.use(securityHeaders);
 
@@ -334,7 +376,7 @@ app.use(corsMiddleware);
 // Request size limiting
 app.use(requestSizeLimit);
 
-// Body parsing with size limits
+// Body parsing with size limits (Phase 6: moved to enterprise middleware service)
 app.use(
   express.json({
     limit: config.server.maxRequestSize,
@@ -504,12 +546,23 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') server.listen(PORT, 
     `🔐 Auth mode: ${process.env.AUTH_DEVELOPMENT_MODE === 'true' ? 'Development' : 'Production JWT'}`
   );
   
-  // Initialize infrastructure systems
+  // Phase 6: Initialize infrastructure systems with enterprise services
   try {
-    const { middlewareManager } = await initializeInfrastructure();
+    const infrastructure = await initializeInfrastructure();
     console.log('🏗️ Infrastructure initialization completed');
+    
+    // Setup enterprise middleware if available
+    if (infrastructure.phase6Integration) {
+      const systemStatus = infrastructure.phase6Integration.getSystemStatus();
+      console.log(`✅ Phase 6: Enterprise services running (${systemStatus.healthyServices}/${systemStatus.totalServices} healthy)`);
+    } else {
+      await setupEnterpriseMiddleware();
+      await applyLegacyMiddleware();
+    }
   } catch (error) {
     console.error('❌ Infrastructure initialization failed:', error);
+    // Fallback to legacy middleware
+    await applyLegacyMiddleware();
   }
 
   // Initialize session management

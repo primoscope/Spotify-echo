@@ -1,0 +1,331 @@
+name: Performance Benchmarking
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run performance benchmarks nightly
+    - cron: '0 3 * * *'
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  api-performance:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+
+    - name: Start application
+      env:
+        MONGODB_URI: mongodb://admin:password@localhost:27017/test?authSource=admin
+        REDIS_URL: redis://localhost:6379
+        NODE_ENV: test
+      run: |
+        npm start &
+        APP_PID=$!
+        echo "APP_PID=$APP_PID" >> $GITHUB_ENV
+        
+        # Wait for app to be ready
+        timeout 60 bash -c 'until curl -f http://localhost:3000/health; do sleep 1; done'
+
+    - name: Load test with Artillery
+      run: |
+        npm install -g artillery
+        artillery run scripts/performance/artillery-config.yml --output artillery-report.json
+
+    - name: Load test with Autocannon
+      run: |
+        npx autocannon -c 10 -d 30 -j http://localhost:3000/api/recommendations > autocannon-report.json
+
+    - name: Custom performance tests
+      run: |
+        # TODO: Implement custom performance test script
+        echo "Running custom performance tests - placeholder"
+        ./scripts/performance/custom_benchmarks.py \
+          --base-url http://localhost:3000 \
+          --duration 60 \
+          --output custom-perf.json
+
+    - name: Database performance test
+      env:
+        MONGODB_URI: mongodb://admin:password@localhost:27017/test?authSource=admin
+        REDIS_URL: redis://localhost:6379
+      run: |
+        # TODO: Implement database performance test
+        echo "Database performance testing - placeholder"
+        ./scripts/performance/db_benchmarks.py \
+          --mongodb-uri $MONGODB_URI \
+          --redis-url $REDIS_URL \
+          --output db-perf.json
+
+    - name: Stop application
+      run: |
+        kill $APP_PID || true
+
+    - name: Analyze performance results
+      run: |
+        # TODO: Implement performance analysis script
+        echo "Analyzing performance results - placeholder"
+        ./scripts/performance/analyze_results.py \
+          --artillery artillery-report.json \
+          --autocannon autocannon-report.json \
+          --custom custom-perf.json \
+          --database db-perf.json \
+          --output performance-analysis.json
+
+    - name: Performance regression check
+      run: |
+        # TODO: Implement regression check script
+        echo "Performance regression check - placeholder"
+        ./scripts/performance/regression_check.py \
+          --current performance-analysis.json \
+          --baseline baseline-performance.json \
+          --threshold 10 \
+          --output regression-report.json
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results-${{ github.sha }}
+        path: |
+          artillery-report.json
+          autocannon-report.json
+          custom-perf.json
+          db-perf.json
+          performance-analysis.json
+          regression-report.json
+
+  frontend-performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build:frontend
+
+    - name: Start dev server
+      run: |
+        npm run dev &
+        DEV_PID=$!
+        echo "DEV_PID=$DEV_PID" >> $GITHUB_ENV
+        
+        # Wait for dev server
+        timeout 60 bash -c 'until curl -f http://localhost:5173; do sleep 1; done'
+
+    - name: Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        configPath: './.lighthouserc.json'
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+
+    - name: Web Vitals testing
+      run: |
+        # TODO: Implement Web Vitals testing
+        echo "Web Vitals performance testing - placeholder"
+        ./scripts/performance/web_vitals.js \
+          --url http://localhost:5173 \
+          --output web-vitals.json
+
+    - name: Bundle size analysis
+      run: |
+        # TODO: Implement bundle size analysis
+        echo "Bundle size analysis - placeholder"
+        ./scripts/performance/bundle_analysis.js \
+          --build-dir dist/ \
+          --output bundle-analysis.json
+
+    - name: Stop dev server
+      run: |
+        kill $DEV_PID || true
+
+    - name: Upload frontend performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-performance-${{ github.sha }}
+        path: |
+          lhci_reports/
+          web-vitals.json
+          bundle-analysis.json
+
+  ml-performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest-benchmark
+
+    - name: ML model performance benchmarks
+      run: |
+        # TODO: Implement ML performance benchmarks
+        echo "ML model performance benchmarks - placeholder"
+        ./scripts/performance/ml_benchmarks.py \
+          --model-dir models/ \
+          --test-data test_data.csv \
+          --output ml-perf.json
+
+    - name: Recommendation algorithm benchmarks
+      run: |
+        # TODO: Implement recommendation algorithm benchmarks
+        echo "Recommendation algorithm benchmarks - placeholder"
+        python -m pytest scripts/performance/test_recommendation_performance.py \
+          --benchmark-json=recommendation-benchmarks.json
+
+    - name: Feature extraction benchmarks
+      run: |
+        # TODO: Implement feature extraction benchmarks
+        echo "Feature extraction benchmarks - placeholder"
+        ./scripts/performance/feature_benchmarks.py \
+          --dataset test_dataset.csv \
+          --output feature-perf.json
+
+    - name: Upload ML performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: ml-performance-${{ github.sha }}
+        path: |
+          ml-perf.json
+          recommendation-benchmarks.json
+          feature-perf.json
+
+  performance-report:
+    runs-on: ubuntu-latest
+    needs: [api-performance, frontend-performance, ml-performance]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all performance results
+      uses: actions/download-artifact@v3
+      with:
+        pattern: "*performance*"
+        merge-multiple: true
+
+    - name: Generate comprehensive performance report
+      run: |
+        # TODO: Implement comprehensive performance report
+        echo "Generating comprehensive performance report - placeholder"
+        ./scripts/performance/generate_report.py \
+          --api-results performance-analysis.json \
+          --frontend-results web-vitals.json \
+          --ml-results ml-perf.json \
+          --lighthouse lhci_reports/ \
+          --output comprehensive-perf-report.html
+
+    - name: Performance gate validation
+      run: |
+        # TODO: Implement performance gate validation
+        echo "Performance gate validation - placeholder"
+        ./scripts/performance/performance_gate.py \
+          --report comprehensive-perf-report.html \
+          --api-latency-threshold 500 \
+          --frontend-fcp-threshold 2000 \
+          --ml-inference-threshold 100
+
+    - name: Update performance baseline (if main branch)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # TODO: Implement baseline update
+        echo "Updating performance baseline - placeholder"
+        ./scripts/performance/update_baseline.py \
+          --current performance-analysis.json \
+          --baseline-file baseline-performance.json
+
+    - name: Upload comprehensive report
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-report-${{ github.sha }}
+        path: |
+          comprehensive-perf-report.html
+          baseline-performance.json
+
+    - name: Comment performance summary on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          // TODO: Implement PR comment with performance summary
+          const fs = require('fs');
+          if (fs.existsSync('performance-analysis.json')) {
+            const perf = JSON.parse(fs.readFileSync('performance-analysis.json', 'utf8'));
+            const comment = `## Performance Test Results
+            
+            ### API Performance
+            - **Response Time (P95)**: ${perf.api?.p95 || 'N/A'}ms
+            - **Throughput**: ${perf.api?.rps || 'N/A'} req/s
+            - **Error Rate**: ${perf.api?.error_rate || 'N/A'}%
+            
+            ### Frontend Performance
+            - **First Contentful Paint**: ${perf.frontend?.fcp || 'N/A'}ms
+            - **Largest Contentful Paint**: ${perf.frontend?.lcp || 'N/A'}ms
+            - **Bundle Size**: ${perf.frontend?.bundle_size || 'N/A'}KB
+            
+            ### ML Performance
+            - **Inference Time**: ${perf.ml?.inference_time || 'N/A'}ms
+            - **Model Accuracy**: ${perf.ml?.accuracy || 'N/A'}%
+            
+            ${perf.regression_detected ? '⚠️ Performance regression detected' : '✅ No performance regression detected'}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }

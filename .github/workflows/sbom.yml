@@ -1,0 +1,231 @@
+name: Software Bill of Materials (SBOM)
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  release:
+    types: [ published ]
+  schedule:
+    # Generate SBOM weekly on Sundays
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  generate-sbom:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        pip install -r requirements.txt
+
+    - name: Generate NPM SBOM
+      run: |
+        npx @cyclonedx/cyclonedx-npm --output-format json --output-file npm-sbom.json
+
+    - name: Generate Python SBOM
+      run: |
+        pip install cyclonedx-bom
+        cyclonedx-py -o python-sbom.json
+
+    - name: Build Docker image for SBOM
+      run: |
+        docker build -t echotune-ai:sbom .
+
+    - name: Generate container SBOM with Syft
+      uses: anchore/sbom-action@v0
+      with:
+        image: echotune-ai:sbom
+        format: spdx-json
+        output-file: container-sbom.spdx.json
+
+    - name: Generate container SBOM with Trivy
+      run: |
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v ${{ github.workspace }}:/workspace \
+          aquasec/trivy image --format cyclonedx \
+          --output /workspace/trivy-sbom.json \
+          echotune-ai:sbom
+
+    - name: Merge SBOM files
+      run: |
+        # TODO: Implement SBOM merger script
+        echo "Merging SBOM files - placeholder"
+        ./scripts/validation/merge_sbom.py \
+          --npm npm-sbom.json \
+          --python python-sbom.json \
+          --container container-sbom.spdx.json \
+          --output merged-sbom.json
+
+    - name: Validate SBOM completeness
+      run: |
+        # TODO: Implement SBOM validation script
+        echo "Validating SBOM completeness - placeholder"
+        ./scripts/validation/validate_sbom.py \
+          --sbom merged-sbom.json \
+          --min-components 100 \
+          --require-licenses
+
+    - name: Scan SBOM for vulnerabilities
+      run: |
+        # Use Grype to scan the SBOM for vulnerabilities
+        docker run --rm -v ${{ github.workspace }}:/workspace \
+          anchore/grype sbom:/workspace/merged-sbom.json \
+          -o json > vulnerability-scan.json
+
+    - name: License compliance check
+      run: |
+        # TODO: Implement license compliance script
+        echo "License compliance check - placeholder"
+        ./scripts/validation/license_compliance.py \
+          --sbom merged-sbom.json \
+          --allowed-licenses MIT,Apache-2.0,BSD-3-Clause \
+          --output license-report.json
+
+    - name: Generate SBOM report
+      run: |
+        # TODO: Implement SBOM report generator
+        echo "Generating SBOM report - placeholder"
+        ./scripts/validation/generate_sbom_report.py \
+          --sbom merged-sbom.json \
+          --vulnerabilities vulnerability-scan.json \
+          --licenses license-report.json \
+          --output sbom-report.html
+
+    - name: Upload SBOM artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: sbom-${{ github.sha }}
+        path: |
+          npm-sbom.json
+          python-sbom.json
+          container-sbom.spdx.json
+          trivy-sbom.json
+          merged-sbom.json
+          vulnerability-scan.json
+          license-report.json
+          sbom-report.html
+
+    - name: Sign SBOM (if release)
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        # TODO: Implement SBOM signing
+        echo "Signing SBOM for release - placeholder"
+        # Use cosign or similar tool to sign the SBOM
+        # cosign sign-blob --key cosign.key merged-sbom.json > merged-sbom.json.sig
+
+    - name: Publish SBOM to registry (if release)
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        # TODO: Implement SBOM publishing
+        echo "Publishing SBOM to registry - placeholder"
+        # Push SBOM to container registry or artifact repository
+
+  sbom-compliance:
+    runs-on: ubuntu-latest
+    needs: generate-sbom
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download SBOM artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: sbom-${{ github.sha }}
+
+    - name: NTIA compliance check
+      run: |
+        # TODO: Implement NTIA compliance checker
+        echo "NTIA compliance validation - placeholder"
+        ./scripts/validation/ntia_compliance.py \
+          --sbom merged-sbom.json \
+          --output ntia-compliance.json
+
+    - name: Supply chain risk assessment
+      run: |
+        # TODO: Implement supply chain risk assessment
+        echo "Supply chain risk assessment - placeholder"
+        ./scripts/validation/supply_chain_risk.py \
+          --sbom merged-sbom.json \
+          --vulnerabilities vulnerability-scan.json \
+          --output risk-assessment.json
+
+    - name: Generate compliance report
+      run: |
+        # TODO: Implement compliance report generator
+        echo "Generating compliance report - placeholder"
+        ./scripts/validation/compliance_report.py \
+          --sbom merged-sbom.json \
+          --ntia ntia-compliance.json \
+          --risk risk-assessment.json \
+          --output compliance-report.pdf
+
+    - name: Upload compliance artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: compliance-${{ github.sha }}
+        path: |
+          ntia-compliance.json
+          risk-assessment.json
+          compliance-report.pdf
+
+  sbom-notification:
+    runs-on: ubuntu-latest
+    needs: [generate-sbom, sbom-compliance]
+    if: always()
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        pattern: "*-${{ github.sha }}"
+        merge-multiple: true
+
+    - name: Notify stakeholders
+      if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'schedule'
+      run: |
+        # TODO: Implement stakeholder notification
+        echo "Notifying stakeholders of SBOM update - placeholder"
+        ./scripts/notification/sbom_notification.py \
+          --sbom merged-sbom.json \
+          --compliance compliance-report.pdf \
+          --recipients security@echotune.ai,compliance@echotune.ai
+
+    - name: Update dependency dashboard
+      run: |
+        # TODO: Implement dependency dashboard update
+        echo "Updating dependency dashboard - placeholder"
+        ./scripts/dashboard/update_dependency_dashboard.py \
+          --sbom merged-sbom.json \
+          --vulnerabilities vulnerability-scan.json
+
+    - name: Archive SBOM
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        # TODO: Implement SBOM archival
+        echo "Archiving SBOM for release ${{ github.ref_name }} - placeholder"
+        ./scripts/archival/archive_sbom.py \
+          --version ${{ github.ref_name }} \
+          --sbom merged-sbom.json \
+          --compliance compliance-report.pdf
